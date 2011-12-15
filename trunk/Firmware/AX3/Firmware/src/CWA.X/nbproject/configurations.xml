@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="f1" displayName="Flux" projectFiles="true">
+        <logicalFolder name="f1" displayName="Ftl" projectFiles="true">
+          <itemPath>../../../../Flux/include/Ftl/Ecc.h</itemPath>
+          <itemPath>../../../../Flux/include/Ftl/FsFtl.h</itemPath>
+          <itemPath>../../../../Flux/include/Ftl/Ftl.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="Peripherals" projectFiles="true">
+          <itemPath>../../../../Flux/include/Peripherals/Accel.h</itemPath>
+          <itemPath>../../../../Flux/include/Peripherals/Gyro.h</itemPath>
+          <itemPath>../../../../Flux/include/Peripherals/Nand.h</itemPath>
+          <itemPath>../../../../Flux/include/Peripherals/Rtc.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f3" displayName="Utils" projectFiles="true">
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="Microchip" projectFiles="true">
+        <logicalFolder name="f1" displayName="MDD File System" projectFiles="true">
+          <itemPath>C:/Microchip Solutions/Microchip/Include/MDD File System/FSDefs.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/MDD File System/FSIO.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="USB" projectFiles="true">
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_ch9.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_common.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_device.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_function_cdc.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_function_msd.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_hal.h</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_hal_pic24.h</itemPath>
+        </logicalFolder>
+        <itemPath>C:/Microchip Solutions/Microchip/Include/Compiler.h</itemPath>
+        <itemPath>C:/Microchip Solutions/Microchip/Include/GenericTypeDefs.h</itemPath>
+        <itemPath>C:/Microchip Solutions/Microchip/Include/TimeDelay.h</itemPath>
+      </logicalFolder>
+      <itemPath>../Analogue.h</itemPath>
+      <itemPath>../Data.h</itemPath>
+      <itemPath>../FSconfig.h</itemPath>
+      <itemPath>../FtlConfig.h</itemPath>
+      <itemPath>../HardwareProfile-CWA1.6.h</itemPath>
+      <itemPath>../HardwareProfile-CWA1.7.h</itemPath>
+      <itemPath>../HardwareProfile-CWA1.8.h</itemPath>
+      <itemPath>../HardwareProfile.h</itemPath>
+      <itemPath>../Logger.h</itemPath>
+      <itemPath>../Settings.h</itemPath>
+      <itemPath>../USB_CDC_MSD.h</itemPath>
+      <itemPath>../usb_config.h</itemPath>
+      <itemPath>../util.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LibraryFiles"
+                   displayName="Library Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+      <itemPath>../app_hid_boot_p24FJ256GB106.gld</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ObjectFiles"
+                   displayName="Object Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="f2" displayName="Flux" projectFiles="true">
+        <logicalFolder name="f1" displayName="Ftl" projectFiles="true">
+          <itemPath>../../../../Flux/src/Ftl/Ecc.c</itemPath>
+          <itemPath>../../../../Flux/src/Ftl/FsFtl.c</itemPath>
+          <itemPath>../../../../Flux/src/Ftl/Ftl.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="Peripherals" projectFiles="true">
+          <itemPath>../../../../Flux/src/Peripherals/Accel.c</itemPath>
+          <itemPath>../../../../Flux/src/Peripherals/Gyro.c</itemPath>
+          <itemPath>../../../../Flux/src/Peripherals/Nand.c</itemPath>
+          <itemPath>../../../../Flux/src/Peripherals/Rtc.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f3" displayName="Utils" projectFiles="true">
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="Microchip" projectFiles="true">
+        <logicalFolder name="f1" displayName="Common" projectFiles="true">
+          <itemPath>C:/Microchip Solutions/Microchip/Common/TimeDelay.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="MDD File System" projectFiles="true">
+          <itemPath>../../../../Flux/src/Microchip/MDD File System/FSIO.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f3" displayName="USB" projectFiles="true">
+          <itemPath>C:/Microchip Solutions/Microchip/USB/usb_device.c</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
+          <itemPath>C:/Microchip Solutions/Microchip/USB/MSD Device Driver/usb_function_msd.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>../Analogue.c</itemPath>
+      <itemPath>../Data.c</itemPath>
+      <itemPath>../HardwareProfile.c</itemPath>
+      <itemPath>../Logger.c</itemPath>
+      <itemPath>../Settings.c</itemPath>
+      <itemPath>../USB_CDC_MSD.c</itemPath>
+      <itemPath>../main.c</itemPath>
+      <itemPath>../usb_descriptors.c</itemPath>
+      <itemPath>../util.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+      <itemPath>../readme.txt</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="default" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24FJ256GB106</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>3_30b</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <C30>
+        <property key="optimization-level" value="0"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="..;C:\Microchip Solutions\Microchip\Include;../../../../Flux/include"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="data-model" value="large-data"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-all-warnings" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="scalar-model" value="default"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
+      </C30Global>
+      <ICD3PlatformTool>
+        <property key="UART 4" value="true"/>
+        <property key="UART 3" value="true"/>
+        <property key="UART 2" value="true"/>
+        <property key="UART 1" value="true"/>
+        <property key="programoptions.preserveprogramrange" value="true"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.id" value="false"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="INPUT CAPTURE 9" value="true"/>
+        <property key="INPUT CAPTURE 8" value="true"/>
+        <property key="INPUT CAPTURE 7" value="true"/>
+        <property key="INPUT CAPTURE 6" value="true"/>
+        <property key="INPUT CAPTURE 5" value="true"/>
+        <property key="INPUT CAPTURE 4" value="true"/>
+        <property key="INPUT CAPTURE 3" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="ADC 1" value="true"/>
+        <property key="OUTPUT COMPARE 9" value="true"/>
+        <property key="OUTPUT COMPARE 8" value="true"/>
+        <property key="OUTPUT COMPARE 7" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="OUTPUT COMPARE 6" value="true"/>
+        <property key="OUTPUT COMPARE 5" value="true"/>
+        <property key="OUTPUT COMPARE 4" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x29C00"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="voltagevalue" value="3.25"/>
+        <property key="TIMER5" value="true"/>
+        <property key="memories.programmemory.end" value="0x2abf7"/>
+        <property key="TIMER4" value="true"/>
+        <property key="SPI 3" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="SPI 2" value="true"/>
+        <property key="TIMER2" value="true"/>
+        <property key="SPI 1" value="true"/>
+        <property key="TIMER1" value="true"/>
+        <property key="UCNFG1" value="true"/>
+        <property key="CLOCK CONTROL" value="true"/>
+        <property key="I2C3" value="true"/>
+        <property key="CRC" value="true"/>
+        <property key="I2C2" value="true"/>
+        <property key="I2C1" value="true"/>
+        <property key="programoptions.preserveprogramrange.end" value="0x2a3ff"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
+      </ICD3PlatformTool>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -1,0 +1,29 @@
+#summary Open Movement Documentation
+
+= Documentation =
+
+
+== Open Movement ==
+
+  * [OpenMovement Overview]
+  * [http://openmovement.googlecode.com/svn/docs/omapi/html/index.html Open Movement API] (web-based)
+  * (downloadable PDF files)
+  * (documentation of other source code)
+
+
+== AX3 Movement logging sensor ==
+
+  * [AX3 AX3 Overview]
+  * [Ax3Software AX3 Software]
+  * [Ax3Firmware AX3 Firmware]
+  * [Ax3Hardware AX3 Hardware]
+  * [Ax3Mechanical AX3 Mechanical]
+
+
+== WAX3 Wireless accelerometer ==
+
+  * [WAX3 WAX3 Overview]
+  * [Wax3Software WAX3 Software]
+  * [Wax3Firmware WAX3 Firmware]
+  * [Wax3Hardware WAX3 Hardware]
+  * [Wax3Mechanical WAX3 Mechanical]

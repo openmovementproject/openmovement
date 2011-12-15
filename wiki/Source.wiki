@@ -1,0 +1,20 @@
+#summary Open Movement Source
+
+= Source =
+
+To get your hand on the source for the *software*, *firmware*, *hardware*, or *mechanical* aspects of the devices:
+  * [http://code.google.com/p/openmovement/source/browse/#svn%2Ftrunk Browse the source code]
+  * [http://code.google.com/p/openmovement/source/checkout Checkout the source code]
+
+The source code includes:
+
+  * Software
+    * Open Movement API
+    * AX3 PC Software
+  * Firmware
+    * Flux Library
+    * AX3 Device Firmware
+  * Hardware
+    * AX3 PCB and Schematic
+  * Mechanical
+    * AX3 Mechanical

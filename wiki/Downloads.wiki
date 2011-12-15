@@ -1,0 +1,29 @@
+#summary Open Movement Downloads
+
+= Downloads =
+
+Open Movement is an open source project.  To get your hand on the source for the *software*, *firmware*, *hardware*, or *mechanical* aspects of the devices, see:
+  * [Source Source page].
+
+For downloadable and on-line documentation, see:
+  * [Documentation Documentation page]
+
+The below downloads are also listed on the [http://code.google.com/p/openmovement/downloads/list downloads] page.
+
+
+== Software Binaries ==
+
+Some of these utilities require the [http://www.microsoft.com/download/en/details.aspx?id=22 .NET Framework 3.5 SP1]:
+
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Utils-Win.zip AX3 Utilities (Windows)]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-Utils-Win.zip WAX3 Utilities (Windows)]
+
+Drivers:
+
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Driver-Win.zip AX3 Driver (Windows)]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-Driver-Win.zip WAX3 Driver (Windows)]
+
+
+== Firmware Binaries ==
+
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-22.zip AX3 r1.7 Firmware 22]

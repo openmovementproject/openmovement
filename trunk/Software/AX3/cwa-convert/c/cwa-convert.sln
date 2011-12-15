@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cwa-convert", "cwa-convert.vcxproj", "{56C35048-E9C4-466F-ACB5-2B36700C7E48}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{56C35048-E9C4-466F-ACB5-2B36700C7E48}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56C35048-E9C4-466F-ACB5-2B36700C7E48}.Debug|Win32.Build.0 = Debug|Win32
+		{56C35048-E9C4-466F-ACB5-2B36700C7E48}.Release|Win32.ActiveCfg = Release|Win32
+		{56C35048-E9C4-466F-ACB5-2B36700C7E48}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
