@@ -1,6 +1,6 @@
 #summary Open Movement Documentation
 
-= Documentation =
+= Documentation (Wiki) =
 
 
 == Open Movement ==
