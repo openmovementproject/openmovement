@@ -1,0 +1,40 @@
+<!-- Java CWA Converter Built Script -->
+<project name="jcwa" default="dist" basedir=".">
+  <description>Java CWA Converter</description>
+  
+  <property name="project" value="jcwa"/>
+  <property name="src" location="src"/>
+  <property name="build" location="bin"/>
+  <property name="dist"  location="dist"/>
+  <property name="doc"  location="doc"/>
+  
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="Compile the source code.">
+    <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
+  </target>
+
+  <target name="dist" depends="compile" description="Generate the distribution.">
+    <mkdir dir="${dist}/lib"/>
+    <delete file="${dist}/lib/${project}.jar"/>
+    <delete file="${dist}/MANIFEST.MF"/>
+    <manifest file="${dist}/MANIFEST.MF">
+       <attribute name="Main-Class" value="newcastle.cwa.CwaConverter"/>
+    </manifest>
+    <jar jarfile="${dist}/lib/${project}.jar" basedir="${build}" includes="**/*.class" manifest="${dist}/MANIFEST.MF" />
+  </target>
+
+  <target name="clean" description="Clean up">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="${doc}"/>
+  </target>
+  
+  <target name="javadoc" description="Generate JavaDoc">
+    <javadoc access="public" author="true" classpath="." destdir="${doc}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="newcastle.cwa" source="1.6" sourcepath="src" splitindex="true" use="true" version="true"/>
+  </target>
+    
+</project>
