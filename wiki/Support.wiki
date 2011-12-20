@@ -1,1 +1,5 @@
 = Support and Issues =
+
+   * [http://code.google.com/p/openmovement/issues/list Issue tracker]
+   * [http://code.google.com/p/openmovement/wiki/Documentation?tm=6 Documentation]
+   * [http://groups.google.com/group/openmovement/ Open Movment Google Group Discussion]
