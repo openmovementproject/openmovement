@@ -1,17 +1,15 @@
-#summary Overview of Open Movement
-
-= Open Movement =
-
 Open Movement devices are miniature, embeddable, open source sensors developed at [http://di.ncl.ac.uk/blog/open-movement/ Newcastle University, UK].
 
 * Devices
   * [AX3 AX3 Movement logging]
   * [WAX3 WAX3 Wireless accelerometers]
 
-* [Documentation]
+* [http://code.google.com/p/openmovement/wiki/Downloads?tm=2 Downloads]
 
-* [Downloads]
+* [http://code.google.com/p/openmovement/wiki/Documentation?tm=6 Documentation Wiki]
 
-* [Source]
+* [http://code.google.com/p/openmovement/wiki/Support?tm=3 Support & Issues]
+
+* [http://code.google.com/p/openmovement/wiki/Source?tm=4 Source]
 
 ==
