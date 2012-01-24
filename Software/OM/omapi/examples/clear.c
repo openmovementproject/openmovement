@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -27,8 +27,8 @@
  *  @file clear.c
  *  @brief     Open Movement API Example: Clear all attached devices.
  *  @author    Dan Jackson
- *  @date      2011
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2011, Newcastle University, UK. All rights reserved.
+ *  @date      2011-2012
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
  *
  *  A command-line tool to clear all attached devices.

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -28,9 +28,9 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.0
- *  @date      2011
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2011, Newcastle University, UK. All rights reserved.
+ *  @version   1.1
+ *  @date      2011-2012
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
     Open Movement API header file.
 
@@ -47,8 +47,8 @@
 
 /** @mainpage Open Movement API
  *  @version   1.0
- *  @date      2011
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2011, Newcastle University, UK. All rights reserved.
+ *  @date      2011-2012
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
         This document describes the Open Movement application programming interface (API).
         The API provides an interface to communicate with AX3 longitudinal movement data loggers and their data files.  
@@ -558,6 +558,17 @@ OM_EXPORT int OmGetLastConfigTime(int deviceId, OM_DATETIME *time);
  */
 OM_EXPORT int OmClearDataAndCommit(int deviceId);
 
+
+/**
+ * Commits the metadata and settings without clearing.
+ * This is not recommended as it changes the metadata of an existing recording.
+ * @note To modify the file system, the device prevents the computer from accessing the data store (by temporarily disconnecting it).
+ * Therefore, the operation will report failure if a download is in progress - the download must complete or first be cancelled with OmCancelDownload();
+ * @param deviceId Identifier of the device.  
+ * @return \a OM_OK if successful, an error code otherwise.
+ */
+OM_EXPORT int OmCommit(int deviceId);
+
 /**@}*/
 
 
@@ -815,6 +826,16 @@ OM_EXPORT OmReaderHandle OmReaderOpen(const char *binaryFilename);
 
 
 /**
+ * Opens the binary data file on the specified device.
+ * Parses the file header and places the stream at the first block of data.
+ * @param deviceId Identifier of the device that holds the required data file.
+ * @return If successful, a handle to the reader object, otherwise \a NULL
+ * @see OmReaderNextBlock(), OmReaderClose()
+ */
+OM_EXPORT OmReaderHandle OmReaderOpenDeviceData(int deviceId);
+
+
+/**
  * Read the size, time-range, and internal chunking of the binary file.
  * @param reader The handle to the reader.
  * @param[out] dataBlockSize A pointer to a value to receive the block size of the data (512 bytes), or \a NULL if not required.
@@ -824,7 +845,34 @@ OM_EXPORT OmReaderHandle OmReaderOpen(const char *binaryFilename);
  * @param[out] endTime A pointer for the end time of the data, or \a NULL if not required.
  * @return \a OM_OK if successful, an error code otherwise.
  */
-int OmReaderDataRange(OmReaderHandle reader, int *dataBlockSize, int *dataOffsetBlocks, int *dataNumBlocks, OM_DATETIME *startTime, OM_DATETIME *endTime);
+OM_EXPORT int OmReaderDataRange(OmReaderHandle reader, int *dataBlockSize, int *dataOffsetBlocks, int *dataNumBlocks, OM_DATETIME *startTime, OM_DATETIME *endTime);
+
+
+/**
+ * Read the device id, session id and metadata of the binary file.
+ * @param reader The handle to the reader.
+ * @param[out] deviceId A pointer to a value to receive the device id, or \a NULL if not required.
+ * @param[out] sessionId A pointer to a value to receive the session id, or \a NULL if not required.
+ * @return A pointer to a value to receive the pointer to the metadata, or \a NULL if the reader handle is not valid.
+ */
+OM_EXPORT const char *OmReaderMetadata(OmReaderHandle reader, int *deviceId, unsigned int *sessionId);
+
+
+/**
+ * Return the current block index of the reader.
+ * @param reader The handle to the reader.
+ * @return If non-negative, the block position within the file, an error code otherwise.
+ */
+OM_EXPORT int OmReaderDataBlockPosition(OmReaderHandle reader);
+
+
+/**
+ * Seeks the file reader to the specified data block.
+ * @param reader The handle to the reader.
+ * @param seekBlock If positive, the data block index from the start of the file (after any header blocks); if negative, the data block index from the end of the file.
+ * @return \a OM_OK if successful, an error code otherwise.
+ */
+OM_EXPORT int OmReaderDataBlockSeek(OmReaderHandle reader, int dataBlockNumber);
 
 
 /**
@@ -888,7 +936,7 @@ typedef struct
 	unsigned char firmwareRevision;		/**< @41 +1 Firmware revision number */
 	signed short timeZone;				/**< @42 +2 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown */
     unsigned char reserved4[20];        /**< @44 +20 (20 bytes reserved) */
-    unsigned char annotation[448];      /**< @64 +448 Scratch buffer / meta-data (448 characters) */
+    unsigned char annotation[OM_METADATA_SIZE]; /**< @64 +448 Scratch buffer / meta-data (448 characters) */
     unsigned char reserved[512];        /**< @512 +512 Reserved for post-collection scratch buffer / meta-data (512 characters) */
 } OM_READER_HEADER_PACKET;
 #pragma pack(pop)

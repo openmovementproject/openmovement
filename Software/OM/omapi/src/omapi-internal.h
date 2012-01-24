@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Open Movement API - Internal Header File
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 
 
@@ -219,6 +219,9 @@ int OmPortAcquire(unsigned short deviceId);
 
 /** Release a port */
 int OmPortRelease(unsigned short deviceId);
+
+/** Get data filename */
+int OmGetDataFilename(int deviceId, char *filenameBuffer);
 
 /**
  * Issues a command over the CDC port for a particular device.

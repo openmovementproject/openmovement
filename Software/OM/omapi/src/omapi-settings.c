@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -91,6 +91,25 @@ int OmClearDataAndCommit(int deviceId)
     //status = OM_COMMAND(deviceId, "\r\nCLEAR DATA\r\n", response, "COMMIT", 4000, parts);   // Delete file + re-create file
     status = OM_COMMAND(deviceId, "\r\nFORMAT QC\r\n", response, "COMMIT", 6000, parts);      // Make all data inaccessible through FTL + re-create file
     //status = OM_COMMAND(deviceId, "\r\nFORMAT WC\r\n", response, "COMMIT", 15000, parts);      // Physically erase all NAND pages + re-create file
+    if (OM_FAILED(status)) return status;
+    // "COMMIT"
+    if (parts[0] == NULL) { return OM_E_FAIL; }
+    return OM_OK;
+}
+
+
+int OmCommit(int deviceId)
+{
+    int status;
+    char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
+    OM_DOWNLOAD_STATUS downloadStatus;
+
+    // Queries the current download status, fails if a download is in progress
+    status = OmQueryDownload(deviceId, &downloadStatus, NULL);
+    if (OM_FAILED(status)) return status;
+    if (downloadStatus == OM_DOWNLOAD_PROGRESS) return OM_E_NOT_VALID_STATE;
+
+    status = OM_COMMAND(deviceId, "\r\nCOMMIT\r\n", response, "COMMIT", 6000, parts);      // Update file
     if (OM_FAILED(status)) return status;
     // "COMMIT"
     if (parts[0] == NULL) { return OM_E_FAIL; }
