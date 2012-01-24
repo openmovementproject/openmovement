@@ -123,7 +123,7 @@ int OmUpdateDevices(void)
 
     // Example
     OmDeviceDiscovery(OM_DEVICE_CONNECTED, 1, "/dev/tty.usbmodem", "/dev/disk1");
-    return OM_FAIL;
+    return OM_E_FAIL;
 }
 
 /** Internal, thread for discovering devices. */
