@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -27,8 +27,8 @@
  *  @file convert.c
  *  @brief     Open Movement API Example: Convert a binary data file to a CSV text file.
  *  @author    Dan Jackson
- *  @date      2011
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2011, Newcastle University, UK. All rights reserved.
+ *  @date      2011-2012
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
  *
  *  A command-line tool to convert a specified binary data file to a CSV text file.
@@ -51,7 +51,7 @@
 
 
 /* Conversion function */
-int convert(const char *infile, const char *outfile)
+int convert(const char *infile, const char *outfile, char tee)
 {
     FILE *ofp = NULL;
     OmReaderHandle reader;
@@ -75,6 +75,11 @@ int convert(const char *infile, const char *outfile)
         ofp = stdout;
     }
 
+//#define VERIFY
+#ifdef VERIFY
+    OmReaderDataBlockSeek(reader, 82875);
+#endif
+
     /* Iterate over all of the blocks of the file */
     while ((numSamples = OmReaderNextBlock(reader)) >= 0)
     {
@@ -88,6 +93,9 @@ int convert(const char *infile, const char *outfile)
             unsigned short fractional;
             short x, y, z;
             static char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
+#ifdef VERIFY
+            static int firstPacket = 1, seconds, lastSecond = -1, packetCount = 0;
+#endif
 
             /* Get the date/time value for this sample, and the 1/65536th fractions of a second */
             dateTime = OmReaderTimestamp(reader, i, &fractional);
@@ -103,7 +111,34 @@ int convert(const char *infile, const char *outfile)
 
             /* Output the data */
             fprintf(ofp, "%s,%d,%d,%d\n", timeString, x, y, z);
-            if (ofp != stdout) { fprintf(stderr, "%s,%d,%d,%d\n", timeString, x, y, z); }
+
+#ifdef VERIFY
+seconds = OM_DATETIME_SECONDS(dateTime);
+if (lastSecond == -1) { lastSecond = seconds; };
+if (seconds != lastSecond)
+{
+    if (firstPacket) { printf(","); firstPacket = 0; }
+    else if (packetCount >= 98 && packetCount <= 105) { printf("."); }
+    else
+    { 
+        if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
+        {
+            fprintf(stderr, "\r\nWARNING: Only %d samples in second :%02d before %s]", packetCount, lastSecond, timeString);
+        }
+        else
+        {
+            fprintf(stderr, "\r\nWARNING: Non-sequential second jump (%d samples in second :%02d before %s)]", packetCount, lastSecond, timeString);
+        }
+        printf("\r\n");
+    }
+    lastSecond = seconds;
+    packetCount = 0;
+}
+packetCount++;
+#endif
+
+            /* 'Tee' the data to stderr */
+            if (tee) { fprintf(stderr, "%s,%d,%d,%d\n", timeString, x, y, z); }
         }
     }
 
@@ -123,12 +158,14 @@ int convert_main(int argc, char *argv[])
     {
         const char *infile = argv[1];
         const char *outfile = NULL;
+        char tee = 0;
         if (argc > 2) { outfile = argv[2]; }
-        return convert(infile, outfile);
+        if (argc > 3 && !strcmp(argv[3], "-tee")) { tee = 1; }
+        return convert(infile, outfile, tee);
     }
     else
     {
-        printf("Usage: convert <binary-input-file> [text-output-file]\n");
+        printf("Usage: convert <binary-input-file> [text-output-file [-tee]]\n");
         printf("\n");
         printf("Where: binary-input-file: the name of the binary file to convert.\n");
         printf("       text-output-file: the name of the comma-separated-value text file to create, stdout if none.\n");

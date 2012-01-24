@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Open Movement API - Download Functions
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 #include "omapi-internal.h"
 #include <sys/stat.h>
@@ -205,7 +205,7 @@ int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks,
         // Checks if we are already downloading, fails if a download is in progress
         if (device->downloadStatus == OM_DOWNLOAD_PROGRESS) { status = OM_E_NOT_VALID_STATE; break; }
 
-        // Sets the download status to no-started
+        // Sets the download status to not-started
         device->downloadStatus = OM_DOWNLOAD_NONE;
 
         // Checks system and device state and gets the data file name for the specified device
@@ -325,3 +325,12 @@ int OmCancelDownload(int deviceId)
     return OmWaitForDownload(deviceId, NULL, NULL);
 }
 
+
+OmReaderHandle OmReaderOpenDeviceData(int deviceId)
+{
+    char filenameBuffer[256];
+    int status;
+    status = OmGetDataFilename(deviceId, filenameBuffer);
+    if (OM_FAILED(status)) { return NULL; }
+    return OmReaderOpen(filenameBuffer);
+}

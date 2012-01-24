@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Device Finder
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 
 #ifndef DEVICEFINDER_H
@@ -38,16 +38,16 @@
 class Device
 {
 public:
-    std::string usb;                // Unique PNP prefix, "USB\VID_04D8&PID_0057\7&91737B1&0"
-    std::string port;               // Serial port device name, "\\.\COM98"
-    std::string usbStor;            // USBSTOR identifier "USBSTOR\DISK&VEN_CWA&PROD_CWA_MASS_STORAGE&REV_0017\8&1A780901&0&CWA17_65535&0"
-    std::string usbComposite;       // 
+    std::string usb;                // Unique PNP prefix, e.g. "USB\VID_04D8&PID_0057\7&91737B1&0"
+    std::string port;               // Serial port device name, e.g. "\\.\COM98"
+    std::string usbStor;            // USBSTOR identifier, e.g. "USBSTOR\DISK&VEN_CWA&PROD_CWA_MASS_STORAGE&REV_0017\8&1A780901&0&CWA17_65535&0"
+    std::string usbComposite;       // USB composite device ID
     unsigned int deviceNumber;      // Device number, e.g. 1
-    std::string physicalVolume;     // "\Device\HarddiskVolume105"
-    std::string volumeName;         // "\\?\Volume{377c1972-0fbb-11e1-98fc-0024bed79d50}\"
-    std::string volumePath;         // "E:\"
-    std::string serialString;       // Parent composite device serial number, "CWA17_00123"
-    unsigned int serialNumber;      // Serial number, 123
+    std::string physicalVolume;     // e.g. "\Device\HarddiskVolume105"
+    std::string volumeName;         // e.g. "\\?\Volume{377c1972-0fbb-11e1-98fc-0024bed79d50}\"
+    std::string volumePath;         // e.g. "E:\"
+    std::string serialString;       // Parent composite device serial number, e.g. "CWA17_00123"
+    unsigned int serialNumber;      // Serial number, e.g. 123
 
     std::string ToString();
 
@@ -83,7 +83,10 @@ public:
     void Stop(void);
 
     // (Usually internal)
+    bool Initialize(void);
+    bool Uninitialize(void);
     bool FindDevices(std::list<Device>& devices);
+    bool InitialScanDevices(void);
     bool RescanDevices(void);
     std::map<int, Device> deviceMap;
 

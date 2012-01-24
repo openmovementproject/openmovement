@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Open Movement API - Binary File Reader Functions
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 #include "omapi-internal.h"
 
@@ -73,31 +73,15 @@ typedef struct
     unsigned int numSamples;
     unsigned long long blockStart;
     unsigned long long blockEnd;
+    unsigned int sequenceId;
+    unsigned char events;
+
+    // Output values
+    unsigned short deviceId;
+    unsigned int sessionId;
+    unsigned char metaData[OM_METADATA_SIZE + 1];
+
 } OmReaderState;
-
-
-/** Internal method to seek to a specified data block. */
-int OmReaderSeekDataBlock(OmReaderHandle reader, int blockNumber)
-{
-    OmReaderState *state = (OmReaderState *)reader;
-
-    // Check parameter
-    if (state == NULL) { return OM_E_POINTER; }
-
-    // Seek the file
-    fseek(state->fp, state->dataOffset + blockNumber * OM_BLOCK_SIZE, SEEK_SET);
-
-    // Clear the data buffer and samples
-    memset(state->data, 0xff, OM_BLOCK_SIZE);
-    memset(state->samples, 0x00, OM_MAX_SAMPLES * 3 * sizeof(short));
-
-    // Clear the time-tracking values
-    state->numSamples = 0;
-    state->blockStart = 0;
-    state->blockEnd = 0;
-
-    return OM_OK;
-}
 
 
 OmReaderHandle OmReaderOpen(const char *binaryFilename)
@@ -133,8 +117,18 @@ OmReaderHandle OmReaderOpen(const char *binaryFilename)
         fclose(state->fp); free(state); return NULL;
     }
 
+    // Extract the metadata from the header
+    state->deviceId = (unsigned short)(state->header[5]) | ((unsigned short)state->header[6] << 8);
+    state->sessionId = (unsigned int)(state->header[7]) | ((unsigned int)state->header[8] << 8) | ((unsigned int)state->header[9] << 16) | ((unsigned int)state->header[10] << 24);
+    memcpy(state->metaData, &(state->header[64]), OM_METADATA_SIZE);
+    state->metaData[OM_METADATA_SIZE] = '\0';
+
     // Calculate the number of data blocks
     state->numDataBlocks = (state->fileSize - state->dataOffset) / OM_BLOCK_SIZE;
+
+    // Clear the current event and sequence counter
+    state->events = 0;
+    state->sequenceId = (unsigned int)-1;
 
     // Determine the start time from the first readable data block
     state->firstStartTime = OM_DATETIME_ZERO;
@@ -145,7 +139,7 @@ OmReaderHandle OmReaderOpen(const char *binaryFilename)
         {
             int values;
             if (retry > 16) { break; }      // Give up after 16 blocks
-            OmReaderSeekDataBlock((OmReaderHandle)state, 0 + retry);
+            OmReaderDataBlockSeek((OmReaderHandle)state, 0 + retry);
             values = OmReaderNextBlock((OmReaderHandle)state);
             if (values > 0)
             {
@@ -164,7 +158,7 @@ OmReaderHandle OmReaderOpen(const char *binaryFilename)
         {
             int values;
             if (retry > 16) { break; }      // Give up after 16 blocks
-            OmReaderSeekDataBlock((OmReaderHandle)state, state->numDataBlocks - 1 - retry);
+            OmReaderDataBlockSeek((OmReaderHandle)state, (state->fileSize / OM_BLOCK_SIZE) - 1 - retry);
             values = OmReaderNextBlock((OmReaderHandle)state);
             if (values > 0)
             {
@@ -175,7 +169,7 @@ OmReaderHandle OmReaderOpen(const char *binaryFilename)
     }
 
     // Seek ready to read the first data block
-    OmReaderSeekDataBlock((OmReaderHandle)state, 0);
+    OmReaderDataBlockSeek((OmReaderHandle)state, 0);
 
     return (OmReaderHandle)state;
 }
@@ -199,9 +193,71 @@ int OmReaderDataRange(OmReaderHandle reader, int *dataBlockSize, int *dataOffset
 }
 
 
+const char *OmReaderMetadata(OmReaderHandle reader, int *deviceId, unsigned int *sessionId)
+{
+    OmReaderState *state = (OmReaderState *)reader;
+
+    // Check parameter
+    if (state == NULL) { return NULL; }
+
+    // Output values
+    if (deviceId != NULL) { *deviceId = state->deviceId; }
+    if (sessionId != NULL) { *sessionId = state->sessionId; }
+
+    return (char *)state->metaData; 
+}
+
+
+int OmReaderDataBlockPosition(OmReaderHandle reader)
+{
+    int dataBlockNumber;
+    OmReaderState *state = (OmReaderState *)reader;
+
+    // Check parameter
+    if (state == NULL) { return OM_E_POINTER; }
+
+    // Get the data block position
+    dataBlockNumber = (ftell(state->fp) - state->dataOffset) / OM_BLOCK_SIZE;
+
+    // Return data block position
+    return dataBlockNumber;
+}
+
+
+int OmReaderDataBlockSeek(OmReaderHandle reader, int dataBlockNumber)
+{
+    OmReaderState *state = (OmReaderState *)reader;
+
+    // Check parameter
+    if (state == NULL) { return OM_E_POINTER; }
+
+    // Check values
+    //if (dataBlockNumber < 0) { dataBlockNumber += state->numDataBlocks; }       // Negative values from end of file
+    if (dataBlockNumber < -(state->dataOffset / OM_BLOCK_SIZE)) { return OM_E_FAIL; }
+    if (dataBlockNumber > (state->fileSize / OM_BLOCK_SIZE)) { return OM_E_FAIL; }
+
+    // Seek the file
+    fseek(state->fp, state->dataOffset + dataBlockNumber * OM_BLOCK_SIZE, SEEK_SET);
+
+    // Clear the data buffer and samples
+    memset(state->data, 0xff, OM_BLOCK_SIZE);
+    memset(state->samples, 0x00, OM_MAX_SAMPLES * 3 * sizeof(short));
+
+    // Clear the sequence and time-tracking values
+    state->sequenceId = (unsigned int)-1;
+    state->events = 0;
+    state->numSamples = 0;
+    state->blockStart = 0;
+    state->blockEnd = 0;
+
+    return OM_OK;
+}
+
+
 int OmReaderNextBlock(OmReaderHandle reader)
 {
     unsigned long long previousBlockEnd;
+    unsigned int sequenceId;
     char bytesPerSample;
     int sampleRate;
 
@@ -243,6 +299,10 @@ int OmReaderNextBlock(OmReaderHandle reader)
     if ((state->data[25] & 0x0f) == 2)      { bytesPerSample = 6; }    // @0 numAxesBPS:L == 2 -- 3x 16-bit signed
     else if ((state->data[25] & 0x0f) == 0) { bytesPerSample = 4; }    // @0 numAxesBPS:L == 0 -- 3x 10-bit signed + 2-bit exponent
     else { return 0; }
+
+    // Read sequence number and events
+    sequenceId = ((unsigned int)state->data[10] << 0) | ((unsigned int)state->data[11] << 8) | ((unsigned int)state->data[12] << 16) | ((unsigned int)state->data[13] << 24);
+    state->events = state->data[22];
 
     // Extract data values
     if (bytesPerSample == 4)
@@ -316,13 +376,57 @@ int OmReaderNextBlock(OmReaderHandle reader)
         }
 
         // Calculate times at start and end of block
-        state->blockStart = t - (timestampOffset * 0x10000 / sampleRate);
-        state->blockEnd = state->blockStart + state->numSamples * 0x10000 / sampleRate;
+        state->blockStart = t - ((long long)timestampOffset * 0x10000 / sampleRate);
+        state->blockEnd = state->blockStart + (unsigned long long)state->numSamples * 0x10000 / sampleRate;
+//#define VERIFY
+#ifdef VERIFY
+        if (state->events & 0xf0)
+        {
+            fprintf(stderr, "\n[EVENT-ERROR: 0x%02x]", state->events); 
+        }
+        fprintf(stderr, "\n[timestampOffset %04d-%02d-%02d %02d:%02d:%02d %+d * %.3f]", 
+            OM_DATETIME_YEAR(timestamp), OM_DATETIME_MONTH(timestamp), OM_DATETIME_DAY(timestamp),
+            OM_DATETIME_HOURS(timestamp), OM_DATETIME_MINUTES(timestamp), OM_DATETIME_SECONDS(timestamp),
+            -timestampOffset, 1.0f / sampleRate);
+#endif
 
-        // If the previous block's "blockEnd" is close to this block's "blockStart", use that value to smooth over any tiny jitter
-        if (previousBlockEnd != 0 && state->blockStart != 0 && (int)(previousBlockEnd - state->blockStart) < 65536) { state->blockStart = previousBlockEnd; }
+        // If we are reading a block in sequence
+        if (state->sequenceId != (unsigned int)-1 && state->sequenceId + 1 == sequenceId)
+        {
+            // If the previous block's "blockEnd" is close (+- 5%) to this block's "blockStart", use that value to smooth over any tiny jitter
+            if (previousBlockEnd != 0 && state->blockStart != 0 && abs((int)(previousBlockEnd - state->blockStart)) < 3276)
+            {
+                state->blockStart = previousBlockEnd;
+            }
+#ifdef VERIFY
+else
+{
+    long long diff = (long long)(state->blockStart - previousBlockEnd);
+    fprintf(stderr, "\nWARNING: Time break in sequence by %+.2f seconds [timestampOffset was %d]", (float)diff / 65536.0f, timestampOffset);
+    fprintf(stderr, "\n");
+}
+#endif
+        }
+#ifdef VERIFY
+else if (state->sequenceId != (unsigned int)-1)
+{
+    if (sequenceId != 0)
+    {
+        fprintf(stderr, "\nWARNING: Sequence break %u -> %u", state->sequenceId, sequenceId);
+        fprintf(stderr, "\n");
+    }
+    else
+    {
+        fprintf(stderr, "\nNOTE: Recording sequence restarted at sequence %u", state->sequenceId);
+        fprintf(stderr, "\n");
+    }
+}
+#endif
 
     }
+
+    // Update sequence id
+    state->sequenceId = sequenceId;
 
     return state->numSamples;
 }

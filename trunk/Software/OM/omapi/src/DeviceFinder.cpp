@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Device Finder
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 // NOTE: Finding the pairs of CDC and MSD instances, together with their composite parent device serial number, 
 //       is quite a mess on Windows.  This file is still a complete mess from getting it working!
@@ -101,11 +101,11 @@ bool Device::operator==(const Device &other) const
 }
 
 
-// Constructs a DeviceFinder with the specified vendor id and product id
-DeviceFinder::DeviceFinder(unsigned int vidPid)
+bool DeviceFinder::Initialize(void)
 {
+    if (initialized) { return true; }
+
     initialized = false;
-    this->vidPid = vidPid;
     pLoc = NULL;
     pSvc = NULL;
     hWndDeviceFinder = NULL;
@@ -114,7 +114,7 @@ DeviceFinder::DeviceFinder(unsigned int vidPid)
     // Initialize COM
     HRESULT hr;
     hr =  CoInitializeEx(0, COINIT_MULTITHREADED); 
-    if (hr != S_OK && hr != S_FALSE && hr != RPC_E_CHANGED_MODE) { cerr << "ERROR: Failed to initialize COM library: " << hr << endl; return; }
+    if (hr != S_OK && hr != S_FALSE && hr != RPC_E_CHANGED_MODE) { cerr << "ERROR: Failed to initialize COM library: " << hr << endl; return false; }
 
     // Set COM security levels
     hr =  CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
@@ -122,18 +122,41 @@ DeviceFinder::DeviceFinder(unsigned int vidPid)
 
     // Obtain the WMI initial locator
     hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
-    if (FAILED(hr)) { cerr << "ERROR: Failed to create IWbemLocator object: " << hr << endl; CoUninitialize(); return; }
+    if (FAILED(hr)) { cerr << "ERROR: Failed to create IWbemLocator object: " << hr << endl; CoUninitialize(); return false; }
 
     // Connect to the root\cimv2 WMI namespace through the IWbemLocator::ConnectServer method with the current user and obtain pointer pSvc to make IWbemServices calls.
     hr = ((IWbemLocator *)pLoc)->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, (IWbemServices **)&pSvc);
-    if (FAILED(hr)) { cerr << "ERROR: Could not connect to WMI ROOT\\CIMV2: " << hr << endl; ((IWbemLocator *)pLoc)->Release(); pLoc = NULL; CoUninitialize(); return; }
+    if (FAILED(hr)) { cerr << "ERROR: Could not connect to WMI ROOT\\CIMV2: " << hr << endl; ((IWbemLocator *)pLoc)->Release(); pLoc = NULL; CoUninitialize(); return false; }
 
     // Set security levels on the proxy
     hr = CoSetProxyBlanket((IWbemServices *)pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hr)) { cerr << "WARNING: Could not set proxy blanket: " << hr << endl; }
 
     initialized = true;
+    return true;
+}
 
+
+bool DeviceFinder::Uninitialize(void)
+{
+    // Cleanup IWbemServices, IWbemLocator
+    if (pSvc != NULL) { ((IWbemServices *)pSvc)->Release(); pSvc = NULL; }
+    if (pLoc != NULL) { ((IWbemLocator *)pLoc)->Release(); pLoc = NULL; }
+
+    // Un-initialize COM
+// TODO: Track whether we initialized com or if it was already initialized
+//    if (initialized) { CoUninitialize(); }
+
+    initialized = false; 
+    return true;
+}
+
+
+// Constructs a DeviceFinder with the specified vendor id and product id
+DeviceFinder::DeviceFinder(unsigned int vidPid)
+{
+    this->initialized = false;
+    this->vidPid = vidPid;
     return;
 }
 
@@ -142,14 +165,7 @@ DeviceFinder::DeviceFinder(unsigned int vidPid)
 DeviceFinder::~DeviceFinder()
 {
     Stop();
-
-    // Cleanup IWbemServices, IWbemLocator
-    if (pSvc != NULL) { ((IWbemServices *)pSvc)->Release(); pSvc = NULL; }
-    if (pLoc != NULL) { ((IWbemLocator *)pLoc)->Release(); pLoc = NULL; }
-
-    // Un-initialize COM
-    if (initialized) { CoUninitialize(); initialized = false; }
-
+    Uninitialize();
 }
 
 
@@ -550,6 +566,9 @@ bool DeviceFinder::MappingUsbstorToDeviceNumber(std::map<std::string, int>& usbS
     // Clear list of drive names
     usbStorToDeviceMap.clear();
 
+    // Ensure pSvc is initialized
+    Initialize();
+
     if (pSvc == NULL) { cerr << "ERROR: Unable to get usbstor-deviceNumber mapping." << endl;  return false; }
 
     // Use the IWbemServices pointer to make a WMI request for Win32_SerialPort
@@ -725,7 +744,6 @@ std::string DeviceFinder::GetVolumePathForVolumeName(std::string volumeName)
 }
 
 
-
 bool DeviceFinder::FindDevices(std::list<Device>& devices)
 {
     devices.clear();
@@ -834,6 +852,19 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
         devices.push_back(device);
     }
 
+#if 0
+    char b[16];
+    string s = "";
+    s += _itoa(devices.size(), b, 10); s += " device(s). From: ";
+    s += _itoa(mapUsbToPort.size(), b, 10); s += "; ";
+    s += _itoa(mapUsbToUsbstor.size(), b, 10); s += "; ";
+    s += _itoa(mapUsbToUsbComposite.size(), b, 10); s += "; ";
+    s += _itoa(mapUsbstorToDeviceNumber.size(), b, 10); s += "; ";
+    s += _itoa(mapDeviceNumberToPhysicalVolume.size(), b, 10); s += "; ";
+    s += _itoa(mapPhysicalVolumeToVolumeName.size(), b, 10); s += "; ";
+    MessageBoxA(NULL, s.c_str(), "Debug", 0);
+#endif
+
     return true;
 }
 
@@ -897,7 +928,10 @@ int DeviceFinder::WinProc(void *windowHandle, unsigned int message, unsigned int
     {
         case WM_CREATE:
             // Registration at application startup when the window is created.
-            DoRegisterDeviceInterfaceToHwnd(WceusbshGUID, hWnd, &hDeviceNotify);
+            if (!DoRegisterDeviceInterfaceToHwnd(WceusbshGUID, hWnd, &hDeviceNotify))
+            {
+                MessageBoxA(NULL, "Error registering device finder device interface", "Error", 0);
+            }
             break;
 
         case WM_DEVICECHANGE:
@@ -1021,18 +1055,29 @@ unsigned int DeviceFinder::DiscoveryLoop(void)
     wndClass.hIconSm = wndClass.hIcon;
 
     ATOM registerClass = RegisterClassEx(&wndClass);
-    //if (!registerClass) { return 0; }
+    if (!registerClass) 
+    { 
+        //MessageBoxA(NULL, "Error creating device finder window class", "Error", 0);
+        //return 0; 
+    }
 
     // Create window
     HWND hWnd = CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_APPWINDOW, wndClass.lpszClassName, TEXT("DeviceFinder"), WS_OVERLAPPEDWINDOW, 0, 0, 0, 0, NULL, NULL, (HINSTANCE)GetModuleHandle(NULL), this);
     hWndDeviceFinder = (void *)hWnd;
-    if (hWnd == NULL) { return 0; }
+    if (hWnd == NULL) 
+    { 
+        MessageBoxA(NULL, "Error creating device finder window", "Error", 0);
+        return 0; 
+    }
     ShowWindow(hWnd, SW_HIDE);
     UpdateWindow(hWnd);
 
     // Start a timer
     timerUpdateCountdown = 0;
-    SetTimer(hWnd, TIMER_ID, TIMER_INTERVAL, NULL);
+    if (!SetTimer(hWnd, TIMER_ID, TIMER_INTERVAL, NULL))
+    {
+        MessageBoxA(NULL, "Error creating device finder timer", "Error", 0);
+    }
 
     // Message pump loops until the window is destroyed
     MSG msg; 
@@ -1057,6 +1102,13 @@ static DWORD WINAPI DiscoveryThreadTrampoline(void *reference)
 }
 
 
+bool DeviceFinder::InitialScanDevices(void)
+{
+    bool ret = RescanDevices();
+    Uninitialize();
+    return ret;
+}
+
 
 bool DeviceFinder::Start(bool continuous, DeviceFinderCallback addedCallback, DeviceFinderCallback removedCallback, void *callbackReference)
 {
@@ -1070,12 +1122,16 @@ bool DeviceFinder::Start(bool continuous, DeviceFinderCallback addedCallback, De
     this->callbackReference = callbackReference;
 
     // Perform an initial scan
-    RescanDevices();
+    InitialScanDevices();
 
     // Continuous loop
     if (!quitFlag)
     {
         thread = CreateThread(NULL, 0, DiscoveryThreadTrampoline, this, 0, NULL);
+        if (thread == NULL)
+        {
+            MessageBoxA(NULL, "Error creating device finder thread", "Error", 0);
+        }
     }
 
     return true;
