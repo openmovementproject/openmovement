@@ -26,4 +26,5 @@ Drivers:
 
 == Firmware Binaries ==
 
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-22.zip AX3 r1.7 Firmware 22]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.6-Firmware-29.zip AX3 r1.6 Firmware 29]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-29.zip AX3 r1.7 Firmware 29]
