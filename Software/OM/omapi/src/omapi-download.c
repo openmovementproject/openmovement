@@ -67,7 +67,15 @@ static thread_return_t OmDownloadThread(void *arg)
     OM_DOWNLOAD_STATUS downloadStatus = OM_DOWNLOAD_ERROR;
     OmDeviceState *deviceState = (OmDeviceState *)arg;
     char *buffer = (char *)malloc((OM_DOWNLOAD_BLOCK_SET * OM_BLOCK_SIZE));
-    if (buffer != NULL && deviceState->downloadSource != NULL && deviceState->downloadDest != NULL)
+    if (buffer == NULL)
+    { 
+        downloadStatus = OM_E_OUT_OF_MEMORY; 
+    }
+    else if (deviceState->downloadSource == NULL || deviceState->downloadDest == NULL)
+    {
+        downloadStatus = OM_E_POINTER; 
+    }
+    else
     {
         // Initial status update
         downloadStatus = OM_DOWNLOAD_PROGRESS;
