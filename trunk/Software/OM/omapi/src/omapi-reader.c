@@ -277,7 +277,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
     if (feof(state->fp)) { return OM_E_FAIL; }                                                              // End of file
 
     // Read a block, error on incomplete read
-    if (fread(state->data, 1, OM_BLOCK_SIZE, state->fp) != OM_BLOCK_SIZE) { return OM_E_UNEXPECTED; }       // Read error
+    if (fread(state->data, 1, OM_BLOCK_SIZE, state->fp) != OM_BLOCK_SIZE) { return OM_E_ACCESS_DENIED; }    // Read error
 
     // Check header and size
     if (state->data[0] != 0x41 || state->data[1] != 0x58) { return 0; }                                     // @0 packetHeader
