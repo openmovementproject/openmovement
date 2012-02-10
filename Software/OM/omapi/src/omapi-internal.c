@@ -334,7 +334,7 @@ int OmPortAcquire(unsigned short deviceId)
     do          // This is only a 'do' to allow a single code path to hit the mutex unlock with any exceptional 'break's
     {
         // Check if already open
-        if (om.devices[deviceId]->fd >= 0) {  status = OM_E_ACCESS_DENIED; break; }
+        if (om.devices[deviceId]->fd >= 0) { status = OM_E_ACCESS_DENIED; break; }
 
         // Open the port
         om.devices[deviceId]->fd = OmPortOpen(om.devices[deviceId]->port, 1);
@@ -346,7 +346,7 @@ int OmPortAcquire(unsigned short deviceId)
     } while (0);
     mutex_unlock(&om.portMutex);        // Release the mutex
 
-    return OM_OK;
+    return status;
 }
 
 
