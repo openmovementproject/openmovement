@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,40 +23,51 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// USB CDC and MSD handler
-// Dan Jackson, Karim Ladha, 2010-2011.
+// Header for drivers for the magnetometer devices
+// Karim Ladha 08-12-2012
 
-#ifndef USB_MSD_CDC_H
-#define USB_MSD_CDC_H
+#ifndef MAG_H
+#define MAG_H
 
-#include "USB/usb.h"
+extern char 	magPresent;
 
-void usb_putchar(unsigned char);
-int usb_getchar(void);
-void USBCDCWait(void);
-void USBProcessIO(void);
-void USBSerialIO(void);
-unsigned char GetCDCBytesToCircularBuffer(void);
-void USBInitializeSystem(void);
+// Data types
+typedef union
+{
+    struct { short x, y, z; };
+    struct { unsigned char xl, xh, yl, yh,  zl, zh; };
+    short values[3];
+} mag_t;
 
-#if defined(USB_CDC_SET_LINE_CODING_HANDLER)
-extern void mySetLineCodingHandler(void);
+// Read data rate in Hz
+unsigned char 	MagRate(void);		
+
+// Read device ID
+unsigned char MagVerifyDeviceId(void);
+
+// MagStartup
+void MagStartup(unsigned char samplingRate);
+
+// Shutdown the Magnetometer
+void MagStandby(void);
+
+// Sample the device. Note: The samples are 2's compliment and 16bit
+void MagSingleSample(mag_t *MagBuffer);
+
+// Enable interrupts
+void MagEnableInterrupt(void);
+
+// Read at most 'maxEntries' 3-axis samples - Note: device may have no fifo
+unsigned char MagReadFIFO(mag_t *MagBuffer, unsigned char maxEntries);
+
+// Read interrupt source - Note: device may have only one int source
+unsigned char MagReadIntSource(void);
+
+// Debug dump registers
+void MagDebugDumpRegisters(void);
+
+// 16 bit data will not be packed and this function will not be implemented
+void MagPackData(short *input, unsigned char *output);
+
 #endif
-//void USBDeviceTasks(void);
-void USBCBWakeFromSuspend(void);
-void USBCB_SOF_Handler(void);
-void USBCBErrorHandler(void);
-void USBCBCheckOtherReq(void);
-void USBCBStdSetDscHandler(void);
-void USBCBInitEP(void);
-void USBCBSendResume(void);
-void USBCBSuspend(void);
-BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
-#define BlinkUSBStatus()
 
-#if 0 // use following for isr - see .c file
-extern void __attribute__ ((interrupt)) _USB1Interrupt(void)
-#endif
-
-
-#endif   

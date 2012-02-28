@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 

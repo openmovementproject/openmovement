@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,20 +24,28 @@
  */
 
 // Serial timestamp functions
-// Dan Jackson, 2010-2011
+// Dan Jackson, 2010-2012
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "Utils/Timestamp.h"
 
+// Date/time constants (don't change these!)
+#define TIMESTAMP_START_YEAR 2000    // must be a leap year (if changed, will need to tweak code)
+#define TIMESTAMP_DAYS_PER_YEAR 365
+#define TIMESTAMP_MONTHS_PER_YEAR 12
+#define TIMESTAMP_YEARS_PER_CYCLE 4
+#define TIMESTAMP_DAYS_PER_CYCLE (TIMESTAMP_YEARS_PER_CYCLE * TIMESTAMP_DAYS_PER_YEAR + 1)  // 996
+#define TIMESTAMP_DAYS_PER_WEEK 7
 
-// Months                                                                      01,    02,    03,    04,    05,    06,    07,    08,    09,    10,    11,    12
+
+// Months                                                                            01,    02,    03,    04,    05,    06,    07,    08,    09,    10,    11,    12
 static const unsigned char *MonthName[TIMESTAMP_MONTHS_PER_YEAR + 1]   = { "---", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 static const unsigned char DaysPerMonth[TIMESTAMP_MONTHS_PER_YEAR + 1] = {     0,    31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
 static const unsigned short DaysBeforeMonthFromMarch[TIMESTAMP_MONTHS_PER_YEAR] =                 { 0,    31,    61,    92,   122,   153,   184,   214,   245,   275,   306,   337 };
 
-// Day of week                                                         00,    01,    02,    03,    04,    05,    06
+// Day of week                                                        00,    01,    02,    03,    04,    05,    06
 static const unsigned char *DayName[TIMESTAMP_DAYS_PER_WEEK]   = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
 // Temporary string
@@ -55,7 +63,7 @@ static int DaysInMonth(int month, int year)
 
 
 // Convert a timestamp to date and time components (out param pointers can be NULL if you don't want the return value)
-void TimestampToYMDHMS(Timestamp timestamp, unsigned short *outYear, unsigned char *outMonth, unsigned char *outDay, unsigned char *outWeekday, unsigned char *outHours, unsigned char *outMins, unsigned char *outSecs)
+void TimestampToYMDHMS(timestamp_t timestamp, unsigned short *outYear, unsigned char *outMonth, unsigned char *outDay, unsigned char *outWeekday, unsigned char *outHours, unsigned char *outMins, unsigned char *outSecs)
 {
     unsigned short year = 0;
     unsigned char month = 0, day = 0, weekday = 0;
@@ -77,36 +85,50 @@ void TimestampToYMDHMS(Timestamp timestamp, unsigned short *outYear, unsigned ch
 
     // Initial date value is the number of days in the passed in Timestamp
     v = (timestamp / TIMESTAMP_TICKS_PER_DAY);
-    weekday = (v + 3) % 7;      // The epoch is a Wednesday(!)
+    weekday = (v + 6) % 7;      // The epoch is a Saturday
 
-    // The only leap year exception in our date range (2000 to 2136 or 2179) is the year 2100
 #if TIMESTAMP_START_YEAR != 2000
 #error "The Timestamp offset calculation will need fixing for a start year other than 2000"
 #endif
-    offset = (unsigned short)((v / 36524L) - (v / (4 * 36524L)));
-    v += offset;
 
-    // Calculate cycle number and the day within the cycle
-    cycle = (short)(v / TIMESTAMP_DAYS_PER_CYCLE);
-    v = (v % TIMESTAMP_DAYS_PER_CYCLE);
+	// Patched in support for moving epoch from 1-Mar-2000 to 1-Jan-2000
+	if (v < 60)
+	{
+		year = 2000;
+		if (v < 31) { month = 1; day = (char)v + 1; }
+		else { month = 2; day = (char)(v - 30); }
+	}
+	else
+	{
+		// Fix up for original epoch of 1-Mar-2000
+		v -= 60;
+		
+        // The only leap year exception in our date range (2000 to 2136 or 2179) is the year 2100
+        offset = (unsigned short)((v / 36524L) - (v / (4 * 36524L)));
+        v += offset;
 
-    // Calculate year (leap day after end of 4-year cycle)
-    year = TIMESTAMP_START_YEAR + TIMESTAMP_YEARS_PER_CYCLE * cycle;
-    for (i = 0; i < (TIMESTAMP_YEARS_PER_CYCLE - 1); i++)
-    {
-        if (v >= TIMESTAMP_DAYS_PER_YEAR) { v -= TIMESTAMP_DAYS_PER_YEAR; year++; }
-    }
+        // Calculate cycle number and the day within the cycle
+        cycle = (short)(v / TIMESTAMP_DAYS_PER_CYCLE);
+        v = (v % TIMESTAMP_DAYS_PER_CYCLE);
 
-    for (i = 11; i >= 0; i--)
-    {
-        if (v >= DaysBeforeMonthFromMarch[i])
+        // Calculate year (leap day after end of 4-year cycle)
+        year = TIMESTAMP_START_YEAR + TIMESTAMP_YEARS_PER_CYCLE * cycle;
+        for (i = 0; i < (TIMESTAMP_YEARS_PER_CYCLE - 1); i++)
         {
-            day = (char)(v - DaysBeforeMonthFromMarch[i]) + 1;
-            month = i + 3;
-            if (month > 12) { month -= 12; year++; }
-            break;
+            if (v >= TIMESTAMP_DAYS_PER_YEAR) { v -= TIMESTAMP_DAYS_PER_YEAR; year++; }
         }
-    }
+
+        for (i = 11; i >= 0; i--)
+        {
+            if (v >= DaysBeforeMonthFromMarch[i])
+            {
+                day = (char)(v - DaysBeforeMonthFromMarch[i]) + 1;
+                month = i + 3;
+                if (month > 12) { month -= 12; year++; }
+                break;
+            }
+        }
+	}
 
     if (outYear != NULL) { *outYear = year; }
     if (outMonth != NULL) { *outMonth = month; }
@@ -120,41 +142,58 @@ void TimestampToYMDHMS(Timestamp timestamp, unsigned short *outYear, unsigned ch
 
 
 // Create a timestamp serial number from date and time components
-Timestamp TimestampFromYMDHMS(unsigned short year, unsigned char month, unsigned char day, unsigned char hours, unsigned char mins, unsigned char secs)
+timestamp_t TimestampFromYMDHMS(unsigned short year, unsigned char month, unsigned char day, unsigned char hours, unsigned char mins, unsigned char secs)
 {
-    Timestamp timestamp = 0;
+    timestamp_t timestamp = 0;
     unsigned short cycle;
     unsigned short offset;
-
-    if (year >= TIMESTAMP_START_YEAR) { year -= TIMESTAMP_START_YEAR; }          // Start year
-    else if (year >= 200) { return 0; }
-    if (month == 0 || day == 0) { return 0; }
-    month--;                                    // month base 0
-    day--;                                      // day base 0
-    if (month < 2)
-    {
-        if (year == 0) { return 0; }
-        year--; month += 10;
-    } else { month -= 2; }
 
 #if TIMESTAMP_START_YEAR != 2000
 #error "The Timestamp offset calculation will need fixing for a start year other than 2000"
 #endif
-    offset = (year / 100) - (year / 400);
 
-    cycle = year / TIMESTAMP_YEARS_PER_CYCLE;    // cycle number
-    year = year % TIMESTAMP_YEARS_PER_CYCLE;     // year within cycle
+	if (year >= TIMESTAMP_START_YEAR) { year -= TIMESTAMP_START_YEAR; }          // Start year
+	else if (year >= 200) { return 0; }
+	if (month == 0 || day == 0) { return 0; }
 
-    timestamp = (unsigned long)TIMESTAMP_TICKS_PER_DAY * ((unsigned long)cycle * TIMESTAMP_DAYS_PER_CYCLE + (unsigned long)year * TIMESTAMP_DAYS_PER_YEAR + (unsigned long)DaysBeforeMonthFromMarch[month] + (unsigned long)day - offset);
+	// Patched in support for moving epoch from 1-Mar-2000 to 1-Jan-2000
+	if (year == 0 && (month == 1 || month == 2))
+	{
+		if (month == 2) { day += 31; }
+        timestamp = (unsigned long)TIMESTAMP_TICKS_PER_DAY * ((unsigned long)day - 1);
+	}
+	else
+	{
+        month--;                                    // month base 0
+        day--;                                      // day base 0
+        if (month < 2)
+        {
+            if (year == 0) { return 0; }
+            year--; month += 10;
+        } else { month -= 2; }
+
+        offset = (year / 100) - (year / 400);
+
+        cycle = year / TIMESTAMP_YEARS_PER_CYCLE;    // cycle number
+        year = year % TIMESTAMP_YEARS_PER_CYCLE;     // year within cycle
+    
+        timestamp = (unsigned long)TIMESTAMP_TICKS_PER_DAY * ((unsigned long)cycle * TIMESTAMP_DAYS_PER_CYCLE + (unsigned long)year * TIMESTAMP_DAYS_PER_YEAR + (unsigned long)DaysBeforeMonthFromMarch[month] + (unsigned long)day - offset);
+		
+        // Fix up for new epoch of 1-Mar-2000
+        timestamp += (unsigned long)TIMESTAMP_TICKS_PER_DAY * 60;
+    }
+	
+	// Add time
 #ifdef TIMESTAMP_HAS_TIME
     timestamp += (((((unsigned long)hours * 60L) + (unsigned long)mins) * 60L) + (unsigned long)secs) * (unsigned long)TIMESTAMP_TIME_TICKS_PER_SECOND; 
 #endif
+    
     return timestamp;
 }
 
 
 // Convert a timestamp serial number to a string using the specified format
-char *TimestampToString(Timestamp timestamp, unsigned short format)
+const char *TimestampToString(timestamp_t timestamp, unsigned short format)
 {
     char *c = timestampString;
     unsigned short year;
@@ -251,11 +290,11 @@ char *TimestampToString(Timestamp timestamp, unsigned short format)
 
 
 // Add date and time components to a timestamp serial number
-Timestamp TimestampAdd(Timestamp timestamp, int addYear, int addMonth, int addDay, int addHours, int addMins, int addSecs)
+timestamp_t TimestampAdd(timestamp_t timestamp, int addYear, int addMonth, int addDay, int addHours, int addMins, int addSecs)
 {
     unsigned short year;
     unsigned char month, day, hours, mins, secs;
-    Timestamp delta = 0;
+    timestamp_t delta = 0;
 
     // Get current date and time (we need to know the year/month)
     TimestampToYMDHMS(timestamp, &year, &month, &day, NULL, &hours, &mins, &secs);
@@ -284,7 +323,7 @@ Timestamp TimestampAdd(Timestamp timestamp, int addYear, int addMonth, int addDa
         }
     }
 
-    timestamp = (Timestamp)((long)timestamp + ((long)addDay * TIMESTAMP_TICKS_PER_DAY));
+    timestamp = (timestamp_t)((long)timestamp + ((long)addDay * TIMESTAMP_TICKS_PER_DAY));
 #ifdef TIMESTAMP_HAS_TIME
     timestamp += (((((long)addHours * 60) + addMins) * 60) + addSecs) * TIMESTAMP_TIME_TICKS_PER_SECOND;
 #endif
@@ -294,7 +333,7 @@ Timestamp TimestampAdd(Timestamp timestamp, int addYear, int addMonth, int addDa
 
 
 // Convert a DateTime packed number to a timestamp
-Timestamp TimestampFromDateTime(unsigned long datetime)
+timestamp_t TimestampFromDateTime(unsigned long datetime)
 {
 	unsigned char year  = ((unsigned char)((datetime >> 26) & 0x3f));
 	unsigned char month = ((unsigned char)((datetime >> 22) & 0x0f));
@@ -307,7 +346,7 @@ Timestamp TimestampFromDateTime(unsigned long datetime)
 
 
 // Convert a Timestamp to a DateTime packed number
-unsigned long TimestampToDateTime(Timestamp timestamp)
+unsigned long TimestampToDateTime(timestamp_t timestamp)
 {
     unsigned short year;
     unsigned char month, day, hours, mins, secs;
@@ -317,7 +356,7 @@ unsigned long TimestampToDateTime(Timestamp timestamp)
 
 
 // For debugging: round-trip conversion function to and from a timestamp serial (should return same value)
-Timestamp TimestampFromTimestampDebug(Timestamp timestamp)
+timestamp_t TimestampFromTimestampDebug(timestamp_t timestamp)
 {
     unsigned short year;
     unsigned char month, day, hours, mins, secs;

@@ -36,13 +36,13 @@ int OmGetDelays(int deviceId, OM_DATETIME *startTime, OM_DATETIME *stopTime)
     status = OM_COMMAND(deviceId, "\r\nHIBERNATE\r\n", response, "HIBERNATE=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     // "HIBERNATE=2011/11/30,02:50:53"
-    if (parts[1] == NULL) { return OM_E_FAIL; }
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (startTime != NULL) { *startTime = OmDateTimeFromString(parts[1]); }
 
     status = OM_COMMAND(deviceId, "\r\nSTOP\r\n", response, "STOP=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     // "STOP=2011/11/30,02:50:53"
-    if (parts[1] == NULL) { return OM_E_FAIL; }
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (stopTime != NULL) { *stopTime = OmDateTimeFromString(parts[1]); }
 
     return OM_OK;
@@ -52,7 +52,7 @@ int OmGetDelays(int deviceId, OM_DATETIME *startTime, OM_DATETIME *stopTime)
 int OmSetDelays(int deviceId, OM_DATETIME startTime, OM_DATETIME stopTime)
 {
     char command[64];
-    int status1 = OM_E_FAIL, status2 = OM_E_FAIL;
+    int status1 = OM_E_UNEXPECTED, status2 = OM_E_UNEXPECTED;
     char response[OM_MAX_RESPONSE_SIZE], *parts[2] = {0};
 
     {
@@ -60,7 +60,7 @@ int OmSetDelays(int deviceId, OM_DATETIME startTime, OM_DATETIME stopTime)
         else if (startTime > OM_DATETIME_MAX_VALID) { sprintf(command, "\r\nHIBERNATE -1\r\n"); }
         else sprintf(command, "\r\nHIBERNATE %04u-%02u-%02u %02u:%02u:%02u\r\n", OM_DATETIME_YEAR(startTime), OM_DATETIME_MONTH(startTime), OM_DATETIME_DAY(startTime), OM_DATETIME_HOURS(startTime), OM_DATETIME_MINUTES(startTime), OM_DATETIME_SECONDS(startTime));
         status1 = OM_COMMAND(deviceId, command, response, "HIBERNATE=", OM_DEFAULT_TIMEOUT, parts);
-        if (parts[1] == NULL) { status1 = OM_E_FAIL; }
+        if (parts[1] == NULL) { status1 = OM_E_UNEXPECTED_RESPONSE; }
     }
 
     {
@@ -68,7 +68,7 @@ int OmSetDelays(int deviceId, OM_DATETIME startTime, OM_DATETIME stopTime)
         else if (stopTime > OM_DATETIME_MAX_VALID) { sprintf(command, "\r\nSTOP -1\r\n"); }
         else sprintf(command, "\r\nSTOP %04u-%02u-%02u %02u:%02u:%02u\r\n", OM_DATETIME_YEAR(stopTime), OM_DATETIME_MONTH(stopTime), OM_DATETIME_DAY(stopTime), OM_DATETIME_HOURS(stopTime), OM_DATETIME_MINUTES(stopTime), OM_DATETIME_SECONDS(stopTime));
         status2 = OM_COMMAND(deviceId, command, response, "STOP=", OM_DEFAULT_TIMEOUT, parts);
-        if (parts[1] == NULL) { status2 = OM_E_FAIL; }
+        if (parts[1] == NULL) { status2 = OM_E_UNEXPECTED_RESPONSE; }
     }
 
     if (OM_FAILED(status1)) return status1;
@@ -77,7 +77,7 @@ int OmSetDelays(int deviceId, OM_DATETIME startTime, OM_DATETIME stopTime)
 }
 
 
-int OmClearDataAndCommit(int deviceId)
+int OmEraseDataAndCommit(int deviceId, int level)
 {
     int status;
     char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
@@ -88,31 +88,30 @@ int OmClearDataAndCommit(int deviceId)
     if (OM_FAILED(status)) return status;
     if (downloadStatus == OM_DOWNLOAD_PROGRESS) return OM_E_NOT_VALID_STATE;
 
-    //status = OM_COMMAND(deviceId, "\r\nCLEAR DATA\r\n", response, "COMMIT", 4000, parts);   // Delete file + re-create file
-    status = OM_COMMAND(deviceId, "\r\nFORMAT QC\r\n", response, "COMMIT", 6000, parts);      // Make all data inaccessible through FTL + re-create file
-    //status = OM_COMMAND(deviceId, "\r\nFORMAT WC\r\n", response, "COMMIT", 15000, parts);      // Physically erase all NAND pages + re-create file
+    if (status == OM_ERASE_NONE)
+    {
+        status = OM_COMMAND(deviceId, "\r\ncommit\r\n", response, "COMMIT", 6000, parts);   // Update file
+    }
+    else if (status == OM_ERASE_DELETE)
+    {
+        status = OM_COMMAND(deviceId, "\r\nCLEAR DATA\r\n", response, "COMMIT", 6000, parts);   // Delete file + re-create file
+    }
+    else if (status == OM_ERASE_QUICKFORMAT)
+    {
+        status = OM_COMMAND(deviceId, "\r\nFORMAT QC\r\n", response, "COMMIT", 6000, parts);      // Rewrite filesystem + re-create file
+    }
+    else if (status == OM_ERASE_WIPE)
+    {
+        status = OM_COMMAND(deviceId, "\r\nFORMAT WC\r\n", response, "COMMIT", 15000, parts);      // Physically erase all NAND pages + re-create file
+    }
+    else
+    {
+        status = OM_E_INVALID_ARG;
+    }
+
     if (OM_FAILED(status)) return status;
     // "COMMIT"
-    if (parts[0] == NULL) { return OM_E_FAIL; }
-    return OM_OK;
-}
-
-
-int OmCommit(int deviceId)
-{
-    int status;
-    char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
-    OM_DOWNLOAD_STATUS downloadStatus;
-
-    // Queries the current download status, fails if a download is in progress
-    status = OmQueryDownload(deviceId, &downloadStatus, NULL);
-    if (OM_FAILED(status)) return status;
-    if (downloadStatus == OM_DOWNLOAD_PROGRESS) return OM_E_NOT_VALID_STATE;
-
-    status = OM_COMMAND(deviceId, "\r\nCOMMIT\r\n", response, "COMMIT", 6000, parts);      // Update file
-    if (OM_FAILED(status)) return status;
-    // "COMMIT"
-    if (parts[0] == NULL) { return OM_E_FAIL; }
+    if (parts[0] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     return OM_OK;
 }
 
@@ -124,7 +123,7 @@ int OmGetSessionId(int deviceId, unsigned int *sessionId)
     status = OM_COMMAND(deviceId, "\r\nSESSION\r\n", response, "SESSION=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     // "SESSION=1"
-    if (parts[1] == NULL) { return OM_E_FAIL; }
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (sessionId == NULL) { return OM_E_POINTER; }
     *sessionId = atoi(parts[1]);
     return OM_OK;
@@ -140,7 +139,7 @@ int OmSetSessionId(int deviceId, unsigned int sessionId)
     status = OM_COMMAND(deviceId, command, response, "SESSION=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     // "SESSION=1"
-    if (parts[1] == NULL) { return OM_E_FAIL; }
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (atoi(parts[1]) != sessionId) { return OM_E_FAIL; }
     return OM_OK;
 }
@@ -167,7 +166,7 @@ int OmGetMetadata(int deviceId, char *metadata)
         status = OM_COMMAND(deviceId, command, response, expected, OM_DEFAULT_TIMEOUT, parts);
         if (OM_FAILED(status)) return status;
         // "ANNOTATE00=0123456789abcdef0123456789abcdef"
-        if (parts[1] == NULL) { return OM_E_FAIL; }
+        if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
         p = parts[1];
         for (o = 0; o < 32; o++)
         {
@@ -213,7 +212,7 @@ int OmSetMetadata(int deviceId, const char *metadata, int size)
 
         status = OM_COMMAND(deviceId, command, response, expected, OM_DEFAULT_TIMEOUT, parts);
         if (OM_FAILED(status)) return status;
-        if (parts[1] == NULL) { return OM_E_FAIL; }
+        if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     }
     return OM_OK;
 }
@@ -221,12 +220,12 @@ int OmSetMetadata(int deviceId, const char *metadata, int size)
 
 int OmGetLastConfigTime(int deviceId, OM_DATETIME *time)
 {
-    int status = OM_E_FAIL;
+    int status = OM_E_UNEXPECTED;
     char response[OM_MAX_RESPONSE_SIZE], *parts[2] = {0};
     status = OM_COMMAND(deviceId, "\r\nLASTCHANGED\r\n", response, "LASTCHANGED=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     // "LASTCHANGED=2011/11/30,02:39:19"
-    if (parts[1] == NULL) { return OM_E_FAIL; }
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (time != NULL) { *time = OmDateTimeFromString(parts[1]); }
     return OM_OK;
 }

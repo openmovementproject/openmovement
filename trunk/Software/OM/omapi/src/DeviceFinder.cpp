@@ -61,6 +61,13 @@
 using namespace std;
 
 
+#if 1
+extern "C" int OmLog(const char *format, ...);
+#define Log(...) OmLog(__VA_ARGS__)
+#else
+#define Log(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
 
 // Utility function
 static const char *GetLastErrorString()
@@ -375,9 +382,9 @@ bool DeviceFinder::MappingUsbToPort(unsigned int vidPid, std::map<std::string, s
     // Convert the name "Ports" to a GUID
     DWORD dwGuids = 0;
     SetupDiClassGuidsFromNameW(L"Ports", NULL, 0, &dwGuids) ;
-    if (dwGuids == 0) { fprintf(stderr, "ERROR: SetupDiClassGuidsFromName() failed.\n"); return false; }
+    if (dwGuids == 0) { Log("ERROR: SetupDiClassGuidsFromName() failed.\n"); return false; }
     GUID *pGuids = new GUID[dwGuids];       // &GUID_DEVINTERFACE_COMPORT
-    if (!SetupDiClassGuidsFromNameW(L"Ports", pGuids, dwGuids, &dwGuids)) { fprintf(stderr, "ERROR: SetupDiClassGuidsFromName() failed.\n"); return false; }
+    if (!SetupDiClassGuidsFromNameW(L"Ports", pGuids, dwGuids, &dwGuids)) { Log("ERROR: SetupDiClassGuidsFromName() failed.\n"); return false; }
 
     // For each GUID returned
     for (unsigned int guidIndex = 0; guidIndex < dwGuids; guidIndex++)
@@ -401,7 +408,7 @@ bool DeviceFinder::MappingUsbToPort(unsigned int vidPid, std::map<std::string, s
             char usbId[256];
             wcstombs_s(NULL, usbId, scratch, 256);
 
-//fprintf(stderr, "[PORT:USB] %s\n", usbId);
+//Log("[PORT:USB] %s\n", usbId);
 
             // If this is the device we're after
             if (strncmp(usbId, prefix, strlen(prefix)) == 0)
@@ -440,11 +447,11 @@ bool DeviceFinder::MappingUsbToPort(unsigned int vidPid, std::map<std::string, s
                 strcpy(usbUnique, GetUniquePart(usbId).c_str());
 
                 // Store mapping
-//fprintf(stderr, "[PORT:KEY] %s\n", key);
-//fprintf(stderr, "[PORT:NAME] %s\n", portName);
+//Log("[PORT:KEY] %s\n", key);
+//Log("[PORT:NAME] %s\n", portName);
 
 #ifdef DEBUG_PRINT
-    fprintf(stderr, "[USB->PORT] %s -> %s\n", usbUnique, portName);
+    Log("[USB->PORT] %s -> %s\n", usbUnique, portName);
 #endif
 
                 usbToPortMap[usbUnique] = portName;
@@ -495,15 +502,18 @@ bool DeviceFinder::MappingUsbToUsbstorAndUsbComposite(unsigned int vidPid, std::
             DWORD nRequiredSize = 0;
             SetupDiGetDeviceInterfaceDetail(hDevInfo, &devInterface, NULL, 0, &nRequiredSize, NULL);
             SP_DEVICE_INTERFACE_DETAIL_DATA *devInterfaceDetail = (SP_DEVICE_INTERFACE_DETAIL_DATA *)malloc(nRequiredSize + sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA));
-            devInterfaceDetail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-            if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &devInterface, devInterfaceDetail, nRequiredSize, NULL, NULL))
-            { 
-                wcstombs_s(NULL, path, devInterfaceDetail->DevicePath, 256);
+            if (devInterfaceDetail != NULL)
+            {
+                devInterfaceDetail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+                if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &devInterface, devInterfaceDetail, nRequiredSize, NULL, NULL))
+                { 
+                    wcstombs_s(NULL, path, devInterfaceDetail->DevicePath, 256);
+                }
+                free(devInterfaceDetail);
             }
-            free(devInterfaceDetail);
         }
 
-        fprintf(stderr, "[DRIVEMAP:PATH] %s\n", path);
+        Log("[DRIVEMAP:PATH] %s\n", path);
 #endif
 
         // Move up one level to get to the "USB" level
@@ -513,7 +523,7 @@ bool DeviceFinder::MappingUsbToUsbstorAndUsbComposite(unsigned int vidPid, std::
         CM_Get_Device_IDW(parent, scratch, 256, 0);
         char usbId[256];
         wcstombs_s(NULL, usbId, scratch, 256);
-        //fprintf(stderr, "[DRIVEMAP:USB] %s\n", usbId);
+        //Log("[DRIVEMAP:USB] %s\n", usbId);
 
         // If this is the device we're after
         if (strncmp(usbId, prefix, strlen(prefix)) == 0)
@@ -541,11 +551,11 @@ bool DeviceFinder::MappingUsbToUsbstorAndUsbComposite(unsigned int vidPid, std::
             strcpy(usbUnique, GetUniquePart(usbId).c_str());
 
             // Store mapping
-//fprintf(stderr, "[DRIVEMAP:KEY] %s\n", key);
-//fprintf(stderr, "[DRIVEMAP:USBSTOR] %s\n", usbstorId);
+//Log("[DRIVEMAP:KEY] %s\n", key);
+//Log("[DRIVEMAP:USBSTOR] %s\n", usbstorId);
 
 #ifdef DEBUG_PRINT
-            fprintf(stderr, "[USB->USBSTOR] %s -> %s\n", usbUnique, usbstorId);
+            Log("[USB->USBSTOR] %s -> %s\n", usbUnique, usbstorId);
 #endif
 
             usbToUsbstorMap[usbUnique] = usbstorId;
@@ -608,7 +618,7 @@ bool DeviceFinder::MappingUsbstorToDeviceNumber(std::map<std::string, int>& usbS
             //DiskDriveToLogicalDrive(deviceId);
 
 #ifdef DEBUG_PRINT
-            fprintf(stderr, "[USBSTOR->DEVICENUMBER] %s -> %u\n", usbstorId, deviceNumber);
+            Log("[USBSTOR->DEVICENUMBER] %s -> %u\n", usbstorId, deviceNumber);
 #endif
             usbStorToDeviceMap[usbstorId] = deviceNumber;
 
@@ -651,7 +661,7 @@ bool DeviceFinder::MappingDeviceNumberToPhysicalVolume(std::map<int, std::string
                     char physicalVolume[MAX_PATH + 1];
                     wcstombs(physicalVolume, buf, MAX_PATH);
 #ifdef DEBUG_PRINT
-    fprintf(stderr, "[DEVICE->PHYSICALVOLUME] %u -> %s\n", volumeDeviceNumber, physicalVolume);
+    Log("[DEVICE->PHYSICALVOLUME] %u -> %s\n", volumeDeviceNumber, physicalVolume);
 #endif
                     deviceNumberToPhysicalVolumeMap[volumeDeviceNumber] = physicalVolume;
                 }
@@ -693,7 +703,7 @@ bool DeviceFinder::MappingPhysicalVolumeToVolumeName(std::map<std::string, std::
             wcstombs(physicalVolume, physicalVolumeW, MAX_PATH);
 
 #ifdef DEBUG_PRINT
-            fprintf(stderr, "[PHYSICALVOLUME->VOLUMENAME] %s -> %s\n", physicalVolume, volumeName);
+            Log("[PHYSICALVOLUME->VOLUMENAME] %s -> %s\n", physicalVolume, volumeName);
 #endif
             physicalVolumeToVolumeNameMap[physicalVolume] = volumeName;
         }
@@ -749,20 +759,20 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
     devices.clear();
 
     std::map<std::string, std::string> mapUsbToPort;
-    if (!MappingUsbToPort(vidPid, mapUsbToPort)) { fprintf(stderr, "ERROR: Problem finding ports.\n"); return false; }
+    if (!MappingUsbToPort(vidPid, mapUsbToPort)) { Log("ERROR: Problem finding ports.\n"); return false; }
 
     std::map<std::string, std::string> mapUsbToUsbstor;
     std::map<std::string, std::string> mapUsbToUsbComposite;
-    if (!MappingUsbToUsbstorAndUsbComposite(vidPid, mapUsbToUsbstor, mapUsbToUsbComposite)) { fprintf(stderr, "ERROR: Problem finding drive mapping.\n"); return false; }
+    if (!MappingUsbToUsbstorAndUsbComposite(vidPid, mapUsbToUsbstor, mapUsbToUsbComposite)) { Log("ERROR: Problem finding drive mapping.\n"); return false; }
 
     std::map<std::string, int> mapUsbstorToDeviceNumber;
-    if (!MappingUsbstorToDeviceNumber(mapUsbstorToDeviceNumber)) { fprintf(stderr, "ERROR: Problem finding drives.\n"); return false; }
+    if (!MappingUsbstorToDeviceNumber(mapUsbstorToDeviceNumber)) { Log("ERROR: Problem finding drives.\n"); return false; }
 
     std::map<int, std::string> mapDeviceNumberToPhysicalVolume;
-    if (!MappingDeviceNumberToPhysicalVolume(mapDeviceNumberToPhysicalVolume)) { fprintf(stderr, "ERROR: Problem finding physical volumes.\n"); return false; }
+    if (!MappingDeviceNumberToPhysicalVolume(mapDeviceNumberToPhysicalVolume)) { Log("ERROR: Problem finding physical volumes.\n"); return false; }
 
     std::map<std::string, std::string> mapPhysicalVolumeToVolumeName;
-    if (!MappingPhysicalVolumeToVolumeName(mapPhysicalVolumeToVolumeName)) { fprintf(stderr, "ERROR: Problem finding volume names.\n"); return false; }
+    if (!MappingPhysicalVolumeToVolumeName(mapPhysicalVolumeToVolumeName)) { Log("ERROR: Problem finding volume names.\n"); return false; }
 
     for (map<string, string>::const_iterator i = mapUsbToPort.begin(); i != mapUsbToPort.end(); ++i)
     {
@@ -1152,11 +1162,11 @@ void DeviceFinder::Stop(void)
 
 bool DeviceFinder::RescanDevices(void)
 {
-//fprintf(stderr, "RESCAN:\n");
+//Log("RESCAN:\n");
 
     // Obtain a list of currently attached devices
     list<Device> devices;
-    if (!this->FindDevices(devices)) { fprintf(stderr, "ERROR: Problem finding devices.\n"); }
+    if (!this->FindDevices(devices)) { Log("ERROR: Problem finding devices.\n"); }
 
     // Put the new devices into a map
     map<int, Device> newDeviceMap;
@@ -1207,7 +1217,7 @@ bool DeviceFinder::RescanDevices(void)
     for (set<int>::const_iterator i = removed.begin(); i != removed.end(); ++i)
     {
         if (removedCallback != NULL) removedCallback(callbackReference, deviceMap[*i]);   // Call the device handler
-//fprintf(stderr, "REMOVED: %s\n", deviceMap[*i].ToString().c_str());
+//Log("REMOVED: %s\n", deviceMap[*i].ToString().c_str());
         deviceMap.erase(*i);        // Remove the element
     }
 
@@ -1215,11 +1225,11 @@ bool DeviceFinder::RescanDevices(void)
     for (set<int>::const_iterator i = added.begin(); i != added.end(); ++i)
     {
         deviceMap[*i] = newDeviceMap[*i]; // Add the element
-//fprintf(stderr, "ADDED: %s\n", newDeviceMap[*i].ToString().c_str());
+//Log("ADDED: %s\n", newDeviceMap[*i].ToString().c_str());
         if (addedCallback != NULL) addedCallback(callbackReference, deviceMap[*i]);   // Call the device handler
     }
 
-//fprintf(stderr, "---\n");
+//Log("---\n");
 
     return true;
 }

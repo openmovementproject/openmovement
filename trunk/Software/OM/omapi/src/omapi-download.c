@@ -131,7 +131,6 @@ static thread_return_t OmDownloadThread(void *arg)
 }
 
 
-/** Internal method to gets the data file name for the specified device */
 int OmGetDataFilename(int deviceId, char *filenameBuffer)
 {
     if (filenameBuffer == NULL) return OM_E_POINTER;
@@ -142,8 +141,8 @@ int OmGetDataFilename(int deviceId, char *filenameBuffer)
     if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
     if (strlen(om.devices[deviceId]->root) == 0)
     {
-        // We don't yet have a path to the root
-        // TODO: Here we can mount the volume to a path to support more drives than drive letters in Windows
+        // We don't have a path to the root
+        // ??? (Could re-mount the volume to a path here?)
         return OM_E_FAIL;
     }
     strcat(filenameBuffer, om.devices[deviceId]->root);

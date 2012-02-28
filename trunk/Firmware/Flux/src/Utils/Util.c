@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // util.h - Utility functions
-// Dan Jackson, Karim Ladha, 2010-2011.
+// Dan Jackson, Karim Ladha, 2010-2012.
 
 // Includes
 #if defined(USE_USART) || defined(DEBUG_USART2_TX)
@@ -33,10 +33,10 @@
 
 #include "HardwareProfile.h"
 #include <stdio.h>
-#include <USB/USB.h>
-#include <USB/usb_function_cdc.h>
-#include "USB_CDC_MSD.h"
-#include "util.h"
+#include "USB/USB.h"
+#include "USB/usb_function_cdc.h"
+#include "Usb/USB_CDC_MSD.h"
+#include "Utils/Util.h"
 
 
 // Edit-line buffer
@@ -191,7 +191,7 @@ unsigned short checksum(const void *buffer, size_t len)
 
 
 // Hex dump of memory
-void hexdump(void *buffer, size_t offset, size_t length)
+void printhexdump(void *buffer, size_t offset, size_t length)
 {
 	unsigned char *buf = (unsigned char *)buffer;
 	char w = 16, b;

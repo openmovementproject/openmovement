@@ -100,7 +100,13 @@
 #define USB_SUPPORT_DEVICE
 
 // Number of string descriptions should be 4 if we want a serial number (3 otherwise)
-#define USB_NUM_STRING_DESCRIPTORS 4        // [dgj] 3 -> 4 to include serial number
+/** DESCRIPTORS ***************************************************/
+#define USB_NUM_STRING_DESCRIPTORS 		4        // [dgj] 3 -> 4 to include serial number
+// This makes the descriptots static
+//#define UsbInitDescriptors()	;
+#ifndef UsbInitDescriptors
+	void UsbInitDescriptors(void);
+#endif
 
 //#define USB_INTERRUPT_LEGACY_CALLBACKS
 #define USB_ENABLE_ALL_HANDLERS
@@ -115,7 +121,11 @@
 //#define USB_ENABLE_TRANSFER_COMPLETE_HANDLER
 /** DEVICE CLASS USAGE *********************************************/
 #define USB_USE_MSD
+#define HAVE_OWN_ENQUIRY_RESPONCE /*KL - added to allow USB_CDC_MSD.c to compile with or without external enquiry resp*/
+
 #define USB_USE_CDC
+
+
 
 /** ENDPOINTS ALLOCATION *******************************************/
 

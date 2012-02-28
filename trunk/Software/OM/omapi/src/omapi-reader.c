@@ -30,7 +30,7 @@
 
 
 /*
-    // Non-timezone affected time functions
+    // Non-timezone-affected time functions
     time_t tSec;             // Seconds since epoch
     struct tm tParts;        // Time elements (YMDHMS)
 

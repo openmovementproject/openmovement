@@ -164,6 +164,12 @@ state according to the definition in the USB specification.
 #include "./USB/usb_function_msd.h"
 #include "./USB/usb_function_cdc.h"
 
+#ifndef UsbInitDescriptors
+	#include "Settings.h"
+#else
+	#error "You have set your descriptors as static and called the dynamic descriptor functions too?"
+#endif
+
 /** CONSTANTS ******************************************************/
 #if defined(__18CXX)
 #pragma romdata
@@ -309,8 +315,13 @@ ROM struct{BYTE bLength;BYTE bDscType;WORD string[28];}sd002={
 
 
 #if USB_NUM_STRING_DESCRIPTORS > 3
-// Product serial number (defined in Settings.c)
-extern struct { BYTE bLength; BYTE bDscType; WORD string[11]; } sd003;
+// USB Product serial number -- serial number is overwritten and is initially ',' 
+// characters as that triggers the "invalid serial number" behaviour on Windows
+struct { BYTE bLength; BYTE bDscType; WORD string[11]; } sd003 =
+{
+    sizeof(sd003), USB_DESCRIPTOR_STRING,		// sizeof(sd003) = 24, USB_DESCRIPTOR_STRING = 0x03
+    {'C','W','A','0' + (HARDWARE_VERSION >> 4),'0' + (HARDWARE_VERSION & 0x0f),'_',',',',',',',',',','}     // Serial number is still 'CWA' for detection code
+}; //                                                                            14  16  18  20  22
 #endif
 
 //Array of configuration descriptors
@@ -333,6 +344,41 @@ BYTE *USB_SD_Ptr[]=
 #if (USB_NUM_STRING_DESCRIPTORS <= 3)
 #warning "This build doesn't have a USB serial number"
 #endif
+
+// Standard Response to INQUIRY command stored in ROM
+const ROM InquiryResponse inq_resp =
+{
+    0x00,   // peripheral device is connected, 0 = direct access block device
+    0x80,   // high bit = removable
+    0x04,   // version, 0 = does not conform to any standard, 4 = SPC-2, 5 = SPC-3
+    0x02,   // response is in format specified by SPC-2
+    0x20,   // n-4 = 36-4=32= 0x20
+    0x00,   // sccs etc.
+    0x00,   // bque=1 and cmdque=0,indicates simple queueing 00 is obsolete, but as in case of other device, we are just using 00
+    0x00,   // 00 obsolete, 0x80 for basic task queueing
+    {'A','X','3',' ',' ',' ',' ',' '},                                  // T10 assigned Vendor identification
+    {'A','X','3',' ','M','a','s','s',' ','S','t','o','r','a','g','e'},  // Product identification
+    {'0' + ((HARDWARE_VERSION >> 12) & 0x0f),'0' + ((HARDWARE_VERSION >> 8) & 0x0f),'0' + ((HARDWARE_VERSION >> 4) & 0x0f),'0' + (HARDWARE_VERSION & 0x0f)} // Product revision level
+};
+
+void UsbInitDescriptors(void)
+{
+#if USB_NUM_STRING_DESCRIPTORS > 3
+    // If we have a valid serial number, patch the USB response with the serial number
+    if (settings.deviceId != 0xffff)
+	{
+        unsigned short *number = (unsigned short *)((char *)&sd003 + 14);
+        *number++ = (signed short)'0' + ((settings.deviceId / 10000) % 10);
+        *number++ = (signed short)'0' + ((settings.deviceId /  1000) % 10);
+        *number++ = (signed short)'0' + ((settings.deviceId /   100) % 10);
+        *number++ = (signed short)'0' + ((settings.deviceId /    10) % 10);
+        *number++ = (signed short)'0' + ((settings.deviceId        ) % 10);
+    }
+#else
+	#error "you have made a mistake"
+#endif
+}
+
 
 /** EOF usb_descriptors.c ***************************************************/
 

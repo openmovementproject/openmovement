@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // accel.c - ADXL345 accelerometer interface
-// Dan Jackson, Karim Ladha, Cas Ladha, 2010-2011.
+// Dan Jackson, Karim Ladha, Cas Ladha, 2010-2012.
 
 // Needed, or else spi.h fails
 #define USE_AND_OR
@@ -44,6 +44,8 @@
 //  GyrInt2 RP27 -> Int4
 // You can use read-modify-write sequences on the SPI buffer regs on a pic24
 
+// Device id
+#define ACCEL_DEVICE_ID 0xE5
 
 // ADXL SPI address registers
 #define ACCEL_ADDR_DEVID            0x00	// Device ID
@@ -133,11 +135,14 @@ unsigned short AccelFrequency(void) { return accelFrequency; }
 //      Timing scheme follows clock polarity (CPOL) = 1 and clock phase (CPHA) = 1.
 //      Data should be sampled at the rising edge of SCLK.
 
+char accelPresent = 0;
+
 
 // Read device ID
-unsigned char AccelReadDeviceId(void)
+unsigned char AccelVerifyDeviceId(void)
 {
 	unsigned char id;
+    ACCEL_INIT_PINS();     // Ensure pins are correct
     ACCEL_DELAY();  // 3.4us
 	OpenSPIADXL();
 	ACCEL_CS = 0;		// active low
@@ -146,7 +151,8 @@ unsigned char AccelReadDeviceId(void)
 	ACCEL_CS = 1;		// active low
 	CloseSPIx();
     ACCEL_DELAY();  // 3.4us
-	return id;
+    accelPresent = (id == ACCEL_DEVICE_ID) ? 1 : 0;
+	return accelPresent;
 }
 
 
@@ -293,7 +299,7 @@ extern void AccelStandby(void)
 }
 
 
-void AccelSingleSample(short *accelBuffer)
+void AccelSingleSample(accel_t *accelBuffer)
 {
     // Preserve interrupt status
     char int1 = ACCEL_INT1_IE;
@@ -402,7 +408,7 @@ unsigned char AccelReadFifoLength(void)
 
 
 // Read at most 'maxEntries' 3-axis samples (3 words = 6 bytes) from the ADXL FIFO into the specified RAM buffer
-unsigned char AccelReadFIFO(short *accelBuffer, unsigned char maxEntries)
+unsigned char AccelReadFIFO(accel_t *accelBuffer, unsigned char maxEntries)
 {
 	unsigned char availableFifo;
 	unsigned char numRead;

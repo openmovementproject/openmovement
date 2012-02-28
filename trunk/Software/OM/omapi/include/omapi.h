@@ -28,7 +28,7 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.1
+ *  @version   1.2
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -46,7 +46,7 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.0
+ *  @version   1.2
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -224,13 +224,14 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 1
+#define OM_VERSION 102
 
 
 /**
  * Initializes the Open Movement API.
  * Allocates required resources for the API, initializes its state, and initiates device discovery. 
- * @note OmStartup() Must be called before most other functions in the API.  Exceptions are: OmErrorString(), OmSetDeviceCallback(), OmSetDownloadCallback(), and all \a OmReaderXXX() functions.
+ * @note OmStartup() Must be called before most other functions in the API.  
+ *       Exceptions are: OmSetLogStream(), OmSetLogCallback(), OmErrorString(), OmSetDeviceCallback(), OmSetDownloadCallback(), and all \a OmReaderXXX() functions.
  * @note If the \a OmDeviceCallback has already been set, it will be called for all devices identified at start-up.
  * @note Once successfully initialized, the caller must call OmShutdown() when finished with the API.
  * @param version The version number of the API required (use OM_VERSION).
@@ -249,6 +250,25 @@ OM_EXPORT int OmStartup(int version);
  * @see OmStartup()
  */
 OM_EXPORT int OmShutdown(void);
+
+
+/**
+ * Sets the stream to use for log messages.
+ * @note This can be called at any time.
+ * @param fd The file descriptor to use. Specify -1 for none; fileno(stderr) for standard error; or fileno(fopen("log.txt", "wt")) for a file.
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmSetLogStream(int fd);
+
+
+/**
+ * Log callback function type.
+ * Called for API log messages.
+ * Callback functions take a user-defined reference pointer, and a log message.
+ * @see OmSetLogCallback
+ */
+typedef void(*OmLogCallback)(void *, const char *);
 
 
 /**
@@ -292,6 +312,7 @@ OM_EXPORT int OmSetDeviceCallback(OmDeviceCallback deviceCallback, void *referen
  */
 OM_EXPORT int OmGetDeviceIds(int *deviceIds, int maxDevices);
 
+
 /**@}*/
 
 
@@ -316,6 +337,12 @@ typedef unsigned long OM_DATETIME;
  * The on-board triaxial accelerometer can be accessed to give an instantaneous reading with: OmGetAccelerometer().
  *
  * The device's 7-colour external LED indicator can be directly controlled with OmSetLed().
+ *
+ * The anti-tamper lock can be queried and controlled with OmIsLocked(), OmSetLock(), OmUnlock().
+ *
+ * Error-correcting code status can be set and queried with OmSetEcc() and OmGetEcc().
+ *
+ * Advanced commands can be sent with OmCommand().
  *
  * @see Example code test.c, for an example of how to use the device status functions of the API.
  * @{
@@ -342,6 +369,7 @@ OM_EXPORT int OmGetBatteryLevel(int deviceId);
 
 /**
  * Performs a firmware-specific self-test on the specified device (e.g. test peripherals).
+ * @remark A positive, non-zero self-test diagnostic code should be treated as an opaque, firmware-specific value indicating failure.
  * @param deviceId Identifier of the device.
  * @return \a OM_OK if a the device successfully completed its self-test.
  *         A positive value indicates the device failed its self-test with the returned diagnostic code. 
@@ -361,6 +389,9 @@ OM_EXPORT int OmSelfTest(int deviceId);
  *         A negative value indicates an error code for an issue within the API.
  */
 OM_EXPORT int OmGetMemoryHealth(int deviceId);
+
+#define OM_MEMORY_HEALTH_ERROR   1  /**< Threshold at or below which the OmGetMemoryHealth() result should be treated as a failure. @since 1.2 */
+#define OM_MEMORY_HEALTH_WARNING 8  /**< Threshold at or below which the OmGetMemoryHealth() result should be treated as a warning. @since 1.2 */
 
 
 /**
@@ -406,12 +437,15 @@ OM_EXPORT int OmSetTime(int deviceId, OM_DATETIME time);
 
 /**
  * Enumeration of LED colours.
+ * @note In the \a OM_LED_AUTO setting, when connected, the device fades from off to yellow when charging; 
+ *       and from off to white when charged.  The device will fade to and from red instead of off when the 
+ *       computer has recently written data to the mass storage drive (but this should not typically be observed through API access).
  * @remark Values are from the bit pattern: 0b00000RGB.
  * @see OmSetLed()
  */
 typedef enum
 {
-    OM_LED_AUTO = -1,           /**< Automatic device-controlled LED to indicate state (default) */
+    OM_LED_AUTO = -1,           /**< Automatic device-controlled LED to indicate state (default). */
     OM_LED_OFF = 0,             /**< rgb(0,0,0) Off     */
     OM_LED_BLUE = 1,            /**< rgb(0,0,1) Blue    */
     OM_LED_GREEN = 2,           /**< rgb(0,1,0) Green   */
@@ -433,6 +467,76 @@ typedef enum
 OM_EXPORT int OmSetLed(int deviceId, OM_LED_STATE ledState);
 
 
+/**
+ * Checks whether the device is currently locked.
+ * @param deviceId Identifier of the device.
+ * @param[out] hasLockCode Pointer to a value that receives a flag indicating whether the device has a non-zero lock code and will be locked whenever connected (OM_FALSE or OM_TRUE).
+ * @return The current lock state: \a OM_FALSE if unlocked, \a OM_TRUE if locked, an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmIsLocked(int deviceId, int *hasLockCode);
+
+
+/**
+ * Sets the lock code for the device when it is connected.
+ * The device will not be locked immediately, only when next connected.
+ * @param deviceId Identifier of the device.
+ * @param code Lock code to use. 0 = no lock, 0xffff is reserved for internal use.
+ * @return The 'initial lock' state: \a OM_FALSE if unlocked, \a OM_TRUE if locked.  Or an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmSetLock(int deviceId, unsigned short code);
+
+
+/**
+ * Sets the lock code for the device when it is connected.
+ * The device will not be locked immediately, only when next connected.
+ * @param deviceId Identifier of the device.
+ * @param code Unlock code to use (0 is reserved to indicate no lock code, 0xffff is reserved for internal use).
+ * @return The current lock state: \a OM_FALSE if unlocked, \a OM_TRUE if the unlock code was not accepted, an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmUnlock(int deviceId, unsigned short code);
+
+
+/**
+ * Sets the error-correcting code flag for the specified device.
+ * @param deviceId Identifier of the device.
+ * @param state \a OM_TRUE to enable ECC, \a OM_FALSE to disable ECC.
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmSetEcc(int deviceId, int state);
+
+
+/**
+ * Gets the error-correcting code flag for the specified device.
+ * @param deviceId Identifier of the device.
+ * @return \a OM_TRUE if ECC enabled, \a OM_FALSE if ECC disabled, an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmGetEcc(int deviceId);
+
+
+/**
+ * Issues a direct command over the CDC port for a particular device.
+ * Waits for a line with the specified response (until the timeout is hit).
+ * If the response is found, and parsing is required (parseParts != NULL), it parses the response (at '=' and ',' places) up to 'parseMax' token.
+ * @note This method is not generally recommended -- incorrect results could lead to unspecified behaviour.
+ * @param deviceId Identifier of the device.
+ * @param command The command string to send (typically followed with CRLF).
+ * @param[out] buffer A buffer to hold the response, or \a NULL if not required.
+ * @param bufferSize The size (in bytes) of the output buffer.
+ * @param expected The expected response prefix, or \a NULL if not specified (command will timeout if a response buffer is specified).
+ * @param timeoutMs The time, in milliseconds, after which the command will time-out and return.
+ * @param[out] parseParts A buffer to hold the parsed response, or \a NULL if parsing is not required.
+ * @param parseMax The maximum number of entries the \a parsePoints buffer can hold.
+ * @return The offset in the buffer of the start of the expected response, if found; or the offset in the buffer of the start of the error response string; otherwise the length of the unrecognized response.
+ * @since 1.2
+ */
+OM_EXPORT int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize, const char *expected, unsigned int timeoutMs, char **parseParts, int parseMax);
+
+
 /**@}*/
 
 
@@ -447,7 +551,10 @@ OM_EXPORT int OmSetLed(int deviceId, OM_LED_STATE ledState);
  *
  * User-defined data can be stored in a 'scratch buffer', see: OmGetMetadata() and OmSetMetadata().
  *
- * Calls to OmSetDelays(), OmSetSessionId() and OmSetMetadata() are written to not alter existing session data on the device, and are designed to take full effect when the data is cleared with OmClearDataAndCommit().
+ * Calls to OmSetDelays(), OmSetSessionId() and OmSetMetadata() are written to not alter existing session data on the device; 
+ * instead they modify a (volatile at disconnect) stored state on the device and only take full effect only when the data is 
+ * committed with OmEraseDataAndCommit().  Note that queries consult the volatile storage, so the non-permanent values will be read
+ * if they've not yet been committed.
  *
  * @see Example code clear.c and deploy.c, for examples of how to use the device settings and metadata functions of the API.
  * @{
@@ -469,14 +576,14 @@ OM_EXPORT int OmGetDelays(int deviceId, OM_DATETIME *startTime, OM_DATETIME *sto
  *      \code OmSetDelays(deviceId, OM_DATETIME_ZERO, OM_DATETIME_INFINITE); \endcode
  * To set the device to never record:
  *      \code OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_INFINITE); \endcode
- * @note This API call does not alter existing session data on the device, and only takes full effect when OmClearDataAndCommit() is called.
+ * @note This API call does not alter existing session data on the device, and only takes full effect when OmEraseDataAndCommit() is called.
  * @remark When not connected, a device would stop recording, even within the recording time window, if either storage or battery were to be exhausted. 
  *         When not recording, devices keep themselves in a low power mode to conserve battery. 
  * @param deviceId Identifier of the device.
  * @param startTime The start date and time.
  * @param stopTime The stop date and time.
  * @return \a OM_OK if successful, an error code otherwise.
- * @see OmClearDataAndCommit()
+ * @see OmEraseDataAndCommit()
  */
 OM_EXPORT int OmSetDelays(int deviceId, OM_DATETIME startTime, OM_DATETIME stopTime);
 
@@ -492,11 +599,11 @@ OM_EXPORT int OmGetSessionId(int deviceId, unsigned int *sessionId);
 
 /**
  * Sets the specified device's session identifier to be used at the next recording session.
- * @note This API call does not alter existing session data on the device, and only takes full effect when OmClearDataAndCommit() is called.
+ * @note This API call does not alter existing session data on the device, and only takes full effect when OmEraseDataAndCommit() is called.
  * @param deviceId Identifier of the device.
  * @param sessionId A value to set as the session ID.
  * @return \a OM_OK if successful, an error code otherwise.
- * @see OmClearDataAndCommit()
+ * @see OmEraseDataAndCommit()
  */
 OM_EXPORT int OmSetSessionId(int deviceId, unsigned int sessionId);
 
@@ -520,12 +627,12 @@ OM_EXPORT int OmGetMetadata(int deviceId, char *metadata);
 
 /**
  * Sets the specified device's metadata scratch buffer to be used for the next recording session.  
- * @note This API call does not alter existing session data on the device, and only takes full effect when OmClearDataAndCommit() is called.
+ * @note This API call does not alter existing session data on the device, and only takes full effect when OmEraseDataAndCommit() is called -- after which, all existing metadata on the device will be replaced.
  * @remark A suggested encoding of name/value pairs that preserves characters outside the non-control-ASCII range is URL-encoding from UTF-8 strings.
  * @param deviceId Identifier of the device.
  * @param[out] metadata A pointer to the metadata to store, or \a NULL if clearing the metadata.
  * @param size The size of the specified metaData.  Can be 0 to clear the metadata.  If larger than OM_METADATA_SIZE, additional bytes will be ignored.
- * @see OmClearDataAndCommit()
+ * @see OmEraseDataAndCommit()
  * @return \a OM_OK if successful, an error code otherwise.
  */
 OM_EXPORT int OmSetMetadata(int deviceId, const char *metadata, int size);
@@ -541,33 +648,62 @@ OM_EXPORT int OmGetLastConfigTime(int deviceId, OM_DATETIME *time);
 
 
 /**
- * Clears the specified device storage and commits the metadata and settings.  
- * This ensures all blocks on the NAND flash are cleared and the file-system is cleanly re-created.  
+ * Erase levels for OmEraseDataAndCommit() function.
+ * @see OmEraseDataAndCommit
+ */
+typedef enum {
+    OM_ERASE_NONE = 0,                  /**< Data file not erased but metadata just updated (this is not recommended as it could lead to a data/metadata mismatch). */
+    OM_ERASE_DELETE = 1,                /**< Data file is removed and a new one created with the current metadata. */
+    OM_ERASE_QUICKFORMAT = 2,           /**< Device file-system is re-created and a new data file is created with the current metadata. */
+    OM_ERASE_WIPE = 3                   /**< All blocks on the NAND flash memory are cleared, the file-system is cleanly re-created, and a new data file is created with the current metadata. */
+} OM_ERASE_LEVEL;
+
+ 
+/**
+ * Erases the specified device storage and commits the metadata and settings.  
  * To fully wipe a device, the caller can execute:
  * \code
  *     OmSetSessionId(deviceId, 0); 
  *     OmSetMetadata(deviceId, NULL, 0); 
  *     OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_INFINITE); 
- *     OmClearDataAndCommit(deviceId); 
+ *     OmEraseDataAndCommit(deviceId, OM_ERASE_WIPE); 
  * \endcode
  * And similarly, to cleanly re-configure a device, the same sequence can be called with non-zero values. 
  * @note To modify the file system, the device prevents the computer from accessing the data store (by temporarily disconnecting it).
- * Therefore, the operation will report failure if a download is in progress - the download must complete or first be cancelled with OmCancelDownload();
+ *       Therefore, the operation will report failure if a download is in progress - the download must complete or first be cancelled with OmCancelDownload().
  * @param deviceId Identifier of the device.  
+ * @param eraseLevel The erase level to use, one of: OM_ERASE_NONE, OM_ERASE_DELETE, OM_ERASE_QUICKFORMAT, OM_ERASE_WIPE
  * @return \a OM_OK if successful, an error code otherwise.
+ * @since 1.2
  */
-OM_EXPORT int OmClearDataAndCommit(int deviceId);
+OM_EXPORT int OmEraseDataAndCommit(int deviceId, OM_ERASE_LEVEL eraseLevel);
 
 
 /**
- * Commits the metadata and settings without clearing.
+ * Macro to quick-format a device and commit the metadata and settings.
+ * This provides backwards compatibility for older versions of OMAPI.
+ * @note To modify the file system, the device prevents the computer from accessing the data store (by temporarily disconnecting it).
+ * Therefore, the operation will report failure if a download is in progress - the download must complete or first be cancelled with OmCancelDownload();
+ * @param _deviceId Identifier of the device.  
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @see OmEraseDataAndCommit()
+ */
+#define OmClearDataAndCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_QUICKFORMAT)
+
+
+/**
+ * Macro to commit the metadata and settings without clearing.
+ * This provides backwards compatibility for older versions of OMAPI.
  * This is not recommended as it changes the metadata of an existing recording.
  * @note To modify the file system, the device prevents the computer from accessing the data store (by temporarily disconnecting it).
  * Therefore, the operation will report failure if a download is in progress - the download must complete or first be cancelled with OmCancelDownload();
- * @param deviceId Identifier of the device.  
+ * @param _deviceId Identifier of the device.  
  * @return \a OM_OK if successful, an error code otherwise.
+ * @see OmEraseDataAndCommit()
  */
-OM_EXPORT int OmCommit(int deviceId);
+#define OmCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_NONE)
+
+
 
 /**@}*/
 
@@ -590,6 +726,14 @@ OM_EXPORT int OmCommit(int deviceId);
  * @see Example code download.c, for an example of how to use the data download functions of the API.
  * @{
  */
+
+
+/**
+ * Macro for the maximum path length of a data filename.
+ * @since 1.2 
+ */
+#define OM_MAX_PATH 256
+
 
 /**
  * Download states used in the OmDownloadCallback handler.
@@ -621,6 +765,16 @@ typedef void(*OmDownloadCallback)(void *, int, OM_DOWNLOAD_STATUS, int);
  * @return \a OM_OK if successful, an error code otherwise.
  */
 OM_EXPORT int OmSetDownloadCallback(OmDownloadCallback downloadCallback, void *reference);
+
+
+/**
+ * Return the path to the data file for the specified device.
+ * @param deviceId Identifier of the device.
+ * @param[out] filenameBuffer A buffer to receive the data filename (of size OM_MAX_PATH).
+ * @see OmReaderOpen()
+ * @since 1.2
+ */
+OM_EXPORT int OmGetDataFilename(int deviceId, char *filenameBuffer);
 
 
 /**
@@ -706,17 +860,21 @@ OM_EXPORT int OmCancelDownload(int deviceId);
  * @{
  */
 
-#define OM_OK                   0           /**< Return code: Success. */
-#define OM_E_FAIL               -1          /**< Return code: Unspecified failure. */
-#define OM_E_UNEXPECTED         -2          /**< Return code: Unexpected error. An error which was not anticipated by the code. */
-#define OM_E_NOT_VALID_STATE    -3          /**< Return code: API not in a valid state. For example, it is uninitialized, or an operation cannot be completed because a download is currently in progress. */
-#define OM_E_OUT_OF_MEMORY      -4          /**< Return code: Out of memory error. */
-#define OM_E_INVALID_ARG        -5          /**< Return code: Invalid argument error. For example, an out-of-range value. */
-#define OM_E_POINTER            -6          /**< Return code: Invalid pointer. For example, a 'NULL pointer'. */
-#define OM_E_NOT_IMPLEMENTED    -7          /**< Return code: Requested functionality not implemented. */
-#define OM_E_ABORT              -8          /**< Return code: Operation was aborted. */
-#define OM_E_ACCESS_DENIED      -9          /**< Return code: Access was denied. */
-#define OM_E_INVALID_DEVICE     -10         /**< Return code: Device identifier was invalid. For example, if the device has been removed. */
+#define OM_TRUE                     1       /**< Return code: 'True' boolean value. @since 1.2 */
+#define OM_FALSE                    0       /**< Return code: 'False' boolean value. @since 1.2 */
+#define OM_OK                       0       /**< Return code: Success. */
+#define OM_E_FAIL                   -1      /**< Return code: Unspecified failure. An error occurred that didn't have a more specific category. */
+#define OM_E_UNEXPECTED             -2      /**< Return code: Unexpected error. An error occurred which was not anticipated by the code. */
+#define OM_E_NOT_VALID_STATE        -3      /**< Return code: API not in a valid state. For example, it is uninitialized, or an operation cannot be completed because a download is currently in progress. This error should be avoidable on the client side. */
+#define OM_E_OUT_OF_MEMORY          -4      /**< Return code: Out of memory error. A memory allocation failed. */
+#define OM_E_INVALID_ARG            -5      /**< Return code: Invalid argument error. For example, an out-of-range value. */
+#define OM_E_POINTER                -6      /**< Return code: Invalid pointer. For example, a 'NULL pointer'. */
+#define OM_E_NOT_IMPLEMENTED        -7      /**< Return code: Requested functionality not implemented, either at the API level on this platform or the firmware version on the device. */
+#define OM_E_ABORT                  -8      /**< Return code: Operation was aborted. (Not used) */
+#define OM_E_ACCESS_DENIED          -9      /**< Return code: Access was denied opening, reading from, or writing to a device.  This can be returned if the device has been removed, or through some permissions problem. This could also be returned if the specified device is currently busy executing a command called from another thread. If the caller attempts to run a function on a specific device whilst another function is being run on that same device, E_ACCESS_DENIED will be returned.  This is true if called from another thread or another process. */
+#define OM_E_INVALID_DEVICE         -10     /**< Return code: Device identifier was invalid. For example, if the device has been removed. */
+#define OM_E_UNEXPECTED_RESPONSE    -11     /**< Return code: Device response was not as expected. */
+#define OM_E_LOCKED                 -12     /**< Return code: Device is locked and the requested operation cannot be performed until it is unlocked. */
 #define OM_SUCCEEDED(value) ((value) >= 0)  /**< Macro to check the specified return value for success. @return true for a successful (non-negative) value, false otherwise. */
 #define OM_FAILED(value) ((value) < 0)      /**< Macro to check the specified return value for failure. @return true for a failed (negative) value, false otherwise. */
 
@@ -826,16 +984,6 @@ OM_EXPORT OmReaderHandle OmReaderOpen(const char *binaryFilename);
 
 
 /**
- * Opens the binary data file on the specified device.
- * Parses the file header and places the stream at the first block of data.
- * @param deviceId Identifier of the device that holds the required data file.
- * @return If successful, a handle to the reader object, otherwise \a NULL
- * @see OmReaderNextBlock(), OmReaderClose()
- */
-OM_EXPORT OmReaderHandle OmReaderOpenDeviceData(int deviceId);
-
-
-/**
  * Read the size, time-range, and internal chunking of the binary file.
  * @param reader The handle to the reader.
  * @param[out] dataBlockSize A pointer to a value to receive the block size of the data (512 bytes), or \a NULL if not required.
@@ -869,7 +1017,7 @@ OM_EXPORT int OmReaderDataBlockPosition(OmReaderHandle reader);
 /**
  * Seeks the file reader to the specified data block.
  * @param reader The handle to the reader.
- * @param seekBlock If positive, the data block index from the start of the file (after any header blocks); if negative, the data block index from the end of the file.
+ * @param dataBlockNumber If positive, the data block index from the start of the file (after any header blocks); if negative, the data block index from the end of the file.
  * @return \a OM_OK if successful, an error code otherwise.
  */
 OM_EXPORT int OmReaderDataBlockSeek(OmReaderHandle reader, int dataBlockNumber);

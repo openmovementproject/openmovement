@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,11 +23,11 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// Hardware profile for the CWA 1.7 (using PIC24FJ256GB106)
-// Karim Ladha, Dan Jackson, 2011
+// Hardware profile for the CWA 1.6 (using PIC24FJ256GB106)
+// Karim Ladha, Dan Jackson, 2011-2012
 
-#ifndef HARDWAREPROFILE_CWA17_H
-#define HARDWAREPROFILE_CWA17_H
+#ifndef HARDWAREPROFILE_CWA16_H
+#define HARDWAREPROFILE_CWA16_H
 
     #ifndef __PIC24FJ256GB106__
     //    #error "Unexpected device selection"
@@ -38,106 +38,111 @@
     #endif
 
     #define 	PIC24
-    #define 	CWA1_7
-    #define HARDWARE_VERSION 0x17           // BCD format (for USB response)
+    #define 	CWA2
+
+    #define HARDWARE_VERSION 0x16           // BCD format (for USB response)
+
+//#define NOP() __builtin_nop()
+
+// System tick - presently the sample tick
+//#define T1_ISR_RATE 100 /*for 100 Hz*/
+//#define MS_PER_TICK	10 /*so the ms in the file is correct*/
 
 //SystemPwrSave arguments OR together
-#define WAKE_ON_USB				0x1
-#define WAKE_ON_ADXL1			0x2	
-#define WAKE_ON_ADXL2			0x4
-#define WAKE_ON_GYRO1			0x8	
-#define WAKE_ON_GYRO2			0x10
-#define WAKE_ON_BUTTON			0x20
-#define WAKE_ON_WDT				0x40
-#define WAKE_ON_RTC				0x80
-#define WAKE_ON_TIMER1			0x100
-#define LOWER_PWR_SLOWER_WAKE	0x200
-#define ADC_POWER_DOWN			0x400
-#define LCD_POWER_DOWN			0x800
-#define GYRO_POWER_DOWN			0x1000
-#define ACCEL_POWER_DOWN		0x2000
-#define SAVE_INT_STATUS			0x4000
-#define ALLOW_VECTOR_ON_WAKE	0x8000
-#define LEAVE_WDT_RUNNING		0x10000
-#define JUST_POWER_DOWN_PERIPHERALS	0x20000
-#define DONT_RESTORE_PERIPHERALS	0x40000
-
-// Essential Functions in HardwareProfile.c
-extern void WaitForPrecharge(void);
-extern void SystemPwrSave(unsigned long NapSetting);
-
-// LED Colours 0bRGB
-enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
+#define WAKE_ON_USB		1
+#define WAKE_ON_ADXL1	2	
+#define WAKE_ON_ADXL2	4
+#define WAKE_ON_GYRO1	8	
+#define WAKE_ON_GYRO2	16
+#define WAKE_ON_BUTTON	32
+#define WAKE_ON_WDT		64
+#define WAKE_ON_RTC		128
+#define WAKE_ON_TIMER1	256
+#define LOWER_PWR_SLOWER_WAKE	512
+#define ADC_POWER_DOWN			1024
+#define LCD_POWER_DOWN			2048
+#define GYRO_POWER_DOWN			4096
+#define ACCEL_POWER_DOWN		8192
+#define SAVE_INT_STATUS			16384
+#define ALLOW_VECTOR_ON_WAKE	32768
+#define LEAVE_WDT_RUNNING		65536
+#define JUST_POWER_DOWN_PERIPHERALS	131072
+#define DONT_RESTORE_PERIPHERALS	262144
 
 	// Used for delays in TimeDelay.h
 	#define GetInstructionClock()  4000000
 
     // USB bus sense I/O
     // #define USE_USB_BUS_SENSE_IO
-	#define USB_BUS_SENSE_PIN	TRISFbits.TRISF5
-    #define USB_BUS_SENSE       PORTFbits.RF5
+    #define USB_BUS_SENSE_PIN   TRISCbits.TRISC12
+    #define USB_BUS_SENSE       PORTCbits.RC12
 	#define USB_BUS_SENSE_INIT() USB_BUS_SENSE_PIN=1
-	// Change notification int,  vectors to button handler
-	#define USB_BUS_SENSE_INTS()	{/*New USB int is remappable -> INT3*/\
-									IFS3bits.INT3IF = 0;/*Flag*/\
-									IEC3bits.INT3IE = 1;/*Unmask*/\
-									}
+	// Change notification interrupt
+	#define USB_BUS_SENSE_INTS()	{\
+							CNEN2bits.CN23IE = 1;\
+							IFS1bits.CNIF = 0;/*Flag*/\
+							IEC1bits.CNIE = 1;/*Unmask*/\
+							IPC4bits.CNIP = 4;/*Priority*/\
+							}
     // MCHPFSUSB frameworkc self-power
     #define self_power          0   // 0 = bus-powered, 1 = self-powered
+
 
     // ROM storage
     #define WRITE_BLOCK_SIZE 128		// Write in rows of 64 instructions (only 2/3 bytes available = 128 bytes)
     #define ERASE_BLOCK_SIZE 1024		// Erase in blocks of 8 rows, 512 instructions (only 2/3 bytes available = 1024 bytes)
 
+
 	// The pins
 	#define InitIO()        {\
                             REMAP_PINS();\
+							ADC_INIT_PINS();\
+							BATT_INIT_PINS();\
                             FLASH_INIT_PINS();\
+                            GYRO_INIT_PINS();\
                             ACCEL_INIT_PINS();\
                             LED_INIT_PINS();\
                             TEMP_INIT_PINS();\
                             LDR_INIT_PINS();\
-                            ANALOGUE_INIT_PINS();\
+                            EXTRA_IO_INIT_PINS();\
                             DRIVE_FLOATING_PINS(); /*Reduce leakage*/\
                             USB_BUS_SENSE_INIT();\
                             }
 
 	#define DRIVE_FLOATING_PINS() {\
-                            TRISGbits.TRISG6 = 0; LATGbits.LATG6 = 0;\
-                            TRISGbits.TRISG7 = 0; LATGbits.LATG7 = 0;\
-                            TRISGbits.TRISG8 = 0; LATGbits.LATG8 = 0;\
+                            TRISDbits.TRISD3 = 0; LATDbits.LATD3 = 0;\
+                            TRISDbits.TRISD11 = 0; LATDbits.LATD11 = 0;\
+                            TRISDbits.TRISD10 = 0; LATDbits.LATD10 = 0;\
+                            TRISDbits.TRISD1 = 0; LATDbits.LATD1 = 0;\
+                            TRISDbits.TRISD1 = 0; LATDbits.LATD1 = 0;\
+                            TRISDbits.TRISD2 = 0; LATDbits.LATD2 = 0;\
+                            TRISDbits.TRISD6 = 0; LATDbits.LATD6 = 0;\
+                            TRISDbits.TRISD7 = 0; LATDbits.LATD7 = 0;\
                             TRISGbits.TRISG9 = 0; LATGbits.LATG9 = 0;\
-                            TRISFbits.TRISF0 = 0; LATFbits.LATF0 = 0;\
-                            TRISFbits.TRISF1 = 0; LATFbits.LATF1 = 0;\
-                            TRISFbits.TRISF4 = 0; LATFbits.LATF4 = 0;\
-                            TRISFbits.TRISF3 = 0; LATFbits.LATF3 = 0;\
-                            TRISCbits.TRISC12 = 0; LATCbits.LATC12 = 0;\
-							TRISBbits.TRISB3 = 0; LATBbits.LATB3 = 0;\
-							TRISBbits.TRISB4 = 0; LATBbits.LATB4 = 0;\
-							TRISBbits.TRISB5 = 0; LATBbits.LATB5 = 0;\
-							TRISBbits.TRISB11 = 0; LATBbits.LATB11 = 0;\
-							TRISBbits.TRISB13 = 0; LATBbits.LATB13 = 0;\
-							TRISBbits.TRISB14 = 0; LATBbits.LATB14 = 0;\
                             }
 							
 	// REMAP pins
 	#define REMAP_PINS()	{\
 							__builtin_write_OSCCONL(OSCCON & 0xBF);/*Unlock*/\
-							RPINR0bits.INT1R = 11;/* AccInt1 RP11 -> Int1 */\
-							RPINR1bits.INT2R = 12;/* AccInt2 RP12 -> Int2 */\
-							RPINR1bits.INT3R = 17;/* USB det RP16 -> Int3 */\
-							RPINR20bits.SCK1R= 3;/* AccSCK RP13 -> SCK1i */\
-							RPINR20bits.SDI1R= 4;/* AccSDO RP7 -> SDI1 */\
-							RPOR1bits.RP3R = 8;  /* AccGyrSCK RP13 -> SCK1o */\
-							RPOR1bits.RP2R = 7;  /* AccGyrSDI RP6 -> SDO1 */\
+							/* NB, Bug on schematic, int1 and int2 on adxl not labeled correctly*/\
+							/* therefore HW profile does not reflect schematic exactly*/\
+							RPINR0bits.INT1R = 9;/* AccInt1 RP9 -> Int1 */\
+							RPINR1bits.INT2R = 8;/* AccInt2 RP8 -> Int2 */\
+							RPINR1bits.INT3R = 18;/* GyrInt1 RP18 -> Int3 */\
+							RPINR2bits.INT4R = 28;/* GyrInt2 RP28 -> Int4 */\
+							RPINR20bits.SCK1R= 13;/* AccGyrSCK RP13 -> SCK1i */\
+							RPINR20bits.SDI1R= 7;/* AccGyrSDO RP7 -> SDI1 */\
+							RPOR6bits.RP13R = 8;  /* AccGyrSCK RP13 -> SCK1o */\
+							RPOR3bits.RP6R = 7;  /* AccGyrSDI RP6 -> SDO1 */\
 							/*Then lock the PPS module*/\
 							__builtin_write_OSCCONL(OSCCON | 0x40);\
 							}						
 
-    // Clock: initialize PLL for 96 MHz USB and 16MIPS
+    // Clock: initialize PLL for 96 MHz USB and 12MIPS
 	#define CLOCK_PLL() 	{\
 							OSCCONBITS OSCCONBITS_copy = OSCCONbits;\
 							asm("DISI #0x3FFF");\
+							CLKDIVbits.RCDIV = 0b000; 				/*8 MHz */\
 							OSCCONBITS_copy.NOSC = 0b001;			/*Internal FRC+PLL oscillator*/\
 							OSCCONBITS_copy.OSWEN = 1;\
 							__builtin_write_OSCCONH( ((unsigned char*)  &OSCCONBITS_copy)[1] );\
@@ -145,7 +150,6 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 							asm("DISI #0");\
 							while (OSCCONbits.OSWEN == 1);\
 							while (OSCCONbits.LOCK != 1); 			/*Wait for PLL lock to engage*/\
-							CLKDIVbits.RCDIV = 0b000; 				/*8 MHz */\
 							}				
 
     // Clock: switch to 8 MHz INTOSC
@@ -161,7 +165,7 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 							CLKDIVbits.RCDIV = 0b000; 				/*8 MHz */\
 							}
 
-    // Clock: switch to 31.25 kHz INTRC
+    // Clock: switch to 31 kHz INTRC
     #define CLOCK_INTRC() 	{\
 							OSCCONBITS OSCCONBITS_copy = OSCCONbits;\
 							asm("DISI #0x3FFF");\
@@ -173,7 +177,6 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 							while (OSCCONbits.OSWEN == 1);\
 							CLKDIVbits.RCDIV = 0b000; 				/*8 MHz */\
 							}
-	// SOSC / RTC, 32.768 kHz							
     #define CLOCK_32KHZ() 	{\
 							OSCCONBITS OSCCONBITS_copy = OSCCONbits;\
 							asm("DISI #0x3FFF");\
@@ -190,14 +193,17 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 	#define CLOCK_SOSCEN()	{OSCCONbits.SOSCEN=1;}
 
     // LED
-    #define LED_G_PIN  			TRISBbits.TRISB7        
-    #define LED_G               LATBbits.LATB7
-    #define LED_R_PIN           TRISBbits.TRISB6
-    #define LED_R              	LATBbits.LATB6 
-    #define LED_B_PIN           TRISBbits.TRISB2
-    #define LED_B     			LATBbits.LATB2
-    #define LED_INIT_PINS()     {TRISB&=0b1111111100111011;LATB&=0b1111111100111011;}
+    #define LED_G_PIN  			TRISFbits.TRISF5         
+    #define LED_G               LATFbits.LATF5
+    #define LED_R_PIN           TRISFbits.TRISF4
+    #define LED_R              	LATFbits.LATF4 
+    #define LED_B_PIN           TRISFbits.TRISF3
+    #define LED_B     			LATFbits.LATF3
+    #define LED_INIT_PINS()     {TRISF&=0b1111111111000111;LATF&=0b1111111111000111;}
 
+	// LED Colours 0bRGB (not to be confused with the LED output registers LED_R, LED_G, LED_B)
+	enum { LED_OFF, LED_BLUE, LED_GREEN, LED_CYAN, LED_RED, LED_MAGENTA, LED_YELLOW, LED_WHITE };
+	
     // LED set (0bRGB) - should compile to three bit set/clears with a static colour value
     #define LED_SET(_c) {\
                     if ((_c) & 0x4) { LED_R = 1; } else { LED_R = 0; } \
@@ -210,57 +216,60 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
     #define LED_RESUME()        { LED_R_PIN = 0; LED_G_PIN = 0; LED_B_PIN = 0; }
 
 
-    // Battery - AN15
-    #define BATT_MON_PIN        TRISBbits.TRISB15
+    // Battery AN12
+    #define BATT_MON_PIN        TRISBbits.TRISB12
     #define BATT_INIT_PINS()   	BATT_MON_PIN = 1
-	// 5% battery level - avoids unwanted RTC resets and file corruptions etc
-	#define MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE 520
-	#define MINIMUM_UPDATE_LOG_VOLTAGE 517
-    #define batt_zero_charge	512
-    #define batt_full_charge	682
-    #define batt_full_charge_with_USB	670
-    #define batt_mid_charge_with_USB	650     // level to count towards recharge cycle counter
+    #define BATT_CHARGE_ZERO		614
+	#define BATT_CHARGE_MIN_LOG		517		// minimum level to update log
+	#define BATT_CHARGE_MIN_SAFE	520		// minimum safe running voltage (5%), avoids unwanted RTC resets and file corruptions etc.
+    #define BATT_CHARGE_MID_USB		650     // level to count towards recharge cycle counter
+    #define BATT_CHARGE_FULL_USB	670
+    #define BATT_CHARGE_FULL		708
 
 
-    // LDR - AN9
-    #define LDR_EN_PIN			TRISBbits.TRISB8         
-    #define LDR_EN              LATBbits.LATB8
-    #define LDR_OUT_PIN         TRISBbits.TRISB9
+    // LDR AN13
+    #define LDR_EN_PIN			TRISBbits.TRISB11         
+    #define LDR_EN              LATBbits.LATB11
+    #define LDR_OUT_PIN         TRISBbits.TRISB13
     #define LDR_ENABLE()        {LDR_OUT_PIN=1;LDR_EN_PIN = 0;LDR_EN = 0;}
     #define LDR_DISABLE()       {LDR_OUT_PIN=1;LDR_EN_PIN = 0;LDR_EN = 1;}
     #define LDR_INIT_PINS()     LDR_DISABLE()
 
-	// Temp sensor - AN10
+	// Temp sensor AN15
 	#define USE_MCP9701
-	#define TEMP_EN_PIN			TRISBbits.TRISB12
-	#define TEMP_EN				LATBbits.LATB12
-	#define TEMP_OUT_PIN		TRISBbits.TRISB10
+	#define TEMP_EN_PIN			TRISBbits.TRISB14
+	#define TEMP_EN				LATBbits.LATB14
+	#define TEMP_OUT_PIN		TRISBbits.TRISB15
 	#define TEMP_ENABLE()		{TEMP_OUT_PIN=1;TEMP_EN_PIN=0;TEMP_EN=1;}
 	#define TEMP_DISABLE()		{TEMP_OUT_PIN=1;TEMP_EN_PIN=0;TEMP_EN=0;}
 	#define TEMP_INIT_PINS()	TEMP_DISABLE()
 
-	// Analogue select pins - 0 = Analogue
-	#define ANALOGUE_SELECT_L 0b0111100111111111
-	#define ANALOGUE_SELECT_H 0b1111111111111111
-	#define ANALOGUE_INIT_PINS()	{AD1PCFGL = ANALOGUE_SELECT_L;AD1PCFGH = ANALOGUE_SELECT_H;}
+	// ADC select pins for CWA 1.6 (0 = Analog)
+	#define ADC_SELECT_L		0b0100111111111111
+	#define ADC_SELECT_H		0b1111111111111111
+	#define ADC_INIT_PINS()		{AD1PCFGL = ADC_SELECT_L;AD1PCFGH = ADC_SELECT_H;}
+    #define ADC_INDEX_BATT		0
+    #define ADC_INDEX_LDR		1
+    #define ADC_INDEX_TEMP		2
+    
 
 	// For the following interfaces the pins are referenced to the HOST (PIC)
 	// i.e. ACCEL_SDO is the SDO pin of the MCU, it is an output. This differs from the schematic
 	// All the pins need re-mapping. See RemapPins() in this file.
 
     // Accelerometer 
-    #define ACCEL_CS_PIN		TRISCbits.TRISC15         
-    #define ACCEL_CS            LATCbits.LATC15
-    #define	ACCEL_SCK           needs remapping   	
-    #define ACCEL_SCK_PIN       TRISDbits.TRISD10 
-    #define ACCEL_SDO           needs remapping
-    #define ACCEL_SDO_PIN       TRISDbits.TRISD8   
-    #define ACCEL_SDI    		needs remapping       
-    #define ACCEL_SDI_PIN       TRISDbits.TRISD9
-    #define ACCEL_INT1_PIN      TRISDbits.TRISD0 
-    #define ACCEL_INT2_PIN      TRISDbits.TRISD11 	
-    #define ACCEL_INT1          needs remapping
-    #define ACCEL_INT2          needs remapping 
+    #define ACCEL_CS_PIN		TRISBbits.TRISB10         
+    #define ACCEL_CS            LATBbits.LATB10
+    #define	ACCEL_SCK           LATBbits.LATB2   needs remapping to RP13	
+    #define ACCEL_SCK_PIN       TRISBbits.TRISB2 
+    #define ACCEL_SDO           LATBbits.LATB6   needs remapping to RP6
+    #define ACCEL_SDO_PIN       TRISBbits.TRISB6   
+    #define ACCEL_SDI    		PORTBbits.PORTB7 needs remapping to RP7       
+    #define ACCEL_SDI_PIN       TRISBbits.TRISB7
+    #define ACCEL_INT1_PIN      TRISBbits.TRISB8 
+    #define ACCEL_INT2_PIN      TRISBbits.TRISB9 	
+    #define ACCEL_INT1          PORTBbits.PORTB8 needs remapping to RP8
+    #define ACCEL_INT2          PORTBbits.PORTB9 needs remapping to RP9  
     #define ACCEL_INT1_IF       IFS1bits.INT1IF 
     #define ACCEL_INT2_IF       IFS1bits.INT2IF 
     #define ACCEL_INT1_IE     	IEC1bits.INT1IE   
@@ -274,9 +283,52 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 								ACCEL_SDI_PIN	= 1;\
 								ACCEL_INT1_PIN	= 1;\
 								ACCEL_INT2_PIN	= 1;\
+								}					
+
+	// Gyro L3G4200
+	/*
+	The gyro is on the same SPI bus as the accelerometer.
+	The only difference is the SPI_CS line and interrupts.
+	*/
+    #define USE_GYRO
+#ifdef USE_GYRO
+	#define GYRO_INT_PRIORITY	4
+    #define GYRO_CS_PIN 		TRISBbits.TRISB3
+    #define GYRO_CS     		LATBbits.LATB3
+    #define	GYRO_SCK           	LATBbits.LATB2   needs remapping to RP13
+    #define GYRO_SCK_PIN       	TRISBbits.TRISB2
+    #define GYRO_SDO           	LATBbits.LATB6   needs remapping to RP6
+    #define GYRO_SDO_PIN       	TRISBbits.TRISB6
+    #define GYRO_SDI  			PORTBbits.PORTB7 needs remapping to RP7
+    #define GYRO_SDI_PIN       	TRISBbits.TRISB7
+    #define GYRO_INT1_PIN     	TRISBbits.TRISB5
+    #define GYRO_INT2_PIN     	TRISBbits.TRISB4
+    #define GYRO_INT1      		PORTBbits.PORTB5 needs remapping to RP18
+    #define GYRO_INT2   		PORTBbits.PORTB4 needs remapping to RP28
+    #define GYRO_INT1_IP        IPC13bits.INT3IP
+    #define GYRO_INT2_IP        IPC13bits.INT4IP
+    #define GYRO_INT1_IF      	IFS3bits.INT3IF
+    #define GYRO_INT2_IF      	IFS3bits.INT4IF
+    #define GYRO_INT1_IE        IEC3bits.INT3IE
+    #define GYRO_INT2_IE        IEC3bits.INT4IE
+
+	#define GYRO_INIT_PINS() {\
+								GYRO_CS_PIN	= 0;\
+								GYRO_CS = 1;\
+								GYRO_SCK_PIN	= 0;\
+								GYRO_SDO_PIN	= 0;\
+								GYRO_SDI_PIN	= 1;\
+								GYRO_INT1_PIN	= 1;\
+								GYRO_INT2_PIN	= 1;\
 								}
-								
+#else
+    #define GYRO_INIT_PINS()
+#endif
+
     // Flash Memory - Hynix/Micron
+	//#define FLASH_BITBANGED
+    #define NAND_DEVICE     NAND_DEVICE_HY27UF084G2B
+
 	#define FLASH_DATA_WR	LATE
 	#define FLASH_DATA_RD	PORTE
 	#define FLASH_DATA		PMDIN1
@@ -288,16 +340,16 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 	
     #define FLASH_CE_PIN  	FLASH_CE1_PIN    
     #define FLASH_CE		FLASH_CE1
-    #define FLASH_CE1_PIN  	TRISDbits.TRISD2  
-    #define FLASH_CE1		LATDbits.LATD2
-    #define FLASH_CE2_PIN  	TRISDbits.TRISD3  
-    #define FLASH_CE2		LATDbits.LATD3                
-    #define FLASH_CLE_PIN 	TRISDbits.TRISD6  
-    #define FLASH_CLE		LATDbits.LATD6       
-    #define FLASH_ALE_PIN 	TRISDbits.TRISD7   
-    #define FLASH_ALE		LATDbits.LATD7      
-    #define FLASH_RB_PIN 	TRISDbits.TRISD1    
-    #define FLASH_RB		PORTDbits.RD1 
+    #define FLASH_CE1_PIN  	TRISDbits.TRISD8  
+    #define FLASH_CE1		LATDbits.LATD8
+    #define FLASH_CE2_PIN  	NOT USED  
+    #define FLASH_CE2		NOT USED                 
+    #define FLASH_CLE_PIN 	TRISDbits.TRISD9  
+    #define FLASH_CLE		LATDbits.LATD9       
+    #define FLASH_ALE_PIN 	TRISDbits.TRISD0   
+    #define FLASH_ALE		LATDbits.LATD0       
+    #define FLASH_RB_PIN 	TRISCbits.TRISC15    
+    #define FLASH_RB		PORTCbits.RC15 
     #define FLASH_WP_PIN 	NOT USED    
     #define FLASH_WP		NOT USED        
 
@@ -309,8 +361,8 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 								FLASH_WE		= 1;\
 								FLASH_CE1_PIN	= 0;\
 								FLASH_CE1		= 1;/*Disabled*/\
-								FLASH_CE2_PIN	= 0;\
-								FLASH_CE2		= 1;/*Disabled*/\
+								/*FLASH_CE2_PIN	= 0;NOT USED*/\
+								/*FLASH_CE2		= 1;NOT USED*/\
 								FLASH_CLE_PIN	= 0;\
 								FLASH_CLE		= 0;\
 								FLASH_ALE_PIN 	= 0;\
@@ -319,17 +371,36 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 								/*FLASH_WP		= 1;NOT USED*/\
 								FLASH_RB_PIN 	= 1;\
 								}				 
+   
+
 					
-// Legacy includes for MCHIP stacks
-/* 
-	After discussions between DGJ and KL, this was includes 
-	to allow MCHPs example projects to work directly with our 
-	hardware. The examples in Microchip Solutions use these
-	defines to talk with thier demo boards. Clock switching etc
-	should still be performed with the other macros in this file.
-	Always call InitIO() before anything else when using MCHPs code.
-*/ 
-    #define self_power          0   // 0 = bus-powered, 1 = self-powered
+    // Extra I/O pins (RP13 / RB2)
+    #define EXP_PWR_PIN     TRISFbits.TRISF1
+	#define EXP_PWR			LATFbits.LATF1
+    #define EXTRA_IO1_PIN   TRISGbits.TRISG6
+    #define EXTRA_IO1		LATGbits.LATG6
+    #define EXTRA_IO2_PIN   TRISGbits.TRISG7
+    #define EXTRA_IO2		LATGbits.LATG7
+    #define EXTRA_IO3_PIN   TRISGbits.TRISG8
+    #define EXTRA_IO3		LATGbits.LATG8
+    #define EXTRA_IO_INIT_PINS()	{ EXP_PWR_PIN = 0; EXTRA_IO1_PIN = 0; EXTRA_IO2_PIN = 0; EXTRA_IO3_PIN = 0;}
+
+
+// Legacy compatibility definitions, define NO_LEGACY to ensure using new values
+#ifndef NO_LEGACY
+
+	// Pre-standardized names compatibility
+	#define MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE BATT_CHARGE_MIN_SAFE
+	#define MINIMUM_UPDATE_LOG_VOLTAGE	BATT_CHARGE_MIN_LOG
+    #define batt_zero_charge			BATT_CHARGE_ZERO
+    #define batt_full_charge			BATT_CHARGE_FULL
+    #define batt_full_charge_with_USB	BATT_CHARGE_FULL_USB
+    #define batt_mid_charge_with_USB	BATT_CHARGE_MID_USB
+	#define ANALOGUE_SELECT_L 			ADC_SELECT_L
+	#define ANALOGUE_SELECT_H 			ADC_SELECT_H
+	#define ANALOGUE_INIT_PINS 			ADC_INIT_PINS
+	
+	// Microchip Solutions example project compatibility
 	#define usb_bus_sense 		USB_BUS_SENSE
 	
 	#define CLOCK_FREQ 			32000000
@@ -370,8 +441,7 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
-
+#endif
 
 
 #endif
-

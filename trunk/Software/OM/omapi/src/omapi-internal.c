@@ -35,6 +35,30 @@
 OmState om = {0};
 
 
+/** Log text to the current log stream. */
+int OmLog(const char *format, ...)
+{
+    int ret = -1;
+    if (om.log != NULL)
+    {
+        va_list args;
+        va_start(args, format);
+        ret = vfprintf(om.log, format, args);
+        va_end(args);
+    }
+    if (om.logCallback != NULL)
+    {
+        char message[512];
+        va_list args;
+        message[0] = '\0';
+        va_start(args, format);
+        ret = vsnprintf(message, sizeof(message) - 1, format, args);
+        va_end(args);
+        om.logCallback(om.logCallbackReference, message);
+    }
+    return ret;
+}
+
 
 /** Internal, method for handling device discovery. */
 void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, const char *port, const char *volumePath)
@@ -44,7 +68,7 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
         unsigned short serialNumber;
         OmDeviceState *deviceState;
 
-        if (inSerialNumber > OM_MAX_SERIAL) { fprintf(stderr, "WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
+        if (inSerialNumber > OM_MAX_SERIAL) { OmLog("WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
         // Get the current OmDeviceState structure, or make one if it doesn't exist
@@ -53,11 +77,16 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
         {
             // Create and initialize the structure
             deviceState = (OmDeviceState *)malloc(sizeof(OmDeviceState));
+            if (deviceState == NULL)
+            {
+                OmLog("WARNING: Cannot add new device %u - out of memory.\n", inSerialNumber); 
+                return;
+            }
             memset(deviceState, 0, sizeof(OmDeviceState));
             deviceState->fd = -1;
         }
 
-fprintf(stderr, "DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
+OmLog("DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
 
         // Update the OmDeviceState structure
         deviceState->id = serialNumber;
@@ -83,10 +112,10 @@ fprintf(stderr, "DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePa
         unsigned short serialNumber;
         OmDeviceState *deviceState;
 
-        if (inSerialNumber > OM_MAX_SERIAL) { fprintf(stderr, "WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
+        if (inSerialNumber > OM_MAX_SERIAL) { OmLog("WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
-fprintf(stderr, "DEBUG: Device removed: %d\n", serialNumber);
+OmLog("DEBUG: Device removed: %d\n", serialNumber);
 
         // Get the current OmDeviceState structure
         deviceState = om.devices[serialNumber];
@@ -136,7 +165,7 @@ thread_return_t OmDeviceDiscoveryThread(void *arg)
         status = OmUpdateDevices();
         if (status != OM_OK)
         {
-            fprintf(stderr, "ERROR: OmDeviceDiscoveryThread() - %s\n", OmErrorString(status));
+            OmLog("ERROR: OmDeviceDiscoveryThread() - %s\n", OmErrorString(status));
         }
         sleep(10);       // Sleep (seconds)
     }
@@ -196,7 +225,7 @@ static int OmPortOpen(const char *infile, char writeable)
         fd = open(infile, flags);
         if (fd < 0)
         {
-            fprintf(stderr, "ERROR: Problem opening input: %s\n", infile);
+            OmLog("ERROR: Problem opening input: %s\n", infile);
             return -1;
         }
 
@@ -210,14 +239,14 @@ static int OmPortOpen(const char *infile, char writeable)
             hSerial = (HANDLE)_get_osfhandle(fd);
             if (hSerial == INVALID_HANDLE_VALUE)
             {
-                fprintf(stderr, "ERROR: Failed to get HANDLE from file.\n");
+                OmLog("ERROR: Failed to get HANDLE from file.\n");
             }
             else
             {
                 dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
                 if (!GetCommState(hSerial, &dcbSerialParams))
                 {
-                    fprintf(stderr, "ERROR: GetCommState() failed.\n");
+                    OmLog("ERROR: GetCommState() failed.\n");
                 }
                 else
                 {
@@ -226,7 +255,7 @@ static int OmPortOpen(const char *infile, char writeable)
                     dcbSerialParams.StopBits = ONESTOPBIT;
                     dcbSerialParams.Parity = NOPARITY;
                     if (!SetCommState(hSerial, &dcbSerialParams)){
-                        fprintf(stderr, "ERROR: SetCommState() failed.\n");
+                        OmLog("ERROR: SetCommState() failed.\n");
                     };
                 }
 
@@ -237,7 +266,7 @@ static int OmPortOpen(const char *infile, char writeable)
                 timeouts.WriteTotalTimeoutMultiplier = 0;
                 if (!SetCommTimeouts(hSerial, &timeouts))
                 {
-                    fprintf(stderr, "ERROR: SetCommTimeouts() failed.\n");
+                    OmLog("ERROR: SetCommTimeouts() failed.\n");
                 }
             }
         }
@@ -368,117 +397,4 @@ int OmPortRelease(unsigned short deviceId)
 }
 
 
-
-/**
- * Internal method to issue a command over the CDC port for a particular device.
- * Flushes any initial incoming data on the port.
- * Waits for a line with the specified response (until the timeout is hit).
- * If the response is found, and parsing is required (parseParts != NULL), it parses the response (at '=' and ',' places) up to 'parseMax' token.
- */
-int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize, const char *expected, unsigned int timeoutMs, char **parseParts, int parseMax)
-{
-    int status;
-    unsigned long start = OmMilliseconds();
-    int i;
-    int offset;
-    char *expectedPosition;
-
-    // Initialize the output buffer
-    if (buffer != NULL && bufferSize > 0)
-    {
-        buffer[0] = '\0';
-    }
-
-    // If parsing requested, zero output values
-    if (parseMax > 0 && parseParts != NULL)
-    { 
-        for (i = 0; i < parseMax; i++) { parseParts[i] = NULL; }
-    }
-
-    // (Checks the system and device state first, then) acquire the lock and open the port
-    status = OmPortAcquire(deviceId);
-    if (OM_FAILED(status)) return status; 
-
-    // If writing a command
-    if (command != NULL && strlen(command) > 0)
-    {
-#if 0
-        // Flush any existing incoming data
-        {
-            char c;
-            for(;;)
-            {
-                unsigned long ret = -1;
-                ret = read(om.devices[deviceId]->fd, &c, 1);
-                if (ret != 1) { break; }
-                if (OmMilliseconds() - start > 5000) { OmPortRelease(deviceId); return OM_E_FAIL; }   // e.g. if in streaming mode, will not stop producing data
-            }
-        }
-#endif
-
-#ifdef DEBUG_COMMANDS
-        printf(">>> '%s'\n", command);
-#endif
-        // Write command
-        if (OM_FAILED(OmPortWrite(deviceId, command)))
-        {
-            OmPortRelease(deviceId); 
-            return OM_E_ACCESS_DENIED;
-        }
-    }
-
-    // Read response (with timeout for each line)
-    offset = 0;
-    expectedPosition = NULL;
-    for (;;)
-    {
-        int len;
-        char *p = buffer + offset;
-        if (buffer != NULL) { *p = '\0'; }
-        //if (offset >= bufferSize - 1) break;                                // Ignore filled output buffer, wait for timeout or expected response
-        len = OmPortReadLine(deviceId, p, bufferSize - offset - 1, 100);  // 100 msec timeout for each line (actual value affected by port timeout)
-        if (OmMilliseconds() - start > timeoutMs) { break; }                // Overall timeout supplied by caller
-        if (len > 0 && buffer != NULL)
-        {
-            p[len] = '\0'; 
-#ifdef DEBUG_COMMANDS
-        printf("<<< '%s'\n", p);
-#endif
-            offset += len;
-            if (expected != NULL && strncmp(expected, p, strlen(expected)) == 0) { expectedPosition = p; break; }       // Expected prefix found
-            p[len] = '\n'; p[len + 1] = '\0';
-            offset++;
-        }
-    }
-    OmPortRelease(deviceId); 
-
-    // Exit now if we weren't storing storing the response in a buffer
-    if (buffer == NULL || bufferSize <= 0) { return offset; }
-
-    // Exit now if we weren't expecting a specific response
-    if (expected == NULL) { return offset; }
-
-    // Exit now if we we didn't find the specific response expected
-    if (expectedPosition == NULL) { return offset; }
-
-    // If parsing expected
-    if (parseParts != NULL && parseMax > 0)
-    {
-        char *p = buffer;
-        int parseNum = 0;
-        parseParts[parseNum++] = p;
-        while (*p != '\0' && parseNum < parseMax)
-        {
-            if (*p == ',' || *p == '=')
-            {
-                *p = '\0';
-                parseParts[parseNum++] = p + 1;
-            }
-            p++;
-        }
-    }
-
-    // Return offset of start of response
-    return (int)(expectedPosition - buffer);
-}
 

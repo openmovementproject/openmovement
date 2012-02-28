@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,32 +23,53 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// util.h - Utility functions
-// Dan Jackson & Karim Ladha, 2010/2011.
+// FIFO buffer
+// Dan Jackson, 2011-2012
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef FIFO_H
+#define FIFO_H
 
-extern char commEcho;
 
-#ifdef PIC24
-int write(int handle, void *buffer, unsigned int len);
+// FIFO
+typedef struct
+{
+    unsigned short head;
+    unsigned short tail;
+    unsigned short elementSize;
+    unsigned short capacity;
+    unsigned short mask;
+    void *buffer;
+} fifo_t;
+
+
+// Initialize FIFO data structure
+void FifoInit(fifo_t *fifo, unsigned short elementSize, unsigned short capacity, void *buffer);
+
+// Clear FIFO
+void FifoClear(fifo_t *fifo);
+
+// Add values to the FIFO
+unsigned short FifoPush(fifo_t *fifo, void *values, unsigned short count);
+
+// Empty values from the FIFO
+unsigned short FifoPop(fifo_t *fifo, void *values, unsigned short count);
+
+// Returns the current length of the FIFO
+unsigned short FifoLength(fifo_t *fifo);
+
+// Returns the free space left in the FIFO
+unsigned short FifoFree(fifo_t *fifo);
+
+// See how many contiguous entries there are
+unsigned short FifoContiguousEntries(fifo_t *fifo, void **buffer);
+
+// See how many contiguous free entries there are
+unsigned short FifoContiguousSpaces(fifo_t *fifo, void **buffer);
+
+// Data has been directly removed from the FIFO
+void FifoExternallyRemoved(fifo_t *fifo, unsigned short count);
+
+// Data has been directly added to the FIFO
+void FifoExternallyAdded(fifo_t *fifo, unsigned short count);
+
 #endif
-
-// Retrieve a line of console-edited input
-extern const char *_user_gets(void);
-
-// String utility functions
-extern const char *my_itoa(int );
-extern const char *my_ultoa(unsigned long );
-extern unsigned long my_atoi(const char *s);
-extern int strnicmp(const char *a, const char *b, int max);
-
-// Checksum
-unsigned short checksum(const void *data, size_t len);
-
-// Hex dump of memory to the console
-extern void hexdump(void *buffer, size_t offset, size_t length);
-
-#endif
-

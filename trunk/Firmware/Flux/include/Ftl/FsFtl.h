@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -36,6 +36,9 @@
 //#define FSFTL_WRITE_VOLUME_LABEL    // [experimental - may cause file system problems] Write volume label after formatting
 
 #include "Compiler.h" 
+#ifndef FSFTL_IN_FSCONFIG
+#include "FSconfig.h"
+#endif
 #include "MDD File System/FSDefs.h" 
 #include "MDD File System/FSIO.h"
 #include "Ftl/Ftl.h"
@@ -52,8 +55,13 @@ BYTE MDD_FTL_FSIO_MediaDetect(void);
 BYTE MDD_FTL_USB_MediaDetect(void);
 
 MEDIA_INFORMATION * MDD_FTL_MediaInitialize(void);
-BYTE MDD_FTL_SectorRead(DWORD sector_addr, BYTE* buffer);
-BYTE MDD_FTL_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero);
+
+BYTE MDD_FTL_FSIO_SectorRead(DWORD sector_addr, BYTE* buffer);
+BYTE MDD_FTL_USB_SectorRead(DWORD sector_addr, BYTE* buffer);
+
+BYTE MDD_FTL_USB_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero);
+BYTE MDD_FTL_FSIO_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero);
+
 WORD MDD_FTL_ReadSectorSize(void);
 DWORD MDD_FTL_ReadCapacity(void);
 BYTE MDD_FTL_WriteProtectState(void);
@@ -107,8 +115,9 @@ extern char fsftlUsbDiskMounted;
     // Writes an aligned sector with optional ECC
     BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc);
 
-
 #endif
 
+// Calculates the free space remaining on the drive
+unsigned long FSDiskFree(void);
 
 #endif

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,10 +24,10 @@
  */
 
 // Configuration settings, status and command handling
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 
-// Device settings
+// Device settings (from file)
 typedef struct
 {
     unsigned short deviceId;            // Device identifier (stored in ROM)
@@ -61,22 +61,30 @@ typedef struct
     unsigned short initialBattery;      // Battery level at start (used for battery health)
     
     // Status: logging
-    unsigned long sequenceId;           // Sequence counter for logging
+    unsigned long accelSequenceId;      // Sequence counter for logging
+    unsigned long gyroSequenceId;       // Sequence counter for logging
     unsigned char events;               // Event flags
     unsigned long sampleCount;          // Total count of samples in the file
+    unsigned short lastSampledTicks;    // Time last sampled enough for a sector
     unsigned short lastWrittenTicks;    // Time last successfully written
     unsigned char debugFlashCount;      // Remaining number of debug flashes
 
     // Status: attached
-    unsigned short lockCode;            // Comms lock when non-zero
-    char batteryFull;                   // Battery fully charged flag (set only)
+    unsigned char batteryFull;          // Battery fully charged counter (seconds, up to BATT_FULL_INTERVAL)
     char ledOverride;                   // Set LED colour (-1 = automatic)
     char diskMounted;                   // USB disk mounted flag
     char stream;                        // Streaming data while connected
     char actionFlags;                   // Settings for delayed actions
     char actionCountdown;               // Countdown to delayed action
 
+    // Options read from NVM
+    unsigned short lockCode;            // Comms lock when non-zero
+    char dataEcc;                       // Apply error-correction code to recorded data sectors
+
 } Status;
+
+#define BATT_FULL_INTERVAL 60       // 60 seconds over 'full' level before reporting battery as full
+#define CONFIG_ECC_DEFAULT 1        // 0 = ECC off for data sectors, 1 = ECC on for data sectors
 
 extern Status status;
 
@@ -136,6 +144,13 @@ unsigned short SettingsIncrementLogValue(unsigned int index);
 void SettingsAddLogEntry(unsigned short status, unsigned long timestamp, const char *message);
 const char *SettingsGetLogEntry(int index, unsigned short *status, unsigned long *timestamp);
 
+
+// Configuration
+#define CONFIG_LOCK 0
+#define CONFIG_ECC  1
+#define CONFIG_UNDEFINED 0xffff
+unsigned short SettingsGetConfigValue(unsigned int index);
+char SettingsSetConfigValue(unsigned int index, unsigned short value);
 
 
 // CWA constants

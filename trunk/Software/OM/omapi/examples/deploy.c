@@ -260,7 +260,7 @@ int deploy(const char *infile, const char *outfile)
 
             /* Commit the new settings */
             printf("DEPLOY #%d: Committing new settings...\n", deviceId);
-            OmClearDataAndCommit(deviceId);
+            OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
 
             /* The device is ready for deployment */
             printf("DEPLOYED,%u,%d,%s,%s\n", nextSessionId, deviceId, timeStartString, timeStopString);

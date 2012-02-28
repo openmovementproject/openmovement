@@ -128,12 +128,12 @@ int test(void)
         if (OM_FAILED(result)) { printf("WARNING: OmGetMemoryHealth() %s\n", OmErrorString(result)); errors++; }
         else
         {
-            if (result <= 1)
+            if (result <= OM_MEMORY_HEALTH_ERROR)
             {
                 errors++;
                 printf("CHECK #%d: Memory health: FAILED (at least one plane has (or is near to having) no free blocks)\n", deviceId);
             }
-            else if (result < 8)
+            else if (result <= OM_MEMORY_HEALTH_WARNING)
             {
                 printf("CHECK #%d: Memory health: WARNING (only %d free blocks on worst plane)\n", deviceId, result);
             }
