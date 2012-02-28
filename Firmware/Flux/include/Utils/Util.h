@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,44 +23,32 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// Data capture
-// Dan Jackson, 2011
+// util.h - Utility functions
+// Dan Jackson & Karim Ladha, 2010-2012.
 
+#ifndef UTIL_H
+#define UTIL_H
 
-// Data type
-typedef struct { unsigned short x, y, z; } DataType;
+extern char commEcho;
 
-// Buffer size
-#define DATA_BUFFER_CAPACITY 256   // Must be a power of 2. Memory requirement is * sizeof(DataType) -- e.g. 256 entries takes 1.5 kB
+#ifdef PIC24
+int write(int handle, void *buffer, unsigned int len);
+#endif
 
-// Clear data collection buffer
-void DataClear(void);
+// Retrieve a line of console-edited input
+extern const char *_user_gets(void);
 
-// Collect any new data (usually called from interrupt)
-inline void DataTasks(void);
+// String utility functions
+extern const char *my_itoa(int );
+extern const char *my_ultoa(unsigned long );
+extern unsigned long my_atoi(const char *s);
+extern int strnicmp(const char *a, const char *b, int max);
 
-// Returns the current length of the buffer
-unsigned short DataLength(void);
+// Checksum
+unsigned short checksum(const void *data, size_t len);
 
-// Returns the most recent timestamp and relative sample offset from the start of the buffer
-void DataTimestamp(unsigned long *timestamp, short *relativeOffset);
+// Hex dump of memory to the console
+extern void printhexdump(void *buffer, size_t offset, size_t length);
 
-// Empties a value from the buffer
-char DataPop(DataType *value, unsigned short count);
-
-
-
-#define DATA_EVENT_NONE                0x00
-#define DATA_EVENT_RESUME              0x01
-#define DATA_EVENT_SINGLE_TAP          0x02
-#define DATA_EVENT_DOUBLE_TAP          0x04
-//#define DATA_EVENT_EVENT               0x08
-#define DATA_EVENT_FIFO_OVERFLOW       0x10
-#define DATA_EVENT_BUFFER_OVERFLOW     0x20
-//#define DATA_EVENT_UNHANDLED_INTERRUPT 0x40
-//#define DATA_EVENT_CHECKSUM_FAIL       0x80	// Not used internally on CWA
-
-
-// Return (and clear) the events status flag
-unsigned char DataEvents(void);
+#endif
 

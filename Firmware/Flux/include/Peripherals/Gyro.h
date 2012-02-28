@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // gyro.h - L3G4200 Gyroscope interface.
-// Karim Ladha, Dan Jackson 2011.
+// Karim Ladha, Dan Jackson 2011-2012.
 // Adapted to be more user friendly, KL 01-12-11 
 /*
 Revisions:
@@ -32,16 +32,27 @@ Revisions:
 */
 
 // Data types
-typedef struct
+typedef union
 {
-	int x; int y; int z;
-}gyro_t;
+    struct { short x, y, z; };
+    struct { unsigned char xl, xh, yl, yh,  zl, zh; };
+    short values[3];
+} gyro_t;
 
 #define GYRO_BYTES_PER_SAMPLE 6
+#define GYRO_MAX_FIFO_SAMPLES  (32)
+//#define GYRO_MAX_FIFO_BYTES    (GYRO_MAX_FIFO_SAMPLES * GYRO_BYTES_PER_SAMPLE)
 
-// Read device ID (should be GYRO_DEVICE_ID = 0xD3)
-#define GYRO_DEVICE_ID 0xD3
-extern unsigned char GyroReadDeviceId(void);
+// Gyro detection
+extern char gyroPresent;       // Gyro present (call GyroReadDeviceId() once to set this)
+
+
+// TODO: Make this return the current gyro frequency
+#define GyroFrequency() (100)
+
+
+// Verify device ID
+extern unsigned char GyroVerifyDeviceId(void);
 
 // Initialisation for single sample mode - no interrupts
 extern void GyroStartup(void);	

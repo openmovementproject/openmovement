@@ -33,26 +33,25 @@ const char *OmErrorString(int status)
 {
     switch (status)
     {
-        case OM_OK                : return "OK";
-        case OM_E_FAIL            : return "Fail";
-        case OM_E_UNEXPECTED      : return "Unexpected";
-        case OM_E_NOT_VALID_STATE : return "Not valid state";
-        case OM_E_OUT_OF_MEMORY   : return "Out of memory";
-        case OM_E_INVALID_ARG     : return "Invalid argument";
-        case OM_E_POINTER         : return "Pointer";
-        case OM_E_NOT_IMPLEMENTED : return "Not implemented";
-        case OM_E_ABORT           : return "Aborted";
-        case OM_E_ACCESS_DENIED   : return "Access denied";
-        case OM_E_INVALID_DEVICE  : return "Invalid device";
+        case OM_OK                    : return "OK";
+        case OM_E_FAIL                : return "Fail";
+        case OM_E_UNEXPECTED          : return "Unexpected";
+        case OM_E_NOT_VALID_STATE     : return "Not valid state";
+        case OM_E_OUT_OF_MEMORY       : return "Out of memory";
+        case OM_E_INVALID_ARG         : return "Invalid argument";
+        case OM_E_POINTER             : return "Pointer";
+        case OM_E_NOT_IMPLEMENTED     : return "Not implemented";
+        case OM_E_ABORT               : return "Aborted";
+        case OM_E_ACCESS_DENIED       : return "Access denied";
+        case OM_E_INVALID_DEVICE      : return "Invalid device";
+        case OM_E_UNEXPECTED_RESPONSE : return "Unexpected response";
+        case OM_E_LOCKED              : return "Locked";
     }
     if (OM_SUCCEEDED(status))
     {
         return "<success>";
     }
-    else
-    {
-        return "<unknown>";
-    }
+    return "<unknown>";
 }
 
 
@@ -66,6 +65,12 @@ int OmStartup(int version)
 
     // Setup
     om.apiVersion = version;
+
+    // Set log stream if not already set before Startup call
+    if (!om.logSet)
+    {
+        om.log = stderr;
+    }
 
     // Ensure device state table is clear
     for (i = 0; i < OM_MAX_SERIAL; i++)
@@ -117,6 +122,40 @@ int OmShutdown(void)
     mutex_destroy(&om.portMutex);
     mutex_destroy(&om.downloadMutex);
 
+    return OM_OK;
+}
+
+
+int OmSetLogStream(int fd)
+{
+    // Close existing if set
+    if (om.logSet && om.log != NULL)
+    {
+        fclose(om.log);
+        om.log = NULL;
+        om.logSet = 0;
+    }
+
+    // Handle no stream
+    if (fd < 0)
+    {
+        om.log = NULL;
+        om.logSet = 1;
+        return OM_OK;
+    }
+
+    // Open specified stream
+    om.log = fdopen(fd, "wt");
+    if (om.log == NULL) { return OM_E_ACCESS_DENIED; }
+
+    return OM_OK;
+}
+
+
+int OmSetLogCallback(OmLogCallback logCallback, void *reference)
+{
+    om.logCallback = logCallback;
+    om.logCallbackReference = reference;
     return OM_OK;
 }
 

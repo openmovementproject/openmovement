@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,8 +24,11 @@
  */
 
 // NAND Flash abstract interface
-// Dan Jackson, 2011
-// Karim Ladha 28-11-2011 : Added support for ONFI read id function (typedef structure now internal to nand.c)
+// Dan Jackson, 2011-2012
+// Karim Ladha 28-11-2012 : Added support for ONFI read id function (typedef structure now internal to nand.c)
+
+// Globals..
+extern char nandPresent;       // NAND present (call NandVerifyDeviceId() once to set this)
 
 // Initialize the NAND device
 char NandInitialize(void);
@@ -34,9 +37,12 @@ char NandInitialize(void);
 char NandShutdown(void);
 
 // Read the device id (6 bytes)
-extern const char NAND_DEVICE_HY27UF084G2B[6];
-extern const char NAND_DEVICE_MT29F8G08AAA[6];
+extern const unsigned char NAND_DEVICE_HY27UF084G2B[6];
+extern const unsigned char NAND_DEVICE_MT29F8G08AAA[6];
 char NandReadId(unsigned char* destination);
+
+// Verify the device id
+unsigned char NandVerifyDeviceId(void);
 
 // Erase a block
 char NandEraseBlock(unsigned short block);

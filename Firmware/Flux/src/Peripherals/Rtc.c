@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Real Time Clock
-// Karim Ladha, Dan Jackson, 2011
+// Karim Ladha, Dan Jackson, 2011-2012
 
 // Includes
 #include <Rtcc.h>
@@ -52,6 +52,10 @@ static const unsigned char maxDaysPerMonth[12+1] = {0, 31, 29, 31, 30, 31, 30, 3
 volatile unsigned short rtcTicksSeconds = 0;
 unsigned short rtcRate = 0;
 volatile unsigned short rtcTimer = 0, rtcTimerTotal = 0;
+
+#ifdef RTC_SWWDT
+volatile unsigned int rtcSwwdtValue = 0;
+#endif
 
 
 // Checks that a BCD-coded internal time is valid
@@ -92,7 +96,7 @@ void RtcStartup(void)
 	mRtccWrOff();
 
 	// Check the time is a valid date
-    mRtccWaitSync(); // don't read until safe to do so.
+    //mRtccWaitSync();                // Don't need to do this (double-read instead)
     RtccReadTimeDate(&rtcLastTime[rtcLastTimeIndex]);
     if (!RtcValidInternal(&rtcLastTime[rtcLastTimeIndex]))
     {
@@ -115,16 +119,17 @@ void RtcInterruptOn(unsigned short newRate)
 	RtccWrOn();
 	//mRtccOn();
 	RtccWriteAlrmTimeDate(&rtcLastTime[rtcLastTimeIndex]);
+    // Interrupt will fire at next second, chime will continue at 1 second intervals
 	RtccSetChimeEnable(TRUE, TRUE);
 	RtccSetAlarmRpt(RTCC_RPT_SEC, TRUE);
-	RtccSetAlarmRptCount(1, TRUE); // Repeat once
-	mRtccSetAlrmPtr(0b0000); //Interrupt will fire <0.5s and chime will continue at rate
+	RtccSetAlarmRptCount(1, TRUE);  // Repeat once
+	//mRtccSetAlrmPtr(0b0000);
+	mRtccSetIntPriority(6);         // Priority 6 will still be disabled by DISI
 	mRtccAlrmEnable();
-	mRtccSetIntPriority(4);
 	mRtccWrOff();
 
     // Setup timer
-	T1CONbits.TSYNC= 1;	// Sync - for read/write alignment issue
+	T1CONbits.TSYNC = 1;	// Sync - for read/write alignment issue
 	T1CONbits.TCS = 1;	// Secondary osc timer input
 	T1CONbits.TCKPS = 0;// No prescale
 	T1CONbits.TGATE = 0;// Ignored bit (Not Gated)
@@ -146,7 +151,7 @@ void RtcInterruptOn(unsigned short newRate)
         IFS3bits.RTCIF = 0;
         while (!IFS3bits.RTCIF && !IFS0bits.T1IF && (USB_BUS_SENSE == originalBusSense))
         { 
-        	LED_SET(BLUE); LED_SET(OFF);
+        	LED_SET(LED_BLUE); LED_SET(LED_OFF);
         }
     }
     TMR1 = 0;       // Zero TMR1 for this new second boundary
@@ -216,8 +221,24 @@ void RtcClear(void)
 void RtcRead(rtcInternalTime *time)
 {
     // WARNING: Don't call this code while RTC interrupts are enabled
-    mRtccWaitSync(); // don't read until safe to do so.
+
+    //mRtccWaitSync();                // Don't need to do this (double-read instead)
     RtccReadTimeDate(time);
+
+#if 0   // (this double read is already done in RtccReadTimeDate)
+    // Read until it reads the same
+    {
+        rtcInternalTime check;
+        char iter = 0;
+        for (iter = 0; iter < 10; iter++)   // Should require no more than 4 reads
+        {
+            RtccReadTimeDate(&check);
+            if (time->l[0] == check.l[0] && time->l[1] == check.l[1]) { break; }
+            time->l[0] = check.l[0];
+            time->l[1] = check.l[1];
+        }
+    }
+#endif
 }
 
 
@@ -233,17 +254,16 @@ inline void RtcTasks(void)
         if (!rtcLastTimeIndex) { nextIndex = 1; }
         else { nextIndex = 0; }
 
-        mRtccWaitSync(); // don't read until safe to do so (worst case 1ms, but probably not after 1 sec chime?)
-
         // Need DISI so that TMR1 will always match cached timestamp in any higher priority interrupts
-        asm("DISI #0x3FF"); // Stop interrupts
-        RtccReadTimeDate(&rtcLastTime[nextIndex]);  // read into next buffer (nobody should see a partial-overwrite)
-        TMR1 = 0; // Clear TMR1 so it is synced to the RTC
+        asm("DISI #0x3FF");             // Stop interrupts
+        // Directly reads the RTC (WARNING: RTC interrupts must not be on)
+        RtcRead(&rtcLastTime[nextIndex]);   // Read into next buffer (nobody should see a partial-overwrite)
+        TMR1 = 0;                       // Clear TMR1 so it is synced to the RTC
         rtcLastTimeIndex = nextIndex;   // Save current index
-        rtcTicksSeconds++;  // Increment second counter
-        rtcTimer = 0;       // Zero sample timer counter for a new second
-        rtcTimerTotal = 0;  // Zero total timer value for a new second
-        asm("DISI #0"); // Enable interrupts
+        rtcTicksSeconds++;              // Increment second counter
+        rtcTimer = 0;                   // Zero sample timer counter for a new second
+        rtcTimerTotal = 0;              // Zero total timer value for a new second
+        asm("DISI #0");                 // Enable interrupts
 
     }
 }
@@ -255,13 +275,12 @@ DateTime RtcNow(void)
     {
         unsigned char nextIndex;
         if (!rtcLastTimeIndex) { nextIndex = 1; } else { nextIndex = 0; }
-        mRtccWaitSync(); // don't read until safe to do so (worst case 1ms, but probably not after 1 sec chime?)
-        RtccReadTimeDate(&rtcLastTime[nextIndex]);  // read into next buffer (nobody should see a partial-overwrite)
+        RtcRead(&rtcLastTime[nextIndex]);  // read into next buffer (nobody should see a partial-overwrite)
         rtcLastTimeIndex = nextIndex;   // Save current index
     }
 
     // Read from double-buffered data protects from overwrite by interrupt
-    if (rtcLastTimeIndex >= 2) { return NULL; }
+    if (rtcLastTimeIndex >= 2) { return 0; }
     return RtcFromInternal(&rtcLastTime[rtcLastTimeIndex]);
 }
 
@@ -276,8 +295,18 @@ DateTime RtcNowFractional(unsigned short *fractional)
     IEC3bits.RTCIE = 0;
     IEC0bits.T1IE = 0;
 
-    // Get time
-    t = RtcNow();
+    //RtcNow(); // Don't call RtcNow() as it will attempt a direct read when the interrupts are off
+
+    // Read from double-buffered data protects from overwrite by interrupt
+    if (rtcLastTimeIndex < 2)
+    {
+        t = RtcFromInternal(&rtcLastTime[rtcLastTimeIndex]);
+    }
+    else
+    {
+        t = 0;
+    }
+
 
     // Get fractional part
     f = TMR1;                                           // acquire
@@ -497,7 +526,25 @@ rtcInternalTime *RtcToInternal(DateTime value)
     return &retval;
 }
 
+// Calibrate the RCT to speed up (+ive value) or slow down (-ive value) - send signed int in ppm +/- 258 ppm
+void RtcCal(signed short ppm)
+{
+	// RCFGCAL adjustments fix +/- 4 pulses per minute x the cal value
+	// 4 pulses per minute = 2.0345 ppm, we will fix this based on one divde and offset
+	// If the ppm adjust value is greater than +/-58, we subtract (or add) an extra 1 to the value to compensate
 
+	// Grab sign
+	signed char 	sign = 1;
+	if (ppm<0) 		sign = -1;
+	// Clamp to +/-258
+	if ((ppm > 258)||(ppm <-258)) {(sign==1)? (ppm=258) : (ppm=-258);}
+	// Compensate for inexact ppm - cal conversion
+	ppm -= (ppm/58);
+	// Scale to multiples of 2ppm 
+	ppm>>=1;
+	RCFGCALbits.CAL = (signed char)(ppm&0xff);
+	return;	
+}
 
 // TMR1 tasks
 inline char RtcTimerTasks(void)

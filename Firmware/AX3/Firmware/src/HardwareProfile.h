@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,63 +24,34 @@
  */
 
 // HardwareProfile.h - Hardware Profile switching header
-// Karim Ladha, Dan Jackson, 2011
+// Karim Ladha, Dan Jackson, 2011-2012
 
 #ifndef HARDWAREPROFILE_H
 #define HARDWAREPROFILE_H
 
 	// Switch between hardware versions (0x16 = 1.6, 0x17 = 1.7)
 	#define HARDWARE_SELECT 0x17
-
+    
     // Define firmware version
-    #define SOFTWARE_VERSION 22
+    #define SOFTWARE_VERSION 30
 
-    // Device-specific profiles
-    #ifdef __PIC24FJ256GB106__
-        // CWA 1.6 & 1.7 uses a PIC24FJ256GB106
-        #if HARDWARE_SELECT == 0x16
-	        #include "HardwareProfile-CWA1.6.h"
-	    #elif HARDWARE_SELECT == 0x17
-	        #include "HardwareProfile-CWA1.7.h"
-	    #elif HARDWARE_SELECT == 0x18
-        	//#include "HardwareProfile-CWA1.8.h"
-        #endif
-    #else
-        #error "Unknown hardware profile."
-    #endif
+	// No legacy defines for this code
+	#define NO_LEGACY
 
-	// Verify we've selected the correct hardware profile
-	#if HARDWARE_VERSION != HARDWARE_SELECT
-        #error "Hardware does not match selection."
-	#endif
-
-
+    // Include CWA hardware profile
+    #include "Hardware/HardwareProfile-CWA.h"
+    
     // Additional defines for all hardware
-    #define DEFAULT_DEBUGGING 2     // 1=delayed activation, 2=on-tap, 3=always
-	
-	
-
-    // --- Required functions for all hardware ---
-
-    // Wait until the battery is out of pre-charge
-    void WaitForPrecharge(void);
-
-    // Power save the system
-    void SystemPwrSave(unsigned long napSetting);
-
-
-#if defined(__C30__)
-    // Non PSV data address access:
-    #define ROM_ADDRESS(_v) (((unsigned long) __builtin_tblpage(_v) << 16) + __builtin_tbloffset(_v))
+#if HARDWARE_VERSION == 0x16
+    #define DEFAULT_DEBUGGING 0     // 1=delayed activation, 2=on-tap, 3=always
+#else
+    #define DEFAULT_DEBUGGING 0     // 1=delayed activation, 2=on-tap, 3=always
 #endif
     
-    // Read from program memory (faster if even address and length)
-    char ReadProgram(unsigned long address, void *buffer, unsigned short length);
-
-    // Write to program memory (must be a page-aligned address; if length is odd, one extra byte of junk will be written)
-    char WriteProgramPage(unsigned long pageAddress, void *buffer, unsigned short length);
-
-    // Performs a self test, returns a bitmap of failures (0x0000 = success)
-    unsigned short SelfTest(void);
+    #if 0
+    	#warning "This is a no-battery build"
+    	#undef USB_BUS_SENSE
+    	#define USB_BUS_SENSE 0
+    #endif
 
 #endif

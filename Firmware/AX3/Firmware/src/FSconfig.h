@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -75,13 +75,23 @@
 // Define our MDD function implementations
 #define MDD_MediaInitialize     MDD_FTL_MediaInitialize
 #define MDD_MediaDetect         MDD_FTL_FSIO_MediaDetect
-#define MDD_SectorRead          MDD_FTL_SectorRead
-#define MDD_SectorWrite         MDD_FTL_SectorWrite
+#define MDD_SectorRead          MDD_FTL_FSIO_SectorRead
+#define MDD_SectorWrite         MDD_FTL_FSIO_SectorWrite
 #define MDD_InitIO              MDD_FTL_InitIO
 #define MDD_ShutdownMedia       MDD_FTL_ShutdownMedia
 #define MDD_WriteProtectState   MDD_FTL_WriteProtectState
 #define MDD_ReadSectorSize      MDD_FTL_ReadSectorSize
 #define MDD_ReadCapacity        MDD_FTL_ReadCapacity
+
+#define MDD_USB_MediaInitialize     MDD_FTL_MediaInitialize
+#define MDD_USB_MediaDetect         MDD_FTL_USB_MediaDetect
+#define MDD_USB_SectorRead          MDD_FTL_USB_SectorRead
+#define MDD_USB_SectorWrite         MDD_FTL_USB_SectorWrite
+#define MDD_USB_InitIO              MDD_FTL_InitIO
+#define MDD_USB_ShutdownMedia       MDD_FTL_ShutdownMedia
+#define MDD_USB_WriteProtectState   MDD_FTL_WriteProtectState
+#define MDD_USB_ReadSectorSize      MDD_FTL_ReadSectorSize
+#define MDD_USB_ReadCapacity        MDD_FTL_ReadCapacity
 
 
 // 32kb cluster size

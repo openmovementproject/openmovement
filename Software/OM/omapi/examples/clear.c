@@ -100,10 +100,10 @@ int clear(void)
 
         /* Clear the data and commit the settings */
         printf("CLEARING #%d: Clear data and commit...\n", deviceId);
-        result = OmClearDataAndCommit(deviceId); 
+        result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT); 
         if (OM_FAILED(result)) 
         { 
-            printf("WARNING: OmClearDataAndCommit() %s\n", OmErrorString(result));
+            printf("WARNING: OmEraseDataAndCommit() %s\n", OmErrorString(result));
         }
         else
         {

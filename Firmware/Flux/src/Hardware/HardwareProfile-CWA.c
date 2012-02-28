@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Hardware-specific code
-// Karim Ladha, Dan Jackson, 2011
+// Karim Ladha, Dan Jackson, 2011-2012
 
 
 // Includes
@@ -36,8 +36,8 @@
 #endif
 #include "Peripherals/Rtc.h"
 #include "Peripherals/Nand.h"
+#include "Peripherals/Analog.h"
 #include "Ftl/Ftl.h"
-#include "Analogue.h"
 
 
 // Configuration word
@@ -65,10 +65,10 @@ void SystemPwrSave(unsigned long NapSetting)
 	// External peripherals off as needed
 	LDR_DISABLE();
 	LED_INIT_PINS();
-#ifdef GYRO
+#ifdef USE_GYRO
 	if (NapSetting & GYRO_POWER_DOWN)GyroStandby();
 #endif
-	if (NapSetting & ADC_POWER_DOWN)InitADCOff();
+	if (NapSetting & ADC_POWER_DOWN)AdcOff();
 	if (NapSetting & ACCEL_POWER_DOWN)AccelStandby();
 
 	// Internal Peripherals off
@@ -122,10 +122,7 @@ void SystemPwrSave(unsigned long NapSetting)
 	// Enable wakeup interrupts + peripherals
 	if (NapSetting & WAKE_ON_USB)	// Wake on USB detect
 	{
-		//USB_BUS_SENSE_INTS(); // Shared with button inter on change notifications
-        CNEN2bits.CN23IE = 1;   // [dgj] Put these inline, the macro clears the flag and we don't want that
-        IEC1bits.CNIE = 1;
-        IPC4bits.CNIP = 4;
+		USB_BUS_SENSE_INTS(); 		// Shared with button inter on change notifications
 	}	 	
 	if (NapSetting & WAKE_ON_ADXL1)	// Wake on ADXL int1
 	{
@@ -137,16 +134,16 @@ void SystemPwrSave(unsigned long NapSetting)
 		//ACCEL_INT2_IF = 0;        // [dgj] Don't clear flag - if it was just set it should wake the device from sleep
 		ACCEL_INT2_IE = 1;
 	}
-#ifdef GYRO
+#ifdef USE_GYRO
 	if (NapSetting & WAKE_ON_GYRO1)	// Wake on GYRO int1
 	{
-		//GY_INT1_IF = 0;        // [dgj] Don't clear flag - if it was just set it should wake the device from sleep
-		GY_INT1_IE = 1;
+		//GYRO_INT1_IF = 0;        // [dgj] Don't clear flag - if it was just set it should wake the device from sleep
+		GYRO_INT1_IE = 1;
 	}			
 	if (NapSetting & WAKE_ON_GYRO2)	// Wake on GYRO int2
 	{
-		//GY_INT2_IF = 0;        // [dgj] Don't clear flag - if it was just set it should wake the device from sleep
-		GY_INT2_IE = 1;
+		//GYRO_INT2_IF = 0;        // [dgj] Don't clear flag - if it was just set it should wake the device from sleep
+		GYRO_INT2_IE = 1;
 	}
 #endif
 	if (NapSetting & WAKE_ON_RTC)	// Wake on RTC alarm
@@ -185,10 +182,10 @@ void SystemPwrSave(unsigned long NapSetting)
 	// Restore peripherals
 	if (!(NapSetting & DONT_RESTORE_PERIPHERALS))
 	{
-		if (NapSetting & ADC_POWER_DOWN)InitADCOn();
+		if (NapSetting & ADC_POWER_DOWN)AdcInit();
 
         // [dgj] Won't attempt to restore Gyro or Adxl as we won't know all of the settings required -- leave this to the caller
-#ifdef GYRO
+#ifdef USE_GYRO
 //        if (NapSetting & GYRO_POWER_DOWN)GyroStartup();
 #endif
 //		if (NapSetting & ACCEL_POWER_DOWN)AccelStartup(ACCEL_DEFAULT_RATE);
@@ -224,21 +221,30 @@ void WaitForPrecharge(void)
 	// 32 kHz rc osc
 	CLOCK_INTRC();
 		
-	InitADCOnRCOSC();
-	SampleADC_noLDR(); // Get one sample
-	InitADCOff();
-
+	AdcInit();		// Selects RCOSC automatically
+	AdcSampleNow(); // Get one sample
+	AdcOff();
+	
 	// if battery is flat and no charger/ USB present
-	if ((ADCresult[ADC_BATTERY] < MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE)&&(!USB_BUS_SENSE))
+	if ((adcResult.batt < BATT_CHARGE_MIN_LOG)&&(!USB_BUS_SENSE))
 	{
         // Stall here until charger/USB is connected
-    	//while (!USB_BUS_SENSE)
-        //{
+    	while (!USB_BUS_SENSE)
+        {
+			// Check battery voltage even though we don't think we're connected
+			// This will prevent a lockup if the wrong firmware is programmed on a discharged device (assuming the battery ADC pin is the same)
+			AdcInit();		// Selects RCOSC automatically
+			AdcSampleNow(); // Get one sample
+			AdcOff();
+			if (adcResult.batt < 20 || adcResult.batt >= 0x3f0)	return;	// Give up if invalid battery reading
+			if (adcResult.batt > BATT_CHARGE_MIN_SAFE) break;
+			
+			// Power save (wake on WDT or USB)
             SystemPwrSave(WAKE_ON_WDT|LOWER_PWR_SLOWER_WAKE|WAKE_ON_USB|ADC_POWER_DOWN|ACCEL_POWER_DOWN|GYRO_POWER_DOWN);
-            LED_SET(RED);
-            //Nop(); Nop(); Nop(); Nop(); Nop(); Nop(); Nop(); Nop();
-            //LED_SET(OFF);
-        //}
+            LED_SET(LED_RED);
+            Nop(); Nop(); Nop(); Nop(); Nop(); Nop(); Nop(); Nop();
+            LED_SET(LED_OFF);
+        }
         // Reset once connected
 		Reset();
 	}
@@ -252,19 +258,19 @@ void WaitForPrecharge(void)
 		// if battery is flat - red 5% flash @ ~2Hz
 		if(timer > 100)
 		{
-			LED_SET(RED);
+			LED_SET(LED_RED);
 		}
 		if (timer > 105)
 		{
-			LED_SET(OFF);
+			LED_SET(LED_OFF);
 			// Check battery voltage
-			InitADCOnRCOSC();
-			SampleADC_noLDR(); 
-			InitADCOff();
-			if (ADCresult[ADC_BATTERY] > MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE)
+			AdcInit();		// Selects RCOSC automatically
+			AdcSampleNow(); // Get one sample
+			AdcOff();
+			if (adcResult.batt > BATT_CHARGE_MIN_SAFE)
 			{
 				// Not in precharge
-				LED_SET(OFF);
+				LED_SET(LED_OFF);
 				CLOCK_INTOSC();
 				return;	
 			}
@@ -393,7 +399,7 @@ unsigned short SelfTest(void)
     unsigned short result = 0x0000;
 
     // Read ADXL device ID (should be ACCEL_DEVICE_ID = 0xE5)
-    if (AccelReadDeviceId() != ACCEL_DEVICE_ID) { result |= 0x0001; }
+    if (!AccelVerifyDeviceId()) { result |= 0x0001; }
 
     // Read NAND parameters and compare with compiled-in constants
     if (FtlVerifyNandParameters()) { result |= 0x0002; }

@@ -48,12 +48,17 @@ namespace OmApiNet
 
 
         // Must keep a reference to callbacks to prevent the garbage collector removing the delegate
+        private volatile OmApi.OmLogCallback logCallbackDelegate;
         private volatile OmApi.OmDeviceCallback deviceCallbackDelegate;
         private volatile OmApi.OmDownloadCallback downloadCallbackDelegate;
 
         /** Private constructor (singleton class) */
         private Om()
         {
+            // Register our log callback handler first (before startup)
+            logCallbackDelegate = new OmApi.OmLogCallback(LogCallback);
+            OmApi.OmSetLogCallback(logCallbackDelegate, IntPtr.Zero);
+
             // Register our device callback handler (before startup, so we get the initial set of devices)
             deviceCallbackDelegate = new OmApi.OmDeviceCallback(DeviceCallback);
             OmApi.OmSetDeviceCallback(deviceCallbackDelegate, IntPtr.Zero);
@@ -160,6 +165,11 @@ namespace OmApiNet
                 }
             }
             return device;
+        }
+
+        protected void LogCallback(IntPtr reference, string message)
+        {
+            Console.WriteLine("LOG: " + message);
         }
 
         protected void DeviceCallback(IntPtr reference, int deviceId, OmApi.OM_DEVICE_STATUS status)

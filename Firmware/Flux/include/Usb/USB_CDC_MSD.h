@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,39 +23,40 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-/* This code was written for the ADC on the PIC 24 */
-/* KL 28-03-11 */
-#ifndef ANALOGUE_H
-#define ANALOGUE_H
+// USB CDC and MSD handler
+// Dan Jackson, Karim Ladha, 2010-2012.
 
+#ifndef USB_MSD_CDC_H
+#define USB_MSD_CDC_H
 
-#include <adc.h>
+#include "USB/usb.h"
 
-// Globals
-extern unsigned int ADCresult[3];// [0]-batt, [1]-LDR, [2]-Temp
+void usb_putchar(unsigned char);
+int usb_getchar(void);
+void USBCDCWait(void);
+void USBProcessIO(void);
+void USBSerialIO(void);
+unsigned char GetCDCBytesToCircularBuffer(void);
+void USBInitializeSystem(void);
 
-// Following can be set to zero if LDR is not disabled between reads
-#define DelayLDRsettle() DelayMs(1)
+#if defined(USB_CDC_SET_LINE_CODING_HANDLER)
+extern void mySetLineCodingHandler(void);
+#endif
+//void USBDeviceTasks(void);
+void USBCBWakeFromSuspend(void);
+void USBCB_SOF_Handler(void);
+void USBCBErrorHandler(void);
+void USBCBCheckOtherReq(void);
+void USBCBStdSetDscHandler(void);
+void USBCBInitEP(void);
+void USBCBSendResume(void);
+void USBCBSuspend(void);
+BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
+#define BlinkUSBStatus()
 
-// Following can be set to zero if Temp sensor is not disabled between reads
-#define DelayTempsettle() DelayMs(1)
-
-void InitADCOn(void);
-void InitADCOnRCOSC(void);
-void InitADCOff(void);
-
-// This one returns a pointer to a unsigned int buffer[2], the first one is the battery, then LDR
-unsigned int *SampleADC(void);
-unsigned int *SampleADC_noLDR(void);
-unsigned int ConvertBattToPercentage(unsigned int);
-
-unsigned short BattConvert_mV(unsigned short value);
-unsigned int LDRConvert_Lux(unsigned short value);
-short TempConvert_TenthDegreeC(unsigned short value);
-
-#define ADC_BATTERY 0
-#define ADC_LDR 1
-#define ADC_TEMP 2
-
+#if 0 // use following for isr - see .c file
+extern void __attribute__ ((interrupt)) _USB1Interrupt(void)
 #endif
 
+
+#endif   

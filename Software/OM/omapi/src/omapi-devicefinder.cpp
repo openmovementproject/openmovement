@@ -52,7 +52,7 @@ static void OmWindowsAddedCallback(void *reference, const Device &device)
     std::string volumePath = device.volumePath;
 
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "1: %s\n", volumePath.c_str());
+OmLog("1: %s\n", volumePath.c_str());
 #endif
 
     // Mount location
@@ -66,8 +66,8 @@ fprintf(stderr, "1: %s\n", volumePath.c_str());
     }
 
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "2: %s\n", root);
-fprintf(stderr, "3: %s\n", desiredVolumePath);
+OmLog("2: %s\n", root);
+OmLog("3: %s\n", desiredVolumePath);
 #endif
 
     // Get existing mount points
@@ -77,13 +77,16 @@ fprintf(stderr, "3: %s\n", desiredVolumePath);
     GetVolumePathNamesForVolumeNameA(device.volumeName.c_str(), volumePathNames, cchBufferLength, &cchReturnLength);
     cchBufferLength = cchReturnLength + MAX_PATH;   // Add a bit as some comments seem to indicate that the wrong length may be returned on some Windows versions
     volumePathNames = (char *)malloc(cchBufferLength * sizeof(char));
-    volumePathNames[0] = 0; volumePathNames[1] = 0; // Initialize as a zero-length list of strings
-    GetVolumePathNamesForVolumeNameA(device.volumeName.c_str(), volumePathNames, cchBufferLength, &cchReturnLength);
+    if (volumePathNames != NULL)
+    {
+        volumePathNames[0] = 0; volumePathNames[1] = 0; // Initialize as a zero-length list of strings
+        GetVolumePathNamesForVolumeNameA(device.volumeName.c_str(), volumePathNames, cchBufferLength, &cchReturnLength);
+    }
 
     // Scan existing mount points
     int numMountPoints = 0;
     char hasDesiredMountPoint = 0;
-    for (char *name = volumePathNames; name[0] != '\0'; name += strlen(name) + 1)
+    for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
     {
         numMountPoints++;
         if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, desiredVolumePath) == 0)
@@ -96,7 +99,7 @@ fprintf(stderr, "3: %s\n", desiredVolumePath);
     if (!hasDesiredMountPoint)
     {
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "4: Creating desired mount point...\n");
+OmLog("4: Creating desired mount point...\n");
 #endif
         // Make root folder if it doesn't exist
         if (root != NULL && root[0] != '\0')
@@ -105,12 +108,12 @@ fprintf(stderr, "4: Creating desired mount point...\n");
             if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY))
             { 
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "5: Creating mount point root...\n");
+OmLog("5: Creating mount point root...\n");
 #endif
                 if (!CreateDirectoryA(root, NULL)) 
                 { 
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "5a: Failed to create mount point root...\n");
+OmLog("5a: Failed to create mount point root...\n");
 #endif
                     desiredVolumePath[0] = '\0'; 
                 } 
@@ -124,12 +127,12 @@ fprintf(stderr, "5a: Failed to create mount point root...\n");
             if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY)) 
             { 
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "6: Creating mount point...\n");
+OmLog("6: Creating mount point...\n");
 #endif
                 if (!CreateDirectoryA(desiredVolumePath, NULL)) 
                 { 
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "6a: Failed to create mount point...\n");
+OmLog("6a: Failed to create mount point...\n");
 #endif
                     desiredVolumePath[0] = '\0'; 
                 } 
@@ -140,12 +143,12 @@ fprintf(stderr, "6a: Failed to create mount point...\n");
         if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0')
         {
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "7: Setting mount point... SetVolumeMountPointA(\"%s\", \"%s\");\n", desiredVolumePath, device.volumeName.c_str());
+OmLog("7: Setting mount point... SetVolumeMountPointA(\"%s\", \"%s\");\n", desiredVolumePath, device.volumeName.c_str());
 #endif
             if (SetVolumeMountPointA(desiredVolumePath, device.volumeName.c_str()))
             {
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "7b: Set mount point...\n");
+OmLog("7b: Set mount point...\n");
 #endif
                 hasDesiredMountPoint = 1;
             }
@@ -154,10 +157,10 @@ fprintf(stderr, "7b: Set mount point...\n");
                 DWORD err = GetLastError();
                 if (err == 0x00000005)
                 {
-fprintf(stderr, "7a: Failed to set mount point... access denied, must run as an Administrator.\n");
+OmLog("7a: Failed to set mount point... access denied, must run as an Administrator.\n");
                 }
 #ifdef DEBUG_MOUNT
-else fprintf(stderr, "7a: Failed to set mount point... %08x\n", err);
+else OmLog("7a: Failed to set mount point... %08x\n", err);
 #endif
             }
         }
@@ -168,13 +171,13 @@ else fprintf(stderr, "7a: Failed to set mount point... %08x\n", err);
     {
         volumePath = desiredVolumePath;
 #ifdef DEBUG_MOUNT
-fprintf(stderr, "8: Has mount point: %s\n", volumePath.c_str());
+OmLog("8: Has mount point: %s\n", volumePath.c_str());
 #endif
     }
 
 #if 1
     // Un-mount any other (unused) mount points
-    for (char *name = volumePathNames; name[0] != '\0'; name += strlen(name) + 1)
+    for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
     {
         numMountPoints++;
         if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, volumePath.c_str()) != 0)
@@ -189,7 +192,7 @@ fprintf(stderr, "8: Has mount point: %s\n", volumePath.c_str());
 #endif
 
     // Free mount point list
-    free(volumePathNames);
+    if (volumePathNames != NULL) { free(volumePathNames); }
 
     // Call the device discovery using the found volume
     OmDeviceDiscovery(OM_DEVICE_CONNECTED, device.serialNumber, device.port.c_str(), volumePath.c_str());

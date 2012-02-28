@@ -10,47 +10,51 @@
           <itemPath>../../../../Flux/include/Ftl/FsFtl.h</itemPath>
           <itemPath>../../../../Flux/include/Ftl/Ftl.h</itemPath>
         </logicalFolder>
+        <logicalFolder name="f5" displayName="Hardware" projectFiles="true">
+          <itemPath>../../../../Flux/include/Hardware/HardwareProfile-CWA.h</itemPath>
+          <itemPath>../../../../Flux/include/Hardware/HardwareProfile-CWA1.6.h</itemPath>
+          <itemPath>../../../../Flux/include/Hardware/HardwareProfile-CWA1.7.h</itemPath>
+        </logicalFolder>
         <logicalFolder name="f2" displayName="Peripherals" projectFiles="true">
           <itemPath>../../../../Flux/include/Peripherals/Accel.h</itemPath>
+          <itemPath>../../../../Flux/include/Peripherals/Analog.h</itemPath>
           <itemPath>../../../../Flux/include/Peripherals/Gyro.h</itemPath>
           <itemPath>../../../../Flux/include/Peripherals/Nand.h</itemPath>
           <itemPath>../../../../Flux/include/Peripherals/Rtc.h</itemPath>
         </logicalFolder>
+        <logicalFolder name="f4" displayName="Usb" projectFiles="true">
+          <itemPath>../../../../Flux/include/Usb/USB_CDC_MSD.h</itemPath>
+        </logicalFolder>
         <logicalFolder name="f3" displayName="Utils" projectFiles="true">
+          <itemPath>../../../../Flux/include/Utils/Fifo.h</itemPath>
+          <itemPath>../../../../Flux/include/Utils/Util.h</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f2" displayName="Microchip" projectFiles="true">
         <logicalFolder name="f1" displayName="MDD File System" projectFiles="true">
-          <itemPath>C:/Microchip Solutions/Microchip/Include/MDD File System/FSDefs.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/MDD File System/FSIO.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/MDD File System/FSDefs.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/MDD File System/FSIO.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f2" displayName="USB" projectFiles="true">
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_ch9.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_common.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_device.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_function_cdc.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_function_msd.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_hal.h</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/Include/USB/usb_hal_pic24.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_ch9.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_common.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_device.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_function_cdc.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_function_msd.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_hal.h</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_hal_pic24.h</itemPath>
         </logicalFolder>
-        <itemPath>C:/Microchip Solutions/Microchip/Include/Compiler.h</itemPath>
-        <itemPath>C:/Microchip Solutions/Microchip/Include/GenericTypeDefs.h</itemPath>
-        <itemPath>C:/Microchip Solutions/Microchip/Include/TimeDelay.h</itemPath>
+        <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/Compiler.h</itemPath>
+        <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/GenericTypeDefs.h</itemPath>
+        <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Include/TimeDelay.h</itemPath>
       </logicalFolder>
-      <itemPath>../Analogue.h</itemPath>
-      <itemPath>../Data.h</itemPath>
       <itemPath>../FSconfig.h</itemPath>
       <itemPath>../FtlConfig.h</itemPath>
-      <itemPath>../HardwareProfile-CWA1.6.h</itemPath>
-      <itemPath>../HardwareProfile-CWA1.7.h</itemPath>
-      <itemPath>../HardwareProfile-CWA1.8.h</itemPath>
       <itemPath>../HardwareProfile.h</itemPath>
       <itemPath>../Logger.h</itemPath>
       <itemPath>../Settings.h</itemPath>
-      <itemPath>../USB_CDC_MSD.h</itemPath>
       <itemPath>../usb_config.h</itemPath>
-      <itemPath>../util.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -74,37 +78,41 @@
           <itemPath>../../../../Flux/src/Ftl/FsFtl.c</itemPath>
           <itemPath>../../../../Flux/src/Ftl/Ftl.c</itemPath>
         </logicalFolder>
+        <logicalFolder name="f5" displayName="Hardware" projectFiles="true">
+          <itemPath>../../../../Flux/src/Hardware/HardwareProfile-CWA.c</itemPath>
+        </logicalFolder>
         <logicalFolder name="f2" displayName="Peripherals" projectFiles="true">
-          <itemPath>../../../../Flux/src/Peripherals/Accel.c</itemPath>
-          <itemPath>../../../../Flux/src/Peripherals/Gyro.c</itemPath>
+          <itemPath>../../../../Flux/src/Peripherals/Accel-ADXL345.c</itemPath>
+          <itemPath>../../../../Flux/src/Peripherals/Analog.c</itemPath>
+          <itemPath>../../../../Flux/src/Peripherals/Gyro-L3G4200D.c</itemPath>
           <itemPath>../../../../Flux/src/Peripherals/Nand.c</itemPath>
           <itemPath>../../../../Flux/src/Peripherals/Rtc.c</itemPath>
         </logicalFolder>
+        <logicalFolder name="f4" displayName="Usb" projectFiles="true">
+          <itemPath>../../../../Flux/src/Usb/USB_CDC_MSD.c</itemPath>
+        </logicalFolder>
         <logicalFolder name="f3" displayName="Utils" projectFiles="true">
+          <itemPath>../../../../Flux/src/Utils/Fifo.c</itemPath>
+          <itemPath>../../../../Flux/src/Utils/Util.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f1" displayName="Microchip" projectFiles="true">
         <logicalFolder name="f1" displayName="Common" projectFiles="true">
-          <itemPath>C:/Microchip Solutions/Microchip/Common/TimeDelay.c</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/Common/TimeDelay.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f2" displayName="MDD File System" projectFiles="true">
           <itemPath>../../../../Flux/src/Microchip/MDD File System/FSIO.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f3" displayName="USB" projectFiles="true">
-          <itemPath>C:/Microchip Solutions/Microchip/USB/usb_device.c</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
-          <itemPath>C:/Microchip Solutions/Microchip/USB/MSD Device Driver/usb_function_msd.c</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/USB/usb_device.c</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
+          <itemPath>C:/Microchip Solutions v2011-12-05/Microchip/USB/MSD Device Driver/usb_function_msd.c</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <itemPath>../Analogue.c</itemPath>
-      <itemPath>../Data.c</itemPath>
-      <itemPath>../HardwareProfile.c</itemPath>
       <itemPath>../Logger.c</itemPath>
       <itemPath>../Settings.c</itemPath>
-      <itemPath>../USB_CDC_MSD.c</itemPath>
       <itemPath>../main.c</itemPath>
       <itemPath>../usb_descriptors.c</itemPath>
-      <itemPath>../util.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -131,8 +139,17 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <C30>
-        <property key="optimization-level" value="0"/>
+        <property key="optimization-level" value="3"/>
         <property key="preprocessor-macros" value=""/>
         <property key="code-model" value="large-code"/>
         <property key="const-model" value="default"/>
@@ -140,9 +157,10 @@
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-short-double" value="false"/>
         <property key="extra-include-directories"
-                  value="..;C:\Microchip Solutions\Microchip\Include;../../../../Flux/include"/>
+                  value="..;C:/Microchip Solutions v2011-12-05/Microchip/Include;../../../../Flux/include"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
         <property key="data-model" value="large-data"/>
         <property key="isolate-each-function" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
@@ -150,6 +168,7 @@
         <property key="enable-ansi-std" value="false"/>
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
         <property key="scalar-model" value="default"/>
       </C30>
       <C30-AS>
@@ -160,8 +179,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -202,6 +221,7 @@
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
+        <property key="output-file-format" value="elf"/>
         <property key="legacy-libc" value="false"/>
       </C30Global>
       <ICD3PlatformTool>
@@ -242,12 +262,12 @@
         <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
         <property key="OUTPUT COMPARE 2" value="true"/>
         <property key="OUTPUT COMPARE 1" value="true"/>
-        <property key="poweroptions.powerenable" value="false"/>
+        <property key="poweroptions.powerenable" value="true"/>
         <property key="memories.programmemory.start" value="0x0"/>
         <property key="programoptions.preserveprogramrange.start" value="0x29C00"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="voltagevalue" value="3.25"/>
+        <property key="voltagevalue" value="3.375"/>
         <property key="TIMER5" value="true"/>
         <property key="memories.programmemory.end" value="0x2abf7"/>
         <property key="TIMER4" value="true"/>

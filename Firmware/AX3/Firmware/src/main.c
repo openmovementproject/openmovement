@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // AX3 Main Code
-// Dan Jackson, Karim Ladha, 2011
+// Dan Jackson, Karim Ladha, 2011-2012
 
 // Includes
 #include <Compiler.h>
@@ -39,14 +39,14 @@
 #include "USB/USB.h"
 #include "USB/usb_function_msd.h"
 #include "USB/usb_function_cdc.h"
-#include "USB_CDC_MSD.h"
 #include "MDD File System/FSIO.h"
+#include "Usb/USB_CDC_MSD.h"
 #include "Ftl/FsFtl.h"
-#include "Analogue.h"
+#include "Utils/Fifo.h"
+#include "Utils/Util.h"
+#include "Peripherals/Analog.h"
 #include "Settings.h"
 #include "Logger.h"
-#include "Data.h"
-#include "Util.h"
 //#include <string.h>
 
 
@@ -62,7 +62,7 @@ void LedTasks(void);
 void __attribute__((interrupt,auto_psv)) _DefaultInterrupt(void)
 {
  	static unsigned int INTCON1val;
-	LED_SET(MAGENTA);
+	LED_SET(LED_MAGENTA);
 	INTCON1val = INTCON1;
 	Nop();
 	Nop();
@@ -75,6 +75,7 @@ void __attribute__((interrupt,auto_psv)) _DefaultInterrupt(void)
 // RTC
 void __attribute__((interrupt,auto_psv)) _RTCCInterrupt(void)
 {
+    RtcSwwdtIncrement();    // Increment software RTC, reset if overflow
     RtcTasks();
     //IFS3bits.RTCIF = 0;   // RtcTasks() services and clears the interrupt
 }
@@ -82,16 +83,32 @@ void __attribute__((interrupt,auto_psv)) _RTCCInterrupt(void)
 // Accel interrupt 1
 void __attribute__((interrupt,auto_psv)) _INT1Interrupt(void)
 {
-    DataTasks();
+    LoggerAccelTasks();
 	//IFS1bits.INT1IF = 0;  // DataTasks() services and clears the interrupt
 }
 
 // Accel interrupt 2
 void __attribute__((interrupt,auto_psv)) _INT2Interrupt(void)
 {
-    DataTasks();
+    LoggerAccelTasks();
 	//IFS1bits.INT2IF = 0;  // DataTasks() services and clears the interrupt
 }
+
+#ifdef USE_GYRO
+// Gyro interrupt 1
+void __attribute__((interrupt,auto_psv)) _INT3Interrupt(void)
+{
+    LoggerGyroTasks();
+	//IFS3bits.INT3IF = 0;  // DataTasks() services and clears the interrupt
+}
+
+// Gyro interrupt 2
+void __attribute__((interrupt,auto_psv)) _INT4Interrupt(void)
+{
+    LoggerGyroTasks();
+	//IFS3bits.INT4IF = 0;  // DataTasks() services and clears the interrupt
+}
+#endif
 
 // TMR1
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void)
@@ -102,6 +119,14 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void)
     }
 	//IFS0bits.T1IF = 0; // RtcTimerTasks() services and clears the interrupt
 }
+
+// CN
+void __attribute__((interrupt, shadow, auto_psv)) _CNInterrupt(void)
+{
+	IFS1bits.CNIF = 0;
+}
+
+#include <p24FJ256GB106.h>
 
 
 // Restart flag
@@ -119,28 +144,49 @@ int main(void)
 	WaitForPrecharge();	// ~0.5mA current
 
 	// Peripherals - RTC and ADC always used
+    LED_SET(LED_BLUE);  // Blue LED during startup
 	CLOCK_INTOSC();     // 8 MHz
-	LED_SET(CYAN);
+    // RTC and 'software WDT'
+    RtcSwwdtReset();
     RtcStartup();
-	InitADCOn();
-    SampleADC();                    // Ensure we have a valid battery level
+    RtcInterruptOn(0);  // Enable precise RTC (and software WDT)
+    LED_SET(LED_BLUE);  // Blue LED during startup (set again as RTC sync strobes LED)
+    // ADC
+	AdcInit();
+    AdcSampleWait();    // Ensure we have a valid battery level
+
+    // Check the devices we have
+    NandInitialize();
+    NandVerifyDeviceId();
+    AccelVerifyDeviceId();
+#ifdef USE_GYRO
+    GyroVerifyDeviceId();
+#endif
+
+    // If we haven't detected the NAND or accelerometer this could be the wrong firmware for this device (reset to bootloader)
+    if (!nandPresent || !accelPresent)
+    {
+        int i;
+        for (i = 0; i < 5 * 3; i++) { LED_SET(LED_RED); DelayMs(111); LED_SET(LED_GREEN); DelayMs(111); LED_SET(LED_BLUE); DelayMs(111); }
+    	Reset();                // Reset
+    }
 
     // Read settings
-    LED_SET(GREEN);
     restart = 0;
     inactive = 0;
-    SettingsInitialize();           // Initialize settings from ROM
-    FtlStartup();                   // FTL & NAND startup
-    FSInit();                       // Initialize the filesystem for reading
+    SettingsInitialize();               // Initialize settings from ROM
+
+LED_SET(LED_WHITE);         // White LED during later startup
+    FtlStartup();                       // FTL & NAND startup
+    FSInit();                           // Initialize the filesystem for reading
     SettingsReadFile(SETTINGS_FILE);    // Read settings from script
     // TODO: Make this "single binary file" mode optional on the settings just read
     LoggerReadMetadata(DEFAULT_FILE);   // Read settings from the logging binary file
 
-
     // Run as attached or logging
-	if (USB_BUS_SENSE)
-	{
-		RunAttached();      // Run attached, returns when detatched
+    if (USB_BUS_SENSE)
+    {
+        RunAttached();      // Run attached, returns when detatched
     }
     else
     {
@@ -152,24 +198,30 @@ int main(void)
 }
 
 
-
 // Attached to USB
 void RunAttached(void)
 {
-    // Enable peripherals
-	RtcInterruptOn(0);
-
     // Clear the data capture buffer
-    DataClear();
+    LoggerClear();
 
-    // Initialize the ADXL and enable ADXL interrupts
+    // Initialize the ADXL
     AccelStartup(settings.sampleRate);
-    AccelEnableInterrupts(ACCEL_INT_SOURCE_WATERMARK | ACCEL_INT_SOURCE_OVERRUN | ACCEL_INT_SOURCE_DOUBLE_TAP, 0x00);
+    //AccelEnableInterrupts(ACCEL_INT_SOURCE_WATERMARK | ACCEL_INT_SOURCE_OVERRUN | ACCEL_INT_SOURCE_DOUBLE_TAP, 0x00);
+#ifdef USE_GYRO
+    GyroStartup();
+    //GyroStartupFifoInterrupts();
+#endif
 
+#if 1
+FtlFlush(0);    // [dgj] Possible fix for 'format disk' bug
+#endif
     CLOCK_PLL();	// HS PLL clock for the USB module 12MIPS
-    DelayMs(1); 	// Allow PLL to stabilise
+    DelayMs(2); 	// Allow PLL to stabilise
 
     fsftlUsbDiskMounted = status.diskMounted;
+#if 1
+FSInit();       // [dgj] Possible fix for 'format disk' bug
+#endif
     MDD_MediaInitialize();  // MDD initialize
 
     USBInitializeSystem(); 	// Initializes buffer, USB module SFRs and firmware
@@ -177,7 +229,7 @@ void RunAttached(void)
     USBDeviceAttach();
     #endif
 
-    while(USB_BUS_SENSE && restart != 1)
+    while (USB_BUS_SENSE && restart != 1)
     {
         fsftlUsbDiskMounted = status.diskMounted;
 
@@ -195,6 +247,38 @@ void RunAttached(void)
                 status.stream = 0;                  // Disable streaming
                 SettingsCommand(line, SETTINGS_USB);
             }
+
+            // Stream accelerometer data
+            if (status.stream)
+            {
+                #define STREAM_RATE 100
+                #define STREAM_INTERVAL (0x10000UL / STREAM_RATE)
+                static unsigned long lastSampleTicks = 0;
+                unsigned long now = RtcTicks();
+                if (lastSampleTicks == 0) { lastSampleTicks = now; }
+                if (now - lastSampleTicks > STREAM_INTERVAL)
+                {
+                    accel_t accelSample;
+                    lastSampleTicks += STREAM_INTERVAL;
+                    if (now - lastSampleTicks > 2 * STREAM_INTERVAL) { lastSampleTicks = now; } // not keeping up with sample rate
+
+                    AccelSingleSample(&accelSample);
+#ifdef USE_GYRO
+                    if (gyroPresent)
+                    {
+                        gyro_t gyroSample;
+                        GyroSingleSample(&gyroSample);
+                        printf("%d,%d,%d,%d,%d,%d\r\n", accelSample.x, accelSample.y, accelSample.z, gyroSample.x, gyroSample.y, gyroSample.z);
+                    }
+                    else
+#endif
+                    {
+                        printf("%d,%d,%d\r\n", accelSample.x, accelSample.y, accelSample.z);
+                    }
+                    USBCDCWait();
+                }
+
+            }
         }
         else
         {
@@ -203,18 +287,6 @@ void RunAttached(void)
         LedTasks();
         TimedTasks();
 		
-        // Stream accelerometer data
-        if (status.stream)
-        {
-            unsigned short samples;
-            samples = DataLength();
-            while (samples--)
-            {
-                DataType value;
-                DataPop(&value, 1);
-                printf("%d,%d,%d\r\n", value.x, value.y, value.z);
-            }
-        }
 
         // Experiment to see if this improves speed -- it doesn't seem to
         #ifdef FSFTL_READ_PREFETCH
@@ -235,24 +307,27 @@ void RunAttached(void)
 // Timed tasks
 void TimedTasks(void)
 {
+    // 1 Hz update
     if (lastTime != rtcTicksSeconds)
     {
         lastTime = rtcTicksSeconds;
 
         // Increment timer and toggle bit on overflow
         inactive = FtlIncrementInactivity();
-        SampleADC_noLDR();
-        if (ADCresult[ADC_BATTERY] > batt_full_charge_with_USB && !status.batteryFull)
+        AdcSampleNow();
+        if (adcResult.batt > BATT_CHARGE_FULL_USB && status.batteryFull < BATT_FULL_INTERVAL)
         {
-            status.batteryFull = 1;
-            if (status.initialBattery != 0 && status.initialBattery < batt_mid_charge_with_USB)
+            status.batteryFull++;
+            if (status.batteryFull >= BATT_FULL_INTERVAL)
             {
-                // Increment battery health counter
-                SettingsIncrementLogValue(LOG_VALUE_BATTERY);
+                if (status.initialBattery != 0 && status.initialBattery < BATT_CHARGE_MID_USB)
+                {
+                    // Increment battery health counter
+                    SettingsIncrementLogValue(LOG_VALUE_BATTERY);
+                }
             }
         }
 
-        // TODO: Change to be time-based
         if (inactive > 3)
         {
             FtlFlush(1);	// Inactivity time out on scratch hold
@@ -269,6 +344,9 @@ void TimedTasks(void)
                 }
             }
         }
+
+        // Reset SW-WDT
+        RtcSwwdtReset();
     }
     return;
 }
@@ -283,29 +361,37 @@ void LedTasks(void)
 
     if (++LEDTimer == 0) { LEDtoggle = !LEDtoggle; }
 
-    if (status.actionCountdown)
+    if (status.attached > 0)
     {
-        if (((unsigned char)(LEDTimer)) < ((LEDTimer) >> 8)) { LED_SET(LEDtoggle ? RED : OFF); } else { LED_SET(LEDtoggle ? RED : OFF); }
-    }
-    else if (status.ledOverride >= 0)
-    {
-        LED_SET(status.ledOverride);
+        if (status.actionCountdown)
+        {
+            if (((unsigned char)(LEDTimer)) < ((LEDTimer) >> 8)) { LED_SET(LEDtoggle ? LED_RED : LED_OFF); } else { LED_SET(LEDtoggle ? LED_RED : LED_OFF); }
+        }
+        else if (status.ledOverride >= 0)
+        {
+            LED_SET(status.ledOverride);
+        }
+        else
+        {
+            char c0, c1;
+
+            if (inactive == 0)
+            {
+                if (status.batteryFull >= BATT_FULL_INTERVAL) { c0 = LED_OFF; c1 = LED_WHITE; }       // full - flushed
+                else                    { c0 = LED_OFF; c1 = LED_YELLOW; }      // charging - flushed
+            }
+            else						// Red breath
+            {
+                if (status.batteryFull >= BATT_FULL_INTERVAL) { c0 = LED_RED; c1 = LED_WHITE; }       // full - unflushed
+                else                    { c0 = LED_RED; c1 = LED_YELLOW; }      // charging - unflushed
+            }
+            if (((unsigned char)(LEDTimer)) < ((LEDTimer) >> 8)) { LED_SET(LEDtoggle ? c1 : c0); } else { LED_SET(LEDtoggle ? c0 : c1); }
+        }
     }
     else
     {
-        char c0, c1;
-
-        if (inactive == 0)
-        {
-            if (status.batteryFull) { c0 = OFF; c1 = WHITE; }       // full - flushed
-            else                    { c0 = OFF; c1 = YELLOW; }      // charging - flushed
-        }
-        else						// Red breath
-        {
-            if (status.batteryFull) { c0 = RED; c1 = WHITE; }       // full - unflushed
-            else                    { c0 = RED; c1 = YELLOW; }      // charging - unflushed
-        }
-        if (((unsigned char)(LEDTimer)) < ((LEDTimer) >> 8)) { LED_SET(LEDtoggle ? c1 : c0); } else { LED_SET(LEDtoggle ? c0 : c1); }
+        if (status.batteryFull) { LED_SET(LED_GREEN); }       // full - not enumerated
+        else                    { LED_SET(LED_YELLOW); }      // charging - not enumarated (could change to red if yellow-green contrast not strong enough)
     }
     return;
 }
@@ -317,16 +403,19 @@ typedef enum
 	STOP_NONE                   = 0,    // (not seen)
 	STOP_INTERVAL               = 1,    // Blue 0 ..
 	STOP_SAMPLE_LIMIT           = 2,    // Blue 1 -.-.
+	STOP_DISK_FULL              = 2,    // Blue 1 -.-. (same as sample limit)
 	NOT_STARTED_NO_INTERVAL     = 3,    // Blue 2 --.--.
 	NOT_STARTED_AFTER_INTERVAL  = 4,    // Blue 3 ---.---.
 	NOT_STARTED_SAMPLE_LIMIT    = 5,    // Blue 4 ----.----.
+	NOT_STARTED_DISK_FULL       = 5,    // Blue 4 ----.----. (same as sample limit)
 	NOT_STARTED_WAIT_USB        = 6,    // (not seen)
 	STOP_USB                    = 7,    // (not seen)
 	NOT_STARTED_INITIAL_BATTERY = 8,    // Red 0 ..
 	NOT_STARTED_WAIT_BATTERY    = 9,    // Red 1 -.-.
 	STOP_BATTERY                = 10,   // Red 2 --.--.
 	NOT_STARTED_FILE_OPEN       = 11,   // Red 3 ---.---.
-	STOP_LOGGING_ERROR          = 12,   // Red 4 ----.----.
+	STOP_LOGGING_WRITE_ERR      = 12,   // Red 4 ----.----. (not seen, restarted)
+	STOP_LOGGING_SAMPLE_ERR     = 13,   // Red 5 -----.-----. (not seen, restarted)
 } StopCondition;
 
 // Log entry strings
@@ -334,25 +423,26 @@ const char *stopConditionString[] =
 {
 	"STOP_NONE",                   // 0
 	"STOP_INTERVAL",               // 1
-	"STOP_SAMPLE_LIMIT",           // 2
+	"STOP_SAMPLE_LIMIT",           // 2 (or STOP_DISK_FULL)
 	"NOT_STARTED_NO_INTERVAL",     // 3
 	"NOT_STARTED_AFTER_INTERVAL",  // 4
-	"NOT_STARTED_SAMPLE_LIMIT",    // 5
+	"NOT_STARTED_SAMPLE_LIMIT",    // 5 (or NOT_STARTED_DISK_FULL)
 	"NOT_STARTED_WAIT_USB",        // 6
 	"STOP_USB",                    // 7
 	"NOT_STARTED_INITIAL_BATTERY", // 8
 	"NOT_STARTED_WAIT_BATTERY",    // 9
 	"STOP_BATTERY",                // 10
 	"NOT_STARTED_FILE_OPEN",       // 11
-	"STOP_LOGGING_ERROR",          // 12
+	"STOP_LOGGING_WRITE_ERR",      // 12
+	"STOP_LOGGING_SAMPLE_ERR",     // 13
 };
 
 // Flash codes
 const char stopFlashCode[] =
 {
-//     0,    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12
-//   off,  B:0,  B:1,  B:2,  B:3,  B:4,  B:5,  B:6,  R:0,  R:1,  R:2,  R:3,  R:4
-    0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x40, 0x41, 0x42, 0x42, 0x44
+//     0,    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13
+//   off,  B:0,  B:1,  B:2,  B:3,  B:4,  B:5,  B:6,  R:0,  R:1,  R:2,  R:3,  R:4,  R:5
+    0x00, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45
 };
 
 
@@ -362,12 +452,12 @@ void RunLogging(void)
     const char *filename = DEFAULT_FILE;
     StopCondition stopCondition = 0;
 
-    InitADCOn();
-    SampleADC();
+    AdcInit();
+    AdcSampleWait();
 
     SettingsIncrementLogValue(LOG_VALUE_RESTART);   // Increment restart counter
 
-    if (ADCresult[ADC_BATTERY] < MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE)
+    if (adcResult.batt < BATT_CHARGE_MIN_SAFE)
     {
         // Battery level insufficient to start logging -- error
         stopCondition = NOT_STARTED_INITIAL_BATTERY;
@@ -392,36 +482,44 @@ void RunLogging(void)
             while (restart != 1 && !stopCondition)
             {
                 unsigned int i;
+
+                // Reset SW-WDT
+                RtcSwwdtReset();
+
                 // Don't always perform the battery amd RTC checks
                 for (i = 0; i < 5; i++)
                 {
                     // Exit condition: USB connection
                     if (USB_BUS_SENSE) { stopCondition = NOT_STARTED_WAIT_USB; restart = 1; break; }
 
-                    if (settings.debuggingInfo >= 1 || status.debugFlashCount > 0) { LED_SET(YELLOW); if (status.debugFlashCount > 0) status.debugFlashCount--; Delay10us(5); }
-                    LED_SET(OFF);
+                    if (settings.debuggingInfo >= 1 || status.debugFlashCount > 0) { LED_SET(LED_YELLOW); if (status.debugFlashCount > 0) status.debugFlashCount--; Delay10us(5); }
+                    LED_SET(LED_OFF);
 
                     SystemPwrSave(WAKE_ON_WDT|WAKE_ON_USB|DONT_RESTORE_PERIPHERALS|ADC_POWER_DOWN|LOWER_PWR_SLOWER_WAKE|SAVE_INT_STATUS|ALLOW_VECTOR_ON_WAKE);
                 }
                 if (stopCondition) { break; }
 
                 //Delay10us(10);
-                InitADCOn();
-                SampleADC_noLDR();
+                AdcInit();
+                AdcSampleNow();
 
                 // Exit condition: Battery too low
-                if (ADCresult[ADC_BATTERY] < MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE) { stopCondition = NOT_STARTED_WAIT_BATTERY; break; }
+                if (adcResult.batt < BATT_CHARGE_MIN_SAFE) { stopCondition = NOT_STARTED_WAIT_BATTERY; break; }
 
                 // Exit condition: Start logging
                 if (RtcNow() >= settings.loggingStartTime) { break; }
             }
-            LED_SET(OFF);
+            LED_SET(LED_OFF);
         }
 
         // If battery not too low and USB not connected, start logging (we are after any delayed start time)
         if (restart != 1 && !stopCondition)
         {
-            if (!LoggerStart(filename))
+            if (FSDiskFree() == 0)
+            {
+	            stopCondition = NOT_STARTED_DISK_FULL;
+            }
+            else if (!LoggerStart(filename))
             {
 	            stopCondition = NOT_STARTED_FILE_OPEN;
             }
@@ -434,21 +532,24 @@ void RunLogging(void)
                 }
                 else
                 {
-	                // Enable precise RTC
-	                RtcInterruptOn(0);
-	
+                    int failCounter = 0;
+
 	                // Clear the data capture buffer
-	                DataClear();
+	                LoggerClear();
 	
 	                // Initialize the ADXL and enable ADXL interrupts
 	                AccelStartup(settings.sampleRate);
 	                AccelEnableInterrupts(ACCEL_INT_SOURCE_WATERMARK | ACCEL_INT_SOURCE_OVERRUN | ACCEL_INT_SOURCE_DOUBLE_TAP, 0x00);
+#ifdef USE_GYRO
+                    GyroStartupFifoInterrupts();
+#endif
 	
 	                // Logging loop
 	                while (restart != 1 && !stopCondition)
 	                {
 	                    unsigned short now;
-	
+                        short result;
+
 	                    // Exit condition: USB connection
 	                    if (USB_BUS_SENSE) { stopCondition = STOP_USB; restart = 1; break; }
 	
@@ -456,18 +557,28 @@ void RunLogging(void)
 	                    now = RtcSeconds();
 	
 	                    // Write sector (if enough data)
-	                    if (LoggerWrite())
+                        result = LoggerWrite();
+	                    if (result)
 	                    {
-	                        // We successfully wrote something, update 'last written' status
-	                        status.lastWrittenTicks = now;
+                            // We successfully sampled
+                            status.lastSampledTicks = now;
+
+                            // We successfully wrote something, update 'last written' status
+                            if (result > 0)
+                            {
+                                status.lastWrittenTicks = now;
+
+                                // Reset SW-WDT
+                                RtcSwwdtReset();
+                            }
 	
 	                        // Check if battery too low...
-	                        InitADCOn(); SampleADC_noLDR(); // (ADC was just updated by logger anyway)
-	                        if (ADCresult[ADC_BATTERY] < MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE)
+	                        AdcInit(); AdcSampleNow(); // (ADC was just updated by logger anyway)
+	                        if (adcResult.batt < BATT_CHARGE_MIN_SAFE)
 	                        {
 	                            // Get a second opinion to be certain and, if so, stop logging
-	                            InitADCOn(); SampleADC();
-	                            if (ADCresult[ADC_BATTERY] < MINIMUM_SAFE_BATTERY_RUNNING_VOLTAGE) { stopCondition = STOP_BATTERY; break; }
+	                            AdcInit(); AdcSampleNow();
+	                            if (adcResult.batt < BATT_CHARGE_MIN_SAFE) { stopCondition = STOP_BATTERY; break; }
 	                        }
 	
 	                        // If written required number of samples, stop logging
@@ -478,16 +589,51 @@ void RunLogging(void)
 	                    }
 	
 	                    // Status monitor
+	                    if (status.lastSampledTicks == 0x0000) { status.lastSampledTicks = now; }
 	                    if (status.lastWrittenTicks == 0x0000) { status.lastWrittenTicks = now; }
 	
-	                    // If not been able to write for 15 seconds, there's a Filesystem/Ftl/NAND problem, stop logging
-	                    if (now - status.lastWrittenTicks > 15) { stopCondition = STOP_LOGGING_ERROR; break; }
+                        if (now - status.lastSampledTicks > 15)
+                        {
+                            // If not been sampled enough for a sector for 15 seconds, there's an ADXL problem, log the error and restart
+                            failCounter++;
+                            if (failCounter > 5)
+                            {
+                                stopCondition = STOP_LOGGING_SAMPLE_ERR;
+                                restart = 1;
+                                break;
+                            }
+                        }
+                        else if (now - status.lastWrittenTicks > 30)
+                        {
+                            // If not been able to successfully write for 30 seconds, there may be a Filesystem/Ftl/NAND problem, stop logging
+                            failCounter++;
+                            if (failCounter > 5)
+                            {
+                                // If we detected a write problem and the disk is full, this is a valid stop reason, otherwise it's a write error
+                                if (FSDiskFree() == 0)
+                                {
+            	                    stopCondition = STOP_DISK_FULL;
+                                }
+                                else
+                                {
+                                    stopCondition = STOP_LOGGING_WRITE_ERR;
+                                    restart = 1;
+                                }
+                                break;
+                            }
+                        }
+                        else { failCounter = 0; }
 	
 	                    // Sleep until ADXL INT1, RTC, USB or WDT
+#ifdef USE_GYRO
+	                    SystemPwrSave(WAKE_ON_RTC|WAKE_ON_WDT|WAKE_ON_USB|WAKE_ON_ADXL1|WAKE_ON_GYRO2|WAKE_ON_TIMER1|ADC_POWER_DOWN|LOWER_PWR_SLOWER_WAKE|SAVE_INT_STATUS|ALLOW_VECTOR_ON_WAKE);
+#else
 	                    SystemPwrSave(WAKE_ON_RTC|WAKE_ON_WDT|WAKE_ON_USB|WAKE_ON_ADXL1|WAKE_ON_TIMER1|ADC_POWER_DOWN|LOWER_PWR_SLOWER_WAKE|SAVE_INT_STATUS|ALLOW_VECTOR_ON_WAKE);
+#endif
 	                    //Sleep();
 	                    //__builtin_nop();
 	                }
+
 				}
 	
                 LoggerStop();
@@ -496,10 +642,13 @@ void RunLogging(void)
     }
 
     // Blue while powering down (lowest power)
-    LED_SET(BLUE);
+    LED_SET(LED_BLUE);
 
     // Shutdown peripherals
     AccelStandby();
+#ifdef USE_GYRO
+    GyroStandby();
+#endif
     RtcInterruptOff();
     FtlShutdown();
 
@@ -507,7 +656,7 @@ void RunLogging(void)
     SettingsAddLogEntry(LOG_CATEGORY_STOP | (unsigned int)stopCondition, RtcNow(), stopConditionString[stopCondition]);
 
     // Turn off LEDs
-    LED_SET(OFF);
+    LED_SET(LED_OFF);
 
     // Sleep if not connected (and not restarting)
     if (restart != 1)
@@ -516,12 +665,18 @@ void RunLogging(void)
         led = (stopFlashCode[stopCondition] >> 4);
         countReset = stopFlashCode[stopCondition] & 0x0f;
         countdown = countReset;
+        if (settings.debuggingInfo == 0xff) { led = 0; }
         CLOCK_INTOSC(); // Lower power
         
         // Strobes LED every few seconds until connected
         while (restart != 1)
         {
             if (USB_BUS_SENSE) { restart = 1; break; }
+
+            // Reset SW-WDT
+            RtcSwwdtReset();
+
+// NOTE: RTC interrupts are now off, this assumes a WDT interval of 1 second.
             SystemPwrSave(WAKE_ON_WDT|LOWER_PWR_SLOWER_WAKE|WAKE_ON_USB|ADC_POWER_DOWN|ACCEL_POWER_DOWN|GYRO_POWER_DOWN|SAVE_INT_STATUS|ALLOW_VECTOR_ON_WAKE);
             //SystemPwrSave(WAKE_ON_WDT|WAKE_ON_BUTTON|WAKE_ON_USB|DONT_RESTORE_PERIPHERALS|ADC_POWER_DOWN|ACCEL_POWER_DOWN|GYRO_POWER_DOWN|LOWER_PWR_SLOWER_WAKE|SAVE_INT_STATUS);
 
@@ -538,7 +693,7 @@ void RunLogging(void)
                     Delay10us(3);
                     countdown = countReset;
                 }
-                LED_SET(OFF);
+                LED_SET(LED_OFF);
             }
         }
     }

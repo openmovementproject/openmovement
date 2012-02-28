@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,23 +24,28 @@
  */
 
 // Configuration settings, status and command handling
-// Dan Jackson, 2011
+// Dan Jackson, 2011-2012
 
 // Includes
-#include "Analogue.h"
+#include "HardwareProfile.h"
 #include <Compiler.h>
+#include <TimeDelay.h>
+#include "Peripherals/Analog.h"
 #include "Peripherals/Rtc.h"
 //#include "USB/USB.h"
 //#include "USB/usb_function_msd.h"
 //#include "USB/usb_function_cdc.h"
 #include "Ftl/FsFtl.h"
 #include "Peripherals/Accel.h"
+#ifdef USE_GYRO
+#include "Peripherals/Gyro.h"
+#endif
 #include "Peripherals/Rtc.h"
-#include "USB_CDC_MSD.h"
-#include "util.h"
+#include "Usb/USB_CDC_MSD.h"
+#include "Utils/Util.h"
 #include "Settings.h"
+#include "Utils/Fifo.h"
 #include "Logger.h"
-#include "Data.h"
 
 #define RAW_NAND_DEBUG
 #ifdef RAW_NAND_DEBUG
@@ -58,7 +63,7 @@
 #define LOG_ADDRESS  0x29C00ul
 //ROM BYTE __attribute__ ((address(LOG_ADDRESS),space(prog),aligned(ERASE_BLOCK_SIZE),section(".log" ),noload)) LogData[ERASE_BLOCK_SIZE];
 
-//#define SETTINGS_ADDRESS  0x29800ul
+#define SETTINGS_ADDRESS  0x29800ul
 //ROM BYTE __attribute__ ((address(SETTINGS_ADDRESS),space(prog),aligned(ERASE_BLOCK_SIZE),section(".settings" ),noload)) SettingsData[ERASE_BLOCK_SIZE];
 
 
@@ -82,7 +87,7 @@ unsigned short SettingsGetDeviceId(void)
 void SettingsSetDeviceId(unsigned short newId)
 {
     // Check voltage ok to program
-    if (ADCresult[ADC_BATTERY] < MINIMUM_UPDATE_LOG_VOLTAGE) { return; }
+    if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return; }
     // Fetch current id
     settings.deviceId = SettingsGetDeviceId();
     // If different, rewrite
@@ -110,7 +115,7 @@ unsigned short SettingsIncrementLogValue(unsigned int index)
     unsigned short value;
 
     // Check voltage ok to program
-    if (ADCresult[ADC_BATTERY] < MINIMUM_UPDATE_LOG_VOLTAGE) { return 0xffff; }
+    if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return 0xffff; }
 
     // Read existing data to RAM
     ReadProgram(LOG_ADDRESS, scratchBuffer, 512);
@@ -134,7 +139,7 @@ void SettingsAddLogEntry(unsigned short status, unsigned long timestamp, const c
     int len, i;
 
     // Check voltage ok to program
-    if (ADCresult[ADC_BATTERY] < MINIMUM_UPDATE_LOG_VOLTAGE) { return; }
+    if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return; }
 
     // Read existing data to RAM
     ReadProgram(LOG_ADDRESS, scratchBuffer, 512);
@@ -174,6 +179,41 @@ const char *SettingsGetLogEntry(int index, unsigned short *status, unsigned long
 }
 
 
+
+// Get a config value
+unsigned short SettingsGetConfigValue(unsigned int index)
+{
+    unsigned short value1 = 0xffff;
+    unsigned short value2 = 0xffff;
+    ReadProgram(SETTINGS_ADDRESS + (2 * index + 0) * sizeof(unsigned short), &value1, sizeof(unsigned short));
+    ReadProgram(SETTINGS_ADDRESS + (2 * index + 1) * sizeof(unsigned short), &value2, sizeof(unsigned short));
+    if (value1 == ~value2) { return value1; }
+    return 0xffff;
+}
+
+
+// Set a config value
+char SettingsSetConfigValue(unsigned int index, unsigned short value)
+{
+     // Read existing data to RAM
+    ReadProgram(SETTINGS_ADDRESS, scratchBuffer, 512);
+
+    // Update value
+    //oldValue = ((unsigned short *)scratchBuffer)[index];   // Retrieve
+    ((unsigned short *)scratchBuffer)[2 * index + 0] =  value;   // Store value
+    ((unsigned short *)scratchBuffer)[2 * index + 1] = ~value;   // Store second copy of inverted value
+
+    // Rewrite program memory from RAM
+    WriteProgramPage(SETTINGS_ADDRESS, scratchBuffer, 512);
+
+    // Check for mismatch
+    if (SettingsGetConfigValue(index) == value) { return 0; }
+
+    return 1;
+}
+
+
+
 // Reset settings from ROM
 void SettingsInitialize(void)
 {
@@ -203,23 +243,51 @@ void SettingsInitialize(void)
     
     // Status
     status.attached = 0;
-    status.initialBattery = ADCresult[ADC_BATTERY];
+    status.initialBattery = adcResult.batt;
 
     // Status: Logging
-    status.sequenceId = 0;
+    status.accelSequenceId = 0;
+    status.gyroSequenceId = 0;
     status.events = 0;
     status.sampleCount = 0;
+    status.lastSampledTicks = 0x0000;
     status.lastWrittenTicks = 0x0000;
     status.debugFlashCount = 0;
 
     // Status: attached
-    status.lockCode = 0x0000;
     status.batteryFull = 0;
     status.ledOverride = -1;
     status.diskMounted = 1;
     status.actionFlags = 0;
     status.actionCountdown = 0;
     status.stream = 0;
+
+    // Configuration
+    status.lockCode = 0x0000;
+    status.dataEcc = CONFIG_ECC_DEFAULT;
+
+    // "Initial lock" value
+    {
+        unsigned short code;
+        code = SettingsGetConfigValue(CONFIG_LOCK);
+        if (code != 0 && code != 0xffff)
+        {
+            status.lockCode = code;
+            status.diskMounted = 0; // Disk will be unmounted at start
+        }
+    }
+
+    // ECC
+    {
+        unsigned short value;
+        value = SettingsGetConfigValue(CONFIG_ECC);
+        if (value != 0xffff)
+        {
+            status.dataEcc = (char)value;
+        }
+    } 
+
+    
 }
 
 
@@ -258,18 +326,32 @@ char SettingsAction(char flags)
     {
         char wipe = 0, error = 0;
         static char volumeBuffer[13];
+        volumeBuffer[0]  = 'A';
+        volumeBuffer[1]  = 'X';
+        volumeBuffer[2]  = '3';
+        volumeBuffer[3]  = '0' + ((HARDWARE_VERSION >> 4) & 0x0f);
+        volumeBuffer[4]  = '0' + ((HARDWARE_VERSION     ) & 0x0f);
+        volumeBuffer[5]  = '_';
+        if (settings.deviceId == 0xffff)
+        {
+            volumeBuffer[6]  = '_';
+            volumeBuffer[7]  = '_';
+            volumeBuffer[8]  = '_';
+            volumeBuffer[9]  = '_';
+            volumeBuffer[10] = '_';
+            volumeBuffer[11] = '\0';
+        }
+        else
+        {
+            volumeBuffer[6]  = '0' + (settings.deviceId / 10000) % 10;
+            volumeBuffer[7]  = '0' + (settings.deviceId /  1000) % 10;
+            volumeBuffer[8]  = '0' + (settings.deviceId /   100) % 10;
+            volumeBuffer[9]  = '0' + (settings.deviceId /    10) % 10;
+            volumeBuffer[10] = '0' + (settings.deviceId        ) % 10;
+            volumeBuffer[11] = '\0';
+        }
 
-        volumeBuffer[0] = 'C';
-        volumeBuffer[1] = 'W';
-        volumeBuffer[2] = 'A';
-        volumeBuffer[3] = '0' + (settings.deviceId / 10000) % 10;
-        volumeBuffer[4] = '0' + (settings.deviceId /  1000) % 10;
-        volumeBuffer[5] = '0' + (settings.deviceId /   100) % 10;
-        volumeBuffer[6] = '0' + (settings.deviceId /    10) % 10;
-        volumeBuffer[7] = '0' + (settings.deviceId        ) % 10;
-        volumeBuffer[8] = '\0';
-
-        LED_SET(RED);
+        LED_SET(LED_RED);
         if (flags & ACTION_FORMAT_WIPE) { wipe = 1; }
         error |= FsFtlFormat(wipe, settings.deviceId, volumeBuffer);
         
@@ -283,7 +365,7 @@ char SettingsAction(char flags)
         {
 	        printf("FORMAT: Complete.\r\n"); 
 	    }
-        LED_SET(OFF);
+        LED_SET(LED_OFF);
     }
 
     if (flags & ACTION_CREATE)
@@ -314,12 +396,12 @@ char SettingsAction(char flags)
 }
 
 
-
 // Serial commands
 char SettingsCommand(const char *line, SettingsMode mode)
 {
     char locked = (mode == SETTINGS_USB) && (status.lockCode != 0x0000);
     if (line == NULL || strlen(line) == 0) { return 0; }
+	if (mode == SETTINGS_USB && status.stream) { status.stream = 0; }
 
     if (mode != SETTINGS_BATCH && strnicmp(line, "help", 4) == 0)
     {
@@ -352,34 +434,34 @@ char SettingsCommand(const char *line, SettingsMode mode)
         // Update ADC values
         if (z >= 0 && z <= 3)
         {
-            InitADCOn();
+            AdcInit();
             if (!z || z == 2)
-                SampleADC();
+                AdcSampleWait();
             else
-                SampleADC_noLDR();
+                AdcSampleNow();
         }
 
         if (!z || z == 1)
         {
             printf("$BATT=");
-            v = ADCresult[ADC_BATTERY];
-            printf("%u,%u,mV,%d,%d\r\n", v, BattConvert_mV(v), ConvertBattToPercentage(v), status.batteryFull);
+            v = adcResult.batt;
+            printf("%u,%u,mV,%d,%d\r\n", v, AdcBattToMillivolt(v), AdcBattToPercent(v), (status.batteryFull >= BATT_FULL_INTERVAL) ? 1 : 0);
             if (!z) USBCDCWait();
         }
 
         if (!z || z == 2)
         {
             printf("$LDR=");
-            v = ADCresult[ADC_LDR];
-            printf("%u,%u\r\n", v, LDRConvert_Lux(v));
+            v = adcResult.ldr;
+            printf("%u,%u\r\n", v, AdcLdrToLux(v));
             if (!z) USBCDCWait();
         }
 
         if (!z || z == 3)
         {
             printf("$TEMP=");
-            v = ADCresult[ADC_TEMP];
-            printf("%u,%d,0.1dC\r\n", v, TempConvert_TenthDegreeC(v));
+            v = adcResult.temp;
+            printf("%u,%d,0.1dC\r\n", v, AdcTempToTenthDegreeC(v));
             if (!z) USBCDCWait();
         }
 
@@ -392,14 +474,29 @@ char SettingsCommand(const char *line, SettingsMode mode)
             if (!z) USBCDCWait();
         }
 
+        
         if (!z || z == 5)
         {
-            short samples[3];
+            accel_t sample;
 
             printf("$ACCEL=");
-            AccelSingleSample(samples);
+            AccelSingleSample(&sample);
+            printf("%d,%d,%d\r\n", sample.x, sample.y, sample.z);
+            if (!z) USBCDCWait();
+        }
 
-            printf("%d,%d,%d\r\n", samples[0], samples[1], samples[2]);
+        if (!z || z == 5)
+        {
+#ifdef USE_GYRO
+            if (gyroPresent)
+            {
+                gyro_t sample;
+                GyroSingleSample(&sample);
+                printf("$GYRO=%d,%d,%d\r\n", sample.x, sample.y, sample.z);
+            }
+            else
+#endif
+            { printf("$GYRO=\r\n"); }
             if (!z) USBCDCWait();
         }
     }
@@ -602,7 +699,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
         {
             status.diskMounted = 0;
             status.actionFlags = flags | ACTION_REMOUNT;
-            status.actionCountdown = 2;
+            status.actionCountdown = 1;
             FSInit();
             printf("COMMIT: Delayed activation.\r\n");
         }
@@ -679,7 +776,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
                 }
                 
                 printf("ERROR: Problem reading logical sector %lu\r\n", sector);
-                hexdump(scratchBuffer, 0, MEDIA_SECTOR_SIZE);
+                printhexdump(scratchBuffer, 0, MEDIA_SECTOR_SIZE);
                 printf("ERROR%s\r\n", identical ? ",IDENTICAL" : (sequential ? ",SEQUENTIAL" : ""));
             }
             else
@@ -694,7 +791,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
                 }
                 
                 printf("READL=%lu\r\n", sector);
-                hexdump(scratchBuffer, 0, MEDIA_SECTOR_SIZE);
+                printhexdump(scratchBuffer, 0, MEDIA_SECTOR_SIZE);
                 printf("OK%s\r\n", identical ? ",IDENTICAL" : (sequential ? ",SEQUENTIAL" : ""));
             }
         }
@@ -756,7 +853,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
                 }
 
                 printf("READRAW=%lu\r\n", sector);
-                hexdump(scratchBuffer, 0, MEDIA_SECTOR_SIZE);
+                printhexdump(scratchBuffer, 0, MEDIA_SECTOR_SIZE);
                 printf("OK%s\r\n", identical ? ",IDENTICAL" : (sequential ? ",SEQUENTIAL" : ""));
             }
         }
@@ -831,13 +928,12 @@ char SettingsCommand(const char *line, SettingsMode mode)
     }
 #endif
     else if (strnicmp(line, "standby", 7) == 0) { printf("STANDBY=0\r\n"); }
-    else if (strnicmp(line, "stream", 9) == 0)
+    else if (strnicmp(line, "stream", 6) == 0)
     {
         if (locked) { printf("ERROR: Locked.\r\n"); }
         else
         {
             // Enable streaming
-            DataClear();
             status.stream = 1;
         }
     }
@@ -892,26 +988,35 @@ char SettingsCommand(const char *line, SettingsMode mode)
     else if (mode != SETTINGS_BATCH && strnicmp(line, "format", 6) == 0)
     {
         if (locked) { printf("ERROR: Locked.\r\n"); }
-        else if (line[6] != '\0' && (line[7] == 'Q' || line[7] == 'q' || line[7] == 'W' || line[7] == 'w'))
+        else if (line[6] != '\0' && (line[7] == 'Q' || line[7] == 'q' || line[7] == 'W' || line[7] == 'w' || line[7] == 'D' || line[7] == 'd'))
         {
-            char wipe = (line[7] == 'W' || line[7] == 'w') ? 1 : 0;
-            char flags = 0;
-            if (wipe) { flags |= ACTION_FORMAT_WIPE; }
-            else { flags |= ACTION_FORMAT_QUICK; }
-
-            if (line[8] == 'C' || line[8] == 'c') { flags |= ACTION_CREATE; } // Create data file with current settings
-
-            if (status.diskMounted && status.attached)
+            if (line[7] == 'd' || line[7] == 'D')
             {
-                status.diskMounted = 0;
-                status.actionFlags = flags | ACTION_REMOUNT;
-                status.actionCountdown = 2;
-                FSInit();
-                printf("FORMAT: Delayed activation.\r\n");
+                if (line[8] == '\0') { printf("FORMAT: Destroy.\r\n"); FtlDestroy(0); }
+                else if (line[8] == 'B') { printf("FORMAT: Destroy user-marked bad blocks.\r\n"); FtlDestroy(1); }
+                //else if (line[8] == '!') { printf("FORMAT: Destroy manufacturer-marked bad blocks.\r\n"); FtlDestroy(42); }   // this is a bad idea
             }
             else
             {
-                SettingsAction(flags);
+                char wipe = (line[7] == 'W' || line[7] == 'w') ? 1 : 0;
+                char flags = 0;
+                if (wipe) { flags |= ACTION_FORMAT_WIPE; }
+                else { flags |= ACTION_FORMAT_QUICK; }
+
+                if (line[8] == 'C' || line[8] == 'c') { flags |= ACTION_CREATE; } // Create data file with current settings
+
+                if (status.diskMounted && status.attached)
+                {
+                    status.diskMounted = 0;
+                    status.actionFlags = flags | ACTION_REMOUNT;
+                    status.actionCountdown = 2;
+                    FSInit();
+                    printf("FORMAT: Delayed activation.\r\n");
+                }
+                else
+                {
+                    SettingsAction(flags);
+                }
             }
         }
         else
@@ -971,22 +1076,61 @@ char SettingsCommand(const char *line, SettingsMode mode)
     }
     else if (strnicmp(line, "lock", 4) == 0)
     {
-        if (line[4] != '\0')
+        unsigned int i = 0xffff;
+
+        if ((line[4] == ':' || line[4] == '=' || line[4] == ' ') && (line[5] >= '0' && line[5] <= '9') && strlen(line) <= 10) // Slightly more careful parsing than usual
         {
-            unsigned int i = (unsigned int)my_atoi(line + 5);
-            if (i != 0xffff)
+            i = (unsigned int)my_atoi(line + 5);
+        }
+
+        if (i != 0xffff)
+        {
+            if (locked) { printf("ERROR: Locked.\r\n"); }
+            else
             {
-                if (locked) { printf("ERROR: Locked.\r\n"); }
-                else
+                status.lockCode = i;
+
+                if (mode != SETTINGS_BATCH)
                 {
-                    status.lockCode = i;
-                    if (mode != SETTINGS_BATCH) printf("LOCK=1\r\n");
+                    unsigned int lockStatus = 0;
+                    unsigned short iCode = SettingsGetConfigValue(CONFIG_LOCK);
+                    if (status.lockCode != 0x0000) { lockStatus += 1; }
+                    if (iCode != 0 && iCode != 0xffff) { lockStatus += 2; }
+                    printf("LOCK=%d\r\n", lockStatus);
                 }
             }
         }
         else
         {
-            if (locked) printf("LOCK=1\r\n"); else printf("LOCK=0\r\n");
+            unsigned int lockStatus = 0;
+            unsigned short iCode = SettingsGetConfigValue(CONFIG_LOCK);
+            if (status.lockCode != 0x0000) { lockStatus += 1; }
+            if (iCode != 0 && iCode != 0xffff) { lockStatus += 2; }
+            printf("LOCK=%d\r\n", lockStatus);
+        }
+    }
+    else if (strnicmp(line, "ilock", 5) == 0 && (mode != SETTINGS_BATCH))
+    {
+        unsigned int i = 0xffff;
+
+        if ((line[5] == ':' || line[5] == '=' || line[5] == ' ') && (line[6] >= '0' && line[6] <= '9') && strlen(line) <= 11) // Slightly more careful parsing than usual
+        {
+            i = (unsigned int)my_atoi(line + 6);
+        }
+
+        if (i != 0xffff)
+        {
+            if (locked) { printf("ERROR: Locked.\r\n"); }
+            else
+            {
+                SettingsSetConfigValue(CONFIG_LOCK, i);
+                if (i == 0) printf("ILOCK=0\r\n"); else printf("ILOCK=1\r\n");
+            }
+        }
+        else
+        {
+            unsigned short code = SettingsGetConfigValue(CONFIG_LOCK);
+            if (code == 0 || code == 0xffff) printf("ILOCK=0\r\n"); else printf("ILOCK=1\r\n");
         }
     }
     else if (strnicmp(line, "unlock", 6) == 0)
@@ -994,12 +1138,46 @@ char SettingsCommand(const char *line, SettingsMode mode)
         if (line[6] != '\0')
         {
             unsigned int i = (unsigned int)my_atoi(line + 7);
-            if (locked && i != status.lockCode) { printf("ERROR: Locked.\r\n"); }
+            if (locked && i != status.lockCode)
+            {
+                DelayMs(1000);
+                printf("ERROR: Locked.\r\n");
+            }
             else
             {
-                status.lockCode = 0x0000;
+                if (status.lockCode != 0x0000)
+                {
+                    unsigned short code = SettingsGetConfigValue(CONFIG_LOCK);
+                    status.lockCode = 0x0000;
+    
+                    // If we were initially locked, mount the drive
+                    if (code != 0 && code != 0xffff && !status.diskMounted)
+                    {
+        	            FtlFlush(0);
+                        status.diskMounted = 1;
+                    }
+                }
+
                 if (mode != SETTINGS_BATCH) printf("LOCK=0\r\n");
             }
+        }
+    }
+    else if (strnicmp(line, "ecc", 3) == 0)
+    {
+        if (line[3] != '\0')
+        {
+            if (locked) { printf("ERROR: Locked.\r\n"); }
+            else
+            {
+                unsigned int i = (unsigned int)my_atoi(line + 4);
+                status.dataEcc = i;
+                if (mode != SETTINGS_BATCH) { SettingsSetConfigValue(CONFIG_ECC, status.dataEcc); }
+                printf("ECC=%d\r\n", status.dataEcc);
+            }
+        }
+        else
+        {
+            printf("ECC=%d\r\n", status.dataEcc);
         }
     }
     else if (mode != SETTINGS_BATCH && strnicmp(line, "reset", 5) == 0)

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -70,7 +70,7 @@ In fsio.c, FILECreateHeadCluster(), comment out:
 #endif
 
 static MEDIA_INFORMATION mediaInformation; 		// Mchips MDD variable
-char fsftlUsbDiskMounted = 0;
+char fsftlUsbDiskMounted = 1;
 
 
 BYTE MDD_FTL_FSIO_MediaDetect(void)
@@ -121,21 +121,28 @@ BYTE MDD_FTL_InitIO(void)
 }
 
 
-BYTE MDD_FTL_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
+BYTE MDD_FTL_FSIO_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
 {
-	char ret;
-	if (sector_addr == 0 && !allowWriteToZero)
-	{
-		return 0;
-	}
+	if (sector_addr == 0 && !allowWriteToZero) { return 0; }
+	return FtlWriteSector(sector_addr, buffer, 1);
+}
+
+BYTE MDD_FTL_USB_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
+{
+	if (sector_addr == 0 && !allowWriteToZero) { return 0; }
 #ifdef FSFTL_READ_PREFETCH
     fsftlPrefetchSector = (DWORD)-1;
 #endif
-	ret = FtlWriteSector(sector_addr, buffer, 1);
-	return 1;		// Always return success
+	return FtlWriteSector(sector_addr, buffer, 1);
+	//return 1;		// Always return success
 }
 
-BYTE MDD_FTL_SectorRead(DWORD sector_addr, BYTE* buffer)
+BYTE MDD_FTL_FSIO_SectorRead(DWORD sector_addr, BYTE* buffer)
+{
+	return FtlReadSector(sector_addr, buffer);
+}
+
+BYTE MDD_FTL_USB_SectorRead(DWORD sector_addr, BYTE* buffer)
 {
 #ifdef FSFTL_READ_PREFETCH
     fsftlLastSector = sector_addr;
@@ -183,6 +190,7 @@ extern DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite);
 extern DIRENTRY LoadDirAttrib(FILEOBJ fo, WORD *fHandle);
 extern CETYPE CreateFileEntry(FILEOBJ fo, WORD *fHandle, BYTE mode, BOOL createFirstCluster);
 extern BYTE FormatFileName( const char* fileName, FILEOBJ fptr, BYTE mode);
+extern DWORD ReadFAT (DISK *dsk, DWORD ccls);
 
 // External FSIO Globals
 extern BYTE    FSerrno;                    	// Global error variable.  Set to one of many error codes after each function call.
@@ -335,7 +343,7 @@ int FSfflush(FSFILE   *fo)
 
 
 /*********************************************************************************
-	Modification of the microchip function FSfwrite by Karim Ladha, auto-flushing and ecc option added by Dan Jackson
+	Modification of the Microchip function FSfwrite by Karim Ladha, auto-flushing and ECC option added by Dan Jackson
   Function:
     size_t FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc)
   Summary:
@@ -462,6 +470,13 @@ BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc)
 	        	{error = FILEget_next_cluster( stream, 1);}	// find location in next cluster
 	    }
 	}
+
+	// Check for any errors so far
+	if(error != CE_GOOD)
+    {
+		return FALSE;
+	}
+
 end:
 // Now we own the data buffer, and it is flushed, and the file pointer
 // points to the start of an empty sector. We get the LBA of this sector first
@@ -472,30 +487,27 @@ end:
     l = Cluster2Sector(dsk,stream->ccls);
     l += (WORD)stream->sec;      // add the sector number to it
 
-	{
-		stream->pos = 0;// Set the new position to the end of the sector
-   		stream->seek+=(dsk->sectorSize);// Seek fwd 1 sector
-		stream->sec++;  				// point to the next sector in the file   
-		if(stream->flags.FileWriteEOF)  // If we are writing at the end then increment the EOF
-                stream->size+=(dsk->sectorSize);
-	}
-
 	// get a new cluster if necessary
-    if (stream->sec == dsk->SecPerClus)
+    if ((stream->sec + 1) == dsk->SecPerClus)
     {
 #ifdef FSFTL_SECTOR_FLUSH
 		unsigned short flushEveryNClusters = FSFTL_SECTOR_FLUSH * ((unsigned int)(65536UL / MEDIA_SECTOR_SIZE) / stream->dsk->SecPerClus);		// Flush every FSFTL_SECTOR_FLUSH * 64 kB, (128 sectors per 64kB)
 		if (flushEveryNClusters != 0)
 		{
-			unsigned long cluster = stream->seek / MEDIA_SECTOR_SIZE / stream->dsk->SecPerClus;
+			unsigned long cluster = (stream->seek + dsk->sectorSize) / MEDIA_SECTOR_SIZE / stream->dsk->SecPerClus;
 			flush = (char)(((cluster % flushEveryNClusters) == 0) ? (char)1 : (char)0);
 		}
 #endif
-        stream->sec = 0;
         if(stream->flags.FileWriteEOF)
         	{error = FILEallocate_new_cluster(stream, 0);} // add new cluster to the fill
         else
         	{error = FILEget_next_cluster( stream, 1);}	// find location in next cluster
+
+	    // Check for any errors so far
+	    if(error != CE_GOOD)
+        {
+		    return FALSE;
+	    }
     }
 
 	// Check for any errors so far
@@ -503,6 +515,14 @@ end:
     {
 		return FALSE;
 	}
+
+	stream->sec++;  				// point to the next sector in the file   
+	stream->pos = 0;// Set the new position to the end of the sector
+   	stream->seek+=(dsk->sectorSize);// Seek fwd 1 sector
+	if(stream->flags.FileWriteEOF)  // If we are writing at the end then increment the EOF
+            stream->size+=(dsk->sectorSize);
+
+    if (stream->sec == dsk->SecPerClus) stream->sec = 0;
 
 	// Now.....
 	//stream->Pos == SectorSize
@@ -524,6 +544,54 @@ end:
 	// Ignore 'ret', always return true
 	return TRUE;
 }
+
+
+// [dgj] Disk free function
+unsigned long FSDiskFree(void)
+{
+    DISK *disk;
+    DWORD numEmptyClusters = 0;
+    DWORD EndClusterLimit, ClusterFailValue;
+    DWORD c;
+
+    disk = &gDiskData;
+    switch (disk->type)
+    {
+#ifdef SUPPORT_FAT32
+        case FAT32:
+            EndClusterLimit = END_CLUSTER_FAT32;
+            ClusterFailValue = CLUSTER_FAIL_FAT32;
+            break;
+#endif
+        case FAT12:
+            EndClusterLimit = END_CLUSTER_FAT12;
+            ClusterFailValue = CLUSTER_FAIL_FAT16;
+            break;
+        case FAT16:
+        default:
+            EndClusterLimit = END_CLUSTER_FAT16;
+            ClusterFailValue = CLUSTER_FAIL_FAT16;
+            break;
+    }
+
+    // Scan through the FAT, counting empty clusters
+    for (c = 2; c < disk->maxcls+2; c++)
+    {
+        DWORD value;
+        
+        // Read FAT entry
+        value = ReadFAT(disk, c);
+
+        // Failed to read cluster or end cluster limit
+        if (value == ClusterFailValue || value == EndClusterLimit) { break; }
+
+        // If empty cluster found
+        if (value == CLUSTER_EMPTY) { numEmptyClusters++; }
+    }
+
+    return numEmptyClusters * disk->SecPerClus * disk->sectorSize;
+}
+
 
 
 // Get a character

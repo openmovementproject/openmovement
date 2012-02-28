@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -39,7 +39,7 @@
 
 #ifdef _WIN32
 	#ifdef _DEBUG
-		#define PRINT_LOG
+//		#define PRINT_LOG
 	#endif
 	#define PRINT_WARNINGS
 #else
@@ -294,10 +294,6 @@ char FtlReadSector(unsigned long sector, unsigned char *buffer)
 	unsigned char sectorInPage;
 	char found;
 
-#ifdef EMU_VISUALIZER
-EmuVisualizerUpdate(1, sector, 1, 2);
-#endif
-
 	// If uninitialized, return 0
 	if (!ftlContext.initialized)
 	{ 
@@ -318,6 +314,10 @@ EmuVisualizerUpdate(1, sector, 1, 2);
 		for (j = 0; j < FTL_SECTOR_SIZE; j++) { buffer[j] = 0xff; }
 		return 0; 
 	}
+
+#ifdef EMU_VISUALIZER
+EmuVisualizerUpdate(1, sector, 1, 2);
+#endif
 
 	// If the buffer has an owner (don't allow reading from a buffer open for writing), or if the current buffer doesn't match the requested block and page...
 	if (ftlContext.pageOwner >= 0 || ftlContext.currentBlock != logicalBlock || ftlContext.currentPage != logicalPage)

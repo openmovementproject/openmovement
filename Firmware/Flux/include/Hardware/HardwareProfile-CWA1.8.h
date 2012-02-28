@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Hardware profile for the CWA 1.8 (using PIC24FJ256GB106)
-// Karim Ladha, Dan Jackson, 2011
+// Karim Ladha, Dan Jackson, 2011-2012
 
 #ifndef HARDWAREPROFILE_CWA18_H
 #define HARDWAREPROFILE_CWA18_H
@@ -65,9 +65,6 @@
 // Essential Functions in HardwareProfile.c
 extern void WaitForPrecharge(void);
 extern void SystemPwrSave(unsigned long NapSetting);
-
-// LED Colours 0bRGB
-enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 
 	// Used for delays in TimeDelay.h
 	#define GetInstructionClock()  16000000
@@ -131,6 +128,7 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 	#define CLOCK_PLL() 	{\
 							OSCCONBITS OSCCONBITS_copy = OSCCONbits;\
 							asm("DISI #0x3FFF");\
+							CLKDIVbits.RCDIV = 0b000; 				/*8 MHz */\
 							OSCCONBITS_copy.NOSC = 0b001;			/*Internal FRC+PLL oscillator*/\
 							OSCCONBITS_copy.OSWEN = 1;\
 							__builtin_write_OSCCONH( ((unsigned char*)  &OSCCONBITS_copy)[1] );\
@@ -138,7 +136,6 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
 							asm("DISI #0");\
 							while (OSCCONbits.OSWEN == 1);\
 							while (OSCCONbits.LOCK != 1); 			/*Wait for PLL lock to engage*/\
-							CLKDIVbits.RCDIV = 0b000; 				/*8 MHz */\
 							}				
 
     // Clock: switch to 8 MHz INTOSC
@@ -191,6 +188,9 @@ enum { OFF, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, WHITE };
     #define LED_B     			LATBbits.LATB2
     #define LED_INIT_PINS()     {TRISB&=0b1111111100111011;LATF&=0b1111111100111011;}
 
+	// LED Colours 0bRGB (not to be confused with the LED output registers LED_R, LED_G, LED_B)
+	enum { LED_OFF, LED_BLUE, LED_GREEN, LED_CYAN, LED_RED, LED_MAGENTA, LED_YELLOW, LED_WHITE };
+	
     // LED set (0bRGB) - should compile to three bit set/clears with a static colour value
     #define LED_SET(_c) {\
                     if ((_c) & 0x4) { LED_R = 1; } else { LED_R = 0; } \

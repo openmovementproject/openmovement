@@ -93,6 +93,7 @@
 // Includes
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -112,7 +113,6 @@ extern "C" {
 #define OM_MAX_CDC_PATH 32      /**< The maximum string length of the CDC port.  e.g. "\\.\COM12345" + '\0' on Windows, or "/dev/tty.usbmodem12345" + '\0' */
 #define OM_MAX_MSD_PATH 64      /**< The maximum string length to the root of the MSD volume.  e.g. "\\?\Volume{abc12345-1234-1234-1234-123456789abc}\" + '\0'. */
 #define OM_DEFAULT_FILENAME "CWA-DATA.CWA"
-#define OM_MAX_PATH 256
 
 #define OM_MAX_RESPONSE_SIZE 256
 #define OM_DEFAULT_TIMEOUT 2000
@@ -138,6 +138,7 @@ typedef struct
     OM_DEVICE_STATUS deviceStatus;      /**< Current connection status for this device. */
     char port[OM_MAX_CDC_PATH];         /**< Address to access the serial port. */
     char root[OM_MAX_MSD_PATH];         /**< Mounted root of the file system. */
+    char dataFile[OM_MAX_PATH];         /**< Data filename. */
 
     int fd;                             /**< File descriptor for the serial port while open. The common portMutex is used to allow changes to this -- must hold to acquire or release the CDC port. */
 
@@ -163,8 +164,12 @@ typedef struct
     // Status
     int initialized;                    /**< API initialized flag */
     int apiVersion;                     /**< Requested API version number. Where supported, this can be used to emulate earlier behaviour. */
+    FILE *log;                          /**< Output log stream */
+    char logSet;                        /**< Flag indicating the log stream has been redirected */
 
     // Callbacks
+    OmLogCallback logCallback;          /**< User-supplied callback for log messages. */
+    void *logCallbackReference;         /**< User-supplied reference that will be passed to the log callback. */
     OmDeviceCallback deviceCallback;    /**< User-supplied callback for device changes. */
     void *deviceCallbackReference;      /**< User-supplied reference that will be passed to the device callback. */
     OmDownloadCallback downloadCallback;/**< User-supplied callback for download status changes. */
@@ -191,6 +196,8 @@ typedef struct
 extern OmState om;
 
 
+/** Log text to the current log stream. */
+int OmLog(const char *format, ...);
 
 /** Device discovery start */
 void OmDeviceDiscoveryStart(void);
@@ -219,18 +226,6 @@ int OmPortAcquire(unsigned short deviceId);
 
 /** Release a port */
 int OmPortRelease(unsigned short deviceId);
-
-/** Get data filename */
-int OmGetDataFilename(int deviceId, char *filenameBuffer);
-
-/**
- * Issues a command over the CDC port for a particular device.
- * Flushes any initial incoming data on the port.
- * Waits for a line with the specified response (until the timeout is hit).
- * If the response is found, and parsing is required (parseParts != NULL), it parses the response (at '=' and ',' places) up to 'parseMax' token.
- */
-int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize, const char *expected, unsigned int timeoutMs, char **parseParts, int parseMax);
-
 
 
 

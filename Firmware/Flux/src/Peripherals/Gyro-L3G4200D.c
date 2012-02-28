@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // gyro.c - L3G4200 Gyroscope interface.
-// Karim Ladha and Dan Jackson 2011.
+// Karim Ladha and Dan Jackson 2011-2012.
 // Adapted to be more user friendly, KL 01-12-11 
 
 
@@ -37,40 +37,44 @@
 // Defined in HW profile
 #ifdef USE_GYRO 
 
+char gyroPresent = 0;
+#define GYRO_DEVICE_ID 0xD3	/*Static responce*/
+
 #ifdef GYRO_I2C_MODE
+	// Needed, or else i2c.h fails
+	#define USE_AND_OR
+	#include "myI2C.h"
 
-	#include "Utils/swi2c.h"
-
-	#define GYRO_ADDRESS	0xD2
-	
-	#define GYRO_MASK_READ  0x01 /*I2C_READ_MASK*/
-	//#define GYRO_MASK_WRITE 0x00 /*OR to write - not needed*/
-	#define GYRO_MASK_BURST 0x80 
-	
+	#define LOCAL_I2C_RATE		((OSCCONbits.COSC==1)? 72 : 18)		/*200kHz for this device, controls baud*/
+	#define GYRO_ADDRESS		0xD2	/*I2C address*/
+	#define GYRO_MASK_READ  	0x01 	/*I2C_READ_MASK*/
+	#define GYRO_MASK_BURST		0		/*This allows the same code to be used for SPI routines on this device*/
+		
 	// I2C functions for using the GYRO.c code
-	#define GYROIdleI2C        myi2cIdle
-	#define GYROStartI2C       myi2cStart
-	#define GYROWriteI2C       myi2cputc
-	#define GYROStopI2C        myi2cStop
-	#define GYROAckI2C         myi2cAck
-	#define GYRONackI2C 	   myi2cNack
-	#define GYROReadI2C        myi2cgetc
-	#define GYRORestartI2C     myi2cRestart
-	// Not used
-	#define GYROWaitStartI2C()
-	#define GYROWaitStopI2C()  
-
-
-	// I2C - (OR register in GyroAddressX with GYRO_MASK_BURST)
-	#define GyroOpen()              GYROStartI2C(); GYROWaitStartI2C();
+	#define GYROIdleI2C        myI2CIdle
+	#define GYROStartI2C       myI2CStart
+	#define GYROWriteI2C       myI2Cputc
+	#define GYROStopI2C        myI2CStop
+	#define GYROAckI2C         myI2CAck
+	#define GYRONackI2C 	   myI2CNack
+	#define GYROReadI2C        myI2Cgetc
+	#define GYRORestartI2C     myI2CRestart
+	#define GYROOpenI2C()	   myI2COpen()
+	#define GYROWaitStartI2C()	WaitStartmyI2C()
+	#define GYROWaitStopI2C()  	WaitStopmyI2C()
+	#define GYROWaitRestartI2C() WaitRestartmyI2C()
+	#define GYROCloseI2C()		myI2CClose()
+	
+	// I2C - (OR register in GYROAddressX with GYRO_MASK_BURST)
+	#define GyroOpen()              GYROOpenI2C();GYROStartI2C(); GYROWaitStartI2C();
 	#define GyroAddressRead(_r)     GYROWriteI2C(GYRO_ADDRESS); GYROWriteI2C((_r)); GYRORestartI2C(); GYROWaitStartI2C(); GYROWriteI2C(GYRO_ADDRESS | GYRO_MASK_READ);
 	#define GyroAddressWrite(_r)    GYROWriteI2C(GYRO_ADDRESS); GYROWriteI2C((_r)); 
 	#define GyroReadContinue()      GYROReadI2C(); GYROAckI2C()
 	#define GyroReadLast()          GYROReadI2C(); GYRONackI2C()
 	#define GyroWrite(_v)           GYROWriteI2C((_v));
-	#define GyroClose()             GYROStopI2C(); GYROWaitStopI2C();
-	#define GyroReopen()            GYRORestartI2C(); GYROWaitStartI2C();
-
+	#define GyroClose()             GYROStopI2C(); GYROWaitStopI2C();GYROCloseI2C();
+	#define GyroReopen()            GYRORestartI2C(); GYROWaitRestartI2C()
+	
 #else
 
 	#ifdef USE_PIC18
@@ -131,14 +135,14 @@
 		#define GYRO_MASK_BURST            0x40 /*OR for burst*/
 		
 		// SPI - (OR register in GyroAddressX with GYRO_MASK_BURST)
-		#define GyroOpen()              OpenSPIGYRO(); GY_CS = 0;
+		#define GyroOpen()              OpenSPIGYRO(); GYRO_CS = 0;
 		#define GyroAddressRead(_r)     WriteSPIGYRO((_r) | GYRO_MASK_READ)
 		#define GyroAddressWrite(_r)    WriteSPIGYRO((_r))
 		#define GyroReadContinue()      ReadSPIGYRO()
 		#define GyroReadLast()          ReadSPIGYRO()
 		#define GyroWrite(_v)           WriteSPIGYRO((_v))
-		#define GyroClose()             GY_CS = 1; CloseSPIGYRO();
-		#define GyroReopen()			GY_CS = 1; Delay10us(1); GY_CS = 0;
+		#define GyroClose()             GYRO_CS = 1; CloseSPIGYRO();
+		#define GyroReopen()			GYRO_CS = 1; Delay10us(1); GYRO_CS = 0;
 		
 	#endif
 
@@ -176,30 +180,36 @@
 #define GYRO_INT1_DURATION 	0x38   // READ/WRITE, default=0b00000000
 
 
-unsigned char GyroReadDeviceId(void)
+unsigned char GyroVerifyDeviceId(void)
 {
 	unsigned char id;	
 	GyroOpen();	
 	GyroAddressRead(GYRO_WHO_AM_I);
 	id = GyroReadLast();
 	GyroClose();
-	return id;
+    gyroPresent = (id == GYRO_DEVICE_ID) ? 1 : 0;
+	return gyroPresent;
 }
 
 void GyroStartup(void)
 {
+    if (!gyroPresent) { return; }
 	GyroOpen();	
 	GyroAddressWrite(GYRO_CTRL_REG1 | GYRO_MASK_BURST);
-	GyroWrite(0b11111111);  // GYRO_CTRL_REG1 - full rate, full bw, no power down, all axis on
+	GyroWrite(0);			// GYRO_CTRL_REG1 - Device  off first
 	GyroWrite(0b00001001);  // GYRO_CTRL_REG2 - normal mode, minimal high pass filter
 	GyroWrite(0b00000000);  // GYRO_CTRL_REG3 - no interrupts selected, push pull o/p, active high
 	GyroWrite(0b00110000);  // GYRO_CTRL_REG4 - 4 wire SPI, normal data format, self test off, 2000dps
 	GyroWrite(0b00000000);  // GYRO_CTRL_REG5 - normal mode, FIFO off, high pass filt off
+	GyroReopen();
+	GyroAddressWrite(GYRO_CTRL_REG1 | GYRO_MASK_BURST);
+	GyroWrite(0b11111111);  // GYRO_CTRL_REG1 - full rate, full bw, no power down, all axis on
 	GyroClose();
 }
 
 void GyroStartupFifoInterrupts(void)
 {
+    if (!gyroPresent) { return; }
 	// Startup with fifo in stream mode
 	GyroOpen();	
 	GyroAddressWrite(GYRO_CTRL_REG1 | GYRO_MASK_BURST);
@@ -217,14 +227,16 @@ void GyroStartupFifoInterrupts(void)
 	GyroClose();
 	// Empty fifo
 	DelayMs(1);
-	GyroReadFIFO(NULL,32);
+	GyroReadFIFO(NULL, GYRO_MAX_FIFO_SAMPLES);
 	// Enable the data ready interrupt
-	GY_INT2_IF = 0;
-	GY_INT2_IE = 1;
+	GYRO_INT2_IP = GYRO_INT_PRIORITY;
+	GYRO_INT2_IF = 0;
+	GYRO_INT2_IE = 1;
 }
 
 void GyroStandby(void)
 {
+    if (!gyroPresent) { return; }
 	GyroOpen();	
 	GyroAddressWrite(GYRO_CTRL_REG1 | GYRO_MASK_BURST);
 	GyroWrite(0b00000000);  // GYRO_CTRL_REG1 - no axes enabled, power down mode, bandwidth and data rate (100 Hz ODR, 12.5 cut-off)
@@ -238,6 +250,7 @@ void GyroStandby(void)
 signed char GyroReadTemp(void)
 {
 	unsigned char temp;
+    if (!gyroPresent) { return -1; }
 	GyroOpen();	
 	GyroAddressRead(GYRO_OUT_TEMP);
 	temp = GyroReadLast();
@@ -247,27 +260,22 @@ signed char GyroReadTemp(void)
 
 void GyroSingleSample(gyro_t *value)
 {
+    if (!gyroPresent) { value->x = 0; value->y = 0; value->z = 0; return; }
 	GyroOpen();	
 	GyroAddressRead(GYRO_OUT_X_L | GYRO_MASK_BURST);
-	value->x = GyroReadContinue();
-	value->x |= ((unsigned int)GyroReadContinue()<<8);
-	value->y = GyroReadContinue();
-	value->y |= ((unsigned int)GyroReadContinue()<<8);
-	value->z = GyroReadContinue();
-	value->z |= ((unsigned int)GyroReadLast()<<8);
-
-#ifdef CONVERT_AXIS_CWA2	
-	// WAX+GYRO axis conversion (to match CWA2): Ax' = Ay, Ay' = Ax, Az' = -Az, Gx = -Gx, Gy = -Gy
-	value->x = -value->x;
-	value->y = -value->y;
-#endif
-	
+	value->xl = GyroReadContinue();
+	value->xh = GyroReadContinue();
+	value->yl = GyroReadContinue();
+	value->yh = GyroReadContinue();
+	value->zl = GyroReadContinue();
+	value->zh = GyroReadLast();
 	GyroClose();
 }
 
 unsigned char GyroReadFifoLength(void)
 {
 	unsigned char availableFifo;
+    if (!gyroPresent) { return 0; }
 	GyroOpen();	
 	GyroAddressRead(GYRO_FIFO_SRC_REG);
 	availableFifo = GyroReadLast();
@@ -282,7 +290,8 @@ unsigned char GyroReadFIFO(gyro_t *gyroBuffer, unsigned char maxEntries)
 	unsigned char availableFifo;
 	unsigned char numRead;
 	unsigned char *p;
-	int i;
+
+    if (!gyroPresent) { return 0; }
 
     // Check if we have any room to fit
     if (maxEntries == 0) { return 0; }
@@ -376,5 +385,5 @@ void GyroReadRegisters(unsigned char reg, unsigned char count, unsigned char *bu
 }
 
 #else
-	#warning "You compiled this .c file but didn't enable the gyro in HW profile"
+//	#warning "You compiled this .c file but didn't enable the gyro in HW profile"
 #endif

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -24,7 +24,7 @@
  */
 
 // Real Time Clock
-// Karim Ladha, Dan Jackson, 2011
+// Karim Ladha, Dan Jackson, 2011-2012
 
 #ifndef _RTC_H
 #define _RTC_H
@@ -77,6 +77,9 @@ void RtcStartup(void);
 
 // Reads the current (cached) date/time (interrupts enabled)
 DateTime RtcNow(void);
+
+// Calibrate the RCT to speed up (+ive value) or slow down (-ive value) - send signed int in ppm
+void RtcCal(signed short);
 
 // Reads the current (cached) date/time (interrupts enabled) and a fractional part of a second (1/65536th of a second)
 DateTime RtcNowFractional(unsigned short *fractional);
@@ -147,6 +150,19 @@ inline void RtcTasks(void);
 //extern void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void)
 // (internal update function)
 inline char RtcTimerTasks(void);
+
+#ifdef RTC_SWWDT
+volatile unsigned int rtcSwwdtValue = 0;
+#endif
+
+#define RTC_SWWDT
+#ifdef RTC_SWWDT
+#define RTC_SWWDT_TIMEOUT 55
+extern volatile unsigned int rtcSwwdtValue;
+// These functions are actually defines to ensure they're actually inline
+#define RtcSwwdtReset() { rtcSwwdtValue = 0; }
+#define RtcSwwdtIncrement() { if (++rtcSwwdtValue >= RTC_SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); Reset(); } }
+#endif
 
 
 #endif

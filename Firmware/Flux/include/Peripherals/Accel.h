@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2011, Newcastle University, UK.
+ * Copyright (c) 2009-2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,15 +23,23 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// accel.c - ADXL345 accelerometer interface
-// Dan Jackson, Karim Ladha, Cas Ladha, 2010-2011.
+// accel - xxxx.c - accelerometer interface
+// Dan Jackson, Karim Ladha, Cas Ladha, 2010-2012.
+// KL 01-01-2012, changed to select #defines based on hw profile selection
+// left default to adxl for compatibility
 
 
 #ifndef ACCEL_H
 #define ACCEL_H
+#include "HardwareProfile.h"
 
+/*Default settings - legacy*/
+// Default settings
+#define ACCEL_DEFAULT_RATE      (ACCEL_RATE_100 | ACCEL_RANGE_8G)   // ACCEL_RATE_LOW_POWER
+#define ACCEL_DEFAULT_WATERMARK 25          // up to 31
 
-// ADXL sampling rate codes (current shown as normal / low-power mode)
+/*For all accelerometers*/
+// Accelerometer sampling rate codes (current shown as normal / low-power mode)
 #define ACCEL_RATE_3200     0x0f    // 145 uA (no low-power mode)
 #define ACCEL_RATE_1600     0x0e    // 100 uA (no low-power mode)
 #define ACCEL_RATE_800      0x0d    // 145 uA (no low-power mode)
@@ -42,13 +50,11 @@
 #define ACCEL_RATE_25       0x08    //  65 uA /  40 uA
 #define ACCEL_RATE_12_5     0x07    //  55 uA /  40 uA
 #define ACCEL_RATE_6_25     0x06    //  40 uA (no low-power mode)
-
-// Sampling rate modifiers
-#define ACCEL_RATE_NORMAL   0x00    // Normal mode
-#define ACCEL_RATE_LOW_POWER 0x10   // Low-power mode, only valid for rates from 12.5 Hz - 400 Hz
+#define ACCEL_RATE_3_125	0x05
+#define ACCEL_RATE_1_56		0x04
 
 // In this API, the top two bits of the sampling rate value are used to determine the acceleromter's range.
-// (For backwards compatibility we treat the top two bits as the reverse of the ADXL's internal range values)
+// (For backwards compatibility we treat the top two bits as the reverse of the ADXL345's internal range values)
 // 0=±16g, 1=±8g, 2=±4g, 3=±2g
 #define ACCEL_RANGE_16G     0x00
 #define ACCEL_RANGE_8G      0x40
@@ -60,56 +66,86 @@
 #define ACCEL_IS_VALID_RATE(_v)        (((_v & 0x3f) >= 0x6 && (_v & 0x3f) <= 0xf) || ((_v & 0x3f) >= 0x17 && (_v & 0x3f) <= 0x1c))
 #define ACCEL_IS_LOW_POWER_RATE(_v)    ((_v & 0x3f) & 0x10)
 
-// Default settings
-#define ACCEL_DEFAULT_RATE      (ACCEL_RATE_100 | ACCEL_RANGE_8G)   // ACCEL_RATE_LOW_POWER
-#define ACCEL_DEFAULT_WATERMARK 25          // up to 31
 
+#ifdef ACCEL_MMA8451Q
+	/*For the MMA8451Q*/
+	// Defines
+	#define ACCEL_BYTES_PER_SAMPLE 6
+	#define ACCEL_MAX_FIFO_SAMPLES  (32)
+	// Interrupt source masks
+	#define ACCEL_INT_SOURCE_INACTIVITY   0x80
+	#define ACCEL_INT_SOURCE_WATERMARK    0x40
+	#define ACCEL_INT_SOURCE_ORIENTATION  0x20
+	#define ACCEL_INT_SOURCE_ACTIVITY     0x10
+	#define ACCEL_INT_SOURCE_TAP   		  0x08
+	#define ACCEL_INT_SOURCE_SINGLE_TAP   0x08
+	#define ACCEL_INT_SOURCE_DOUBLE_TAP   0x08
+	#define ACCEL_INT_SOURCE_FREE_FALL    0x04
+	#define ACCEL_INT_SOURCE_DATA_READY   0x01 // per sample!
 
-#define ACCEL_INT_SOURCE_DATA_READY   0x80
-#define ACCEL_INT_SOURCE_SINGLE_TAP   0x40
-#define ACCEL_INT_SOURCE_DOUBLE_TAP   0x20
-#define ACCEL_INT_SOURCE_ACTIVITY     0x10
-#define ACCEL_INT_SOURCE_INACTIVITY   0x08
-#define ACCEL_INT_SOURCE_FREE_FALL    0x04
-#define ACCEL_INT_SOURCE_WATERMARK    0x02
-#define ACCEL_INT_SOURCE_OVERRUN      0x01
+	#define ACCEL_INT_SOURCE_OVERRUN	0x00 //Not used
 
+#else //defined(ACCEL_ADXL345)
+	/*For the ADXL345*/
+	// Defines
+	#define ACCEL_BYTES_PER_SAMPLE 6
+	#define ACCEL_MAX_FIFO_SAMPLES  (32)
+	
+	// Sampling rate modifiers
+	#define ACCEL_RATE_NORMAL   0x00    // Normal mode
+	#define ACCEL_RATE_LOW_POWER 0x10   // Low-power mode, only valid for rates from 12.5 Hz - 400 Hz
+	
+	// Interrupt source masks
+	#define ACCEL_INT_SOURCE_DATA_READY   0x80
+	#define ACCEL_INT_SOURCE_SINGLE_TAP   0x40
+	#define ACCEL_INT_SOURCE_DOUBLE_TAP   0x20
+	#define ACCEL_INT_SOURCE_ACTIVITY     0x10
+	#define ACCEL_INT_SOURCE_INACTIVITY   0x08
+	#define ACCEL_INT_SOURCE_FREE_FALL    0x04
+	#define ACCEL_INT_SOURCE_WATERMARK    0x02
+	#define ACCEL_INT_SOURCE_OVERRUN      0x01
 
-#define ACCEL_BYTES_PER_SAMPLE 6
-#define ACCEL_MAX_FIFO_SAMPLES  (32)
-#define ACCEL_MAX_FIFO_BYTES    (ACCEL_MAX_FIFO_SAMPLES * ACCEL_BYTES_PER_SAMPLE)
+#endif
 
+// Globals..
+extern char accelPresent;       // Accelerometer present (call AccelVerifyDeviceId() once to set this)
 
-// Types
-typedef struct
+// Data types
+typedef union
 {
-	int x; int y; int z;
-}accel_t;
+    struct { short x, y, z; };
+    struct { unsigned char xl, xh, yl, yh,  zl, zh; };
+    short values[3];
+} accel_t;
+
+// Prototypes..
 
 // Read device ID (should be ACCEL_DEVICE_ID = 0xE5)
-#define ACCEL_DEVICE_ID 0xE5
-unsigned char AccelReadDeviceId(void);
+unsigned char AccelVerifyDeviceId(void);
 
-// Initialize the ADXL
-extern void AccelStartup(unsigned char samplingRate);					
+// Initialize the accelerometer
+extern void AccelStartup(unsigned char setting);					
 
-// Shutdown the ADXL (standby mode)
+// Shutdown the accelerometer (standby mode)
 extern void AccelStandby(void);
 
 // Enable interrupts
 void AccelEnableInterrupts(unsigned char flags, unsigned char pinMask);
 
-// Reads a 3-axis value from the ADXL into the specified address.
-extern void AccelSingleSample(short *value);
+// Reads a 3-axis value from the accelerometer into the specified address.
+extern void AccelSingleSample(accel_t *value);
 
 // Read FIFO queue length
 extern unsigned char AccelReadFifoLength(void);
 
-// Reads the ADXL FIFO (bytes = ADXL_BYTES_PER_SAMPLE * entries)
-extern unsigned char AccelReadFIFO(short *buffer, unsigned char maxEntries);
+// Reads the accelerometer FIFO (bytes = ADXL_BYTES_PER_SAMPLE * entries)
+extern unsigned char AccelReadFIFO(accel_t *buffer, unsigned char maxEntries);
 
 // Read tap status - b0 = Tap-Z
 extern unsigned char AccelReadTapStatus(void);
+
+// Read the orientation of the device - on supported hardware
+unsigned char AccelReadOrientaion(void);
 
 // Read interrupt source - b1 = watermark, b5=double-tap, b6=single-tap
 extern unsigned char AccelReadIntSource(void);
