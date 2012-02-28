@@ -267,8 +267,19 @@ OM_EXPORT int OmSetLogStream(int fd);
  * Called for API log messages.
  * Callback functions take a user-defined reference pointer, and a log message.
  * @see OmSetLogCallback
+ * @since 1.2
  */
 typedef void(*OmLogCallback)(void *, const char *);
+
+
+/**
+ * Sets the callback function that is called whenever an API log message is written.
+ * @param logCallback The function to call when a log message is written, or \a NULL to remove the callback.
+ * @param[in] reference  A user-defined reference to pass to the callback function (or \a NULL if unwanted).
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @since 1.2
+ */
+OM_EXPORT int OmSetLogCallback(OmLogCallback logCallback, void *reference);
 
 
 /**
