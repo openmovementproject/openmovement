@@ -130,6 +130,7 @@ Functions</h2></td></tr>
 <tr class="memitem:ga782201920a152ac053bb1c7957d15742"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga782201920a152ac053bb1c7957d15742">OmStartup</a> (int version)</td></tr>
 <tr class="memitem:ga93f9149aada32ac42fc9a082312c236b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga93f9149aada32ac42fc9a082312c236b">OmShutdown</a> (void)</td></tr>
 <tr class="memitem:ga83e3a6aa8ddeda0506884ed35c65620a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga83e3a6aa8ddeda0506884ed35c65620a">OmSetLogStream</a> (int fd)</td></tr>
+<tr class="memitem:ga64aa6b3ea6c0935dd1aade482c2f6689"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga64aa6b3ea6c0935dd1aade482c2f6689">OmSetLogCallback</a> (<a class="el" href="group__api__init.html#gacb0e5b28fec48c86ed2eb35af5aaa89a">OmLogCallback</a> logCallback, void *reference)</td></tr>
 <tr class="memitem:ga3ae947ab7a9580b19126d481248cf8a1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga3ae947ab7a9580b19126d481248cf8a1">OmSetDeviceCallback</a> (<a class="el" href="group__api__init.html#ga40563cf3fea2f2743b14cc4fbc8bbb27">OmDeviceCallback</a> deviceCallback, void *reference)</td></tr>
 <tr class="memitem:ga46854000fee82fa6555bbf5762dd74c3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga46854000fee82fa6555bbf5762dd74c3">OmGetDeviceIds</a> (int *deviceIds, int maxDevices)</td></tr>
 </table>
@@ -175,7 +176,7 @@ Functions</h2></td></tr>
 <p>Called for device addition or removal. Callback functions take a user-defined reference pointer, a device ID, and a state code. </p>
 <dl class="section see"><dt>See also:</dt><dd><a class="el" href="group__api__init.html#ga3ae947ab7a9580b19126d481248cf8a1" title="Sets the callback function that is called whenever a device is added or removed.">OmSetDeviceCallback</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l00291">291</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l00302">302</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -192,9 +193,10 @@ Functions</h2></td></tr>
 
 <p>Log callback function type. </p>
 <p>Called for API log messages. Callback functions take a user-defined reference pointer, and a log message. </p>
-<dl class="section see"><dt>See also:</dt><dd>OmSetLogCallback </dd></dl>
+<dl class="section see"><dt>See also:</dt><dd><a class="el" href="group__api__init.html#ga64aa6b3ea6c0935dd1aade482c2f6689" title="Sets the callback function that is called whenever an API log message is written.">OmSetLogCallback</a> </dd></dl>
+<dl class="section since"><dt>Since:</dt><dd>1.2 </dd></dl>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l00271">271</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l00272">272</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -223,7 +225,7 @@ Functions</h2></td></tr>
 </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l00278">278</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l00289">289</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -313,6 +315,44 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ga64aa6b3ea6c0935dd1aade482c2f6689"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="group__api__init.html#ga64aa6b3ea6c0935dd1aade482c2f6689">OmSetLogCallback</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__api__init.html#gacb0e5b28fec48c86ed2eb35af5aaa89a">OmLogCallback</a>&#160;</td>
+          <td class="paramname"><em>logCallback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>reference</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Sets the callback function that is called whenever an API log message is written. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">logCallback</td><td>The function to call when a log message is written, or <em>NULL</em> to remove the callback. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">reference</td><td>A user-defined reference to pass to the callback function (or <em>NULL</em> if unwanted). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns:</dt><dd><em>OM_OK</em> if successful, an error code otherwise. </dd></dl>
+<dl class="section since"><dt>Since:</dt><dd>1.2 </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ga83e3a6aa8ddeda0506884ed35c65620a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -383,7 +423,7 @@ Once called, functions that require <a class="el" href="group__api__init.html#ga
 
 <p>Initializes the Open Movement API. </p>
 <p>Allocates required resources for the API, initializes its state, and initiates device discovery. </p>
-<dl class="section note"><dt>Note:</dt><dd><a class="el" href="group__api__init.html#ga782201920a152ac053bb1c7957d15742" title="Initializes the Open Movement API.">OmStartup()</a> Must be called before most other functions in the API. Exceptions are: <a class="el" href="group__api__init.html#ga83e3a6aa8ddeda0506884ed35c65620a" title="Sets the stream to use for log messages.">OmSetLogStream()</a>, OmSetLogCallback(), <a class="el" href="group__return__codes.html#gacf8cd8926d77b109158af0b72f38f166" title="Returns an error string for the specified API return code.">OmErrorString()</a>, <a class="el" href="group__api__init.html#ga3ae947ab7a9580b19126d481248cf8a1" title="Sets the callback function that is called whenever a device is added or removed.">OmSetDeviceCallback()</a>, <a class="el" href="group__data__download.html#ga71136c4df0b0b7260786ba56b84be447" title="Sets the callback function that is called for download progress, completion, cancellation, or failure.">OmSetDownloadCallback()</a>, and all <em>OmReaderXXX()</em> functions. </dd>
+<dl class="section note"><dt>Note:</dt><dd><a class="el" href="group__api__init.html#ga782201920a152ac053bb1c7957d15742" title="Initializes the Open Movement API.">OmStartup()</a> Must be called before most other functions in the API. Exceptions are: <a class="el" href="group__api__init.html#ga83e3a6aa8ddeda0506884ed35c65620a" title="Sets the stream to use for log messages.">OmSetLogStream()</a>, <a class="el" href="group__api__init.html#ga64aa6b3ea6c0935dd1aade482c2f6689" title="Sets the callback function that is called whenever an API log message is written.">OmSetLogCallback()</a>, <a class="el" href="group__return__codes.html#gacf8cd8926d77b109158af0b72f38f166" title="Returns an error string for the specified API return code.">OmErrorString()</a>, <a class="el" href="group__api__init.html#ga3ae947ab7a9580b19126d481248cf8a1" title="Sets the callback function that is called whenever a device is added or removed.">OmSetDeviceCallback()</a>, <a class="el" href="group__data__download.html#ga71136c4df0b0b7260786ba56b84be447" title="Sets the callback function that is called for download progress, completion, cancellation, or failure.">OmSetDownloadCallback()</a>, and all <em>OmReaderXXX()</em> functions. </dd>
 <dd>
 If the <em>OmDeviceCallback</em> has already been set, it will be called for all devices identified at start-up. </dd>
 <dd>
@@ -404,7 +444,7 @@ Once successfully initialized, the caller must call <a class="el" href="group__a
   <div id="nav-path" class="navpath">
     <ul>
 
-    <li class="footer"><!-- Generated on Tue Feb 28 2012 22:33:02 for OMAPI by -->
+    <li class="footer"><!-- Generated on Tue Feb 28 2012 23:02:38 for OMAPI by -->
     <a href="http://www.doxygen.org/index.html">doxygen</a> 1.8.0 </li>
    </ul>
  </div>

@@ -142,7 +142,7 @@ Data Fields</h2></td></tr>
 <div class="textblock"><p>Internal structure of a binary file data block. </p>
 <p>This structure would not typically be used by an API client. </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01108">1108</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01119">1119</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 </div><hr/><h2>Field Documentation</h2>
 <a class="anchor" id="ab60186c8e4a2fbf7fbb3cf84e2c81e94"></a>
 <div class="memitem">
@@ -157,7 +157,7 @@ Data Fields</h2></td></tr>
 
 <p>@23 +1 Last recorded battery level in raw units, 0 = unknown </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01119">1119</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01130">1130</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -174,7 +174,7 @@ Data Fields</h2></td></tr>
 
 <p>@510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01125">1125</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01136">1136</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -191,7 +191,7 @@ Data Fields</h2></td></tr>
 
 <p>@ 4 +2 Device identifier, 0 = unknown </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01112">1112</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01123">1123</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -208,7 +208,7 @@ Data Fields</h2></td></tr>
 
 <p>@22 +1 Event flags since last packet, b0 = resume logging, b1 = single-tap event, b2 = double-tap event, b3-b7 = reserved for diagnostic use) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01118">1118</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01129">1129</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -225,7 +225,7 @@ Data Fields</h2></td></tr>
 
 <p>@18 +2 Last recorded light sensor value in raw units, 0 = none </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01116">1116</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01127">1127</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -242,7 +242,7 @@ Data Fields</h2></td></tr>
 
 <p>@25 +1 0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01121">1121</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01132">1132</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -259,7 +259,7 @@ Data Fields</h2></td></tr>
 
 <p>@ 0 +2 ASCII "AX", little-endian (0x5841) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01110">1110</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01121">1121</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -276,7 +276,7 @@ Data Fields</h2></td></tr>
 
 <p>@ 2 +2 Packet length (508 bytes, with header (4) = 512 bytes total) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01111">1111</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01122">1122</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -294,7 +294,7 @@ Data Fields</h2></td></tr>
 <p>@30 +480 Raw sample data. </p>
 <p>Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01124">1124</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01135">1135</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -311,7 +311,7 @@ Data Fields</h2></td></tr>
 
 <p>@28 +2 Number of accelerometer samples (80 or 120) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01123">1123</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01134">1134</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -328,7 +328,7 @@ Data Fields</h2></td></tr>
 
 <p>@24 +1 Sample rate code, (3200/(1&lt;&lt;(15-(rate &amp; 0x0f)))) Hz </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01120">1120</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01131">1131</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -345,7 +345,7 @@ Data Fields</h2></td></tr>
 
 <p>@10 +4 Sequence counter, each packet has a new number (reset if restarted) </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01114">1114</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01125">1125</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -362,7 +362,7 @@ Data Fields</h2></td></tr>
 
 <p>@ 6 +4 Unique session identifier, 0 = unknown </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01113">1113</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01124">1124</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -379,7 +379,7 @@ Data Fields</h2></td></tr>
 
 <p>@20 +2 Last recorded temperature sensor value in raw units, 0 = none </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01117">1117</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01128">1128</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -396,7 +396,7 @@ Data Fields</h2></td></tr>
 
 <p>@14 +4 Last reported RTC value, 0 = unknown </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01115">1115</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01126">1126</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -413,7 +413,7 @@ Data Fields</h2></td></tr>
 
 <p>@26 +2 Relative sample index from the start of the buffer where the whole-second timestamp is valid </p>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01122">1122</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01133">1133</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -423,7 +423,7 @@ Data Fields</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html">OM_READER_DATA_PACKET</a>      </li>
 
-    <li class="footer"><!-- Generated on Tue Feb 28 2012 22:33:02 for OMAPI by -->
+    <li class="footer"><!-- Generated on Tue Feb 28 2012 23:02:38 for OMAPI by -->
     <a href="http://www.doxygen.org/index.html">doxygen</a> 1.8.0 </li>
    </ul>
  </div>

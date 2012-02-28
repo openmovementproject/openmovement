@@ -86,6 +86,7 @@ var omapi_8h =
     [ "OmSetEcc", "group__device__status.html#ga0190e53ce5c6e2a951c1e5411698ea7a", null ],
     [ "OmSetLed", "group__device__status.html#gae974d7eec0b9c41a1251dfa63d4ec671", null ],
     [ "OmSetLock", "group__device__status.html#gaee8090cd743c037030b94fd9532f09f2", null ],
+    [ "OmSetLogCallback", "group__api__init.html#ga64aa6b3ea6c0935dd1aade482c2f6689", null ],
     [ "OmSetLogStream", "group__api__init.html#ga83e3a6aa8ddeda0506884ed35c65620a", null ],
     [ "OmSetMetadata", "group__settings.html#gac706936179db9a75f27d2ee71361a522", null ],
     [ "OmSetSessionId", "group__settings.html#ga17e5d4d0d4c5a4f78d2b61bcf633fcd5", null ],
