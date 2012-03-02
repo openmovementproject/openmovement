@@ -17,14 +17,15 @@ Some of these utilities require the [http://www.microsoft.com/download/en/detail
 
   * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Utils-Win-2.zip AX3 Utilities r2 (Windows)]
   * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-Utils-Win.zip WAX3 Utilities (Windows)]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-GUI-beta-1.zip AX3 GUI Beta 1 (Windows)]
 
 Drivers:
 
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Driver-Win.zip AX3 Driver (Windows)]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Driver-Win-2.zip AX3 Driver (Windows) r2]
   * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-Driver-Win.zip WAX3 Driver (Windows)]
 
 
 == Firmware Binaries ==
 
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.6-Firmware-29.zip AX3 r1.6 Firmware 29]
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-29.zip AX3 r1.7 Firmware 29]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.6-Firmware-30.zip AX3 r1.6 Firmware 30]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-30.zip AX3 r1.7 Firmware 30]
