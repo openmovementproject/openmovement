@@ -1,6 +1,6 @@
 #summary Open Movement Downloads
 
-= Downloads =
+= [Downloads] =
 
 Open Movement is an open source project.  To get your hand on the source for the *software*, *firmware*, *hardware*, or *mechanical* aspects of the devices, see:
   * [Source Source page].
