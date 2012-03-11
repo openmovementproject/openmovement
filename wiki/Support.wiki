@@ -1,4 +1,4 @@
-= Support and Issues =
+= [Support Support and Issues] =
 
    * [http://code.google.com/p/openmovement/issues/list Issue tracker]
    * [http://code.google.com/p/openmovement/wiki/Documentation?tm=6 Documentation]

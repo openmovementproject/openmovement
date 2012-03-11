@@ -1,6 +1,6 @@
 #summary Open Movement Source
 
-= Source =
+= [Source] =
 
 To get your hand on the source for the *software*, *firmware*, *hardware*, or *mechanical* aspects of the devices:
   * [http://code.google.com/p/openmovement/source/browse/#svn%2Ftrunk Browse the source code]
