@@ -11,9 +11,15 @@ The AX3 appears as a USB device with two interfaces: a standard "mass storage dr
 
 == Documentation ==
 
+== Links ==
+
+<wiki:comment>
   * [Ax3Software AX3 Software]
   * [Ax3Firmware AX3 Firmware]
   * [Ax3Hardware AX3 Hardware]
   * [Ax3Mechanical AX3 Mechanical]
+</wiki:comment>
 
-See also: [Documentation All documentation], [Source Source], [Downloads Downloads].
+  * [Documentation Documentation]
+  * [Source Source]
+  * [Downloads Downloads]
