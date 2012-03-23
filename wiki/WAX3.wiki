@@ -1,6 +1,6 @@
-#summary Open Movement WAX3 Wireless accelerometer
+#summary Open Movement WAX3 Wireless accelerometers
 
-= Open Movement - WAX3 Wireless accelerometer =
+= Open Movement - WAX3 Wireless accelerometers =
 
 http://openmovement.googlecode.com/svn/docs/images/wax3-devices.jpg
 
