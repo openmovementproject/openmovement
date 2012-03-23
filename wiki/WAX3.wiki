@@ -10,16 +10,18 @@ They intelligently enter a power save mode when undisturbed for a configurable p
 
 Each device can be used as a transmitter or receiver.  The WAX3 devices use a USB connection for receiving data into a PC, device configuration and battery recharge. 
 
-
-== Links ==
-
 <wiki:comment>
+== Documentation ==
   * [Wax3Software WAX3 Software]
   * [Wax3Firmware WAX3 Firmware]
   * [Wax3Hardware WAX3 Hardware]
   * [Wax3Mechanical WAX3 Mechanical]
 </wiki:comment>
 
+== Links ==
   * [Documentation Documentation]
   * [Source Source]
   * [Downloads Downloads]
+
+== Known Suppliers ==
+  * [http://www.axivity.com/ Axivity.com]
