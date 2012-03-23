@@ -8,18 +8,18 @@ The AX3 also incorporate a real time quartz clock, temperature sensor and light 
 
 The AX3 appears as a USB device with two interfaces: a standard "mass storage drive", which contains the data file (in an open format), and a "communications device class" serial terminal for configuration.
 
-
-== Documentation ==
-
-== Links ==
-
 <wiki:comment>
+== Documentation ==
   * [Ax3Software AX3 Software]
   * [Ax3Firmware AX3 Firmware]
   * [Ax3Hardware AX3 Hardware]
   * [Ax3Mechanical AX3 Mechanical]
 </wiki:comment>
 
+== Links ==
   * [Documentation Documentation]
   * [Source Source]
   * [Downloads Downloads]
+
+== Known Suppliers ==
+  * [http://www.axivity.com/ Axivity.com]
