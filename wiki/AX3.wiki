@@ -1,6 +1,6 @@
-#summary Open Movement - AX3 Movement logging sensor.
+#summary Open Movement - AX3 Movement logging sensors.
 
-= Open Movement - AX3 Movement logging sensor =
+= Open Movement - AX3 Movement logging sensors =
 
 AX3 is a fully waterproof data logging device which feature a MEMS 3-axis accelerometer and flash-based on-board memory.  It is designed to collect data in non-lab based environments -- capable of recording raw accelerometer values at 100 Hz for 14 days.
 
