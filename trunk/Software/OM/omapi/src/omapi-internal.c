@@ -69,6 +69,7 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
         OmDeviceState *deviceState;
 
         if (inSerialNumber > OM_MAX_SERIAL) { OmLog("WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
+        if (volumePath == NULL || volumePath[0] == '\0') { OmLog("WARNING: Ignoring added device with no mount point (%u)\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
         // Get the current OmDeviceState structure, or make one if it doesn't exist

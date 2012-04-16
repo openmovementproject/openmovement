@@ -88,19 +88,19 @@ int OmEraseDataAndCommit(int deviceId, int level)
     if (OM_FAILED(status)) return status;
     if (downloadStatus == OM_DOWNLOAD_PROGRESS) return OM_E_NOT_VALID_STATE;
 
-    if (status == OM_ERASE_NONE)
+    if (level == OM_ERASE_NONE)
     {
         status = OM_COMMAND(deviceId, "\r\ncommit\r\n", response, "COMMIT", 6000, parts);   // Update file
     }
-    else if (status == OM_ERASE_DELETE)
+    else if (level == OM_ERASE_DELETE)
     {
         status = OM_COMMAND(deviceId, "\r\nCLEAR DATA\r\n", response, "COMMIT", 6000, parts);   // Delete file + re-create file
     }
-    else if (status == OM_ERASE_QUICKFORMAT)
+    else if (level == OM_ERASE_QUICKFORMAT)
     {
         status = OM_COMMAND(deviceId, "\r\nFORMAT QC\r\n", response, "COMMIT", 6000, parts);      // Rewrite filesystem + re-create file
     }
-    else if (status == OM_ERASE_WIPE)
+    else if (level == OM_ERASE_WIPE)
     {
         status = OM_COMMAND(deviceId, "\r\nFORMAT WC\r\n", response, "COMMIT", 15000, parts);      // Physically erase all NAND pages + re-create file
     }
@@ -229,4 +229,96 @@ int OmGetLastConfigTime(int deviceId, OM_DATETIME *time)
     if (time != NULL) { *time = OmDateTimeFromString(parts[1]); }
     return OM_OK;
 }
+
+
+
+
+// Accelerometer sampling rate codes (current shown as normal / low-power mode)
+#define OM_ACCEL_RATE_3200  0x0f
+#define OM_ACCEL_RATE_1600  0x0e
+#define OM_ACCEL_RATE_800   0x0d
+#define OM_ACCEL_RATE_400   0x0c
+#define OM_ACCEL_RATE_200   0x0b
+#define OM_ACCEL_RATE_100   0x0a
+#define OM_ACCEL_RATE_50    0x09
+#define OM_ACCEL_RATE_25    0x08
+#define OM_ACCEL_RATE_12_5  0x07
+#define OM_ACCEL_RATE_6_25  0x06
+
+// Low-power mode
+#define OM_ACCEL_RATE_LOW_POWER 0x10   // Low-power mode (for rates from 12.5 Hz - 400 Hz)
+
+// Top two bits of the sampling rate value are used to determine the acceleromter range
+#define OM_ACCEL_RANGE_16G  0x00
+#define OM_ACCEL_RANGE_8G   0x40
+#define OM_ACCEL_RANGE_4G   0x80
+#define OM_ACCEL_RANGE_2G   0xC0
+
+// Rate/range calculations
+#define OM_ACCEL_RATE_FROM_CONFIG(_f)   (3200 / (1 << (15-((_f) & 0x0f))))
+#define OM_ACCEL_RANGE_FROM_CONFIG(_f)  (16 >> ((_f) >> 6))
+#define OM_ACCEL_IS_VALID_RATE(_v)      (((_v & 0x3f) >= 0x6 && (_v & 0x3f) <= 0xf) || ((_v & 0x3f) >= 0x17 && (_v & 0x3f) <= 0x1c))
+
+
+int OmGetAccelConfig(int deviceId, int *rate, int *range)
+{
+    int status;
+    int value;
+    char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
+    status = OM_COMMAND(deviceId, "\r\nRATE\r\n", response, "RATE=", OM_DEFAULT_TIMEOUT, parts);
+    if (OM_FAILED(status)) return status;
+    // "RATE=74,100"
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
+    value = atoi(parts[1]);
+
+    // Calculate return values from configuration value
+    if (rate != NULL) { *rate = OM_ACCEL_RATE_FROM_CONFIG(value); }
+    if (range != NULL) { *range = OM_ACCEL_RANGE_FROM_CONFIG(value); }
+
+    if (!OM_ACCEL_IS_VALID_RATE(value)) { return OM_E_FAIL; }       // Not a valid configuration
+    return OM_OK;
+}
+
+
+int OmSetAccelConfig(int deviceId, int rate, int range)
+{
+    char command[32];
+    int status;
+    char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
+    int value;
+
+    // Calculate configuration value from parameters
+    value = 0;
+    switch (rate)
+    {
+        case 3200: value |= OM_ACCEL_RATE_3200; break;
+        case 1600: value |= OM_ACCEL_RATE_1600; break;
+        case  800: value |= OM_ACCEL_RATE_800;  break;
+        case  400: value |= OM_ACCEL_RATE_400;  break;
+        case  200: value |= OM_ACCEL_RATE_200;  break;
+        case  100: value |= OM_ACCEL_RATE_100;  break;
+        case   50: value |= OM_ACCEL_RATE_50;   break;
+        case   25: value |= OM_ACCEL_RATE_25;   break;
+        case   12: value |= OM_ACCEL_RATE_12_5; break;
+        case    6: value |= OM_ACCEL_RATE_6_25; break;
+        default: return OM_E_INVALID_ARG;
+    }
+    switch (range)
+    {
+        case 16:   value |= OM_ACCEL_RANGE_16G; break;
+        case  8:   value |= OM_ACCEL_RANGE_8G;  break;
+        case  4:   value |= OM_ACCEL_RANGE_4G;  break;
+        case  2:   value |= OM_ACCEL_RANGE_2G;  break;
+        default: return OM_E_INVALID_ARG;
+    }
+
+    sprintf(command, "\r\nRATE %u\r\n", value);
+    status = OM_COMMAND(deviceId, command, response, "RATE=", OM_DEFAULT_TIMEOUT, parts);
+    if (OM_FAILED(status)) return status;
+    // "RATE=74,100"
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
+    if (atoi(parts[1]) != value) { return OM_E_FAIL; }
+    return OM_OK;
+}
+
 

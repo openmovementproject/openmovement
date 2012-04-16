@@ -274,7 +274,14 @@ int OmReaderNextBlock(OmReaderHandle reader)
     state->blockEnd = 0;
 
     // Check if EOF
-    if (feof(state->fp)) { return OM_E_FAIL; }                                                              // End of file
+    if (feof(state->fp))
+    {
+        if (ftell(state->fp) == state->fileSize)
+        {
+            return OM_E_FAIL;       // End-of-file as expected
+        }
+        return OM_E_UNEXPECTED;     // Unanticipated end-of-file (could events like device removal/network error/external file truncation cause this?)
+    }
 
     // Read a block, error on incomplete read
     if (fread(state->data, 1, OM_BLOCK_SIZE, state->fp) != OM_BLOCK_SIZE) { return OM_E_ACCESS_DENIED; }    // Read error
@@ -471,17 +478,52 @@ OM_DATETIME OmReaderTimestamp(OmReaderHandle reader, int index, unsigned short *
 }
 
 
+int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
+{ 
+    OmReaderState *state = (OmReaderState *)reader;
+    OM_READER_DATA_PACKET *dataPacket;
+
+    // Check parameter
+    if (state == NULL) { return -1; }
+
+    //if (state->numSamples == 0)
+
+    dataPacket = OmReaderRawDataPacket(reader);
+    if (dataPacket == NULL) { return -1; }
+
+    switch (valueType)
+    {
+        // Raw values
+        case OM_VALUE_DEVICEID:         return dataPacket->deviceId;
+        case OM_VALUE_SESSIONID:        return dataPacket->sessionId;
+        case OM_VALUE_SEQUENCEID:       return dataPacket->sequenceId;
+        case OM_VALUE_LIGHT:            return dataPacket->light; 
+        case OM_VALUE_TEMPERATURE:      return dataPacket->temperature; 
+        case OM_VALUE_EVENTS:           return dataPacket->events;
+        case OM_VALUE_BATTERY:          return dataPacket->battery;
+        case OM_VALUE_SAMPLERATE:       return dataPacket->sampleRate;
+
+        // Cooked values
+        case OM_VALUE_TEMPERATURE_MC:   return (dataPacket->temperature * 150 - 20500); // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
+        case OM_VALUE_BATTERY_MV:       return (dataPacket->battery * 6000 / 1024);     // Conversion to millivolts:  Vref = 3V, Vbat = 6V * value / 1024
+
+        // Default
+        default:                    return OM_E_FAIL;
+    }
+}
+
+
 OM_READER_HEADER_PACKET *OmReaderRawHeaderPacket(OmReaderHandle reader) 
 {
     if (reader == NULL) { return NULL; }
-    return (OM_READER_HEADER_PACKET *)&((OmReaderState *)reader)->header; 
+    return (OM_READER_HEADER_PACKET *)&(((OmReaderState *)reader)->header[0]); 
 }
 
 
 OM_READER_DATA_PACKET *OmReaderRawDataPacket(OmReaderHandle reader) 
 { 
     if (reader == NULL) { return NULL; }
-    return (OM_READER_DATA_PACKET *)&((OmReaderState *)reader)->data; 
+    return (OM_READER_DATA_PACKET *)&(((OmReaderState *)reader)->data[0]); 
 }
 
 
