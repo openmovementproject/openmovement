@@ -28,7 +28,7 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.2
+ *  @version   1.3
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -46,7 +46,7 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.2
+ *  @version   1.3
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -224,7 +224,7 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 102
+#define OM_VERSION 103
 
 
 /**
@@ -662,7 +662,8 @@ OM_EXPORT int OmGetLastConfigTime(int deviceId, OM_DATETIME *time);
  * Erase levels for OmEraseDataAndCommit() function.
  * @see OmEraseDataAndCommit
  */
-typedef enum {
+typedef enum
+{
     OM_ERASE_NONE = 0,                  /**< Data file not erased but metadata just updated (this is not recommended as it could lead to a data/metadata mismatch). */
     OM_ERASE_DELETE = 1,                /**< Data file is removed and a new one created with the current metadata. */
     OM_ERASE_QUICKFORMAT = 2,           /**< Device file-system is re-created and a new data file is created with the current metadata. */
@@ -677,6 +678,7 @@ typedef enum {
  *     OmSetSessionId(deviceId, 0); 
  *     OmSetMetadata(deviceId, NULL, 0); 
  *     OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_INFINITE); 
+ *     OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, OM_ACCEL_DEFAULT_RANGE);
  *     OmEraseDataAndCommit(deviceId, OM_ERASE_WIPE); 
  * \endcode
  * And similarly, to cleanly re-configure a device, the same sequence can be called with non-zero values. 
@@ -713,6 +715,47 @@ OM_EXPORT int OmEraseDataAndCommit(int deviceId, OM_ERASE_LEVEL eraseLevel);
  * @see OmEraseDataAndCommit()
  */
 #define OmCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_NONE)
+
+
+/**
+ * Default accelerometer rate configuration is 100Hz
+ * @see OmSetAccelConfig()
+ * @since 1.3
+ */
+#define OM_ACCEL_DEFAULT_RATE 100
+
+
+/**
+ * Default accelerometer range configuration is +/- 8 G 
+ * @see OmSetAccelConfig()
+ * @since 1.3
+ */
+#define OM_ACCEL_DEFAULT_RANGE 8
+
+
+/**
+ * Queries the specified device's accelerometer configuration.
+ * @param deviceId Identifier of the device.
+ * @param[out] rate Pointer to a value to receive the sampling rate in Hz (50, 100, 200)
+ * @param[out] range Pointer to a value to receive the sampling range in +/- G (2, 4, 8, 16)
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @see OmSetAccelConfig()
+ * @since 1.3
+ */
+OM_EXPORT int OmGetAccelConfig(int deviceId, int *rate, int *range);
+
+
+/**
+ * Sets the specified device's accelerometer configuration to be used at the next recording session.
+ * @note This API call does not alter the existing settings, and only takes full effect when OmEraseDataAndCommit() is called.
+ * @param deviceId Identifier of the device.
+ * @param rate Sampling rate value in Hz (50, 100, 200)
+ * @param range Sampling range value in +/- G (2, 4, 8, 16)
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @see OmGetRate()
+ * @since 1.3
+ */
+OM_EXPORT int OmSetAccelConfig(int deviceId, int rate, int range);
 
 
 
@@ -1071,6 +1114,44 @@ OM_EXPORT short *OmReaderBuffer(OmReaderHandle reader);
  * @return The packed date/time value of the sample at the start of the buffer, or 0 if none (e.g. an invalid index).
  */
 OM_EXPORT OM_DATETIME OmReaderTimestamp(OmReaderHandle reader, int index, unsigned short *fractional);
+
+
+/**
+ * Reader value indexes for OmReaderGetValue() function.
+ * @see OmReaderGetValue
+ * @since 1.3
+ */
+typedef enum
+{
+/** \cond */
+    OM_VALUE_DEVICEID = 3, 
+    OM_VALUE_SESSIONID = 4, 
+    OM_VALUE_SEQUENCEID = 5, 
+/** \endcond */
+    OM_VALUE_LIGHT = 7,                 /**< Raw light sensor reading. Calculating Lux values on these devices does not make sense -- this raw reading should be used instead, and only as a per-device, relative, light measurement. */
+/** \cond */
+    OM_VALUE_TEMPERATURE = 8,           
+    OM_VALUE_EVENTS = 9, 
+    OM_VALUE_BATTERY = 10, 
+    OM_VALUE_SAMPLERATE = 11,
+/** \endcond */
+    OM_VALUE_TEMPERATURE_MC = 108,      /**< Temperature sensor reading in millicentigrade */
+/** \cond */
+    OM_VALUE_BATTERY_MV = 110,
+/** \endcond */
+} OM_READER_VALUE_TYPE;
+
+
+/**
+ * Returns a specific value type from the buffer read by OmReaderNextBlock().
+ *
+ * @param reader The handle to the reader.
+ * @param valueType The value to return.
+ * @return The raw value requested for the current block.
+ * @see OM_READER_VALUE_TYPE
+ * @since 1.3
+ */
+OM_EXPORT int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType);
 
 
 /**

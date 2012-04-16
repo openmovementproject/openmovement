@@ -179,7 +179,7 @@ OmLog("8: Has mount point: %s\n", volumePath.c_str());
     // Un-mount any other (unused) mount points
     for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
     {
-        numMountPoints++;
+        //numMountPoints++;
         if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, volumePath.c_str()) != 0)
         {
             printf("DEBUG: Un-mounting unused mount point: %s  -- using: %s\n", name, volumePath.c_str());

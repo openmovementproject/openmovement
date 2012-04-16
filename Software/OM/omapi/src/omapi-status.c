@@ -43,6 +43,63 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
 }
 
 
+/** \cond */
+#define BATT_CHARGE_ZERO 614
+#define BATT_CHARGE_FULL 708
+#define USB_BUS_SENSE 1
+static unsigned int AdcBattToPercent(unsigned int Vbat)
+{
+    /*
+		This is the new code written by KL 2012 which compensates for the non linearity of
+		the battery and the internal resistance of the cell whilst charging. It does not compensate
+		the voltage drop caused by current draw from the motor, LED etc so, for consistent values, 
+		call with the same power draw each time. At 0% left the battery will have ~6% actual storage
+		this can be used to keep the RTC going etc.
+    */
+	#if (BATT_CHARGE_ZERO != 614) 
+		#error "Set zero bat charge to 614"
+	#endif
+	#if (BATT_CHARGE_FULL != 708)
+		#error "Set full charge threshold to 708"
+	#endif
+
+	#define BATT_FIT_CONST_1	666LU
+	#define BATT_FIT_CONST_2	150LU
+	#define BATT_FIT_CONST_3	538LU	
+	#define BATT_FIT_CONST_4	8
+	#define BATT_FIT_CONST_5	614LU
+	#define BATT_FIT_CONST_6	375LU
+	#define BATT_FIT_CONST_7	614LU	
+	#define BATT_FIT_CONST_8	8
+
+	unsigned long temp; 
+	
+	// Compensate for charging current
+	if (USB_BUS_SENSE && (Vbat>12)) Vbat -= 12; 
+ 
+	// Early out functions for full and zero charge
+	if (Vbat > BATT_CHARGE_FULL) return 100;
+    if (Vbat < BATT_CHARGE_ZERO) return 0;
+
+	// Calculations for curve fit
+	if (Vbat>BATT_FIT_CONST_1)
+	{
+		temp = (BATT_FIT_CONST_2 * (Vbat - BATT_FIT_CONST_3))>>BATT_FIT_CONST_4;
+	}
+	else if (Vbat>BATT_FIT_CONST_5)
+	{
+		temp = (BATT_FIT_CONST_6 * (Vbat - BATT_FIT_CONST_7))>>BATT_FIT_CONST_8;
+	}
+	else 
+	{
+		temp = 0;
+	}
+
+    return (unsigned int)temp;
+}
+/** \endcond */
+
+
 int OmGetBatteryLevel(int deviceId)
 {
     int status;
@@ -51,9 +108,17 @@ int OmGetBatteryLevel(int deviceId)
     if (OM_FAILED(status)) return status;
     // "$BATT=697,4083,mV,100,1"
     if (parts[5] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
-    status = atoi(parts[4]);                                    // Percentage charge complete
-    if (status > 95 && atoi(parts[5]) != 0) { status = 100; }   // Charge complete
-    else if (status = 100) { status = 99; }                     // Charge not quite complete
+    status = atoi(parts[4]);                                    // Percentage charge complete from device
+
+    // If the device isn't performing the calculation itself, we model the percentage on the software side instead
+    if (status == 0)
+    {
+        int raw = atoi(parts[1]);
+        status = AdcBattToPercent(raw);
+    }
+
+    if (status > 95 && atoi(parts[5]) != 0) { status = 100; }   // Charge complete (raw reading of 714)
+    else if (status == 100) { status = 99; }                    // Charge not quite complete
     return status;
 }
 

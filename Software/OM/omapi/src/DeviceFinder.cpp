@@ -750,7 +750,7 @@ std::string DeviceFinder::GetVolumePathForVolumeName(std::string volumeName)
         if (GetLastError() != ERROR_MORE_DATA) { break; }
     }
     delete[] volumeNameW;
-    return ret.length() == 0 ? NULL : ret;
+    return ret;
 }
 
 

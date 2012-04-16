@@ -98,6 +98,11 @@ int clear(void)
         result = OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_INFINITE); 
         if (OM_FAILED(result)) { printf("WARNING: OmSetDelays() %s\n", OmErrorString(result)); }
 
+        /* Configure the sample rate to the defaults */
+        printf("CLEARING #%d: AccelConfig = <defaults>...\n", deviceId);
+        result = OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, OM_ACCEL_DEFAULT_RANGE);
+        if (OM_FAILED(result)) { printf("WARNING: OmSetAccelConfig() %s\n", OmErrorString(result)); }
+
         /* Clear the data and commit the settings */
         printf("CLEARING #%d: Clear data and commit...\n", deviceId);
         result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT); 
