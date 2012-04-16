@@ -77,7 +77,7 @@ int OmSetDelays(int deviceId, OM_DATETIME startTime, OM_DATETIME stopTime)
 }
 
 
-int OmEraseDataAndCommit(int deviceId, int level)
+int OmEraseDataAndCommit(int deviceId, OM_ERASE_LEVEL level)
 {
     int status;
     char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};

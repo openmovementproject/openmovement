@@ -333,8 +333,8 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
     // If writing a command
     if (command != NULL && strlen(command) > 0)
     {
-#if 1
-        // Flush any existing incoming data
+#ifdef _WIN32
+        // Flush any existing incoming data (seems to cause some problem on Linux?)
         {
             char c;
             for(;;)
