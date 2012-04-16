@@ -661,6 +661,7 @@ OM_EXPORT int OmGetLastConfigTime(int deviceId, OM_DATETIME *time);
 /**
  * Erase levels for OmEraseDataAndCommit() function.
  * @see OmEraseDataAndCommit
+ * @since 1.2
  */
 typedef enum
 {
@@ -670,7 +671,7 @@ typedef enum
     OM_ERASE_WIPE = 3                   /**< All blocks on the NAND flash memory are cleared, the file-system is cleanly re-created, and a new data file is created with the current metadata. */
 } OM_ERASE_LEVEL;
 
- 
+
 /**
  * Erases the specified device storage and commits the metadata and settings.  
  * To fully wipe a device, the caller can execute:
