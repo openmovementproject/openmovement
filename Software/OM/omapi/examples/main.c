@@ -53,6 +53,7 @@ extern int deploy_main(int argc, char *argv[]);
 extern int download_main(int argc, char *argv[]);
 extern int clear_main(int argc, char *argv[]);
 extern int convert_main(int argc, char *argv[]);
+extern int verify_main(int argc, char *argv[]);
 
 
 /* Main function just chains to the required example code */
@@ -68,9 +69,10 @@ int main(int argc, char *argv[])
     else if (argc > 1 && !strcmp(argv[1], "download")) { ret = download_main(argc - 1, argv + 1); }
     else if (argc > 1 && !strcmp(argv[1], "clear"))    { ret =    clear_main(argc - 1, argv + 1); }
     else if (argc > 1 && !strcmp(argv[1], "convert"))  { ret =  convert_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "verify"))   { ret =   verify_main(argc - 1, argv + 1); }
     else
     {
-        printf("Usage: omapi <test|deploy|download|clear|convert> [parameters...]\n");
+        printf("Usage: omapi <test|deploy|download|clear|convert|verify> [parameters...]\n");
         printf("\n");
         ret = -1;
     }
