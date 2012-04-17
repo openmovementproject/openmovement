@@ -260,6 +260,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
     unsigned int sequenceId;
     char bytesPerSample;
     int sampleRate;
+    int len;
 
     // Check parameter
     OmReaderState *state = (OmReaderState *)reader;
@@ -273,18 +274,27 @@ int OmReaderNextBlock(OmReaderHandle reader)
     state->blockStart = 0;
     state->blockEnd = 0;
 
-    // Check if EOF
-    if (feof(state->fp))
+    // Read a block (if not EOF)
+    len = -1;
+    if (!feof(state->fp))
     {
-        if (ftell(state->fp) == state->fileSize)
-        {
-            return OM_E_FAIL;       // End-of-file as expected
-        }
-        return OM_E_UNEXPECTED;     // Unanticipated end-of-file (could events like device removal/network error/external file truncation cause this?)
+        len = fread(state->data, 1, OM_BLOCK_SIZE, state->fp);
     }
 
-    // Read a block, error on incomplete read
-    if (fread(state->data, 1, OM_BLOCK_SIZE, state->fp) != OM_BLOCK_SIZE) { return OM_E_ACCESS_DENIED; }    // Read error
+    if (len != OM_BLOCK_SIZE)
+    {
+        // Check if EOF
+        if (len == 0 || len == -1)
+        {
+            if (ftell(state->fp) == state->fileSize)
+            {
+                return OM_E_FAIL;       // End-of-file as expected
+            }
+            return OM_E_UNEXPECTED;     // Unanticipated end-of-file (could events like device removal/network error/external file truncation cause this?)
+        }
+        // Other read error
+        return OM_E_ACCESS_DENIED; 
+    }
 
     // Check header and size
     if (state->data[0] != 0x41 || state->data[1] != 0x58) { return 0; }                                     // @0 packetHeader
@@ -385,17 +395,6 @@ int OmReaderNextBlock(OmReaderHandle reader)
         // Calculate times at start and end of block
         state->blockStart = t - ((long long)timestampOffset * 0x10000 / sampleRate);
         state->blockEnd = state->blockStart + (unsigned long long)state->numSamples * 0x10000 / sampleRate;
-//#define VERIFY
-#ifdef VERIFY
-        if (state->events & 0xf0)
-        {
-            fprintf(stderr, "\n[EVENT-ERROR: 0x%02x]", state->events); 
-        }
-        fprintf(stderr, "\n[timestampOffset %04d-%02d-%02d %02d:%02d:%02d %+d * %.3f]", 
-            OM_DATETIME_YEAR(timestamp), OM_DATETIME_MONTH(timestamp), OM_DATETIME_DAY(timestamp),
-            OM_DATETIME_HOURS(timestamp), OM_DATETIME_MINUTES(timestamp), OM_DATETIME_SECONDS(timestamp),
-            -timestampOffset, 1.0f / sampleRate);
-#endif
 
         // If we are reading a block in sequence
         if (state->sequenceId != (unsigned int)-1 && state->sequenceId + 1 == sequenceId)
@@ -405,31 +404,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
             {
                 state->blockStart = previousBlockEnd;
             }
-#ifdef VERIFY
-else
-{
-    long long diff = (long long)(state->blockStart - previousBlockEnd);
-    fprintf(stderr, "\nWARNING: Time break in sequence by %+.2f seconds [timestampOffset was %d]", (float)diff / 65536.0f, timestampOffset);
-    fprintf(stderr, "\n");
-}
-#endif
         }
-#ifdef VERIFY
-else if (state->sequenceId != (unsigned int)-1)
-{
-    if (sequenceId != 0)
-    {
-        fprintf(stderr, "\nWARNING: Sequence break %u -> %u", state->sequenceId, sequenceId);
-        fprintf(stderr, "\n");
-    }
-    else
-    {
-        fprintf(stderr, "\nNOTE: Recording sequence restarted at sequence %u", state->sequenceId);
-        fprintf(stderr, "\n");
-    }
-}
-#endif
-
     }
 
     // Update sequence id

@@ -75,11 +75,6 @@ int convert(const char *infile, const char *outfile, char tee)
         ofp = stdout;
     }
 
-//#define VERIFY
-#ifdef VERIFY
-    OmReaderDataBlockSeek(reader, 82875);
-#endif
-
     /* Iterate over all of the blocks of the file */
     while ((numSamples = OmReaderNextBlock(reader)) >= 0)
     {
@@ -93,9 +88,6 @@ int convert(const char *infile, const char *outfile, char tee)
             unsigned short fractional;
             short x, y, z;
             static char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
-#ifdef VERIFY
-            static int firstPacket = 1, seconds, lastSecond = -1, packetCount = 0;
-#endif
 
             /* Get the date/time value for this sample, and the 1/65536th fractions of a second */
             dateTime = OmReaderTimestamp(reader, i, &fractional);
@@ -111,31 +103,6 @@ int convert(const char *infile, const char *outfile, char tee)
 
             /* Output the data */
             fprintf(ofp, "%s,%d,%d,%d\n", timeString, x, y, z);
-
-#ifdef VERIFY
-seconds = OM_DATETIME_SECONDS(dateTime);
-if (lastSecond == -1) { lastSecond = seconds; };
-if (seconds != lastSecond)
-{
-    if (firstPacket) { printf(","); firstPacket = 0; }
-    else if (packetCount >= 98 && packetCount <= 105) { printf("."); }
-    else
-    { 
-        if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
-        {
-            fprintf(stderr, "\r\nWARNING: Only %d samples in second :%02d before %s]", packetCount, lastSecond, timeString);
-        }
-        else
-        {
-            fprintf(stderr, "\r\nWARNING: Non-sequential second jump (%d samples in second :%02d before %s)]", packetCount, lastSecond, timeString);
-        }
-        printf("\r\n");
-    }
-    lastSecond = seconds;
-    packetCount = 0;
-}
-packetCount++;
-#endif
 
             /* 'Tee' the data to stderr */
             if (tee) { fprintf(stderr, "%s,%d,%d,%d\n", timeString, x, y, z); }
