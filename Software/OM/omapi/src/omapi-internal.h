@@ -65,6 +65,9 @@
     #define gmtime_r(timer, result) gmtime_s(result, timer)
     #define timegm _mkgmtime
 
+    // Strings
+    #define snprintf _snprintf
+
 #else
     // Headers
     #include <unistd.h>
