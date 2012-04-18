@@ -197,8 +197,33 @@ namespace OmApiNet
         }
 
 
+        private IDictionary<int, int> cacheProgressValue = new Dictionary<int, int>();
+
         protected void DownloadCallback(IntPtr reference, int deviceId, OmApi.OM_DOWNLOAD_STATUS status, int value)
         {
+            lock (cacheProgressValue)
+            {
+                // HACK: Only update if the percentage value changes
+                if (cacheProgressValue.ContainsKey(deviceId))
+                {
+                    if (status != OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_PROGRESS)
+                    {
+                        cacheProgressValue.Remove(deviceId);        // Remove
+                    }
+                    else
+                    {
+                        if (cacheProgressValue[deviceId] == value)
+                        {
+                            return;                                 // Ignore same percentage value
+                        }
+                        else
+                        {
+                            cacheProgressValue[deviceId] = value;   // Update
+                        }
+                    }
+                }
+            }
+
             //Console.WriteLine("" + status + " - " + deviceId);
             OmDevice device = GetDevice(deviceId);
             if (device == null) { return; }

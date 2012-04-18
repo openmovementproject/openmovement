@@ -38,7 +38,7 @@ namespace OmApiNet
 {
     public static class OmApi
     {
-        public const int OM_VERSION = 102;
+        public const int OM_VERSION = 103;      // Must match the library version
         [DllImport("libomapi.dll")] public static extern int OmStartup(int version);
         [DllImport("libomapi.dll")] public static extern int OmShutdown();
         [DllImport("libomapi.dll")] public static extern int OmSetLogStream(int fd);
@@ -78,6 +78,10 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmEraseDataAndCommit(int deviceId, OM_ERASE_LEVEL eraseLevel);
         public static int OmClearDataAndCommit(int deviceId) { return OmEraseDataAndCommit(deviceId, OM_ERASE_LEVEL.OM_ERASE_QUICKFORMAT); }
         public static int OmCommit(int deviceId) { return OmEraseDataAndCommit(deviceId, OM_ERASE_LEVEL.OM_ERASE_NONE); }
+        public const int OM_ACCEL_DEFAULT_RATE = 100;
+        public const int OM_ACCEL_DEFAULT_RANGE = 8;
+        [DllImport("libomapi.dll")] public static extern int OmGetAccelConfig(int deviceId, out int rate, out int range);
+        [DllImport("libomapi.dll")] public static extern int OmSetAccelConfig(int deviceId, int rate, int range);
         public enum OM_DOWNLOAD_STATUS { OM_DOWNLOAD_NONE, OM_DOWNLOAD_ERROR, OM_DOWNLOAD_PROGRESS, OM_DOWNLOAD_COMPLETE, OM_DOWNLOAD_CANCELLED };
         [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)] public delegate void OmDownloadCallback(IntPtr reference, int deviceId, OM_DOWNLOAD_STATUS status, int value);
         [DllImport("libomapi.dll")] public static extern int OmSetDownloadCallback(OmDownloadCallback downloadCallback, IntPtr reference);
@@ -162,6 +166,8 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmReaderNextBlock(IntPtr reader);
         [DllImport("libomapi.dll")] public static extern IntPtr OmReaderBuffer(IntPtr reader);
         [DllImport("libomapi.dll")] public static extern uint OmReaderTimestamp(IntPtr reader, int index, out ushort fractional);
+        public enum OM_READER_VALUE_TYPE { OM_VALUE_DEVICEID = 3, OM_VALUE_SESSIONID = 4, OM_VALUE_SEQUENCEID = 5, OM_VALUE_LIGHT = 7, OM_VALUE_TEMPERATURE = 8, OM_VALUE_EVENTS = 9, OM_VALUE_BATTERY = 10, OM_VALUE_SAMPLERATE = 11, OM_VALUE_TEMPERATURE_MC = 108, OM_VALUE_BATTERY_MV = 110 };
+        [DllImport("libomapi.dll")] public static extern int OmReaderGetValue(IntPtr reader, OM_READER_VALUE_TYPE valueType);
 
 /*
         [StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]

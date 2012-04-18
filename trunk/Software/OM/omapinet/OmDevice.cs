@@ -265,13 +265,15 @@ validData = false;
             return SetInterval(DateTime.MinValue, DateTime.MaxValue);
         }
 
-        public void SetSessionId(uint sessionId)
+        public bool SetSessionId(uint sessionId)
         {
-            OmApi.OmSetSessionId(deviceId, sessionId);
-            OmApi.OmCommit(deviceId);
+            bool failed = false;
+            failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId(deviceId, sessionId));
+            failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
             validData = false;
             hasChanged = true;
             om.OnChanged(new OmDeviceEventArgs(this));
+            return !failed;
         }
 
 
@@ -279,14 +281,15 @@ validData = false;
         {
             bool failed = false;
 
+            // ???
+            //failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
 
-            failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
-            failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
-
-            OmApi.OmSetSessionId(deviceId, 0);                                                      // Clear the session id
-            OmApi.OmSetMetadata(deviceId, "", 0);                                                   // No metadata
-            OmApi.OmSetDelays(deviceId, OmApi.OM_DATETIME_INFINITE, OmApi.OM_DATETIME_INFINITE);    // Never log
-            OmApi.OmClearDataAndCommit(deviceId);                                                   // Clear data and commit
+            failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId(deviceId, 0));                                                      // Clear the session id
+            failed |= OmApi.OM_FAILED(OmApi.OmSetMetadata(deviceId, "", 0));                                                   // No metadata
+            failed |= OmApi.OM_FAILED(OmApi.OmSetDelays(deviceId, OmApi.OM_DATETIME_INFINITE, OmApi.OM_DATETIME_INFINITE));    // Never log
+            failed |= OmApi.OM_FAILED(OmApi.OmSetAccelConfig(deviceId, OmApi.OM_ACCEL_DEFAULT_RATE, OmApi.OM_ACCEL_DEFAULT_RANGE));    // Default configuration
+            failed |= OmApi.OM_FAILED(OmApi.OmEraseDataAndCommit(deviceId, OmApi.OM_ERASE_LEVEL.OM_ERASE_WIPE));                 // Erase data and commit
+            //failed |= OmApi.OM_FAILED(OmApi.OmClearDataAndCommit(deviceId));                                                   // Clear data and commit
 
             validData = false;
             hasChanged = true;
