@@ -68,12 +68,13 @@ int test(void)
     /* Get the currently-attached devices ids */
     deviceIds = (int *)malloc(numDevices * sizeof(int));
     result = OmGetDeviceIds(deviceIds, numDevices);
+    
     if (OM_FAILED(result)) { printf("ERROR: OmGetDeviceIds() %s\n", OmErrorString(result)); return -1; }
     /* Cope with fewer devices being returned (if some were just removed).
      * If more devices were just attached, we'll ignore them for now.
      * (Production code wouldn't typically use OmGetDeviceIds but would instead work asynchronously with OmDeviceCallback) */
     if (result < numDevices) { numDevices = result; } 
-
+  
     /* For each device currently connected... */
     for (i = 0; i < numDevices; i++)
     {
@@ -85,7 +86,7 @@ int test(void)
         /* Set the LED to blue to indicate testing */
         result = OmSetLed(deviceId, OM_LED_BLUE);
         if (OM_FAILED(result)) { printf("WARNING: OmSetLed() %s\n", OmErrorString(result)); }
-
+        
         /* Check hardware and firmware versions */
         result = OmGetVersion(deviceId, &firmwareVersion, &hardwareVersion);
         if (OM_FAILED(result)) { printf("WARNING: OmGetVersion() %s\n", OmErrorString(result)); errors++; }
