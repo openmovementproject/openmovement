@@ -72,6 +72,7 @@
     //#include <sys/types.h>
     #include <termios.h>
     #include <pthread.h>
+    #include <libudev.h>
 
     // Thread
 	#define thread_t      pthread_t
@@ -86,6 +87,17 @@
     #define mutex_lock    pthread_mutex_lock
     #define mutex_unlock  pthread_mutex_unlock
     #define mutex_destroy pthread_mutex_destroy
+
+    typedef struct {
+        char serial_device[100];
+        char block_device[100];
+        char mount_path[100];
+        int device_id;
+        struct deviceNode *next;
+    } deviceNode;
+
+    deviceNode *deviceList;
+
 #endif
 
 

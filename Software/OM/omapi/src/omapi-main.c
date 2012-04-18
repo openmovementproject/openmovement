@@ -101,7 +101,7 @@ int OmShutdown(void)
 
     // Destroy device discovery thread
     OmDeviceDiscoveryStop();
-
+    
     // Clear device state table
     for (i = 0; i < OM_MAX_SERIAL; i++)
     {

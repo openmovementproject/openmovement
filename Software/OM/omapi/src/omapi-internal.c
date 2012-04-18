@@ -91,8 +91,8 @@ OmLog("DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
 
         // Update the OmDeviceState structure
         deviceState->id = serialNumber;
-        sprintf_s(deviceState->port, OM_MAX_CDC_PATH, "%s", port);
-        sprintf_s(deviceState->root, OM_MAX_MSD_PATH, "%s", volumePath);
+        snprintf(deviceState->port, OM_MAX_CDC_PATH, "%s", port);
+        snprintf(deviceState->root, OM_MAX_MSD_PATH, "%s", volumePath);
 
         // Download status
         //deviceState->downloadStatus = OM_DOWNLOAD_NONE;
@@ -146,39 +146,226 @@ OmLog("DEBUG: Device removed: %d\n", serialNumber);
 
 #if !defined(_WIN32)
 
-/** Internal, method for updating a list of seen devices. */
-int OmUpdateDevices(void)
-{
-    #warning "No non-Win32 device discovery implementation\n"
-
-    // Example
-    OmDeviceDiscovery(OM_DEVICE_CONNECTED, 1, "/dev/tty.usbmodem", "/dev/disk1");
-    return OM_E_FAIL;
+/** Internal, extract device id from serial id **/
+int GetDeviceId(char *serial_id) {
+    int value = 0;
+    if(serial_id) {
+        while(*serial_id != '\0' && *serial_id != '_') {
+            serial_id++;
+        }
+        serial_id++;
+        //convert rest to integer
+        while(*serial_id != '\0' && *serial_id <= '9' && *serial_id >= '0') {
+            value = (value * 10) + (*serial_id - '0');
+            serial_id++;
+        }
+    }
+    return value;
 }
 
-/** Internal, thread for discovering devices. */
+/** Internal, method to add a device to the device list **/
+void AddDevice(char *block_device, char *mount_path, char *serial_device, int id) {
+    deviceNode *dev = (deviceNode *)malloc(sizeof(deviceNode));
+    strcpy(dev->block_device, block_device);
+    strcpy(dev->mount_path, mount_path);
+    strcpy(dev->serial_device, serial_device);
+    dev->device_id = id;
+    dev->next = NULL;
+    
+    OmDeviceDiscovery(OM_DEVICE_CONNECTED, dev->device_id, dev->serial_device, dev->mount_path);
+
+    if(deviceList == NULL) {
+        deviceList = dev;
+    } else {
+        dev->next = deviceList;
+        deviceList = dev;
+    }
+}
+
+/** Internal, method to remove a device from the device list **/
+void RemoveDevice(char *block_device) 
+{
+    deviceNode *current;
+    deviceNode *previous = NULL;
+
+    for(current = deviceList; current != NULL, previous = current; current = current->next) {
+        
+        //found device
+        if(strcmp(current->block_device, block_device) == 0) {
+            
+            OmDeviceDiscovery(OM_DEVICE_REMOVED, current->device_id, current->serial_device, current->mount_path);
+            if(previous == NULL) {
+                deviceList = current->next;
+            } else {
+                previous->next = current->next;
+            }
+
+            free(current);
+            
+            return;
+        }
+    }
+}
+
+/** Internal, method for getting devices already plugged in **/
+void InitDeviceFinder() 
+{
+    struct udev *udev;
+    struct udev_enumerate *enumerate;
+    struct udev_list_entry *devices, *dev_list_entry;
+    struct udev_device *dev;
+
+    deviceList = NULL;
+    
+    udev = udev_new();
+    if(!udev) {
+        printf("Can't create udev\n");
+        exit(1);
+    }
+
+    //find block devices with vendor id and product id.
+    enumerate = udev_enumerate_new(udev);
+
+    udev_enumerate_add_match_subsystem(enumerate, "block");
+    udev_enumerate_add_match_property(enumerate, "ID_PRODUCT_ID", "0057");
+    udev_enumerate_add_match_property(enumerate, "ID_VENDOR_ID", "04d8");
+    udev_enumerate_scan_devices(enumerate);
+    devices = udev_enumerate_get_list_entry(enumerate);
+
+    udev_list_entry_foreach(dev_list_entry, devices) {
+        const char *path;
+
+        path = udev_list_entry_get_name(dev_list_entry);
+        dev = udev_device_new_from_syspath(udev, path);
+
+        strcpy(path, udev_device_get_devnode(dev));
+
+        //get mount path first.
+        char mount_path[100];
+        strcpy(mount_path, "/media/");
+        char *name = udev_device_get_property_value(dev, "ID_FS_LABEL");
+        if(name != NULL) {
+            dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+            if(dev) {
+               
+                //get serial device path.
+                char serial_device[100];
+                char *serial_id = udev_device_get_sysattr_value(dev, "serial");
+                GetSerialDevice(serial_id, serial_device);
+                if(strlen(serial_device) > 0) {
+                    strcat(mount_path, name);
+                    //now save device info.
+                    AddDevice(path, mount_path, serial_device, GetDeviceId(serial_id));
+                }
+            }
+        }
+    }
+    
+    udev_enumerate_unref(enumerate);
+    udev_unref(udev);
+}
+
+
+/** Internal, method for getting serial device by id **/
+void GetSerialDevice(char *serial_id, char *serial_device)
+{
+    struct udev *udev;
+    struct udev_enumerate *enumerate;
+    struct udev_list_entry *devices, *dev_list_entry;
+    struct udev_device *dev;
+
+    udev = udev_new();
+    if(!udev) {
+        printf("Can't create udev\n");
+        exit(1);
+    }
+
+    //find serial devices with vendor id and product id and serial id.
+    enumerate = udev_enumerate_new(udev);
+
+    udev_enumerate_add_match_subsystem(enumerate, "tty");
+    udev_enumerate_add_match_property(enumerate, "ID_SERIAL_SHORT", serial_id);
+    udev_enumerate_scan_devices(enumerate);
+    devices = udev_enumerate_get_list_entry(enumerate);
+
+    udev_list_entry_foreach(dev_list_entry, devices) {
+        const char *path;
+        path = udev_list_entry_get_name(dev_list_entry);
+        dev = udev_device_new_from_syspath(udev, path);
+        strcpy(serial_device, udev_device_get_devnode(dev));
+        break;
+    }
+    udev_enumerate_unref(enumerate);
+    udev_unref(udev);
+}
+
+
+/** Internal, method for updating a list of seen devices. */
 thread_return_t OmDeviceDiscoveryThread(void *arg)
 {
+    struct udev *udev;
+    struct udev_enumerate *enumerate;
+    struct udev_device *dev;
+    struct udev_monitor *mon;
+
+    udev = udev_new();
+
+    mon = udev_monitor_new_from_netlink(udev, "udev");
+    udev_monitor_filter_add_match_subsystem_devtype(mon, "block", NULL);
+    udev_monitor_enable_receiving(mon);
+
+
     // Polled device discovery for non-Windows
     while (!om.quitDiscoveryThread)
     {
-        int status;
-        status = OmUpdateDevices();
-        if (status != OM_OK)
-        {
-            OmLog("ERROR: OmDeviceDiscoveryThread() - %s\n", OmErrorString(status));
+        dev = udev_monitor_receive_device(mon);
+        if(dev) {
+
+            //get block device name.
+            struct udev_device *usb_dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+
+            //make sure it's one of our devices.
+            if(strcmp(udev_device_get_sysattr_value(usb_dev, "idVendor"), "04d8") == 0 && strcmp(udev_device_get_sysattr_value(usb_dev, "idProduct"), "0057") == 0) {
+
+                //get block device name.
+                char *block_device = udev_device_get_devnode(dev);
+
+                //check type of action (remove or add)
+                char *action = udev_device_get_action(dev);
+
+                if(strcmp(action, "add") == 0)  {
+                    //get mount path.
+                    char mount_path[100];
+                    strcpy(mount_path, "/media/");
+                    char *name = udev_device_get_property_value(dev, "ID_FS_LABEL");
+                    if(name != NULL) {
+                        char serial_device[100];
+                        char *serial_id = udev_device_get_sysattr_value(usb_dev, "serial");
+                        GetSerialDevice(serial_id, &serial_device[0]);
+                        
+                        if(strlen(serial_device) > 0) {
+                            strcat(mount_path, name);
+                            AddDevice(&block_device[0], &mount_path[0], &serial_device[0], GetDeviceId(serial_id));
+                        }
+                    }
+                } else if(strcmp(action, "remove") == 0) {
+                    RemoveDevice(block_device);
+                }
+            }
         }
-        sleep(10);       // Sleep (seconds)
     }
+ 
+    udev_unref(udev);
     return thread_return_value(0);
 }
 
 /** Internal method to start device discovery. */
 void OmDeviceDiscoveryStart(void)
 {
+    InitDeviceFinder();
     // Perform an initial device discovery and create device discovery thread
     om.quitDiscoveryThread = 0;
-    OmUpdateDevices();
+    //OmUpdateDevices();
     thread_create(&om.discoveryThread, NULL, OmDeviceDiscoveryThread, NULL);
 }
 
@@ -186,7 +373,8 @@ void OmDeviceDiscoveryStart(void)
 void OmDeviceDiscoveryStop(void)
 {
     om.quitDiscoveryThread = 1;
-    thread_join(&om.discoveryThread, NULL);
+    pthread_cancel(&om.discoveryThread);
+    //thread_join(&om.discoveryThread, NULL);
 }
 
 #endif
