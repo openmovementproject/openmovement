@@ -41,11 +41,17 @@
 /* Headers */
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
+#define gmtime_r(timer, result) gmtime_s(result, timer)
+#define timegm _mkgmtime
 #endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
+#include <sys/timeb.h>
+
+
 
 /* API header */
 #include "omapi.h"
@@ -56,6 +62,22 @@
 #define AVERAGE_FACTOR 0.00001
 #define AVERAGE_RANGE_MAX 0.3
 #define AVERAGE_RANGE_OFF 0.1
+
+
+// Calculate the time in ticks from a packed time
+unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
+{
+    time_t tSec;                            // Seconds since epoch
+    struct tm tParts = {0};                 // Time elements (YMDHMS)
+    tParts.tm_year = OM_DATETIME_YEAR(timestamp) - 1900;
+    tParts.tm_mon = OM_DATETIME_MONTH(timestamp) - 1;
+    tParts.tm_mday = OM_DATETIME_DAY(timestamp);
+    tParts.tm_hour = OM_DATETIME_HOURS(timestamp);
+    tParts.tm_min = OM_DATETIME_MINUTES(timestamp);
+    tParts.tm_sec = OM_DATETIME_SECONDS(timestamp);
+    tSec = timegm(&tParts);                 // Pack from YMDHMS
+    return ((unsigned long long)tSec << 16) + fractional;
+}
 
 
 /* Conversion function */
@@ -70,6 +92,9 @@ int verify(const char *infile, char output)
     unsigned int totalSamples = 0;
     unsigned int errorFile = 0, errorEvent = 0, errorStuck = 0, errorRange = 0, errorBreaks = 0, errorRate = 0;
     double maxAv = 0.0;
+    char first = 1;
+    unsigned long long minInterval = 0, maxInterval = 0;
+    unsigned long long lastBlockStart = 0;
 
     /* Open the binary file reader on the input file */
     reader = OmReaderOpen(infile);
@@ -83,6 +108,7 @@ int verify(const char *infile, char output)
     for (block = 0; ; block++)
     {
         OM_READER_DATA_PACKET *dp;
+        unsigned long long interval;
         int numSamples;
         short *buffer;
         int i;
@@ -132,9 +158,10 @@ int verify(const char *infile, char output)
 
         // Read the block start time
         {
+            unsigned int timestamp;
             unsigned short fractional;
-            blockStart = (unsigned long long)OmReaderTimestamp(reader, 0, &fractional) << 16;
-            blockStart += fractional;
+            timestamp = OmReaderTimestamp(reader, 0, &fractional);
+            blockStart = Ticks(timestamp, fractional);
         }
 
         /*
@@ -144,12 +171,28 @@ int verify(const char *infile, char output)
             -timestampOffset, 1.0f / sampleRate);
             */
 
-        // If the previous block's "blockEnd" is not close (+- 5%) to this block's "blockStart", we have a time discontinuity
-        if (previousBlockEnd != 0 && blockStart != 0 && abs((int)(previousBlockEnd - blockStart)) >= 3276)
+        if (lastBlockStart > 0)
         {
-            long long diff = (long long)(blockStart - previousBlockEnd);
-            fprintf(stderr, "WARNING: Time break in sequence by %+.2f seconds\n", (float)diff / 65536.0f);
+            // Interval
+            interval = blockStart - lastBlockStart;
+
+            // If the previous block's "blockEnd" is not close (+- 5%) to this block's "blockStart", we have a time discontinuity
+            if (previousBlockEnd != 0 && blockStart != 0 && abs((int)(previousBlockEnd - blockStart)) >= 3276)
+            {
+                long long diff = (long long)(blockStart - previousBlockEnd);
+                fprintf(stderr, "WARNING: Time break in sequence by %+.2f seconds (last: %f, curr: %f)\n", (float)diff / 65536.0f, lastBlockStart / 65536.0f, blockStart / 65536.0f);
+                fprintf(stderr, "\n");
+            }
+            else
+            {
+                // Min/max interval
+                if (first) { first = 0; minInterval = interval; maxInterval = interval; }
+                if (interval > maxInterval) { maxInterval = interval; }
+                if (interval < minInterval) { minInterval = interval; }
+            }
         }
+
+        lastBlockStart = blockStart;
 
         // If we read a block out-of-sequence
         if (previousSequenceId != (unsigned int)-1 && previousSequenceId + 1 != dp->sequenceId)
@@ -244,7 +287,7 @@ int verify(const char *infile, char output)
             if (seconds != lastSecond)
             {
                 if (firstPacket) { /* printf(","); */ firstPacket = 0; }
-                else if (packetCount >= 98 && packetCount <= 105) { /* printf("."); */ }
+                else if (packetCount >= 97 && packetCount <= 105) { /* printf("."); */ }
                 else
                 { 
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
@@ -270,14 +313,15 @@ int verify(const char *infile, char output)
 
         // Read the block end time
         {
+            unsigned int timestamp;
             unsigned short fractional;
-            previousBlockEnd = (unsigned long long)OmReaderTimestamp(reader, numSamples, &fractional) << 16;
-            previousBlockEnd += fractional;
+            timestamp = OmReaderTimestamp(reader, numSamples, &fractional);
+            previousBlockEnd = Ticks(timestamp, fractional);
         }
 
     }
 
-    fprintf(stderr, "Errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, (breaks=%d), (maxAv=%f)\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, maxAv);
+    fprintf(stderr, "Errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, (breaks=%d), (maxAv=%f), (minInterval=%f), (maxInterval=%f)\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f);
 
 
     /* Close the files */

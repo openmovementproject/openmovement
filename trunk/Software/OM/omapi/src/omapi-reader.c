@@ -256,6 +256,7 @@ int OmReaderDataBlockSeek(OmReaderHandle reader, int dataBlockNumber)
 
 int OmReaderNextBlock(OmReaderHandle reader)
 {
+    unsigned long long previousBlockStart;
     unsigned long long previousBlockEnd;
     unsigned int sequenceId;
     char bytesPerSample;
@@ -266,7 +267,8 @@ int OmReaderNextBlock(OmReaderHandle reader)
     OmReaderState *state = (OmReaderState *)reader;
     if (state == NULL) { return OM_E_POINTER; }
 
-    // Record previous block's 'blockEnd'
+    // Record previous block's 'blockStart' and 'blockEnd'
+    previousBlockStart = state->blockStart;
     previousBlockEnd = state->blockEnd;
 
     // No data unless we find a valid block
