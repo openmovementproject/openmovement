@@ -80,8 +80,15 @@ int OmStartup(int version)
 
     // Mutex
     mutex_init(&om.portMutex, NULL);
+#if !defined(_WIN32)
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); 
+    mutex_init(&om.downloadMutex, &attr);
+#else
     mutex_init(&om.downloadMutex, NULL);
-
+#endif
+    
     // Flag the API as initialized (before device discovery)
     om.initialized = 1;
 

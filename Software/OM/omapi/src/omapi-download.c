@@ -146,6 +146,9 @@ int OmGetDataFilename(int deviceId, char *filenameBuffer)
         return OM_E_FAIL;
     }
     strcat(filenameBuffer, om.devices[deviceId]->root);
+#if !defined(_WIN32)
+    strcat(filenameBuffer, "/");
+#endif
     strcat(filenameBuffer, OM_DEFAULT_FILENAME);
 
     // Check file existence/properties
