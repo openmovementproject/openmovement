@@ -188,7 +188,7 @@ void RemoveDevice(char *block_device)
     deviceNode *current;
     deviceNode *previous = NULL;
 
-    for(current = deviceList; current != NULL, previous = current; current = current->next) {
+    for(current = deviceList; current != NULL; previous = current, current = current->next) {
         
         //found device
         if(strcmp(current->block_device, block_device) == 0) {
