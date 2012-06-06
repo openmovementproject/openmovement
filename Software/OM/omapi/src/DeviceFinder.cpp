@@ -49,6 +49,9 @@
 #include <cfgmgr32.h>
 #pragma comment(lib, "setupapi.lib")
 
+#pragma comment(lib, "advapi32.lib")    // For RegQueryValueEx()
+//#pragma comment(lib, "gdi32.lib")       // For CreateSolidBrush()
+
 #include <dbt.h>
 
 #include <tchar.h>
@@ -436,6 +439,7 @@ bool DeviceFinder::MappingUsbToPort(unsigned int vidPid, std::map<std::string, s
                     scratch[0] = 0;
                     DWORD dwSize = sizeof(scratch);
                     DWORD dwType = 0;
+
                     if ((RegQueryValueExW(hDeviceKey, L"PortName", NULL, &dwType, (LPBYTE)scratch, &dwSize) == ERROR_SUCCESS) && (dwType == REG_SZ))
                     {
                         portName[0] = '\\'; portName[1] = '\\'; portName[2] = '.'; portName[3] = '\\';
@@ -913,11 +917,11 @@ static INT_PTR WINAPI WinProcTrampoline(HWND hWnd, UINT message, WPARAM wParam, 
     if (message == WM_CREATE)
     { 
         instance = (DeviceFinder*)((LPCREATESTRUCT)lParam)->lpCreateParams; 
-        SetWindowLongPtr(hWnd, GWL_USERDATA, (LONG_PTR)instance);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)instance);  // GWL_USERDATA
     }
     else
     {
-        instance = (DeviceFinder*)GetWindowLongPtr(hWnd, GWL_USERDATA);
+        instance = (DeviceFinder*)GetWindowLongPtr(hWnd, GWLP_USERDATA);    // GWL_USERDATA
     }
 
     if (!instance) { return DefWindowProc(hWnd, message, wParam, lParam); }
@@ -1058,7 +1062,7 @@ unsigned int DeviceFinder::DiscoveryLoop(void)
     wndClass.cbClsExtra = 0;
     wndClass.cbWndExtra = 0;
     wndClass.hIcon = LoadIcon(0,IDI_APPLICATION);
-    wndClass.hbrBackground = CreateSolidBrush(RGB(192,192,192));
+    wndClass.hbrBackground = NULL; //CreateSolidBrush(RGB(192,192,192));
     wndClass.hCursor = LoadCursor(0, IDC_ARROW);
     wndClass.lpszClassName = TEXT("DeviceFinderClass");
     wndClass.lpszMenuName = NULL;
