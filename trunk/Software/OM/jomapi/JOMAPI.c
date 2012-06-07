@@ -41,6 +41,52 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     ;
 }
 
+/*
+static JavaVM *gJavaVM = NULL;
+
+//env->GetJavaVM(&gJavaVM);
+
+static void myCallback()
+{
+    if (gJavaVM != NULL)
+    {
+        JNIEnv *env;
+        gJavaVM->AttachCurrentThread((void**)&env, NULL);
+        if (env != NULL)
+        {
+            jclass theClass = env->FindClass("JOMAPI");
+            if (theClass == NULL)
+            {
+                jthrowable ex = env->ExceptionOccurred();
+                if (ex)
+                {
+                    env->ExceptionDescribe();
+                    env->ExceptionClear();
+                }
+            }
+            else
+            {
+                jmethodID methodId = env->GetStaticMethodID(theClass, "callback", "(I)V");
+                if (methodId == 0)
+                {
+                    jthrowable ex = env->ExceptionOccurred();
+                    if (ex)
+                    {
+                        env->ExceptionDescribe();
+                        env->ExceptionClear();
+                    }
+                }
+                else
+                {
+                    env->CallStaticVoidMethod(theClass, methodId);
+                }
+            }
+        }
+    }
+}
+*/
+
+
 JNIEXPORT jint JNICALL Java_JOMAPI_OmStartup
   (JNIEnv *env, jclass jObj, jint version)
   { return 0; }//OmStartup(version); }
