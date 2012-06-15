@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace OmApiNet
 {
@@ -16,6 +17,18 @@ namespace OmApiNet
             this.om = om;
             this.deviceId = deviceId;
             validData = false;
+
+            filename = null;
+            try
+            {
+                StringBuilder filenamesb = new StringBuilder(256);
+                if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
+                {
+                    filename = filenamesb.ToString();
+                }
+            }
+            catch (Exception e) { Console.Error.WriteLine("ERROR: Problem getting data filename for device " + deviceId + "."); }
+
         }
 
         // Properties
@@ -108,10 +121,26 @@ category = SourceCategory.Other;
         protected int downloadValue = 0;
         public int DownloadValue { get { return downloadValue; } }
 
+        protected string filename;
+        public string Filename { get { return filename; } }
 
-// TODO: Implement the required API for these (remember to clear archive on successful download)
-public bool HasData { get { return true; } }
-public bool HasNewData { get { return true; } }
+        public bool HasData { get { if (Filename == null) { return false; }  return File.Exists(Filename); } }
+
+        // TODO: Remember to clear archive on successful download
+        public bool HasNewData 
+        {
+            get 
+            {
+                if (Filename == null) { Console.Error.WriteLine("ERROR: Problem getting filename attributes for device " + deviceId + " with unknown data file name."); return false; }
+                try
+                {
+                    if (!File.Exists(Filename)) { Console.Error.WriteLine("ERROR: Problem getting filename attributes for device " + deviceId + " with missing data file: " + Filename); return false; }
+                    FileAttributes attributes = File.GetAttributes(Filename);
+                    return ((attributes & FileAttributes.Archive) != 0);
+                }
+                catch (Exception e) { Console.Error.WriteLine("ERROR: Problem getting filename attributes for device " + deviceId + ": " + Filename); return false; }
+            } 
+        }
 
 
         public bool IsDownloading

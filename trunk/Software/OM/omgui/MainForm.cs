@@ -432,9 +432,11 @@ namespace OmGui
             toolStripButtonRecord.Enabled = any && all && !downloading;
             toolStripButtonInterval.Enabled = any && all && !downloading;
             toolStripButtonSessionId.Enabled = any && all && !downloading;
+            toolStripMenuItemConvert.Enabled = any;
 
             return selected.ToArray();
         }
+
 
         private void listViewDevices_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -749,6 +751,47 @@ namespace OmGui
         private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void toolStripMenuItemConvert_Click(object sender, EventArgs e)
+        {
+            int numFiles = 0;
+            int numDevices = 0;
+
+            List<string> files = new List<string>();
+            foreach (ListViewItem i in listView.SelectedItems)
+            {
+                OmSource device = (OmSource)i.Tag;
+                if (!(device is OmDevice) || !((OmDevice)device).Connected)
+                {
+                    if (device is OmReader)
+                    {
+                        files.Add(((OmReader)device).Filename);
+                        numFiles++;
+                    }
+                }
+                else
+                {
+                    if (device is OmDevice)
+                    {
+                        files.Add(((OmDevice)device).Filename);
+                        numDevices++;
+                    }
+                }
+            }
+            string[] filesArray = files.ToArray();
+
+            if (filesArray.Length < 1) { return; }
+
+            if (filesArray.Length > 1)
+            {
+                MessageBox.Show(this, "Multiple file export not supported.", "Sorry", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                return;
+            }
+
+            string folder = GetPath(OmGui.Properties.Settings.Default.DownloadPath);
+            ExportForm exportForm = new ExportForm(filesArray[0], folder);
+            DialogResult result = exportForm.ShowDialog(this);
         }
 
 
