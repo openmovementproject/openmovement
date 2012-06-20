@@ -293,7 +293,7 @@ int verify(const char *infile, char output)
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
                     {
                         errorRate++;
-                        fprintf(stderr, "WARNING: Only %d samples in second :%02d before %s]\n", packetCount, lastSecond, timeString);
+                        fprintf(stderr, "WARNING: 'Out of range' %d samples in second :%02d before %s]\n", packetCount, lastSecond, timeString);
                     }
                     else
                     {
