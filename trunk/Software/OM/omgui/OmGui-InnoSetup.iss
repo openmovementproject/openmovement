@@ -26,6 +26,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
+Source: "utils\cwa-convert.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\Release\OmGui.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\Release\OmApiNet.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin\Release\libomapi.dll"; DestDir: "{app}"; Flags: ignoreversion
