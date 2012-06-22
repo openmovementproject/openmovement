@@ -31,12 +31,15 @@ ECHO Compiling JNI file...
 cl -c /D WIN32 /EHsc /I "%JAVA_HOME%\include" /I "%JAVA_HOME%\include\win32" /I "..\omapi\include" JOMAPI.c "..\omapi\src\DeviceFinder.cpp" "..\omapi\src\omapi-devicefinder.cpp" "..\omapi\src\omapi-download.c" "..\omapi\src\omapi-internal.c" "..\omapi\src\omapi-main.c" "..\omapi\src\omapi-reader.c" "..\omapi\src\omapi-settings.c" "..\omapi\src\omapi-status.c"
 IF ERRORLEVEL 1 GOTO ERROR
 
-ECHO Linking JNI files...
-link /dll /defaultlib:user32.lib JOMAPI DeviceFinder omapi-devicefinder omapi-download omapi-internal omapi-main omapi-reader omapi-settings omapi-status
+ECHO Linking JNI files... %PLATFORM%
+SET POSTFIX=
+IF /I %PLATFORM%!==x86! SET POSTFIX=32
+IF /I %PLATFORM%!==x64! SET POSTFIX=64
+link /dll /defaultlib:user32.lib JOMAPI DeviceFinder omapi-devicefinder omapi-download omapi-internal omapi-main omapi-reader omapi-settings omapi-status /out:JOMAPI%POSTFIX%.dll
 IF ERRORLEVEL 1 GOTO ERROR
 
 rem ECHO Copying DLL file...
-rem copy /Y JOMAPI.dll "%JAVA_HOME%\bin"
+rem copy /Y JOMAPI%POSTFIX%.dll "%JAVA_HOME%\bin"
 
 
 rem GOTO END
