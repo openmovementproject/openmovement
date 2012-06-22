@@ -70,10 +70,36 @@ namespace OmGui
 
             // <filename.cwa> [-s:accel|-s:gyro] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel] [-start 0] [-length <len>] [-step 1] [-out <outfile>]
 
-            string args = "\"{infile}\" -f:csv -out \"{outfile}\"";
-            args = args.Replace("{infile}", textBoxSourceFile.Text);
-            args = args.Replace("{outfile}", textBoxOutputFile.Text);
-            processInformation.Arguments = args;
+            List<string> args = new List<string>();
+            args.Add("\"" + textBoxSourceFile.Text + "\"");
+            args.Add("-f:csv");
+            args.Add("-out \"" + textBoxOutputFile.Text + "\"");
+
+            // Stream
+            if (radioButtonStreamAccel.Checked) { args.Add("-s:accel"); }
+            if (radioButtonStreamGyro.Checked)  { args.Add("-s:gyro"); }
+
+            // Values
+            if (radioButtonValuesFloat.Checked) { args.Add("-v:float"); }
+            if (radioButtonValuesInt.Checked)   { args.Add("-v:int"); }
+
+            // Timestamp
+            if (radioButtonTimeTimestamp.Checked) { args.Add("-t:timestamp"); }
+            if (radioButtonTimeNone.Checked)      { args.Add("-t:none"); }
+            if (radioButtonTimeSequence.Checked)  { args.Add("-t:sequence"); }
+            if (radioButtonTimeSecs.Checked)      { args.Add("-t:secs"); }
+            if (radioButtonTimeDays.Checked)      { args.Add("-t:days"); }
+            if (radioButtonTimeSerial.Checked)    { args.Add("-t:serial"); }
+            if (radioButtonTimeExcel.Checked)     { args.Add("-t:excel"); }
+            if (radioButtonTimeMatlab.Checked)    { args.Add("-t:matlab"); }
+
+            // Sub-sample
+            if (textBoxSampleStart.Text.Length > 0)  { args.Add("-start " + textBoxSampleStart.Text); }
+            if (textBoxSampleLength.Text.Length > 0) { args.Add("-length " + textBoxSampleLength.Text); }
+            if (textBoxSampleStep.Text.Length > 0)   { args.Add("-step " + textBoxSampleStep.Text); }
+
+            // Construct arguments
+            processInformation.Arguments = string.Join(" ", args.ToArray());
             processInformation.UseShellExecute = false;
             //processInformation.CreateNoWindow = true;
             //processInformation.RedirectStandardError = true;
