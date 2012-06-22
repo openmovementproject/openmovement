@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libomapi", "libomapi\liboma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "omgui", "omgui\omgui.csproj", "{91C173AF-FC0E-47F2-BBD1-6A83FCB2F820}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jomapi", "jomapi\jomapi.vcxproj", "{DA24599A-5C36-405C-A43D-6F6E0C16C880}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,18 @@ Global
 		{91C173AF-FC0E-47F2-BBD1-6A83FCB2F820}.Release|Win32.ActiveCfg = Release|x86
 		{91C173AF-FC0E-47F2-BBD1-6A83FCB2F820}.Release|x86.ActiveCfg = Release|x86
 		{91C173AF-FC0E-47F2-BBD1-6A83FCB2F820}.Release|x86.Build.0 = Release|x86
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Debug|Any CPU.ActiveCfg = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Debug|Win32.ActiveCfg = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Debug|Win32.Build.0 = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Debug|x86.ActiveCfg = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Release|Any CPU.ActiveCfg = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Release|Win32.ActiveCfg = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Release|Win32.Build.0 = Release|Win32
+		{DA24599A-5C36-405C-A43D-6F6E0C16C880}.Release|x86.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
