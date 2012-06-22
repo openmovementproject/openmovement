@@ -33,7 +33,12 @@ public class JOMAPI {
 	// Load library
 	static {
 		try {
-			System.loadLibrary("JOMAPI");
+			if (System.getProperty("os.name").startsWith("Win")) {
+				boolean bits64 = System.getProperty("sun.arch.data.model").contains("64");
+				System.loadLibrary("JOMAPI" + (bits64 ? "64" : "32"));
+			} else {
+				System.loadLibrary("JOMAPI");
+			}
 		} catch (Throwable e) {
 			System.err.println("JOMAPI Load Error: " + e.toString());
 		}
