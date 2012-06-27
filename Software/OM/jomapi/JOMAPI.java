@@ -50,22 +50,34 @@ public class JOMAPI {
 	private JOMAPI() { ; }
 
 	// Static Log Callback
-	void logCallback(String message)
+	private static JOMAPIListener logListener;
+	private static Object logReference;
+	public static void logCallback(String message)
 	{
 		System.out.println("LOG: " + message);
+		if (logListener != null) {
+			logListener.logCallback(message);
+		}
 	}
 	
 	// Static Device Callback
-	void deviceCallback(int deviceId, int deviceStatus)
+	private static JOMAPIListener deviceListener;
+	private static Object deviceReference;
+	public static void deviceCallback(int deviceId, int deviceStatus)
 	{
 		String status = "<" + deviceStatus + ">";
 		if      (deviceStatus == OM_DEVICE_REMOVED)   { status = "OM_DEVICE_REMOVED"; }
 		else if (deviceStatus == OM_DEVICE_CONNECTED) { status = "OM_DEVICE_CONNECTED"; }
 		System.out.println("DEVICE: #" + deviceId + " - " + status);
+		if (deviceListener != null) {
+			deviceListener.deviceCallback(deviceId, deviceStatus);
+		}
 	}
 	
 	// Static Download Callback
-	void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
+	private static JOMAPIListener downloadListener;
+	private static Object downloadReference;
+	public static void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
 	{
 		String status = "<" + downloadStatus + ">";
 		if      (downloadStatus == OM_DOWNLOAD_NONE)      { status = "OM_DOWNLOAD_NONE"; }
@@ -74,6 +86,9 @@ public class JOMAPI {
 		else if (downloadStatus == OM_DOWNLOAD_COMPLETE)  { status = "OM_DOWNLOAD_COMPLETE"; }
 		else if (downloadStatus == OM_DOWNLOAD_CANCELLED) { status = "OM_DOWNLOAD_CANCELLED"; }
 		System.out.println("DOWNLOAD: #" + deviceId + " @" + downloadValue + " - " + status);
+		if (downloadListener != null) {
+			downloadListener.downloadCallback(deviceId, downloadStatus, downloadValue);
+		}
 	}
 	
 	
@@ -82,19 +97,23 @@ public class JOMAPI {
 	public native static int OmStartup(int version);
 	public native static int OmShutdown();
 	public native static int OmSetLogStream(int fd);
-	
-// TODO
-	//[UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)] public delegate void OmLogCallback(IntPtr reference, string message);
-	//public static extern int OmSetLogCallback(OmLogCallback logCallback, IntPtr reference);	
+	public static int OmSetLogCallback(JOMAPIListener listener, Object reference)
+	{
+		logListener = listener;
+		logReference = reference;
+		return OM_OK;
+	}
 	
 	public static final int OM_DEVICE_REMOVED = 0;		// enum OM_DEVICE_STATUS
 	public static final int OM_DEVICE_CONNECTED = 1;	// enum OM_DEVICE_STATUS	
-// TODO
-	//[UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)] public delegate void OmDeviceCallback(IntPtr reference, int deviceId, OM_DEVICE_STATUS status);
-	//public static extern int OmSetDeviceCallback(OmDeviceCallback deviceCallback, IntPtr reference);
+	public static int OmSetDeviceCallback(JOMAPIListener listener, Object reference)
+	{
+		deviceListener = listener;
+		deviceReference = reference;
+		return OM_OK;
+	}
 	
-// TODO
-	//public native static int OmGetDeviceIds(int[] deviceIds, int maxDevices);
+	public native static int OmGetDeviceIds(int[] deviceIds, int maxDevices);
 	public native static int OmGetVersion(int deviceId, int[] firmwareVersion, int[] hardwareVersion);
 	public native static int OmGetBatteryLevel(int deviceId);
 	public native static int OmSelfTest(int deviceId);
@@ -103,9 +122,8 @@ public class JOMAPI {
 	public native static int OmGetMemoryHealth(int deviceId);
 	public native static int OmGetBatteryHealth(int deviceId);
 	public native static int OmGetAccelerometer(int deviceId, int[] xyz);
-// TODO	
-	//public native static int OmGetTime(int deviceId, out uint time);
-	//public native static int OmSetTime(int deviceId, uint time);
+	public native static int OmGetTime(int deviceId, long[] time);
+	public native static int OmSetTime(int deviceId, long time);
 	
 	public static final int OM_LED_UNKNOWN = -2;	// OM_LED_STATE
 	public static final int OM_LED_AUTO = -1;		// OM_LED_STATE
@@ -134,7 +152,7 @@ public class JOMAPI {
 	//public static final int OM_METADATA_SIZE = 448;
 	//public native static int OmGetMetadata(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata);
 	public native static int OmSetMetadata(int deviceId, String metadata, int size);
-	//public native static int OmGetLastConfigTime(int deviceId, out uint time);
+	public native static int OmGetLastConfigTime(int deviceId, long[] time);
 	
 	public static final int OM_ERASE_NONE = 0;			// OM_ERASE_LEVEL
 	public static final int OM_ERASE_DELETE = 1;		// OM_ERASE_LEVEL
@@ -154,9 +172,15 @@ public class JOMAPI {
 	public static final int OM_DOWNLOAD_PROGRESS = 2;	// OM_DOWNLOAD_STATUS
 	public static final int OM_DOWNLOAD_COMPLETE = 3;	// OM_DOWNLOAD_STATUS
 	public static final int OM_DOWNLOAD_CANCELLED = 4;	// OM_DOWNLOAD_STATUS
+
+	public static int OmSetDownloadCallback(JOMAPIListener listener, Object reference)
+	{
+		downloadListener = listener;
+		downloadReference = reference;
+		return OM_OK;
+	}
+	
 // TODO	
-	//[UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)] public delegate void OmDownloadCallback(IntPtr reference, int deviceId, OM_DOWNLOAD_STATUS status, int value);
-	//public native static int OmSetDownloadCallback(OmDownloadCallback downloadCallback, IntPtr reference);
 	//public native static int OmGetDataFilename(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder filenameBuffer);
 	//public native static int OmGetDataRange(int deviceId, out int dataBlockSize, out int dataOffsetBlocks, out int dataNumBlocks, out uint startTime, out uint endTime);
 	//public native static int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, string destinationFile);
