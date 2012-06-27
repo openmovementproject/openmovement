@@ -115,6 +115,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLogStream
 
 /*
  * Class:     JOMAPI
+ * Method:    OmGetDeviceIds
+ * Signature: ([II)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDeviceIds
+  (JNIEnv *, jclass, jintArray, jint);
+
+/*
+ * Class:     JOMAPI
  * Method:    OmGetVersion
  * Signature: (I[I[I)I
  */
@@ -163,6 +171,22 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer
 
 /*
  * Class:     JOMAPI
+ * Method:    OmGetTime
+ * Signature: (I[J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetTime
+  (JNIEnv *, jclass, jint, jlongArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetTime
+ * Signature: (IJ)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetTime
+  (JNIEnv *, jclass, jint, jlong);
+
+/*
+ * Class:     JOMAPI
  * Method:    OmSetLed
  * Signature: (II)I
  */
@@ -176,6 +200,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLed
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmSetMetadata
   (JNIEnv *, jclass, jint, jstring, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetLastConfigTime
+ * Signature: (I[J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetLastConfigTime
+  (JNIEnv *, jclass, jint, jlongArray);
 
 /*
  * Class:     JOMAPI

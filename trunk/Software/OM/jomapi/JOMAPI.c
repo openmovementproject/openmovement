@@ -54,56 +54,74 @@ static jomapi_state state = {0};
 // Local log callback
 static void logCallback(void *reference, const char *message)
 {
-    if (state.midLogCallback != 0)
+    JNIEnv *env = NULL;
+    
+    if (state.midLogCallback == 0) { return; }
+    
+    (*state.javaVM)->AttachCurrentThread(state.javaVM, (void**)&env, NULL);
+    if (env == NULL) { return; }
+    
+    //void logCallback(String message)
     {
-        //void logCallback(String message)
         jstring messageString = ((*env)->NewStringUTF(env, message));
         jvalue args[1];
-        args[0] = messageString;
-        env->CallStaticVoidMethod(state.classJomapi, state.midLogCallback, args);
-        DeleteLocalRef(messageString);
+        args[0].l = (jobject)messageString;
+        (*env)->CallStaticVoidMethod(env, state.classJomapi, state.midLogCallback, args);
+        (*env)->DeleteLocalRef(env, messageString);
     }
+    
+    (*state.javaVM)->DetachCurrentThread(state.javaVM);
 }
 
 
 // Local device callback
-static void deviceCallback(void *reference, int deviceId, int deviceStatus)
+static void deviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS deviceStatus)
 {
-    if (state.midDeviceCallback != 0)
+    JNIEnv *env = NULL;
+    
+    if (state.midDeviceCallback == 0) { return; }
+    
+    (*state.javaVM)->AttachCurrentThread(state.javaVM, (void**)&env, NULL);
+    if (env == NULL) { return; }
+
+    //void deviceCallback(int deviceId, int deviceStatus)
     {
-        //void deviceCallback(int deviceId, int deviceStatus)
         jvalue args[2];
-        args[0] = (jint)deviceId;
-        args[1] = (jint)deviceStatus;
-        env->CallStaticVoidMethod(state.classJomapi, state.midDeviceCallback, args);
+        args[0].i = (jint)deviceId;
+        args[1].i = (jint)deviceStatus;
+        (*env)->CallStaticVoidMethod(env, state.classJomapi, state.midDeviceCallback, args);
     }
+    
+    (*state.javaVM)->DetachCurrentThread(state.javaVM);
 }
 
 
 // Local download callback
-static void downloadCallback(void *reference, int deviceId, int downloadStatus, int downloadValue)
+static void downloadCallback(void *reference, int deviceId, OM_DOWNLOAD_STATUS downloadStatus, int downloadValue)
 {
-    if (state.midDownloadCallback != 0)
+    JNIEnv *env = NULL;
+    
+    if (state.midDownloadCallback == 0) { return; }
+    
+    (*state.javaVM)->AttachCurrentThread(state.javaVM, (void**)&env, NULL);
+    if (env == NULL) { return; }
+    
+    //void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
     {
-        //void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
         jvalue args[3];
-        args[0] = (jint)deviceId;
-        args[1] = (jint)downloadStatus;
-        args[2] = (jint)downloadValue;
-        env->CallStaticVoidMethod(state.classJomapi, state.midDownloadCallback, args);
+        args[0].i = (jint)deviceId;
+        args[1].i = (jint)downloadStatus;
+        args[2].i = (jint)downloadValue;
+        (*env)->CallStaticVoidMethod(env, state.classJomapi, state.midDownloadCallback, args);
     }
+    
+    (*state.javaVM)->DetachCurrentThread(state.javaVM);
 }
 
 
 // JNI_OnLoad
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     state.javaVM = vm;
-    
-    //JNIEnv *env;
-    //state.javaVM->AttachCurrentThread((void**)&env, NULL);
-    //if (env != NULL)
-    
-    ////env->GetJavaVM(&state.javaVM);
     return JNI_VERSION_1_4;
 }
 
@@ -119,27 +137,29 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmStartup
   (JNIEnv *env, jclass jObj, jint version)
   {
     // Get handle to the JVM
-    env->GetJavaVM(&state.javaVM);
+    (*env)->GetJavaVM(env, &state.javaVM);
     
     // Fetch the Java class callback methods
     if (state.javaVM != NULL)
     {
-        state.classJomapi = env->FindClass("JOMAPI");
+        state.classJomapi = (*env)->FindClass(env, "JOMAPI");
         if (state.classJomapi != NULL)
         {
-            state.midLogCallback = env->GetStaticMethodID(theClass, "logCallback", "(Ljava/lang/String;)V"); //void logCallback(String message)
-            state.midDeviceCallback = env->GetStaticMethodID(theClass, "deviceCallback", "(II)V");           //void deviceCallback(int deviceId, int deviceStatus)
-            state.midDownloadCallback = env->GetStaticMethodID(theClass, "downloadCallback", "(III)V");      //void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
+            state.midLogCallback = (*env)->GetStaticMethodID(env, state.classJomapi, "logCallback", "(Ljava/lang/String;)V"); //void logCallback(String message)
+            state.midDeviceCallback = (*env)->GetStaticMethodID(env, state.classJomapi, "deviceCallback", "(II)V");           //void deviceCallback(int deviceId, int deviceStatus)
+            state.midDownloadCallback = (*env)->GetStaticMethodID(env, state.classJomapi, "downloadCallback", "(III)V");      //void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
         }
+/*        
         else
         {
-            jthrowable ex = env->ExceptionOccurred();
+            jthrowable ex = (*env)->ExceptionOccurred(env);
             if (ex)
             {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
+                (*env)->ExceptionDescribe(env);
+                (*env)->ExceptionClear(env);
             }
         }
+*/
     }
     
     // Register our own OM callback functions
@@ -161,10 +181,54 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLogStream
   { return OmSetLogStream(fd); }
   
   
-// TODO: OmSetLogCallback();
-// TODO: OmSetLogCallback(OmLogCallback logCallback, IntPtr reference);	
-// TODO: OmSetDeviceCallback(OmDeviceCallback deviceCallback, IntPtr reference);
-// TODO: OmGetDeviceIds(int[] deviceIds, int maxDevices);
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDeviceIds
+  (JNIEnv *env, jclass jObj, jintArray deviceIds, jint maxDevices)
+  {
+    int *intDeviceIds;
+    int retval;
+    
+    // Limit to array length and maximum possible devices
+    jsize len = (*env)->GetArrayLength(env, deviceIds);
+    if (maxDevices > len) { maxDevices = len; }
+    if (maxDevices > 0xffff) { maxDevices = 0xffff; }
+    
+    // Make a true 'int' buffer for the arrays (in case of 64-bit C-int vs. 32-bit jint)
+    intDeviceIds = (int *)malloc(maxDevices * sizeof(int));
+    if (intDeviceIds == NULL)
+    {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "Out of memory allocating native buffer for device IDs.");
+        return OM_E_OUT_OF_MEMORY;
+    }
+    
+    // Retrieve device IDs
+    retval = OmGetDeviceIds(intDeviceIds, 0xffff);
+    
+    // Fill caller's return buffer
+    if (retval >= 0)
+    {
+        int i;
+        
+        // Get array
+        jint *elements = (*env)->GetIntArrayElements(env, deviceIds, 0);
+        
+        // Clip return length
+        if (maxDevices > retval) { maxDevices = retval; }
+        
+        // Copy to jint array from C-int array
+        for (i = 0; i < maxDevices; i++)
+        {
+            elements[i] = intDeviceIds[i];
+        }
+        
+        // Release array
+        (*env)->ReleaseIntArrayElements(env, deviceIds, elements, 0);
+    }
+    
+    // Free local buffer
+    free(intDeviceIds);
+    
+    return retval;
+  }
 
 
 JNIEXPORT jint JNICALL Java_JOMAPI_OmGetVersion
@@ -219,8 +283,28 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer
     return retval;
   }
 
-// TODO: OmGetTime(int deviceId, out uint time);
-// TODO: OmSetTime(int deviceId, uint time);
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetTime
+  (JNIEnv *env, jclass jObj, jint deviceId, jlongArray timeArray)
+  {
+    OM_DATETIME time = 0;
+    int retval;
+    retval = OmGetTime(deviceId, &time);
+    // Out: time
+    {
+        jlong outval[1];
+        outval[0] = (jlong)time;
+        (*env)->SetLongArrayRegion(env, timeArray, 0, 1, outval);
+    }
+    return retval;
+  }
+  
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetTime
+  (JNIEnv *env, jclass jObj, jint deviceId, jlong time)
+  {
+    int retval;
+    retval = OmSetTime(deviceId, (OM_DATETIME)time);
+    return retval;
+  }
     
 JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLed
   (JNIEnv *env, jclass jObj, jint deviceId, jint ledState)
@@ -251,7 +335,20 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetMetadata
     return retval;
   }
 
-// TODO: OmGetLastConfigTime(int deviceId, out uint time);
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetLastConfigTime
+  (JNIEnv *env, jclass jObj, jint deviceId, jlongArray timeArray)
+  {
+    OM_DATETIME time = 0;
+    int retval;
+    retval = OmGetLastConfigTime(deviceId, &time);
+    // Out: time
+    {
+        jlong outval[1];
+        outval[0] = (jlong)time;
+        (*env)->SetLongArrayRegion(env, timeArray, 0, 1, outval);
+    }
+    return retval;
+  }
   
 JNIEXPORT jint JNICALL Java_JOMAPI_OmEraseDataAndCommit
   (JNIEnv *env, jclass jObj, jint deviceId, jint eraseLevel)

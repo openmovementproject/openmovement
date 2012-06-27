@@ -24,19 +24,25 @@ GOTO END
 
 :C_COMPILER
 SET PLATFORM=%1
-if %PLATFORM%!==! echo Platform not specified (x86 / x64), defaulting to x86...
-if %PLATFORM%!==! SET PLATFORM=x86
+IF NOT %PLATFORM%!==! GOTO PLATFORM_SPECIFIED
+echo Platform not specified, auto-detecting...
+SET PLATFORM=x86
+IF NOT "%ProgramFiles(x86)%"=="" SET PLATFORM=x64
+
+:PLATFORM_SPECIFIED
+echo Platform is: %PLATFORM%
 ECHO Setting environment variables for C compiler (%PLATFORM%)...
 call "%COMNTOOLS%\..\..\VC\vcvarsall.bat" %PLATFORM%
 
 ECHO Compiling JNI file...
-cl -c /D WIN32 /EHsc /I "%JAVA_HOME%\include" /I "%JAVA_HOME%\include\win32" /I "..\omapi\include" JOMAPI.c "..\omapi\src\DeviceFinder.cpp" "..\omapi\src\omapi-devicefinder.cpp" "..\omapi\src\omapi-download.c" "..\omapi\src\omapi-internal.c" "..\omapi\src\omapi-main.c" "..\omapi\src\omapi-reader.c" "..\omapi\src\omapi-settings.c" "..\omapi\src\omapi-status.c"
+cl -c /D WIN32 /EHsc /I "%JAVA_HOME%\include" /I "%JAVA_HOME%\include\win32" /I "..\omapi\include" /TcJOMAPI.c /Tp"..\omapi\src\DeviceFinder.cpp" /Tp"..\omapi\src\omapi-devicefinder.cpp" /Tc"..\omapi\src\omapi-download.c" /Tc"..\omapi\src\omapi-internal.c" /Tc"..\omapi\src\omapi-main.c" /Tc"..\omapi\src\omapi-reader.c" /Tc"..\omapi\src\omapi-settings.c" /Tc"..\omapi\src\omapi-status.c"
 IF ERRORLEVEL 1 GOTO ERROR
 
 ECHO Linking JNI files... %PLATFORM%
 SET POSTFIX=
 IF /I %PLATFORM%!==x86! SET POSTFIX=32
 IF /I %PLATFORM%!==x64! SET POSTFIX=64
+rem  "%JAVA_HOME%\lib\jvm.lib" 
 link /dll /defaultlib:user32.lib JOMAPI DeviceFinder omapi-devicefinder omapi-download omapi-internal omapi-main omapi-reader omapi-settings omapi-status /out:JOMAPI%POSTFIX%.dll
 IF ERRORLEVEL 1 GOTO ERROR
 
