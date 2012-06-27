@@ -13,6 +13,82 @@ extern "C" {
 #define JOMAPI_OM_DEVICE_REMOVED 0L
 #undef JOMAPI_OM_DEVICE_CONNECTED
 #define JOMAPI_OM_DEVICE_CONNECTED 1L
+#undef JOMAPI_OM_MEMORY_HEALTH_ERROR
+#define JOMAPI_OM_MEMORY_HEALTH_ERROR 1L
+#undef JOMAPI_OM_MEMORY_HEALTH_WARNING
+#define JOMAPI_OM_MEMORY_HEALTH_WARNING 8L
+#undef JOMAPI_OM_LED_UNKNOWN
+#define JOMAPI_OM_LED_UNKNOWN -2L
+#undef JOMAPI_OM_LED_AUTO
+#define JOMAPI_OM_LED_AUTO -1L
+#undef JOMAPI_OM_LED_OFF
+#define JOMAPI_OM_LED_OFF 0L
+#undef JOMAPI_OM_LED_BLUE
+#define JOMAPI_OM_LED_BLUE 1L
+#undef JOMAPI_OM_LED_GREEN
+#define JOMAPI_OM_LED_GREEN 2L
+#undef JOMAPI_OM_LED_CYAN
+#define JOMAPI_OM_LED_CYAN 3L
+#undef JOMAPI_OM_LED_RED
+#define JOMAPI_OM_LED_RED 4L
+#undef JOMAPI_OM_LED_MAGENTA
+#define JOMAPI_OM_LED_MAGENTA 5L
+#undef JOMAPI_OM_LED_YELLOW
+#define JOMAPI_OM_LED_YELLOW 6L
+#undef JOMAPI_OM_LED_WHITE
+#define JOMAPI_OM_LED_WHITE 7L
+#undef JOMAPI_OM_ERASE_NONE
+#define JOMAPI_OM_ERASE_NONE 0L
+#undef JOMAPI_OM_ERASE_DELETE
+#define JOMAPI_OM_ERASE_DELETE 1L
+#undef JOMAPI_OM_ERASE_QUICKFORMAT
+#define JOMAPI_OM_ERASE_QUICKFORMAT 2L
+#undef JOMAPI_OM_ERASE_WIPE
+#define JOMAPI_OM_ERASE_WIPE 3L
+#undef JOMAPI_OM_ACCEL_DEFAULT_RATE
+#define JOMAPI_OM_ACCEL_DEFAULT_RATE 100L
+#undef JOMAPI_OM_ACCEL_DEFAULT_RANGE
+#define JOMAPI_OM_ACCEL_DEFAULT_RANGE 8L
+#undef JOMAPI_OM_DOWNLOAD_NONE
+#define JOMAPI_OM_DOWNLOAD_NONE 0L
+#undef JOMAPI_OM_DOWNLOAD_ERROR
+#define JOMAPI_OM_DOWNLOAD_ERROR 1L
+#undef JOMAPI_OM_DOWNLOAD_PROGRESS
+#define JOMAPI_OM_DOWNLOAD_PROGRESS 2L
+#undef JOMAPI_OM_DOWNLOAD_COMPLETE
+#define JOMAPI_OM_DOWNLOAD_COMPLETE 3L
+#undef JOMAPI_OM_DOWNLOAD_CANCELLED
+#define JOMAPI_OM_DOWNLOAD_CANCELLED 4L
+#undef JOMAPI_OM_TRUE
+#define JOMAPI_OM_TRUE 1L
+#undef JOMAPI_OM_FALSE
+#define JOMAPI_OM_FALSE 0L
+#undef JOMAPI_OM_OK
+#define JOMAPI_OM_OK 0L
+#undef JOMAPI_OM_E_FAIL
+#define JOMAPI_OM_E_FAIL -1L
+#undef JOMAPI_OM_E_UNEXPECTED
+#define JOMAPI_OM_E_UNEXPECTED -2L
+#undef JOMAPI_OM_E_NOT_VALID_STATE
+#define JOMAPI_OM_E_NOT_VALID_STATE -3L
+#undef JOMAPI_OM_E_OUT_OF_MEMORY
+#define JOMAPI_OM_E_OUT_OF_MEMORY -4L
+#undef JOMAPI_OM_E_INVALID_ARG
+#define JOMAPI_OM_E_INVALID_ARG -5L
+#undef JOMAPI_OM_E_POINTER
+#define JOMAPI_OM_E_POINTER -6L
+#undef JOMAPI_OM_E_NOT_IMPLEMENTED
+#define JOMAPI_OM_E_NOT_IMPLEMENTED -7L
+#undef JOMAPI_OM_E_ABORT
+#define JOMAPI_OM_E_ABORT -8L
+#undef JOMAPI_OM_E_ACCESS_DENIED
+#define JOMAPI_OM_E_ACCESS_DENIED -9L
+#undef JOMAPI_OM_E_INVALID_DEVICE
+#define JOMAPI_OM_E_INVALID_DEVICE -10L
+#undef JOMAPI_OM_E_UNEXPECTED_RESPONSE
+#define JOMAPI_OM_E_UNEXPECTED_RESPONSE -11L
+#undef JOMAPI_OM_E_LOCKED
+#define JOMAPI_OM_E_LOCKED -12L
 /*
  * Class:     JOMAPI
  * Method:    OmStartup
@@ -35,6 +111,110 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmShutdown
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLogStream
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetVersion
+ * Signature: (I[I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetVersion
+  (JNIEnv *, jclass, jint, jintArray, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetBatteryLevel
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetBatteryLevel
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSelfTest
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSelfTest
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetMemoryHealth
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMemoryHealth
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetBatteryHealth
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetBatteryHealth
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetAccelerometer
+ * Signature: (I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer
+  (JNIEnv *, jclass, jint, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetLed
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLed
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetMetadata
+ * Signature: (ILjava/lang/String;I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetMetadata
+  (JNIEnv *, jclass, jint, jstring, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmEraseDataAndCommit
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmEraseDataAndCommit
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetAccelConfig
+ * Signature: (I[I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelConfig
+  (JNIEnv *, jclass, jint, jintArray, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetAccelConfig
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetAccelConfig
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmCancelDownload
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmCancelDownload
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmErrorString
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_JOMAPI_OmErrorString
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
