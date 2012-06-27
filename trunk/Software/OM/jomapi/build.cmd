@@ -1,5 +1,7 @@
 @ECHO OFF
 rem Daniel Jackson, 2006-2012
+SETLOCAL
+CD /D %~dp0
 
 ECHO Checking Java environment variable...
 IF NOT "%JAVA_HOME%"=="" GOTO JAVA_COMPILER
@@ -62,3 +64,4 @@ pause
 GOTO END
 
 :END
+ENDLOCAL
