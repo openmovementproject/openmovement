@@ -135,9 +135,6 @@ extern "C" {
 /** Data block size in bytes */
 #define OM_BLOCK_SIZE 512
 
-/** The maximum number of samples in a data block */
-#define OM_MAX_SAMPLES 120
-
 // Helpful command macros
 #define OM_COMMAND(deviceId, output, response, expected, timeout, parts)  OmCommand(deviceId, output, response, sizeof(response)/sizeof(response[0]), expected, timeout, parts, sizeof(parts)/sizeof(parts[0]))
 #define OM_MAX_PARSE_PARTS 10
