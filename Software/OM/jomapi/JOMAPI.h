@@ -250,10 +250,10 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetEcc
 /*
  * Class:     JOMAPI
  * Method:    OmGetEcc
- * Signature: (I[I)I
+ * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmGetEcc
-  (JNIEnv *, jclass, jint, jintArray);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     JOMAPI
@@ -286,6 +286,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetSessionId
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmSetSessionId
   (JNIEnv *, jclass, jint, jlong);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetMetadata
+ * Signature: (ILjava/lang/StringBuffer;)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMetadata
+  (JNIEnv *, jclass, jint, jobject);
 
 /*
  * Class:     JOMAPI
@@ -326,6 +334,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelConfig
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmSetAccelConfig
   (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetDataFilename
+ * Signature: (ILjava/lang/StringBuffer;)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataFilename
+  (JNIEnv *, jclass, jint, jobject);
 
 /*
  * Class:     JOMAPI

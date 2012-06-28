@@ -150,8 +150,7 @@ public class JOMAPI {
 	public native static int OmGetSessionId(int deviceId, long[] sessionId);
 	public native static int OmSetSessionId(int deviceId, long sessionId);
 	public static final int OM_METADATA_SIZE = 448;
-// TODO	
-	//public native static int OmGetMetadata(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata);
+	public native static int OmGetMetadata(int deviceId, StringBuffer metadata);
 	public native static int OmSetMetadata(int deviceId, String metadata, int size);
 	public native static int OmGetLastConfigTime(int deviceId, long[] time);
 	
@@ -181,8 +180,7 @@ public class JOMAPI {
 		return OM_OK;
 	}
 	
-// TODO	
-	//public native static int OmGetDataFilename(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder filenameBuffer);
+	public native static int OmGetDataFilename(int deviceId, StringBuffer filenameBuffer);
 	public native static int OmGetDataRange(int deviceId, int[] dataBlockSize, int[] dataOffsetBlocks, int[] dataNumBlocks, long[] startTime, long[] endTime);
 	public native static int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, String destinationFile);
 	public native static int OmQueryDownload(int deviceId, int[] downloadStatus, int[] value);
