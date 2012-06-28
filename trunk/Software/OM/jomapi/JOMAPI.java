@@ -26,6 +26,9 @@
 // Java JNI OMAPI Layer
 // Dan Jackson, 2012
 
+import java.util.Date;
+import java.util.Calendar;
+
 //package openmovement;
 
 public class JOMAPI {
@@ -209,44 +212,54 @@ public class JOMAPI {
 	
 	public native static String OmErrorString(int status);
 	
-// TODO
-/*	
-	public static uint OM_DATETIME_FROM_YMDHMS(int year, int month, int day, int hours, int minutes, int seconds)
+	public static long OM_DATETIME_FROM_YMDHMS(int year, int month, int day, int hours, int minutes, int seconds)
 	{ 
-			return ((((uint)(year % 100) & 0x3f) << 26) | (((uint)(month) & 0x0f) << 22) | (((uint)(day) & 0x1f) << 17) | (((uint)(hours) & 0x1f) << 12) | (((uint)(minutes) & 0x3f) << 6) | (((uint)(seconds) & 0x3f)));
+			return ((((long)(year % 100) & 0x3f) << 26) | (((long)(month) & 0x0f) << 22) | (((long)(day) & 0x1f) << 17) | (((long)(hours) & 0x1f) << 12) | (((long)(minutes) & 0x3f) << 6) | (((long)(seconds) & 0x3f)));
 	}
-	public static int OM_DATETIME_YEAR(uint dateTime)    { return ((int)((byte)(((dateTime) >> 26) & 0x3f)) + 2000); }
-	public static int OM_DATETIME_MONTH(uint dateTime)   { return ((byte)(((dateTime) >> 22) & 0x0f)); }
-	public static int OM_DATETIME_DAY(uint dateTime)     { return ((byte)(((dateTime) >> 17) & 0x1f)); }
-	public static int OM_DATETIME_HOURS(uint dateTime)   { return ((byte)(((dateTime) >> 12) & 0x1f)); }
-	public static int OM_DATETIME_MINUTES(uint dateTime) { return ((byte)(((dateTime) >>  6) & 0x3f)); }
-	public static int OM_DATETIME_SECONDS(uint dateTime) { return ((byte)(((dateTime)      ) & 0x3f)); }
-	public static final uint OM_DATETIME_ZERO = 0x00000000;
-	public static final uint OM_DATETIME_INFINITE = 0xffffffff;
-	public static final uint OM_DATETIME_MIN_VALID = ((((uint)( 0) & 0x3f) << 26) | (((uint)( 1) & 0x0f) << 22) | (((uint)( 1) & 0x1f) << 17) | (((uint)( 0) & 0x1f) << 12) | (((uint)( 0) & 0x3f) << 6) | (((uint)( 0) & 0x3f)));
-	public static final uint OM_DATETIME_MAX_VALID = ((((uint)(63) & 0x3f) << 26) | (((uint)(12) & 0x0f) << 22) | (((uint)(31) & 0x1f) << 17) | (((uint)(23) & 0x1f) << 12) | (((uint)(59) & 0x3f) << 6) | (((uint)(59) & 0x3f)));
-	public static DateTime OmDateTimeUnpack(uint value, ushort fractional = 0x0000)
+	public static int OM_DATETIME_YEAR(long dateTime)    { return (int)((((dateTime) >> 26) & 0x3f)) + 2000; }
+	public static int OM_DATETIME_MONTH(long dateTime)   { return (int)(((dateTime) >> 22) & 0x0f); }
+	public static int OM_DATETIME_DAY(long dateTime)     { return (int)(((dateTime) >> 17) & 0x1f); }
+	public static int OM_DATETIME_HOURS(long dateTime)   { return (int)(((dateTime) >> 12) & 0x1f); }
+	public static int OM_DATETIME_MINUTES(long dateTime) { return (int)(((dateTime) >>  6) & 0x3f); }
+	public static int OM_DATETIME_SECONDS(long dateTime) { return (int)(((dateTime)      ) & 0x3f); }
+	public static final long OM_DATETIME_ZERO = 0x00000000;
+	public static final long OM_DATETIME_INFINITE = 0xffffffff;
+	public static final long OM_DATETIME_MIN_VALID = ((((long)( 0) & 0x3f) << 26) | (((long)( 1) & 0x0f) << 22) | (((long)( 1) & 0x1f) << 17) | (((long)( 0) & 0x1f) << 12) | (((long)( 0) & 0x3f) << 6) | (((long)( 0) & 0x3f)));
+	public static final long OM_DATETIME_MAX_VALID = ((((long)(63) & 0x3f) << 26) | (((long)(12) & 0x0f) << 22) | (((long)(31) & 0x1f) << 17) | (((long)(23) & 0x1f) << 12) | (((long)(59) & 0x3f) << 6) | (((long)(59) & 0x3f)));
+	public static Date OmDateTimeUnpack(long value) { return OmDateTimeUnpack(value, 0); }
+	public static Date OmDateTimeUnpack(long value, int fractional)
 	{
-		if (value == OM_DATETIME_ZERO) { return DateTime.MinValue; }
-		if (value == OM_DATETIME_INFINITE) { return DateTime.MaxValue; }
+		if (value == OM_DATETIME_ZERO) { Calendar cal = Calendar.getInstance(); cal.setTimeInMillis(0); return cal.getTime(); }
+		if (value >= OM_DATETIME_INFINITE || value < 0) { Calendar cal = Calendar.getInstance(); cal.setTimeInMillis(Long.MAX_VALUE); return cal.getTime(); }
 		try
 		{
-			DateTime ret = new DateTime(OM_DATETIME_YEAR(value), OM_DATETIME_MONTH(value), OM_DATETIME_DAY(value), OM_DATETIME_HOURS(value), OM_DATETIME_MINUTES(value), OM_DATETIME_SECONDS(value));
-			if (fractional > 0x0000) { ret.AddSeconds((double)fractional / 0x10000); }
-			return ret;
+			Calendar cal = Calendar.getInstance();
+			cal.clear();
+			cal.set(Calendar.YEAR, OM_DATETIME_YEAR(value));
+			cal.set(Calendar.MONTH, OM_DATETIME_MONTH(value));
+			cal.set(Calendar.DAY_OF_MONTH, OM_DATETIME_DAY(value));
+			cal.set(Calendar.HOUR_OF_DAY, OM_DATETIME_HOURS(value));
+			cal.set(Calendar.MINUTE, OM_DATETIME_MINUTES(value));
+			cal.set(Calendar.SECOND, OM_DATETIME_SECONDS(value));
+			cal.set(Calendar.MILLISECOND, 1000 * fractional / 0x10000);
+			return cal.getTime();
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
-			return DateTime.MinValue;
+			Calendar cal = Calendar.getInstance(); 
+			cal.setTimeInMillis(0); 
+			return cal.getTime();
 		}
 	}
-	public static uint OmDateTimePack(DateTime value)
+	public static long OmDateTimePack(Date value)
 	{
-		if (value == DateTime.MinValue || value.Year < 2000) { return OM_DATETIME_ZERO; }
-		if (value == DateTime.MaxValue || value.Year > 2063) { return OM_DATETIME_INFINITE; }
-		return OM_DATETIME_FROM_YMDHMS(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(value);
+		int year = cal.get(Calendar.YEAR);
+		if (value.getTime() <= 0 || year < 2000) { return OM_DATETIME_ZERO; }
+		if (value.getTime() >= Long.MAX_VALUE || year > 2063) { return OM_DATETIME_INFINITE; }
+		return OM_DATETIME_FROM_YMDHMS(year, cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 	}
-*/
 
 	public native static long OmReaderOpen(String binaryFilename);
 	public static long OmReaderOpenDeviceData(int deviceId)

@@ -91,6 +91,14 @@ extern "C" {
 #define JOMAPI_OM_E_UNEXPECTED_RESPONSE -11L
 #undef JOMAPI_OM_E_LOCKED
 #define JOMAPI_OM_E_LOCKED -12L
+#undef JOMAPI_OM_DATETIME_ZERO
+#define JOMAPI_OM_DATETIME_ZERO 0i64
+#undef JOMAPI_OM_DATETIME_INFINITE
+#define JOMAPI_OM_DATETIME_INFINITE -1i64
+#undef JOMAPI_OM_DATETIME_MIN_VALID
+#define JOMAPI_OM_DATETIME_MIN_VALID 4325376i64
+#undef JOMAPI_OM_DATETIME_MAX_VALID
+#define JOMAPI_OM_DATETIME_MAX_VALID 4282351355i64
 #undef JOMAPI_OM_VALUE_DEVICEID
 #define JOMAPI_OM_VALUE_DEVICEID 3L
 #undef JOMAPI_OM_VALUE_SESSIONID
@@ -254,14 +262,6 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetEcc
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmGetEcc
   (JNIEnv *, jclass, jint);
-
-/*
- * Class:     JOMAPI
- * Method:    OmCommand
- * Signature: (ILjava/lang/String;[BILjava/lang/String;I[Ljava/lang/String;I)I
- */
-JNIEXPORT jint JNICALL Java_JOMAPI_OmCommand
-  (JNIEnv *, jclass, jint, jstring, jbyteArray, jint, jstring, jint, jobjectArray, jint);
 
 /*
  * Class:     JOMAPI
@@ -449,14 +449,6 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderNextBlock
 
 /*
  * Class:     JOMAPI
- * Method:    OmReaderBuffer
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderBuffer
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     JOMAPI
  * Method:    OmReaderTimestamp
  * Signature: (JI[I)J
  */
@@ -470,22 +462,6 @@ JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue
   (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     JOMAPI
- * Method:    OmReaderRawHeaderPacket
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawHeaderPacket
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     JOMAPI
- * Method:    OmReaderRawDataPacket
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawDataPacket
-  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     JOMAPI
