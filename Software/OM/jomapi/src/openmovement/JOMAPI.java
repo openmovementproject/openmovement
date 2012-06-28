@@ -30,10 +30,10 @@
 //       even at the expense of some inefficiencies, inelegance, type safety, etc.
 //       For example, the use of single element arrays to simulate 'out' parameters is particularly bad!
 
+package openmovement;
+
 import java.util.Date;
 import java.util.Calendar;
-
-//package openmovement;
 
 public class JOMAPI {
 

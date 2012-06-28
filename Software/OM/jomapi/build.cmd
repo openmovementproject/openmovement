@@ -10,11 +10,12 @@ GOTO END
 
 :JAVA_COMPILER
 ECHO Compiling Java file...
-"%JAVA_HOME%\bin\javac.exe" JOMAPI.java
+if not exist class mkdir class
+"%JAVA_HOME%\bin\javac.exe" -classpath class -d class -sourcepath src src/openmovement/JOMAPI.java
 IF ERRORLEVEL 1 GOTO ERROR
 
 ECHO Creating JNI header file...
-"%JAVA_HOME%\bin\javah.exe" -classpath . -jni JOMAPI
+"%JAVA_HOME%\bin\javah.exe" -classpath class -d c -jni openmovement.JOMAPI
 IF ERRORLEVEL 1 GOTO ERROR
 
 IF EXIST "%VS100COMNTOOLS%\vsvars32.bat" SET COMNTOOLS=%VS100COMNTOOLS%
@@ -35,7 +36,7 @@ ECHO Setting environment variables for C compiler (%PLATFORM%)...
 call "%COMNTOOLS%\..\..\VC\vcvarsall.bat" %PLATFORM%
 
 ECHO Compiling JNI file...
-cl -c /D WIN32 /EHsc /I "%JAVA_HOME%\include" /I "%JAVA_HOME%\include\win32" /I "..\omapi\include" /TcJOMAPI.c /Tp"..\omapi\src\DeviceFinder.cpp" /Tp"..\omapi\src\omapi-devicefinder.cpp" /Tc"..\omapi\src\omapi-download.c" /Tc"..\omapi\src\omapi-internal.c" /Tc"..\omapi\src\omapi-main.c" /Tc"..\omapi\src\omapi-reader.c" /Tc"..\omapi\src\omapi-settings.c" /Tc"..\omapi\src\omapi-status.c"
+cl -c /D WIN32 /EHsc /I "%JAVA_HOME%\include" /I "%JAVA_HOME%\include\win32" /I "..\omapi\include" /Tc"c\JOMAPI.c" /Tp"..\omapi\src\DeviceFinder.cpp" /Tp"..\omapi\src\omapi-devicefinder.cpp" /Tc"..\omapi\src\omapi-download.c" /Tc"..\omapi\src\omapi-internal.c" /Tc"..\omapi\src\omapi-main.c" /Tc"..\omapi\src\omapi-reader.c" /Tc"..\omapi\src\omapi-settings.c" /Tc"..\omapi\src\omapi-status.c"
 IF ERRORLEVEL 1 GOTO ERROR
 
 ECHO Linking JNI files... %PLATFORM%
@@ -55,11 +56,11 @@ rem GOTO END
 
 :RUN
 ECHO Compiling test program...
-"%JAVA_HOME%\bin\javac.exe" JOM.java
+"%JAVA_HOME%\bin\javac.exe" -classpath class -d class -sourcepath src src/openmovement/JOM.java
 IF ERRORLEVEL 1 GOTO ERROR
 
 ECHO Running test program...
-java.exe -cp . JOM
+java.exe -classpath class openmovement.JOM
 IF ERRORLEVEL 1 GOTO ERROR
 GOTO END
 

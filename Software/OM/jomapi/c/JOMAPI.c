@@ -26,7 +26,7 @@
 // Java JNI OMAPI Layer
 // Dan Jackson, 2012
 
-#include "JOMAPI.h"
+#include "openmovement_JOMAPI.h"
 #include "omapi.h"
 
 #ifdef __cplusplus
@@ -180,7 +180,7 @@ static void downloadCallback(void *reference, int deviceId, OM_DOWNLOAD_STATUS d
 }
 
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmStartup(JNIEnv *env, jclass jObj, jint version)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmStartup(JNIEnv *env, jclass jObj, jint version)
 {
     // Get handle to the JVM
     (*env)->GetJavaVM(env, &state.javaVM);
@@ -205,17 +205,17 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmStartup(JNIEnv *env, jclass jObj, jint vers
     return OmStartup((int)version);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmShutdown(JNIEnv *env, jclass jObj)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmShutdown(JNIEnv *env, jclass jObj)
 {
 	return OmShutdown();
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLogStream(JNIEnv *env, jclass jObj, jint fd)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetLogStream(JNIEnv *env, jclass jObj, jint fd)
 {
 	return OmSetLogStream((int)fd);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDeviceIds(JNIEnv *env, jclass jObj, jintArray deviceIds, jint maxDevices)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetDeviceIds(JNIEnv *env, jclass jObj, jintArray deviceIds, jint maxDevices)
 {
     int *intDeviceIds;
     int retval;
@@ -263,7 +263,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDeviceIds(JNIEnv *env, jclass jObj, jint
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetVersion(JNIEnv *env, jclass jObj, jint deviceId, jintArray firmwareVersionArray, jintArray hardwareVersionArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetVersion(JNIEnv *env, jclass jObj, jint deviceId, jintArray firmwareVersionArray, jintArray hardwareVersionArray)
 {
     int firmwareVersion = 0, hardwareVersion = 0;
     int retval = OmGetVersion(deviceId, &firmwareVersion, &hardwareVersion);
@@ -272,27 +272,27 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetVersion(JNIEnv *env, jclass jObj, jint d
     return retval;
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetBatteryLevel(JNIEnv *env, jclass jObj, jint deviceId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetBatteryLevel(JNIEnv *env, jclass jObj, jint deviceId)
 {
 	return OmGetBatteryLevel(deviceId);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSelfTest(JNIEnv *env, jclass jObj, jint deviceId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSelfTest(JNIEnv *env, jclass jObj, jint deviceId)
 {
 	return OmSelfTest(deviceId);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMemoryHealth(JNIEnv *env, jclass jObj, jint deviceId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetMemoryHealth(JNIEnv *env, jclass jObj, jint deviceId)
 {
     return OmGetMemoryHealth(deviceId);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetBatteryHealth(JNIEnv *env, jclass jObj, jint deviceId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetBatteryHealth(JNIEnv *env, jclass jObj, jint deviceId)
 {
 	return OmGetBatteryHealth(deviceId);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer(JNIEnv *env, jclass jObj, jint deviceId, jintArray xArray, jintArray yArray, jintArray zArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetAccelerometer(JNIEnv *env, jclass jObj, jint deviceId, jintArray xArray, jintArray yArray, jintArray zArray)
 {
     int x = 0, y = 0, z = 0;
     int retval = OmGetAccelerometer(deviceId, &x, &y, &z);
@@ -302,7 +302,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer(JNIEnv *env, jclass jObj, 
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetTime(JNIEnv *env, jclass jObj, jint deviceId, jlongArray timeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetTime(JNIEnv *env, jclass jObj, jint deviceId, jlongArray timeArray)
 {
     OM_DATETIME time = 0;
     int retval = OmGetTime(deviceId, &time);
@@ -310,18 +310,18 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetTime(JNIEnv *env, jclass jObj, jint devi
     return retval;
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetTime(JNIEnv *env, jclass jObj, jint deviceId, jlong time)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetTime(JNIEnv *env, jclass jObj, jint deviceId, jlong time)
 {
     int retval = OmSetTime(deviceId, (OM_DATETIME)time);
     return retval;
 }
     
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLed(JNIEnv *env, jclass jObj, jint deviceId, jint ledState)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetLed(JNIEnv *env, jclass jObj, jint deviceId, jint ledState)
 {
 	return OmSetLed(deviceId, ledState);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmIsLocked(JNIEnv *env, jclass jObj, jint deviceId, jintArray hasLockCodeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmIsLocked(JNIEnv *env, jclass jObj, jint deviceId, jintArray hasLockCodeArray)
 {
     int hasLockCode = 0;
     int retval = OmIsLocked(deviceId, &hasLockCode);
@@ -329,38 +329,38 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmIsLocked(JNIEnv *env, jclass jObj, jint dev
     return retval;
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLock(JNIEnv *env, jclass jObj, jint deviceId, jint code)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetLock(JNIEnv *env, jclass jObj, jint deviceId, jint code)
 {
 	if (code < 0x0000 || code > 0xffff) { return OM_E_INVALID_ARG; }	// range-check unsigned short
 	return OmSetLock(deviceId, (unsigned short)code);
 }
 
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmUnlock(JNIEnv *env, jclass jObj, jint deviceId, jint code)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmUnlock(JNIEnv *env, jclass jObj, jint deviceId, jint code)
 {
 	if (code < 0x0000 || code > 0xffff) { return OM_E_INVALID_ARG; }	// range-check unsigned short
 	return OmUnlock(deviceId, (unsigned short)code);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetEcc(JNIEnv *env, jclass jObj, jint deviceId, jint state)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetEcc(JNIEnv *env, jclass jObj, jint deviceId, jint state)
 {
 	return OmSetEcc(deviceId, state);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetEcc(JNIEnv *env, jclass jObj, jint deviceId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetEcc(JNIEnv *env, jclass jObj, jint deviceId)
 {
 	return OmGetEcc(deviceId);
 }
 
 // TODO: OmCommand()
 /*
-JNIEXPORT jint JNICALL Java_JOMAPI_OmCommand(JNIEnv *env, jclass jObj, jint deviceId, jstring command, jbyteArray buffer, jint bufferSize, jstring expected, jint timeoutMs, jobjectArray parseParts, jint parseMax)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmCommand(JNIEnv *env, jclass jObj, jint deviceId, jstring command, jbyteArray buffer, jint bufferSize, jstring expected, jint timeoutMs, jobjectArray parseParts, jint parseMax)
 {
 	// OmCommand(int deviceId, String command, String buffer, size_t bufferSize, String expected, unsigned int timeoutMs, char **parseParts, int parseMax);
 }
 */
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDelays(JNIEnv *env, jclass jObj, jint deviceId, jlongArray startTimeArray, jlongArray stopTimeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetDelays(JNIEnv *env, jclass jObj, jint deviceId, jlongArray startTimeArray, jlongArray stopTimeArray)
 {
 	OM_DATETIME startTime = 0;
 	OM_DATETIME stopTime = 0;
@@ -370,14 +370,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDelays(JNIEnv *env, jclass jObj, jint de
 	return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetDelays(JNIEnv *env, jclass jObj, jint deviceId, jlong startTime, jlong stopTime)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetDelays(JNIEnv *env, jclass jObj, jint deviceId, jlong startTime, jlong stopTime)
 {
 	if (startTime < 0x00000000ul || startTime > 0xfffffffful) { return OM_E_INVALID_ARG; }	// range-check unsigned long
 	if (stopTime  < 0x00000000ul || stopTime  > 0xfffffffful) { return OM_E_INVALID_ARG; }	// range-check unsigned long
 	return OmSetDelays(deviceId, (OM_DATETIME)startTime, (OM_DATETIME)stopTime);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetSessionId(JNIEnv *env, jclass jObj, jint deviceId, jlongArray sessionIdArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetSessionId(JNIEnv *env, jclass jObj, jint deviceId, jlongArray sessionIdArray)
 {
 	unsigned int sessionId = 0;
 	int retval = OmGetSessionId(deviceId, &sessionId);
@@ -385,13 +385,13 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetSessionId(JNIEnv *env, jclass jObj, jint
 	return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetSessionId(JNIEnv *env, jclass jObj, jint deviceId, jlong sessionId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetSessionId(JNIEnv *env, jclass jObj, jint deviceId, jlong sessionId)
 {
 	if (sessionId < 0x00000000ul || sessionId > 0xfffffffful) { return OM_E_INVALID_ARG; }	// range-check unsigned long
 	return OmSetSessionId(deviceId, (unsigned int)sessionId);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMetadata(JNIEnv *env, jclass jObj, jint deviceId, jobject metadataBufferObject)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetMetadata(JNIEnv *env, jclass jObj, jint deviceId, jobject metadataBufferObject)
 {
 	int retval;
 	char metadataBuffer[OM_METADATA_SIZE + 1] = {0};
@@ -400,7 +400,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMetadata(JNIEnv *env, jclass jObj, jint 
 	return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetMetadata(JNIEnv *env, jclass jObj, jint deviceId, jstring metadataString, jint size)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetMetadata(JNIEnv *env, jclass jObj, jint deviceId, jstring metadataString, jint size)
 {
     int retval;
     const char *metadata = (*env)->GetStringUTFChars(env, metadataString, NULL);
@@ -410,7 +410,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetMetadata(JNIEnv *env, jclass jObj, jint 
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetLastConfigTime(JNIEnv *env, jclass jObj, jint deviceId, jlongArray timeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetLastConfigTime(JNIEnv *env, jclass jObj, jint deviceId, jlongArray timeArray)
 {
     OM_DATETIME time = 0;
     int retval = OmGetLastConfigTime(deviceId, &time);
@@ -418,12 +418,12 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetLastConfigTime(JNIEnv *env, jclass jObj,
     return retval;
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmEraseDataAndCommit(JNIEnv *env, jclass jObj, jint deviceId, jint eraseLevel)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmEraseDataAndCommit(JNIEnv *env, jclass jObj, jint deviceId, jint eraseLevel)
 {
 	return OmEraseDataAndCommit(deviceId, eraseLevel);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelConfig(JNIEnv *env, jclass jObj, jint deviceId, jintArray rateArray, jintArray rangeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetAccelConfig(JNIEnv *env, jclass jObj, jint deviceId, jintArray rateArray, jintArray rangeArray)
 {
     int rate = 0, range = 0;
     int retval = OmGetAccelConfig(deviceId, &rate, &range);
@@ -432,12 +432,12 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelConfig(JNIEnv *env, jclass jObj, ji
     return retval;
 }
     
-JNIEXPORT jint JNICALL Java_JOMAPI_OmSetAccelConfig(JNIEnv *env, jclass jObj, jint deviceId, jint rate, jint range)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmSetAccelConfig(JNIEnv *env, jclass jObj, jint deviceId, jint rate, jint range)
 {
 	return OmSetAccelConfig(deviceId, rate, range);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataFilename(JNIEnv *env, jclass jObj, jint deviceId, jobject filenameBufferObject)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetDataFilename(JNIEnv *env, jclass jObj, jint deviceId, jobject filenameBufferObject)
 {
 	int retval;
 	char filenameBuffer[OM_MAX_PATH + 1] = {0};
@@ -446,7 +446,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataFilename(JNIEnv *env, jclass jObj, j
 	return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataRange(JNIEnv *env, jclass jObj, jint deviceId, jintArray dataBlockSizeArray, jintArray dataOffsetBlocksArray, jintArray dataNumBlocksArray, jlongArray startTimeArray, jlongArray endTimeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetDataRange(JNIEnv *env, jclass jObj, jint deviceId, jintArray dataBlockSizeArray, jintArray dataOffsetBlocksArray, jintArray dataNumBlocksArray, jlongArray startTimeArray, jlongArray endTimeArray)
 {
     int dataBlockSize = 0, dataOffsetBlocks = 0, dataNumBlocks = 0;
 	OM_DATETIME startTime = 0, endTime = 0;
@@ -459,7 +459,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataRange(JNIEnv *env, jclass jObj, jint
     return retval;
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmBeginDownloading(JNIEnv *env, jclass jObj, jint deviceId, jint dataOffsetBlocks, jint dataLengthBlocks, jstring destinationFileString)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmBeginDownloading(JNIEnv *env, jclass jObj, jint deviceId, jint dataOffsetBlocks, jint dataLengthBlocks, jstring destinationFileString)
 {
     int retval;
     const char *destinationFile = (*env)->GetStringUTFChars(env, destinationFileString, NULL);
@@ -469,7 +469,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmBeginDownloading(JNIEnv *env, jclass jObj, 
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmQueryDownload(JNIEnv *env, jclass jObj, jint deviceId, jintArray downloadStatusArray, jintArray valueArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmQueryDownload(JNIEnv *env, jclass jObj, jint deviceId, jintArray downloadStatusArray, jintArray valueArray)
 {
     OM_DOWNLOAD_STATUS downloadStatus = 0;
 	int value = 0;
@@ -480,7 +480,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmQueryDownload(JNIEnv *env, jclass jObj, jin
 	
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmWaitForDownload(JNIEnv *env, jclass jObj, jint deviceId, jintArray downloadStatusArray, jintArray valueArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmWaitForDownload(JNIEnv *env, jclass jObj, jint deviceId, jintArray downloadStatusArray, jintArray valueArray)
 {
     OM_DOWNLOAD_STATUS downloadStatus = 0;
 	int value = 0;
@@ -490,12 +490,12 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmWaitForDownload(JNIEnv *env, jclass jObj, j
     return retval;
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmCancelDownload(JNIEnv *env, jclass jObj, jint deviceId)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmCancelDownload(JNIEnv *env, jclass jObj, jint deviceId)
 {
 	return OmCancelDownload(deviceId);
 }
   
-JNIEXPORT jstring JNICALL Java_JOMAPI_OmErrorString(JNIEnv *env, jclass jObj, jint status)
+JNIEXPORT jstring JNICALL Java_openmovement_JOMAPI_OmErrorString(JNIEnv *env, jclass jObj, jint status)
 {
     const char *error = OmErrorString(status);
 	jstring errorString = ((*env)->NewStringUTF(env, error));
@@ -503,7 +503,7 @@ JNIEXPORT jstring JNICALL Java_JOMAPI_OmErrorString(JNIEnv *env, jclass jObj, ji
 	return errorString;
 }
 
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderOpen(JNIEnv *env, jclass jObj, jstring binaryFilenameString)
+JNIEXPORT jlong JNICALL Java_openmovement_JOMAPI_OmReaderOpen(JNIEnv *env, jclass jObj, jstring binaryFilenameString)
 {
     OmReaderHandle reader = NULL;
     const char *binaryFilename = (*env)->GetStringUTFChars(env, binaryFilenameString, NULL);
@@ -513,7 +513,7 @@ JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderOpen(JNIEnv *env, jclass jObj, jstri
     return (jlong)reader;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataRange(JNIEnv *env, jclass jObj, jlong reader, jintArray dataBlockSizeArray, jintArray dataOffsetBlocksArray, jintArray dataNumBlocksArray, jlongArray startTimeArray, jlongArray endTimeArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderDataRange(JNIEnv *env, jclass jObj, jlong reader, jintArray dataBlockSizeArray, jintArray dataOffsetBlocksArray, jintArray dataNumBlocksArray, jlongArray startTimeArray, jlongArray endTimeArray)
 {
     int dataBlockSize = 0, dataOffsetBlocks = 0, dataNumBlocks = 0;
 	OM_DATETIME startTime = 0, endTime = 0;
@@ -526,7 +526,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataRange(JNIEnv *env, jclass jObj, j
     return retval;
 }
 
-JNIEXPORT jstring JNICALL Java_JOMAPI_OmReaderMetadata(JNIEnv *env, jclass jObj, jlong reader, jintArray deviceIdArray, jlongArray sessionIdArray)
+JNIEXPORT jstring JNICALL Java_openmovement_JOMAPI_OmReaderMetadata(JNIEnv *env, jclass jObj, jlong reader, jintArray deviceIdArray, jlongArray sessionIdArray)
 {
     int deviceId;
 	unsigned int sessionId;
@@ -538,22 +538,22 @@ JNIEXPORT jstring JNICALL Java_JOMAPI_OmReaderMetadata(JNIEnv *env, jclass jObj,
 	return metadataString;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataBlockPosition(JNIEnv *env, jclass jObj, jlong reader)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderDataBlockPosition(JNIEnv *env, jclass jObj, jlong reader)
 {
 	return OmReaderDataBlockPosition((OmReaderHandle)reader);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataBlockSeek(JNIEnv *env, jclass jObj, jlong reader, jint dataBlockNumber)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderDataBlockSeek(JNIEnv *env, jclass jObj, jlong reader, jint dataBlockNumber)
 {
 	return OmReaderDataBlockSeek((OmReaderHandle)reader, dataBlockNumber);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderNextBlock(JNIEnv *env, jclass jObj, jlong reader)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderNextBlock(JNIEnv *env, jclass jObj, jlong reader)
 {
 	return OmReaderNextBlock((OmReaderHandle)reader);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderBufferCopy(JNIEnv *env, jclass jObj, jlong reader, jshortArray bufferArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderBufferCopy(JNIEnv *env, jclass jObj, jlong reader, jshortArray bufferArray)
 {
 	const short *buffer;
 	int count;
@@ -569,7 +569,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderBufferCopy(JNIEnv *env, jclass jObj, 
 	return OM_OK;
 }
 
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp(JNIEnv *env, jclass jObj, jlong reader, jint index, jintArray fractionalArray)
+JNIEXPORT jlong JNICALL Java_openmovement_JOMAPI_OmReaderTimestamp(JNIEnv *env, jclass jObj, jlong reader, jint index, jintArray fractionalArray)
 {
 	OM_DATETIME timestamp = 0;
 	unsigned short fractional = 0;
@@ -578,12 +578,12 @@ JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp(JNIEnv *env, jclass jObj, 
 	return timestamp;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue(JNIEnv *env, jclass jObj, jlong reader, jint valueType)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderGetValue(JNIEnv *env, jclass jObj, jlong reader, jint valueType)
 {
 	return OmReaderGetValue((OmReaderHandle)reader, (OM_READER_VALUE_TYPE)valueType);
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawHeaderPacketCopy(JNIEnv *env, jclass jObj, jlong reader, jbyteArray headerPacketArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderRawHeaderPacketCopy(JNIEnv *env, jclass jObj, jlong reader, jbyteArray headerPacketArray)
 {
 	const OM_READER_HEADER_PACKET *headerPacket;
 	int count;
@@ -599,7 +599,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawHeaderPacketCopy(JNIEnv *env, jcla
 	return OM_OK;
 }
 
-JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawDataPacketCopy(JNIEnv *env, jclass jObj, jlong reader, jbyteArray dataPacketArray)
+JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmReaderRawDataPacketCopy(JNIEnv *env, jclass jObj, jlong reader, jbyteArray dataPacketArray)
 {
 	const OM_READER_DATA_PACKET *dataPacket;
 	int count;
@@ -615,7 +615,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawDataPacketCopy(JNIEnv *env, jclass
 	return OM_OK;
 }
 
-JNIEXPORT void JNICALL Java_JOMAPI_OmReaderClose(JNIEnv *env, jclass jObj, jlong reader)
+JNIEXPORT void JNICALL Java_openmovement_JOMAPI_OmReaderClose(JNIEnv *env, jclass jObj, jlong reader)
 {
 	OmReaderClose((OmReaderHandle)reader);
 }
