@@ -358,7 +358,17 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetSessionId(JNIEnv *env, jclass jObj, jint
 	return OmSetSessionId(deviceId, (unsigned int)sessionId);
 }
 
-// TODO: OmGetMetadata(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata);
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMetadata(JNIEnv *env, jclass jObj, jint deviceId, jobject metadataBufferObject)
+{
+	int retval;
+	char metadataBuffer[OM_METADATA_SIZE + 1] = {0};
+	retval = OmGetMetadata(deviceId, metadataBuffer);
+
+// TODO: +++ Output value in StringBuffer metadataBufferObject
+// See: http://www.javaworld.com/javaworld/javatips/jw-javatip54.html
+	
+	return retval;
+}
 
 JNIEXPORT jint JNICALL Java_JOMAPI_OmSetMetadata(JNIEnv *env, jclass jObj, jint deviceId, jstring metadataString, jint size)
 {
@@ -397,7 +407,17 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetAccelConfig(JNIEnv *env, jclass jObj, ji
 	return OmSetAccelConfig(deviceId, rate, range);
 }
   
-// TODO: OmGetDataFilename(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder filenameBuffer);
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataFilename(JNIEnv *env, jclass jObj, jint deviceId, jobject filenameBufferObject)
+{
+	int retval;
+	char filenameBuffer[OM_MAX_PATH + 1] = {0};
+	retval = OmGetDataFilename(deviceId, filenameBuffer);
+
+// TODO: +++ Output value in StringBuffer filenameBufferObject
+// See: http://www.javaworld.com/javaworld/javatips/jw-javatip54.html
+	
+	return retval;
+}
 
 JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataRange(JNIEnv *env, jclass jObj, jint deviceId, jintArray dataBlockSizeArray, jintArray dataOffsetBlocksArray, jintArray dataNumBlocksArray, jlongArray startTimeArray, jlongArray endTimeArray)
 {
