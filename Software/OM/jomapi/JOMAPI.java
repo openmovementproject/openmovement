@@ -143,8 +143,10 @@ public class JOMAPI {
 	public native static int OmUnlock(int deviceId, int code);
 	public native static int OmSetEcc(int deviceId, int state);
 	public native static int OmGetEcc(int deviceId);
-// TODO
-	//public native static int OmCommand(int deviceId, String command, String buffer, size_t bufferSize, String expected, unsigned int timeoutMs, char **parseParts, int parseMax);
+	
+// TODO: OmCommand()
+//public native static int OmCommand(int deviceId, String command, byte[] buffer, int bufferSize, String expected, int timeoutMs, String[] parseParts, int parseMax);
+	
 	public native static int OmGetDelays(int deviceId, long[] startTime, long[] stopTime);
 	public native static int OmSetDelays(int deviceId, long startTime, long stopTime);
 	public native static int OmGetSessionId(int deviceId, long[] sessionId);
@@ -247,22 +249,22 @@ public class JOMAPI {
 */
 
 	public native static long OmReaderOpen(String binaryFilename);
-// TODO	
-/*
 	public static long OmReaderOpenDeviceData(int deviceId)
 	{
-		StringBuilder filename = new StringBuilder(256);
+		StringBuffer filename = new StringBuffer(256 + 1);
 		int ret = OmGetDataFilename(deviceId, filename);
 		if (ret != OM_OK) { return ret; }
-		return OmReaderOpen(filename.ToString());
+		return OmReaderOpen(filename.toString());
 	}
-*/	
 	public native static int OmReaderDataRange(long reader, int[] dataBlockSize, int[] dataOffsetBlocks, int[] dataNumBlocks, long[] startTime, long[] endTime);
 	public native static String OmReaderMetadata(long reader, int[] deviceId, long[] sessionId);
 	public native static int OmReaderDataBlockPosition(long reader);
 	public native static int OmReaderDataBlockSeek(long reader, int dataBlockNumber);
 	public native static int OmReaderNextBlock(long reader);
-	public native static long OmReaderBuffer(long reader);
+	
+// TODO: A more useful OmReaderBuffer(), use a short array?
+//	public native static long OmReaderBuffer(long reader);
+	
 	public native static long OmReaderTimestamp(long reader, int index, int[] fractional);
 	public static final int OM_VALUE_DEVICEID = 3;			// OM_READER_VALUE_TYPE
 	public static final int OM_VALUE_SESSIONID = 4;			// OM_READER_VALUE_TYPE
@@ -276,7 +278,6 @@ public class JOMAPI {
 	public static final int OM_VALUE_BATTERY_MV = 110;		// OM_READER_VALUE_TYPE
 	public native static int OmReaderGetValue(long reader, int valueType);
 
-// TODO	
 /*
 	[StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]
 	public unsafe class OM_READER_HEADER_PACKET
@@ -299,8 +300,11 @@ public class JOMAPI {
 		[FieldOffset(64)] public fixed byte annotation[448]; // @64 +448 Scratch buffer / meta-data (448 characters) 
 		[FieldOffset(512)] public fixed byte reserved[512];  // @512 +512 Reserved for post-collection scratch buffer / meta-data (512 characters) 
 	};
-	public static extern OM_READER_HEADER_PACKET OmReaderRawHeaderPacket(IntPtr reader);
+*/	
+// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
+//	public native static long OmReaderRawHeaderPacket(long reader);
 
+/*
 	[StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]
 	public class OM_READER_DATA_PACKET
 	{
@@ -321,8 +325,9 @@ public class JOMAPI {
 		[FieldOffset(30)] public fixed byte rawSampleData[480];   // @30 +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right) 
 		[FieldOffset(510)] public ushort checksum;          // @510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero) 
 	};
-	public static extern OM_READER_DATA_PACKET OmReaderRawDataPacket(IntPtr reader);
 */
+// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
+//	public native static long OmReaderRawDataPacket(long reader);
 
 	public native static void OmReaderClose(long reader);
 	

@@ -84,7 +84,7 @@ static void logCallback(void *reference, const char *message)
         jstring messageString = ((*env)->NewStringUTF(env, message));
         jvalue args[1];
         args[0].l = (jobject)messageString;
-        (*env)->CallStaticVoidMethod(env, state.classJomapi, state.midLogCallback, args);
+        (*env)->CallStaticVoidMethodA(env, state.classJomapi, state.midLogCallback, args);
         (*env)->DeleteLocalRef(env, messageString);
 	}
     
@@ -107,7 +107,7 @@ static void deviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS devic
         jvalue args[2];
         args[0].i = (jint)deviceId;
         args[1].i = (jint)deviceStatus;
-        (*env)->CallStaticVoidMethod(env, state.classJomapi, state.midDeviceCallback, args);
+        (*env)->CallStaticVoidMethodA(env, state.classJomapi, state.midDeviceCallback, args);
 	}
     
     (*state.javaVM)->DetachCurrentThread(state.javaVM);
@@ -130,7 +130,7 @@ static void downloadCallback(void *reference, int deviceId, OM_DOWNLOAD_STATUS d
         args[0].i = (jint)deviceId;
         args[1].i = (jint)downloadStatus;
         args[2].i = (jint)downloadValue;
-        (*env)->CallStaticVoidMethod(env, state.classJomapi, state.midDownloadCallback, args);
+        (*env)->CallStaticVoidMethodA(env, state.classJomapi, state.midDownloadCallback, args);
 	}
     
     (*state.javaVM)->DetachCurrentThread(state.javaVM);
@@ -363,10 +363,18 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMetadata(JNIEnv *env, jclass jObj, jint 
 	int retval;
 	char metadataBuffer[OM_METADATA_SIZE + 1] = {0};
 	retval = OmGetMetadata(deviceId, metadataBuffer);
-
-// TODO: +++ Output value in StringBuffer metadataBufferObject
-// See: http://www.javaworld.com/javaworld/javatips/jw-javatip54.html
-	
+	if (metadataBufferObject != null)	// Out: metadataBuffer
+	{
+		jclass sbClass = (*env)->GetObjectClass(env, metadataBufferObject);
+		jmethodID midReplace = (*env)->GetMethodID(sbClass, "append", "(IILjava/lang/String;)Ljava/lang/StringBuffer;");
+		jstring tempString = (*env)->NewStringUTF(metadataBuffer);
+        jvalue args[1];
+		args[0].i = 0;
+		args[1].i = 0x7fffffffL;
+        args[2].l = (jobject)tempString;
+		(*env)->CallObjectMethodA(metadataBufferObject, midReplace, args);
+		(*env)->DeleteLocalRef(env, tempString);		// Assume it is safe to delete our local reference?
+	}
 	return retval;
 }
 
@@ -412,10 +420,18 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataFilename(JNIEnv *env, jclass jObj, j
 	int retval;
 	char filenameBuffer[OM_MAX_PATH + 1] = {0};
 	retval = OmGetDataFilename(deviceId, filenameBuffer);
-
-// TODO: +++ Output value in StringBuffer filenameBufferObject
-// See: http://www.javaworld.com/javaworld/javatips/jw-javatip54.html
-	
+	if (filenameBufferObject != null)	// Out: filenameBuffer
+	{
+		jclass sbClass = (*env)->GetObjectClass(env, filenameBufferObject);
+		jmethodID midReplace = (*env)->GetMethodID(sbClass, "append", "(IILjava/lang/String;)Ljava/lang/StringBuffer;");
+		jstring tempString = (*env)->NewStringUTF(filenameBuffer);
+        jvalue args[1];
+		args[0].i = 0;
+		args[1].i = 0x7fffffffL;
+        args[2].l = (jobject)tempString;
+		(*env)->CallObjectMethodA(filenameBufferObject, midReplace, args);
+		(*env)->DeleteLocalRef(env, tempString);		// Assume it is safe to delete our local reference?
+	}
 	return retval;
 }
 
@@ -472,7 +488,7 @@ JNIEXPORT jstring JNICALL Java_JOMAPI_OmErrorString(JNIEnv *env, jclass jObj, ji
 {
     const char *error = OmErrorString(status);
 	jstring errorString = ((*env)->NewStringUTF(env, error));
-    //(*env)->DeleteLocalRef(env, errorString);		// Is it safe to delete our reference for return value?
+    //(*env)->DeleteLocalRef(env, errorString);		// Is it safe to delete our local reference for return value?
 	return errorString;
 }
 
@@ -508,7 +524,7 @@ JNIEXPORT jstring JNICALL Java_JOMAPI_OmReaderMetadata(JNIEnv *env, jclass jObj,
 	SET_OUT_INT(env, deviceIdArray, deviceId);
 	SET_OUT_INT(env, sessionIdArray, sessionId);
 	jstring metadataString = ((*env)->NewStringUTF(env, metadata));
-    //(*env)->DeleteLocalRef(env, metadataString);		// Is it safe to delete our reference for return value?
+    //(*env)->DeleteLocalRef(env, metadataString);		// Is it safe to delete our local reference for return value?
 	return metadataString;
 }
 
@@ -529,6 +545,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderNextBlock(JNIEnv *env, jclass jObj, j
 
 JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderBuffer(JNIEnv *env, jclass jObj, jlong reader)
 {
+	// TODO: A more useful OmReaderBuffer(), use a short array?
 	return (jlong)OmReaderBuffer((OmReaderHandle)reader);
 }
 
@@ -546,9 +563,17 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue(JNIEnv *env, jclass jObj, jl
 	return OmReaderGetValue((OmReaderHandle)reader, (OM_READER_VALUE_TYPE)valueType);
 }
 
-// TODO: OM_READER_HEADER_PACKET OmReaderRawHeaderPacket(IntPtr reader);
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawHeaderPacket(JNIEnv *env, jclass jObj, jlong reader)
+{
+	// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
+	return (long)OmReaderRawHeaderPacket((OmReaderHandle)reader);
+}
 
-// TODO: OM_READER_DATA_PACKET OmReaderRawDataPacket(IntPtr reader);
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawDataPacket(JNIEnv *env, jclass jObj, jlong reader)
+{
+	// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
+	return (long)OmReaderRawDataPacket((OmReaderHandle)reader);
+}
 
 JNIEXPORT void JNICALL Java_JOMAPI_OmReaderClose(JNIEnv *env, jclass jObj, jlong reader)
 {
