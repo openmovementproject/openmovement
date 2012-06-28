@@ -81,10 +81,13 @@
     <None Include="build.cmd">
       <FileType>Text</FileType>
     </None>
-    <None Include="JOM.java">
+    <None Include="src\openmovement\JOM.java">
       <FileType>CSharpFile</FileType>
     </None>
-    <None Include="JOMAPI.java">
+    <None Include="src\openmovement\JOMAPI.java">
+      <FileType>CSharpFile</FileType>
+    </None>
+    <None Include="src\openmovement\JOMAPIListener.java">
       <FileType>CSharpFile</FileType>
     </None>
     <None Include="Makefile">
@@ -92,10 +95,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="JOMAPI.c" />
+    <ClCompile Include="c\JOMAPI.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="JOMAPI.h" />
+    <ClInclude Include="c\openmovement_JOMAPI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

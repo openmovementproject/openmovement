@@ -188,7 +188,7 @@ JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmStartup(JNIEnv *env, jclass jO
     // Fetch the Java class callback methods
     if (state.javaVM != NULL)
 	{
-        state.classJomapi = (*env)->FindClass(env, "JOMAPI");
+        state.classJomapi = (*env)->FindClass(env, "openmovement/JOMAPI");
         if (state.classJomapi != NULL)
 		{
             state.midLogCallback = (*env)->GetStaticMethodID(env, state.classJomapi, "logCallback", "(Ljava/lang/String;)V"); //void logCallback(String message)

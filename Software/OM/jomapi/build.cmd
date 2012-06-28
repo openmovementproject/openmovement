@@ -9,9 +9,9 @@ ECHO ERROR: 'JAVA_HOME' environment variable not set.
 GOTO END
 
 :JAVA_COMPILER
-ECHO Compiling Java file...
+ECHO Compiling Java files...
 if not exist class mkdir class
-"%JAVA_HOME%\bin\javac.exe" -classpath class -d class -sourcepath src src/openmovement/JOMAPI.java
+"%JAVA_HOME%\bin\javac.exe" -classpath class -d class -sourcepath src src/openmovement/JOM.java
 IF ERRORLEVEL 1 GOTO ERROR
 
 ECHO Creating JNI header file...
@@ -44,7 +44,7 @@ SET POSTFIX=
 IF /I %PLATFORM%!==x86! SET POSTFIX=32
 IF /I %PLATFORM%!==x64! SET POSTFIX=64
 rem  "%JAVA_HOME%\lib\jvm.lib" 
-link /dll /defaultlib:user32.lib JOMAPI DeviceFinder omapi-devicefinder omapi-download omapi-internal omapi-main omapi-reader omapi-settings omapi-status /out:JOMAPI%POSTFIX%.dll
+link /dll /defaultlib:user32.lib JOMAPI DeviceFinder omapi-devicefinder omapi-download omapi-internal omapi-main omapi-reader omapi-settings omapi-status /out:bin\JOMAPI%POSTFIX%.dll
 IF ERRORLEVEL 1 GOTO ERROR
 
 rem ECHO Copying DLL file...
@@ -54,13 +54,13 @@ rem copy /Y JOMAPI%POSTFIX%.dll "%JAVA_HOME%\bin"
 rem GOTO END
 
 
-:RUN
-ECHO Compiling test program...
-"%JAVA_HOME%\bin\javac.exe" -classpath class -d class -sourcepath src src/openmovement/JOM.java
+:MAKE_JAR
+jar cvfe lib\JOMAPI.jar openmovement.JOM -C class openmovement\JOMAPI.class -C class openmovement\JOM.class -C class openmovement\JOMAPIListener.class
 IF ERRORLEVEL 1 GOTO ERROR
 
+:RUN_TEST
 ECHO Running test program...
-java.exe -classpath class openmovement.JOM
+java.exe -Djava.library.path="./bin" -jar lib\JOMAPI.jar openmovement.JOM
 IF ERRORLEVEL 1 GOTO ERROR
 GOTO END
 
