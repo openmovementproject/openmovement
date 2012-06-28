@@ -59,17 +59,21 @@ public class JOM {
 		}
 	}
 	
-	// Demonstration function
+	/** Demonstration function */
+	public void demo() {
+		// NOTE: This is not the recommended method for finding devices, should use a callback instead
+		int[] deviceIds = new int[0x10000];
+		int numDevices = JOMAPI.OmGetDeviceIds(deviceIds, deviceIds.length);
+		for (int i = 0; i < numDevices; i++) {
+			System.out.println("#" + i + " found device");
+		}
+	}
+	
+	/** Main for demonstration function */
 	public static void main(String[] args) {
 		System.out.println("JOM: Demo started.");
-		
 		JOM om = JOM.getInstance();
-		
-		//int numDevices = 0;
-		//for (int i = 0; i < numDevices; i++) {
-		//	System.out.println("#" + i + " found device");
-		//}
-		
+		om.demo();
 		System.out.println("JOM: Demo ended.");
 	}
 
