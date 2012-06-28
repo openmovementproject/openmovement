@@ -37,6 +37,8 @@ extern "C" {
 #define JOMAPI_OM_LED_YELLOW 6L
 #undef JOMAPI_OM_LED_WHITE
 #define JOMAPI_OM_LED_WHITE 7L
+#undef JOMAPI_OM_METADATA_SIZE
+#define JOMAPI_OM_METADATA_SIZE 448L
 #undef JOMAPI_OM_ERASE_NONE
 #define JOMAPI_OM_ERASE_NONE 0L
 #undef JOMAPI_OM_ERASE_DELETE
@@ -89,6 +91,26 @@ extern "C" {
 #define JOMAPI_OM_E_UNEXPECTED_RESPONSE -11L
 #undef JOMAPI_OM_E_LOCKED
 #define JOMAPI_OM_E_LOCKED -12L
+#undef JOMAPI_OM_VALUE_DEVICEID
+#define JOMAPI_OM_VALUE_DEVICEID 3L
+#undef JOMAPI_OM_VALUE_SESSIONID
+#define JOMAPI_OM_VALUE_SESSIONID 4L
+#undef JOMAPI_OM_VALUE_SEQUENCEID
+#define JOMAPI_OM_VALUE_SEQUENCEID 5L
+#undef JOMAPI_OM_VALUE_LIGHT
+#define JOMAPI_OM_VALUE_LIGHT 7L
+#undef JOMAPI_OM_VALUE_TEMPERATURE
+#define JOMAPI_OM_VALUE_TEMPERATURE 8L
+#undef JOMAPI_OM_VALUE_EVENTS
+#define JOMAPI_OM_VALUE_EVENTS 9L
+#undef JOMAPI_OM_VALUE_BATTERY
+#define JOMAPI_OM_VALUE_BATTERY 10L
+#undef JOMAPI_OM_VALUE_SAMPLERATE
+#define JOMAPI_OM_VALUE_SAMPLERATE 11L
+#undef JOMAPI_OM_VALUE_TEMPERATURE_MC
+#define JOMAPI_OM_VALUE_TEMPERATURE_MC 108L
+#undef JOMAPI_OM_VALUE_BATTERY_MV
+#define JOMAPI_OM_VALUE_BATTERY_MV 110L
 /*
  * Class:     JOMAPI
  * Method:    OmStartup
@@ -195,6 +217,78 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLed
 
 /*
  * Class:     JOMAPI
+ * Method:    OmIsLocked
+ * Signature: (I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmIsLocked
+  (JNIEnv *, jclass, jint, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetLock
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetLock
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmUnlock
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmUnlock
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetEcc
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetEcc
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetEcc
+ * Signature: (I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetEcc
+  (JNIEnv *, jclass, jint, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetDelays
+ * Signature: (I[J[J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDelays
+  (JNIEnv *, jclass, jint, jlongArray, jlongArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetDelays
+ * Signature: (IJJ)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetDelays
+  (JNIEnv *, jclass, jint, jlong, jlong);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmGetSessionId
+ * Signature: (I[J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetSessionId
+  (JNIEnv *, jclass, jint, jlongArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmSetSessionId
+ * Signature: (IJ)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmSetSessionId
+  (JNIEnv *, jclass, jint, jlong);
+
+/*
+ * Class:     JOMAPI
  * Method:    OmSetMetadata
  * Signature: (ILjava/lang/String;I)I
  */
@@ -235,6 +329,38 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmSetAccelConfig
 
 /*
  * Class:     JOMAPI
+ * Method:    OmGetDataRange
+ * Signature: (I[I[I[I[J[J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataRange
+  (JNIEnv *, jclass, jint, jintArray, jintArray, jintArray, jlongArray, jlongArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmBeginDownloading
+ * Signature: (IIILjava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmBeginDownloading
+  (JNIEnv *, jclass, jint, jint, jint, jstring);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmQueryDownload
+ * Signature: (I[I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmQueryDownload
+  (JNIEnv *, jclass, jint, jintArray, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmWaitForDownload
+ * Signature: (I[I[I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmWaitForDownload
+  (JNIEnv *, jclass, jint, jintArray, jintArray);
+
+/*
+ * Class:     JOMAPI
  * Method:    OmCancelDownload
  * Signature: (I)I
  */
@@ -248,6 +374,86 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmCancelDownload
  */
 JNIEXPORT jstring JNICALL Java_JOMAPI_OmErrorString
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderOpen
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderOpen
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderDataRange
+ * Signature: (J[I[I[I[J[J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataRange
+  (JNIEnv *, jclass, jlong, jintArray, jintArray, jintArray, jlongArray, jlongArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderMetadata
+ * Signature: (J[I[J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_JOMAPI_OmReaderMetadata
+  (JNIEnv *, jclass, jlong, jintArray, jlongArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderDataBlockPosition
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataBlockPosition
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderDataBlockSeek
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderDataBlockSeek
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderNextBlock
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderNextBlock
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderBuffer
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderBuffer
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderTimestamp
+ * Signature: (JI[I)J
+ */
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp
+  (JNIEnv *, jclass, jlong, jint, jintArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderGetValue
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderClose
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_JOMAPI_OmReaderClose
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }

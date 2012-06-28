@@ -64,7 +64,7 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmSetLock(int deviceId, ushort code);
         [DllImport("libomapi.dll")] public static extern int OmUnlock(int deviceId, ushort code);
         [DllImport("libomapi.dll")] public static extern int OmSetEcc(int deviceId, int state);
-        [DllImport("libomapi.dll")] public static extern int OmGetEcc(int deviceId, int state);
+        [DllImport("libomapi.dll")] public static extern int OmGetEcc(int deviceId);
         //[DllImport("libomapi.dll")] public static extern int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize, const char *expected, unsigned int timeoutMs, char **parseParts, int parseMax);
         [DllImport("libomapi.dll")] public static extern int OmGetDelays(int deviceId, out uint startTime, out uint stopTime);
         [DllImport("libomapi.dll")] public static extern int OmSetDelays(int deviceId, uint startTime, uint stopTime);
