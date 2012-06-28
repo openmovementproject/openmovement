@@ -138,18 +138,19 @@ public class JOMAPI {
 	
 	public native static int OmSetLed(int deviceId, int ledState);
 	
+	public native static int OmIsLocked(int deviceId, int[] hasLockCode);
+	public native static int OmSetLock(int deviceId, int code);
+	public native static int OmUnlock(int deviceId, int code);
+	public native static int OmSetEcc(int deviceId, int state);
+	public native static int OmGetEcc(int deviceId);
 // TODO
-	//public native static int OmIsLocked(int deviceId, out int hasLockCode);
-	//public native static int OmSetLock(int deviceId, ushort code);
-	//public native static int OmUnlock(int deviceId, ushort code);
-	//public native static int OmSetEcc(int deviceId, int state);
-	//public native static int OmGetEcc(int deviceId, int state);
 	//public native static int OmCommand(int deviceId, String command, String buffer, size_t bufferSize, String expected, unsigned int timeoutMs, char **parseParts, int parseMax);
-	//public native static int OmGetDelays(int deviceId, out uint startTime, out uint stopTime);
-	//public native static int OmSetDelays(int deviceId, uint startTime, uint stopTime);
-	//public native static int OmGetSessionId(int deviceId, out uint sessionId);
-	//public native static int OmSetSessionId(int deviceId, uint sessionId);
-	//public static final int OM_METADATA_SIZE = 448;
+	public native static int OmGetDelays(int deviceId, long[] startTime, long[] stopTime);
+	public native static int OmSetDelays(int deviceId, long startTime, long stopTime);
+	public native static int OmGetSessionId(int deviceId, long[] sessionId);
+	public native static int OmSetSessionId(int deviceId, long sessionId);
+	public static final int OM_METADATA_SIZE = 448;
+// TODO	
 	//public native static int OmGetMetadata(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata);
 	public native static int OmSetMetadata(int deviceId, String metadata, int size);
 	public native static int OmGetLastConfigTime(int deviceId, long[] time);
@@ -182,10 +183,10 @@ public class JOMAPI {
 	
 // TODO	
 	//public native static int OmGetDataFilename(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder filenameBuffer);
-	//public native static int OmGetDataRange(int deviceId, out int dataBlockSize, out int dataOffsetBlocks, out int dataNumBlocks, out uint startTime, out uint endTime);
-	//public native static int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, string destinationFile);
-	//public native static int OmQueryDownload(int deviceId, out OM_DOWNLOAD_STATUS downloadStatus, out int value);
-	//public native static int OmWaitForDownload(int deviceId, out OM_DOWNLOAD_STATUS downloadStatus, out int value);	
+	public native static int OmGetDataRange(int deviceId, int[] dataBlockSize, int[] dataOffsetBlocks, int[] dataNumBlocks, long[] startTime, long[] endTime);
+	public native static int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, String destinationFile);
+	public native static int OmQueryDownload(int deviceId, int[] downloadStatus, int[] value);
+	public native static int OmWaitForDownload(int deviceId, int[] downloadStatus, int[] value);	
 	public native static int OmCancelDownload(int deviceId);
 	
 	public static final int OM_TRUE              = 1;
@@ -245,31 +246,40 @@ public class JOMAPI {
 		if (value == DateTime.MaxValue || value.Year > 2063) { return OM_DATETIME_INFINITE; }
 		return OM_DATETIME_FROM_YMDHMS(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second);
 	}
+*/
 
-	public static extern IntPtr OmReaderOpen(string binaryFilename);
-	public static IntPtr OmReaderOpenDeviceData(int deviceId)
+	public native static long OmReaderOpen(String binaryFilename);
+// TODO	
+/*
+	public static long OmReaderOpenDeviceData(int deviceId)
 	{
 		StringBuilder filename = new StringBuilder(256);
-		if (OmGetDataFilename(deviceId, filename) != OM_OK)
-		{
-			filename = null;
-		}
-		if (filename == null)
-		{
-			return IntPtr.Zero;
-		}
+		int ret = OmGetDataFilename(deviceId, filename);
+		if (ret != OM_OK) { return ret; }
 		return OmReaderOpen(filename.ToString());
 	}
-	public static extern int OmReaderDataRange(IntPtr reader, out int dataBlockSize, out int dataOffsetBlocks, out int dataNumBlocks, out uint startTime, out uint endTime);
-	public static extern string OmReaderMetadata(IntPtr reader, out int deviceId, out uint sessionId);
-	public static extern int OmReaderDataBlockPosition(IntPtr reader);
-	public static extern int OmReaderDataBlockSeek(IntPtr reader, int dataBlockNumber);
-	public static extern int OmReaderNextBlock(IntPtr reader);
-	public static extern IntPtr OmReaderBuffer(IntPtr reader);
-	public static extern uint OmReaderTimestamp(IntPtr reader, int index, out ushort fractional);
-	public enum OM_READER_VALUE_TYPE { OM_VALUE_DEVICEID = 3, OM_VALUE_SESSIONID = 4, OM_VALUE_SEQUENCEID = 5, OM_VALUE_LIGHT = 7, OM_VALUE_TEMPERATURE = 8, OM_VALUE_EVENTS = 9, OM_VALUE_BATTERY = 10, OM_VALUE_SAMPLERATE = 11, OM_VALUE_TEMPERATURE_MC = 108, OM_VALUE_BATTERY_MV = 110 };
-	public static extern int OmReaderGetValue(IntPtr reader, OM_READER_VALUE_TYPE valueType);
+*/	
+	public native static int OmReaderDataRange(long reader, int[] dataBlockSize, int[] dataOffsetBlocks, int[] dataNumBlocks, long[] startTime, long[] endTime);
+	public native static String OmReaderMetadata(long reader, int[] deviceId, long[] sessionId);
+	public native static int OmReaderDataBlockPosition(long reader);
+	public native static int OmReaderDataBlockSeek(long reader, int dataBlockNumber);
+	public native static int OmReaderNextBlock(long reader);
+	public native static long OmReaderBuffer(long reader);
+	public native static long OmReaderTimestamp(long reader, int index, int[] fractional);
+	public static final int OM_VALUE_DEVICEID = 3;			// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_SESSIONID = 4;			// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_SEQUENCEID = 5;		// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_LIGHT = 7;				// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_TEMPERATURE = 8;		// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_EVENTS = 9;			// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_BATTERY = 10;			// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_SAMPLERATE = 11;		// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_TEMPERATURE_MC = 108;	// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_BATTERY_MV = 110;		// OM_READER_VALUE_TYPE
+	public native static int OmReaderGetValue(long reader, int valueType);
 
+// TODO	
+/*
 	[StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]
 	public unsafe class OM_READER_HEADER_PACKET
 	{
@@ -291,7 +301,6 @@ public class JOMAPI {
 		[FieldOffset(64)] public fixed byte annotation[448]; // @64 +448 Scratch buffer / meta-data (448 characters) 
 		[FieldOffset(512)] public fixed byte reserved[512];  // @512 +512 Reserved for post-collection scratch buffer / meta-data (512 characters) 
 	};
-
 	public static extern OM_READER_HEADER_PACKET OmReaderRawHeaderPacket(IntPtr reader);
 
 	[StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]
@@ -314,9 +323,9 @@ public class JOMAPI {
 		[FieldOffset(30)] public fixed byte rawSampleData[480];   // @30 +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right) 
 		[FieldOffset(510)] public ushort checksum;          // @510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero) 
 	};
-
 	public static extern OM_READER_DATA_PACKET OmReaderRawDataPacket(IntPtr reader);
-	public static extern void OmReaderClose(IntPtr reader);
-*/		
+*/
+
+	public native static void OmReaderClose(long reader);
 	
 }
