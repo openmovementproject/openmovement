@@ -34,9 +34,52 @@ extern "C" {
 #endif 
 
 
-// Defines
-#define SET_OUT_INT(env, array, value) if (array != NULL) { jint outval[1]; outval[0] = value; (*env)->SetIntArrayRegion(env, array, 0, 1, outval); }
-#define SET_OUT_LONG(env, array, value) if (array != NULL) { jlong outval[1]; outval[0] = value; (*env)->SetLongArrayRegion(env, array, 0, 1, outval); }
+// Utilitiy define for integer 'out' parameters (hackily simulated with single-element arrays)
+#define SET_OUT_INT(env, array, value) \
+	if (array != NULL && (*env)->GetArrayLength(env, array) >= 1) \
+	{ \
+		jint outval[1]; \
+		outval[0] = value; \
+		(*env)->SetIntArrayRegion(env, array, 0, 1, outval); \
+	}
+	
+// Utilitiy define for long 'out' parameters (hackily simulated with single-element arrays)
+#define SET_OUT_LONG(env, array, value) \
+	if (array != NULL && (*env)->GetArrayLength(env, array) >= 1) \
+	{ \
+		jlong outval[1]; \
+		outval[0] = value; \
+		(*env)->SetLongArrayRegion(env, array, 0, 1, outval); \
+	}
+	
+// Utilitiy define for String 'out' parameters (hackily simulated with StringBuffer objects)
+#define SET_OUT_STRINGBUFFER(env, bufferObject, buffer) \
+	if (bufferObject != NULL) \
+	{ \
+		jclass sbClass = (*env)->GetObjectClass(env, bufferObject); \
+		jmethodID midReplace = (*env)->GetMethodID(env, sbClass, "append", "(IILjava/lang/String;)Ljava/lang/StringBuffer;"); \
+		jstring tempString = (*env)->NewStringUTF(env, buffer); \
+        jvalue args[3]; \
+		args[0].i = 0; \
+		args[1].i = 0x7fffffffL; \
+        args[2].l = (jobject)tempString; \
+		(*env)->CallObjectMethodA(env, bufferObject, midReplace, args); \
+		(*env)->DeleteLocalRef(env, tempString);	/* Assume it is safe to delete our local reference? */ \
+	}
+
+// Utility define to throw an exception
+#define THROW_EXCEPTION(env, exceptionClass, message) { (*env)->ThrowNew(env, (*env)->FindClass(env, exceptionClass), message); }
+	
+// Utility define to catch, report and clear an exception
+#define CATCH_REPORT_CLEAR(env) \
+	{ \
+		jthrowable ex = (*env)->ExceptionOccurred(env); \
+		if (ex) \
+		{ \
+			(*env)->ExceptionDescribe(env); \
+			(*env)->ExceptionClear(env); \
+		} \
+	}
 
 
 // Local state structure
@@ -152,17 +195,6 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmStartup(JNIEnv *env, jclass jObj, jint vers
             state.midDeviceCallback = (*env)->GetStaticMethodID(env, state.classJomapi, "deviceCallback", "(II)V");           //void deviceCallback(int deviceId, int deviceStatus)
             state.midDownloadCallback = (*env)->GetStaticMethodID(env, state.classJomapi, "downloadCallback", "(III)V");      //void downloadCallback(int deviceId, int downloadStatus, int downloadValue)
 		}
-/*        
-        else
-		{
-            jthrowable ex = (*env)->ExceptionOccurred(env);
-            if (ex)
-			{
-                (*env)->ExceptionDescribe(env);
-                (*env)->ExceptionClear(env);
-			}
-		}
-*/
 	}
     
     // Register our own OM callback functions
@@ -189,15 +221,15 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDeviceIds(JNIEnv *env, jclass jObj, jint
     int retval;
     
     // Limit to array length and maximum possible devices
-    jsize len = (*env)->GetArrayLength(env, deviceIds);
-    if (maxDevices > len) { maxDevices = len; }
+    jsize arrayLen = (*env)->GetArrayLength(env, deviceIds);
+    if (maxDevices > arrayLen) { maxDevices = arrayLen; }
     if (maxDevices > 0xffff) { maxDevices = 0xffff; }
     
     // Make a true 'int' buffer for the arrays (in case of 64-bit C-int vs. 32-bit jint)
     intDeviceIds = (int *)malloc(maxDevices * sizeof(int));
     if (intDeviceIds == NULL)
 	{
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "Out of memory allocating native buffer for device IDs.");
+		THROW_EXCEPTION(env, "java/lang/OutOfMemoryError", "Out of memory allocating native buffer for device IDs.");
         return OM_E_OUT_OF_MEMORY;
 	}
     
@@ -260,18 +292,13 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetBatteryHealth(JNIEnv *env, jclass jObj, 
 	return OmGetBatteryHealth(deviceId);
 }
   
-JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer(JNIEnv *env, jclass jObj, jint deviceId, jintArray axesArray)
+JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer(JNIEnv *env, jclass jObj, jint deviceId, jintArray xArray, jintArray yArray, jintArray zArray)
 {
     int x = 0, y = 0, z = 0;
     int retval = OmGetAccelerometer(deviceId, &x, &y, &z);
-    if (axesArray != NULL)	// Out: x, y, z
-	{
-		jint outval[3];
-		outval[0] = x;
-		outval[1] = y;
-		outval[2] = z;
-		(*env)->SetIntArrayRegion(env, axesArray, 0, 3, outval);
-	}
+	SET_OUT_INT(env, xArray, x);
+	SET_OUT_INT(env, yArray, y);
+	SET_OUT_INT(env, zArray, z);
     return retval;
 }
 
@@ -369,18 +396,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetMetadata(JNIEnv *env, jclass jObj, jint 
 	int retval;
 	char metadataBuffer[OM_METADATA_SIZE + 1] = {0};
 	retval = OmGetMetadata(deviceId, metadataBuffer);
-	if (metadataBufferObject != NULL)	// Out: metadataBuffer
-	{
-		jclass sbClass = (*env)->GetObjectClass(env, metadataBufferObject);
-		jmethodID midReplace = (*env)->GetMethodID(env, sbClass, "append", "(IILjava/lang/String;)Ljava/lang/StringBuffer;");
-		jstring tempString = (*env)->NewStringUTF(env, metadataBuffer);
-        jvalue args[3];
-		args[0].i = 0;
-		args[1].i = 0x7fffffffL;
-        args[2].l = (jobject)tempString;
-		(*env)->CallObjectMethodA(env, metadataBufferObject, midReplace, args);
-		(*env)->DeleteLocalRef(env, tempString);		// Assume it is safe to delete our local reference?
-	}
+	SET_OUT_STRINGBUFFER(env, metadataBufferObject, metadataBuffer);
 	return retval;
 }
 
@@ -426,18 +442,7 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetDataFilename(JNIEnv *env, jclass jObj, j
 	int retval;
 	char filenameBuffer[OM_MAX_PATH + 1] = {0};
 	retval = OmGetDataFilename(deviceId, filenameBuffer);
-	if (filenameBufferObject != NULL)	// Out: filenameBuffer
-	{
-		jclass sbClass = (*env)->GetObjectClass(env, filenameBufferObject);
-		jmethodID midReplace = (*env)->GetMethodID(env, sbClass, "append", "(IILjava/lang/String;)Ljava/lang/StringBuffer;");
-		jstring tempString = (*env)->NewStringUTF(env, filenameBuffer);
-        jvalue args[3];
-		args[0].i = 0;
-		args[1].i = 0x7fffffffL;
-        args[2].l = (jobject)tempString;
-		(*env)->CallObjectMethodA(env, filenameBufferObject, midReplace, args);
-		(*env)->DeleteLocalRef(env, tempString);		// Assume it is safe to delete our local reference?
-	}
+	SET_OUT_STRINGBUFFER(env, filenameBufferObject, filenameBuffer);
 	return retval;
 }
 
@@ -548,14 +553,21 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderNextBlock(JNIEnv *env, jclass jObj, j
 	return OmReaderNextBlock((OmReaderHandle)reader);
 }
 
-// TODO: OmReaderBuffer()
-/*
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderBuffer(JNIEnv *env, jclass jObj, jlong reader)
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderBufferCopy(JNIEnv *env, jclass jObj, jlong reader, jshortArray bufferArray)
 {
-	// TODO: A more useful OmReaderBuffer(), use a short array?
-	return (jlong)OmReaderBuffer((OmReaderHandle)reader);
+	const short *buffer;
+	int count;
+	jsize arrayLen;
+	if (reader == 0) { return OM_E_POINTER; }
+	if (bufferArray == 0) { return OM_E_POINTER; }
+	buffer = OmReaderBuffer((OmReaderHandle)reader);
+	if (buffer == NULL) { return OM_E_UNEXPECTED; }
+	count = OM_MAX_SAMPLES;
+    arrayLen = (*env)->GetArrayLength(env, bufferArray);
+    if (arrayLen < count) { count = arrayLen; }
+	(*env)->SetShortArrayRegion(env, bufferArray, 0, count, buffer);
+	return OM_OK;
 }
-*/
 
 JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp(JNIEnv *env, jclass jObj, jlong reader, jint index, jintArray fractionalArray)
 {
@@ -571,23 +583,37 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue(JNIEnv *env, jclass jObj, jl
 	return OmReaderGetValue((OmReaderHandle)reader, (OM_READER_VALUE_TYPE)valueType);
 }
 
-// TODO: OmReaderRawHeaderPacket()
-/*
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawHeaderPacket(JNIEnv *env, jclass jObj, jlong reader)
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawHeaderPacketCopy(JNIEnv *env, jclass jObj, jlong reader, jbyteArray headerPacketArray)
 {
-	// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
-	return (long)OmReaderRawHeaderPacket((OmReaderHandle)reader);
+	const OM_READER_HEADER_PACKET *headerPacket;
+	int count;
+	jsize arrayLen;
+	if (reader == 0) { return OM_E_POINTER; }
+	if (headerPacketArray == 0) { return OM_E_POINTER; }
+	headerPacket = OmReaderRawHeaderPacket((OmReaderHandle)reader);
+	if (headerPacket == NULL) { return OM_E_UNEXPECTED; }
+	count = OM_MAX_HEADER_SIZE;
+    arrayLen = (*env)->GetArrayLength(env, headerPacketArray);
+    if (arrayLen < count) { count = arrayLen; }
+	(*env)->SetByteArrayRegion(env, headerPacketArray, 0, count, (const char *)headerPacket);
+	return OM_OK;
 }
-*/
 
-// TODO: OmReaderRawDataPacket()
-/*
-JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawDataPacket(JNIEnv *env, jclass jObj, jlong reader)
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawDataPacketCopy(JNIEnv *env, jclass jObj, jlong reader, jbyteArray dataPacketArray)
 {
-	// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
-	return (long)OmReaderRawDataPacket((OmReaderHandle)reader);
+	const OM_READER_DATA_PACKET *dataPacket;
+	int count;
+	jsize arrayLen;
+	if (reader == 0) { return OM_E_POINTER; }
+	if (dataPacketArray == 0) { return OM_E_POINTER; }
+	dataPacket = OmReaderRawDataPacket((OmReaderHandle)reader);
+	if (dataPacket == NULL) { return OM_E_UNEXPECTED; }
+	count = OM_MAX_DATA_SIZE;
+    arrayLen = (*env)->GetArrayLength(env, dataPacketArray);
+    if (arrayLen < count) { count = arrayLen; }
+	(*env)->SetByteArrayRegion(env, dataPacketArray, 0, count, (const char *)dataPacket);
+	return OM_OK;
 }
-*/
 
 JNIEXPORT void JNICALL Java_JOMAPI_OmReaderClose(JNIEnv *env, jclass jObj, jlong reader)
 {

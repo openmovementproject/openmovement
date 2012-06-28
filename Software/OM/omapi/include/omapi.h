@@ -28,7 +28,7 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.3
+ *  @version   1.3.1
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -46,7 +46,7 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.3
+ *  @version   1.3.1
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -787,7 +787,7 @@ OM_EXPORT int OmSetAccelConfig(int deviceId, int rate, int range);
  * Macro for the maximum path length of a data filename.
  * @since 1.2 
  */
-#define OM_MAX_PATH 256
+#define OM_MAX_PATH (256)
 
 
 /**
@@ -991,7 +991,7 @@ OM_EXPORT const char *OmErrorString(int status);
 #define OM_DATETIME_INFINITE ((OM_DATETIME)-1)                                      /**< Special date/time value for "infinitely late". @see OmSetDelays() @hideinitializer */
 
 /** @private The size of a buffer to hold a string representation of an OM_DATETIME */
-#define OM_DATETIME_BUFFER_SIZE 20
+#define OM_DATETIME_BUFFER_SIZE (20)
 
 /** @private Convert a date/time number from a string ("YYYY-MM-DD hh:mm:ss") */
 OM_EXPORT OM_DATETIME OmDateTimeFromString(const char *value);
@@ -1026,6 +1026,27 @@ OM_EXPORT char *OmDateTimeToString(OM_DATETIME value, char *buffer);
  * @see OmReaderOpen(), OmReaderClose()
  */
 typedef void * OmReaderHandle;
+
+
+/**
+ * Macro for the maximum number of samples in a block.
+ * @since 1.3.1
+ */
+#define OM_MAX_SAMPLES (120)
+
+
+/**
+ * Macro for the maximum number of bytes in a header packet.
+ * @since 1.3.1
+ */
+#define OM_MAX_HEADER_SIZE (2 * 512)
+
+
+/**
+ * Macro for the maximum number of bytes in a data packet.
+ * @since 1.3.1
+ */
+#define OM_MAX_DATA_SIZE (512)
 
 
 /**

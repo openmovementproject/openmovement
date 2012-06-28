@@ -26,6 +26,10 @@
 // Java JNI OMAPI Layer
 // Dan Jackson, 2012
 
+// NOTE: This JNI wrapper class has been written to as closely match the underlying C API as possible, 
+//       even at the expense of some inefficiencies, inelegance, type safety, etc.
+//       For example, the use of single element arrays to simulate 'out' parameters is particularly bad!
+
 import java.util.Date;
 import java.util.Calendar;
 
@@ -124,7 +128,7 @@ public class JOMAPI {
 	public static final int OM_MEMORY_HEALTH_WARNING = 8;
 	public native static int OmGetMemoryHealth(int deviceId);
 	public native static int OmGetBatteryHealth(int deviceId);
-	public native static int OmGetAccelerometer(int deviceId, int[] xyz);
+	public native static int OmGetAccelerometer(int deviceId, int[] x, int[] y, int[] z);
 	public native static int OmGetTime(int deviceId, long[] time);
 	public native static int OmSetTime(int deviceId, long time);
 	
@@ -261,6 +265,9 @@ public class JOMAPI {
 		return OM_DATETIME_FROM_YMDHMS(year, cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 	}
 
+	public static final int OM_MAX_SAMPLES = 120;
+	public static final int OM_MAX_HEADER_SIZE = (2 * 512);
+	public static final int OM_MAX_DATA_SIZE = 512;
 	public native static long OmReaderOpen(String binaryFilename);
 	public static long OmReaderOpenDeviceData(int deviceId)
 	{
@@ -274,9 +281,7 @@ public class JOMAPI {
 	public native static int OmReaderDataBlockPosition(long reader);
 	public native static int OmReaderDataBlockSeek(long reader, int dataBlockNumber);
 	public native static int OmReaderNextBlock(long reader);
-	
-// TODO: A more useful OmReaderBuffer(), use a short array?
-//	public native static long OmReaderBuffer(long reader);
+	public native static int OmReaderBufferCopy(long reader, short[] buffer);	// Instead of OmReaderBuffer()
 	
 	public native static long OmReaderTimestamp(long reader, int index, int[] fractional);
 	public static final int OM_VALUE_DEVICEID = 3;			// OM_READER_VALUE_TYPE
@@ -292,55 +297,51 @@ public class JOMAPI {
 	public native static int OmReaderGetValue(long reader, int valueType);
 
 /*
-	[StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]
-	public unsafe class OM_READER_HEADER_PACKET
+	OM_READER_HEADER_PACKET
 	{
-		[FieldOffset(0)]  public ushort packetHeader;	    // @ 0 +2 ASCII "MD", little-endian (0x444D) 
-		[FieldOffset(2)]  public ushort packetLength;	    // @ 2 +2 Packet length (1020 bytes, with header (4) = 1024 bytes total) 
-		[FieldOffset(4)]  public byte reserved1;            // @ 4 +1 (1 byte reserved) 
-		[FieldOffset(5)]  public ushort deviceId;           // @ 5 +2 Device identifier 
-		[FieldOffset(7)]  public uint sessionId;            // @ 7 +4 Unique session identifier 
-		[FieldOffset(11)] public ushort reserved2;          // @11 +2 (2 bytes reserved) 
-		[FieldOffset(13)] public uint loggingStartTime;     // @13 +4 Start time for delayed logging 
-		[FieldOffset(17)] public uint loggingEndTime;       // @17 +4 Stop time for delayed logging 
-		[FieldOffset(21)] public uint loggingCapacity;      // @21 +4 Preset maximum number of samples to collect, 0 = unlimited 
-		[FieldOffset(25)] public fixed byte reserved3[11];  // @25 +11 (11 bytes reserved) 
-		[FieldOffset(36)] public byte samplingRate;		    // @36 +1 Sampling rate 
-		[FieldOffset(37)] public uint lastChangeTime;       // @37 +4 Last change metadata time 
-		[FieldOffset(41)] public byte firmwareRevision;		// @41 +1 Firmware revision number 
-		[FieldOffset(42)] public short timeZone;		    // @42 +2 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown 
-		[FieldOffset(44)] public fixed byte reserved4[20];   // @44 +20 (20 bytes reserved) 
-		[FieldOffset(64)] public fixed byte annotation[448]; // @64 +448 Scratch buffer / meta-data (448 characters) 
-		[FieldOffset(512)] public fixed byte reserved[512];  // @512 +512 Reserved for post-collection scratch buffer / meta-data (512 characters) 
+		ushort packetHeader;	    // @ 0 +2 ASCII "MD", little-endian (0x444D) 
+		ushort packetLength;	    // @ 2 +2 Packet length (1020 bytes, with header (4) = 1024 bytes total) 
+		byte reserved1;             // @ 4 +1 (1 byte reserved) 
+		ushort deviceId;            // @ 5 +2 Device identifier 
+		uint sessionId;             // @ 7 +4 Unique session identifier 
+		ushort reserved2;           // @11 +2 (2 bytes reserved) 
+		uint loggingStartTime;      // @13 +4 Start time for delayed logging 
+		uint loggingEndTime;        // @17 +4 Stop time for delayed logging 
+		uint loggingCapacity;       // @21 +4 Preset maximum number of samples to collect, 0 = unlimited 
+		byte reserved3[11];         // @25 +11 (11 bytes reserved) 
+		byte samplingRate;		    // @36 +1 Sampling rate 
+		uint lastChangeTime;        // @37 +4 Last change metadata time 
+		byte firmwareRevision;      // @41 +1 Firmware revision number 
+		short timeZone;	            // @42 +2 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown 
+		byte reserved4[20];         // @44 +20 (20 bytes reserved) 
+		byte annotation[448];       // @64 +448 Scratch buffer / meta-data (448 characters) 
+		byte reserved[512];         // @512 +512 Reserved for post-collection scratch buffer / meta-data (512 characters) 
 	};
 */	
-// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
-//	public native static long OmReaderRawHeaderPacket(long reader);
+	public native static int OmReaderRawHeaderPacketCopy(long reader, byte[] headerPacket);	// Instead of OmReaderRawHeaderPacket()
 
 /*
-	[StructLayout(LayoutKind.Explicit, Size=512, LayoutKind.Sequential)]
-	public class OM_READER_DATA_PACKET
+	OM_READER_DATA_PACKET
 	{
-		[FieldOffset(0)]  public ushort packetHeader;	    // @ 0 +2  ASCII "AX", little-endian (0x5841) 
-		[FieldOffset(2)]  public ushort packetLength;	    // @ 2 +2  Packet length (508 bytes, with header (4) = 512 bytes total) 
-		[FieldOffset(4)]  public ushort deviceId;		    // @ 4 +2  Device identifier, 0 = unknown 
-		[FieldOffset(6)]  public uint sessionId;			// @ 6 +4  Unique session identifier, 0 = unknown 
-		[FieldOffset(10)] public uint sequenceId;		    // @10 +4  Sequence counter, each packet has a new number (reset if restarted) 
-		[FieldOffset(14)] public uint timestamp;			// @14 +4  Last reported RTC value, 0 = unknown 
-		[FieldOffset(18)] public ushort light;			    // @18 +2  Last recorded light sensor value in raw units, 0 = none 
-		[FieldOffset(20)] public ushort temperature;		// @20 +2  Last recorded temperature sensor value in raw units, 0 = none 
-		[FieldOffset(22)] public byte  events;			    // @22 +1  Event flags since last packet, b0 = resume logging, b1 = single-tap event, b2 = double-tap event, b3-b7 = reserved for diagnostic use) 
-		[FieldOffset(23)] public byte  battery;			    // @23 +1  Last recorded battery level in raw units, 0 = unknown 
-		[FieldOffset(24)] public byte  sampleRate;		    // @24 +1  Sample rate code, (3200/(1<<(15-(rate & 0x0f)))) Hz 
-		[FieldOffset(25)] public byte  numAxesBPS;		    // @25 +1  0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent) 
-		[FieldOffset(26)] public short   timestampOffset;	// @26 +2  Relative sample index from the start of the buffer where the whole-second timestamp is valid
-		[FieldOffset(28)] public ushort sampleCount;		// @28 +2  Number of accelerometer samples (80 or 120) 
-		[FieldOffset(30)] public fixed byte rawSampleData[480];   // @30 +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right) 
-		[FieldOffset(510)] public ushort checksum;          // @510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero) 
+		ushort packetHeader;	    // @ 0 +2  ASCII "AX", little-endian (0x5841) 
+		ushort packetLength;	    // @ 2 +2  Packet length (508 bytes, with header (4) = 512 bytes total) 
+		ushort deviceId;		    // @ 4 +2  Device identifier, 0 = unknown 
+		uint sessionId;	            // @ 6 +4  Unique session identifier, 0 = unknown 
+		uint sequenceId;		    // @10 +4  Sequence counter, each packet has a new number (reset if restarted) 
+		uint timestamp;	            // @14 +4  Last reported RTC value, 0 = unknown 
+		ushort light;			    // @18 +2  Last recorded light sensor value in raw units, 0 = none 
+		ushort temperature;         // @20 +2  Last recorded temperature sensor value in raw units, 0 = none 
+		byte  events;			    // @22 +1  Event flags since last packet, b0 = resume logging, b1 = single-tap event, b2 = double-tap event, b3-b7 = reserved for diagnostic use) 
+		byte  battery;			    // @23 +1  Last recorded battery level in raw units, 0 = unknown 
+		byte  sampleRate;		    // @24 +1  Sample rate code, (3200/(1<<(15-(rate & 0x0f)))) Hz 
+		byte  numAxesBPS;		    // @25 +1  0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent) 
+		short timestampOffset;      // @26 +2  Relative sample index from the start of the buffer where the whole-second timestamp is valid
+		ushort sampleCount;         // @28 +2  Number of accelerometer samples (80 or 120) 
+		byte rawSampleData[480];    // @30 +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right) 
+		ushort checksum;            // @510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero) 
 	};
 */
-// TODO: A more useful OmReaderRawHeaderPacket(), use a byte array?
-//	public native static long OmReaderRawDataPacket(long reader);
+	public native static int OmReaderRawDataPacketCopy(long reader, byte[] dataPacket);	// Instead of OmReaderRawDataPacket()
 
 	public native static void OmReaderClose(long reader);
 	

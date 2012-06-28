@@ -99,6 +99,12 @@ extern "C" {
 #define JOMAPI_OM_DATETIME_MIN_VALID 4325376i64
 #undef JOMAPI_OM_DATETIME_MAX_VALID
 #define JOMAPI_OM_DATETIME_MAX_VALID 4282351355i64
+#undef JOMAPI_OM_MAX_SAMPLES
+#define JOMAPI_OM_MAX_SAMPLES 120L
+#undef JOMAPI_OM_MAX_HEADER_SIZE
+#define JOMAPI_OM_MAX_HEADER_SIZE 1024L
+#undef JOMAPI_OM_MAX_DATA_SIZE
+#define JOMAPI_OM_MAX_DATA_SIZE 512L
 #undef JOMAPI_OM_VALUE_DEVICEID
 #define JOMAPI_OM_VALUE_DEVICEID 3L
 #undef JOMAPI_OM_VALUE_SESSIONID
@@ -194,10 +200,10 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetBatteryHealth
 /*
  * Class:     JOMAPI
  * Method:    OmGetAccelerometer
- * Signature: (I[I)I
+ * Signature: (I[I[I[I)I
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmGetAccelerometer
-  (JNIEnv *, jclass, jint, jintArray);
+  (JNIEnv *, jclass, jint, jintArray, jintArray, jintArray);
 
 /*
  * Class:     JOMAPI
@@ -449,6 +455,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderNextBlock
 
 /*
  * Class:     JOMAPI
+ * Method:    OmReaderBufferCopy
+ * Signature: (J[S)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderBufferCopy
+  (JNIEnv *, jclass, jlong, jshortArray);
+
+/*
+ * Class:     JOMAPI
  * Method:    OmReaderTimestamp
  * Signature: (JI[I)J
  */
@@ -462,6 +476,22 @@ JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue
   (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderRawHeaderPacketCopy
+ * Signature: (J[B)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawHeaderPacketCopy
+  (JNIEnv *, jclass, jlong, jbyteArray);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderRawDataPacketCopy
+ * Signature: (J[B)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderRawDataPacketCopy
+  (JNIEnv *, jclass, jlong, jbyteArray);
 
 /*
  * Class:     JOMAPI
