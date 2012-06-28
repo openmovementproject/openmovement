@@ -257,6 +257,14 @@ JNIEXPORT jint JNICALL Java_JOMAPI_OmGetEcc
 
 /*
  * Class:     JOMAPI
+ * Method:    OmCommand
+ * Signature: (ILjava/lang/String;[BILjava/lang/String;I[Ljava/lang/String;I)I
+ */
+JNIEXPORT jint JNICALL Java_JOMAPI_OmCommand
+  (JNIEnv *, jclass, jint, jstring, jbyteArray, jint, jstring, jint, jobjectArray, jint);
+
+/*
+ * Class:     JOMAPI
  * Method:    OmGetDelays
  * Signature: (I[J[J)I
  */
@@ -462,6 +470,22 @@ JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderTimestamp
  */
 JNIEXPORT jint JNICALL Java_JOMAPI_OmReaderGetValue
   (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderRawHeaderPacket
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawHeaderPacket
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     JOMAPI
+ * Method:    OmReaderRawDataPacket
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_JOMAPI_OmReaderRawDataPacket
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     JOMAPI
