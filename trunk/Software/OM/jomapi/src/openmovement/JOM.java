@@ -26,9 +26,9 @@
 // Java Open Movement
 // Dan Jackson, 2012
 
-//package openmovement;
+package openmovement;
 
-//import openmovement.*;
+import java.util.Date;
 
 public class JOM {
 

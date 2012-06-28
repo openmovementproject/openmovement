@@ -26,7 +26,7 @@
 // Java JNI OMAPI Layer
 // Dan Jackson, 2012
 
-//package openmovement;
+package openmovement;
 
 public interface JOMAPIListener {
 	
