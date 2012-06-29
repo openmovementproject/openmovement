@@ -94,14 +94,15 @@ static unsigned char buffer[SECTOR_SIZE];
 static void fputshort(unsigned short v, FILE *fp) { fputc((unsigned char)((v >> 0) & 0xff), fp); fputc((unsigned char)((v >> 8) & 0xff), fp); }
 static void fputlong(unsigned long v, FILE *fp) { fputc((unsigned char)((v >> 0) & 0xff), fp); fputc((unsigned char)((v >> 8) & 0xff), fp); fputc((unsigned char)((v >> 16) & 0xff), fp); fputc((unsigned char)((v >> 24) & 0xff), fp); }
 
-static char DumpFile(const char *filename, const char *outfile, Stream stream, Format format, Values values, Time time, Options options, float amplify, unsigned long iStart, unsigned long iLength, unsigned long iStep)
+static char DumpFile(const char *filename, const char *outfile, Stream stream, Format format, Values values, Time time, Options options, float amplify, unsigned long iStart, unsigned long iLength, unsigned long iStep, int blockStart, int blockCount)
 {
     unsigned long outputSize = 0;
     unsigned long totalSamples = 0;
     unsigned long lengthBytes;
-    unsigned long lengthSectors;
+    int lengthSectors;
+    int numSectors;
     unsigned long sequence = 0;
-    unsigned int n;
+    int n;
 	double tStart = 0;
 	double tLast = 0;
     char timestring[48] = "";
@@ -257,12 +258,15 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
         fputlong(expectedLength, ofp);
     }
 
-    fprintf(stderr, "\rReading %d sectors...\n", (int)lengthSectors);
-    for (n = 0; n < lengthSectors; n++)
+    numSectors = lengthSectors - blockStart;
+    if (blockCount >= 0 && numSectors > blockCount) { numSectors = blockCount; }
+
+    fprintf(stderr, "\rReading %d sectors (offset %d, file %d)...\n", numSectors, blockStart, lengthSectors);
+    for (n = 0; n < numSectors; n++)
     {
         unsigned long offset;
         //fprintf(stderr, "\rSECTOR %5d/%5d (%3d%%): ...\b\b\b", n, lengthSectors, 100 * n / lengthSectors);
-        offset = n * SECTOR_SIZE;
+        offset = (n + blockStart) * SECTOR_SIZE;
         fseek(fp, offset, SEEK_SET);
 
         if (sizeof(DataPacket) != SECTOR_SIZE)
@@ -691,6 +695,8 @@ int main(int argc, char *argv[])
 	unsigned long iStart = 0;
 	unsigned long iLength = ULONG_MAX;
 	unsigned long iStep = 1;
+    int blockStart = 0;
+    int blockCount = -1;
     int i;
     //Cwa *cwa;
     //Cwa *ocwa;
@@ -734,6 +740,8 @@ atexit(_getch);
             else if (strcasecmp(argv[i], "-start") == 0)       { i++; iStart = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-length") == 0)      { i++; iLength = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-step") == 0 || strcasecmp(argv[i], "-skip") == 0) { i++; iStep = atol(argv[i]); }
+            else if (strcasecmp(argv[i], "-blockstart") == 0)  { i++; blockStart = atoi(argv[i]); }
+            else if (strcasecmp(argv[i], "-blockcount") == 0)  { i++; blockCount = atoi(argv[i]); }
             else if (strcasecmp(argv[i], "-out") == 0)
             {
                 i++; 
@@ -788,7 +796,7 @@ atexit(_getch);
 #ifdef SQLITE
             "|-f:sqlite"
 #endif
-            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-light] [-temp] [-batt] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>]\n");
+            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-light] [-temp] [-batt] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
         return 1;
     }
     
@@ -797,7 +805,7 @@ atexit(_getch);
     fprintf(stderr, "DEBUG: Opening file: %s\n", filename);
 #endif
 
-    if (DumpFile(filename, outfilename, stream, format, values, time, options, amplify, iStart, iLength, iStep))
+    if (DumpFile(filename, outfilename, stream, format, values, time, options, amplify, iStart, iLength, iStep, blockStart, blockCount))
 	{
 	    fprintf(stderr, "ERROR: Problem dumping file: %s (check exists, readable and not corrupted.)\n", filename);
 	}
