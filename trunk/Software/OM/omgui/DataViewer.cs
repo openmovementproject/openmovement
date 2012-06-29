@@ -73,6 +73,8 @@ namespace OmGui
                 firstBlock = 0;
                 numBlocks = 0;
                 if (reader != null) { numBlocks = reader.DataNumBlocks; }
+                offsetBlocks = 0;
+                if (reader != null) { offsetBlocks = reader.DataOffsetBlocks; }
                 beginBlock = endBlock = 0.0f;
 
                 StartPreview();
@@ -107,6 +109,9 @@ namespace OmGui
 
         float firstBlock = 0.0f;
         float numBlocks = 0.0f;
+
+        int offsetBlocks = 0;
+        public int OffsetBlocks { get { return offsetBlocks; } }
 
         // Animate: 0 = use live values, 1 = (start animation) use 'animate from' values, interpolated in-between
         DateTime lastAnimateTime = DateTime.MinValue;
@@ -401,6 +406,9 @@ namespace OmGui
 
         float beginBlock = 0;
         float endBlock = 0;
+
+        public float SelectionBeginBlock { get { return beginBlock; } }
+        public float SelectionEndBlock { get { return endBlock; } }
 
         public enum SelectionType { SelectionNone, SelectionMove, SelectionBegin, SelectionEnd };
         private SelectionType selectionType = SelectionType.SelectionNone;

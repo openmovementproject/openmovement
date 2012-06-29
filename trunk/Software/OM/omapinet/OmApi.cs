@@ -50,7 +50,7 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmGetDeviceIds(/*ref */ int[] deviceIds, int maxDevices);
         [DllImport("libomapi.dll")] public static extern int OmGetVersion(int deviceId, out int firmwareVersion, out int hardwareVersion);
         [DllImport("libomapi.dll")] public static extern int OmGetBatteryLevel(int deviceId);
-        [DllImport("libomapi.dll")] public static extern int OmGetSelfTest(int deviceId);
+        [DllImport("libomapi.dll")] public static extern int OmSelfTest(int deviceId);
         public const int OM_MEMORY_HEALTH_ERROR = 1;
         public const int OM_MEMORY_HEALTH_WARNING = 8;
         [DllImport("libomapi.dll")] public static extern int OmGetMemoryHealth(int deviceId);

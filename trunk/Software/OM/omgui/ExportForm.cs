@@ -16,7 +16,7 @@ namespace OmGui
         // Conversion Executable
         public const string EXECUTABLE_NAME = @"cwa-convert.exe";
 
-        public ExportForm(string inputFilename, string downloadPath)
+        public ExportForm(string inputFilename, string downloadPath, float blockStart, float blockCount)
         {
             InitializeComponent();
 
@@ -24,6 +24,16 @@ namespace OmGui
 
             textBoxSourceFile.Text = inputFilename;
             textBoxOutputFile.Text = Path.Combine(downloadPath, Path.ChangeExtension(Path.GetFileName(inputFilename), saveFileDialog.DefaultExt));
+
+            if (blockStart >= 0)
+            {
+                textBoxBlockStart.Text = ((int)Math.Floor(blockStart)).ToString();
+            }
+
+            if (blockCount >= 0)
+            {
+                textBoxBlockCount.Text = ((int)Math.Ceiling(blockCount)).ToString();
+            }
         }
 
         private void ExportForm_Load(object sender, EventArgs e)
@@ -97,6 +107,10 @@ namespace OmGui
             if (textBoxSampleStart.Text.Length > 0)  { args.Add("-start " + textBoxSampleStart.Text); }
             if (textBoxSampleLength.Text.Length > 0) { args.Add("-length " + textBoxSampleLength.Text); }
             if (textBoxSampleStep.Text.Length > 0)   { args.Add("-step " + textBoxSampleStep.Text); }
+
+            // Blocks
+            if (textBoxBlockStart.Text.Length > 0) { args.Add("-blockstart " + textBoxBlockStart.Text); }
+            if (textBoxBlockCount.Text.Length > 0) { args.Add("-blockcount " + textBoxBlockCount.Text); }
 
             // Construct arguments
             processInformation.Arguments = string.Join(" ", args.ToArray());
