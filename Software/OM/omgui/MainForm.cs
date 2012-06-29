@@ -757,6 +757,18 @@ namespace OmGui
         {
             int numFiles = 0;
             int numDevices = 0;
+            float blockStart = -1;
+            float blockCount = -1;
+
+            // Selection
+            if (dataViewer != null)
+            {
+                if (dataViewer.HasSelection)
+                {
+                    blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
+                    blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+                }
+            }
 
             List<string> files = new List<string>();
             foreach (ListViewItem i in listView.SelectedItems)
@@ -790,7 +802,7 @@ namespace OmGui
             }
 
             string folder = GetPath(OmGui.Properties.Settings.Default.DownloadPath);
-            ExportForm exportForm = new ExportForm(filesArray[0], folder);
+            ExportForm exportForm = new ExportForm(filesArray[0], folder, blockStart, blockCount);
             DialogResult result = exportForm.ShowDialog(this);
         }
 
