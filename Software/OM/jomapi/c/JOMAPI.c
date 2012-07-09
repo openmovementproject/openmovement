@@ -221,44 +221,55 @@ JNIEXPORT jint JNICALL Java_openmovement_JOMAPI_OmGetDeviceIds(JNIEnv *env, jcla
     int retval;
     
     // Limit to array length and maximum possible devices
-    jsize arrayLen = (*env)->GetArrayLength(env, deviceIds);
+    jsize arrayLen = 0;
+    if (deviceIds != NULL) { arrayLen = (*env)->GetArrayLength(env, deviceIds); }
+    if (maxDevices < 0) { maxDevices = 0; }
     if (maxDevices > arrayLen) { maxDevices = arrayLen; }
     if (maxDevices > 0xffff) { maxDevices = 0xffff; }
     
     // Make a true 'int' buffer for the arrays (in case of 64-bit C-int vs. 32-bit jint)
-    intDeviceIds = (int *)malloc(maxDevices * sizeof(int));
-    if (intDeviceIds == NULL)
-	{
-		THROW_EXCEPTION(env, "java/lang/OutOfMemoryError", "Out of memory allocating native buffer for device IDs.");
-        return OM_E_OUT_OF_MEMORY;
-	}
+    intDeviceIds = NULL;
+    if (deviceIds != NULL && maxDevices > 0)
+    {
+        intDeviceIds = (int *)malloc(maxDevices * sizeof(int));
+        if (intDeviceIds == NULL)
+        {
+            THROW_EXCEPTION(env, "java/lang/OutOfMemoryError", "Out of memory allocating native buffer for device IDs.");
+            return OM_E_OUT_OF_MEMORY;
+        }
+    }
     
     // Retrieve device IDs
-    retval = OmGetDeviceIds(intDeviceIds, 0xffff);
+    retval = OmGetDeviceIds(intDeviceIds, maxDevices);
     
-    // Fill caller's return buffer
-    if (retval >= 0)
-	{
-        int i;
+    if (intDeviceIds != NULL)
+    {
+        // Fill caller's return buffer
+        if (deviceIds != NULL && retval >= 0)
+        {
+            int count;
+            int i;
+            
+            // Get array
+            jint *elements = (*env)->GetIntArrayElements(env, deviceIds, 0);
+            
+            // Clip return length
+            count = retval;
+            if (count > maxDevices) { count = maxDevices; }
+            
+            // Copy to jint array from C-int array
+            for (i = 0; i < count; i++)
+            {
+                elements[i] = intDeviceIds[i];
+            }
+            
+            // Release array
+            (*env)->ReleaseIntArrayElements(env, deviceIds, elements, 0);
+        }
         
-        // Get array
-        jint *elements = (*env)->GetIntArrayElements(env, deviceIds, 0);
-        
-        // Clip return length
-        if (maxDevices > retval) { maxDevices = retval; }
-        
-        // Copy to jint array from C-int array
-        for (i = 0; i < maxDevices; i++)
-		{
-            elements[i] = intDeviceIds[i];
-		}
-        
-        // Release array
-        (*env)->ReleaseIntArrayElements(env, deviceIds, elements, 0);
-	}
-    
-    // Free local buffer
-    free(intDeviceIds);
+        // Free local buffer
+        free(intDeviceIds);
+    }
     
     return retval;
 }
