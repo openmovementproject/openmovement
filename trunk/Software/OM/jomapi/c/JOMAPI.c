@@ -57,7 +57,7 @@ extern "C" {
 	if (bufferObject != NULL) \
 	{ \
 		jclass sbClass = (*env)->GetObjectClass(env, bufferObject); \
-		jmethodID midReplace = (*env)->GetMethodID(env, sbClass, "append", "(IILjava/lang/String;)Ljava/lang/StringBuffer;"); \
+		jmethodID midReplace = (*env)->GetMethodID(env, sbClass, "replace", "(IILjava/lang/String;)Ljava/lang/StringBuffer;"); \
 		jstring tempString = (*env)->NewStringUTF(env, buffer); \
         jvalue args[3]; \
 		args[0].i = 0; \
