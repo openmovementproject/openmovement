@@ -294,6 +294,7 @@ public class JOMAPI {
 	public static final int OM_VALUE_SAMPLERATE = 11;		// OM_READER_VALUE_TYPE
 	public static final int OM_VALUE_TEMPERATURE_MC = 108;	// OM_READER_VALUE_TYPE
 	public static final int OM_VALUE_BATTERY_MV = 110;		// OM_READER_VALUE_TYPE
+	public static final int OM_VALUE_BATTERY_PERCENT = 210;	// OM_READER_VALUE_TYPE
 	public native static int OmReaderGetValue(long reader, int valueType);
 
 /*

@@ -56,7 +56,7 @@
             this.groupBoxOptions.Dock = System.Windows.Forms.DockStyle.Right;
             this.groupBoxOptions.Location = new System.Drawing.Point(858, 0);
             this.groupBoxOptions.Name = "groupBoxOptions";
-            this.groupBoxOptions.Size = new System.Drawing.Size(106, 130);
+            this.groupBoxOptions.Size = new System.Drawing.Size(106, 236);
             this.groupBoxOptions.TabIndex = 0;
             this.groupBoxOptions.TabStop = false;
             this.groupBoxOptions.Text = "Options";
@@ -162,13 +162,13 @@
             // checkBoxAccel
             // 
             this.checkBoxAccel.AutoSize = true;
+            this.checkBoxAccel.Enabled = false;
             this.checkBoxAccel.Location = new System.Drawing.Point(3, 78);
             this.checkBoxAccel.Name = "checkBoxAccel";
             this.checkBoxAccel.Size = new System.Drawing.Size(68, 19);
             this.checkBoxAccel.TabIndex = 0;
             this.checkBoxAccel.Text = "Accel.";
             this.checkBoxAccel.UseVisualStyleBackColor = true;
-            this.checkBoxAccel.Visible = false;
             this.checkBoxAccel.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // checkBoxLight
@@ -180,7 +180,6 @@
             this.checkBoxLight.TabIndex = 0;
             this.checkBoxLight.Text = "Light";
             this.checkBoxLight.UseVisualStyleBackColor = true;
-            this.checkBoxLight.Visible = false;
             this.checkBoxLight.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // checkBoxTemp
@@ -192,7 +191,6 @@
             this.checkBoxTemp.TabIndex = 0;
             this.checkBoxTemp.Text = "Temp.";
             this.checkBoxTemp.UseVisualStyleBackColor = true;
-            this.checkBoxTemp.Visible = false;
             this.checkBoxTemp.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // checkBoxBatt
@@ -204,7 +202,6 @@
             this.checkBoxBatt.TabIndex = 0;
             this.checkBoxBatt.Text = "Batt.";
             this.checkBoxBatt.UseVisualStyleBackColor = true;
-            this.checkBoxBatt.Visible = false;
             this.checkBoxBatt.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // graphPanel
@@ -214,7 +211,7 @@
             this.graphPanel.Image = null;
             this.graphPanel.Location = new System.Drawing.Point(0, 0);
             this.graphPanel.Name = "graphPanel";
-            this.graphPanel.Size = new System.Drawing.Size(858, 130);
+            this.graphPanel.Size = new System.Drawing.Size(858, 236);
             this.graphPanel.TabIndex = 1;
             this.graphPanel.SizeChanged += new System.EventHandler(this.graphPanel_SizeChanged);
             this.graphPanel.Click += new System.EventHandler(this.graphPanel_Click);
@@ -237,7 +234,7 @@
             this.Controls.Add(this.graphPanel);
             this.Controls.Add(this.groupBoxOptions);
             this.Name = "DataViewer";
-            this.Size = new System.Drawing.Size(964, 130);
+            this.Size = new System.Drawing.Size(964, 236);
             this.groupBoxOptions.ResumeLayout(false);
             this.groupBoxOptions.PerformLayout();
             this.toolStripData.ResumeLayout(false);
@@ -258,11 +255,11 @@
         private System.Windows.Forms.CheckBox checkBoxAccel;
         private System.Windows.Forms.CheckBox checkBoxLight;
         private System.Windows.Forms.CheckBox checkBoxTemp;
-        private System.Windows.Forms.CheckBox checkBoxBatt;
         private GraphPanel graphPanel;
         private System.Windows.Forms.ToolStrip toolStripData;
         private System.Windows.Forms.ToolStripButton toolStripButtonZoom;
         private System.Windows.Forms.ToolStripButton toolStripButtonSelection;
         private System.Windows.Forms.Timer timerAnimate;
+        private System.Windows.Forms.CheckBox checkBoxBatt;
     }
 }

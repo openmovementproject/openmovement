@@ -28,6 +28,10 @@ namespace OmApiNet
         public int DataNumBlocks { get; protected set; }
         public string MetaData { get; protected set; }
 
+        public float Light { get; protected set; }
+        public float Temp { get; protected set; }
+        public float Batt { get; protected set; }
+
         // Base constructor
         protected OmReader(Om om, IntPtr handle)
         {
@@ -106,6 +110,11 @@ namespace OmApiNet
             short[] samples = new short[sampleCount * 3];
             IntPtr buffer = OmApi.OmReaderBuffer(Handle);
             System.Runtime.InteropServices.Marshal.Copy(buffer, samples, 0, sampleCount * 3);
+
+            Light = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_LIGHT);
+            Temp = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_TEMPERATURE_MC);
+            Batt = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY_PERCENT);
+
             return samples;
         }
 

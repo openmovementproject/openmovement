@@ -166,7 +166,7 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmReaderNextBlock(IntPtr reader);
         [DllImport("libomapi.dll")] public static extern IntPtr OmReaderBuffer(IntPtr reader);
         [DllImport("libomapi.dll")] public static extern uint OmReaderTimestamp(IntPtr reader, int index, out ushort fractional);
-        public enum OM_READER_VALUE_TYPE { OM_VALUE_DEVICEID = 3, OM_VALUE_SESSIONID = 4, OM_VALUE_SEQUENCEID = 5, OM_VALUE_LIGHT = 7, OM_VALUE_TEMPERATURE = 8, OM_VALUE_EVENTS = 9, OM_VALUE_BATTERY = 10, OM_VALUE_SAMPLERATE = 11, OM_VALUE_TEMPERATURE_MC = 108, OM_VALUE_BATTERY_MV = 110 };
+        public enum OM_READER_VALUE_TYPE { OM_VALUE_DEVICEID = 3, OM_VALUE_SESSIONID = 4, OM_VALUE_SEQUENCEID = 5, OM_VALUE_LIGHT = 7, OM_VALUE_TEMPERATURE = 8, OM_VALUE_EVENTS = 9, OM_VALUE_BATTERY = 10, OM_VALUE_SAMPLERATE = 11, OM_VALUE_TEMPERATURE_MC = 108, OM_VALUE_BATTERY_MV = 110, OM_VALUE_BATTERY_PERCENT = 210 };
         [DllImport("libomapi.dll")] public static extern int OmReaderGetValue(IntPtr reader, OM_READER_VALUE_TYPE valueType);
 
 /*
