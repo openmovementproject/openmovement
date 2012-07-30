@@ -1160,6 +1160,7 @@ typedef enum
     OM_VALUE_TEMPERATURE_MC = 108,      /**< Temperature sensor reading in millicentigrade */
 /** \cond */
     OM_VALUE_BATTERY_MV = 110,
+    OM_VALUE_BATTERY_PERCENT = 210,
 /** \endcond */
 } OM_READER_VALUE_TYPE;
 

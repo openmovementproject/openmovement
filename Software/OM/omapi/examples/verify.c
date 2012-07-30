@@ -80,12 +80,18 @@ unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
 }
 
 
+
 /* Conversion function */
 int verify(const char *infile, char output)
 {
     OmReaderHandle reader;
+    int batteryStartPercent = 0, batteryEndPercent = 0;
+    int batteryStartMv = 0, batteryEndMv = 0;
+    unsigned long long firstTime = 0;
+    unsigned long long lastTime = 0;
     unsigned long long blockStart = 0;
     unsigned long long previousBlockEnd = 0;
+    unsigned int minLight = 0xffff;
     unsigned int previousSequenceId = -1;
     int block;
     int day = 0;
@@ -162,6 +168,21 @@ int verify(const char *infile, char output)
             unsigned short fractional;
             timestamp = OmReaderTimestamp(reader, 0, &fractional);
             blockStart = Ticks(timestamp, fractional);
+        }
+
+        if (firstTime == 0)
+        {
+            firstTime = blockStart;
+            lastTime = firstTime;
+            batteryStartMv = OmReaderGetValue(reader, OM_VALUE_BATTERY_MV);
+            batteryStartPercent = OmReaderGetValue(reader, OM_VALUE_BATTERY_PERCENT);
+            batteryEndMv = batteryStartMv;
+            batteryEndPercent = batteryStartPercent;
+        }
+
+        {
+            unsigned int light = OmReaderGetValue(reader, OM_VALUE_LIGHT);
+            if (light < minLight) { minLight = light; }
         }
 
         /*
@@ -287,7 +308,7 @@ int verify(const char *infile, char output)
             if (seconds != lastSecond)
             {
                 if (firstPacket) { /* printf(","); */ firstPacket = 0; }
-                else if (packetCount >= 97 && packetCount <= 105) { /* printf("."); */ }
+                else if (packetCount >= 96 && packetCount <= 105) { /* printf("."); */ }
                 else
                 { 
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
@@ -319,9 +340,18 @@ int verify(const char *infile, char output)
             previousBlockEnd = Ticks(timestamp, fractional);
         }
 
+        lastTime = previousBlockEnd;
+        batteryEndMv = OmReaderGetValue(reader, OM_VALUE_BATTERY_MV);
+        batteryEndPercent = OmReaderGetValue(reader, OM_VALUE_BATTERY_PERCENT);
+
     }
 
-    fprintf(stderr, "Errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, (breaks=%d), (maxAv=%f), (minInterval=%f), (maxInterval=%f)\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f);
+
+    /* Summary */
+    {
+        unsigned long duration = (unsigned long)((lastTime - firstTime) >> 16);
+        fprintf(stderr, "Errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, (breaks=%d), (maxAv=%f), (minInterval=%0.3f), (maxInterval=%0.3f), (duration=%0.4f), (minLight=%d)\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f, (duration / 60.0f / 60.0f), minLight);
+    }
 
 
     /* Close the files */

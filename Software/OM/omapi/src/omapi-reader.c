@@ -455,6 +455,46 @@ OM_DATETIME OmReaderTimestamp(OmReaderHandle reader, int index, unsigned short *
 }
 
 
+static unsigned int AdcBattToPercent(unsigned int Vbat)
+{
+    #define BATT_CHARGE_ZERO 614
+    #define BATT_CHARGE_FULL 708
+	#define BATT_FIT_CONST_1	666LU
+	#define BATT_FIT_CONST_2	150LU
+	#define BATT_FIT_CONST_3	538LU	
+	#define BATT_FIT_CONST_4	8
+	#define BATT_FIT_CONST_5	614LU
+	#define BATT_FIT_CONST_6	375LU
+	#define BATT_FIT_CONST_7	614LU	
+	#define BATT_FIT_CONST_8	8
+    #define USB_BUS_SENSE 0
+
+	unsigned long temp; 
+	
+	// Compensate for charging current
+	if (USB_BUS_SENSE && (Vbat>12)) Vbat -= 12; 
+ 
+	// Early out functions for full and zero charge
+	if (Vbat > BATT_CHARGE_FULL) return 100;
+    if (Vbat < BATT_CHARGE_ZERO) return 0;
+
+	// Calculations for curve fit
+	if (Vbat>BATT_FIT_CONST_1)
+	{
+		temp = (BATT_FIT_CONST_2 * (Vbat - BATT_FIT_CONST_3))>>BATT_FIT_CONST_4;
+	}
+	else if (Vbat>BATT_FIT_CONST_5)
+	{
+		temp = (BATT_FIT_CONST_6 * (Vbat - BATT_FIT_CONST_7))>>BATT_FIT_CONST_8;
+	}
+	else 
+	{
+		temp = 0;
+	}
+    return (unsigned int)temp;
+}
+
+
 int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
 { 
     OmReaderState *state = (OmReaderState *)reader;
@@ -481,8 +521,9 @@ int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
         case OM_VALUE_SAMPLERATE:       return dataPacket->sampleRate;
 
         // Cooked values
-        case OM_VALUE_TEMPERATURE_MC:   return (dataPacket->temperature * 150 - 20500); // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
-        case OM_VALUE_BATTERY_MV:       return (dataPacket->battery * 6000 / 1024);     // Conversion to millivolts:  Vref = 3V, Vbat = 6V * value / 1024
+        case OM_VALUE_TEMPERATURE_MC:   return (dataPacket->temperature * 150 - 20500);     // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
+        case OM_VALUE_BATTERY_MV:       return ((dataPacket->battery + 512) * 6000 / 1024); // Conversion to millivolts:  Vref = 3V, Vbat = 6V * value / 1024
+        case OM_VALUE_BATTERY_PERCENT:  return AdcBattToPercent(dataPacket->battery + 512); // Conversion to percentage
 
         // Default
         default:                    return OM_E_FAIL;

@@ -142,6 +142,8 @@ namespace OmGui
                 if (bitmapDirty)
                 {
                     bool displayX = checkBoxX.Checked, displayY = checkBoxY.Checked, displayZ = checkBoxZ.Checked;
+                    bool displayAccel = checkBoxAccel.Checked;
+                    bool displayLight = checkBoxLight.Checked, displayTemp = checkBoxTemp.Checked, displayBatt = checkBoxBatt.Checked;
 
                     int width = graphPanel.Width;
                     if (myBitmap == null || myBitmap.Width != width || myBitmap.Height != graphPanel.Height)
@@ -158,6 +160,10 @@ namespace OmGui
                     Pen penDataX = new Pen(Color.FromArgb(96, Color.Red));
                     Pen penDataY = new Pen(Color.FromArgb(96, Color.Green));
                     Pen penDataZ = new Pen(Color.FromArgb(96, Color.Blue));
+                    Pen penDataAccel = new Pen(Color.FromArgb(96, Color.Black));
+                    Pen penDataLight = new Pen(Color.FromArgb(96, Color.Brown));
+                    Pen penDataTemp = new Pen(Color.FromArgb(96, Color.DarkMagenta));
+                    Pen penDataBatt = new Pen(Color.FromArgb(96, Color.DarkCyan));
 
                     // Fade-zoom
                     //int fadedA = (int)(255 * (1.0f - animate));
@@ -207,11 +213,17 @@ namespace OmGui
                                 float scale = 0.10f;
 
                                 // Axis
-                                if ((x & 4) < 2) g.DrawRectangle(penMissing2, x, (center + scale * 0.0f) * myBitmap.Height, 1, 1);
+                                if ((x & 3) < 2) g.DrawRectangle(penMissing2, x, (center + scale * 0.0f) * myBitmap.Height, 1, 1);
 
-                                if (displayX) g.DrawRectangle(penDataX, x, (center + scale * aggregate.Min.X) * myBitmap.Height, 1, 1 + (scale * (aggregate.Max.X - aggregate.Min.X)) * myBitmap.Height);
-                                if (displayY) g.DrawRectangle(penDataY, x, (center + scale * aggregate.Min.Y) * myBitmap.Height, 1, 1 + (scale * (aggregate.Max.Y - aggregate.Min.Y)) * myBitmap.Height);
-                                if (displayZ) g.DrawRectangle(penDataZ, x, (center + scale * aggregate.Min.Z) * myBitmap.Height, 1, 1 + (scale * (aggregate.Max.Z - aggregate.Min.Z)) * myBitmap.Height);
+                                if (displayX) g.DrawRectangle(penDataX, x, (center + scale * aggregate.Min.X) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.X - aggregate.Min.X))) * myBitmap.Height);
+                                if (displayY) g.DrawRectangle(penDataY, x, (center + scale * aggregate.Min.Y) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Y - aggregate.Min.Y))) * myBitmap.Height);
+                                if (displayZ) g.DrawRectangle(penDataZ, x, (center + scale * aggregate.Min.Z) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Z - aggregate.Min.Z))) * myBitmap.Height);
+
+                                //if (displayAccel) g.DrawRectangle(penDataAccel, x, (center + scale * aggregate.Min.Amplitude) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Amplitude - aggregate.Min.Amplitude))) * myBitmap.Height);
+
+                                if (displayLight) { float height = ((aggregate.Max.Light - aggregate.Min.Light) / 1024.0f);     g.DrawRectangle(penDataLight, x, (1.0f - (height + aggregate.Min.Light / 1024.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
+                                if (displayTemp) { float height = -0.02f * (aggregate.Max.Temp - aggregate.Min.Temp) / 1000.0f; g.DrawRectangle(penDataTemp,  x, (1.0f - (height + 0.02f * aggregate.Min.Temp / 1000.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
+                                if (displayBatt) { float height = (aggregate.Max.Batt - aggregate.Min.Batt + 1) / 102.0f;       g.DrawRectangle(penDataBatt,  x, (1.0f - (height + (aggregate.Min.Batt + 1) / 102.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                             }
                             else
                             {
@@ -785,13 +797,16 @@ namespace OmGui
 
     public struct Sample
     {
-        public Sample(DateTime t, float x, float y, float z) : this() { T = t;  X = x; Y = y; Z = z; }
+        public Sample(DateTime t, float x, float y, float z, float light, float temp, float batt) : this() { T = t; X = x; Y = y; Z = z; Light = light; Temp = temp; Batt = batt; }
         public DateTime T { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
+        public float Light { get; set; }
+        public float Temp { get; set; }
+        public float Batt { get; set; }
         public float Amplitude { get { return (float)Math.Sqrt(X * X + Y * Y + Z * Z); } }
-        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f);
+        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         /*
         public static Sample Minimum(Sample a, Sample b)
         {
@@ -812,7 +827,10 @@ namespace OmGui
             float x = (1.0f - p) * a.X + p * b.X;
             float y = (1.0f - p) * a.Y + p * b.Y;
             float z = (1.0f - p) * a.Z + p * b.Z;
-            return new Sample(t, x, y, z);
+            float light = (1.0f - p) * a.Light + p * b.Light;
+            float temp = (1.0f - p) * a.Temp + p * b.Temp;
+            float batt = (1.0f - p) * a.Batt + p * b.Batt;
+            return new Sample(t, x, y, z, light, temp, batt);
         }
     }
 
@@ -837,6 +855,9 @@ namespace OmGui
             if (sample.X < Min.X) { Min.X = sample.X; } if (sample.X > Max.X) { Max.X = sample.X; }
             if (sample.Y < Min.Y) { Min.Y = sample.Y; } if (sample.Y > Max.Y) { Max.Y = sample.Y; }
             if (sample.Z < Min.Z) { Min.Z = sample.Z; } if (sample.Z > Max.Z) { Max.Z = sample.Z; }
+            if (sample.Light < Min.Light) { Min.Light = sample.Light; } if (sample.Light > Max.Light) { Max.Light = sample.Light; }
+            if (sample.Temp < Min.Temp) { Min.Temp = sample.Temp; } if (sample.Temp > Max.Temp) { Max.Temp = sample.Temp; }
+            if (sample.Batt < Min.Batt) { Min.Batt = sample.Batt; } if (sample.Batt > Max.Batt) { Max.Batt = sample.Batt; }
             //Min = Sample.Minimum(Min, sample);
             //Max = Sample.Maximum(Max, sample);
         }
@@ -865,7 +886,7 @@ namespace OmGui
         private Aggregate aggregate;
         public Aggregate Aggregate { get { return aggregate; } }
 
-        public DataBlock(DateTime firstTime, DateTime lastTime, short[] raw)
+        public DataBlock(DateTime firstTime, DateTime lastTime, float light, float temp, float batt, short[] raw)
         {
             RawValues = raw;
             Values = new Sample[raw.Length / 3];
@@ -878,7 +899,7 @@ namespace OmGui
                 float x = raw[3 * i + 0] / 256.0f;
                 float y = raw[3 * i + 1] / 256.0f;
                 float z = raw[3 * i + 2] / 256.0f;
-                Values[i] = new Sample(t, x, y, z);
+                Values[i] = new Sample(t, x, y, z, light, temp, batt);
             }
             aggregate.Add(Values);
         }
@@ -895,9 +916,12 @@ namespace OmGui
                 }
                 DateTime firstTime = reader.TimeForSample(0);
                 DateTime lastTime;
+                float light = reader.Light;
+                float temp = reader.Temp;
+                float batt = reader.Batt;
                 if (values.Length == 0) { lastTime = firstTime; }
                 else { lastTime = reader.TimeForSample(values.Length - 1); }
-                return new DataBlock(firstTime, lastTime, values);
+                return new DataBlock(firstTime, lastTime, light, temp, batt, values);
             }
             catch (Exception)
             {
@@ -999,7 +1023,14 @@ namespace OmGui
                     if (result >= cache.Keys.Count) { result--; }
                     if (result < 0 || result >= cache.Keys.Count) { tolerance = 0; return Aggregate.Zero; }
                     tolerance = Math.Abs(result - blockNumber);
-                    return cache.ElementAt(result).Value.Aggregate;
+                    try
+                    {
+                        return cache.ElementAt(result).Value.Aggregate;
+                    }
+                    catch (NullReferenceException)
+                    {
+                        return Aggregate.Zero;
+                    }
                 }
             }
 

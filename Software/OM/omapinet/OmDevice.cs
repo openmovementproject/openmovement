@@ -27,7 +27,7 @@ namespace OmApiNet
                     filename = filenamesb.ToString();
                 }
             }
-            catch (Exception e) { Console.Error.WriteLine("ERROR: Problem getting data filename for device " + deviceId + "."); }
+            catch (Exception) { Console.Error.WriteLine("ERROR: Problem getting data filename for device " + deviceId + "."); }
 
         }
 
@@ -138,7 +138,7 @@ category = SourceCategory.Other;
                     FileAttributes attributes = File.GetAttributes(Filename);
                     return ((attributes & FileAttributes.Archive) != 0);
                 }
-                catch (Exception e) { Console.Error.WriteLine("ERROR: Problem getting filename attributes for device " + deviceId + ": " + Filename); return false; }
+                catch (Exception) { Console.Error.WriteLine("ERROR: Problem getting filename attributes for device " + deviceId + ": " + Filename); return false; }
             } 
         }
 
