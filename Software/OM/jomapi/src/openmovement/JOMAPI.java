@@ -240,7 +240,7 @@ public class JOMAPI {
 			Calendar cal = Calendar.getInstance();
 			cal.clear();
 			cal.set(Calendar.YEAR, OM_DATETIME_YEAR(value));
-			cal.set(Calendar.MONTH, OM_DATETIME_MONTH(value));
+			cal.set(Calendar.MONTH, OM_DATETIME_MONTH(value) - 1);
 			cal.set(Calendar.DAY_OF_MONTH, OM_DATETIME_DAY(value));
 			cal.set(Calendar.HOUR_OF_DAY, OM_DATETIME_HOURS(value));
 			cal.set(Calendar.MINUTE, OM_DATETIME_MINUTES(value));
@@ -262,7 +262,7 @@ public class JOMAPI {
 		int year = cal.get(Calendar.YEAR);
 		if (value.getTime() <= 0 || year < 2000) { return OM_DATETIME_ZERO; }
 		if (value.getTime() >= Long.MAX_VALUE || year > 2063) { return OM_DATETIME_INFINITE; }
-		return OM_DATETIME_FROM_YMDHMS(year, cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+		return OM_DATETIME_FROM_YMDHMS(year, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 	}
 
 	public static final int OM_MAX_SAMPLES = 120;
