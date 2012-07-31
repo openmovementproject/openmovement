@@ -47,7 +47,7 @@
 	#define thread_t HANDLE
     #define thread_create(thread, attr_ignored, start_routine, arg) ((*(thread) = CreateThread(attr_ignored, 0, start_routine, arg, 0, NULL)) == NULL)
     #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((*thread), INFINITE) != WAIT_OBJECT_0)
-    #define thread_cancel (TerminateThread(*(thread), -1) == 0)
+    #define thread_cancel(thread) (TerminateThread(*(thread), -1) == 0)
     #define thread_return_t DWORD WINAPI
     #define thread_return_value(value) ((unsigned int)(value))
 
