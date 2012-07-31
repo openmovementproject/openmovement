@@ -373,8 +373,7 @@ void OmDeviceDiscoveryStart(void)
 void OmDeviceDiscoveryStop(void)
 {
     om.quitDiscoveryThread = 1;
-    pthread_cancel(&om.discoveryThread);
-    //thread_join(&om.discoveryThread, NULL);
+    thread_cancel(&om.discoveryThread);     // thread_join(&om.discoveryThread, NULL);
 }
 
 #endif
