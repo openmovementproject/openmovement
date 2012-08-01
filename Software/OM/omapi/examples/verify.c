@@ -61,8 +61,8 @@
 /* Error measures */
 #define STUCK_COUNT (5 * 120)
 #define AVERAGE_FACTOR 0.00001
-#define AVERAGE_RANGE_MAX 0.3
-#define AVERAGE_RANGE_OFF 0.1
+#define AVERAGE_RANGE_MAX 0.400
+#define AVERAGE_RANGE_OFF 0.300
 
 
 // Calculate the time in ticks from a packed time
@@ -95,9 +95,9 @@ int verify(const char *infile, char output)
 {
     OmReaderHandle reader;
     int batteryStartPercent = 0, batteryEndPercent = 0;
-    int batteryStartMv = 0, batteryEndMv = 0;
-    unsigned long long firstTime = 0;
-    unsigned long long lastTime = 0;
+    int batteryMaxPercent = -1, batteryMinPercent = -1;
+    unsigned long long veryFirstTime = 0;                   // First time in file
+    unsigned long long firstTime = 0, lastTime = 0;         // First & last time in current recording block
     unsigned long long blockStart = 0;
     unsigned long long previousBlockEnd = 0;
     unsigned int minLight = 0xffff;
@@ -106,15 +106,17 @@ int verify(const char *infile, char output)
     int day = 0;
     unsigned int totalSamples = 0;
     unsigned int errorFile = 0, errorEvent = 0, errorStuck = 0, errorRange = 0, errorBreaks = 0, errorRate = 0;
-    double maxAv = 0.0;
+    double maxAv = 0.0, peakAv = 0.0;
     char first = 1;
     unsigned long long minInterval = 0, maxInterval = 0;
     unsigned long long lastBlockStart = 0;
+    unsigned long long totalDuration = 0;
     float breakTime = 0.0f;
     int firstPacket;
     int lastSecond;
     int restarts = 0;
     OM_READER_HEADER_PACKET *hp;
+    char outOfRange = 0;
 
     fprintf(stderr, "FILE: %s\n", infile);
 
@@ -188,16 +190,6 @@ int verify(const char *infile, char output)
             blockStart = Ticks(timestamp, fractional);
         }
 
-        if (firstTime == 0)
-        {
-            firstTime = blockStart;
-            lastTime = firstTime;
-            batteryStartMv = OmReaderGetValue(reader, OM_VALUE_BATTERY_MV);
-            batteryStartPercent = OmReaderGetValue(reader, OM_VALUE_BATTERY_PERCENT);
-            batteryEndMv = batteryStartMv;
-            batteryEndPercent = batteryStartPercent;
-        }
-
         {
             unsigned int light = OmReaderGetValue(reader, OM_VALUE_LIGHT);
             if (light < minLight) { minLight = light; }
@@ -219,14 +211,29 @@ int verify(const char *infile, char output)
             }
             else
             {
+                long long recordingLength = (long long)(lastTime - firstTime);
                 long long diff = (long long)(blockStart - previousBlockEnd);
-                fprintf(stderr, "NOTE: Recording sequence restarted after %u (gap of %+.2f seconds)\n", previousSequenceId, (float)diff / 65536.0f);
+                fprintf(stderr, "NOTE: Recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
                 restarts++;
+                totalDuration += recordingLength;
                 breakTime += (float)diff / 65536.0f;
+
                 lastBlockStart = 0;
                 firstPacket = 1;
                 lastSecond = -1;
+                firstTime = 0;           // Start of a new block
             }
+        }
+
+        if (firstTime == 0)
+        {
+            firstTime = blockStart;
+            if (veryFirstTime == 0) { veryFirstTime = firstTime; }
+            lastTime = firstTime;
+            batteryStartPercent = OmReaderGetValue(reader, OM_VALUE_BATTERY_PERCENT);
+            batteryEndPercent = batteryStartPercent;
+            if (batteryMaxPercent < 0) { batteryMaxPercent = batteryStartPercent; }
+            if (batteryMinPercent < 0) { batteryMinPercent = batteryStartPercent; }
         }
 
         if (lastBlockStart > 0)
@@ -235,7 +242,7 @@ int verify(const char *infile, char output)
             interval = blockStart - lastBlockStart;
 
             // If the previous block's "blockEnd" is not close (+- 5%) to this block's "blockStart", we have a time discontinuity
-            if (previousBlockEnd != 0 && blockStart != 0 && abs((int)(previousBlockEnd - blockStart)) >= 3276)
+            if (previousBlockEnd != 0 && blockStart != 0 && abs((int)(previousBlockEnd - blockStart)) >= 5000)
             {
                 long long diff = (long long)(blockStart - previousBlockEnd);
                 fprintf(stderr, "WARNING: Time break in sequence by %+.2f seconds (last: %f, curr: %f)\n", (float)diff / 65536.0f, lastBlockStart / 65536.0f, blockStart / 65536.0f);
@@ -264,7 +271,6 @@ int verify(const char *infile, char output)
             static int seconds, packetCount = 0;
             double v;
             static double av = 0.0;
-            char outOfRange = 0;
 
             totalSamples++;
 
@@ -303,16 +309,22 @@ int verify(const char *infile, char output)
             /* Get the SVM - 1 */
             v = sqrt((x / 256.0) * (x / 256.0) + (y / 256.0) * (y / 256.0) + (z / 256.0) * (z / 256.0)) - 1.0;
             av = ((1.0 - AVERAGE_FACTOR) * av) + (AVERAGE_FACTOR * v);
+            if (fabs(av) > peakAv) { peakAv = fabs(av); }
             if (fabs(av) > maxAv) { maxAv = fabs(av); }
-            if (fabs(av) > AVERAGE_RANGE_MAX && !outOfRange)
+            if (fabs(av) > AVERAGE_RANGE_MAX)
             {
-                errorRange++;
-                outOfRange = 1;
-                fprintf(stderr, "ERROR: Out-of-range abs(avg(svm-1)): %0.3f\n", fabs(av));
+                if (!outOfRange)
+                {
+                    errorRange++;
+                    outOfRange = 1;
+                    peakAv = fabs(av);
+                    fprintf(stderr, "WARNING: Average SVM gone out-of-normal-range abs(avg(svm-1)): %0.3f\n", fabs(av));
+                }
             } 
-            else if (fabs(av) < AVERAGE_RANGE_OFF) 
+            else if (fabs(av) < AVERAGE_RANGE_OFF && outOfRange) 
             { 
                 outOfRange = 0; 
+                fprintf(stderr, "WARNING: Average SVM back in normal range, peak was abs(avg(svm-1)): %0.3f\n", peakAv);
             }
 
             /* Output the data */
@@ -333,7 +345,7 @@ int verify(const char *infile, char output)
             if (seconds != lastSecond)
             {
                 if (firstPacket) { /* fprintf(stderr, "!"); */ firstPacket = 0; }
-                else if (packetCount >= 96 && packetCount <= 105) { /* fprintf(stderr, "#"); */ }
+                else if (packetCount >= 90 && packetCount <= 110) { /* fprintf(stderr, "#"); */ }
                 else
                 { 
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
@@ -366,24 +378,25 @@ int verify(const char *infile, char output)
         }
 
         lastTime = previousBlockEnd;
-        batteryEndMv = OmReaderGetValue(reader, OM_VALUE_BATTERY_MV);
         batteryEndPercent = OmReaderGetValue(reader, OM_VALUE_BATTERY_PERCENT);
+        if (batteryEndPercent > batteryMaxPercent) { batteryMaxPercent = batteryEndPercent; }
+        if (batteryEndPercent < batteryMinPercent) { batteryMinPercent = batteryEndPercent; }
 
     }
 
+    /* Last session's duration */
+    {
+        long long recordingLength = (long long)(lastTime - firstTime);
+        totalDuration += recordingLength;
+    }
 
     /* Summary */
     {
-        unsigned long duration = (unsigned long)((lastTime - firstTime) >> 16);
+        int startStopFail = 0;
+
         hp = OmReaderRawHeaderPacket(reader);
 
         fprintf(stderr, "\n");
-        fprintf(stderr, "---\n");
-        fprintf(stderr, "Input file: \"%s\"\n", infile);
-        fprintf(stderr, "Summary errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, breaks=%d\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks);
-        fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
-        fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, (duration / 60.0f / 60.0f));
-        fprintf(stderr, "Summary info-3: minLight=%d, Bs=%d%%, Be=%d%%\n", minLight, batteryStartPercent, batteryEndPercent);
 
         if (hp == NULL)
         {
@@ -394,7 +407,7 @@ int verify(const char *infile, char output)
             if (hp->loggingStartTime >= OM_DATETIME_MIN_VALID && hp->loggingStartTime <= OM_DATETIME_MAX_VALID && hp->loggingEndTime > hp->loggingStartTime)
             {
                 unsigned long fStart = (unsigned long)TimeSerial(hp->loggingStartTime);
-                unsigned long aStart = (unsigned long)(firstTime >> 16);
+                unsigned long aStart = (unsigned long)(veryFirstTime >> 16);
                 int startDiff = (int)(aStart - fStart);
                 if (abs(startDiff) < 80)
                 { 
@@ -403,6 +416,7 @@ int verify(const char *infile, char output)
                 else
                 {
                     fprintf(stderr, "ERROR: Data did not start near recording start time (%ds).\n", startDiff);
+                    startStopFail += 2;
                 }
             }
             else
@@ -423,6 +437,7 @@ int verify(const char *infile, char output)
                 else
                 {
                     fprintf(stderr, "ERROR: Data did not stop near recording stop time (%ds).\n", stopDiff);
+                    startStopFail += 1;
                 }
             }
             else
@@ -432,10 +447,16 @@ int verify(const char *infile, char output)
         }
 
         fprintf(stderr, "---\n");
+        fprintf(stderr, "Input file: \"%s\"\n", infile);
+        fprintf(stderr, "Summary errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, breaks=%d\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks);
+        fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
+        fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f));
+        fprintf(stderr, "Summary info-3: minLight=%d, Bmax=%d%%, Bmin=%d%%, intervalFail=%d\n", minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
+        fprintf(stderr, "---\n");
 
-#define HEADER          "filename,      file,      event,      stuck,      range,      rate,      breaks, restarts, breakTime, maxAv, minInterval,            maxInterval,             duration,                  minLight, batteryStartPercent, batteryEndPercent\n"
-        fprintf(stdout, "  \"%s\",        %d,         %d,         %d,         %d,        %d,          %d,       %d,     %0.1f, %0.4f,       %0.3f,                  %0.3f,                %0.4f,                        %d,                  %d,                %d\n",
-                           infile, errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts, breakTime, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f, (duration / 60.0f / 60.0f), minLight, batteryStartPercent, batteryEndPercent);
+#define HEADER          "filename,      file,      event,      stuck,      range,      rate,      breaks, restarts, breakTime, maxAv, minInterval,            maxInterval,                   duration,                         minLight, batteryMaxPercent, batteryMinPercent,  intervalFail\n"
+        fprintf(stdout, "  \"%s\",        %d,         %d,         %d,         %d,        %d,          %d,       %d,     %0.1f, %0.4f,       %0.3f,                  %0.3f,                      %0.4f,                               %d,                %d,                %d,            %d\n",
+                           infile, errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts, breakTime, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
     }
 
 
