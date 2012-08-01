@@ -402,7 +402,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
         if (state->sequenceId != (unsigned int)-1 && state->sequenceId + 1 == sequenceId)
         {
             // If the previous block's "blockEnd" is close (+- 5%) to this block's "blockStart", use that value to smooth over any tiny jitter
-            if (previousBlockEnd != 0 && state->blockStart != 0 && abs((int)(previousBlockEnd - state->blockStart)) < 3276)
+            if (previousBlockEnd != 0 && state->blockStart != 0 && abs((int)(previousBlockEnd - state->blockStart)) < 5000)
             {
                 state->blockStart = previousBlockEnd;
             }
