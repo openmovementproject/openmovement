@@ -26,7 +26,7 @@
 /** 
  *  @file verify.c
  *  @brief     Open Movement API Example: Verify the contents of a binary data file
- *  @author    Dan Jackson
+ *  @author    -
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -41,6 +41,7 @@
 /* Headers */
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
 #define gmtime_r(timer, result) gmtime_s(result, timer)
 #define timegm _mkgmtime
 #endif
@@ -65,7 +66,7 @@
 
 
 // Calculate the time in ticks from a packed time
-unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
+time_t TimeSerial(OM_DATETIME timestamp)
 {
     time_t tSec;                            // Seconds since epoch
     struct tm tParts = {0};                 // Time elements (YMDHMS)
@@ -76,6 +77,14 @@ unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
     tParts.tm_min = OM_DATETIME_MINUTES(timestamp);
     tParts.tm_sec = OM_DATETIME_SECONDS(timestamp);
     tSec = timegm(&tParts);                 // Pack from YMDHMS
+    return tSec;
+}
+
+
+// Calculate the time in ticks from a packed time
+unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
+{
+    time_t tSec = TimeSerial(timestamp);
     return ((unsigned long long)tSec << 16) + fractional;
 }
 
@@ -101,16 +110,25 @@ int verify(const char *infile, char output)
     char first = 1;
     unsigned long long minInterval = 0, maxInterval = 0;
     unsigned long long lastBlockStart = 0;
+    float breakTime = 0.0f;
+    int firstPacket;
+    int lastSecond;
+    int restarts = 0;
+    OM_READER_HEADER_PACKET *hp;
+
+    fprintf(stderr, "FILE: %s\n", infile);
 
     /* Open the binary file reader on the input file */
     reader = OmReaderOpen(infile);
     if (reader == NULL)
     {
-        printf("ERROR: Problem opening file: %s\n", infile);
+        fprintf(stderr, "ERROR: Problem opening file: %s\n", infile);
         return -1;
     }
 
     /* Iterate over all of the blocks of the file */
+    firstPacket = 1;
+    lastSecond = -1;
     for (block = 0; ; block++)
     {
         OM_READER_DATA_PACKET *dp;
@@ -192,6 +210,25 @@ int verify(const char *infile, char output)
             -timestampOffset, 1.0f / sampleRate);
             */
 
+        // If we read a block out-of-sequence
+        if (previousSequenceId != (unsigned int)-1 && previousSequenceId + 1 != dp->sequenceId)
+        {
+            if (dp->sequenceId != 0)
+            {
+                fprintf(stderr, "WARNING: Sequence break %u -> %u\n", previousSequenceId, dp->sequenceId);
+            }
+            else
+            {
+                long long diff = (long long)(blockStart - previousBlockEnd);
+                fprintf(stderr, "NOTE: Recording sequence restarted after %u (gap of %+.2f seconds)\n", previousSequenceId, (float)diff / 65536.0f);
+                restarts++;
+                breakTime += (float)diff / 65536.0f;
+                lastBlockStart = 0;
+                firstPacket = 1;
+                lastSecond = -1;
+            }
+        }
+
         if (lastBlockStart > 0)
         {
             // Interval
@@ -203,6 +240,7 @@ int verify(const char *infile, char output)
                 long long diff = (long long)(blockStart - previousBlockEnd);
                 fprintf(stderr, "WARNING: Time break in sequence by %+.2f seconds (last: %f, curr: %f)\n", (float)diff / 65536.0f, lastBlockStart / 65536.0f, blockStart / 65536.0f);
                 fprintf(stderr, "\n");
+                breakTime += (float)diff / 65536.0f;
             }
             else
             {
@@ -215,19 +253,6 @@ int verify(const char *infile, char output)
 
         lastBlockStart = blockStart;
 
-        // If we read a block out-of-sequence
-        if (previousSequenceId != (unsigned int)-1 && previousSequenceId + 1 != dp->sequenceId)
-        {
-            if (dp->sequenceId != 0)
-            {
-                fprintf(stderr, "WARNING: Sequence break %u -> %u\n", previousSequenceId, dp->sequenceId);
-            }
-            else
-            {
-                fprintf(stderr, "NOTE: Recording sequence restarted after %u\n", previousSequenceId);
-            }
-        }
-
         buffer = OmReaderBuffer(reader);
         for (i = 0; i < numSamples; i++)
         {
@@ -236,7 +261,7 @@ int verify(const char *infile, char output)
             short x, y, z;
             static short lx = 0, ly = 0, lz = 0, stuck = 0;
             static char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
-            static int firstPacket = 1, seconds, lastSecond = -1, packetCount = 0;
+            static int seconds, packetCount = 0;
             double v;
             static double av = 0.0;
             char outOfRange = 0;
@@ -298,7 +323,7 @@ int verify(const char *infile, char output)
                 int hour = OM_DATETIME_HOURS(dateTime);
                 if (hour != lastHour)
                 {
-                    fprintf(stderr, "\n%02d-%02d %02d:%02d:%02d.%02d ", /*OM_DATETIME_YEAR(dateTime) % 100, */ OM_DATETIME_MONTH(dateTime), OM_DATETIME_DAY(dateTime), OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), (int)fractional * 100 / 0xffff);
+                    fprintf(stderr, "\n%02d-%02d %02d:%02d:%02d.%02d", /*OM_DATETIME_YEAR(dateTime) % 100, */ OM_DATETIME_MONTH(dateTime), OM_DATETIME_DAY(dateTime), OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), (int)fractional * 100 / 0xffff);
                     lastHour = hour;
                 }
             }
@@ -307,8 +332,8 @@ int verify(const char *infile, char output)
             if (lastSecond == -1) { lastSecond = seconds; };
             if (seconds != lastSecond)
             {
-                if (firstPacket) { /* printf(","); */ firstPacket = 0; }
-                else if (packetCount >= 96 && packetCount <= 105) { /* printf("."); */ }
+                if (firstPacket) { /* fprintf(stderr, "!"); */ firstPacket = 0; }
+                else if (packetCount >= 96 && packetCount <= 105) { /* fprintf(stderr, "#"); */ }
                 else
                 { 
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
@@ -350,7 +375,67 @@ int verify(const char *infile, char output)
     /* Summary */
     {
         unsigned long duration = (unsigned long)((lastTime - firstTime) >> 16);
-        fprintf(stderr, "Errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, (breaks=%d), (maxAv=%f), (minInterval=%0.3f), (maxInterval=%0.3f), (duration=%0.4f), (minLight=%d)\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f, (duration / 60.0f / 60.0f), minLight);
+        hp = OmReaderRawHeaderPacket(reader);
+
+        fprintf(stderr, "\n");
+        fprintf(stderr, "---\n");
+        fprintf(stderr, "Input file: \"%s\"\n", infile);
+        fprintf(stderr, "Summary errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, breaks=%d\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks);
+        fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
+        fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, (duration / 60.0f / 60.0f));
+        fprintf(stderr, "Summary info-3: minLight=%d, Bs=%d%%, Be=%d%%\n", minLight, batteryStartPercent, batteryEndPercent);
+
+        if (hp == NULL)
+        {
+            fprintf(stderr, "ERROR: Unable to access file header for start/stop times.\n");
+        }
+        else
+        {
+            if (hp->loggingStartTime >= OM_DATETIME_MIN_VALID && hp->loggingStartTime <= OM_DATETIME_MAX_VALID && hp->loggingEndTime > hp->loggingStartTime)
+            {
+                unsigned long fStart = (unsigned long)TimeSerial(hp->loggingStartTime);
+                unsigned long aStart = (unsigned long)(firstTime >> 16);
+                int startDiff = (int)(aStart - fStart);
+                if (abs(startDiff) < 80)
+                { 
+                    fprintf(stderr, "NOTE: Data started near recording start time (%ds).\n", startDiff);
+                }
+                else
+                {
+                    fprintf(stderr, "ERROR: Data did not start near recording start time (%ds).\n", startDiff);
+                }
+            }
+            else
+            {
+                fprintf(stderr, "NOTE: Recording has no start time (not verifying).\n");
+            }
+            
+            
+            if (hp->loggingEndTime >= OM_DATETIME_MIN_VALID && hp->loggingEndTime <= OM_DATETIME_MAX_VALID && hp->loggingStartTime < hp->loggingEndTime)
+            {
+                unsigned long fEnd = (unsigned long)TimeSerial(hp->loggingEndTime);
+                unsigned long aEnd = (unsigned long)(lastTime >> 16);
+                int stopDiff = (int)(aEnd - fEnd);
+                if (abs(stopDiff) < 80)
+                { 
+                    fprintf(stderr, "NOTE: Data stopped near recording stop time (%ds).\n", stopDiff);
+                }
+                else
+                {
+                    fprintf(stderr, "ERROR: Data did not stop near recording stop time (%ds).\n", stopDiff);
+                }
+            }
+            else
+            {
+                fprintf(stderr, "NOTE: Recording has no stop time (not verifying).\n");
+            }
+        }
+
+        fprintf(stderr, "---\n");
+
+#define HEADER          "filename,      file,      event,      stuck,      range,      rate,      breaks, restarts, breakTime, maxAv, minInterval,            maxInterval,             duration,                  minLight, batteryStartPercent, batteryEndPercent\n"
+        fprintf(stdout, "  \"%s\",        %d,         %d,         %d,         %d,        %d,          %d,       %d,     %0.1f, %0.4f,       %0.3f,                  %0.3f,                %0.4f,                        %d,                  %d,                %d\n",
+                           infile, errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts, breakTime, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f, (duration / 60.0f / 60.0f), minLight, batteryStartPercent, batteryEndPercent);
     }
 
 
@@ -363,24 +448,37 @@ int verify(const char *infile, char output)
 /* Main function */
 int verify_main(int argc, char *argv[])
 {
-    printf("VERIFY: verify a specified binary data file contains sensible data.\n");
-    printf("\n");
+    fprintf(stderr, "VERIFY: verify a specified binary data file contains sensible data.\n");
+    fprintf(stderr, "\n");
     if (argc > 1)
     {
-        const char *infile = argv[1];
+        const char *infile;
         char output = 0;
+
+        if (!strcmp(argv[1], "-headeronly"))
+        {
+            fprintf(stdout, HEADER);
+            return -2;
+        }
+
+        infile = argv[1];
         if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
         return verify(infile, output);
     }
     else
     {
-        printf("Usage: verify <binary-input-file> [-output]\n");
-        printf("\n");
-        printf("Where: binary-input-file: the name of the binary file to verify.\n");
-        printf("\n");
-        printf("Example: verify data.cwa\n");
-        printf("\n");
+        fprintf(stderr, "Usage: verify <binary-input-file | -headeronly> [-output]\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "Example: verify data.cwa\n");
+        fprintf(stderr, "\n");
     }
+
+#if defined(_WIN32) && defined(_DEBUG)
+    if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
+#endif
+
     return -1;
 }
 
