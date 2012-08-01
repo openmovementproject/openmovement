@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
 {
     int ret;
 
-    printf("OMAPI Example Code Command Line Interface\n");
-    printf("\n");
+    fprintf(stderr, "OMAPI Example Code Command Line Interface\n");
+    fprintf(stderr, "\n");
 
     if      (argc > 1 && !strcmp(argv[1], "test"  ))   { ret =     test_main(argc - 1, argv + 1); }
     else if (argc > 1 && !strcmp(argv[1], "deploy"))   { ret =   deploy_main(argc - 1, argv + 1); }
@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
     else if (argc > 1 && !strcmp(argv[1], "verify"))   { ret =   verify_main(argc - 1, argv + 1); }
     else
     {
-        printf("Usage: omapi <test|deploy|download|clear|convert|verify> [parameters...]\n");
-        printf("\n");
+        fprintf(stderr, "Usage: omapi <test|deploy|download|clear|convert|verify> [parameters...]\n");
+        fprintf(stderr, "\n");
         ret = -1;
     }
 
