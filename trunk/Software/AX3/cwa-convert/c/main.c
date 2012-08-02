@@ -39,7 +39,7 @@ typedef enum
 } Format;
 typedef enum { VALUES_DEFAULT, VALUES_INT, VALUES_FLOAT } Values;
 typedef enum { TIME_DEFAULT, TIME_NONE, TIME_SEQUENCE, TIME_SECONDS, TIME_DAYS, TIME_SERIAL, TIME_EXCEL, TIME_MATLAB, TIME_BLOCK, TIME_TIMESTAMP } Time;
-typedef enum { OPTIONS_NONE = 0x00, OPTIONS_LIGHT = 0x01, OPTIONS_TEMP = 0x02, OPTIONS_BATT = 0x04, OPTIONS_EVENTS = 0x08 } Options;
+typedef enum { OPTIONS_NONE = 0x00, OPTIONS_LIGHT = 0x01, OPTIONS_TEMP = 0x02, OPTIONS_BATT = 0x04, OPTIONS_EVENTS = 0x08, OPTIONS_NO_DATA = 0x10, OPTIONS_BATT_VOLTAGE = 0x20, OPTIONS_BATT_PERCENT = 0x40 } Options;
 
 //#define DEFAULT_SAMPLE_RATE 100.0f      // HACK: Remove this, use value from file.
 
@@ -93,6 +93,47 @@ static unsigned char buffer[SECTOR_SIZE];
 // Endian-independent short/long read/write
 static void fputshort(unsigned short v, FILE *fp) { fputc((unsigned char)((v >> 0) & 0xff), fp); fputc((unsigned char)((v >> 8) & 0xff), fp); }
 static void fputlong(unsigned long v, FILE *fp) { fputc((unsigned char)((v >> 0) & 0xff), fp); fputc((unsigned char)((v >> 8) & 0xff), fp); fputc((unsigned char)((v >> 16) & 0xff), fp); fputc((unsigned char)((v >> 24) & 0xff), fp); }
+
+
+static float AdcBattToPercent(unsigned int Vbat)
+{
+    #define BATT_CHARGE_ZERO 614
+    #define BATT_CHARGE_FULL 708
+	#define BATT_FIT_CONST_1	666LU
+	#define BATT_FIT_CONST_2	150LU
+	#define BATT_FIT_CONST_3	538LU	
+	#define BATT_FIT_CONST_4	8
+	#define BATT_FIT_CONST_5	614LU
+	#define BATT_FIT_CONST_6	375LU
+	#define BATT_FIT_CONST_7	614LU	
+	#define BATT_FIT_CONST_8	8
+    #define USB_BUS_SENSE 0
+
+	float temp; 
+	
+	// Compensate for charging current
+	if (USB_BUS_SENSE && (Vbat>12)) Vbat -= 12; 
+ 
+	// Early out functions for full and zero charge
+	if (Vbat > BATT_CHARGE_FULL) return 100;
+    if (Vbat < BATT_CHARGE_ZERO) return 0;
+
+	// Calculations for curve fit
+	if (Vbat>BATT_FIT_CONST_1)
+	{
+		temp = (BATT_FIT_CONST_2 * (Vbat - BATT_FIT_CONST_3)) / 256.0f;
+	}
+	else if (Vbat>BATT_FIT_CONST_5)
+	{
+		temp = (BATT_FIT_CONST_6 * (Vbat - BATT_FIT_CONST_7)) / 256.0f;
+	}
+	else 
+	{
+		temp = 0;
+	}
+    return temp;
+}
+
 
 static char DumpFile(const char *filename, const char *outfile, Stream stream, Format format, Values values, Time time, Options options, float amplify, unsigned long iStart, unsigned long iLength, unsigned long iStep, int blockStart, int blockCount)
 {
@@ -349,7 +390,6 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 					else if ((dataPacket->numAxesBPS & 0x0f) == 0) { bps = 4; }
 
 					if (bps == 0) { fprintf(stderr, "[ERROR: format not expected]"); }
-					else if (dataPacket->sessionId != deviceSessionId) { fprintf(stderr, "[X]"); }
 					else if (format == FORMAT_RAW || format == FORMAT_WAV)
 					{
 						if (bps != 6)
@@ -360,7 +400,8 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 						{
 							totalSamples += sampleCount;
 
-							fprintf(stderr, "*");
+                            if (dataPacket->sessionId != deviceSessionId) { fprintf(stderr, "!"); } else { fprintf(stderr, "*"); }
+							
 							if (values == VALUES_FLOAT)
 							{
 								float divide;
@@ -593,12 +634,26 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
                                     else
 #endif
                                     {
-									    outputSize += fprintf(ofp, "%s%s%d,%d,%d", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",", (int)(amplify * x), (int)(amplify * y), (int)(amplify * z));
+                                        if (options & OPTIONS_NO_DATA)
+                                        {
+    									    outputSize += fprintf(ofp, "%s%s", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",");
+                                        }
+                                        else
+                                        {
+    									    outputSize += fprintf(ofp, "%s%s%d,%d,%d", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",", (int)(amplify * x), (int)(amplify * y), (int)(amplify * z));
+                                        }
                                     }
 								}
 								else if (values == VALUES_FLOAT)
 								{
-									outputSize += fprintf(ofp, "%s%s%f,%f,%f", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",", amplify * x / divide, amplify * y / divide, amplify * z / divide);
+                                    if (options & OPTIONS_NO_DATA)
+                                    {
+    									outputSize += fprintf(ofp, "%s%s", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",");
+                                    }
+                                    else
+                                    {
+    									outputSize += fprintf(ofp, "%s%s%f,%f,%f", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",", amplify * x / divide, amplify * y / divide, amplify * z / divide);
+                                    }
 								}
 
 #ifdef SQLITE
@@ -616,7 +671,18 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
                                 {
     								if (options & OPTIONS_LIGHT)  { fprintf(ofp, ",%u", dataPacket->light); }
     								if (options & OPTIONS_TEMP)   { fprintf(ofp, ",%u", dataPacket->temperature); }
-    								if (options & OPTIONS_BATT)   { fprintf(ofp, ",%u", dataPacket->battery); }
+                                    if (options & OPTIONS_BATT)
+                                    {
+                                        fprintf(ofp, ",%u", dataPacket->battery);
+                                    }
+                                    if (options & OPTIONS_BATT_VOLTAGE)
+                                    {
+                                        fprintf(ofp, ",%f", 6.0f * (512.0f + dataPacket->battery) / 1024.0f);
+                                    }
+                                    if (options & OPTIONS_BATT_PERCENT)
+                                    {
+                                        fprintf(ofp, ",%f", AdcBattToPercent((unsigned int)dataPacket->battery + 512));
+                                    }
     								if (options & OPTIONS_EVENTS) 
     								{
     									unsigned char e = events;
@@ -733,9 +799,12 @@ atexit(_getch);
             else if (strcasecmp(argv[i], "-t:matlab") == 0)    { time = TIME_MATLAB; }
             else if (strcasecmp(argv[i], "-t:block") == 0)     { time = TIME_BLOCK; }
             else if (strcasecmp(argv[i], "-t:timestamp") == 0) { time = TIME_TIMESTAMP; }
+			else if (strcasecmp(argv[i], "-nodata") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_DATA); }
 			else if (strcasecmp(argv[i], "-light") == 0)       { options = (Options)((unsigned int)options | OPTIONS_LIGHT); }
 			else if (strcasecmp(argv[i], "-temp") == 0)        { options = (Options)((unsigned int)options | OPTIONS_TEMP); }
 			else if (strcasecmp(argv[i], "-batt") == 0)        { options = (Options)((unsigned int)options | OPTIONS_BATT); }
+			else if (strcasecmp(argv[i], "-battv") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_VOLTAGE); }
+			else if (strcasecmp(argv[i], "-battp") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_PERCENT); }
 			else if (strcasecmp(argv[i], "-events") == 0)      { options = (Options)((unsigned int)options | OPTIONS_EVENTS); }
             else if (strcasecmp(argv[i], "-start") == 0)       { i++; iStart = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-length") == 0)      { i++; iLength = atol(argv[i]); }
@@ -796,7 +865,7 @@ atexit(_getch);
 #ifdef SQLITE
             "|-f:sqlite"
 #endif
-            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-light] [-temp] [-batt] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
+            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-nodata] [-light] [-temp] [-batt[v|p]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
         return 1;
     }
     
