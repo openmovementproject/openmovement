@@ -39,7 +39,7 @@ typedef enum
 } Format;
 typedef enum { VALUES_DEFAULT, VALUES_INT, VALUES_FLOAT } Values;
 typedef enum { TIME_DEFAULT, TIME_NONE, TIME_SEQUENCE, TIME_SECONDS, TIME_DAYS, TIME_SERIAL, TIME_EXCEL, TIME_MATLAB, TIME_BLOCK, TIME_TIMESTAMP } Time;
-typedef enum { OPTIONS_NONE = 0x00, OPTIONS_LIGHT = 0x01, OPTIONS_TEMP = 0x02, OPTIONS_BATT = 0x04, OPTIONS_EVENTS = 0x08, OPTIONS_NO_DATA = 0x10, OPTIONS_BATT_VOLTAGE = 0x20, OPTIONS_BATT_PERCENT = 0x40 } Options;
+typedef enum { OPTIONS_NONE = 0x00, OPTIONS_LIGHT = 0x01, OPTIONS_TEMP = 0x02, OPTIONS_BATT = 0x04, OPTIONS_EVENTS = 0x08, OPTIONS_NO_DATA = 0x10, OPTIONS_BATT_VOLTAGE = 0x20, OPTIONS_BATT_PERCENT = 0x40, OPTIONS_BATT_RELATIVE = 0x80 } Options;
 
 //#define DEFAULT_SAMPLE_RATE 100.0f      // HACK: Remove this, use value from file.
 
@@ -683,6 +683,13 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
                                     {
                                         fprintf(ofp, ",%f", AdcBattToPercent((unsigned int)dataPacket->battery + 512));
                                     }
+                                    if (options & OPTIONS_BATT_RELATIVE)
+                                    {
+                                        float reading = AdcBattToPercent((unsigned int)dataPacket->battery + 512);
+                                        static float firstReading = -1.0f;
+                                        if (firstReading < 0) { firstReading = reading; }
+                                        fprintf(ofp, ",%f", (reading - firstReading));
+                                    }
     								if (options & OPTIONS_EVENTS) 
     								{
     									unsigned char e = events;
@@ -805,6 +812,7 @@ atexit(_getch);
 			else if (strcasecmp(argv[i], "-batt") == 0)        { options = (Options)((unsigned int)options | OPTIONS_BATT); }
 			else if (strcasecmp(argv[i], "-battv") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_VOLTAGE); }
 			else if (strcasecmp(argv[i], "-battp") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_PERCENT); }
+			else if (strcasecmp(argv[i], "-battr") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_RELATIVE); }
 			else if (strcasecmp(argv[i], "-events") == 0)      { options = (Options)((unsigned int)options | OPTIONS_EVENTS); }
             else if (strcasecmp(argv[i], "-start") == 0)       { i++; iStart = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-length") == 0)      { i++; iLength = atol(argv[i]); }
@@ -865,7 +873,7 @@ atexit(_getch);
 #ifdef SQLITE
             "|-f:sqlite"
 #endif
-            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-nodata] [-light] [-temp] [-batt[v|p]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
+            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-nodata] [-light] [-temp] [-batt[v|p|r]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
         return 1;
     }
     
