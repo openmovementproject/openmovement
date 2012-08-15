@@ -53,7 +53,7 @@ static int OmDoDownloadUpdate(unsigned short deviceId, OM_DOWNLOAD_STATUS downlo
     // Call user-supplied callback
     if (om.downloadCallback != NULL)
     {
-        om.downloadCallback(om.downloadCallbackReference, deviceId, device->downloadStatus, device->downloadValue);
+        om.downloadCallback(device->downloadReference != NULL ? device->downloadReference : om.downloadCallbackReference, deviceId, device->downloadStatus, device->downloadValue);
     }
 
     return OM_OK;
@@ -69,11 +69,11 @@ static thread_return_t OmDownloadThread(void *arg)
     char *buffer = (char *)malloc((OM_DOWNLOAD_BLOCK_SET * OM_BLOCK_SIZE));
     if (buffer == NULL)
     { 
-        downloadStatus = OM_E_OUT_OF_MEMORY; 
+        downloadStatus = (OM_DOWNLOAD_STATUS)OM_E_OUT_OF_MEMORY; 
     }
-    else if (deviceState->downloadSource == NULL || deviceState->downloadDest == NULL)
+    else if (deviceState->downloadSource == NULL)
     {
-        downloadStatus = OM_E_POINTER; 
+        downloadStatus = (OM_DOWNLOAD_STATUS)OM_E_POINTER; 
     }
     else
     {
@@ -86,6 +86,7 @@ static thread_return_t OmDownloadThread(void *arg)
         while (downloadStatus == OM_DOWNLOAD_PROGRESS)
         {
             int blocksRead, blocksWritten;
+            int position;
             int toRead;
 
             // Calculate how many blocks to read
@@ -99,6 +100,9 @@ static thread_return_t OmDownloadThread(void *arg)
             // Check for unexpected end
             if (feof(deviceState->downloadSource)) { downloadStatus = OM_DOWNLOAD_ERROR; break; }
 
+            // Get current position
+            position = ftell(deviceState->downloadSource);
+
             // Read a block of data
             blocksRead = fread(buffer, OM_BLOCK_SIZE, toRead, deviceState->downloadSource);
             if (blocksRead <= 0) { downloadStatus = OM_DOWNLOAD_ERROR; downloadValue = OM_E_ACCESS_DENIED; break; }
@@ -106,9 +110,22 @@ static thread_return_t OmDownloadThread(void *arg)
             // Check for cancellation
             if (deviceState->downloadCancel) { downloadStatus = OM_DOWNLOAD_CANCELLED; break; }
 
+            // Call user-supplied chunk callback
+            if (om.downloadChunkCallback != NULL)
+            {
+                om.downloadChunkCallback(deviceState->downloadReference != NULL ? deviceState->downloadReference : om.downloadChunkCallbackReference, deviceState->id, buffer, position, blocksRead * OM_BLOCK_SIZE);
+            }
+
             // Write the block of data
-            blocksWritten = fwrite(buffer, OM_BLOCK_SIZE, blocksRead, deviceState->downloadDest);
-            if (blocksWritten != blocksRead) {  downloadStatus = OM_DOWNLOAD_ERROR; downloadValue = OM_E_ACCESS_DENIED; break; }
+            if (deviceState->downloadDest == NULL)
+            {
+                blocksWritten = blocksRead;
+            }
+            else
+            {
+                blocksWritten = fwrite(buffer, OM_BLOCK_SIZE, blocksRead, deviceState->downloadDest);
+                if (blocksWritten != blocksRead) {  downloadStatus = OM_DOWNLOAD_ERROR; downloadValue = OM_E_ACCESS_DENIED; break; }
+            }
 
             // Update progress
             deviceState->downloadBlocksCopied += blocksWritten;
@@ -128,6 +145,21 @@ static thread_return_t OmDownloadThread(void *arg)
 
     // Return
     return thread_return_value(0);
+}
+
+
+int OmGetDataFileSize(int deviceId)
+{
+    int status;
+    char filename[OM_MAX_PATH];
+    struct stat s;
+
+    status = OmGetDataFilename(deviceId, filename);
+    if (OM_FAILED(status)) { return status; }
+
+    if (stat(filename, &s) != 0) { return OM_E_ACCESS_DENIED; }
+
+    return (int)s.st_size;
 }
 
 
@@ -153,9 +185,9 @@ int OmGetDataFilename(int deviceId, char *filenameBuffer)
 
     // Check file existence/properties
     {
-        struct stat buf;
+        struct stat s;
         int result;
-        result = stat(filenameBuffer, &buf);
+        result = stat(filenameBuffer, &s);
         if (result != 0)
         {
             return OM_E_ACCESS_DENIED;
@@ -190,6 +222,12 @@ int OmGetDataRange(int deviceId, int *dataBlockSize, int *dataOffsetBlocks, int 
 
 int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, const char *destinationFile)
 {
+    return OmBeginDownloadingReference(deviceId, dataOffsetBlocks, dataLengthBlocks, destinationFile, NULL);
+}
+
+
+int OmBeginDownloadingReference(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, const char *destinationFile, void *reference)
+{
     int status;
     char filename[OM_MAX_PATH];
     OmDeviceState *device;
@@ -203,8 +241,7 @@ int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks,
     // Check parameters
     if (dataOffsetBlocks < 0) return OM_E_INVALID_ARG;
     if (dataLengthBlocks < -1) return OM_E_INVALID_ARG;
-    if (destinationFile == NULL) return OM_E_POINTER;
-    if (!strlen(destinationFile)) return OM_E_INVALID_ARG;
+    if (destinationFile != NULL && !strlen(destinationFile)) return OM_E_INVALID_ARG;
 
     // Acquire download mutex here (otherwise there is a small window here in which the state will become unknown if two threads start a download at exactly the same time).
     mutex_lock(&om.downloadMutex);
@@ -227,8 +264,15 @@ int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks,
         if (device->downloadSource == NULL) { status = OM_E_ACCESS_DENIED; break; }
 
         // Open the destination file
-        device->downloadDest = fopen(destinationFile, "wb");
-        if (device->downloadDest == NULL) { fclose(device->downloadSource); device->downloadSource = NULL; status = OM_E_ACCESS_DENIED; break; }
+        if (destinationFile == NULL)
+        {
+            device->downloadDest = NULL;
+        }
+        else
+        {
+            device->downloadDest = fopen(destinationFile, "wb");
+            if (device->downloadDest == NULL) { fclose(device->downloadSource); device->downloadSource = NULL; status = OM_E_ACCESS_DENIED; break; }
+        }
 
         // Calculate the total number of blocks in the file
         fseek(device->downloadSource, 0, SEEK_END);
@@ -254,6 +298,7 @@ int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks,
         // Start the download thread
         device->downloadBlocksCopied = 0;
         device->downloadCancel = 0;
+        device->downloadReference = reference;
         OmDoDownloadUpdate(device->id, OM_DOWNLOAD_PROGRESS, 0);        // Initial update
         thread_create(&device->downloadThread, NULL, OmDownloadThread, device);
 

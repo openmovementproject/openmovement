@@ -204,6 +204,14 @@ int OmSetDownloadCallback(OmDownloadCallback downloadCallback, void *reference)
 }
 
 
+int OmSetDownloadChunkCallback(OmDownloadChunkCallback downloadChunkCallback, void *reference)
+{
+    om.downloadChunkCallback = downloadChunkCallback;
+    om.downloadChunkCallbackReference = reference;
+    return OM_OK;
+}
+
+
 OM_DATETIME OmDateTimeFromString(const char *value)
 {
     static const unsigned char maxDaysPerMonth[12+1] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
