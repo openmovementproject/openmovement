@@ -318,226 +318,248 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00658"></a>00658 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#ga92b5b7686a1ca8a80ab85587510948af" title="Returns the date and time that the specified device was last configured.">OmGetLastConfigTime</a>(<span class="keywordtype">int</span> deviceId, OM_DATETIME *time);
 <a name="l00659"></a>00659 
 <a name="l00660"></a>00660 
-<a name="l00665"></a><a class="code" href="group__settings.html#ga8b228b1eebec0fcb36a7def6d4aa77fc">00665</a> <span class="keyword">typedef</span> <span class="keyword">enum</span>
-<a name="l00666"></a>00666 {
-<a name="l00667"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca4a24168f76e21eee3463141f372a1f2b">00667</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca4a24168f76e21eee3463141f372a1f2b" title="Data file not erased but metadata just updated (this is not recommended as it could lead to a data/me...">OM_ERASE_NONE</a> = 0,                  
-<a name="l00668"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca6ac3923c687ee92b0c5600a889eb9a58">00668</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca6ac3923c687ee92b0c5600a889eb9a58" title="Data file is removed and a new one created with the current metadata.">OM_ERASE_DELETE</a> = 1,                
-<a name="l00669"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca56fdf905bd2f7bbeccb13e9f87431a48">00669</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca56fdf905bd2f7bbeccb13e9f87431a48" title="Device file-system is re-created and a new data file is created with the current metadata.">OM_ERASE_QUICKFORMAT</a> = 2,           
-<a name="l00670"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fcaf8e1af53f7713376c6d8f7fb434a9129">00670</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fcaf8e1af53f7713376c6d8f7fb434a9129" title="All blocks on the NAND flash memory are cleared, the file-system is cleanly re-created, and a new data file is created with the current metadata.">OM_ERASE_WIPE</a> = 3                   
-<a name="l00671"></a>00671 } <a class="code" href="group__settings.html#ga8b228b1eebec0fcb36a7def6d4aa77fc" title="Erase levels for OmEraseDataAndCommit() function.">OM_ERASE_LEVEL</a>;
-<a name="l00672"></a>00672 
-<a name="l00673"></a>00673  
-<a name="l00692"></a>00692 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#ga78e1863c9dae3ff0632baf88995255e3" title="Erases the specified device storage and commits the metadata and settings.">OmEraseDataAndCommit</a>(<span class="keywordtype">int</span> deviceId, <a class="code" href="group__settings.html#ga8b228b1eebec0fcb36a7def6d4aa77fc" title="Erase levels for OmEraseDataAndCommit() function.">OM_ERASE_LEVEL</a> eraseLevel);
-<a name="l00693"></a>00693 
+<a name="l00666"></a><a class="code" href="group__settings.html#ga8b228b1eebec0fcb36a7def6d4aa77fc">00666</a> <span class="keyword">typedef</span> <span class="keyword">enum</span>
+<a name="l00667"></a>00667 {
+<a name="l00668"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca4a24168f76e21eee3463141f372a1f2b">00668</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca4a24168f76e21eee3463141f372a1f2b" title="Data file not erased but metadata just updated (this is not recommended as it could lead to a data/me...">OM_ERASE_NONE</a> = 0,                  
+<a name="l00669"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca6ac3923c687ee92b0c5600a889eb9a58">00669</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca6ac3923c687ee92b0c5600a889eb9a58" title="Data file is removed and a new one created with the current metadata.">OM_ERASE_DELETE</a> = 1,                
+<a name="l00670"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca56fdf905bd2f7bbeccb13e9f87431a48">00670</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fca56fdf905bd2f7bbeccb13e9f87431a48" title="Device file-system is re-created and a new data file is created with the current metadata.">OM_ERASE_QUICKFORMAT</a> = 2,           
+<a name="l00671"></a><a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fcaf8e1af53f7713376c6d8f7fb434a9129">00671</a>     <a class="code" href="group__settings.html#gga8b228b1eebec0fcb36a7def6d4aa77fcaf8e1af53f7713376c6d8f7fb434a9129" title="All blocks on the NAND flash memory are cleared, the file-system is cleanly re-created, and a new data file is created with the current metadata.">OM_ERASE_WIPE</a> = 3                   
+<a name="l00672"></a>00672 } <a class="code" href="group__settings.html#ga8b228b1eebec0fcb36a7def6d4aa77fc" title="Erase levels for OmEraseDataAndCommit() function.">OM_ERASE_LEVEL</a>;
+<a name="l00673"></a>00673 
+<a name="l00674"></a>00674 
+<a name="l00693"></a>00693 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#ga78e1863c9dae3ff0632baf88995255e3" title="Erases the specified device storage and commits the metadata and settings.">OmEraseDataAndCommit</a>(<span class="keywordtype">int</span> deviceId, <a class="code" href="group__settings.html#ga8b228b1eebec0fcb36a7def6d4aa77fc" title="Erase levels for OmEraseDataAndCommit() function.">OM_ERASE_LEVEL</a> eraseLevel);
 <a name="l00694"></a>00694 
-<a name="l00704"></a><a class="code" href="group__settings.html#ga19a55639d8bb58708de946e6376a259d">00704</a> <span class="preprocessor">#define OmClearDataAndCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_QUICKFORMAT)</span>
-<a name="l00705"></a>00705 <span class="preprocessor"></span>
-<a name="l00706"></a>00706 
-<a name="l00717"></a><a class="code" href="group__settings.html#ga32616d81665bdb4b67ffa509a7259312">00717</a> <span class="preprocessor">#define OmCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_NONE)</span>
-<a name="l00718"></a>00718 <span class="preprocessor"></span>
-<a name="l00719"></a>00719 
-<a name="l00725"></a><a class="code" href="group__settings.html#gab7bb1477be2e36b872d4f31477bb781c">00725</a> <span class="preprocessor">#define OM_ACCEL_DEFAULT_RATE 100</span>
-<a name="l00726"></a>00726 <span class="preprocessor"></span>
-<a name="l00727"></a>00727 
-<a name="l00733"></a><a class="code" href="group__settings.html#ga3e55efa9268f0dd7b86ab44cc0644b90">00733</a> <span class="preprocessor">#define OM_ACCEL_DEFAULT_RANGE 8</span>
-<a name="l00734"></a>00734 <span class="preprocessor"></span>
-<a name="l00735"></a>00735 
-<a name="l00745"></a>00745 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#ga5d2a39eb3c5643422c111dfd59f83913" title="Queries the specified device&#39;s accelerometer configuration.">OmGetAccelConfig</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> *rate, <span class="keywordtype">int</span> *range);
-<a name="l00746"></a>00746 
+<a name="l00695"></a>00695 
+<a name="l00705"></a><a class="code" href="group__settings.html#ga19a55639d8bb58708de946e6376a259d">00705</a> <span class="preprocessor">#define OmClearDataAndCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_QUICKFORMAT)</span>
+<a name="l00706"></a>00706 <span class="preprocessor"></span>
+<a name="l00707"></a>00707 
+<a name="l00718"></a><a class="code" href="group__settings.html#ga32616d81665bdb4b67ffa509a7259312">00718</a> <span class="preprocessor">#define OmCommit(_deviceId) OmEraseDataAndCommit((_deviceId), OM_ERASE_NONE)</span>
+<a name="l00719"></a>00719 <span class="preprocessor"></span>
+<a name="l00720"></a>00720 
+<a name="l00726"></a><a class="code" href="group__settings.html#gab7bb1477be2e36b872d4f31477bb781c">00726</a> <span class="preprocessor">#define OM_ACCEL_DEFAULT_RATE 100</span>
+<a name="l00727"></a>00727 <span class="preprocessor"></span>
+<a name="l00728"></a>00728 
+<a name="l00734"></a><a class="code" href="group__settings.html#ga3e55efa9268f0dd7b86ab44cc0644b90">00734</a> <span class="preprocessor">#define OM_ACCEL_DEFAULT_RANGE 8</span>
+<a name="l00735"></a>00735 <span class="preprocessor"></span>
+<a name="l00736"></a>00736 
+<a name="l00746"></a>00746 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#ga5d2a39eb3c5643422c111dfd59f83913" title="Queries the specified device&#39;s accelerometer configuration.">OmGetAccelConfig</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> *rate, <span class="keywordtype">int</span> *range);
 <a name="l00747"></a>00747 
-<a name="l00758"></a>00758 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#gaa4c90687ee99a357b779765bbca7fe38" title="Sets the specified device&#39;s accelerometer configuration to be used at the next recording session...">OmSetAccelConfig</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> rate, <span class="keywordtype">int</span> range);
-<a name="l00759"></a>00759 
+<a name="l00748"></a>00748 
+<a name="l00759"></a>00759 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__settings.html#gaa4c90687ee99a357b779765bbca7fe38" title="Sets the specified device&#39;s accelerometer configuration to be used at the next recording session...">OmSetAccelConfig</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> rate, <span class="keywordtype">int</span> range);
 <a name="l00760"></a>00760 
 <a name="l00761"></a>00761 
-<a name="l00789"></a><a class="code" href="group__data__download.html#gacb397cf74823bb9eb81d9efaace027c8">00789</a> <span class="preprocessor">#define OM_MAX_PATH 256</span>
-<a name="l00790"></a>00790 <span class="preprocessor"></span>
-<a name="l00791"></a>00791 
-<a name="l00796"></a><a class="code" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21">00796</a> <span class="keyword">typedef</span> <span class="keyword">enum</span>
-<a name="l00797"></a>00797 {
-<a name="l00798"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a0ec1e5f25bba0ee2c8c3d368a881d3fb">00798</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a0ec1e5f25bba0ee2c8c3d368a881d3fb" title="No download information.">OM_DOWNLOAD_NONE</a>,                   
-<a name="l00799"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a6492b6c4f15e14bf19e2a4a0a9af2c8b">00799</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a6492b6c4f15e14bf19e2a4a0a9af2c8b" title="Data download failed with an error (the value parameter to OmDownloadCallback indicates a diagnostic ...">OM_DOWNLOAD_ERROR</a>,                  
-<a name="l00800"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a674c1fba749d46be7524f33cd4da5501">00800</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a674c1fba749d46be7524f33cd4da5501" title="Data download progress (the value parameter to OmDownloadCallback indicates progress percentage)...">OM_DOWNLOAD_PROGRESS</a>,               
-<a name="l00801"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a7e4a121cb71052f5607a6a7dd41df548">00801</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a7e4a121cb71052f5607a6a7dd41df548" title="Data download completed successfully.">OM_DOWNLOAD_COMPLETE</a>,               
-<a name="l00802"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21ab41602a1055806c0d15bc32a94f0c4a4">00802</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21ab41602a1055806c0d15bc32a94f0c4a4" title="Data download was cancelled cleanly.">OM_DOWNLOAD_CANCELLED</a>,              
-<a name="l00803"></a>00803 } <a class="code" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21" title="Download states used in the OmDownloadCallback handler.">OM_DOWNLOAD_STATUS</a>;
-<a name="l00804"></a>00804 
+<a name="l00762"></a>00762 
+<a name="l00790"></a><a class="code" href="group__data__download.html#gacb397cf74823bb9eb81d9efaace027c8">00790</a> <span class="preprocessor">#define OM_MAX_PATH (256)</span>
+<a name="l00791"></a>00791 <span class="preprocessor"></span>
+<a name="l00792"></a>00792 
+<a name="l00797"></a><a class="code" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21">00797</a> <span class="keyword">typedef</span> <span class="keyword">enum</span>
+<a name="l00798"></a>00798 {
+<a name="l00799"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a0ec1e5f25bba0ee2c8c3d368a881d3fb">00799</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a0ec1e5f25bba0ee2c8c3d368a881d3fb" title="No download information.">OM_DOWNLOAD_NONE</a>,                   
+<a name="l00800"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a6492b6c4f15e14bf19e2a4a0a9af2c8b">00800</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a6492b6c4f15e14bf19e2a4a0a9af2c8b" title="Data download failed with an error (the value parameter to OmDownloadCallback indicates a diagnostic ...">OM_DOWNLOAD_ERROR</a>,                  
+<a name="l00801"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a674c1fba749d46be7524f33cd4da5501">00801</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a674c1fba749d46be7524f33cd4da5501" title="Data download progress (the value parameter to OmDownloadCallback indicates progress percentage)...">OM_DOWNLOAD_PROGRESS</a>,               
+<a name="l00802"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a7e4a121cb71052f5607a6a7dd41df548">00802</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21a7e4a121cb71052f5607a6a7dd41df548" title="Data download completed successfully.">OM_DOWNLOAD_COMPLETE</a>,               
+<a name="l00803"></a><a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21ab41602a1055806c0d15bc32a94f0c4a4">00803</a>     <a class="code" href="group__data__download.html#ggad6aad80d6e8baf74924dd57569266f21ab41602a1055806c0d15bc32a94f0c4a4" title="Data download was cancelled cleanly.">OM_DOWNLOAD_CANCELLED</a>,              
+<a name="l00804"></a>00804 } <a class="code" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21" title="Download states used in the OmDownloadCallback handler.">OM_DOWNLOAD_STATUS</a>;
 <a name="l00805"></a>00805 
-<a name="l00812"></a><a class="code" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a">00812</a> <span class="keyword">typedef</span> void(*<a class="code" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a" title="Download update callback function type.">OmDownloadCallback</a>)(<span class="keywordtype">void</span> *, int, <a class="code" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21" title="Download states used in the OmDownloadCallback handler.">OM_DOWNLOAD_STATUS</a>, int);
-<a name="l00813"></a>00813 
+<a name="l00806"></a>00806 
+<a name="l00813"></a><a class="code" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a">00813</a> <span class="keyword">typedef</span> void(*<a class="code" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a" title="Download update callback function type.">OmDownloadCallback</a>)(<span class="keywordtype">void</span> *, int, <a class="code" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21" title="Download states used in the OmDownloadCallback handler.">OM_DOWNLOAD_STATUS</a>, int);
 <a name="l00814"></a>00814 
-<a name="l00821"></a>00821 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga71136c4df0b0b7260786ba56b84be447" title="Sets the callback function that is called for download progress, completion, cancellation, or failure.">OmSetDownloadCallback</a>(<a class="code" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a" title="Download update callback function type.">OmDownloadCallback</a> downloadCallback, <span class="keywordtype">void</span> *reference);
-<a name="l00822"></a>00822 
-<a name="l00823"></a>00823 
-<a name="l00831"></a>00831 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gadb64e00f11fda4b30a97bb510b3aab25" title="Return the path to the data file for the specified device.">OmGetDataFilename</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">char</span> *filenameBuffer);
-<a name="l00832"></a>00832 
+<a name="l00815"></a>00815 
+<a name="l00823"></a><a class="code" href="group__data__download.html#gaf50aebac280a26016da8522ee99bda24">00823</a> <span class="keyword">typedef</span> void(*<a class="code" href="group__data__download.html#gaf50aebac280a26016da8522ee99bda24" title="Download chunk callback function type.">OmDownloadChunkCallback</a>)(<span class="keywordtype">void</span> *, int, <span class="keywordtype">void</span> *, int, int);
+<a name="l00824"></a>00824 
+<a name="l00825"></a>00825 
+<a name="l00832"></a>00832 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga71136c4df0b0b7260786ba56b84be447" title="Sets the callback function that is called for download progress, completion, cancellation, or failure.">OmSetDownloadCallback</a>(<a class="code" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a" title="Download update callback function type.">OmDownloadCallback</a> downloadCallback, <span class="keywordtype">void</span> *reference);
 <a name="l00833"></a>00833 
-<a name="l00844"></a>00844 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gad5bbce264a2594ba35fc0e661502a9c3" title="Read the size, time-range, and internal chunking of the data buffer.">OmGetDataRange</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> *dataBlockSize, <span class="keywordtype">int</span> *dataOffsetBlocks, <span class="keywordtype">int</span> *dataNumBlocks, OM_DATETIME *startTime, OM_DATETIME *endTime);
-<a name="l00845"></a>00845 
-<a name="l00846"></a>00846 
-<a name="l00858"></a>00858 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gae54cabf652b35f5be06f05914932614a" title="Begin downloading the data from the current device.">OmBeginDownloading</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> dataOffsetBlocks, <span class="keywordtype">int</span> dataLengthBlocks, <span class="keyword">const</span> <span class="keywordtype">char</span> *destinationFile);
-<a name="l00859"></a>00859 
-<a name="l00860"></a>00860 
-<a name="l00873"></a>00873 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gaf312777c61b1b6c0e0147d214dff029b" title="This function queries the status of the specified device&#39;s asynchronous download.">OmQueryDownload</a>(<span class="keywordtype">int</span> deviceId, OM_DOWNLOAD_STATUS *downloadStatus, <span class="keywordtype">int</span> *downloadValue);
-<a name="l00874"></a>00874 
+<a name="l00834"></a>00834 
+<a name="l00842"></a>00842 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga90a45739fca8d2cf401bf8cc899f33af" title="Sets the chunk callback function that is called when a new download chunk is received.">OmSetDownloadChunkCallback</a>(<a class="code" href="group__data__download.html#gaf50aebac280a26016da8522ee99bda24" title="Download chunk callback function type.">OmDownloadChunkCallback</a> downloadChunkCallback, <span class="keywordtype">void</span> *reference);
+<a name="l00843"></a>00843 
+<a name="l00844"></a>00844 
+<a name="l00851"></a>00851 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga343b5499a74fb06bda84219dc04b8dba" title="Return the data file size of the specified device.">OmGetDataFileSize</a>(<span class="keywordtype">int</span> deviceId);
+<a name="l00852"></a>00852 
+<a name="l00853"></a>00853 
+<a name="l00861"></a>00861 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gadb64e00f11fda4b30a97bb510b3aab25" title="Return the path to the data file for the specified device.">OmGetDataFilename</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">char</span> *filenameBuffer);
+<a name="l00862"></a>00862 
+<a name="l00863"></a>00863 
+<a name="l00874"></a>00874 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gad5bbce264a2594ba35fc0e661502a9c3" title="Read the size, time-range, and internal chunking of the data buffer.">OmGetDataRange</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> *dataBlockSize, <span class="keywordtype">int</span> *dataOffsetBlocks, <span class="keywordtype">int</span> *dataNumBlocks, OM_DATETIME *startTime, OM_DATETIME *endTime);
 <a name="l00875"></a>00875 
-<a name="l00888"></a>00888 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga6396b56db08ff1604b457224717aea36" title="This function waits for the specified device&#39;s asynchronous download to finish.">OmWaitForDownload</a>(<span class="keywordtype">int</span> deviceId, OM_DOWNLOAD_STATUS *downloadStatus, <span class="keywordtype">int</span> *downloadValue);
-<a name="l00889"></a>00889 
-<a name="l00890"></a>00890 
-<a name="l00898"></a>00898 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga0bc6e0477c417c3bb5e3bb51744fb24d" title="Cancel the current download of the data on the specified device.">OmCancelDownload</a>(<span class="keywordtype">int</span> deviceId);
-<a name="l00899"></a>00899 
-<a name="l00917"></a><a class="code" href="group__return__codes.html#gab0a39c9c5d36eea083d89b153e734746">00917</a> <span class="preprocessor">#define OM_TRUE                     1       </span>
-<a name="l00918"></a><a class="code" href="group__return__codes.html#ga54c70e2851f00c69f6193289761b7851">00918</a> <span class="preprocessor">#define OM_FALSE                    0       </span>
-<a name="l00919"></a><a class="code" href="group__return__codes.html#ga1f1c58d657a3bab4fd36dfc83eb253a7">00919</a> <span class="preprocessor">#define OM_OK                       0       </span>
-<a name="l00920"></a><a class="code" href="group__return__codes.html#gaa1ec7826762c2fe2c863363e3ac8c550">00920</a> <span class="preprocessor">#define OM_E_FAIL                   -1      </span>
-<a name="l00921"></a><a class="code" href="group__return__codes.html#gad4772f7381b71d4013779671cff6229d">00921</a> <span class="preprocessor">#define OM_E_UNEXPECTED             -2      </span>
-<a name="l00922"></a><a class="code" href="group__return__codes.html#ga83c21f280bdc1c8bc14982594779ca39">00922</a> <span class="preprocessor">#define OM_E_NOT_VALID_STATE        -3      </span>
-<a name="l00923"></a><a class="code" href="group__return__codes.html#ga9a2e9cd73304b9dd03b800d75ffc65e0">00923</a> <span class="preprocessor">#define OM_E_OUT_OF_MEMORY          -4      </span>
-<a name="l00924"></a><a class="code" href="group__return__codes.html#ga918b4f2c487a4e89d09157011ea6a8ce">00924</a> <span class="preprocessor">#define OM_E_INVALID_ARG            -5      </span>
-<a name="l00925"></a><a class="code" href="group__return__codes.html#ga76bade8e2ac0ab3fc4fa7acd1b0ec802">00925</a> <span class="preprocessor">#define OM_E_POINTER                -6      </span>
-<a name="l00926"></a><a class="code" href="group__return__codes.html#ga47220f5e8792e946e2c30270f0281955">00926</a> <span class="preprocessor">#define OM_E_NOT_IMPLEMENTED        -7      </span>
-<a name="l00927"></a><a class="code" href="group__return__codes.html#ga235981eb3c7d64421499b3ff3eacd270">00927</a> <span class="preprocessor">#define OM_E_ABORT                  -8      </span>
-<a name="l00928"></a><a class="code" href="group__return__codes.html#ga9592cf01d3aec6d8ab1a59441861630f">00928</a> <span class="preprocessor">#define OM_E_ACCESS_DENIED          -9      </span>
-<a name="l00929"></a><a class="code" href="group__return__codes.html#gaaa53e5ef92c2a0b7a3dd27a73fde9d8b">00929</a> <span class="preprocessor">#define OM_E_INVALID_DEVICE         -10     </span>
-<a name="l00930"></a><a class="code" href="group__return__codes.html#ga0ab836743057844f6170feb835565c0f">00930</a> <span class="preprocessor">#define OM_E_UNEXPECTED_RESPONSE    -11     </span>
-<a name="l00931"></a><a class="code" href="group__return__codes.html#ga8c9177d13e502d27e9c3273f7840a626">00931</a> <span class="preprocessor">#define OM_E_LOCKED                 -12     </span>
-<a name="l00932"></a><a class="code" href="group__return__codes.html#ga92738e017e3350c2a7d5a1bfad753f52">00932</a> <span class="preprocessor">#define OM_SUCCEEDED(value) ((value) &gt;= 0)  </span>
-<a name="l00933"></a><a class="code" href="group__return__codes.html#gaa07db56ead2f479f7f397f70fadd675d">00933</a> <span class="preprocessor">#define OM_FAILED(value) ((value) &lt; 0)      </span>
-<a name="l00941"></a>00941 <span class="preprocessor">OM_EXPORT const char *OmErrorString(int status);</span>
-<a name="l00942"></a>00942 <span class="preprocessor"></span>
-<a name="l00967"></a>00967 <span class="comment">/*typedef unsigned long OM_DATETIME;*/</span>  <span class="comment">/* (defined earlier in the file) */</span>
-<a name="l00968"></a>00968 
-<a name="l00973"></a><a class="code" href="group__datetime.html#ga9425fb8aff47067802c577dd84bda413">00973</a> <span class="preprocessor">#define OM_DATETIME_FROM_YMDHMS(year, month, day, hours, minutes, seconds) \</span>
-<a name="l00974"></a>00974 <span class="preprocessor">                ( (((OM_DATETIME)((year) % 100) &amp; 0x3f) &lt;&lt; 26) \</span>
-<a name="l00975"></a>00975 <span class="preprocessor">                | (((OM_DATETIME)(month)        &amp; 0x0f) &lt;&lt; 22) \</span>
-<a name="l00976"></a>00976 <span class="preprocessor">                | (((OM_DATETIME)(day)          &amp; 0x1f) &lt;&lt; 17) \</span>
-<a name="l00977"></a>00977 <span class="preprocessor">                | (((OM_DATETIME)(hours)        &amp; 0x1f) &lt;&lt; 12) \</span>
-<a name="l00978"></a>00978 <span class="preprocessor">                | (((OM_DATETIME)(minutes)      &amp; 0x3f) &lt;&lt;  6) \</span>
-<a name="l00979"></a>00979 <span class="preprocessor">                | (((OM_DATETIME)(seconds)      &amp; 0x3f)      ) \</span>
-<a name="l00980"></a>00980 <span class="preprocessor">                )</span>
-<a name="l00981"></a><a class="code" href="group__datetime.html#ga3889bada708d70fdae157d910771230b">00981</a> <span class="preprocessor"></span><span class="preprocessor">#define OM_DATETIME_YEAR(dateTime)    ((unsigned int)((unsigned char)(((dateTime) &gt;&gt; 26) &amp; 0x3f)) + 2000) </span>
-<a name="l00982"></a><a class="code" href="group__datetime.html#gaf4d3426bec2f1ac9dbce0965c7f6f7c8">00982</a> <span class="preprocessor">#define OM_DATETIME_MONTH(dateTime)   ((unsigned char)(((dateTime) &gt;&gt; 22) &amp; 0x0f))  </span>
-<a name="l00983"></a><a class="code" href="group__datetime.html#ga09d645a3f7989b65fcc9e9c045c8798a">00983</a> <span class="preprocessor">#define OM_DATETIME_DAY(dateTime)     ((unsigned char)(((dateTime) &gt;&gt; 17) &amp; 0x1f))  </span>
-<a name="l00984"></a><a class="code" href="group__datetime.html#gae5d26861be6dc34e6f369496a8f87252">00984</a> <span class="preprocessor">#define OM_DATETIME_HOURS(dateTime)   ((unsigned char)(((dateTime) &gt;&gt; 12) &amp; 0x1f))  </span>
-<a name="l00985"></a><a class="code" href="group__datetime.html#ga6fd03816bcc340df126d7e77f02a7233">00985</a> <span class="preprocessor">#define OM_DATETIME_MINUTES(dateTime) ((unsigned char)(((dateTime) &gt;&gt;  6) &amp; 0x3f))  </span>
-<a name="l00986"></a><a class="code" href="group__datetime.html#gaf89fa3e164311c43b62cf12297a38dbd">00986</a> <span class="preprocessor">#define OM_DATETIME_SECONDS(dateTime) ((unsigned char)(((dateTime)      ) &amp; 0x3f))  </span>
-<a name="l00987"></a><a class="code" href="group__datetime.html#ga8316c5d8a510e084722b53694cb804a7">00987</a> <span class="preprocessor">#define OM_DATETIME_MIN_VALID OM_DATETIME_FROM_YMDHMS(2000,  1,  1,  0, 0,   0)     </span>
-<a name="l00988"></a><a class="code" href="group__datetime.html#ga48430ffa6f1834e1e2f148edf1c2d4de">00988</a> <span class="preprocessor">#define OM_DATETIME_MAX_VALID OM_DATETIME_FROM_YMDHMS(2063, 12, 31, 23, 59, 59)     </span>
-<a name="l00989"></a><a class="code" href="group__datetime.html#gac48644f126458f1060a276c0cc64fd8e">00989</a> <span class="preprocessor">#define OM_DATETIME_ZERO (0)                                                        </span>
-<a name="l00990"></a><a class="code" href="group__datetime.html#gaa4ae7008fd1bf32e1f8ee9fcab833d2b">00990</a> <span class="preprocessor">#define OM_DATETIME_INFINITE ((OM_DATETIME)-1)                                      </span>
-<a name="l00993"></a><a class="code" href="group__datetime.html#ga6d65ff20aac74e619c65661bfdc9d99b">00993</a> <span class="preprocessor">#define OM_DATETIME_BUFFER_SIZE 20</span>
-<a name="l00994"></a>00994 <span class="preprocessor"></span>
-<a name="l00996"></a>00996 OM_EXPORT OM_DATETIME OmDateTimeFromString(<span class="keyword">const</span> <span class="keywordtype">char</span> *value);
-<a name="l00997"></a>00997 
-<a name="l00999"></a>00999 <span class="comment">//#define OmDateTimeToString(value, buffer) (((value) &lt; OM_DATETIME_MIN_VALID) ? &quot;0&quot; : (((value) &gt; OM_DATETIME_MAX_VALID) ? &quot;-1&quot; : (sprintf(buffer, &quot;%04u-%02u-%02u %02u:%02u:%02u&quot;, OM_DATETIME_YEAR(value), OM_DATETIME_MONTH(value), OM_DATETIME_DAY(value), OM_DATETIME_HOURS(value), OM_DATETIME_MINUTES(value), OM_DATETIME_SECONDS(value)), buffer)))</span>
-<a name="l01000"></a>01000 OM_EXPORT <span class="keywordtype">char</span> *OmDateTimeToString(OM_DATETIME value, <span class="keywordtype">char</span> *buffer);
-<a name="l01001"></a>01001 
-<a name="l01002"></a>01002 
-<a name="l01027"></a><a class="code" href="group__reader.html#gaa654dad2b5e252a2e9dbce771f50445e">01027</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span> * <a class="code" href="group__reader.html#gaa654dad2b5e252a2e9dbce771f50445e" title="Handle to a reader object.">OmReaderHandle</a>;
-<a name="l01028"></a>01028 
-<a name="l01029"></a>01029 
-<a name="l01037"></a>01037 OM_EXPORT OmReaderHandle <a class="code" href="group__reader.html#gafe29bdb2bf78d31ae1f75f7bc0ac542d" title="Opens a binary data file for reading.">OmReaderOpen</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *binaryFilename);
-<a name="l01038"></a>01038 
-<a name="l01039"></a>01039 
-<a name="l01050"></a>01050 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga47b3c8dd6e04c06cd106a5ae31cf11ee" title="Read the size, time-range, and internal chunking of the binary file.">OmReaderDataRange</a>(OmReaderHandle reader, <span class="keywordtype">int</span> *dataBlockSize, <span class="keywordtype">int</span> *dataOffsetBlocks, <span class="keywordtype">int</span> *dataNumBlocks, OM_DATETIME *startTime, OM_DATETIME *endTime);
+<a name="l00876"></a>00876 
+<a name="l00890"></a>00890 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gae54cabf652b35f5be06f05914932614a" title="Begin downloading the data from the current device.">OmBeginDownloading</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> dataOffsetBlocks, <span class="keywordtype">int</span> dataLengthBlocks, <span class="keyword">const</span> <span class="keywordtype">char</span> *destinationFile);
+<a name="l00891"></a>00891 
+<a name="l00892"></a>00892 
+<a name="l00908"></a>00908 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gaa272613cc8a6a4f4967f00a93e00cb57" title="Begin downloading the data from the current device, passing an additional reference.">OmBeginDownloadingReference</a>(<span class="keywordtype">int</span> deviceId, <span class="keywordtype">int</span> dataOffsetBlocks, <span class="keywordtype">int</span> dataLengthBlocks, <span class="keyword">const</span> <span class="keywordtype">char</span> *destinationFile, <span class="keywordtype">void</span> *reference);
+<a name="l00909"></a>00909 
+<a name="l00910"></a>00910 
+<a name="l00923"></a>00923 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#gaf312777c61b1b6c0e0147d214dff029b" title="This function queries the status of the specified device&#39;s asynchronous download.">OmQueryDownload</a>(<span class="keywordtype">int</span> deviceId, OM_DOWNLOAD_STATUS *downloadStatus, <span class="keywordtype">int</span> *downloadValue);
+<a name="l00924"></a>00924 
+<a name="l00925"></a>00925 
+<a name="l00938"></a>00938 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga6396b56db08ff1604b457224717aea36" title="This function waits for the specified device&#39;s asynchronous download to finish.">OmWaitForDownload</a>(<span class="keywordtype">int</span> deviceId, OM_DOWNLOAD_STATUS *downloadStatus, <span class="keywordtype">int</span> *downloadValue);
+<a name="l00939"></a>00939 
+<a name="l00940"></a>00940 
+<a name="l00948"></a>00948 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__data__download.html#ga0bc6e0477c417c3bb5e3bb51744fb24d" title="Cancel the current download of the data on the specified device.">OmCancelDownload</a>(<span class="keywordtype">int</span> deviceId);
+<a name="l00949"></a>00949 
+<a name="l00967"></a><a class="code" href="group__return__codes.html#gab0a39c9c5d36eea083d89b153e734746">00967</a> <span class="preprocessor">#define OM_TRUE                     1       </span>
+<a name="l00968"></a><a class="code" href="group__return__codes.html#ga54c70e2851f00c69f6193289761b7851">00968</a> <span class="preprocessor">#define OM_FALSE                    0       </span>
+<a name="l00969"></a><a class="code" href="group__return__codes.html#ga1f1c58d657a3bab4fd36dfc83eb253a7">00969</a> <span class="preprocessor">#define OM_OK                       0       </span>
+<a name="l00970"></a><a class="code" href="group__return__codes.html#gaa1ec7826762c2fe2c863363e3ac8c550">00970</a> <span class="preprocessor">#define OM_E_FAIL                   -1      </span>
+<a name="l00971"></a><a class="code" href="group__return__codes.html#gad4772f7381b71d4013779671cff6229d">00971</a> <span class="preprocessor">#define OM_E_UNEXPECTED             -2      </span>
+<a name="l00972"></a><a class="code" href="group__return__codes.html#ga83c21f280bdc1c8bc14982594779ca39">00972</a> <span class="preprocessor">#define OM_E_NOT_VALID_STATE        -3      </span>
+<a name="l00973"></a><a class="code" href="group__return__codes.html#ga9a2e9cd73304b9dd03b800d75ffc65e0">00973</a> <span class="preprocessor">#define OM_E_OUT_OF_MEMORY          -4      </span>
+<a name="l00974"></a><a class="code" href="group__return__codes.html#ga918b4f2c487a4e89d09157011ea6a8ce">00974</a> <span class="preprocessor">#define OM_E_INVALID_ARG            -5      </span>
+<a name="l00975"></a><a class="code" href="group__return__codes.html#ga76bade8e2ac0ab3fc4fa7acd1b0ec802">00975</a> <span class="preprocessor">#define OM_E_POINTER                -6      </span>
+<a name="l00976"></a><a class="code" href="group__return__codes.html#ga47220f5e8792e946e2c30270f0281955">00976</a> <span class="preprocessor">#define OM_E_NOT_IMPLEMENTED        -7      </span>
+<a name="l00977"></a><a class="code" href="group__return__codes.html#ga235981eb3c7d64421499b3ff3eacd270">00977</a> <span class="preprocessor">#define OM_E_ABORT                  -8      </span>
+<a name="l00978"></a><a class="code" href="group__return__codes.html#ga9592cf01d3aec6d8ab1a59441861630f">00978</a> <span class="preprocessor">#define OM_E_ACCESS_DENIED          -9      </span>
+<a name="l00979"></a><a class="code" href="group__return__codes.html#gaaa53e5ef92c2a0b7a3dd27a73fde9d8b">00979</a> <span class="preprocessor">#define OM_E_INVALID_DEVICE         -10     </span>
+<a name="l00980"></a><a class="code" href="group__return__codes.html#ga0ab836743057844f6170feb835565c0f">00980</a> <span class="preprocessor">#define OM_E_UNEXPECTED_RESPONSE    -11     </span>
+<a name="l00981"></a><a class="code" href="group__return__codes.html#ga8c9177d13e502d27e9c3273f7840a626">00981</a> <span class="preprocessor">#define OM_E_LOCKED                 -12     </span>
+<a name="l00982"></a><a class="code" href="group__return__codes.html#ga92738e017e3350c2a7d5a1bfad753f52">00982</a> <span class="preprocessor">#define OM_SUCCEEDED(value) ((value) &gt;= 0)  </span>
+<a name="l00983"></a><a class="code" href="group__return__codes.html#gaa07db56ead2f479f7f397f70fadd675d">00983</a> <span class="preprocessor">#define OM_FAILED(value) ((value) &lt; 0)      </span>
+<a name="l00991"></a>00991 <span class="preprocessor">OM_EXPORT const char *OmErrorString(int status);</span>
+<a name="l00992"></a>00992 <span class="preprocessor"></span>
+<a name="l01017"></a>01017 <span class="comment">/*typedef unsigned long OM_DATETIME;*/</span>  <span class="comment">/* (defined earlier in the file) */</span>
+<a name="l01018"></a>01018 
+<a name="l01023"></a><a class="code" href="group__datetime.html#ga9425fb8aff47067802c577dd84bda413">01023</a> <span class="preprocessor">#define OM_DATETIME_FROM_YMDHMS(year, month, day, hours, minutes, seconds) \</span>
+<a name="l01024"></a>01024 <span class="preprocessor">                ( (((OM_DATETIME)((year) % 100) &amp; 0x3f) &lt;&lt; 26) \</span>
+<a name="l01025"></a>01025 <span class="preprocessor">                | (((OM_DATETIME)(month)        &amp; 0x0f) &lt;&lt; 22) \</span>
+<a name="l01026"></a>01026 <span class="preprocessor">                | (((OM_DATETIME)(day)          &amp; 0x1f) &lt;&lt; 17) \</span>
+<a name="l01027"></a>01027 <span class="preprocessor">                | (((OM_DATETIME)(hours)        &amp; 0x1f) &lt;&lt; 12) \</span>
+<a name="l01028"></a>01028 <span class="preprocessor">                | (((OM_DATETIME)(minutes)      &amp; 0x3f) &lt;&lt;  6) \</span>
+<a name="l01029"></a>01029 <span class="preprocessor">                | (((OM_DATETIME)(seconds)      &amp; 0x3f)      ) \</span>
+<a name="l01030"></a>01030 <span class="preprocessor">                )</span>
+<a name="l01031"></a><a class="code" href="group__datetime.html#ga3889bada708d70fdae157d910771230b">01031</a> <span class="preprocessor"></span><span class="preprocessor">#define OM_DATETIME_YEAR(dateTime)    ((unsigned int)((unsigned char)(((dateTime) &gt;&gt; 26) &amp; 0x3f)) + 2000) </span>
+<a name="l01032"></a><a class="code" href="group__datetime.html#gaf4d3426bec2f1ac9dbce0965c7f6f7c8">01032</a> <span class="preprocessor">#define OM_DATETIME_MONTH(dateTime)   ((unsigned char)(((dateTime) &gt;&gt; 22) &amp; 0x0f))  </span>
+<a name="l01033"></a><a class="code" href="group__datetime.html#ga09d645a3f7989b65fcc9e9c045c8798a">01033</a> <span class="preprocessor">#define OM_DATETIME_DAY(dateTime)     ((unsigned char)(((dateTime) &gt;&gt; 17) &amp; 0x1f))  </span>
+<a name="l01034"></a><a class="code" href="group__datetime.html#gae5d26861be6dc34e6f369496a8f87252">01034</a> <span class="preprocessor">#define OM_DATETIME_HOURS(dateTime)   ((unsigned char)(((dateTime) &gt;&gt; 12) &amp; 0x1f))  </span>
+<a name="l01035"></a><a class="code" href="group__datetime.html#ga6fd03816bcc340df126d7e77f02a7233">01035</a> <span class="preprocessor">#define OM_DATETIME_MINUTES(dateTime) ((unsigned char)(((dateTime) &gt;&gt;  6) &amp; 0x3f))  </span>
+<a name="l01036"></a><a class="code" href="group__datetime.html#gaf89fa3e164311c43b62cf12297a38dbd">01036</a> <span class="preprocessor">#define OM_DATETIME_SECONDS(dateTime) ((unsigned char)(((dateTime)      ) &amp; 0x3f))  </span>
+<a name="l01037"></a><a class="code" href="group__datetime.html#ga8316c5d8a510e084722b53694cb804a7">01037</a> <span class="preprocessor">#define OM_DATETIME_MIN_VALID OM_DATETIME_FROM_YMDHMS(2000,  1,  1,  0, 0,   0)     </span>
+<a name="l01038"></a><a class="code" href="group__datetime.html#ga48430ffa6f1834e1e2f148edf1c2d4de">01038</a> <span class="preprocessor">#define OM_DATETIME_MAX_VALID OM_DATETIME_FROM_YMDHMS(2063, 12, 31, 23, 59, 59)     </span>
+<a name="l01039"></a><a class="code" href="group__datetime.html#gac48644f126458f1060a276c0cc64fd8e">01039</a> <span class="preprocessor">#define OM_DATETIME_ZERO (0)                                                        </span>
+<a name="l01040"></a><a class="code" href="group__datetime.html#gaa4ae7008fd1bf32e1f8ee9fcab833d2b">01040</a> <span class="preprocessor">#define OM_DATETIME_INFINITE ((OM_DATETIME)-1)                                      </span>
+<a name="l01043"></a><a class="code" href="group__datetime.html#ga6d65ff20aac74e619c65661bfdc9d99b">01043</a> <span class="preprocessor">#define OM_DATETIME_BUFFER_SIZE (20)</span>
+<a name="l01044"></a>01044 <span class="preprocessor"></span>
+<a name="l01046"></a>01046 OM_EXPORT OM_DATETIME OmDateTimeFromString(<span class="keyword">const</span> <span class="keywordtype">char</span> *value);
+<a name="l01047"></a>01047 
+<a name="l01049"></a>01049 <span class="comment">//#define OmDateTimeToString(value, buffer) (((value) &lt; OM_DATETIME_MIN_VALID) ? &quot;0&quot; : (((value) &gt; OM_DATETIME_MAX_VALID) ? &quot;-1&quot; : (sprintf(buffer, &quot;%04u-%02u-%02u %02u:%02u:%02u&quot;, OM_DATETIME_YEAR(value), OM_DATETIME_MONTH(value), OM_DATETIME_DAY(value), OM_DATETIME_HOURS(value), OM_DATETIME_MINUTES(value), OM_DATETIME_SECONDS(value)), buffer)))</span>
+<a name="l01050"></a>01050 OM_EXPORT <span class="keywordtype">char</span> *OmDateTimeToString(OM_DATETIME value, <span class="keywordtype">char</span> *buffer);
 <a name="l01051"></a>01051 
 <a name="l01052"></a>01052 
-<a name="l01060"></a>01060 OM_EXPORT <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="group__reader.html#ga44c821dc029641ab2d1ba269137720d4" title="Read the device id, session id and metadata of the binary file.">OmReaderMetadata</a>(OmReaderHandle reader, <span class="keywordtype">int</span> *deviceId, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *sessionId);
-<a name="l01061"></a>01061 
-<a name="l01062"></a>01062 
-<a name="l01068"></a>01068 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga01ee0170023fb0a045608929dbe180d3" title="Return the current block index of the reader.">OmReaderDataBlockPosition</a>(OmReaderHandle reader);
-<a name="l01069"></a>01069 
-<a name="l01070"></a>01070 
-<a name="l01077"></a>01077 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga9b857c3b9d1043cfbeb8b5713a7c4ca8" title="Seeks the file reader to the specified data block.">OmReaderDataBlockSeek</a>(OmReaderHandle reader, <span class="keywordtype">int</span> dataBlockNumber);
+<a name="l01077"></a><a class="code" href="group__reader.html#gaa654dad2b5e252a2e9dbce771f50445e">01077</a> <span class="keyword">typedef</span> <span class="keywordtype">void</span> * <a class="code" href="group__reader.html#gaa654dad2b5e252a2e9dbce771f50445e" title="Handle to a reader object.">OmReaderHandle</a>;
 <a name="l01078"></a>01078 
 <a name="l01079"></a>01079 
-<a name="l01089"></a>01089 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga1f48311f47268ee9532cbe9961bbcf18" title="Reads the next block of data from the binary file.">OmReaderNextBlock</a>(OmReaderHandle reader);
-<a name="l01090"></a>01090 
-<a name="l01091"></a>01091 
-<a name="l01101"></a>01101 OM_EXPORT <span class="keywordtype">short</span> *<a class="code" href="group__reader.html#ga68ef443d4bad40afb7f52bc9f5bb0f71" title="Obtains a pointer to the buffer of samples read, and unpacked, by OmReaderNextBlock().">OmReaderBuffer</a>(OmReaderHandle reader);
-<a name="l01102"></a>01102 
-<a name="l01103"></a>01103 
-<a name="l01116"></a>01116 OM_EXPORT OM_DATETIME <a class="code" href="group__reader.html#gab8ee286a10180901a40d65647c2735e5" title="Determines the timestamp of the specified sample in the buffer read by OmReaderNextBlock().">OmReaderTimestamp</a>(OmReaderHandle reader, <span class="keywordtype">int</span> index, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> *fractional);
-<a name="l01117"></a>01117 
-<a name="l01118"></a>01118 
-<a name="l01124"></a><a class="code" href="group__reader.html#gaa204b05abde6d663dd69cfc3d991221a">01124</a> <span class="keyword">typedef</span> <span class="keyword">enum</span>
-<a name="l01125"></a>01125 {
-<a name="l01127"></a>01127     OM_VALUE_DEVICEID = 3, 
-<a name="l01128"></a>01128     OM_VALUE_SESSIONID = 4, 
-<a name="l01129"></a>01129     OM_VALUE_SEQUENCEID = 5, 
-<a name="l01131"></a><a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aad9b82ee2308aed3bac11bc14ad228386">01131</a>     <a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aad9b82ee2308aed3bac11bc14ad228386" title="Raw light sensor reading.">OM_VALUE_LIGHT</a> = 7,                 
-<a name="l01133"></a>01133     OM_VALUE_TEMPERATURE = 8,           
-<a name="l01134"></a>01134     OM_VALUE_EVENTS = 9, 
-<a name="l01135"></a>01135     OM_VALUE_BATTERY = 10, 
-<a name="l01136"></a>01136     OM_VALUE_SAMPLERATE = 11,
-<a name="l01138"></a><a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aa90bb8e8c7a026dab98c59b62f7341ec1">01138</a>     <a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aa90bb8e8c7a026dab98c59b62f7341ec1" title="Temperature sensor reading in millicentigrade.">OM_VALUE_TEMPERATURE_MC</a> = 108,      
-<a name="l01140"></a>01140     OM_VALUE_BATTERY_MV = 110,
-<a name="l01142"></a>01142 } <a class="code" href="group__reader.html#gaa204b05abde6d663dd69cfc3d991221a" title="Reader value indexes for OmReaderGetValue() function.">OM_READER_VALUE_TYPE</a>;
-<a name="l01143"></a>01143 
-<a name="l01144"></a>01144 
-<a name="l01154"></a>01154 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga46fddf401761dff1fd0976daf55c5df9" title="Returns a specific value type from the buffer read by OmReaderNextBlock().">OmReaderGetValue</a>(OmReaderHandle reader, <a class="code" href="group__reader.html#gaa204b05abde6d663dd69cfc3d991221a" title="Reader value indexes for OmReaderGetValue() function.">OM_READER_VALUE_TYPE</a> valueType);
-<a name="l01155"></a>01155 
-<a name="l01156"></a>01156 
-<a name="l01161"></a>01161 <span class="preprocessor">#pragma pack(push, 1)</span>
-<a name="l01162"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html">01162</a> <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">struct</span>
-<a name="l01163"></a>01163 {
-<a name="l01164"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0">01164</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0" title="@ 0 +2 ASCII &quot;MD&quot;, little-endian (0x444D)">packetHeader</a>;        
-<a name="l01165"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6">01165</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6" title="@ 2 +2 Packet length (1020 bytes, with header (4) = 1024 bytes total)">packetLength</a>;        
-<a name="l01166"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#affe215a7220b2d52fb9dacf3b35e56dc">01166</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#affe215a7220b2d52fb9dacf3b35e56dc" title="@ 4 +1 (1 byte reserved)">reserved1</a>;            
-<a name="l01167"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a">01167</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a" title="@ 5 +2 Device identifier">deviceId</a>;            
-<a name="l01168"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861">01168</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861" title="@ 7 +4 Unique session identifier">sessionId</a>;             
-<a name="l01169"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad56faf11e646e796919a806bea0fbb09">01169</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad56faf11e646e796919a806bea0fbb09" title="@11 +2 (2 bytes reserved)">reserved2</a>;           
-<a name="l01170"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1f49c52e8909c794bc93f53e65db0b34">01170</a>     OM_DATETIME <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1f49c52e8909c794bc93f53e65db0b34" title="@13 +4 Start time for delayed logging">loggingStartTime</a>;       
-<a name="l01171"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a071d790190e81b84380c397dabe0a2aa">01171</a>     OM_DATETIME <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a071d790190e81b84380c397dabe0a2aa" title="@17 +4 Stop time for delayed logging">loggingEndTime</a>;         
-<a name="l01172"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2f9afd1c374a32f2ecbd8352bcaa3b9f">01172</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2f9afd1c374a32f2ecbd8352bcaa3b9f" title="@21 +4 Preset maximum number of samples to collect, 0 = unlimited">loggingCapacity</a>;       
-<a name="l01173"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#acee440a38ae3f450924acb5d46465d16">01173</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> reserved3[11];        
-<a name="l01174"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad859199ec3e05f48162979f5879e23ac">01174</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad859199ec3e05f48162979f5879e23ac" title="@36 +1 Sampling rate">samplingRate</a>;         
-<a name="l01175"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a3ad8c0d18862ea8d5fe1257fe530578e">01175</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a3ad8c0d18862ea8d5fe1257fe530578e" title="@37 +4 Last change metadata time">lastChangeTime</a>;        
-<a name="l01176"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad09241532e3a8a8fb95155edab667e3a">01176</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad09241532e3a8a8fb95155edab667e3a" title="@41 +1 Firmware revision number">firmwareRevision</a>;     
-<a name="l01177"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2662b9d9d068cdfc7322c91887e5ded4">01177</a>     <span class="keywordtype">signed</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2662b9d9d068cdfc7322c91887e5ded4" title="@42 +2 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown">timeZone</a>;              
-<a name="l01178"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad18c575886ac0be297bb21c869e37279">01178</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> reserved4[20];        
-<a name="l01179"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ae7476d7c7c251209b568e285b4511021">01179</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> annotation[<a class="code" href="group__settings.html#gad80f01674b7204f06de1cad9f98a9fbd" title="The number of bytes of metadata scratch area on the device.">OM_METADATA_SIZE</a>]; 
-<a name="l01180"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a7be6e14e9e71d4fc2913a0f22b439634">01180</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> reserved[512];        
-<a name="l01181"></a>01181 } <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html" title="Internal structure of a binary file header block.">OM_READER_HEADER_PACKET</a>;
-<a name="l01182"></a>01182 <span class="preprocessor">#pragma pack(pop)</span>
-<a name="l01183"></a>01183 <span class="preprocessor"></span>
-<a name="l01184"></a>01184 
-<a name="l01192"></a>01192 OM_EXPORT <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html" title="Internal structure of a binary file header block.">OM_READER_HEADER_PACKET</a> *<a class="code" href="group__reader.html#ga616368cf0b2303d56d7c1406e7aaff47" title="Accesses the contents of a raw header packet.">OmReaderRawHeaderPacket</a>(OmReaderHandle reader);
-<a name="l01193"></a>01193 
-<a name="l01194"></a>01194 
-<a name="l01199"></a>01199 <span class="preprocessor">#pragma pack(push, 1)</span>
-<a name="l01200"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html">01200</a> <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">struct</span>
-<a name="l01201"></a>01201 {
-<a name="l01202"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0">01202</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0" title="@ 0 +2 ASCII &quot;AX&quot;, little-endian (0x5841)">packetHeader</a>;        
-<a name="l01203"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6">01203</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6" title="@ 2 +2 Packet length (508 bytes, with header (4) = 512 bytes total)">packetLength</a>;        
-<a name="l01204"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a">01204</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a" title="@ 4 +2 Device identifier, 0 = unknown">deviceId</a>;            
-<a name="l01205"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861">01205</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861" title="@ 6 +4 Unique session identifier, 0 = unknown">sessionId</a>;             
-<a name="l01206"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a265f19061707d45f04e154c7a8fc1334">01206</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a265f19061707d45f04e154c7a8fc1334" title="@10 +4 Sequence counter, each packet has a new number (reset if restarted)">sequenceId</a>;            
-<a name="l01207"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe14e1641374ab41d47dd230114c1a93">01207</a>     OM_DATETIME <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe14e1641374ab41d47dd230114c1a93" title="@14 +4 Last reported RTC value, 0 = unknown">timestamp</a>;              
-<a name="l01208"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a657002e84a5644e867c4992daed95f72">01208</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a657002e84a5644e867c4992daed95f72" title="@18 +2 Last recorded light sensor value in raw units, 0 = none">light</a>;               
-<a name="l01209"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#abee8811441ea7efaf1c2929ee003fb10">01209</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#abee8811441ea7efaf1c2929ee003fb10" title="@20 +2 Last recorded temperature sensor value in raw units, 0 = none">temperature</a>;         
-<a name="l01210"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a6afb9ac2ccc07c1c5c4adb0ba40fe303">01210</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a6afb9ac2ccc07c1c5c4adb0ba40fe303" title="@22 +1 Event flags since last packet, b0 = resume logging, b1 = single-tap event, b2 = double-tap eve...">events</a>;              
-<a name="l01211"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#ab60186c8e4a2fbf7fbb3cf84e2c81e94">01211</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#ab60186c8e4a2fbf7fbb3cf84e2c81e94" title="@23 +1 Last recorded battery level in raw units, 0 = unknown">battery</a>;             
-<a name="l01212"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a8392b8ba36712df4da65bc3633427aae">01212</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a8392b8ba36712df4da65bc3633427aae" title="@24 +1 Sample rate code, (3200/(1&lt;&lt;(15-(rate &amp; 0x0f)))) Hz">sampleRate</a>;          
-<a name="l01213"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a93196071449708df41ef701e0e6846df">01213</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a93196071449708df41ef701e0e6846df" title="@25 +1 0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed...">numAxesBPS</a>;          
-<a name="l01214"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a92435558413967272aa9fb2dae6f0bfe">01214</a>     <span class="keywordtype">signed</span> <span class="keywordtype">short</span>   <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a92435558413967272aa9fb2dae6f0bfe" title="@26 +2 Relative sample index from the start of the buffer where the whole-second timestamp is valid...">timestampOffset</a>;     
-<a name="l01215"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a3975a747281a967ea81288c7041861bc">01215</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a3975a747281a967ea81288c7041861bc" title="@28 +2 Number of accelerometer samples (80 or 120)">sampleCount</a>;         
-<a name="l01216"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a7c63c99d636721e0d603b8a120a03a97">01216</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> rawSampleData[480];   
-<a name="l01217"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a4b964731ebafd0c435d479b631f754ff">01217</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a4b964731ebafd0c435d479b631f754ff" title="@510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero)">checksum</a>;            
-<a name="l01218"></a>01218 } <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html" title="Internal structure of a binary file data block.">OM_READER_DATA_PACKET</a>;
-<a name="l01219"></a>01219 <span class="preprocessor">#pragma pack(pop)</span>
-<a name="l01220"></a>01220 <span class="preprocessor"></span>
-<a name="l01221"></a>01221 
-<a name="l01230"></a>01230 OM_EXPORT <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html" title="Internal structure of a binary file data block.">OM_READER_DATA_PACKET</a> *<a class="code" href="group__reader.html#ga8ab9d544730fc97372a1b9dee3f5409e" title="Accesses the contents of a raw data packet.">OmReaderRawDataPacket</a>(OmReaderHandle reader);
-<a name="l01231"></a>01231 
-<a name="l01232"></a>01232 
-<a name="l01239"></a>01239 OM_EXPORT <span class="keywordtype">void</span> <a class="code" href="group__reader.html#ga5b18b5c1ece6d59735788465c9731a59" title="Closes the specified reader handle.">OmReaderClose</a>(OmReaderHandle reader);
-<a name="l01240"></a>01240 
-<a name="l01245"></a>01245 <span class="preprocessor">#ifdef __cplusplus</span>
-<a name="l01246"></a>01246 <span class="preprocessor"></span>}
-<a name="l01247"></a>01247 <span class="preprocessor">#endif</span>
-<a name="l01248"></a>01248 <span class="preprocessor"></span>
-<a name="l01249"></a>01249 
-<a name="l01250"></a>01250 <span class="preprocessor">#endif</span>
+<a name="l01084"></a><a class="code" href="group__reader.html#ga91431a82b92815e066bfc153ebd9ee1c">01084</a> <span class="preprocessor">#define OM_MAX_SAMPLES (120)</span>
+<a name="l01085"></a>01085 <span class="preprocessor"></span>
+<a name="l01086"></a>01086 
+<a name="l01091"></a><a class="code" href="group__reader.html#ga678fc8001dfae42455b2dd0294b8b260">01091</a> <span class="preprocessor">#define OM_MAX_HEADER_SIZE (2 * 512)</span>
+<a name="l01092"></a>01092 <span class="preprocessor"></span>
+<a name="l01093"></a>01093 
+<a name="l01098"></a><a class="code" href="group__reader.html#gab51fd948a8a15161f98d43421c9147ec">01098</a> <span class="preprocessor">#define OM_MAX_DATA_SIZE (512)</span>
+<a name="l01099"></a>01099 <span class="preprocessor"></span>
+<a name="l01100"></a>01100 
+<a name="l01108"></a>01108 OM_EXPORT OmReaderHandle <a class="code" href="group__reader.html#gafe29bdb2bf78d31ae1f75f7bc0ac542d" title="Opens a binary data file for reading.">OmReaderOpen</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *binaryFilename);
+<a name="l01109"></a>01109 
+<a name="l01110"></a>01110 
+<a name="l01121"></a>01121 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga47b3c8dd6e04c06cd106a5ae31cf11ee" title="Read the size, time-range, and internal chunking of the binary file.">OmReaderDataRange</a>(OmReaderHandle reader, <span class="keywordtype">int</span> *dataBlockSize, <span class="keywordtype">int</span> *dataOffsetBlocks, <span class="keywordtype">int</span> *dataNumBlocks, OM_DATETIME *startTime, OM_DATETIME *endTime);
+<a name="l01122"></a>01122 
+<a name="l01123"></a>01123 
+<a name="l01131"></a>01131 OM_EXPORT <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="group__reader.html#ga44c821dc029641ab2d1ba269137720d4" title="Read the device id, session id and metadata of the binary file.">OmReaderMetadata</a>(OmReaderHandle reader, <span class="keywordtype">int</span> *deviceId, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *sessionId);
+<a name="l01132"></a>01132 
+<a name="l01133"></a>01133 
+<a name="l01139"></a>01139 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga01ee0170023fb0a045608929dbe180d3" title="Return the current block index of the reader.">OmReaderDataBlockPosition</a>(OmReaderHandle reader);
+<a name="l01140"></a>01140 
+<a name="l01141"></a>01141 
+<a name="l01148"></a>01148 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga9b857c3b9d1043cfbeb8b5713a7c4ca8" title="Seeks the file reader to the specified data block.">OmReaderDataBlockSeek</a>(OmReaderHandle reader, <span class="keywordtype">int</span> dataBlockNumber);
+<a name="l01149"></a>01149 
+<a name="l01150"></a>01150 
+<a name="l01160"></a>01160 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga1f48311f47268ee9532cbe9961bbcf18" title="Reads the next block of data from the binary file.">OmReaderNextBlock</a>(OmReaderHandle reader);
+<a name="l01161"></a>01161 
+<a name="l01162"></a>01162 
+<a name="l01172"></a>01172 OM_EXPORT <span class="keywordtype">short</span> *<a class="code" href="group__reader.html#ga68ef443d4bad40afb7f52bc9f5bb0f71" title="Obtains a pointer to the buffer of samples read, and unpacked, by OmReaderNextBlock().">OmReaderBuffer</a>(OmReaderHandle reader);
+<a name="l01173"></a>01173 
+<a name="l01174"></a>01174 
+<a name="l01187"></a>01187 OM_EXPORT OM_DATETIME <a class="code" href="group__reader.html#gab8ee286a10180901a40d65647c2735e5" title="Determines the timestamp of the specified sample in the buffer read by OmReaderNextBlock().">OmReaderTimestamp</a>(OmReaderHandle reader, <span class="keywordtype">int</span> index, <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> *fractional);
+<a name="l01188"></a>01188 
+<a name="l01189"></a>01189 
+<a name="l01195"></a><a class="code" href="group__reader.html#gaa204b05abde6d663dd69cfc3d991221a">01195</a> <span class="keyword">typedef</span> <span class="keyword">enum</span>
+<a name="l01196"></a>01196 {
+<a name="l01198"></a>01198     OM_VALUE_DEVICEID = 3, 
+<a name="l01199"></a>01199     OM_VALUE_SESSIONID = 4, 
+<a name="l01200"></a>01200     OM_VALUE_SEQUENCEID = 5, 
+<a name="l01202"></a><a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aad9b82ee2308aed3bac11bc14ad228386">01202</a>     <a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aad9b82ee2308aed3bac11bc14ad228386" title="Raw light sensor reading.">OM_VALUE_LIGHT</a> = 7,                 
+<a name="l01204"></a>01204     OM_VALUE_TEMPERATURE = 8,           
+<a name="l01205"></a>01205     OM_VALUE_EVENTS = 9, 
+<a name="l01206"></a>01206     OM_VALUE_BATTERY = 10, 
+<a name="l01207"></a>01207     OM_VALUE_SAMPLERATE = 11,
+<a name="l01209"></a><a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aa90bb8e8c7a026dab98c59b62f7341ec1">01209</a>     <a class="code" href="group__reader.html#ggaa204b05abde6d663dd69cfc3d991221aa90bb8e8c7a026dab98c59b62f7341ec1" title="Temperature sensor reading in millicentigrade.">OM_VALUE_TEMPERATURE_MC</a> = 108,      
+<a name="l01211"></a>01211     OM_VALUE_BATTERY_MV = 110,
+<a name="l01212"></a>01212     OM_VALUE_BATTERY_PERCENT = 210,
+<a name="l01214"></a>01214 } <a class="code" href="group__reader.html#gaa204b05abde6d663dd69cfc3d991221a" title="Reader value indexes for OmReaderGetValue() function.">OM_READER_VALUE_TYPE</a>;
+<a name="l01215"></a>01215 
+<a name="l01216"></a>01216 
+<a name="l01226"></a>01226 OM_EXPORT <span class="keywordtype">int</span> <a class="code" href="group__reader.html#ga46fddf401761dff1fd0976daf55c5df9" title="Returns a specific value type from the buffer read by OmReaderNextBlock().">OmReaderGetValue</a>(OmReaderHandle reader, <a class="code" href="group__reader.html#gaa204b05abde6d663dd69cfc3d991221a" title="Reader value indexes for OmReaderGetValue() function.">OM_READER_VALUE_TYPE</a> valueType);
+<a name="l01227"></a>01227 
+<a name="l01228"></a>01228 
+<a name="l01233"></a>01233 <span class="preprocessor">#pragma pack(push, 1)</span>
+<a name="l01234"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html">01234</a> <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">struct</span>
+<a name="l01235"></a>01235 {
+<a name="l01236"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0">01236</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0" title="@ 0 +2 ASCII &quot;MD&quot;, little-endian (0x444D)">packetHeader</a>;        
+<a name="l01237"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6">01237</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6" title="@ 2 +2 Packet length (1020 bytes, with header (4) = 1024 bytes total)">packetLength</a>;        
+<a name="l01238"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#affe215a7220b2d52fb9dacf3b35e56dc">01238</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#affe215a7220b2d52fb9dacf3b35e56dc" title="@ 4 +1 (1 byte reserved)">reserved1</a>;            
+<a name="l01239"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a">01239</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a" title="@ 5 +2 Device identifier">deviceId</a>;            
+<a name="l01240"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861">01240</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861" title="@ 7 +4 Unique session identifier">sessionId</a>;             
+<a name="l01241"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad56faf11e646e796919a806bea0fbb09">01241</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad56faf11e646e796919a806bea0fbb09" title="@11 +2 (2 bytes reserved)">reserved2</a>;           
+<a name="l01242"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1f49c52e8909c794bc93f53e65db0b34">01242</a>     OM_DATETIME <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a1f49c52e8909c794bc93f53e65db0b34" title="@13 +4 Start time for delayed logging">loggingStartTime</a>;       
+<a name="l01243"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a071d790190e81b84380c397dabe0a2aa">01243</a>     OM_DATETIME <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a071d790190e81b84380c397dabe0a2aa" title="@17 +4 Stop time for delayed logging">loggingEndTime</a>;         
+<a name="l01244"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2f9afd1c374a32f2ecbd8352bcaa3b9f">01244</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2f9afd1c374a32f2ecbd8352bcaa3b9f" title="@21 +4 Preset maximum number of samples to collect, 0 = unlimited">loggingCapacity</a>;       
+<a name="l01245"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#acee440a38ae3f450924acb5d46465d16">01245</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> reserved3[11];        
+<a name="l01246"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad859199ec3e05f48162979f5879e23ac">01246</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad859199ec3e05f48162979f5879e23ac" title="@36 +1 Sampling rate">samplingRate</a>;         
+<a name="l01247"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a3ad8c0d18862ea8d5fe1257fe530578e">01247</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a3ad8c0d18862ea8d5fe1257fe530578e" title="@37 +4 Last change metadata time">lastChangeTime</a>;        
+<a name="l01248"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad09241532e3a8a8fb95155edab667e3a">01248</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad09241532e3a8a8fb95155edab667e3a" title="@41 +1 Firmware revision number">firmwareRevision</a>;     
+<a name="l01249"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2662b9d9d068cdfc7322c91887e5ded4">01249</a>     <span class="keywordtype">signed</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a2662b9d9d068cdfc7322c91887e5ded4" title="@42 +2 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown">timeZone</a>;              
+<a name="l01250"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ad18c575886ac0be297bb21c869e37279">01250</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> reserved4[20];        
+<a name="l01251"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#ae7476d7c7c251209b568e285b4511021">01251</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> annotation[<a class="code" href="group__settings.html#gad80f01674b7204f06de1cad9f98a9fbd" title="The number of bytes of metadata scratch area on the device.">OM_METADATA_SIZE</a>]; 
+<a name="l01252"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#a7be6e14e9e71d4fc2913a0f22b439634">01252</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> reserved[512];        
+<a name="l01253"></a>01253 } <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html" title="Internal structure of a binary file header block.">OM_READER_HEADER_PACKET</a>;
+<a name="l01254"></a>01254 <span class="preprocessor">#pragma pack(pop)</span>
+<a name="l01255"></a>01255 <span class="preprocessor"></span>
+<a name="l01256"></a>01256 
+<a name="l01264"></a>01264 OM_EXPORT <a class="code" href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html" title="Internal structure of a binary file header block.">OM_READER_HEADER_PACKET</a> *<a class="code" href="group__reader.html#ga616368cf0b2303d56d7c1406e7aaff47" title="Accesses the contents of a raw header packet.">OmReaderRawHeaderPacket</a>(OmReaderHandle reader);
+<a name="l01265"></a>01265 
+<a name="l01266"></a>01266 
+<a name="l01271"></a>01271 <span class="preprocessor">#pragma pack(push, 1)</span>
+<a name="l01272"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html">01272</a> <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">struct</span>
+<a name="l01273"></a>01273 {
+<a name="l01274"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0">01274</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe27be79918e8452b2ea71b3458595d0" title="@ 0 +2 ASCII &quot;AX&quot;, little-endian (0x5841)">packetHeader</a>;        
+<a name="l01275"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6">01275</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#aefddd34581d4e2fd50f7b0703cf490b6" title="@ 2 +2 Packet length (508 bytes, with header (4) = 512 bytes total)">packetLength</a>;        
+<a name="l01276"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a">01276</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a" title="@ 4 +2 Device identifier, 0 = unknown">deviceId</a>;            
+<a name="l01277"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861">01277</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a1003bf725bb1c601e1f2462262f5c861" title="@ 6 +4 Unique session identifier, 0 = unknown">sessionId</a>;             
+<a name="l01278"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a265f19061707d45f04e154c7a8fc1334">01278</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a265f19061707d45f04e154c7a8fc1334" title="@10 +4 Sequence counter, each packet has a new number (reset if restarted)">sequenceId</a>;            
+<a name="l01279"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe14e1641374ab41d47dd230114c1a93">01279</a>     OM_DATETIME <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#afe14e1641374ab41d47dd230114c1a93" title="@14 +4 Last reported RTC value, 0 = unknown">timestamp</a>;              
+<a name="l01280"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a657002e84a5644e867c4992daed95f72">01280</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a657002e84a5644e867c4992daed95f72" title="@18 +2 Last recorded light sensor value in raw units, 0 = none">light</a>;               
+<a name="l01281"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#abee8811441ea7efaf1c2929ee003fb10">01281</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#abee8811441ea7efaf1c2929ee003fb10" title="@20 +2 Last recorded temperature sensor value in raw units, 0 = none">temperature</a>;         
+<a name="l01282"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a6afb9ac2ccc07c1c5c4adb0ba40fe303">01282</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a6afb9ac2ccc07c1c5c4adb0ba40fe303" title="@22 +1 Event flags since last packet, b0 = resume logging, b1 = single-tap event, b2 = double-tap eve...">events</a>;              
+<a name="l01283"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#ab60186c8e4a2fbf7fbb3cf84e2c81e94">01283</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#ab60186c8e4a2fbf7fbb3cf84e2c81e94" title="@23 +1 Last recorded battery level in raw units, 0 = unknown">battery</a>;             
+<a name="l01284"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a8392b8ba36712df4da65bc3633427aae">01284</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a8392b8ba36712df4da65bc3633427aae" title="@24 +1 Sample rate code, (3200/(1&lt;&lt;(15-(rate &amp; 0x0f)))) Hz">sampleRate</a>;          
+<a name="l01285"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a93196071449708df41ef701e0e6846df">01285</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a93196071449708df41ef701e0e6846df" title="@25 +1 0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed...">numAxesBPS</a>;          
+<a name="l01286"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a92435558413967272aa9fb2dae6f0bfe">01286</a>     <span class="keywordtype">signed</span> <span class="keywordtype">short</span>   <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a92435558413967272aa9fb2dae6f0bfe" title="@26 +2 Relative sample index from the start of the buffer where the whole-second timestamp is valid...">timestampOffset</a>;     
+<a name="l01287"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a3975a747281a967ea81288c7041861bc">01287</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a3975a747281a967ea81288c7041861bc" title="@28 +2 Number of accelerometer samples (80 or 120)">sampleCount</a>;         
+<a name="l01288"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a7c63c99d636721e0d603b8a120a03a97">01288</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> rawSampleData[480];   
+<a name="l01289"></a><a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a4b964731ebafd0c435d479b631f754ff">01289</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a4b964731ebafd0c435d479b631f754ff" title="@510 +2 Checksum of packet (16-bit word-wise sum of the whole packet should be zero)">checksum</a>;            
+<a name="l01290"></a>01290 } <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html" title="Internal structure of a binary file data block.">OM_READER_DATA_PACKET</a>;
+<a name="l01291"></a>01291 <span class="preprocessor">#pragma pack(pop)</span>
+<a name="l01292"></a>01292 <span class="preprocessor"></span>
+<a name="l01293"></a>01293 
+<a name="l01302"></a>01302 OM_EXPORT <a class="code" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html" title="Internal structure of a binary file data block.">OM_READER_DATA_PACKET</a> *<a class="code" href="group__reader.html#ga8ab9d544730fc97372a1b9dee3f5409e" title="Accesses the contents of a raw data packet.">OmReaderRawDataPacket</a>(OmReaderHandle reader);
+<a name="l01303"></a>01303 
+<a name="l01304"></a>01304 
+<a name="l01311"></a>01311 OM_EXPORT <span class="keywordtype">void</span> <a class="code" href="group__reader.html#ga5b18b5c1ece6d59735788465c9731a59" title="Closes the specified reader handle.">OmReaderClose</a>(OmReaderHandle reader);
+<a name="l01312"></a>01312 
+<a name="l01317"></a>01317 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l01318"></a>01318 <span class="preprocessor"></span>}
+<a name="l01319"></a>01319 <span class="preprocessor">#endif</span>
+<a name="l01320"></a>01320 <span class="preprocessor"></span>
+<a name="l01321"></a>01321 
+<a name="l01322"></a>01322 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
@@ -558,7 +580,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 
 
-    <li class="footer"><!-- Generated on Mon Apr 16 2012 03:50:24 for OMAPI by -->
+    <li class="footer"><!-- Generated on Wed Aug 15 2012 13:49:57 for OMAPI by -->
     <a href="http://www.doxygen.org/index.html">doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>

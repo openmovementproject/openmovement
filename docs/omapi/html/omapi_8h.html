@@ -124,7 +124,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__settings.html#ga32616d81665bdb4b67ffa509a7259312">OmCommit</a>(_deviceId)&#160;&#160;&#160;OmEraseDataAndCommit((_deviceId), OM_ERASE_NONE)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__settings.html#gab7bb1477be2e36b872d4f31477bb781c">OM_ACCEL_DEFAULT_RATE</a>&#160;&#160;&#160;100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__settings.html#ga3e55efa9268f0dd7b86ab44cc0644b90">OM_ACCEL_DEFAULT_RANGE</a>&#160;&#160;&#160;8</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gacb397cf74823bb9eb81d9efaace027c8">OM_MAX_PATH</a>&#160;&#160;&#160;256</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gacb397cf74823bb9eb81d9efaace027c8">OM_MAX_PATH</a>&#160;&#160;&#160;(256)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__return__codes.html#gab0a39c9c5d36eea083d89b153e734746">OM_TRUE</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__return__codes.html#ga54c70e2851f00c69f6193289761b7851">OM_FALSE</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__return__codes.html#ga1f1c58d657a3bab4fd36dfc83eb253a7">OM_OK</a>&#160;&#160;&#160;0</td></tr>
@@ -153,13 +153,17 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__datetime.html#ga48430ffa6f1834e1e2f148edf1c2d4de">OM_DATETIME_MAX_VALID</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__datetime.html#gac48644f126458f1060a276c0cc64fd8e">OM_DATETIME_ZERO</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__datetime.html#gaa4ae7008fd1bf32e1f8ee9fcab833d2b">OM_DATETIME_INFINITE</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__datetime.html#ga6d65ff20aac74e619c65661bfdc9d99b">OM_DATETIME_BUFFER_SIZE</a>&#160;&#160;&#160;20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__datetime.html#ga6d65ff20aac74e619c65661bfdc9d99b">OM_DATETIME_BUFFER_SIZE</a>&#160;&#160;&#160;(20)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#ga91431a82b92815e066bfc153ebd9ee1c">OM_MAX_SAMPLES</a>&#160;&#160;&#160;(120)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#ga678fc8001dfae42455b2dd0294b8b260">OM_MAX_HEADER_SIZE</a>&#160;&#160;&#160;(2 * 512)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#gab51fd948a8a15161f98d43421c9147ec">OM_MAX_DATA_SIZE</a>&#160;&#160;&#160;(512)</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#gacb0e5b28fec48c86ed2eb35af5aaa89a">OmLogCallback</a> )(void *, const char *)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__init.html#ga40563cf3fea2f2743b14cc4fbc8bbb27">OmDeviceCallback</a> )(void *, int, <a class="el" href="group__api__init.html#gab555d2e47896b6e3b4264d988871f455">OM_DEVICE_STATUS</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__datetime.html#ga5ae96407571b49c6086be47907389dfc">OM_DATETIME</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a">OmDownloadCallback</a> )(void *, int, <a class="el" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21">OM_DOWNLOAD_STATUS</a>, int)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gaf50aebac280a26016da8522ee99bda24">OmDownloadChunkCallback</a> )(void *, int, void *, int, int)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#gaa654dad2b5e252a2e9dbce771f50445e">OmReaderHandle</a></td></tr>
 <tr><td colspan="2"><h2><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -231,9 +235,12 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__settings.html#ga5d2a39eb3c5643422c111dfd59f83913">OmGetAccelConfig</a> (int deviceId, int *rate, int *range)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__settings.html#gaa4c90687ee99a357b779765bbca7fe38">OmSetAccelConfig</a> (int deviceId, int rate, int range)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#ga71136c4df0b0b7260786ba56b84be447">OmSetDownloadCallback</a> (<a class="el" href="group__data__download.html#ga20f9c7f919e35790f68b71a3b78fab3a">OmDownloadCallback</a> downloadCallback, void *reference)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#ga90a45739fca8d2cf401bf8cc899f33af">OmSetDownloadChunkCallback</a> (<a class="el" href="group__data__download.html#gaf50aebac280a26016da8522ee99bda24">OmDownloadChunkCallback</a> downloadChunkCallback, void *reference)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#ga343b5499a74fb06bda84219dc04b8dba">OmGetDataFileSize</a> (int deviceId)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gadb64e00f11fda4b30a97bb510b3aab25">OmGetDataFilename</a> (int deviceId, char *filenameBuffer)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gad5bbce264a2594ba35fc0e661502a9c3">OmGetDataRange</a> (int deviceId, int *dataBlockSize, int *dataOffsetBlocks, int *dataNumBlocks, <a class="el" href="group__datetime.html#ga5ae96407571b49c6086be47907389dfc">OM_DATETIME</a> *startTime, <a class="el" href="group__datetime.html#ga5ae96407571b49c6086be47907389dfc">OM_DATETIME</a> *endTime)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gae54cabf652b35f5be06f05914932614a">OmBeginDownloading</a> (int deviceId, int dataOffsetBlocks, int dataLengthBlocks, const char *destinationFile)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gaa272613cc8a6a4f4967f00a93e00cb57">OmBeginDownloadingReference</a> (int deviceId, int dataOffsetBlocks, int dataLengthBlocks, const char *destinationFile, void *reference)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#gaf312777c61b1b6c0e0147d214dff029b">OmQueryDownload</a> (int deviceId, <a class="el" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21">OM_DOWNLOAD_STATUS</a> *downloadStatus, int *downloadValue)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#ga6396b56db08ff1604b457224717aea36">OmWaitForDownload</a> (int deviceId, <a class="el" href="group__data__download.html#gad6aad80d6e8baf74924dd57569266f21">OM_DOWNLOAD_STATUS</a> *downloadStatus, int *downloadValue)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__data__download.html#ga0bc6e0477c417c3bb5e3bb51744fb24d">OmCancelDownload</a> (int deviceId)</td></tr>
@@ -254,7 +261,7 @@ Functions</h2></td></tr>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Open Movement API. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Dan Jackson </dd></dl>
-<dl class="version"><dt><b>Version:</b></dt><dd>1.3 </dd></dl>
+<dl class="version"><dt><b>Version:</b></dt><dd>1.4.0 </dd></dl>
 <dl class="date"><dt><b>Date:</b></dt><dd>2011-2012 </dd></dl>
 <dl class="copyright"><dt><b>Copyright:</b></dt><dd>BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.</dd></dl>
 <p>Open Movement API header file.</p>
@@ -290,7 +297,7 @@ Functions</h2></td></tr>
 </div>
 
 
-    <li class="footer"><!-- Generated on Mon Apr 16 2012 03:50:24 for OMAPI by -->
+    <li class="footer"><!-- Generated on Wed Aug 15 2012 13:49:57 for OMAPI by -->
     <a href="http://www.doxygen.org/index.html">doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>

@@ -140,36 +140,40 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00051"></a>00051 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="main_8c.html#a225542f6ca1f8158933f2a7897ad0339">test_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
 <a name="l00052"></a>00052 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="deploy_8c.html#a03da84c739457d4a2b4010949a7112c0">deploy_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
 <a name="l00053"></a>00053 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="download_8c.html#af20e4a348fe763ccfdd605226953c05a">download_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
-<a name="l00054"></a>00054 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="clear_8c.html#a225c7bfb647a998ec4ac872905b50729">clear_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
-<a name="l00055"></a>00055 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="convert_8c.html#a774f0e070f242052e6f2fb05e6e60475">convert_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
-<a name="l00056"></a>00056 
-<a name="l00057"></a>00057 
-<a name="l00058"></a>00058 <span class="comment">/* Main function just chains to the required example code */</span>
-<a name="l00059"></a><a class="code" href="main_8c.html#a0ddf1224851353fc92bfbff6f499fa97">00059</a> <span class="keywordtype">int</span> <a class="code" href="main_8c.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])
-<a name="l00060"></a>00060 {
-<a name="l00061"></a>00061     <span class="keywordtype">int</span> ret;
-<a name="l00062"></a>00062 
-<a name="l00063"></a>00063     printf(<span class="stringliteral">&quot;OMAPI Example Code Command Line Interface\n&quot;</span>);
-<a name="l00064"></a>00064     printf(<span class="stringliteral">&quot;\n&quot;</span>);
-<a name="l00065"></a>00065 
-<a name="l00066"></a>00066     <span class="keywordflow">if</span>      (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;test&quot;</span>  ))   { ret =     <a class="code" href="main_8c.html#a225542f6ca1f8158933f2a7897ad0339">test_main</a>(argc - 1, argv + 1); }
-<a name="l00067"></a>00067     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;deploy&quot;</span>))   { ret =   <a class="code" href="deploy_8c.html#a03da84c739457d4a2b4010949a7112c0">deploy_main</a>(argc - 1, argv + 1); }
-<a name="l00068"></a>00068     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;download&quot;</span>)) { ret = <a class="code" href="download_8c.html#af20e4a348fe763ccfdd605226953c05a">download_main</a>(argc - 1, argv + 1); }
-<a name="l00069"></a>00069     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;clear&quot;</span>))    { ret =    <a class="code" href="clear_8c.html#a225c7bfb647a998ec4ac872905b50729">clear_main</a>(argc - 1, argv + 1); }
-<a name="l00070"></a>00070     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;convert&quot;</span>))  { ret =  <a class="code" href="convert_8c.html#a774f0e070f242052e6f2fb05e6e60475">convert_main</a>(argc - 1, argv + 1); }
-<a name="l00071"></a>00071     <span class="keywordflow">else</span>
-<a name="l00072"></a>00072     {
-<a name="l00073"></a>00073         printf(<span class="stringliteral">&quot;Usage: omapi &lt;test|deploy|download|clear|convert&gt; [parameters...]\n&quot;</span>);
-<a name="l00074"></a>00074         printf(<span class="stringliteral">&quot;\n&quot;</span>);
-<a name="l00075"></a>00075         ret = -1;
-<a name="l00076"></a>00076     }
-<a name="l00077"></a>00077 
-<a name="l00078"></a>00078 <span class="preprocessor">#if defined(_WIN32) &amp;&amp; defined(_DEBUG)</span>
-<a name="l00079"></a>00079 <span class="preprocessor"></span>    <span class="keywordflow">if</span> (IsDebuggerPresent()) { fprintf(stderr, <span class="stringliteral">&quot;Press [enter] to exit...&quot;</span>); getc(stdin); }
-<a name="l00080"></a>00080 <span class="preprocessor">#endif</span>
-<a name="l00081"></a>00081 <span class="preprocessor"></span>
-<a name="l00082"></a>00082     <span class="keywordflow">return</span> ret;
-<a name="l00083"></a>00083 }
+<a name="l00054"></a>00054 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="downloadmem_8c.html#ae957fad2ffc9485572808af164827772">downloadmem_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
+<a name="l00055"></a>00055 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="clear_8c.html#a225c7bfb647a998ec4ac872905b50729">clear_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
+<a name="l00056"></a>00056 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="convert_8c.html#a774f0e070f242052e6f2fb05e6e60475">convert_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
+<a name="l00057"></a>00057 <span class="keyword">extern</span> <span class="keywordtype">int</span> <a class="code" href="main_8c.html#a3648b96888a861a4f0f61a7691cbda8f">verify_main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]);
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060 <span class="comment">/* Main function just chains to the required example code */</span>
+<a name="l00061"></a><a class="code" href="main_8c.html#a0ddf1224851353fc92bfbff6f499fa97">00061</a> <span class="keywordtype">int</span> <a class="code" href="main_8c.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])
+<a name="l00062"></a>00062 {
+<a name="l00063"></a>00063     <span class="keywordtype">int</span> ret;
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065     fprintf(stderr, <span class="stringliteral">&quot;OMAPI Example Code Command Line Interface\n&quot;</span>);
+<a name="l00066"></a>00066     fprintf(stderr, <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068     <span class="keywordflow">if</span>      (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;test&quot;</span>  ))      { ret =     <a class="code" href="main_8c.html#a225542f6ca1f8158933f2a7897ad0339">test_main</a>(argc - 1, argv + 1); }
+<a name="l00069"></a>00069     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;deploy&quot;</span>))      { ret =   <a class="code" href="deploy_8c.html#a03da84c739457d4a2b4010949a7112c0">deploy_main</a>(argc - 1, argv + 1); }
+<a name="l00070"></a>00070     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;download&quot;</span>))    { ret = <a class="code" href="download_8c.html#af20e4a348fe763ccfdd605226953c05a">download_main</a>(argc - 1, argv + 1); }
+<a name="l00071"></a>00071     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;downloadmem&quot;</span>)) { ret = <a class="code" href="downloadmem_8c.html#ae957fad2ffc9485572808af164827772">downloadmem_main</a>(argc - 1, argv + 1); }
+<a name="l00072"></a>00072     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;clear&quot;</span>))       { ret =    <a class="code" href="clear_8c.html#a225c7bfb647a998ec4ac872905b50729">clear_main</a>(argc - 1, argv + 1); }
+<a name="l00073"></a>00073     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;convert&quot;</span>))     { ret =  <a class="code" href="convert_8c.html#a774f0e070f242052e6f2fb05e6e60475">convert_main</a>(argc - 1, argv + 1); }
+<a name="l00074"></a>00074     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argc &gt; 1 &amp;&amp; !strcmp(argv[1], <span class="stringliteral">&quot;verify&quot;</span>))      { ret =   <a class="code" href="main_8c.html#a3648b96888a861a4f0f61a7691cbda8f">verify_main</a>(argc - 1, argv + 1); }
+<a name="l00075"></a>00075     <span class="keywordflow">else</span>
+<a name="l00076"></a>00076     {
+<a name="l00077"></a>00077         fprintf(stderr, <span class="stringliteral">&quot;Usage: omapi &lt;test|deploy|download|downloadmem|clear|convert|verify&gt; [parameters...]\n&quot;</span>);
+<a name="l00078"></a>00078         fprintf(stderr, <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00079"></a>00079         ret = -1;
+<a name="l00080"></a>00080     }
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082 <span class="preprocessor">#if defined(_WIN32) &amp;&amp; defined(_DEBUG)</span>
+<a name="l00083"></a>00083 <span class="preprocessor"></span>    <span class="keywordflow">if</span> (IsDebuggerPresent()) { fprintf(stderr, <span class="stringliteral">&quot;Press [enter] to exit...&quot;</span>); getc(stdin); }
+<a name="l00084"></a>00084 <span class="preprocessor">#endif</span>
+<a name="l00085"></a>00085 <span class="preprocessor"></span>
+<a name="l00086"></a>00086     <span class="keywordflow">return</span> ret;
+<a name="l00087"></a>00087 }
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
@@ -190,7 +194,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 
 
-    <li class="footer"><!-- Generated on Mon Apr 16 2012 03:50:24 for OMAPI by -->
+    <li class="footer"><!-- Generated on Wed Aug 15 2012 13:49:57 for OMAPI by -->
     <a href="http://www.doxygen.org/index.html">doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>

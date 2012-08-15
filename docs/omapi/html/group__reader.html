@@ -91,6 +91,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Data Structures</a> &#124;
+<a href="#define-members">Defines</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
@@ -105,6 +106,11 @@ Data Structures</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal structure of a binary file header block.  <a href="struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html#details">More...</a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html">OM_READER_DATA_PACKET</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal structure of a binary file data block.  <a href="struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#details">More...</a><br/></td></tr>
+<tr><td colspan="2"><h2><a name="define-members"></a>
+Defines</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#ga91431a82b92815e066bfc153ebd9ee1c">OM_MAX_SAMPLES</a>&#160;&#160;&#160;(120)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#ga678fc8001dfae42455b2dd0294b8b260">OM_MAX_HEADER_SIZE</a>&#160;&#160;&#160;(2 * 512)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#gab51fd948a8a15161f98d43421c9147ec">OM_MAX_DATA_SIZE</a>&#160;&#160;&#160;(512)</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__reader.html#gaa654dad2b5e252a2e9dbce771f50445e">OmReaderHandle</a></td></tr>
@@ -134,6 +140,61 @@ Functions</h2></td></tr>
 <p>The file is read in blocks by repeatedly calling <a class="el" href="group__reader.html#ga1f48311f47268ee9532cbe9961bbcf18" title="Reads the next block of data from the binary file.">OmReaderNextBlock()</a>, and the unpacked data is accessed through <a class="el" href="group__reader.html#ga68ef443d4bad40afb7f52bc9f5bb0f71" title="Obtains a pointer to the buffer of samples read, and unpacked, by OmReaderNextBlock().">OmReaderBuffer()</a>, and the precise sample timestamps are interpolated with <a class="el" href="group__reader.html#gab8ee286a10180901a40d65647c2735e5" title="Determines the timestamp of the specified sample in the buffer read by OmReaderNextBlock().">OmReaderTimestamp()</a>.</p>
 <p>Advanced uses are supported with direct access to the buffer through <a class="el" href="group__reader.html#ga616368cf0b2303d56d7c1406e7aaff47" title="Accesses the contents of a raw header packet.">OmReaderRawHeaderPacket()</a> and <a class="el" href="group__reader.html#ga8ab9d544730fc97372a1b9dee3f5409e" title="Accesses the contents of a raw data packet.">OmReaderRawDataPacket()</a>.</p>
 <dl class="see"><dt><b>See also:</b></dt><dd>Example code <a class="el" href="convert_8c.html" title="Open Movement API Example: Convert a binary data file to a CSV text file.">convert.c</a>, for an example of how to use the binary file <a class="el" href="group__reader.html" title="Functions to read a binary data file.">Binary data file reader</a> functions of the API. </dd></dl>
+<hr/><h2>Define Documentation</h2>
+<a class="anchor" id="gab51fd948a8a15161f98d43421c9147ec"></a><!-- doxytag: member="omapi.h::OM_MAX_DATA_SIZE" ref="gab51fd948a8a15161f98d43421c9147ec" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OM_MAX_DATA_SIZE&#160;&#160;&#160;(512)</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Macro for the maximum number of bytes in a data packet. </p>
+<dl class="since"><dt><b>Since:</b></dt><dd>1.3.1 </dd></dl>
+
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01098">1098</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ga678fc8001dfae42455b2dd0294b8b260"></a><!-- doxytag: member="omapi.h::OM_MAX_HEADER_SIZE" ref="ga678fc8001dfae42455b2dd0294b8b260" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OM_MAX_HEADER_SIZE&#160;&#160;&#160;(2 * 512)</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Macro for the maximum number of bytes in a header packet. </p>
+<dl class="since"><dt><b>Since:</b></dt><dd>1.3.1 </dd></dl>
+
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01091">1091</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ga91431a82b92815e066bfc153ebd9ee1c"></a><!-- doxytag: member="omapi.h::OM_MAX_SAMPLES" ref="ga91431a82b92815e066bfc153ebd9ee1c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OM_MAX_SAMPLES&#160;&#160;&#160;(120)</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Macro for the maximum number of samples in a block. </p>
+<dl class="since"><dt><b>Since:</b></dt><dd>1.3.1 </dd></dl>
+
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01084">1084</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+
+</div>
+</div>
 <hr/><h2>Typedef Documentation</h2>
 <a class="anchor" id="gaa654dad2b5e252a2e9dbce771f50445e"></a><!-- doxytag: member="omapi.h::OmReaderHandle" ref="gaa654dad2b5e252a2e9dbce771f50445e" args="" -->
 <div class="memitem">
@@ -150,7 +211,7 @@ Functions</h2></td></tr>
 <p>Obtained by calling <a class="el" href="group__reader.html#gafe29bdb2bf78d31ae1f75f7bc0ac542d" title="Opens a binary data file for reading.">OmReaderOpen()</a>, and disposed of with <a class="el" href="group__reader.html#ga5b18b5c1ece6d59735788465c9731a59" title="Closes the specified reader handle.">OmReaderClose()</a>. </p>
 <dl class="see"><dt><b>See also:</b></dt><dd><a class="el" href="group__reader.html#gafe29bdb2bf78d31ae1f75f7bc0ac542d" title="Opens a binary data file for reading.">OmReaderOpen()</a>, <a class="el" href="group__reader.html#ga5b18b5c1ece6d59735788465c9731a59" title="Closes the specified reader handle.">OmReaderClose()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01027">1027</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01077">1077</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -181,7 +242,7 @@ Functions</h2></td></tr>
 </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="omapi_8h_source.html#l01124">1124</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
+<p>Definition at line <a class="el" href="omapi_8h_source.html#l01195">1195</a> of file <a class="el" href="omapi_8h_source.html">omapi.h</a>.</p>
 
 </div>
 </div>
@@ -635,7 +696,7 @@ Functions</h2></td></tr>
 </div>
 
 
-    <li class="footer"><!-- Generated on Mon Apr 16 2012 03:50:24 for OMAPI by -->
+    <li class="footer"><!-- Generated on Wed Aug 15 2012 13:49:57 for OMAPI by -->
     <a href="http://www.doxygen.org/index.html">doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>

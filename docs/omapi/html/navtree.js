@@ -16,6 +16,7 @@ var NAVTREE =
       [ "Binary data file reader", "group__reader.html", null ]
     ] ],
     [ "Data Structures", "annotated.html", [
+      [ "downloadStatus_t", "structdownload_status__t.html", null ],
       [ "OM_READER_DATA_PACKET", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html", null ],
       [ "OM_READER_HEADER_PACKET", "struct_o_m___r_e_a_d_e_r___h_e_a_d_e_r___p_a_c_k_e_t.html", null ]
     ] ],
@@ -26,9 +27,11 @@ var NAVTREE =
       [ "convert.c", "convert_8c.html", null ],
       [ "deploy.c", "deploy_8c.html", null ],
       [ "download.c", "download_8c.html", null ],
+      [ "downloadmem.c", "downloadmem_8c.html", null ],
       [ "main.c", "main_8c.html", null ],
       [ "omapi.h", "omapi_8h.html", null ],
-      [ "test.c", "test_8c.html", null ]
+      [ "test.c", "test_8c.html", null ],
+      [ "verify.c", "verify_8c.html", null ]
     ] ],
     [ "Globals", "globals.html", null ]
   ] ]
