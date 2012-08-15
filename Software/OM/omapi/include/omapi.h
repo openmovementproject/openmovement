@@ -224,7 +224,7 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 103
+#define OM_VERSION 104
 
 
 /**
