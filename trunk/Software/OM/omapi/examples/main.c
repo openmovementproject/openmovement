@@ -51,6 +51,7 @@
 extern int test_main(int argc, char *argv[]);
 extern int deploy_main(int argc, char *argv[]);
 extern int download_main(int argc, char *argv[]);
+extern int downloadmem_main(int argc, char *argv[]);
 extern int clear_main(int argc, char *argv[]);
 extern int convert_main(int argc, char *argv[]);
 extern int verify_main(int argc, char *argv[]);
@@ -64,15 +65,16 @@ int main(int argc, char *argv[])
     fprintf(stderr, "OMAPI Example Code Command Line Interface\n");
     fprintf(stderr, "\n");
 
-    if      (argc > 1 && !strcmp(argv[1], "test"  ))   { ret =     test_main(argc - 1, argv + 1); }
-    else if (argc > 1 && !strcmp(argv[1], "deploy"))   { ret =   deploy_main(argc - 1, argv + 1); }
-    else if (argc > 1 && !strcmp(argv[1], "download")) { ret = download_main(argc - 1, argv + 1); }
-    else if (argc > 1 && !strcmp(argv[1], "clear"))    { ret =    clear_main(argc - 1, argv + 1); }
-    else if (argc > 1 && !strcmp(argv[1], "convert"))  { ret =  convert_main(argc - 1, argv + 1); }
-    else if (argc > 1 && !strcmp(argv[1], "verify"))   { ret =   verify_main(argc - 1, argv + 1); }
+    if      (argc > 1 && !strcmp(argv[1], "test"  ))      { ret =     test_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "deploy"))      { ret =   deploy_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "download"))    { ret = download_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "downloadmem")) { ret = downloadmem_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "clear"))       { ret =    clear_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "convert"))     { ret =  convert_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "verify"))      { ret =   verify_main(argc - 1, argv + 1); }
     else
     {
-        fprintf(stderr, "Usage: omapi <test|deploy|download|clear|convert|verify> [parameters...]\n");
+        fprintf(stderr, "Usage: omapi <test|deploy|download|downloadmem|clear|convert|verify> [parameters...]\n");
         fprintf(stderr, "\n");
         ret = -1;
     }

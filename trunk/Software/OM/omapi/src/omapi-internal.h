@@ -166,6 +166,8 @@ typedef struct
     int downloadBlocksTotal;            /**< Number of blocks to copy */
     int downloadBlocksCopied;           /**< Number of blocks already copied */
     thread_t downloadThread;            /**< Download thread */
+
+    void *downloadReference;            /**< Download reference to callbacks (if NULL, the reference given when registering the callbacks will be used instead) */
 } OmDeviceState;
 
 
@@ -188,6 +190,8 @@ typedef struct
     void *deviceCallbackReference;      /**< User-supplied reference that will be passed to the device callback. */
     OmDownloadCallback downloadCallback;/**< User-supplied callback for download status changes. */
     void *downloadCallbackReference;    /**< User-supplied reference that will be passed to the download callback. */
+    OmDownloadChunkCallback downloadChunkCallback; /**< User-supplied callback for download chunks. */
+    void *downloadChunkCallbackReference;   /**< User-supplied reference that will be passed to the download chunk callback. */
 
     // Device discovery
 #ifndef _WIN32

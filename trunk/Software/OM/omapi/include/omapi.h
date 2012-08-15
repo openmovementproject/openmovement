@@ -28,7 +28,7 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.3.1
+ *  @version   1.4.0
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -46,7 +46,7 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.3.1
+ *  @version   1.4.0
  *  @date      2011-2012
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -814,12 +814,41 @@ typedef void(*OmDownloadCallback)(void *, int, OM_DOWNLOAD_STATUS, int);
 
 
 /**
+ * Download chunk callback function type.
+ * Called for download chunks.
+ * Callback functions take a user-defined reference pointer, a device ID, a buffer pointer, a file position and a buffer size.
+ * @see OmSetDownloadCallback
+ * @since 1.4
+ */
+typedef void(*OmDownloadChunkCallback)(void *, int, void *, int, int);
+
+
+/**
  * Sets the callback function that is called for download progress, completion, cancellation, or failure.
  * @param downloadCallback The function to call on download activity, or \a NULL to remove the callback.
  * @param[in] reference  A user-defined reference to pass to the callback function (or \a NULL if unwanted).
  * @return \a OM_OK if successful, an error code otherwise.
  */
 OM_EXPORT int OmSetDownloadCallback(OmDownloadCallback downloadCallback, void *reference);
+
+
+/**
+ * Sets the chunk callback function that is called when a new download chunk is received.
+ * @param downloadChunkCallback The function to call on download activity, or \a NULL to remove the callback.
+ * @param[in] reference  A user-defined reference to pass to the callback function (or \a NULL if unwanted).
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @since 1.4
+ */
+OM_EXPORT int OmSetDownloadChunkCallback(OmDownloadChunkCallback downloadChunkCallback, void *reference);
+
+
+/**
+ * Return the data file size of the specified device.
+ * @param deviceId Identifier of the device.
+ * @see OmBeginDownloading()
+ * @since 1.4
+ */
+OM_EXPORT int OmGetDataFileSize(int deviceId);
 
 
 /**
@@ -853,10 +882,30 @@ OM_EXPORT int OmGetDataRange(int deviceId, int *dataBlockSize, int *dataOffsetBl
  * @param dataOffsetBlocks Start offset of the download (in blocks), typically 0.
  * @param dataLengthBlocks Length of the data to download (in blocks), -1 = all.
  * @param destinationFile File to write to (will truncate any existing file).  
+ *        If NULL, will read the file but not write to a file -- this can be used in 
+ *        conjunction with the OmSetDownloadChunkCallback() so the application can stream the data to another location.
  * @return \a OM_OK if successfully started the download, an error code otherwise.
- * @see OmSetDownloadCallback(), OmWaitForDownload(), OmCancelDownload()
+ * @see OmSetDownloadCallback(), OmSetDownloadChunkCallback(), OmWaitForDownload(), OmCancelDownload()
  */
 OM_EXPORT int OmBeginDownloading(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, const char *destinationFile);
+
+
+/**
+ * Begin downloading the data from the current device, passing an additional reference.
+ * Once the download has successfully started, the call returns immediately, and the download continues in another thread.
+ * The user-specified download callback is called to notify the user about download progress, completion, cancellation, or failure.  
+ * @param deviceId Identifier of the device.
+ * @param dataOffsetBlocks Start offset of the download (in blocks), typically 0.
+ * @param dataLengthBlocks Length of the data to download (in blocks), -1 = all.
+ * @param destinationFile File to write to (will truncate any existing file).  
+ *        If NULL, will read the file but not write to a file -- this can be used in 
+ *        conjunction with the OmSetDownloadChunkCallback() so the application can stream the data to another location.
+ * @param reference An additional reference to pass to the download callbacks -- if NULL, the reference given when registering the callback will be used instead.
+ * @return \a OM_OK if successfully started the download, an error code otherwise.
+ * @see OmBeginDownloading(), OmSetDownloadCallback(), OmSetDownloadChunkCallback(), OmWaitForDownload(), OmCancelDownload()
+ * @since 1.4
+ */
+OM_EXPORT int OmBeginDownloadingReference(int deviceId, int dataOffsetBlocks, int dataLengthBlocks, const char *destinationFile, void *reference);
 
 
 /**
