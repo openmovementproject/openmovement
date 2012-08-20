@@ -5,7 +5,7 @@ CC=gcc
 all: build
 
 build: Makefile waxrec.c
-	$(CC) -o waxrec waxrec.c
+	$(CC) -o waxrec waxrec.c -lpthread
 
 clean:
-	rm -f waxrec.o core
+	rm -f *.o core

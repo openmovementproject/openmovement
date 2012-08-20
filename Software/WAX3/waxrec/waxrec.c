@@ -39,49 +39,95 @@
 
 
 //#define POLL_RECV     // STOMP poll receive
+#define THREAD_RECEIVE_KEYS
+#define THREAD_RECEIVE_UDP
 
 
 /* Cross-platform alternatives */
 #ifdef _WIN32
 
-#define _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_DEPRECATE
-#include <windows.h>
-#include <winsock.h>
-#include <io.h>
-#define _POSIX_
-typedef int socklen_t;
-#define strcasecmp _stricmp
-#define usleep(_t) Sleep((DWORD)((_t) / 1000))
-#pragma warning( disable : 4996 )    /* allow deprecated POSIX name functions */
-#pragma comment(lib, "wsock32")
+    /* Defines and headers */
+    #define _CRT_SECURE_NO_WARNINGS
+    #define _CRT_SECURE_NO_DEPRECATE
+    #include <windows.h>
+    #include <io.h>
+    
+    /* Strings */
+    #define strcasecmp _stricmp
+    #define snprintf _snprintf    
 
-/* Setup API / USB IDs */
-#include <setupapi.h>
-#include <cfgmgr32.h>
-#pragma comment(lib, "setupapi.lib")
-#define DEFAULT_VID 0x04D8           /* USB Vendor ID  */
-#define DEFAULT_PID 0x000A           /* USB Product ID */
+    /* Sleep */
+    #define sleep(seconds) Sleep(seconds * 1000UL)
+    #define usleep(microseconds) Sleep(microseconds / 1000UL)
+
+    /* Time */
+    #define gmtime_r(timer, result) gmtime_s(result, timer)
+    #define timegm _mkgmtime
+
+    /* Socket */
+    #include <winsock.h>
+    #define _POSIX_
+    typedef int socklen_t;
+    #pragma warning( disable : 4996 )    /* allow deprecated POSIX name functions */
+    #pragma comment(lib, "wsock32")
+    
+    /* Thread */
+	#define thread_t HANDLE
+    #define thread_create(thread, attr_ignored, start_routine, arg) ((*(thread) = CreateThread(attr_ignored, 0, start_routine, arg, 0, NULL)) == NULL)
+    #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((*thread), INFINITE) != WAIT_OBJECT_0)
+    #define thread_cancel(thread) (TerminateThread(*(thread), -1) == 0)
+    #define thread_return_t DWORD WINAPI
+    #define thread_return_value(value) ((unsigned int)(value))
+
+    /* Mutex */
+	#define mutex_t HANDLE
+    #define mutex_init(mutex, attr_ignored) ((*(mutex) = CreateMutex(attr_ignored, FALSE, NULL)) == NULL)
+    #define mutex_lock(mutex) (WaitForSingleObject(*(mutex), INFINITE) != WAIT_OBJECT_0)
+    #define mutex_unlock(mutex) (ReleaseMutex(*(mutex)) == 0)
+    #define mutex_destroy(mutex) (CloseHandle(*(mutex)) == 0)
+
+    /* Device discovery */
+    #include <setupapi.h>
+    #include <cfgmgr32.h>
+    #pragma comment(lib, "setupapi.lib")
+    #pragma comment(lib, "advapi32.lib")    /* For RegQueryValueEx() */
 
 #else
 
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <termios.h>
-typedef int SOCKET;
-#define SOCKET_ERROR (-1)
-#define closesocket close
-#define ioctlsocket ioctl
-#ifdef POLL_RECV
-enum { WSAEWOULDBLOCK = EWOULDBLOCK, };
-static int WSAGetLastError() { return errno; }
-#endif
+    /* Sockets */
+    #include <unistd.h>
+    #include <sys/wait.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <netdb.h>
+    #include <termios.h>
+    typedef int SOCKET;
+    #define SOCKET_ERROR (-1)
+    #define closesocket close
+    #define ioctlsocket ioctl
+    #ifdef POLL_RECV
+        enum { WSAEWOULDBLOCK = EWOULDBLOCK, };
+        static int WSAGetLastError() { return errno; }
+    #endif
 
+    /* Thread */
+    #include <pthread.h>
+    #define thread_t      pthread_t
+    #define thread_create pthread_create
+    #define thread_join   pthread_join
+    #define thread_cancel pthread_cancel
+    typedef void *        thread_return_t;
+    #define thread_return_value(value_ignored) ((value_ignored), NULL)
+
+    /* Mutex */
+	#define mutex_t       pthread_mutex_t
+    #define mutex_init    pthread_mutex_init
+    #define mutex_lock    pthread_mutex_lock
+    #define mutex_unlock  pthread_mutex_unlock
+    #define mutex_destroy pthread_mutex_destroy
+    
 #endif
 
 
@@ -93,6 +139,11 @@ static int WSAGetLastError() { return errno; }
 #include <fcntl.h>
 #include <time.h>
 #include <sys/timeb.h>
+
+
+/* USB IDs */
+#define DEFAULT_VID 0x04D8           /* USB Vendor ID  */
+#define DEFAULT_PID 0x000A           /* USB Product ID */
 
 
 /* WAX structures */
@@ -291,7 +342,7 @@ static SOCKET opentcpsocket(const char *host, int defaultPort)
     }
   }
 
-  // Connect
+  /* Connect */
   if (connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
   {
     fprintf(stderr, "ERROR: Socket connect failed (%s)\n", strerrorsocket());
@@ -829,7 +880,6 @@ const char *timestamp(unsigned long long ticks, int timeformat)
     return output;
 }
 
-
 /* Dumps a WAX packet */
 void waxDump(WaxPacket *waxPacket, char tee, int timeformat)
 {
@@ -966,7 +1016,7 @@ int openport(const char *infile, char writeable)
         fd = open(infile, flags);
         if (fd < 0)
         {
-            fprintf(stderr, "ERROR: Problem opening input: %s\n", infile);
+            fprintf(stderr, "ERROR: Problem opening input: '%s'\n", infile);
             return -1;
         }
 
@@ -1106,7 +1156,7 @@ int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t buffe
                         if ((RegQueryValueExA(hDeviceKey, "PortName", NULL, &dwType, (LPBYTE)portName, &dwSize) == ERROR_SUCCESS) && (dwType == REG_SZ))
                         {
                             /* TODO: snprintf with (bufferSize - pos) */
-                            pos += sprintf(buffer + pos, "\\\\.\\%s\n", portName);
+                            pos += sprintf(buffer + pos, "\\\\.\\%s", portName);
                             *(buffer + ++pos) = '\0';
 
                             count++;
@@ -1127,9 +1177,183 @@ int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t buffe
 
 
 
+#ifdef THREAD_RECEIVE_KEYS
+
+static thread_t threadReceiveKeys;
+static char quitReceiveKeys = 0;
+static int receiveKeysFD = 0;
+
+thread_return_t ReceiveKeysThread(void *arg)
+{
+    fprintf(stderr, "KEYLISTEN: Start\n");
+#if 0
+    {
+        FILE *fp = fdopen(receiveKeysFD, "r+");
+        while (!quitReceiveKeys)
+        {
+            char line[1024];
+            if (fgets(line, sizeof(line), fp) == NULL) { break; }
+            fprintf(stderr, "<\"%s\">", line);
+            //fwrite(line, 1, strlen(line), fp);
+            write(receiveKeysFD, line, strlen(line));
+        }
+        fclose(fp);
+    }
+#else
+    while (!quitReceiveKeys)
+    {
+        int ch = getc(stdin);
+        char c;
+        if (ch == EOF) { break; }
+        c = (char)ch;
+        fprintf(stderr, "<%c>", c);
+        if (receiveKeysFD != 0)
+        {
+            write(receiveKeysFD, &c, 1);
+        }
+    }
+#endif        
+    fprintf(stderr, "KEYLISTEN: Stop\n");
+    return thread_return_value(0);
+}
+
+void ReceiveKeysStart(void)
+{
+    quitReceiveKeys = 0;
+    thread_create(&threadReceiveKeys, NULL, ReceiveKeysThread, NULL);
+}
+
+void ReceiveKeysStop(void)
+{
+    quitReceiveKeys = 1;
+    /* thread_join(&threadReceiveKeys, NULL); */
+    thread_cancel(&threadReceiveKeys);
+}
+
+#endif
+
+
+#ifdef THREAD_RECEIVE_UDP
+
+static thread_t threadReceiveUdp;
+static char quitReceiveUdp = 0;
+static int receiveUdpFD = 0;
+static int receiveUdpPort = 0;
+
+
+thread_return_t ReceiveUdpThread(void *arg)
+{
+    char serverName[64] = "localhost";
+    struct sockaddr_in serverAddr;
+    SOCKET serverSocket = SOCKET_ERROR;
+    const int recvMaxLength = 65535;
+    unsigned char *recvBuffer;
+    int recvLength = 0;
+    struct hostent *hp;
+
+    fprintf(stderr, "UDPRECV: Start\n");
+    recvBuffer = (char *)malloc(recvMaxLength + 2);
+
+    /* Get server host information, name and inet address */
+    gethostname(serverName, 64);
+    hp = gethostbyname(serverName);
+    memcpy(&(serverAddr.sin_addr), hp->h_addr, hp->h_length);
+    serverAddr.sin_family = AF_INET; 
+    serverAddr.sin_port = htons(receiveUdpPort);
+    fprintf(stderr, "UDPRECV: Address: [%s] = %s : %d\n", hp->h_name, inet_ntoa(serverAddr.sin_addr), receiveUdpPort);
+    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    
+    /* Create the socket */
+    serverSocket = socket(AF_INET, SOCK_DGRAM, 0); 
+    if (serverSocket < 0)
+    {
+        fprintf(stderr, "UDPRECV: ERROR: Socket creation failed (%s)\n", strerrorsocket());
+        return thread_return_value(0);
+    }
+    
+    /* Allow rapid reuse of this socket */
+    {
+        int option = 1;
+        setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option));
+    }
+    
+    /* Bind the socket */
+    if (bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+    {
+        fprintf(stderr, "UDPRECV: ERROR: Socket bind failed (%s)\n", strerrorsocket());
+        return thread_return_value(0);
+    }
+
+    while (!quitReceiveUdp)
+    {
+        struct sockaddr_in from;
+        int fromlen = sizeof(from);
+        int recvLength;
+        
+        fprintf(stderr, "UDPRECV: Listening...\n");
+        recvLength = recvfrom(serverSocket, (char *)recvBuffer, recvMaxLength, 0, (struct sockaddr *)&from, &fromlen);
+        
+        if (recvLength == 0 || recvLength == SOCKET_ERROR)
+        {
+            fprintf(stderr, "UDPRECV: ERROR: Receive failed (%s)\n", strerrorsocket());
+            return thread_return_value(0);
+        }
+        
+        fprintf(stderr, "UDPRECV: Received from %s:%d\n", inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+
+        /* Check if it appears to be an OSC bundle or OSC packet... */
+        if (recvLength >= 1 && recvBuffer[0] == '/')
+        {
+            fprintf(stderr, "WARNING: OSC packet receive not yet implemented.\n");
+            //if (dump) { hexdump(recvBuffer, recvLength); }
+        }
+        else if (recvLength >= 1 && recvBuffer[0] == '#')
+        {
+            fprintf(stderr, "WARNING: OSC bundle receive not yet implemented.\n");
+            //if (dump) { hexdump(recvBuffer, recvLength); }
+        }
+        else
+        {
+            /* Pass-through data */
+            //if (dump) { hexdump(recvBuffer, recvLength); }
+            if (receiveUdpFD != 0)
+            {
+                write(receiveUdpFD, recvBuffer, recvLength);
+            }
+        }
+
+    }
+
+    closesocket(serverSocket);
+    free(recvBuffer);
+
+    fprintf(stderr, "UDPRECV: End\n");
+
+    return thread_return_value(0);
+}
+
+void ReceiveUdpStart(int port)
+{
+    receiveUdpPort = port;
+    fprintf(stderr, "NOTE: Listening for UDP on port %d.\n", receiveUdpPort);
+    quitReceiveUdp = 0;
+    thread_create(&threadReceiveUdp, NULL, ReceiveUdpThread, NULL);
+}
+
+void ReceiveUdpStop(void)
+{
+    quitReceiveUdp = 1;
+    /* thread_join(&threadReceiveUdp, NULL); */
+    thread_cancel(&threadReceiveUdp);
+}
+
+#endif
+
+
+
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
-int waxrec(const char *infile, const char *host, const char *initString, char log, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, int timeformat)
+int waxrec(const char *infile, const char *host, const char *initString, char log, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, int udpReceivePort, int timeformat)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -1155,7 +1379,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
     }
     
     /* Open the serial port */
-    fd = openport(infile, (initString != NULL));
+    fd = openport(infile, 1);   // (initString != NULL)
     if (fd < 0)
     {
         fprintf(stderr, "ERROR: Port not open.\n");
@@ -1203,6 +1427,21 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
             {
                 fprintf(stderr, "DEBUG: Socket open: %s\n", host);
             }
+        }
+
+        /* Start receiver threads */
+#ifdef THREAD_RECEIVE_KEYS
+        receiveKeysFD = fd;
+        ReceiveKeysStart();
+#endif
+        if (udpReceivePort != 0)
+        {
+#ifdef THREAD_RECEIVE_UDP
+            receiveUdpFD = fd;
+            ReceiveUdpStart(udpReceivePort);
+#else
+            fprintf(stderr, "WARNING: UDP Receive not compiled in.\n");
+#endif
         }
 
         /* Read packets and transmit */
@@ -1344,6 +1583,14 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
             }
         }
 
+        /* Stop receiver threads */
+#ifdef THREAD_RECEIVE_KEYS
+        ReceiveKeysStop();
+#endif
+#ifdef THREAD_RECEIVE_UDP
+        ReceiveUdpStop();
+#endif
+        
         /* Close socket */
         if (s != SOCKET_ERROR) { closesocket(s); }
 
@@ -1375,12 +1622,13 @@ int main(int argc, char *argv[])
     const char *infile = NULL;
     const char *host = NULL;
     const char *initString = NULL;
-    static char stompHost[128] = ""; //"localhost";
+    static char stompHost[128] = ""; /* "localhost"; */
     static char stompAddress[128] = "/topic/OpenMovement.Sensor.Wax";
-	int timeformat = 2;
+    int udpReceivePort = 0;
+    int timeformat = 2;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.61     by Daniel Jackson, 2011-2012\n");
+    fprintf(stderr, "V1.71     by Daniel Jackson, 2011-2012\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -1421,6 +1669,10 @@ int main(int argc, char *argv[])
         {
             host = argv[++i];
         }
+        else if (strcasecmp(argv[i], "-udprecv") == 0)
+        {
+            udpReceivePort = atoi(argv[++i]);
+        }
         else if (strcasecmp(argv[i], "-stomphost") == 0)
         {
             strcpy(stompHost, argv[++i]);
@@ -1458,6 +1710,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "        [-osc <hostname>[:<port>] [-timetag]]  Send OSC to the specified host/port, time-tag.\n");
         fprintf(stderr, "        [-stomphost <hostname>[:<port>] [-stomptopic /topic/Topic]]  Send STOMP to the specified server.\n");
         fprintf(stderr, "        [-init <string> [-exit]]               Send initialzing string; immediately exit.\n");
+#ifdef THREAD_RECEIVE_UDP
+        fprintf(stderr, "        [-udprecv <port>]                      Receive UDP on the specified port.\n");
+#endif
 		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
         fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
         fprintf(stderr, "\n");
@@ -1472,14 +1727,15 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    fprintf(stderr, "WAXREC: %s -> %s%s%s%s%s %s%s\n", (infile == NULL) ? "<stdin>" : infile, host, (log ? " [log]" : ""), (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompHost, stompAddress);
+    fprintf(stderr, "WAXREC: %s -> %s%s%s%s%s %s%s  <-%d\n", (infile == NULL) ? "<stdin>" : infile, host, (log ? " [log]" : ""), (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompHost, stompAddress, udpReceivePort);
     fprintf(stderr, "INIT: %s\n", initString);
 
-    ret = waxrec(infile, host, initString, log, tee, dump, timetag, sendOnly, stompHost, stompAddress, timeformat);
+    ret = waxrec(infile, host, initString, log, tee, dump, timetag, sendOnly, stompHost, stompAddress, udpReceivePort, timeformat);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
 #endif
     return ret;
 }
+
 
