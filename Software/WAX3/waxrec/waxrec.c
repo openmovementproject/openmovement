@@ -805,27 +805,38 @@ unsigned long long TicksNow(void)
 
 
 /* Returns a date/time string for the specific number of milliseconds since the epoch */
-const char *timestamp(unsigned long long ticks)
+const char *timestamp(unsigned long long ticks, int timeformat)
 {
-    static char output[] = "YYYY-MM-DD HH:MM:SS.fff";
-    struct tm *today;
-    struct timeb tp = {0};
-    tp.time = (time_t)(ticks / 1000);
-    tp.millitm = (unsigned short)(ticks % 1000);
-    tzset();
-    today = localtime(&(tp.time));
-    sprintf(output, "%04d-%02d-%02d %02d:%02d:%02d.%03d", 1900 + today->tm_year, today->tm_mon + 1, today->tm_mday, today->tm_hour, today->tm_min, today->tm_sec, tp.millitm);
+	static char output[] = "00000000000.000,YYYY-MM-DD HH:MM:SS.fff";
+	output[0] = '\0';
+	if (timeformat & 1)
+	{
+		double t = ticks / 1000.0;
+		if (strlen(output) != 0) { strcat(output, ","); }
+		sprintf(output + strlen(output), "%.3f", t);
+	}
+	if (timeformat & 2)
+	{
+		struct tm *today;
+		struct timeb tp = {0};
+		tp.time = (time_t)(ticks / 1000);
+		tp.millitm = (unsigned short)(ticks % 1000);
+		tzset();
+		today = localtime(&(tp.time));
+		if (strlen(output) != 0) { strcat(output, ","); }
+		sprintf(output + strlen(output), "%04d-%02d-%02d %02d:%02d:%02d.%03d", 1900 + today->tm_year, today->tm_mon + 1, today->tm_mday, today->tm_hour, today->tm_min, today->tm_sec, tp.millitm);
+	}
     return output;
 }
 
 
 /* Dumps a WAX packet */
-void waxDump(WaxPacket *waxPacket, char tee)
+void waxDump(WaxPacket *waxPacket, char tee, int timeformat)
 {
     int i;
     for (i = 0; i < waxPacket->sampleCount; i++)
     {
-        const char *timeString = timestamp(waxPacket->samples[i].timestamp);
+        const char *timeString = timestamp(waxPacket->samples[i].timestamp, timeformat);
         printf("ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
         if (tee) fprintf(stderr, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
     }
@@ -834,13 +845,13 @@ void waxDump(WaxPacket *waxPacket, char tee)
 
 
 /* Dumps a TEDDI packet */
-void teddiDump(TeddiPacket *teddiPacket, char tee)
+void teddiDump(TeddiPacket *teddiPacket, char tee, int timeformat)
 {
     static char line[2048];
     static char number[16];
     int i;
 
-    sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestamp), teddiPacket->deviceId, teddiPacket->version, 
+    sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestamp, timeformat), teddiPacket->deviceId, teddiPacket->version, 
                                         teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent, 
                                         teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
     for (i = 0; i < teddiPacket->sampleCount; i++)
@@ -1118,7 +1129,7 @@ int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t buffe
 
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
-int waxrec(const char *infile, const char *host, const char *initString, char log, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress)
+int waxrec(const char *infile, const char *host, const char *initString, char log, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, int timeformat)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -1232,7 +1243,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                     if (waxPacket != NULL)
                     {
                         /* Output text version */
-                        if (log) { waxDump(waxPacket, tee); }
+                        if (log) { waxDump(waxPacket, tee, timeformat); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -1272,7 +1283,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                     if (teddiPacket != NULL)
                     {
                         /* Output text version */
-                        if (log) { teddiDump(teddiPacket, tee); }
+                        if (log) { teddiDump(teddiPacket, tee, timeformat); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -1366,9 +1377,10 @@ int main(int argc, char *argv[])
     const char *initString = NULL;
     static char stompHost[128] = ""; //"localhost";
     static char stompAddress[128] = "/topic/OpenMovement.Sensor.Wax";
+	int timeformat = 2;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.60     by Daniel Jackson, 2011-2012\n");
+    fprintf(stderr, "V1.61     by Daniel Jackson, 2011-2012\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -1417,6 +1429,10 @@ int main(int argc, char *argv[])
         {
             strcpy(stompAddress, argv[++i]);
         }
+        else if (strcasecmp(argv[i], "-t:none") == 0) { timeformat = 0; }
+        else if (strcasecmp(argv[i], "-t:secs") == 0) { timeformat = 1; }
+        else if (strcasecmp(argv[i], "-t:full") == 0) { timeformat = 2; }
+        else if (strcasecmp(argv[i], "-t:both") == 0) { timeformat = 3; }
         else if ((argv[i][0] != '-' || argv[i][0] == '\0') && argPosition == 0)
         {
             argPosition++;
@@ -1442,6 +1458,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "        [-osc <hostname>[:<port>] [-timetag]]  Send OSC to the specified host/port, time-tag.\n");
         fprintf(stderr, "        [-stomphost <hostname>[:<port>] [-stomptopic /topic/Topic]]  Send STOMP to the specified server.\n");
         fprintf(stderr, "        [-init <string> [-exit]]               Send initialzing string; immediately exit.\n");
+		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
         fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Log example: waxrec %s -log -tee -init \"MODE=1\\r\\n\" > log.csv\n", EXAMPLE_DEVICE);
@@ -1458,7 +1475,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "WAXREC: %s -> %s%s%s%s%s %s%s\n", (infile == NULL) ? "<stdin>" : infile, host, (log ? " [log]" : ""), (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompHost, stompAddress);
     fprintf(stderr, "INIT: %s\n", initString);
 
-    ret = waxrec(infile, host, initString, log, tee, dump, timetag, sendOnly, stompHost, stompAddress);
+    ret = waxrec(infile, host, initString, log, tee, dump, timetag, sendOnly, stompHost, stompAddress, timeformat);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
