@@ -521,6 +521,7 @@ int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
         case OM_VALUE_SAMPLERATE:       return dataPacket->sampleRate;
 
         // Cooked values
+        case OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3: return ((dataPacket->light + 512) * 6000 / 1024); // log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0)
         case OM_VALUE_TEMPERATURE_MC:   return (dataPacket->temperature * 150 - 20500);     // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
         case OM_VALUE_BATTERY_MV:       return ((dataPacket->battery + 512) * 6000 / 1024); // Conversion to millivolts:  Vref = 3V, Vbat = 6V * value / 1024
         case OM_VALUE_BATTERY_PERCENT:  return AdcBattToPercent(dataPacket->battery + 512); // Conversion to percentage

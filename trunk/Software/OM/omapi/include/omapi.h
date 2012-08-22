@@ -1199,12 +1199,13 @@ typedef enum
     OM_VALUE_SESSIONID = 4, 
     OM_VALUE_SEQUENCEID = 5, 
 /** \endcond */
-    OM_VALUE_LIGHT = 7,                 /**< Raw light sensor reading. Calculating Lux values on these devices does not make sense -- this raw reading should be used instead, and only as a per-device, relative, light measurement. */
+    OM_VALUE_LIGHT = 7,                 /**< Raw light sensor reading. */
 /** \cond */
     OM_VALUE_TEMPERATURE = 8,           
     OM_VALUE_EVENTS = 9, 
     OM_VALUE_BATTERY = 10, 
     OM_VALUE_SAMPLERATE = 11,
+    OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3 = 107, /**< log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0) */
 /** \endcond */
     OM_VALUE_TEMPERATURE_MC = 108,      /**< Temperature sensor reading in millicentigrade */
 /** \cond */
