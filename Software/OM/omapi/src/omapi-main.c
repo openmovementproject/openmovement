@@ -61,7 +61,7 @@ int OmStartup(int version)
 
     // Checks
     if (om.initialized) return OM_E_NOT_VALID_STATE;
-    if (version != OM_VERSION) return OM_E_FAIL;	// TODO: Better error code for any new version of the API
+    if ((version / 100 != OM_VERSION / 100) || (version % 100 > OM_VERSION % 100)) return OM_E_FAIL;	// TODO: Better error code for any new version of the API
 
     // Setup
     om.apiVersion = version;
