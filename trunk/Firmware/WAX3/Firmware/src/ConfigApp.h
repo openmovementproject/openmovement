@@ -58,7 +58,7 @@
 // coordinator. This definition cannot be defined with NWK_ROLE_END_DEVICE.
 #if (DEVICE_TYPE == 0)    // FFD - Full-function device
     #define NWK_ROLE_COORDINATOR
-#elif (DEVICE_TYPE == 1 || DEVICE_TYPE == 2 || DEVICE_TYPE == 3)      // RFD - Reduced-function device
+#elif (DEVICE_TYPE == 1 || DEVICE_TYPE == 2 || DEVICE_TYPE == 3 || DEVICE_TYPE == 4)      // RFD - Reduced-function device
     #define NWK_ROLE_END_DEVICE
 #else
     #error DEVICE_TYPE not valid.

@@ -67,7 +67,9 @@
 #include "USB/usb_function_cdc.h"
 //#include "util.h"
 #include "usb_cdc.h"
-
+#ifdef UART2_DATA_OUTPUT
+	#include <usart.h>
+#endif
 
 // Variables
 #pragma idata
@@ -454,6 +456,8 @@ void USBSerialIO(void)
     unsigned char maxLength;
 	unsigned char numBytes;
 
+#ifndef DISABLE_USB
+
 	// Find space in buffer
     maxLength = (inTail >= inHead) ? (IN_BUFFER_CAPACITY + inHead - inTail - 1) : (inHead - 1 - inTail);
 	if ((maxLength > 0) && (!USBHandleBusy(CDCDataOutHandle))) 	// Is there any room in the buffer and is there any in-data
@@ -489,7 +493,23 @@ void USBSerialIO(void)
             }
         }
     }
-    
+#else
+// KL: In USB ignore mode we send them over the UART
+#ifdef UART2_DATA_OUTPUT
+    buffer = outBuffer + outHead;
+    maxLength = (outTail >= outHead) ? (outTail - outHead) : (OUT_BUFFER_CAPACITY - outHead);
+    if (maxLength > 0)
+    {
+		numBytes = maxLength;   // Uart has no fifo, bytes written one at a time
+		while(maxLength--)
+		{
+			while(Busy2USART());
+			Write2USART(*buffer++);		// [dgj] Dereference fix
+		}
+        outHead = (outHead + numBytes) % OUT_BUFFER_CAPACITY; // Update buffer pointer
+    }
+#endif
+#endif    
     
 }
 
@@ -498,6 +518,7 @@ void USBSerialIO(void)
 // USBProcessIO - User routines
 void USBProcessIO(void)
 {   
+	#ifndef DISABLE_USB
     // Blink the LEDs according to the USB device status
     if(usbDebugStatus)
     {
@@ -511,6 +532,9 @@ void USBProcessIO(void)
     } else {
     	outHead = outTail;
     }
+	#else
+	USBSerialIO(); // KL: In ignore USB mode this sends chars over the UART
+	#endif
 }
 
 

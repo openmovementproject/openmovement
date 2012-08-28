@@ -119,7 +119,7 @@ void LowISR()
 // main - main function
 void main(void)
 {
-    // Start-up code: remappable pins, battery pre-charge, initialize 8MHz INTOSC, read configuration from flash
+    // Start-up code: remappable pins, battery pre-charge, initialize 8MHz INTOSC, read configuration from flash, init UART is used
     RunStartup();
 
     // If USB detected then run USB mode until disconnected (then reset); otherwise...
@@ -169,8 +169,8 @@ void RunStartup(void)
     INTCONbits.GIE = 1;     // Enable interrupts
 
 	// Start debug USART if enabled
-#ifdef DEBUG_USART2_TX
-	#warning "Not expected."
+#if defined(DEBUG_USART2_TX) || defined(UART2_DATA_OUTPUT)
+	#warning "Not expected to have debug USART enabled -- ignore if you really wanted it."
     USARTStartup();
 #endif
 
@@ -213,7 +213,12 @@ char RunAttached(void)
     //DumpConnection(0xFF);  // Debug dump connection entry (0xff = all)
 
 	// Start USB (initializes PLL)
+#ifndef DISABLE_USB
     USBInitializeSystem();
+#else
+	CLOCK_USB_XTAL();
+	USARTStartup1MBaud(); // Higher speed needed in receive mode = 1MBaud
+#endif
 
 #ifndef DISABLE_USB
     // Now USB running at 48MHz -- CPU running at 8 MHz
@@ -228,6 +233,10 @@ char RunAttached(void)
 
 	// Enable interrupts
     INTCONbits.GIE = 1;     
+
+#ifdef MOTOR_DEVICE
+	MOTOR_INIT();
+#endif
 
     // Main loop
     while (USB_BUS_SENSE)
@@ -296,12 +305,12 @@ LED = 1;
             USBDeviceTasks(); 
         #endif
 
-        // USB process I/O
-        USBProcessIO();
-
         // Handle serial console commands
         ProcessConsoleCommand();
 #endif
+
+        // USB process I/O : KL: Changed to use define DISABLE_USB
+        USBProcessIO();
 
         // Check we're still attached
 		#ifndef USE_USB_BUS_SENSE_IO
@@ -309,6 +318,10 @@ LED = 1;
 		#endif
         if (USB_BUS_SENSE) { ClrWdt(); }   // Clear WDT while the USB detect line is high
     }
+
+#ifdef MOTOR_DEVICE
+	MOTOR_OFF();
+#endif
 
 	// Detatching, LED off
 	LED = 0;
@@ -320,6 +333,55 @@ LED = 1;
     return 1;                 // Attach mode was entered, now completed (detached)
 }
 
+
+// Append variable number of bytes to packet
+int VariableAppend(const char *str)
+{
+	const char *p = str;
+	int value = -1;
+	int count = 0;
+	
+	do
+	{
+		if (*p >= '0' && *p <= '9')
+		{
+			if (value < 0) { value = 0; }
+			value = 10 * value + (*p - '0');
+		}
+		else if (value >= 0)
+		{
+			MiApp_WriteData((unsigned char)value);
+			count++;
+			value = -1;
+		}
+	} while (*p++ != '\0');
+	
+	return count;
+}
+
+
+int ExtractNum(char *str, unsigned int *outValue)
+{
+	unsigned int value = 0xffff;
+	int o = 0;
+	
+	do
+	{
+		if (str[o] >= '0' && str[o] <= '9')
+		{
+			if (value == 0xffff) { value = 0; }
+			value = 10 * value + (str[o] - '0');
+		}
+		else if (value != 0xffff)
+		{
+			*outValue = value;
+			if (str[o] != '\0') { str[o] = '\0'; o++; }
+			return o;
+		}
+	} while (str[o++] != '\0');
+	
+	return 0;
+}
 
 
 // RunDetatched - Run system in detatched mode
@@ -368,7 +430,11 @@ void ProcessConsoleCommand(void)
         }
         else if (stricmp_rom(line, "id") == 0)
         {
+#ifdef MOTOR_DEVICE
+            printf("ID=WAX-r(m),%x,%x,%u\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, dataStatus.deviceId);
+#else
             printf("ID=WAX-r,%x,%x,%u\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, dataStatus.deviceId);
+#endif
         }
         else if (stricmp_rom(line, (const rom far char *)"reset") == 0)
         {
@@ -433,6 +499,82 @@ void ProcessConsoleCommand(void)
             }
             printf("MODE=%u\r\n", dataStatus.rxMode);
         }
+        else if (strnicmp_rom(line, "sendm", 5) == 0 || strnicmp_rom(line, "sendb", 5) == 0)
+        {
+	        char *p = line + 5;
+			char success;
+			int count;
+			unsigned int firstDeviceId = 0;
+			
+			p += ExtractNum(p, &firstDeviceId);
+
+			if (firstDeviceId == 0)
+			{
+	            printf("SEND=UNSPECIFIED\r\n");
+	  		}          
+	  		else
+	  		{
+				// Reset the transmit buffer
+				MiApp_FlushTx();
+			
+			    // IMPORTANT: This code has to mirror the DataPacket struct
+				MiApp_WriteData(USER_REPORT_TYPE);                      // reportType;		    // [1] = 0x12 (USER_REPORT_TYPE)
+				MiApp_WriteData('M');                  					// reportId;            // [1] = (ASCII 'M')
+				MiApp_WriteData(0);                  					// version;             // [1] = Packet version
+				MiApp_WriteData(0);                  					// count;               // [1] = Number of devices (calculate from packet length if 0)
+				MiApp_WriteData((unsigned char)firstDeviceId);          // firstDeviceId;       // [2] = First device identifier (16-bit)
+				MiApp_WriteData((unsigned char)(firstDeviceId >> 8));   // firstDeviceId;       // [2] = First device identifier (16-bit)
+
+				count = VariableAppend(p);
+				
+				if (count % 2 != 0 || count <= 0)
+				{
+		            printf("SEND=INVALID\r\n");
+				}
+				else
+				{
+					if (line[4] == 'b' || line[4] == 'B')
+					{
+						success = MiApp_BroadcastPacket(FALSE);							// Broadcast packet (false=unsecure)
+					}
+					else
+					{
+						static BYTE targetLongAddress[8];
+						targetLongAddress[0] = (unsigned char)firstDeviceId;
+						targetLongAddress[1] = (unsigned char)(firstDeviceId >> 8);
+						targetLongAddress[2] = EUI_2;
+						targetLongAddress[3] = EUI_3;
+						targetLongAddress[4] = EUI_4;
+						targetLongAddress[5] = EUI_5;
+						targetLongAddress[6] = EUI_6;
+						targetLongAddress[7] = EUI_7;
+						success = MiApp_UnicastAddress(targetLongAddress, TRUE, FALSE);     // Send to specific address (BYTE *address, true=permanent, false=unsecured)
+					}
+					
+					if (!success)
+					{
+			            printf("SEND=FAILED\r\n");
+					}
+				}
+			}	
+        }
+#ifdef MOTOR_DEVICE
+        else if (strnicmp_rom(line, "motor", 5) == 0)
+        {
+            int duty = -1;
+            if (line[5] != '\0') { duty = (unsigned char)my_atoi(line + 6); }
+            if (duty >= 0x00 && duty <= 0xff)
+            {
+				MOTOR_SET_DUTY((unsigned char)duty);
+            }
+            else if (duty > 0xff)
+            {
+				MOTOR_SET_DUTY(0xff);
+	            MOTOR_ON();
+            }
+            printf("MOTOR=%d\r\n", MOTOR_GET_DUTY());
+        }
+#endif
         else if (stricmp_rom(line, (const rom far char *)"exit") == 0)
         {
       		printf((const rom far char *)"NOTE: You'll have to close the terminal window yourself!\r\n");
@@ -455,4 +597,3 @@ void ProcessConsoleCommand(void)
 #else
 static char dummy;	// C18 doesn't like empty object files
 #endif
-

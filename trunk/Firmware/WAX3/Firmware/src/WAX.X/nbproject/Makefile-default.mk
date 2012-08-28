@@ -40,11 +40,11 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o ${OBJECTDIR}/_ext/686890857/usb_device.o ${OBJECTDIR}/_ext/1472/accel.o ${OBJECTDIR}/_ext/1472/data.o ${OBJECTDIR}/_ext/1472/usb_cdc.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ${OBJECTDIR}/_ext/1472/util.o ${OBJECTDIR}/_ext/1736990619/MiWi.o ${OBJECTDIR}/_ext/828323842/NVM.o ${OBJECTDIR}/_ext/828323842/SymbolTime.o ${OBJECTDIR}/_ext/1453245926/TimeDelay.o ${OBJECTDIR}/_ext/1999247862/crc.o ${OBJECTDIR}/_ext/1999247862/security.o ${OBJECTDIR}/_ext/1472/spi.o ${OBJECTDIR}/_ext/1472/MRF24J40.o ${OBJECTDIR}/_ext/828323842/Console.o ${OBJECTDIR}/_ext/1472/HardwareProfile.o ${OBJECTDIR}/_ext/1472/main-receiver.o ${OBJECTDIR}/_ext/1472/main-transmitter.o ${OBJECTDIR}/_ext/2134243105/P2P.o ${OBJECTDIR}/_ext/1472/c018i.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o.d ${OBJECTDIR}/_ext/686890857/usb_device.o.d ${OBJECTDIR}/_ext/1472/accel.o.d ${OBJECTDIR}/_ext/1472/data.o.d ${OBJECTDIR}/_ext/1472/usb_cdc.o.d ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d ${OBJECTDIR}/_ext/1472/util.o.d ${OBJECTDIR}/_ext/1736990619/MiWi.o.d ${OBJECTDIR}/_ext/828323842/NVM.o.d ${OBJECTDIR}/_ext/828323842/SymbolTime.o.d ${OBJECTDIR}/_ext/1453245926/TimeDelay.o.d ${OBJECTDIR}/_ext/1999247862/crc.o.d ${OBJECTDIR}/_ext/1999247862/security.o.d ${OBJECTDIR}/_ext/1472/spi.o.d ${OBJECTDIR}/_ext/1472/MRF24J40.o.d ${OBJECTDIR}/_ext/828323842/Console.o.d ${OBJECTDIR}/_ext/1472/HardwareProfile.o.d ${OBJECTDIR}/_ext/1472/main-receiver.o.d ${OBJECTDIR}/_ext/1472/main-transmitter.o.d ${OBJECTDIR}/_ext/2134243105/P2P.o.d ${OBJECTDIR}/_ext/1472/c018i.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1472/accel.o ${OBJECTDIR}/_ext/1472/data.o ${OBJECTDIR}/_ext/1472/usb_cdc.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ${OBJECTDIR}/_ext/1472/util.o ${OBJECTDIR}/_ext/1472/spi.o ${OBJECTDIR}/_ext/1472/HardwareProfile.o ${OBJECTDIR}/_ext/1472/main-receiver.o ${OBJECTDIR}/_ext/1472/main-transmitter.o ${OBJECTDIR}/_ext/1472/c018i.o ${OBJECTDIR}/_ext/1453245926/TimeDelay.o ${OBJECTDIR}/_ext/828323842/Console.o ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o ${OBJECTDIR}/_ext/686890857/usb_device.o ${OBJECTDIR}/_ext/1736990619/MiWi.o ${OBJECTDIR}/_ext/828323842/NVM.o ${OBJECTDIR}/_ext/828323842/SymbolTime.o ${OBJECTDIR}/_ext/2134243105/P2P.o ${OBJECTDIR}/_ext/1999247862/crc.o ${OBJECTDIR}/_ext/1999247862/security.o ${OBJECTDIR}/_ext/1472/MRF24J40.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1472/accel.o.d ${OBJECTDIR}/_ext/1472/data.o.d ${OBJECTDIR}/_ext/1472/usb_cdc.o.d ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d ${OBJECTDIR}/_ext/1472/util.o.d ${OBJECTDIR}/_ext/1472/spi.o.d ${OBJECTDIR}/_ext/1472/HardwareProfile.o.d ${OBJECTDIR}/_ext/1472/main-receiver.o.d ${OBJECTDIR}/_ext/1472/main-transmitter.o.d ${OBJECTDIR}/_ext/1472/c018i.o.d ${OBJECTDIR}/_ext/1453245926/TimeDelay.o.d ${OBJECTDIR}/_ext/828323842/Console.o.d ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o.d ${OBJECTDIR}/_ext/686890857/usb_device.o.d ${OBJECTDIR}/_ext/1736990619/MiWi.o.d ${OBJECTDIR}/_ext/828323842/NVM.o.d ${OBJECTDIR}/_ext/828323842/SymbolTime.o.d ${OBJECTDIR}/_ext/2134243105/P2P.o.d ${OBJECTDIR}/_ext/1999247862/crc.o.d ${OBJECTDIR}/_ext/1999247862/security.o.d ${OBJECTDIR}/_ext/1472/MRF24J40.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o ${OBJECTDIR}/_ext/686890857/usb_device.o ${OBJECTDIR}/_ext/1472/accel.o ${OBJECTDIR}/_ext/1472/data.o ${OBJECTDIR}/_ext/1472/usb_cdc.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ${OBJECTDIR}/_ext/1472/util.o ${OBJECTDIR}/_ext/1736990619/MiWi.o ${OBJECTDIR}/_ext/828323842/NVM.o ${OBJECTDIR}/_ext/828323842/SymbolTime.o ${OBJECTDIR}/_ext/1453245926/TimeDelay.o ${OBJECTDIR}/_ext/1999247862/crc.o ${OBJECTDIR}/_ext/1999247862/security.o ${OBJECTDIR}/_ext/1472/spi.o ${OBJECTDIR}/_ext/1472/MRF24J40.o ${OBJECTDIR}/_ext/828323842/Console.o ${OBJECTDIR}/_ext/1472/HardwareProfile.o ${OBJECTDIR}/_ext/1472/main-receiver.o ${OBJECTDIR}/_ext/1472/main-transmitter.o ${OBJECTDIR}/_ext/2134243105/P2P.o ${OBJECTDIR}/_ext/1472/c018i.o
+OBJECTFILES=${OBJECTDIR}/_ext/1472/accel.o ${OBJECTDIR}/_ext/1472/data.o ${OBJECTDIR}/_ext/1472/usb_cdc.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ${OBJECTDIR}/_ext/1472/util.o ${OBJECTDIR}/_ext/1472/spi.o ${OBJECTDIR}/_ext/1472/HardwareProfile.o ${OBJECTDIR}/_ext/1472/main-receiver.o ${OBJECTDIR}/_ext/1472/main-transmitter.o ${OBJECTDIR}/_ext/1472/c018i.o ${OBJECTDIR}/_ext/1453245926/TimeDelay.o ${OBJECTDIR}/_ext/828323842/Console.o ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o ${OBJECTDIR}/_ext/686890857/usb_device.o ${OBJECTDIR}/_ext/1736990619/MiWi.o ${OBJECTDIR}/_ext/828323842/NVM.o ${OBJECTDIR}/_ext/828323842/SymbolTime.o ${OBJECTDIR}/_ext/2134243105/P2P.o ${OBJECTDIR}/_ext/1999247862/crc.o ${OBJECTDIR}/_ext/1999247862/security.o ${OBJECTDIR}/_ext/1472/MRF24J40.o
 
 
 CFLAGS=
@@ -60,19 +60,19 @@ OS_CURRENT="$(shell uname -s)"
 # If you open this project with MPLAB X in the new host, this         #
 # makefile will be regenerated and the paths will be corrected.       #
 #######################################################################
-MP_CC="C:\mcc18\bin\mcc18.exe"
+MP_CC="C:\Program Files (x86)\Microchip\mcc18\bin\mcc18.exe"
 # MP_BC is not defined
-MP_AS="C:\mcc18\bin\..\mpasm\MPASMWIN.exe"
-MP_LD="C:\mcc18\bin\mplink.exe"
-MP_AR="C:\mcc18\bin\mplib.exe"
+MP_AS="C:\Program Files (x86)\Microchip\mcc18\bin\..\mpasm\MPASMWIN.exe"
+MP_LD="C:\Program Files (x86)\Microchip\mcc18\bin\mplink.exe"
+MP_AR="C:\Program Files (x86)\Microchip\mcc18\bin\mplib.exe"
 DEP_GEN=${MP_JAVA_PATH}java -jar "C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/extractobjectdependencies.jar" 
 # fixDeps replaces a bunch of sed/cat/printf statements that slow down the build
 FIXDEPS=fixDeps
-MP_CC_DIR="C:\mcc18\bin"
+MP_CC_DIR="C:\Program Files (x86)\Microchip\mcc18\bin"
 # MP_BC_DIR is not defined
-MP_AS_DIR="C:\mcc18\bin\..\mpasm"
-MP_LD_DIR="C:\mcc18\bin"
-MP_AR_DIR="C:\mcc18\bin"
+MP_AS_DIR="C:\Program Files (x86)\Microchip\mcc18\bin\..\mpasm"
+MP_LD_DIR="C:\Program Files (x86)\Microchip\mcc18\bin"
+MP_AR_DIR="C:\Program Files (x86)\Microchip\mcc18\bin"
 # MP_BC_DIR is not defined
 
 .build-conf:  ${BUILD_SUBPROJECTS}
@@ -90,18 +90,6 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1433380754 
-	@${RM} ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o 
-	
-${OBJECTDIR}/_ext/686890857/usb_device.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/686890857 
-	@${RM} ${OBJECTDIR}/_ext/686890857/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/686890857/usb_device.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/usb_device.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/686890857/usb_device.o 
-	
 ${OBJECTDIR}/_ext/1472/accel.o: ../accel.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
 	@${RM} ${OBJECTDIR}/_ext/1472/accel.o.d 
@@ -132,59 +120,11 @@ ${OBJECTDIR}/_ext/1472/util.o: ../util.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/util.o   ../util.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/util.o 
 	
-${OBJECTDIR}/_ext/1736990619/MiWi.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1736990619 
-	@${RM} ${OBJECTDIR}/_ext/1736990619/MiWi.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1736990619/MiWi.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1736990619/MiWi.o 
-	
-${OBJECTDIR}/_ext/828323842/NVM.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/NVM.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
-	@${RM} ${OBJECTDIR}/_ext/828323842/NVM.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/NVM.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/NVM.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/NVM.o 
-	
-${OBJECTDIR}/_ext/828323842/SymbolTime.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
-	@${RM} ${OBJECTDIR}/_ext/828323842/SymbolTime.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/SymbolTime.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/SymbolTime.o 
-	
-${OBJECTDIR}/_ext/1453245926/TimeDelay.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Common/TimeDelay.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1453245926 
-	@${RM} ${OBJECTDIR}/_ext/1453245926/TimeDelay.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1453245926/TimeDelay.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Common/TimeDelay.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1453245926/TimeDelay.o 
-	
-${OBJECTDIR}/_ext/1999247862/crc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/crc.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
-	@${RM} ${OBJECTDIR}/_ext/1999247862/crc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/crc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/crc.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/crc.o 
-	
-${OBJECTDIR}/_ext/1999247862/security.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/security.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
-	@${RM} ${OBJECTDIR}/_ext/1999247862/security.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/security.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/security.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/security.o 
-	
 ${OBJECTDIR}/_ext/1472/spi.o: ../spi.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
 	@${RM} ${OBJECTDIR}/_ext/1472/spi.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/spi.o   ../spi.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/spi.o 
-	
-${OBJECTDIR}/_ext/1472/MRF24J40.o: ../MRF24J40.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1472 
-	@${RM} ${OBJECTDIR}/_ext/1472/MRF24J40.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/MRF24J40.o   ../MRF24J40.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/MRF24J40.o 
-	
-${OBJECTDIR}/_ext/828323842/Console.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/Console.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
-	@${RM} ${OBJECTDIR}/_ext/828323842/Console.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/Console.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/Console.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/Console.o 
 	
 ${OBJECTDIR}/_ext/1472/HardwareProfile.o: ../HardwareProfile.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
@@ -204,31 +144,79 @@ ${OBJECTDIR}/_ext/1472/main-transmitter.o: ../main-transmitter.c  nbproject/Make
 	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/main-transmitter.o   ../main-transmitter.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/main-transmitter.o 
 	
-${OBJECTDIR}/_ext/2134243105/P2P.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/2134243105 
-	@${RM} ${OBJECTDIR}/_ext/2134243105/P2P.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/2134243105/P2P.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/2134243105/P2P.o 
-	
 ${OBJECTDIR}/_ext/1472/c018i.o: ../c018i.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
 	@${RM} ${OBJECTDIR}/_ext/1472/c018i.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/c018i.o   ../c018i.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/c018i.o 
 	
-else
+${OBJECTDIR}/_ext/1453245926/TimeDelay.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Common/TimeDelay.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1453245926 
+	@${RM} ${OBJECTDIR}/_ext/1453245926/TimeDelay.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1453245926/TimeDelay.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Common/TimeDelay.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1453245926/TimeDelay.o 
+	
+${OBJECTDIR}/_ext/828323842/Console.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/Console.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
+	@${RM} ${OBJECTDIR}/_ext/828323842/Console.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/Console.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/Console.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/Console.o 
+	
 ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1433380754 
 	@${RM} ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o 
 	
 ${OBJECTDIR}/_ext/686890857/usb_device.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/686890857 
 	@${RM} ${OBJECTDIR}/_ext/686890857/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/686890857/usb_device.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/usb_device.c" 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/686890857/usb_device.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/usb_device.c" 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/686890857/usb_device.o 
 	
+${OBJECTDIR}/_ext/1736990619/MiWi.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1736990619 
+	@${RM} ${OBJECTDIR}/_ext/1736990619/MiWi.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1736990619/MiWi.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1736990619/MiWi.o 
+	
+${OBJECTDIR}/_ext/828323842/NVM.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/NVM.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
+	@${RM} ${OBJECTDIR}/_ext/828323842/NVM.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/NVM.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/NVM.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/NVM.o 
+	
+${OBJECTDIR}/_ext/828323842/SymbolTime.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
+	@${RM} ${OBJECTDIR}/_ext/828323842/SymbolTime.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/SymbolTime.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/SymbolTime.o 
+	
+${OBJECTDIR}/_ext/2134243105/P2P.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/2134243105 
+	@${RM} ${OBJECTDIR}/_ext/2134243105/P2P.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/2134243105/P2P.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/2134243105/P2P.o 
+	
+${OBJECTDIR}/_ext/1999247862/crc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/crc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
+	@${RM} ${OBJECTDIR}/_ext/1999247862/crc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/crc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/crc.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/crc.o 
+	
+${OBJECTDIR}/_ext/1999247862/security.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/security.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
+	@${RM} ${OBJECTDIR}/_ext/1999247862/security.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/security.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/security.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/security.o 
+	
+${OBJECTDIR}/_ext/1472/MRF24J40.o: ../MRF24J40.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/MRF24J40.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/MRF24J40.o   ../MRF24J40.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/MRF24J40.o 
+	
+else
 ${OBJECTDIR}/_ext/1472/accel.o: ../accel.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
 	@${RM} ${OBJECTDIR}/_ext/1472/accel.o.d 
@@ -259,59 +247,11 @@ ${OBJECTDIR}/_ext/1472/util.o: ../util.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/util.o   ../util.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/util.o 
 	
-${OBJECTDIR}/_ext/1736990619/MiWi.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1736990619 
-	@${RM} ${OBJECTDIR}/_ext/1736990619/MiWi.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1736990619/MiWi.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1736990619/MiWi.o 
-	
-${OBJECTDIR}/_ext/828323842/NVM.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/NVM.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
-	@${RM} ${OBJECTDIR}/_ext/828323842/NVM.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/NVM.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/NVM.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/NVM.o 
-	
-${OBJECTDIR}/_ext/828323842/SymbolTime.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
-	@${RM} ${OBJECTDIR}/_ext/828323842/SymbolTime.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/SymbolTime.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/SymbolTime.o 
-	
-${OBJECTDIR}/_ext/1453245926/TimeDelay.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Common/TimeDelay.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1453245926 
-	@${RM} ${OBJECTDIR}/_ext/1453245926/TimeDelay.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1453245926/TimeDelay.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Common/TimeDelay.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1453245926/TimeDelay.o 
-	
-${OBJECTDIR}/_ext/1999247862/crc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/crc.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
-	@${RM} ${OBJECTDIR}/_ext/1999247862/crc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/crc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/crc.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/crc.o 
-	
-${OBJECTDIR}/_ext/1999247862/security.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/security.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
-	@${RM} ${OBJECTDIR}/_ext/1999247862/security.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/security.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/security.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/security.o 
-	
 ${OBJECTDIR}/_ext/1472/spi.o: ../spi.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
 	@${RM} ${OBJECTDIR}/_ext/1472/spi.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/spi.o   ../spi.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/spi.o 
-	
-${OBJECTDIR}/_ext/1472/MRF24J40.o: ../MRF24J40.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/1472 
-	@${RM} ${OBJECTDIR}/_ext/1472/MRF24J40.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/MRF24J40.o   ../MRF24J40.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/MRF24J40.o 
-	
-${OBJECTDIR}/_ext/828323842/Console.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/Console.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
-	@${RM} ${OBJECTDIR}/_ext/828323842/Console.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/Console.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/Console.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/Console.o 
 	
 ${OBJECTDIR}/_ext/1472/HardwareProfile.o: ../HardwareProfile.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
@@ -331,17 +271,77 @@ ${OBJECTDIR}/_ext/1472/main-transmitter.o: ../main-transmitter.c  nbproject/Make
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/main-transmitter.o   ../main-transmitter.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/main-transmitter.o 
 	
+${OBJECTDIR}/_ext/1472/c018i.o: ../c018i.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/c018i.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/c018i.o   ../c018i.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/c018i.o 
+	
+${OBJECTDIR}/_ext/1453245926/TimeDelay.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Common/TimeDelay.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1453245926 
+	@${RM} ${OBJECTDIR}/_ext/1453245926/TimeDelay.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1453245926/TimeDelay.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Common/TimeDelay.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1453245926/TimeDelay.o 
+	
+${OBJECTDIR}/_ext/828323842/Console.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/Console.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
+	@${RM} ${OBJECTDIR}/_ext/828323842/Console.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/Console.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/Console.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/Console.o 
+	
+${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1433380754 
+	@${RM} ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1433380754/usb_function_cdc.o 
+	
+${OBJECTDIR}/_ext/686890857/usb_device.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/686890857 
+	@${RM} ${OBJECTDIR}/_ext/686890857/usb_device.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/686890857/usb_device.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/usb_device.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/686890857/usb_device.o 
+	
+${OBJECTDIR}/_ext/1736990619/MiWi.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1736990619 
+	@${RM} ${OBJECTDIR}/_ext/1736990619/MiWi.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1736990619/MiWi.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1736990619/MiWi.o 
+	
+${OBJECTDIR}/_ext/828323842/NVM.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/NVM.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
+	@${RM} ${OBJECTDIR}/_ext/828323842/NVM.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/NVM.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/NVM.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/NVM.o 
+	
+${OBJECTDIR}/_ext/828323842/SymbolTime.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/828323842 
+	@${RM} ${OBJECTDIR}/_ext/828323842/SymbolTime.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/828323842/SymbolTime.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/828323842/SymbolTime.o 
+	
 ${OBJECTDIR}/_ext/2134243105/P2P.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/2134243105 
 	@${RM} ${OBJECTDIR}/_ext/2134243105/P2P.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/2134243105/P2P.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c" 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/2134243105/P2P.o 
 	
-${OBJECTDIR}/_ext/1472/c018i.o: ../c018i.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/_ext/1999247862/crc.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/crc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
+	@${RM} ${OBJECTDIR}/_ext/1999247862/crc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/crc.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/crc.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/crc.o 
+	
+${OBJECTDIR}/_ext/1999247862/security.o: ../../../../../../../Microchip\ Solutions\ v2011-12-05/Microchip/Transceivers/security.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1999247862 
+	@${RM} ${OBJECTDIR}/_ext/1999247862/security.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1999247862/security.o   "../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/security.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1999247862/security.o 
+	
+${OBJECTDIR}/_ext/1472/MRF24J40.o: ../MRF24J40.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1472 
-	@${RM} ${OBJECTDIR}/_ext/1472/c018i.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/c018i.o   ../c018i.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/c018i.o 
+	@${RM} ${OBJECTDIR}/_ext/1472/MRF24J40.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I".." -I"/c:/mcc18/h" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40" -I"../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers" -mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/MRF24J40.o   ../MRF24J40.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/MRF24J40.o 
 	
 endif
 

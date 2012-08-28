@@ -32,7 +32,7 @@
 // Includes
 #include "HardwareProfile.h"
 #include <stdio.h>
-#if defined(USE_USART) || defined(DEBUG_USART2_TX)
+#if defined(USE_USART) || defined(DEBUG_USART2_TX) || defined(UART2_DATA_OUTPUT)
 #include <usart.h>
 #endif
 //#include <delays.h>
@@ -48,7 +48,7 @@
 
 // Edit-line buffer length
 static int serialBufferLength = 0;
-char commEcho = 1;
+char commEcho = 0;	// [dgj] was 1
 
 
 #pragma udata
@@ -68,7 +68,7 @@ void _user_putc(unsigned char c)
     putc1USART(c);
     while(Busy1USART()); 
 #endif
-#ifdef DEBUG_USART2_TX
+#if defined(DEBUG_USART2_TX) || defined(UART2_DATA_OUTPUT)
     Write2USART(c);
     while(Busy2USART()); 
 #endif
