@@ -157,7 +157,7 @@
     #define DEVICE_PROFILE WAX
 
 	#define HARDWARE_VERSION WAX
-	#define SOFTWARE_VERSION 0x29
+	#define SOFTWARE_VERSION 0x30
 
 	// Clock frequency for RF timing
 	#if defined(FAST_USB_CLOCK) && (defined(RADIO_WHEN_ATTACHED) || defined(FAST_WHEN_DETATCHED))
