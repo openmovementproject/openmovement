@@ -190,11 +190,14 @@ void WaitForPrecharge(void)
 
 	// We have to init the pins
 //	WDTCONbits.SWDTEN = 0;
-	#ifdef DEBUG_USART2_TX
+#if defined(DEBUG_USART2_TX) || defined(UART2_DATA_OUTPUT)
 		USART_REMAP_PINS();
 	#endif
 #if (DEVICE_TYPE==2)
 		GYRO_REMAP_PINS();
+#endif
+#ifdef MOTOR_DEVICE
+		MOTOR_REMAP_PINS();
 #endif
 	REMAP_PINS();
 
@@ -294,6 +297,13 @@ void DisableIO(void)
     // Initially set all tristates as inputs
     TRISA = TRISB = TRISC = 0xff;
 
+#ifdef MOTOR_DEVICE
+	MOTOR_OFF();
+#else
+    // Kim says: drive the spare pin low anyway
+    LATAbits.LATA5 = 0; TRISAbits.TRISA5 = 0;
+#endif
+
     // Initially configure all ADC pins as digital
     ANCON0 = 0xff;          // AN0-AN7 as digital
     ANCON1 = 0x0f;          // AN8-AN? as digital, bandgap ref off
@@ -316,8 +326,8 @@ void DisableIO(void)
 	// Disable accelerometer
 	AccelStandby();
 
-#if (DEVICE_TYPE==3)
-	// Initialize pins for expansion board (on certain hardware configurations)
+#if (DEVICE_TYPE==4)
+	// Initialize pins for TEDDI expansion board (on certain hardware configurations)
 	EXP_INIT_PINS();
 #endif
 

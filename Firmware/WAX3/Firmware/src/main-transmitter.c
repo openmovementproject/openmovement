@@ -28,7 +28,7 @@
 
 #include "HardwareProfile.h"
 
-#if (DEVICE_TYPE == 1) || (DEVICE_TYPE == 2)				// 1 = RFD WAX or WAX+GYRO
+#if (DEVICE_TYPE == 1) || (DEVICE_TYPE == 2) || (DEVICE_TYPE == 3)				// 1 = RFD WAX or WAX+GYRO or WAX+MOTOR
 
 // Sampling mode
 //   Setup accelerometer to sample to FIFO with watermark interrupt, unlinked activity/inactivity detection. 
@@ -143,6 +143,28 @@ void TimerStartCountdown(unsigned long v)
 }
 
 
+#ifdef MOTOR_DEVICE
+volatile unsigned char motorDuration = 0;
+
+void MotorElapsed(int num)
+{
+	if (motorDuration != 0)
+	{
+		int count = dataConfig.accelWatermark;
+		if (count <= 0) { count = 1; }
+		if (motorDuration > count)
+		{
+			motorDuration -= count;
+		}
+		else
+		{
+			motorDuration = 0;
+			MOTOR_SET_DUTY(0);
+		}
+	}
+}	
+#endif
+
 
 
 // HighISR - defined in MRF24J40 tranceiver code and chains to UserInterruptHandler()
@@ -195,7 +217,8 @@ void LowISR()
 		source = AccelReadIntSource();
 		if ((source & ACCEL_INT_SOURCE_OVERRUN) || (source & ACCEL_INT_SOURCE_WATERMARK))
         {
-            if (DataPerformAccelSample() == 0) 		// Sample measurements
+	        int num = DataPerformAccelSample();
+            if (num == 0) 		// Sample measurements
             {
                 AccelReadFIFO(NULL, 0xff);      // The only reason we should've read only 0 samples is if our write buffer is full -- dump ADXL FIFO if this occurs to prevent re-interrupt
 #if (DEVICE_TYPE==2)
@@ -203,6 +226,9 @@ void LowISR()
 #endif
             }
 active = 1;
+#ifdef MOTOR_DEVICE
+			MotorElapsed(num == 0 ? 0xff : num);
+#endif
         }
 		if ((source & ACCEL_INT_SOURCE_DOUBLE_TAP) || (source & ACCEL_INT_SOURCE_SINGLE_TAP))	// tap
 		{
@@ -345,6 +371,10 @@ char RunAttached(void)
 	// Enable interrupts
     INTCONbits.GIE = 1;     
 
+#ifdef MOTOR_DEVICE
+	MOTOR_INIT();
+#endif
+
     // Main loop -- as this isn't a receiver, low power mode while battery charging then return to normal mode
 	fullCount = 0x6000;		// Assume charging
 	while (USB_BUS_SENSE) 
@@ -375,8 +405,13 @@ char RunAttached(void)
 		#endif
         if (USB_BUS_SENSE) { ClrWdt(); }   // Clear WDT while the USB detect line is high
     }
-	LED = 0;
 
+#ifdef MOTOR_DEVICE
+	MOTOR_OFF();
+#endif
+
+	LED = 0;
+	
     #if defined(USB_INTERRUPT)
         USBDeviceDetach();    // Wait >100ms before re-attach
     #endif
@@ -457,6 +492,9 @@ void RunDetatched()
 			// Accelerometer is asleep and we were in sampling mode  ==>  put device to sleep
 			if (dataStatus.sampling)
 			{
+#ifdef MOTOR_DEVICE
+				MOTOR_OFF();
+#endif
 				dataStatus.sampling = 0;
 				MiApp_TransceiverPowerState(POWER_STATE_SLEEP); // RF to sleep (== SUCCESS)
 #if (DEVICE_TYPE==2)
@@ -515,6 +553,9 @@ INTCONbits.GIE = 1;     // Re-enable interrupts (will vector now)
 				GYRO_INT2_IE = 1;
 #endif
 				ACCEL_INT1_IE = 1;
+#ifdef MOTOR_DEVICE
+				MOTOR_INIT();
+#endif
 			}
 
 	        // Check whether a packet has been received by the transceiver. 
@@ -544,6 +585,33 @@ INTCONbits.GIE = 1;     // Re-enable interrupts (will vector now)
 				
 	            // rxMessage.Payload[0] // rxMessage.PayloadSize
 	            
+	            if (rxMessage.Payload[0] == USER_REPORT_TYPE)		// 0x12 USER_REPORT_TYPE
+	            {
+#ifdef MOTOR_DEVICE
+		            if (rxMessage.Payload[1] == 'M' && rxMessage.PayloadSize >= 6)
+		            {
+			            unsigned char version = rxMessage.Payload[2];
+			            unsigned char count = rxMessage.Payload[3];
+			            unsigned short firstDeviceId = rxMessage.Payload[4] | ((unsigned short)rxMessage.Payload[5] << 8);
+						unsigned char maxCount = (rxMessage.PayloadSize - 6) / 2;
+						if (count == 0 || count > maxCount) { count = maxCount; }
+						
+						if (dataStatus.deviceId >= firstDeviceId && dataStatus.deviceId < firstDeviceId + count)
+						{
+							unsigned char offset = dataStatus.deviceId - firstDeviceId;
+							unsigned char len = rxMessage.Payload[6 + 2 * offset + 0];
+							if (len > 0)
+							{
+								INTCONbits.GIE = 0;     // Disable interrupts (ensures duration valid)
+								MOTOR_SET_DUTY(rxMessage.Payload[6 + 2 * offset + 1]);
+								motorDuration = len;
+								INTCONbits.GIE = 1;     // Re-enable interrupts
+							}	
+						}
+		            }
+#endif
+	            }
+	            
 	            // Release the current received packet so that the stack can start to process the next received frame.
 	            MiApp_DiscardMessage();
 	        }
@@ -551,11 +619,16 @@ INTCONbits.GIE = 1;     // Re-enable interrupts (will vector now)
 			// Flush the data buffers (transmit) if non-empty
             if (timerComplete)
             {
+	            int num;
+	            
 				ACCEL_INT1_IE = 0;
 #if (DEVICE_TYPE==2)
 				GYRO_INT2_IE = 0;
 #endif
-                DataPerformAccelSample();	// Empty accel FIFO to get latest data, and to ensure it won't overflow while we're transmitting
+                num = DataPerformAccelSample();	// Empty accel FIFO to get latest data, and to ensure it won't overflow while we're transmitting
+#ifdef MOTOR_DEVICE
+				MotorElapsed(num);
+#endif
 #if (DEVICE_TYPE==2)
 				DataPerformGyroSample();  	// Empty gyro FIFO to get latest data, and to ensure it won't overflow while we're transmitting
 #endif
@@ -600,6 +673,11 @@ INTCONbits.GIE = 1;     // Re-enable interrupts (will vector now)
     }
 
 	LED = 0;
+	
+#ifdef MOTOR_DEVICE
+	MOTOR_OFF();
+#endif
+	
 	return;
 }
 
@@ -634,6 +712,8 @@ void ProcessConsoleCommand(void)
         {
 #if (DEVICE_TYPE==2)
            printf("ID=WAX-g,%x,%x,%u\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, dataStatus.deviceId);
+#elif (DEVICE_TYPE==3)
+           printf("ID=WAX-m,%x,%x,%u\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, dataStatus.deviceId);
 #else
            printf("ID=WAX-t,%x,%x,%u\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, dataStatus.deviceId);
 #endif
@@ -773,6 +853,23 @@ void ProcessConsoleCommand(void)
             }
             printf("JITTERMASK=%u\r\n", dataConfig.jitterMask);
         }
+#ifdef MOTOR_DEVICE
+        else if (strnicmp_rom(line, "motor", 5) == 0)
+        {
+            int duty = -1;
+            if (line[5] != '\0') { duty = (unsigned char)my_atoi(line + 6); }
+            if (duty >= 0x00 && duty <= 0xff)
+            {
+				MOTOR_SET_DUTY((unsigned char)duty);
+            }
+            else if (duty > 0xff)
+            {
+	            MOTOR_SET_DUTY(0xff);
+	            MOTOR_ON();
+            }
+            printf("MOTOR=%d\r\n", MOTOR_GET_DUTY());
+        }
+#endif
         else if (stricmp_rom(line, (const rom far char *)"exit") == 0)
         {
       		printf((const rom far char *)"NOTE: You'll have to close the terminal window yourself!\r\n");

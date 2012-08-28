@@ -132,7 +132,9 @@ rom DataConfig romDataConfig =
 	#define USB_ID_CHAR 't'
 #elif (DEVICE_TYPE == 2)		// WAX+GYRO transmiter
 	#define USB_ID_CHAR 'g'
-#elif (DEVICE_TYPE == 3)		// TEDDI transmitter
+#elif (DEVICE_TYPE == 3)		// WAX+MOTOR transmiter/receiver
+	#define USB_ID_CHAR 'm'
+#elif (DEVICE_TYPE == 4)		// TEDDI transmitter
 	#define USB_ID_CHAR 'T'
 #else							// Unknown
 	#define USB_ID_CHAR '?'

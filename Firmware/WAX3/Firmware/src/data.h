@@ -112,4 +112,18 @@ typedef struct DataStatus_t
 extern /*volatile*/ DataStatus dataStatus;
 
 
+
+// Motor command payload -- all WORD/DWORD stored as little-endian (LSB first)
+typedef struct MotorPacket_t
+{
+	unsigned char  reportType;		// [1] = 0x12 (USER_REPORT_TYPE)
+	unsigned char  reportId;	    // [1] = 0x78 (ASCII 'M')
+	unsigned char  version;			// [1] = Packet version
+	unsigned char  count;			// [1] = Number of devices (calculate from packet length if 0)
+	unsigned short firstDeviceId;	// [2] = First device identifier (16-bit)
+	unsigned short data[];			// [2*count] = Array device data, top byte is PWM value, lower byte is length (ignore packet if 0)
+} MotorPacket;
+
+
+
 #endif

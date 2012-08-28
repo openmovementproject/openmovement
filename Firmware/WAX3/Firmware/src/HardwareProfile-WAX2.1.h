@@ -28,7 +28,10 @@
 #ifndef HARDWAREPROFILE_WAX_H
 #define HARDWAREPROFILE_WAX_H
 
-	#define WIFCO_RECEIVER
+	//#define WIFCO_RECEIVER
+
+// Motor output enabled
+//#define MOTOR_DEVICE
 
 	// Tweak settings for WAX hand-out demo devices (default to OSC messages at startup, fast transmit rate, etc.)
 	//#define DEMO_DEVICE	
@@ -65,6 +68,9 @@
 	#elif defined(IMU_DEVICE)
 		#define DEBUG_FIXED_CHANNEL 11		// IMU_DEVICE default is 11 (11-26)
 	    #define DEFAULT_PAN 0x4321			// IMU_DEVICE default PAN id 0x4321 -- (note: need to alter MiWi stack if we want to be able to change this at run-time)
+	#elif defined(MOTOR_DEVICE)
+		#define DEBUG_FIXED_CHANNEL 11		// MOTOR_DEVICE default is 11 (11-26)
+	    #define DEFAULT_PAN 0x1234			// MOTOR_DEVICE default PAN id 0x1234 -- (note: need to alter MiWi stack if we want to be able to change this at run-time)
 	#else
 		#define DEBUG_FIXED_CHANNEL 15		// WAX default is 15 (11-26)
 	    #define DEFAULT_PAN 0x1234			// WAX default PAN id 0x1234 -- (note: need to alter MiWi stack if we want to be able to change this at run-time)
@@ -76,13 +82,15 @@
 	    #define DEVICE_TYPE 0								// 0 = FFD Attached receiver (compatible with any transmitters)
 	#else
 		// Choose transmitter type based on defines...
-		#if defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && !defined(TEDDI_DEVICE)
+		#if defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && !defined(MOTOR_DEVICE) && !defined(TEDDI_DEVICE)
 		    #define DEVICE_TYPE 0							// 0 = WIFCO is always a FFD Attached receiver
-		#elif !defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && defined(TEDDI_DEVICE)
-		    #define DEVICE_TYPE 3							// 3 = RFD TEDDI
-		#elif !defined(WIFCO_RECEIVER) && defined(IMU_DEVICE) && !defined(TEDDI_DEVICE)
+		#elif !defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && !defined(MOTOR_DEVICE) && defined(TEDDI_DEVICE)
+		    #define DEVICE_TYPE 4							// 4 = RFD TEDDI
+		#elif !defined(WIFCO_RECEIVER) && defined(IMU_DEVICE) && !defined(MOTOR_DEVICE) && !defined(TEDDI_DEVICE)
 		    #define DEVICE_TYPE 2							// 2 = RFD WAX+GYRO
-		#elif !defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && !defined(TEDDI_DEVICE)
+		#elif !defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && defined(MOTOR_DEVICE) && !defined(TEDDI_DEVICE)
+		    #define DEVICE_TYPE 3							// 3 = RFD WAX+MOTOR
+		#elif !defined(WIFCO_RECEIVER) && !defined(IMU_DEVICE) && !defined(MOTOR_DEVICE) && !defined(TEDDI_DEVICE)
 		    #define DEVICE_TYPE 1							// 1 = RFD WAX
 	    #else
 	    	#error "DEVICE_TYPE cannot be decided - check for incompatible #define directives"
@@ -102,7 +110,7 @@
 		#define RADIO_WHEN_ATTACHED
 		//#define DEBUG_VERBOSE
 	#else                   // RFD Transmitter
-		#if (DEVICE_TYPE == 3)
+		#if (DEVICE_TYPE == 4)		// TEDDI needs fast clock to process audio
 			#define FAST_WHEN_DETATCHED
 		#endif
 		//#define DEBUG_INTERRUPTS
@@ -149,7 +157,7 @@
     #define DEVICE_PROFILE WAX
 
 	#define HARDWARE_VERSION WAX
-	#define SOFTWARE_VERSION 0x27
+	#define SOFTWARE_VERSION 0x29
 
 	// Clock frequency for RF timing
 	#if defined(FAST_USB_CLOCK) && (defined(RADIO_WHEN_ATTACHED) || defined(FAST_WHEN_DETATCHED))
@@ -175,7 +183,7 @@
     #define JITTER_MASK	0x1fff               // up to 32 msec jitter could be added
 #endif
 
-	#if (DEVICE_TYPE==3)
+	#if (DEVICE_TYPE==4)
 		#ifdef TEDDI_AUDIO_INTERRUPT
 			#define PRIORITY_INTERRUPT AudioTimerISR
 			#define PRIORITY_INTERRUPT_CONDITION if (PIE1bits.TMR2IE)
@@ -183,9 +191,14 @@
 	#endif
 
     // USART2 TX
-    #ifdef __DEBUG
+// Enable for Gadgeteer UART-based receiver    
+//	#define UART_DATA_OUT
+    #if defined(UART_DATA_OUT) 	// defined(__DEBUG) || 
         // Debug mode debugging
-        //#define DEBUG_USART2_TX
+        // #define DEBUG_USART2_TX
+		/*These two defines make the receiver transmit over the uart.*/
+		#define DISABLE_USB
+		#define UART2_DATA_OUTPUT
     #else
         // Release mode debugging
     #endif
@@ -288,11 +301,12 @@
 
 
     // Debugging USART transmit pin
-    #ifdef DEBUG_USART2_TX
+#if defined(DEBUG_USART2_TX) || defined(UART2_DATA_OUTPUT)
         // USART -- (BRG16 + BRGH = 16-bit asynchronous baud generation):  n = Fosc / rate / 4 - 1
         // 115200 @  4 MHz:  4000000 / 115200 / 4 - 1 =   8 (0x08)
         // 115200 @  8 MHz:  8000000 / 115200 / 4 - 1 =  16 (0x10)
         // 115200 @ 48 MHz: 48000000 / 115200 / 4 - 1 = 103 (0x67)
+		// 1000000 @ 48 MHz: 48000000 / 1000000 / 4 - 1 = 11 (0x0B)
 		#define USART_TRIS      TRISAbits.TRISA5
         #define USART_INIT_PINS() { USART_TRIS = 0; }
     
@@ -304,7 +318,14 @@
                                 SPBRGH2 = 0x00;\
                                 BAUDCON2 = 0x08;\
                             }
-
+        #define USARTStartup1MBaud() {\
+                                USART_INIT_PINS();\
+                                TXSTA2 = 0x24;\
+                                RCSTA2 = 0x90;\
+                                SPBRG2 = 0x0B; /* BAUD */ \
+                                SPBRGH2 = 0x00;\
+                                BAUDCON2 = 0x08;\
+                            }
 		// USART_DT2 -- RP2/RA5 as TX2/CK2 EUSART2 Asynchronous Transmit
 		#define USART_REMAP_PINS() { RPOR2 = 5; }
 
@@ -352,11 +373,11 @@
                               
 	// Expansion board I2C configuration
 	// -- (additional pin: TEDDI = power-down; GYRO = interrupt;)
-	#if defined(DEBUG_USART2_TX) && (DEVICE_TYPE == 2 || DEVICE_TYPE == 3)
+	#if (defined(DEBUG_USART2_TX) || defined(UART2_DATA_OUTPUT)) && (DEVICE_TYPE == 2 || DEVICE_TYPE == 3 || DEVICE_TYPE == 4)
 		#error "Cannot use USART debugging with the expansion board."
 	#endif
 
-#if (DEVICE_TYPE==3)
+#if (DEVICE_TYPE==4)		// TEDDI
 	#define PeripheralEn		LATAbits.LATA5
     #define EXP_INIT_PINS()     { mySCL = 1; mySCLd = 0; mySDAw=0; mySDAd=1; ANCON0bits.PCFG4 = 1; PeripheralEn = 0; TRISAbits.TRISA5 = 0; }
 #endif
@@ -377,6 +398,44 @@
 	#define GYRO_INT2_IEDG		INTCON2bits.INTEDG3
 	#define GYRO_REMAP_PINS() { RPINR3 = 2; }
     #define GYRO_INIT_PINS()  { mySCL = 1; mySCLd = 0; mySDAw=0; mySDAd=1; ANCON0bits.PCFG4 = 1; GYRO_INT2_IEDG = 1; GYRO_INT2_IP = 0; GYRO_INT2_IE = 0; GYRO_INT2_TRIS = 1; GYRO_INT2_IF = 0; }
+
+
+	// WAX 'motor' - spare pin is RP2 / RA5 / AN4	
+	// RP2/RA5 as P1A ECCP1 PWM Channel A (14/15/16/17 = P1A/P1B/P1C/P1D ECCP1 PWM Channel A/B/C/D; 18/19/20/21 = P2A/P2B/P2C/P2D ECCP2 PWM Channel A/B/C/D)
+	#ifdef MOTOR_DEVICE
+		#ifdef MOTOR_BINARY
+			#warning "Binary motor output (non-PWM)"
+			#define MOTOR_REMAP_PINS() { ; }
+		    #define MOTOR_INIT() { MOTOR_OFF(); }
+		    #define MOTOR_ON() { LATAbits.LATA5 = 1; TRISAbits.TRISA5 = 0; }
+			#define MOTOR_OFF() { LATAbits.LATA5 = 0; TRISAbits.TRISA5 = 0; }
+			#define MOTOR_SET_DUTY(_v)	{ LATAbits.LATA5 = ((_v) < 0x80) ? 0 : 1; TRISAbits.TRISA5 = 0; }
+			#define MOTOR_GET_DUTY(_v)	(LATAbits.LATA5 ? 0xff : 0x00)
+		#else
+			#define MOTOR_REMAP_PINS() { RPOR2 = 14; }
+		    #define MOTOR_INIT() { \
+					LATAbits.LATA5 = 0;							/* Zero output port -- but as the P1A is mapped to this pin, this won't have any effect */ \
+					TRISAbits.TRISA5 = 0;  						/* Ensure pin is an output */ \
+					PR2 = 0xff; 								/* PWM Period = (PR2 + 1) * 4 * Tosc * (TMR2prescale) */ \
+					CCPR1L = 0; 								/* PWM Duty = ((CCPR1L << 2) | CCP1CON<5:4>) * Tosc * (TMR2prescale) */ \
+					T2CON = 0b00000111;							/* Enable Timer2 -- When TMR2 = PR2, TMR2 = 0, CCP1 pin set (unless duty = 0%), duty cycle latched from CCPR1L to CCPR1H (Timer2 postscaler not used for PWM). */ \
+					CCP1CON = 0b00001100; 						/* Configure the CCP1 module for PWM operation -- PWM, all active high */ \
+			   } 
+		    #define MOTOR_ON() { CCPR1L = 0xff; }
+			#define MOTOR_OFF() { \
+					LATAbits.LATA5 = 0;							/* Zero output port -- but as the P1A is mapped to this pin, this won't have any effect */ \
+					TRISAbits.TRISA5 = 0;  						/* Ensure pin is an output */ \
+					CCPR1L = 0;									/* Set duty to 0% */ \
+					CCP1CON = 0; 								/* Disable PWM output */ \
+					T2CON = 0;									/* Disable timer for PWM */ \
+				} 
+			#define MOTOR_SET_DUTY(_v)	{ CCPR1L = (_v); }
+			#define MOTOR_GET_DUTY(_v)	(CCPR1L)
+		#endif
+		
+	#endif
+
+// clockSpeed = OSCTUNEbits.PLLEN ? 48 : 8;
 
     // RF module interface (from Zena Stack Configuration for MiWi protocol)
     #define TMRL                TMR0L
@@ -456,7 +515,7 @@
 			
 	#define		SIMPLE_INIT_ALL()			{\
 									ANCON0 = 0xFF;/*All digital*/\
-									ANCON1 = 0x0F;/*Bandgap ref off*/\
+									ANCON1 = 0x0F;/*Bandgap ref off  -- [dgj] Shouldn't this be 0x1f ? */\
 									BATT_NCHARGING_TRIS = 1;\
 									USB_BUS_SENSE_TRIS = 1;\
 									LED_INIT_PINS();\

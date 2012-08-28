@@ -16,41 +16,41 @@
         <itemPath>../HardwareProfile-WAX2.1.h</itemPath>
       </logicalFolder>
       <logicalFolder name="Common" displayName="Common" projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/GenericTypeDefs.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Compiler.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/Console.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/TimeDelay.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MSPI.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/GenericTypeDefs.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Compiler.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/Console.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/TimeDelay.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/MSPI.h</itemPath>
       </logicalFolder>
       <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_hal_pic18.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_ch9.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_common.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_device.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_function_cdc.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB/usb_hal.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb_hal_pic18.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb_ch9.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb_common.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb_device.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb_function_cdc.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB/usb_hal.h</itemPath>
       </logicalFolder>
       <logicalFolder name="WirelessProtocols"
                      displayName="WirelessProtocols"
                      projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi/ConfigMiWi.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P/ConfigP2P.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MCHP_API.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi/MiWi.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/NVM.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P/P2P.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/SymbolTime.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/MiWi/ConfigMiWi.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/P2P/ConfigP2P.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/MCHP_API.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/MiWi/MiWi.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/NVM.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/P2P/P2P.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/SymbolTime.h</itemPath>
       </logicalFolder>
       <logicalFolder name="WirelessTranceivers"
                      displayName="WirelessTranceivers"
                      projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40/ConfigMRF24J40.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/crc.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MCHP_MAC.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40/MRF24J40.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/Security.h</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/Transceivers.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/MRF24J40/ConfigMRF24J40.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/crc.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/MCHP_MAC.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/MRF24J40/MRF24J40.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/Security.h</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/Transceivers.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
@@ -82,26 +82,29 @@
         <itemPath>../c018i.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Common" displayName="Common" projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Common/TimeDelay.c</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/Console.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Common/TimeDelay.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/WirelessProtocols/Console.c</itemPath>
+        <itemPath>/c:/Program Files (x86)/Microchip/mplabc18/v3.40/src/pmc_common/Flash/WriteBytesFlash.c</itemPath>
+        <itemPath>/c:/Program Files (x86)/Microchip/mplabc18/v3.40/src/pmc_common/Flash/EraseFlash.c</itemPath>
+        <itemPath>/c:/Program Files (x86)/Microchip/mplabc18/v3.40/src/pmc_common/Flash/ReadFlash.c</itemPath>
       </logicalFolder>
       <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/USB/usb_device.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/USB/usb_device.c</itemPath>
       </logicalFolder>
       <logicalFolder name="WirelessProtocols"
                      displayName="WirelessProtocols"
                      projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/MiWi/MiWi.c</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/NVM.c</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/SymbolTime.c</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/WirelessProtocols/P2P/P2P.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/WirelessProtocols/MiWi/MiWi.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/WirelessProtocols/NVM.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/WirelessProtocols/SymbolTime.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/WirelessProtocols/P2P/P2P.c</itemPath>
       </logicalFolder>
       <logicalFolder name="WirelessTranceivers"
                      displayName="WirelessTranceivers"
                      projectFiles="true">
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/crc.c</itemPath>
-        <itemPath>../../../../../../../Microchip Solutions v2011-12-05/Microchip/Transceivers/security.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Transceivers/crc.c</itemPath>
+        <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Transceivers/security.c</itemPath>
         <itemPath>../MRF24J40.c</itemPath>
       </logicalFolder>
     </logicalFolder>
@@ -154,7 +157,7 @@
         <property key="code-model" value="mL"/>
         <property key="warning-level" value="2"/>
         <property key="extra-include-directories"
-                  value="..;/c:/mcc18/h;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/USB;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/MiWi;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/WirelessProtocols/P2P;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers/MRF24J40;../../../../../../../Microchip Solutions v2011-12-05/Microchip/Include/Transceivers;"/>
+                  value="..;/c:/mcc18/h;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/USB;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/MiWi;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/WirelessProtocols/P2P;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers/MRF24J40;../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Transceivers;/c:/Program Files (x86)/Microchip/mplabc18/v3.40/h;"/>
         <property key="enable-ow" value="true"/>
         <property key="verbose" value="false"/>
         <property key="enable-ou" value="false"/>
@@ -173,8 +176,8 @@
       </C18>
       <C18-AS>
         <property key="default.radix" value="HEX"/>
-        <property key="hex.output.format" value="INHX32"/>
         <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
         <property key="preprocessor.macros" value=""/>
         <property key="warning.level" value="0"/>
         <property key="cross.reference.file" value=""/>
@@ -184,13 +187,13 @@
         <property key="hex-output-format" value="INHX32"/>
         <property key="cod-file" value="true"/>
         <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
-        <property key="extra-lib-directories" value="../../../../../../../mcc18/lib;"/>
+        <property key="extra-lib-directories" value="../../../../../../../mcc18/lib;/c:/Program Files (x86)/Microchip/mplabc18/v3.40/lib"/>
       </C18-LD>
       <C18LanguageToolchain>
         <property key="stack-analysis-mplink" value="false"/>
-        <property key="stack-analysis-mcc18" value="false"/>
-        <property key="stack-analysis" value="false"/>
         <property key="extended-mode-mcc18" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
         <property key="extended-mode" value="false"/>
         <property key="extended-mode-mpasm" value="false"/>
         <property key="extended-mode-mplink" value="false"/>
