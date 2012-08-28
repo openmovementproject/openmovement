@@ -56,6 +56,10 @@
     #define strcasecmp _stricmp
     #define snprintf _snprintf    
 
+    /* Files */
+    #include <direct.h>
+    #define mkdir(path, mode) _mkdir(path)
+
     /* Sleep */
     #define sleep(seconds) Sleep(seconds * 1000UL)
     #define usleep(microseconds) Sleep(microseconds / 1000UL)
@@ -74,8 +78,8 @@
     /* Thread */
 	#define thread_t HANDLE
     #define thread_create(thread, attr_ignored, start_routine, arg) ((*(thread) = CreateThread(attr_ignored, 0, start_routine, arg, 0, NULL)) == NULL)
-    #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((*thread), INFINITE) != WAIT_OBJECT_0)
-    #define thread_cancel(thread) (TerminateThread(*(thread), -1) == 0)
+    #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject(thread, INFINITE) != WAIT_OBJECT_0)
+    #define thread_cancel(thread) (TerminateThread(thread, -1) == 0)
     #define thread_return_t DWORD WINAPI
     #define thread_return_value(value) ((unsigned int)(value))
 
@@ -101,6 +105,7 @@
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
+    #include <netinet/tcp.h>
     #include <netdb.h>
     #include <termios.h>
     typedef int SOCKET;
@@ -127,7 +132,7 @@
     #define mutex_lock    pthread_mutex_lock
     #define mutex_unlock  pthread_mutex_unlock
     #define mutex_destroy pthread_mutex_destroy
-    
+
 #endif
 
 
@@ -139,6 +144,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <sys/timeb.h>
+#include <sys/stat.h>
 
 
 /* USB IDs */
@@ -371,7 +377,7 @@ static size_t tcptransmit(SOCKET s, const void *sendBuffer, size_t sendLength)
 	size_t sent = 0;
 	if (sendLength > 0)
 	{
-		fprintf(stderr, "[%d]\n", sendLength);
+		fprintf(stderr, "[%d]\n", (int)sendLength);
 		/*fprintf(stderr, "DEBUG: Sending...\n");*/
 		/*hexdump(sendBuffer, sendLength);*/
 		while (sent < sendLength)
@@ -466,7 +472,7 @@ TinyStompTransmitter *TinyStompTransmitter_New(const char *host, int defaultPort
 			const char *msg = "CONNECT\r\nlogin:\r\npasscode:\r\n\r\n";
 			size_t tlen;
 			tlen = tcptransmit((SOCKET)trans->_sock, msg, strlen(msg) + 1);
-			if (tlen != strlen(msg) + 1) { fprintf(stderr, "WARNING: Problem transmitting CONNECT: %d / %d\n", tlen, strlen(msg) + 1); }
+			if (tlen != strlen(msg) + 1) { fprintf(stderr, "WARNING: Problem transmitting CONNECT: %d / %d\n", (int)tlen, (int)strlen(msg) + 1); }
 		}
 	}
 
@@ -486,7 +492,7 @@ void TinyStompTransmitter_Transmit(TinyStompTransmitter *inst, const char *desti
 	if (inst->_sock != SOCKET_ERROR)
 	{ 
 		size_t tlen = tcptransmit((SOCKET)inst->_sock, inst->_buffer, inst->_bufferPos);
-		if (tlen != inst->_bufferPos) { fprintf(stderr, "WARNING: Problem transmitting: %d / %d\n", tlen, inst->_bufferPos); }
+		if (tlen != inst->_bufferPos) { fprintf(stderr, "WARNING: Problem transmitting: %d / %d\n", (int)tlen, inst->_bufferPos); }
 	}
 	inst->_bufferPos = 0;
 }
@@ -506,7 +512,7 @@ void TinyStompTransmitter_Delete(TinyStompTransmitter *inst)
 		const char *msg = "DISCONNECT\r\n\r\n";
 		size_t tlen;
 		tlen = tcptransmit((SOCKET)inst->_sock, msg, strlen(msg) + 1);
-		if (tlen != strlen(msg) + 1) { fprintf(stderr, "WARNING: Problem transmitting DISCONNECT: %d / %d\n", tlen, strlen(msg) + 1); }
+		if (tlen != strlen(msg) + 1) { fprintf(stderr, "WARNING: Problem transmitting DISCONNECT: %d / %d\n", (int)tlen, (int)strlen(msg) + 1); }
 		closesocket(inst->_sock);
 		inst->_sock = SOCKET_ERROR;
 	}
@@ -773,7 +779,7 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
         teddiPacket.deviceId = (unsigned short)(buffer[2] | (((unsigned short)buffer[3]) << 8));
         teddiPacket.version = buffer[4];
 
-        if (((teddiPacket.version & 0x0f) == 0x03 || (teddiPacket.version & 0x0f) == 0x04) && len >= 18)
+        if (((teddiPacket.version & 0x0f) == 0x03 || (teddiPacket.version & 0x0f) == 0x05) && len >= 18)
         {
             /*
             unsigned char  reportType;          // @ 0  [1] USER_REPORT_TYPE (0x12)
@@ -792,13 +798,13 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
             unsigned char config = (unsigned char)(buffer[4] >> 4);
             unsigned short sampleInterval = 250;
             teddiPacket.sampleCount = (unsigned char)(buffer[5]);         // Sample count (default config is at 250 msec interval with an equal number of PIR and audio samples; 20 = 5 seconds)
-            teddiPacket.sequence = (unsigned short)(buffer[6] | (((unsigned short)buffer[7]) << 8));
-            teddiPacket.unsent = (unsigned short)(buffer[8] | (((unsigned short)buffer[9]) << 8));
-            teddiPacket.temp = (unsigned short)(buffer[10] | (((unsigned short)buffer[11]) << 8));
-            teddiPacket.light = (unsigned short)(buffer[12] | (((unsigned short)buffer[13]) << 8));
-            teddiPacket.battery = (unsigned short)(buffer[14] | (((unsigned short)buffer[15]) << 8));
+            teddiPacket.sequence = (unsigned short)(buffer[ 6] | (((unsigned short)buffer[ 7]) << 8));
+            teddiPacket.unsent =   (unsigned short)(buffer[ 8] | (((unsigned short)buffer[ 9]) << 8));
+            teddiPacket.temp =     (unsigned short)(buffer[10] | (((unsigned short)buffer[11]) << 8));
+            teddiPacket.light =    (unsigned short)(buffer[12] | (((unsigned short)buffer[13]) << 8));
+            teddiPacket.battery =  (unsigned short)(buffer[14] | (((unsigned short)buffer[15]) << 8));
 
-            if ((teddiPacket.version & 0x0f) >= 0x04)
+            if ((teddiPacket.version & 0x0f) >= 0x05)
             {
                 teddiPacket.humidity = (unsigned short)(buffer[16] | (((unsigned short)buffer[17]) << 8));
             }
@@ -820,11 +826,11 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
             }
 
             // Divide temp/light/battery measurement down
-            if (teddiPacket.sampleCount > 0)
+            if ((teddiPacket.version & 0x0f) <= 0x03 && teddiPacket.sampleCount > 0)
             {
-                teddiPacket.temp /= teddiPacket.sampleCount;
-                teddiPacket.light /= teddiPacket.sampleCount;
-                teddiPacket.battery /= teddiPacket.sampleCount;
+                teddiPacket.temp     /= teddiPacket.sampleCount;
+                teddiPacket.light    /= teddiPacket.sampleCount;
+                teddiPacket.battery  /= teddiPacket.sampleCount;
                 teddiPacket.humidity /= teddiPacket.sampleCount;
             }
 
@@ -881,13 +887,13 @@ const char *timestamp(unsigned long long ticks, int timeformat)
 }
 
 /* Dumps a WAX packet */
-void waxDump(WaxPacket *waxPacket, char tee, int timeformat)
+void waxDump(WaxPacket *waxPacket, FILE *ofp, char tee, int timeformat)
 {
     int i;
     for (i = 0; i < waxPacket->sampleCount; i++)
     {
         const char *timeString = timestamp(waxPacket->samples[i].timestamp, timeformat);
-        printf("ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
+        fprintf(ofp, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
         if (tee) fprintf(stderr, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
     }
     return;
@@ -895,13 +901,13 @@ void waxDump(WaxPacket *waxPacket, char tee, int timeformat)
 
 
 /* Dumps a TEDDI packet */
-void teddiDump(TeddiPacket *teddiPacket, char tee, int timeformat)
+void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee)
 {
     static char line[2048];
     static char number[16];
     int i;
 
-    sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestamp, timeformat), teddiPacket->deviceId, teddiPacket->version, 
+    sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestamp, 3), teddiPacket->deviceId, teddiPacket->version, 
                                         teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent, 
                                         teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
     for (i = 0; i < teddiPacket->sampleCount; i++)
@@ -917,8 +923,8 @@ void teddiDump(TeddiPacket *teddiPacket, char tee, int timeformat)
 
 	strcat(line, "\n");
 
-    printf(line);
-    if (tee) fprintf(stderr, line);
+    fprintf(ofp, "%s", line);
+    if (tee) fprintf(stderr, "%s", line);
     return;
 }
 
@@ -1226,8 +1232,8 @@ void ReceiveKeysStart(void)
 void ReceiveKeysStop(void)
 {
     quitReceiveKeys = 1;
-    /* thread_join(&threadReceiveKeys, NULL); */
-    thread_cancel(&threadReceiveKeys);
+    /* thread_join(threadReceiveKeys, NULL); */
+    thread_cancel(threadReceiveKeys);
 }
 
 #endif
@@ -1252,7 +1258,7 @@ thread_return_t ReceiveUdpThread(void *arg)
     struct hostent *hp;
 
     fprintf(stderr, "UDPRECV: Start\n");
-    recvBuffer = (char *)malloc(recvMaxLength + 2);
+    recvBuffer = (unsigned char *)malloc(recvMaxLength + 2);
 
     /* Get server host information, name and inet address */
     gethostname(serverName, 64);
@@ -1343,17 +1349,104 @@ void ReceiveUdpStart(int port)
 void ReceiveUdpStop(void)
 {
     quitReceiveUdp = 1;
-    /* thread_join(&threadReceiveUdp, NULL); */
-    thread_cancel(&threadReceiveUdp);
+    /* thread_join(threadReceiveUdp, NULL); */
+    thread_cancel(threadReceiveUdp);
 }
 
 #endif
 
 
+FILE *openlogfile(const char *logfile, unsigned long long ticks, unsigned long *loginterval)
+{
+    char temp[260];
+    const char *sp;
+    int o;
+    struct tm *today;
+    struct timeb tp = {0};
+    int year, month, day, hours, mins, secs;
+    int fields = 0;
+    FILE *outfp = NULL;
+    
+    tp.time = (time_t)(ticks / 1000);
+    tp.millitm = (unsigned short)(ticks % 1000);
+    tzset();
+    today = localtime(&(tp.time));
+    year = 1900 + today->tm_year;
+    month = today->tm_mon + 1;
+    day = today->tm_mday;
+    hours = today->tm_hour;
+    mins = today->tm_min;
+    secs = today->tm_sec;
+    
+    if (logfile == NULL) { *loginterval = 0; return NULL; }
+    if (logfile[0] == '\0') { *loginterval = 0; return stdout; }
+
+    sp = logfile;
+    o = 0;
+    for(;;)
+    {
+        char c;
+        
+        c = *sp++;
+        if (c == '\\' || c == '/')
+        {
+            struct stat st;
+
+            /* Make folder part */
+            temp[o] = '\0';
+            
+fprintf(stderr, "DEBUG: Creating log directory: %s\n", temp);
+
+            if (stat(temp, &st) != 0)
+            {
+                if (mkdir(temp, 0777) != 0 && errno != EEXIST)
+                {
+                    fprintf(stderr, "ERROR: Cannot make log directory: %s\n", temp);
+                    return NULL;
+                }
+            }
+            else if (!(st.st_mode & S_IFDIR))
+            {
+                fprintf(stderr, "ERROR: Path not a directory: %s\n", temp);
+                return NULL;
+            }
+
+            temp[o++] = '/';
+
+        }
+        else if (c == '\0')
+        {
+            /* Open file for append */
+            temp[o] = '\0';
+fprintf(stderr, "DEBUG: Opening log file: %s\n", temp);
+            outfp = fopen(temp, "a");
+            break;
+        }
+        else if (c == '@' && *sp == 'Y') { sp++; temp[o++] = '0' + (( year / 1000) % 10); temp[o++] = '0' + ((year / 100) % 10); temp[o++] = '0' + ((year / 10) % 10); temp[o++] = '0' + (year % 10); fields |= 1; }
+        else if (c == '@' && *sp == 'M') { sp++; temp[o++] = '0' + ((month / 10) % 10); temp[o++] = '0' + (month % 10); fields |= 2;  }
+        else if (c == '@' && *sp == 'D') { sp++; temp[o++] = '0' + ((  day / 10) % 10); temp[o++] = '0' + (  day % 10); fields |= 4; }
+        else if (c == '@' && *sp == 'h') { sp++; temp[o++] = '0' + ((hours / 10) % 10); temp[o++] = '0' + (hours % 10); fields |= 8; }
+        else if (c == '@' && *sp == 'm') { sp++; temp[o++] = '0' + (( mins / 10) % 10); temp[o++] = '0' + ( mins % 10); fields |= 16; }
+        else if (c == '@' && *sp == 's') { sp++; temp[o++] = '0' + (( secs / 10) % 10); temp[o++] = '0' + ( secs % 10); fields |= 32; }
+        else
+        {
+            /* Append standard character */
+            temp[o++] = c;
+        }
+    }
+
+    /* Calculate log interval */
+    if (fields & 32) { *loginterval = 1 * 1000ul; }                  /* Every second(!) */
+    else if (fields & 16) { *loginterval = 60 * 1000ul; }            /* Every minute */
+    else if (fields & 8) { *loginterval = 60 * 60 * 1000ul; }        /* Every hour */
+    else if (fields) { *loginterval = 24 * 60 * 60 * 1000ul; }       /* Every day */
+    
+    return outfp;
+}
 
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
-int waxrec(const char *infile, const char *host, const char *initString, char log, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, int udpReceivePort, int timeformat)
+int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, int udpReceivePort, int timeformat)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -1366,7 +1459,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
     /* Search for port */
     if (infile[0] == '!')
     {
-        unsigned long vidpid = (DEFAULT_VID << 16) | DEFAULT_PID;
+        unsigned int vidpid = (DEFAULT_VID << 16) | DEFAULT_PID;
         sscanf(infile + 1, "%08x", &vidpid);
         fprintf(stderr, "Searching for VID=%04X&PID=%04X...\n", (unsigned short)(vidpid >> 16), (unsigned short)vidpid);
         if (findPorts((unsigned short)(vidpid >> 16), (unsigned short)vidpid, ports, 1024) <= 0)
@@ -1446,11 +1539,17 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
 
         /* Read packets and transmit */
         {
+            FILE *outfp = NULL;
+            unsigned long logInterval = 0;
+            unsigned long long logOpen = 0;
             char text = 1;
+
             for (;;)
             {
                 size_t len = 0;
-
+                unsigned long long now;
+                
+                /* Read data */
                 if (text)
                 { 
                     len = lineread(fd, buffer, BUFFER_SIZE); 
@@ -1460,13 +1559,29 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                     } 
                     if (len == 0) { break; } 
                 }
-
                 if (!text)
                 { 
                     len = slipread(fd, buffer, BUFFER_SIZE);
                     if (len == 0) { break; } 
                 }
 
+                /* Get time now */
+                now = TicksNow();
+                
+                /* Close existing log file if interval recording */
+                if (logInterval && outfp != NULL && (now / (unsigned long long)logInterval) != (logOpen / (unsigned long long)logInterval))
+                {
+                    fclose(outfp);
+                    outfp = NULL;
+                }
+                
+                /* Open a log file if needed */
+                if (outfp == NULL && logfile != NULL)
+                {
+                    outfp = openlogfile(logfile, now, &logInterval);
+                    logOpen = now;
+                }
+                
                 if (text)
                 {
                     printf("%s\n", buffer);
@@ -1482,7 +1597,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                     if (waxPacket != NULL)
                     {
                         /* Output text version */
-                        if (log) { waxDump(waxPacket, tee, timeformat); }
+                        if (outfp != NULL) { waxDump(waxPacket, outfp, tee, timeformat); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -1492,7 +1607,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                             int z;
 
                             p += sprintf(p, "{");
-                            p += sprintf(p, "\"Timestamp\":\"%lu\",", waxPacket->timestamp);
+                            p += sprintf(p, "\"Timestamp\":\"%llu\",", waxPacket->timestamp);
                             p += sprintf(p, "\"DeviceId\":\"%u\",", waxPacket->deviceId);
                             p += sprintf(p, "\"SequenceId\":\"%u\",", waxPacket->sequenceId);
                             p += sprintf(p, "\"SampleCount\":\"%u\",", waxPacket->sampleCount);
@@ -1500,7 +1615,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                             p += sprintf(p, "\"Samples\":[");
                             for (z = 0; z < waxPacket->sampleCount; z++)
                             {
-                                p += sprintf(p, "[%lu,%u,%d,%d,%d]%s", waxPacket->samples[z].timestamp, waxPacket->samples[z].sampleIndex, waxPacket->samples[z].x, waxPacket->samples[z].y, waxPacket->samples[z].z, z + 1 < waxPacket->sampleCount ? "," : "");
+                                p += sprintf(p, "[%llu,%u,%d,%d,%d]%s", waxPacket->samples[z].timestamp, waxPacket->samples[z].sampleIndex, waxPacket->samples[z].x, waxPacket->samples[z].y, waxPacket->samples[z].z, z + 1 < waxPacket->sampleCount ? "," : "");
                             }
                             p += sprintf(p, "]");
 
@@ -1522,7 +1637,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                     if (teddiPacket != NULL)
                     {
                         /* Output text version */
-                        if (log) { teddiDump(teddiPacket, tee, timeformat); }
+                        if (outfp != NULL) { teddiDump(teddiPacket, outfp, tee); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -1532,7 +1647,7 @@ int waxrec(const char *infile, const char *host, const char *initString, char lo
                             int i;
                             
                             p += sprintf(p, "{");
-                            p += sprintf(p, "\"Timestamp\":\"%lu\",", teddiPacket->timestamp);
+                            p += sprintf(p, "\"Timestamp\":\"%llu\",", teddiPacket->timestamp);
                             p += sprintf(p, "\"DeviceId\":\"%u\",", teddiPacket->deviceId);
                             p += sprintf(p, "\"Version\":\"%u\",", teddiPacket->version);
                             p += sprintf(p, "\"SampleCount\":\"%u\",", teddiPacket->sampleCount);
@@ -1618,17 +1733,18 @@ int main(int argc, char *argv[])
 {
     char showHelp = 0;
     int i, argPosition = 0, ret;
-    char log = 0, tee = 0, dump = 0, timetag = 0, sendOnly = 0;
+    char tee = 0, dump = 0, timetag = 0, sendOnly = 0;
     const char *infile = NULL;
     const char *host = NULL;
     const char *initString = NULL;
-    static char stompHost[128] = ""; /* "localhost"; */
-    static char stompAddress[128] = "/topic/OpenMovement.Sensor.Wax";
+    char stompHost[128] = ""; /* "localhost"; */
+    char stompAddress[128] = "/topic/OpenMovement.Sensor.Wax";
+    const char *logfile = NULL;
     int udpReceivePort = 0;
     int timeformat = 2;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.71     by Daniel Jackson, 2011-2012\n");
+    fprintf(stderr, "V1.72     by Daniel Jackson, 2011-2012\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -1643,7 +1759,11 @@ int main(int argc, char *argv[])
         }
         else if (strcasecmp(argv[i], "-log") == 0)
         {
-            log = 1;
+            logfile = "";   /* Empty string will map to stdout */
+        }
+        else if (strcasecmp(argv[i], "-out") == 0)
+        {
+            logfile = argv[++i];
         }
         else if (strcasecmp(argv[i], "-tee") == 0)
         {
@@ -1714,11 +1834,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "        [-udprecv <port>]                      Receive UDP on the specified port.\n");
 #endif
 		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
+		fprintf(stderr, "        [-out <file.csv>]                      Output to a specific log file\n");
         fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Log example: waxrec %s -log -tee -init \"MODE=1\\r\\n\" > log.csv\n", EXAMPLE_DEVICE);
         fprintf(stderr, "OSC example: waxrec %s -osc localhost:1234 -init \"MODE=1\\r\\n\"\n", EXAMPLE_DEVICE);
         fprintf(stderr, "STOMP example: waxrec %s -stomphost localhost:61613 -stomptopic /topic/Kitchen.Sensor.Wax -init \"MODE=1\\r\\n\"\n", EXAMPLE_DEVICE);
+        fprintf(stderr, "Hourly log example: waxrec %s -out /log/@Y-@M-@D/@Y-@M-@D-@H-00-00.csv\n", EXAMPLE_DEVICE);
         fprintf(stderr, "\n");
 #ifdef _WIN32
         fprintf(stderr, "NOTE: 'device' can be '!' or '![VID+PID]' to automatically find the first matching serial port.\n");
@@ -1727,15 +1849,16 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    fprintf(stderr, "WAXREC: %s -> %s%s%s%s%s %s%s  <-%d\n", (infile == NULL) ? "<stdin>" : infile, host, (log ? " [log]" : ""), (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompHost, stompAddress, udpReceivePort);
+    fprintf(stderr, "WAXREC: %s -> %s%s%s%s %s%s  <-%d\n", (infile == NULL) ? "<stdin>" : infile, host, (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompHost, stompAddress, udpReceivePort);
     fprintf(stderr, "INIT: %s\n", initString);
 
-    ret = waxrec(infile, host, initString, log, tee, dump, timetag, sendOnly, stompHost, stompAddress, udpReceivePort, timeformat);
+    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, udpReceivePort, timeformat);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
 #endif
     return ret;
 }
+
 
 
