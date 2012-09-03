@@ -50,9 +50,9 @@ static void OmWindowsAddedCallback(void *reference, const Device &device)
 
     // Current (first returned) mount point
     std::string volumePath = device.volumePath;
-
+    
 #ifdef DEBUG_MOUNT
-OmLog("1: %s\n", volumePath.c_str());
+OmLog(1, "1: '%s'\n", volumePath.c_str());
 #endif
 
     // Mount location
@@ -66,8 +66,8 @@ OmLog("1: %s\n", volumePath.c_str());
     }
 
 #ifdef DEBUG_MOUNT
-OmLog("2: %s\n", root);
-OmLog("3: %s\n", desiredVolumePath);
+OmLog(1, "2: %s\n", root);
+OmLog(1, "3: %s\n", desiredVolumePath);
 #endif
 
     // Get existing mount points
@@ -93,13 +93,20 @@ OmLog("3: %s\n", desiredVolumePath);
         {
             hasDesiredMountPoint = 1;
         }
+        if (volumePath.length() == 0)
+        {
+            volumePath = name;
+#ifdef DEBUG_MOUNT
+OmLog(1, "1a: Found non-initial point: %s\n", volumePath.c_str());
+#endif
+        }
     }
 
     // If we don't have the desired mount point, try to add it
     if (!hasDesiredMountPoint)
     {
 #ifdef DEBUG_MOUNT
-OmLog("4: Creating desired mount point...\n");
+OmLog(1, "4: Creating desired mount point...\n");
 #endif
         // Make root folder if it doesn't exist
         if (root != NULL && root[0] != '\0')
@@ -108,12 +115,12 @@ OmLog("4: Creating desired mount point...\n");
             if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY))
             { 
 #ifdef DEBUG_MOUNT
-OmLog("5: Creating mount point root...\n");
+OmLog(1, "5: Creating mount point root...\n");
 #endif
                 if (!CreateDirectoryA(root, NULL)) 
                 { 
 #ifdef DEBUG_MOUNT
-OmLog("5a: Failed to create mount point root...\n");
+OmLog(1, "5a: Failed to create mount point root...\n");
 #endif
                     desiredVolumePath[0] = '\0'; 
                 } 
@@ -127,12 +134,12 @@ OmLog("5a: Failed to create mount point root...\n");
             if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY)) 
             { 
 #ifdef DEBUG_MOUNT
-OmLog("6: Creating mount point...\n");
+OmLog(1, "6: Creating mount point...\n");
 #endif
                 if (!CreateDirectoryA(desiredVolumePath, NULL)) 
                 { 
 #ifdef DEBUG_MOUNT
-OmLog("6a: Failed to create mount point...\n");
+OmLog(1, "6a: Failed to create mount point...\n");
 #endif
                     desiredVolumePath[0] = '\0'; 
                 } 
@@ -143,12 +150,12 @@ OmLog("6a: Failed to create mount point...\n");
         if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0')
         {
 #ifdef DEBUG_MOUNT
-OmLog("7: Setting mount point... SetVolumeMountPointA(\"%s\", \"%s\");\n", desiredVolumePath, device.volumeName.c_str());
+OmLog(1, "7: Setting mount point... SetVolumeMountPointA(\"%s\", \"%s\");\n", desiredVolumePath, device.volumeName.c_str());
 #endif
             if (SetVolumeMountPointA(desiredVolumePath, device.volumeName.c_str()))
             {
 #ifdef DEBUG_MOUNT
-OmLog("7b: Set mount point...\n");
+OmLog(1, "7b: Set mount point...\n");
 #endif
                 hasDesiredMountPoint = 1;
             }
@@ -157,10 +164,10 @@ OmLog("7b: Set mount point...\n");
                 DWORD err = GetLastError();
                 if (err == 0x00000005)
                 {
-OmLog("7a: Failed to set mount point... access denied, must run as an Administrator.\n");
+OmLog(1, "7a: Failed to set mount point... access denied, must run as an Administrator for re-mounting.\n");
                 }
 #ifdef DEBUG_MOUNT
-else OmLog("7a: Failed to set mount point... %08x\n", err);
+else OmLog(1, "7a: Failed to set mount point... %08x\n", err);
 #endif
             }
         }
@@ -171,7 +178,7 @@ else OmLog("7a: Failed to set mount point... %08x\n", err);
     {
         volumePath = desiredVolumePath;
 #ifdef DEBUG_MOUNT
-OmLog("8: Has mount point: %s\n", volumePath.c_str());
+OmLog(1, "8: Has mount point: %s\n", volumePath.c_str());
 #endif
     }
 
@@ -182,10 +189,10 @@ OmLog("8: Has mount point: %s\n", volumePath.c_str());
         //numMountPoints++;
         if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, volumePath.c_str()) != 0)
         {
-            printf("DEBUG: Un-mounting unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
+            OmLog(1, "DEBUG: Un-mounting unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
             if (!DeleteVolumeMountPointA(name))
             {
-                printf("WARNING: Failed to un-mount unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
+                OmLog(1, "WARNING: Failed to un-mount unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
             }
         }
     }

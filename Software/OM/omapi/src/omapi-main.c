@@ -59,6 +59,20 @@ int OmStartup(int version)
 {
     int i;
 
+    // Debug environment variable
+    {
+        char *omdebug;
+        omdebug = getenv("OMDEBUG");
+        if (omdebug != NULL)
+        {
+            om.debug = atoi(omdebug);
+        }
+        else
+        {
+            om.debug = OM_DEBUG_DEFAULT;
+        }
+    }
+
     // Checks
     if (om.initialized) return OM_E_NOT_VALID_STATE;
     if ((version / 100 != OM_VERSION / 100) || (version % 100 > OM_VERSION % 100)) return OM_E_FAIL;	// TODO: Better error code for any new version of the API

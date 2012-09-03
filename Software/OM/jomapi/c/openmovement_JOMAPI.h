@@ -125,6 +125,8 @@ extern "C" {
 #define openmovement_JOMAPI_OM_VALUE_TEMPERATURE_MC 108L
 #undef openmovement_JOMAPI_OM_VALUE_BATTERY_MV
 #define openmovement_JOMAPI_OM_VALUE_BATTERY_MV 110L
+#undef openmovement_JOMAPI_OM_VALUE_BATTERY_PERCENT
+#define openmovement_JOMAPI_OM_VALUE_BATTERY_PERCENT 210L
 /*
  * Class:     openmovement_JOMAPI
  * Method:    OmStartup
