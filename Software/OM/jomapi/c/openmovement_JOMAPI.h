@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 #undef openmovement_JOMAPI_OM_VERSION
-#define openmovement_JOMAPI_OM_VERSION 103L
+#define openmovement_JOMAPI_OM_VERSION 104L
 #undef openmovement_JOMAPI_OM_DEVICE_REMOVED
 #define openmovement_JOMAPI_OM_DEVICE_REMOVED 0L
 #undef openmovement_JOMAPI_OM_DEVICE_CONNECTED
