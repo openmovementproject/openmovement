@@ -44,8 +44,17 @@ public class JOM {
 
 	/** Singleton constructor */
 	private JOM() {
+		int result;
 		System.out.println("JOM: OmStartup()");
-		JOMAPI.OmStartup(JOMAPI.OM_VERSION);
+		result = JOMAPI.OmStartup(JOMAPI.OM_VERSION);
+		if (result < 0)
+		{
+			System.out.println("JOM: Error during OmStartup() = " + result);
+		}
+		else
+		{
+			System.out.println("JOM: ...OK");
+		}
 		return;
 	}
 
@@ -64,6 +73,7 @@ public class JOM {
 		// NOTE: This is not the recommended method for finding devices, should use a callback instead
 		int[] deviceIds = new int[0x10000];
 		int numDevices = JOMAPI.OmGetDeviceIds(deviceIds, deviceIds.length);
+		System.out.println("= " + numDevices + " device(s)");
 		for (int i = 0; i < numDevices; i++) {
 			System.out.println("#" + i + " found device");
 		}
