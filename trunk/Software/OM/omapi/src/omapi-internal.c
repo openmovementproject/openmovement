@@ -36,9 +36,10 @@ OmState om = {0};
 
 
 /** Log text to the current log stream. */
-int OmLog(const char *format, ...)
+int OmLog(int level, const char *format, ...)
 {
     int ret = -1;
+    if (om.debug < level) { return -1; }
     if (om.log != NULL)
     {
         va_list args;
@@ -68,8 +69,8 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
         unsigned short serialNumber;
         OmDeviceState *deviceState;
 
-        if (inSerialNumber > OM_MAX_SERIAL) { OmLog("WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
-        if (volumePath == NULL || volumePath[0] == '\0') { OmLog("WARNING: Ignoring added device with no mount point (%u)\n", inSerialNumber); return; }
+        if (inSerialNumber > OM_MAX_SERIAL) { OmLog(0, "WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
+        if (volumePath == NULL || volumePath[0] == '\0') { OmLog(0, "WARNING: Ignoring added device with no mount point (%u)\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
         // Get the current OmDeviceState structure, or make one if it doesn't exist
@@ -80,14 +81,14 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
             deviceState = (OmDeviceState *)malloc(sizeof(OmDeviceState));
             if (deviceState == NULL)
             {
-                OmLog("WARNING: Cannot add new device %u - out of memory.\n", inSerialNumber); 
+                OmLog(0, "ERROR: Cannot add new device %u - out of memory.\n", inSerialNumber); 
                 return;
             }
             memset(deviceState, 0, sizeof(OmDeviceState));
             deviceState->fd = -1;
         }
 
-OmLog("DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
+OmLog(0, "DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
 
         // Update the OmDeviceState structure
         deviceState->id = serialNumber;
@@ -113,10 +114,10 @@ OmLog("DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
         unsigned short serialNumber;
         OmDeviceState *deviceState;
 
-        if (inSerialNumber > OM_MAX_SERIAL) { OmLog("WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
+        if (inSerialNumber > OM_MAX_SERIAL) { OmLog(0, "WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
-OmLog("DEBUG: Device removed: %d\n", serialNumber);
+OmLog(0, "DEBUG: Device removed: %d\n", serialNumber);
 
         // Get the current OmDeviceState structure
         deviceState = om.devices[serialNumber];
@@ -413,7 +414,7 @@ static int OmPortOpen(const char *infile, char writeable)
         fd = open(infile, flags);
         if (fd < 0)
         {
-            OmLog("ERROR: Problem opening input: %s\n", infile);
+            OmLog(0, "ERROR: Problem opening input: %s\n", infile);
             return -1;
         }
 
@@ -427,14 +428,14 @@ static int OmPortOpen(const char *infile, char writeable)
             hSerial = (HANDLE)_get_osfhandle(fd);
             if (hSerial == INVALID_HANDLE_VALUE)
             {
-                OmLog("ERROR: Failed to get HANDLE from file.\n");
+                OmLog(0, "ERROR: Failed to get HANDLE from file.\n");
             }
             else
             {
                 dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
                 if (!GetCommState(hSerial, &dcbSerialParams))
                 {
-                    OmLog("ERROR: GetCommState() failed.\n");
+                    OmLog(0, "ERROR: GetCommState() failed.\n");
                 }
                 else
                 {
@@ -443,7 +444,7 @@ static int OmPortOpen(const char *infile, char writeable)
                     dcbSerialParams.StopBits = ONESTOPBIT;
                     dcbSerialParams.Parity = NOPARITY;
                     if (!SetCommState(hSerial, &dcbSerialParams)){
-                        OmLog("ERROR: SetCommState() failed.\n");
+                        OmLog(0, "ERROR: SetCommState() failed.\n");
                     };
                 }
 
@@ -454,7 +455,7 @@ static int OmPortOpen(const char *infile, char writeable)
                 timeouts.WriteTotalTimeoutMultiplier = 0;
                 if (!SetCommTimeouts(hSerial, &timeouts))
                 {
-                    OmLog("ERROR: SetCommTimeouts() failed.\n");
+                    OmLog(0, "ERROR: SetCommTimeouts() failed.\n");
                 }
             }
         }
@@ -484,27 +485,36 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
     unsigned char c;
     int fd;
 
+    OmLog(3, "OmPortReadLine(%d, _,%d, %d);", deviceId, len, timeout);
+
     if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
     fd = om.devices[deviceId]->fd;
     if (fd < 0) { return -1; }
     if (inBuffer != NULL) { inBuffer[0] = '\0'; }
     for (;;)
     {
+        unsigned long elapsed;
+
         c = -1;
         read(fd, &c, 1);
 
-        if (timeout > 0 && OmMilliseconds() - start > timeout)
+        elapsed = OmMilliseconds() - start;
+
+        if (timeout > 0 && elapsed > timeout)
         {
+OmLog(3, "- Overall timeout > %d", timeout);
             return -1; 
         }
 
         // If timeout or NULL
         if (c <= 0)
         {
+OmLog(3, "- Waiting %d / %d", elapsed, timeout);
             continue;   // try to read again until timeout
         }
         else if (c == '\r' || c == '\n')
         {
+OmLog(3, "- Done (CRLF), %d bytes", received);
             if (received > 0) { return received; }
         }
         else
@@ -513,6 +523,7 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
             {
                 if (inBuffer != NULL)
                 { 
+OmLog(4, "-<%02x>='%c'", c, c);
                     inBuffer[received] = (char)c; 
                     inBuffer[received + 1] = '\0'; 
                 }
@@ -531,6 +542,7 @@ int OmPortWrite(unsigned short deviceId, const char *command)
     fd = om.devices[deviceId]->fd;
     if (fd < 0) { return OM_E_FAIL; }
     if (command == NULL) { return OM_E_POINTER; }
+OmLog(3, "OmPortWrite(%d, \"%s\");", deviceId, command);
     if (write(fd, command, strlen(command)) != strlen(command)) { return OM_E_FAIL; }
     return OM_OK;
 }

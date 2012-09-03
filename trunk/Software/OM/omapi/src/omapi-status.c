@@ -326,6 +326,8 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
         for (i = 0; i < parseMax; i++) { parseParts[i] = NULL; }
     }
 
+OmLog(3, "OmCommand(%d, \"%s\", _, _, \"%s\", %d, _, _);", deviceId, command, expected, timeoutMs);
+
     // (Checks the system and device state first, then) acquire the lock and open the port
     status = OmPortAcquire(deviceId);
     if (OM_FAILED(status)) return status; 
@@ -337,13 +339,17 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
         // Flush any existing incoming data (seems to cause some problem on Linux?)
         {
             char c;
+            int num = 0;
+OmLog(4, "- Flush start");
             for(;;)
             {
                 unsigned long ret = -1;
                 ret = read(om.devices[deviceId]->fd, &c, 1);
                 if (ret != 1) { break; }
+                num++;
                 if (OmMilliseconds() - start > 5000) { OmPortRelease(deviceId); return OM_E_UNEXPECTED_RESPONSE; }   // e.g. if in streaming mode, will not stop producing data
             }
+OmLog(4, "- Flush done (%d bytes)", num);
         }
 #endif
 
@@ -364,25 +370,40 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
     for (;;)
     {
         int len;
+        unsigned long elapsed;
         char *p = buffer + offset;
         if (buffer != NULL) { *p = '\0'; }
         //if (offset >= bufferSize - 1) break;                                // Ignore filled output buffer, wait for timeout or expected response
-        len = OmPortReadLine(deviceId, p, bufferSize - offset - 1, 100);  // 100 msec timeout for each line (actual value affected by port timeout)
-        if (OmMilliseconds() - start > timeoutMs) { break; }                // Overall timeout supplied by caller
+        elapsed = OmMilliseconds() - start;
+        if (elapsed > timeoutMs)
+        {
+            // Overall timeout supplied by caller
+OmLog(2, "- Overall command timeout (%d)", timeoutMs);
+            break;
+        }                // Overall timeout supplied by caller
+        len = OmPortReadLine(deviceId, p, bufferSize - offset - 1, timeoutMs - elapsed);  // Timeout (actual value affected by port timeout)
         if (len > 0 && buffer != NULL)
         {
             p[len] = '\0'; 
+OmLog(2, "- Read line: \"%s\"", p);
 #ifdef DEBUG_COMMANDS
         printf("<<< '%s'\n", p);
 #endif
             offset += len;
-            if (expected != NULL && strncmp(expected, p, strlen(expected)) == 0) { expectedPosition = p; break; }       // Expected prefix found
+            if (expected != NULL && strncmp(expected, p, strlen(expected)) == 0)
+            {
+                // Expected prefix found
+OmLog(2, "- Expected prefix found: \"%s\"", expected);
+                expectedPosition = p;
+                break;
+            }
 
             // Error found
-            if (strncmp(expected, "ERROR:", 6) == 0)
+            if (strncmp(p, "ERROR:", 6) == 0)
             {
-                if (strncmp(expected, "ERROR: Locked.", 14) == 0) { return OM_E_LOCKED; }                    // Device locked
-                if (strncmp(expected, "ERROR: Unknown command:", 23) == 0) { return OM_E_NOT_IMPLEMENTED; }  // Command not implemented
+OmLog(2, "- Error found: \"%s\"", p);
+                if (strncmp(p, "ERROR: Locked.", 14) == 0) { return OM_E_LOCKED; }                    // Device locked
+                if (strncmp(p, "ERROR: Unknown command:", 23) == 0) { return OM_E_NOT_IMPLEMENTED; }  // Command not implemented
                 // Other error found
                 return OM_E_FAIL;
             }

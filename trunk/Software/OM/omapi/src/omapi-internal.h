@@ -136,6 +136,7 @@ extern "C" {
 
 /** Data block size in bytes */
 #define OM_BLOCK_SIZE 512
+#define OM_DEBUG_DEFAULT 1
 
 // Helpful command macros
 #define OM_COMMAND(deviceId, output, response, expected, timeout, parts)  OmCommand(deviceId, output, response, sizeof(response)/sizeof(response[0]), expected, timeout, parts, sizeof(parts)/sizeof(parts[0]))
@@ -180,6 +181,7 @@ typedef struct
     // Status
     int initialized;                    /**< API initialized flag */
     int apiVersion;                     /**< Requested API version number. Where supported, this can be used to emulate earlier behaviour. */
+    int debug;                          /**< Debug level */
     FILE *log;                          /**< Output log stream */
     char logSet;                        /**< Flag indicating the log stream has been redirected */
 
@@ -215,7 +217,7 @@ extern OmState om;
 
 
 /** Log text to the current log stream. */
-int OmLog(const char *format, ...);
+int OmLog(int level, const char *format, ...);
 
 /** Device discovery start */
 void OmDeviceDiscoveryStart(void);
