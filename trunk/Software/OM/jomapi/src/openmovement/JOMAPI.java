@@ -100,7 +100,7 @@ public class JOMAPI {
 	
 	
 	// JNI functions
-	public static final int OM_VERSION = 103;      // Must match the library version
+	public static final int OM_VERSION = 104;      // Must match the library version
 	public native static int OmStartup(int version);
 	public native static int OmShutdown();
 	public native static int OmSetLogStream(int fd);
