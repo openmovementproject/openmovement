@@ -60,7 +60,11 @@ IF ERRORLEVEL 1 GOTO ERROR
 
 :RUN_TEST
 ECHO Running test program...
-java.exe -Djava.library.path="./bin" -jar lib\JOMAPI.jar openmovement.JOM
+
+SET JAVA=java.exe
+IF %COMPUTERNAME%-%PLATFORM%==DINGO-x86 set JAVA=C:\Program Files (x86)\Java\jre6\bin\java.exe
+
+"%JAVA%" -Djava.library.path="./bin" -jar lib\JOMAPI.jar openmovement.JOM
 IF ERRORLEVEL 1 GOTO ERROR
 GOTO END
 
