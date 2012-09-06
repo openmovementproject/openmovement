@@ -3,8 +3,8 @@
 [Setup]
 AppId={{35C03686-D04D-4807-A60C-52B03087436C}
 AppName=OmGui
-AppVersion=1.0.0.4
-AppVerName=OmGui Beta 4
+AppVersion=1.0.0.6
+AppVerName=OmGui Beta 6
 DefaultDirName={pf}\OmGui
 DefaultGroupName=OmGui
 AllowNoIcons=yes
@@ -34,6 +34,8 @@ Source: "bin\Release\libomapi.dll"; DestDir: "{app}"; Flags: ignoreversion
 ;Source: "convert\convert-all.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Resources\uninstall.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "drivers\MSD_CDC.inf"; DestDir: "{win}\inf"; Flags: ignoreversion
+;Source: "drivers\mchp_MSD_CDC.inf"; DestDir: "{win}\inf"; Flags: ignoreversion
+;Source: "drivers\mchp_msd_cdc.cat"; DestDir: "{win}\inf"; Flags: ignoreversion
 ;Source: "data\*"; DestDir: "{app}\data"; Excludes: ".svn,Thumbs.db"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
@@ -44,7 +46,7 @@ Name: "{commondesktop}\OmGui"; Filename: "{app}\OmGui.exe"; WorkingDir: "{app}";
 ;Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\OmGui"; Filename: "{app}\OmGui.exe"; WorkingDir: "{app}"; Tasks: quicklaunchicon
 
 [Run]
-;Filename: "rundll32"; Parameters: "advpack.dll,LaunchINFSectionEx {app}\drivers\MSD_CDC.inf,,,"; StatusMsg: "Installing driver..."
+;Filename: "rundll32"; Parameters: "advpack.dll,LaunchINFSectionEx {win}\inf\MSD_CDC.inf,,,"; StatusMsg: "Installing driver..."
 Filename: "{app}\OmGui.exe"; WorkingDir: "{app}"; Description: "{cm:LaunchProgram,OmGui}"; Flags: nowait postinstall skipifsilent
 
 [CustomMessages]
