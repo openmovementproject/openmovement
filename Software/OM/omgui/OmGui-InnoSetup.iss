@@ -47,6 +47,8 @@ Name: "{commondesktop}\OmGui"; Filename: "{app}\OmGui.exe"; WorkingDir: "{app}";
 ;Filename: "rundll32"; Parameters: "advpack.dll,LaunchINFSectionEx {app}\drivers\MSD_CDC.inf,,,"; StatusMsg: "Installing driver..."
 Filename: "{app}\OmGui.exe"; WorkingDir: "{app}"; Description: "{cm:LaunchProgram,OmGui}"; Flags: nowait postinstall skipifsilent
 
+[CustomMessages]
+InstallDotNet=Download and install the required runtime for Microsoft .NET 3.5?
 
 [Code]
 const
