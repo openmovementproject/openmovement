@@ -443,6 +443,7 @@ static int OmPortOpen(const char *infile, char writeable)
                     dcbSerialParams.ByteSize = 8;
                     dcbSerialParams.StopBits = ONESTOPBIT;
                     dcbSerialParams.Parity = NOPARITY;
+//dcbSerialParams.
                     if (!SetCommState(hSerial, &dcbSerialParams)){
                         OmLog(0, "ERROR: SetCommState() failed.\n");
                     };
@@ -496,7 +497,7 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
         unsigned long elapsed;
 
         c = -1;
-        read(fd, &c, 1);
+        if (read(fd, &c, 1) < 1) { c = -1; }
 
         elapsed = OmMilliseconds() - start;
 
@@ -521,11 +522,17 @@ OmLog(3, "- Done (CRLF), %d bytes", received);
         {
             if (received < len - 1)
             {
-                if (inBuffer != NULL)
-                { 
-OmLog(4, "-<%02x>='%c'", c, c);
-                    inBuffer[received] = (char)c; 
-                    inBuffer[received + 1] = '\0'; 
+                if (c == 0xff)
+                {
+OmLog(4, "-t/o");
+                }
+                else
+                {
+                    if (inBuffer != NULL)
+                    { 
+                        inBuffer[received] = (char)c; 
+                        inBuffer[received + 1] = '\0'; 
+                    }
                 }
             }
             received++;
