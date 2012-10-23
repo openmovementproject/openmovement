@@ -329,6 +329,28 @@ int main(int argc, char *argv[])
                         c = *p++; 
                         if (c == 'r') { c = '\r'; }
                         if (c == 'n') { c = '\n'; }
+                        if (c == 'x')
+						{
+							if (((p[0] >= '0' && p[0] <= '9') && ((p[0] >= 'a' && p[0] <= 'f') || (p[0] >= 'A' && p[0] <= 'F')))
+							 && ((p[1] >= '0' && p[1] <= '9') && ((p[1] >= 'a' && p[1] <= 'f') || (p[1] >= 'A' && p[1] <= 'F'))))
+							{
+								c = 0;
+								
+								if (*p >= 'A' && *p <= 'F') { c |= *p - 'A' + 10; }
+								else if (*p >= 'a' && *p <= 'f') { c |= *p - 'a' + 10; }
+								else { c |= *p - '0'; }
+								p++;
+
+								c <<= 4;
+								if (*p >= 'A' && *p <= 'F') { c |= *p - 'A' + 10; }
+								else if (*p >= 'a' && *p <= 'f') { c |= *p - 'a' + 10; }
+								else { c |= *p - '0'; }
+								p++;
+								
+								buffer[o++] = c;		// Allow NULL writes
+								continue;
+							}
+						}
                     }
                     if (c == '\0') { break; }
                     buffer[o++] = c;
