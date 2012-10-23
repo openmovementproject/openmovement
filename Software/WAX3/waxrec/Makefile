@@ -1,4 +1,6 @@
 # Makefile
+#
+# With threads:  -lpthread
 
 CC=gcc
 
