@@ -402,8 +402,9 @@ OmLog(2, "- Expected prefix found: \"%s\"", expected);
             if (strncmp(p, "ERROR:", 6) == 0)
             {
 OmLog(2, "- Error found: \"%s\"", p);
-                if (strncmp(p, "ERROR: Locked.", 14) == 0) { return OM_E_LOCKED; }                    // Device locked
-                if (strncmp(p, "ERROR: Unknown command:", 23) == 0) { return OM_E_NOT_IMPLEMENTED; }  // Command not implemented
+                if (strncmp(p, "ERROR: Locked.", 14) == 0) { OmPortRelease(deviceId); return OM_E_LOCKED; }                    // Device locked
+                if (strncmp(p, "ERROR: Unknown command:", 23) == 0) { OmPortRelease(deviceId); return OM_E_NOT_IMPLEMENTED; }  // Command not implemented
+                OmPortRelease(deviceId); 
                 // Other error found
                 return OM_E_FAIL;
             }
