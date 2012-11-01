@@ -27,5 +27,6 @@ Drivers:
 
 == Firmware Binaries ==
 
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.6-Firmware-30.zip AX3 r1.6 Firmware 30]
+Firmware binaries: ([http://code.google.com/p/openmovement/downloads/detail?name=BootLoader-Win.zip Bootloader] required)
+
   * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-30.zip AX3 r1.7 Firmware 30]
