@@ -483,7 +483,8 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
 {
     unsigned long start = OmMilliseconds();
     int received = 0;
-    unsigned char c;
+    unsigned char cc;
+    int c;
     int fd;
 
     OmLog(3, "OmPortReadLine(%d, _,%d, %d);", deviceId, len, timeout);
@@ -496,8 +497,9 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
     {
         unsigned long elapsed;
 
-        c = -1;
-        if (read(fd, &c, 1) < 1) { c = -1; }
+        // Read character
+        c = -1; cc = 0;
+        if (read(fd, &cc, 1) == 1) { c = cc; }
 
         elapsed = OmMilliseconds() - start;
 
@@ -507,35 +509,33 @@ OmLog(3, "- Overall timeout > %d", timeout);
             return -1; 
         }
 
-        // If timeout or NULL
+        // If timeout (or NULL)
         if (c <= 0)
         {
-OmLog(3, "- Waiting %d / %d", elapsed, timeout);
+OmLog(3, "-T/O(%d/%d)", elapsed, timeout);
             continue;   // try to read again until timeout
         }
         else if (c == '\r' || c == '\n')
         {
+OmLog(5, "[CRLF]", c);    // For extreme logging
+            if (received > 0)
+            {
 OmLog(3, "- Done (CRLF), %d bytes", received);
-            if (received > 0) { return received; }
+                return received;
+            }
         }
         else
         {
+OmLog(5, "[%c]", c);    // For extreme logging
             if (received < len - 1)
             {
-                if (c == 0xff)
-                {
-OmLog(4, "-t/o");
+                if (inBuffer != NULL)
+                { 
+                    inBuffer[received] = (char)c; 
+                    inBuffer[received + 1] = '\0';
                 }
-                else
-                {
-                    if (inBuffer != NULL)
-                    { 
-                        inBuffer[received] = (char)c; 
-                        inBuffer[received + 1] = '\0'; 
-                    }
-                }
+                received++;
             }
-            received++;
         }
     }
 }
