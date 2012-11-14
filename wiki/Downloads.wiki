@@ -21,7 +21,7 @@ Some of these utilities require the [http://www.microsoft.com/download/en/detail
 
 Drivers:
 
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Driver-Win-2.zip AX3 Driver (Windows) r2]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Driver-Win-3.zip AX3 Driver (Windows) r3]
   * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-Driver-Win.zip WAX3 Driver (Windows)]
 
 
