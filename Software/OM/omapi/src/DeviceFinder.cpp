@@ -31,7 +31,7 @@
 // TODO: The big messy mixture of char strings, wchar_t strings, std::string, etc. needs a lot of tidying up!
 
 
-//#define DEBUG_PRINT
+#define DEBUG_PRINT
 
 #ifndef _WIN32
 #error "Windows-specific code."
@@ -622,7 +622,7 @@ bool DeviceFinder::MappingUsbstorToDeviceNumber(std::map<std::string, int>& usbS
             //DiskDriveToLogicalDrive(deviceId);
 
 #ifdef DEBUG_PRINT
-            Log(2, "[USBSTOR->DEVICENUMBER] %s -> %u\n", usbstorId, deviceNumber);
+            Log(2, "[USBSTOR->DEVICEID->DEVICENUMBER] %s -> %s -> %u\n", usbstorId, deviceId, deviceNumber);
 #endif
             usbStorToDeviceMap[usbstorId] = deviceNumber;
 
@@ -656,16 +656,28 @@ bool DeviceFinder::MappingDeviceNumberToPhysicalVolume(std::map<int, std::string
         {
             unsigned int volumeDeviceNumber = GetDeviceNumber(devInterfaceDetail->DevicePath);
             // If we don't already have a volume for this device...            
+#define DGJ_FIX
+#ifndef DGJ_FIX
             if (deviceNumberToPhysicalVolumeMap.find(volumeDeviceNumber) == deviceNumberToPhysicalVolumeMap.end()) 
+#endif
             {
                 wchar_t buf[MAX_PATH + 1];
                 DWORD type, len;
                 if (SetupDiGetDeviceRegistryPropertyW(devInfoSet, &devInfoData, SPDRP_PHYSICAL_DEVICE_OBJECT_NAME, &type, (unsigned char *)buf, MAX_PATH, &len)) 
                 {
+                    char dp[MAX_PATH + 1];
+                    wcstombs(dp, devInterfaceDetail->DevicePath, MAX_PATH);
+
                     char physicalVolume[MAX_PATH + 1];
                     wcstombs(physicalVolume, buf, MAX_PATH);
 #ifdef DEBUG_PRINT
-    Log(2, "[DEVICE->PHYSICALVOLUME] %u -> %s\n", volumeDeviceNumber, physicalVolume);
+    Log(2, "[DEVICE->PHYSICALVOLUME] %u [%s] -> %s\n", volumeDeviceNumber, dp, physicalVolume);
+#endif
+#ifdef DGJ_FIX
+    // TODO: Match on USBSTOR "USBSTOR\DISK&VEN_AX3&PROD_AX3_MASS_STORAGE&REV_0017\8&10A9691A&0&CWA17_01808&0"
+    //       ...the devicePath has a prefix "\\?\storage#volume#_??_" and is the same as the USBSTOR but in lower-case and '\' substituted for '#', then ends with "#{GUID}#{GUID}"
+// TEMPORARY HACK: If we don't have a mapping, or this one seems better
+if (deviceNumberToPhysicalVolumeMap.find(volumeDeviceNumber) == deviceNumberToPhysicalVolumeMap.end() || strstr(dp, "&ven_ax3&") != NULL) 
 #endif
                     deviceNumberToPhysicalVolumeMap[volumeDeviceNumber] = physicalVolume;
                 }
@@ -691,6 +703,11 @@ bool DeviceFinder::MappingPhysicalVolumeToVolumeName(std::map<std::string, std::
         if (volumeNameW[0] != L'\\' || volumeNameW[1] != L'\\' || volumeNameW[2] != L'?' || volumeNameW[3] != L'\\' || volumeNameW[index] != L'\\') 
         {
             // error, expected prefix missing
+#ifdef DEBUG_PRINT
+            char volumeName[MAX_PATH];
+            wcstombs(volumeName, volumeNameW, MAX_PATH);
+            Log(2, "[PHYSICALVOLUME->VOLUMENAME volume-name non-matched, skipped] %s\n", volumeName);
+#endif
         }
         else
         {
@@ -699,16 +716,44 @@ bool DeviceFinder::MappingPhysicalVolumeToVolumeName(std::map<std::string, std::
 
             // Get physical volume name
             wchar_t physicalVolumeW[MAX_PATH] = L"";
-            physicalVolumeW[0] = L'\0';
+            physicalVolumeW[0] = L'\0'; physicalVolumeW[1] = L'\0'; // Empty return list
             volumeNameW[index] = L'\0';     // Remove trailing backslash for QueryDosDevice
             DWORD count = QueryDosDeviceW(&volumeNameW[4], physicalVolumeW, sizeof(physicalVolumeW)/sizeof(physicalVolumeW[0])); 
             volumeNameW[index] = L'\\';     // Replace trailing backslash
-            char physicalVolume[MAX_PATH];
-            wcstombs(physicalVolume, physicalVolumeW, MAX_PATH);
 
+            char physicalVolume[MAX_PATH];
+            physicalVolume[0] = '\0';
+
+            int pvcount = 0;
+            wchar_t *pv;
+            for (pv = physicalVolumeW; *pv != L'\0'; pv += wcslen(pv))
+            {
+                if (physicalVolume[0] == '\0')
+                {
+                    wcstombs(physicalVolume, pv, MAX_PATH);
+                    Log(2, "[PHYSICALVOLUME->VOLUMENAME] Using #%d %s -> %s\n", pvcount, physicalVolume, volumeName);
+                }
+                else
+                {
 #ifdef DEBUG_PRINT
-            Log(2, "[PHYSICALVOLUME->VOLUMENAME] %s -> %s\n", physicalVolume, volumeName);
+                    char pva[MAX_PATH];
+                    wcstombs(pva, pv, MAX_PATH);
+                    Log(2, "[PHYSICALVOLUME->VOLUMENAME] Other #%d %s -> %s\n", pvcount, pva, volumeName);
 #endif
+                    ;
+                }
+                pvcount++;
+            }
+
+            // Check for no mapping
+            if (physicalVolume[0] == '\0')
+            {
+#ifdef DEBUG_PRINT
+            Log(2, "[PHYSICALVOLUME->VOLUMENAME] <none> -> %s\n", volumeName);
+#endif
+                ;
+            }
+
             physicalVolumeToVolumeNameMap[physicalVolume] = volumeName;
         }
 
