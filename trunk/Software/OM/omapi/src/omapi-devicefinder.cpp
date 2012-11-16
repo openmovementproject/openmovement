@@ -45,161 +45,172 @@ static DeviceFinder *deviceFinder;
 /** Internal callback handler from DeviceFinder for device addition. */
 static void OmWindowsAddedCallback(void *reference, const Device &device)
 {
-    char root[128] = {0};
-    char desiredVolumePath[256] = {0};
-
     // Current (first returned) mount point
     std::string volumePath = device.volumePath;
     
 #ifdef DEBUG_MOUNT
-OmLog(1, "1: '%s'\n", volumePath.c_str());
+if (volumePath.length() == 0) OmLog(1, "1: <no-volume>\n");
+else OmLog(1, "1: '%s'\n", volumePath.c_str());
 #endif
 
-    // Mount location
-    sprintf(root, "C:\\Mount");
-
-    // Desired mount point
-    if (root != NULL && root[0] != '\0')
+    if (device.volumeName.length() == 0)
     {
-        sprintf(desiredVolumePath, "%s\\AX3_%05u\\", root, device.serialNumber);
-        //sprintf(desiredVolumePath, "%s\\%s\\", root, device.serialString);
+#ifdef DEBUG_MOUNT
+OmLog(1, "1a: Not attempting mount as device has an unknown volume path.\n");
+#endif
     }
+    else
+    {
+        char root[128] = {0};
+        char desiredVolumePath[256] = {0};
+
+        // Mount location
+        sprintf(root, "C:\\Mount");
+
+        // Desired mount point
+        if (root != NULL && root[0] != '\0')
+        {
+            sprintf(desiredVolumePath, "%s\\AX3_%05u\\", root, device.serialNumber);
+            //sprintf(desiredVolumePath, "%s\\%s\\", root, device.serialString);
+        }
 
 #ifdef DEBUG_MOUNT
 OmLog(1, "2: %s\n", root);
 OmLog(1, "3: %s\n", desiredVolumePath);
 #endif
 
-    // Get existing mount points
-    char *volumePathNames = NULL;
-    DWORD cchBufferLength = 0;
-    DWORD cchReturnLength = 0;
-    GetVolumePathNamesForVolumeNameA(device.volumeName.c_str(), volumePathNames, cchBufferLength, &cchReturnLength);
-    cchBufferLength = cchReturnLength + MAX_PATH;   // Add a bit as some comments seem to indicate that the wrong length may be returned on some Windows versions
-    volumePathNames = (char *)malloc(cchBufferLength * sizeof(char));
-    if (volumePathNames != NULL)
-    {
-        volumePathNames[0] = 0; volumePathNames[1] = 0; // Initialize as a zero-length list of strings
+        // Get existing mount points
+        char *volumePathNames = NULL;
+        DWORD cchBufferLength = 0;
+        DWORD cchReturnLength = 0;
         GetVolumePathNamesForVolumeNameA(device.volumeName.c_str(), volumePathNames, cchBufferLength, &cchReturnLength);
-    }
-
-    // Scan existing mount points
-    int numMountPoints = 0;
-    char hasDesiredMountPoint = 0;
-    for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
-    {
-        numMountPoints++;
-        if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, desiredVolumePath) == 0)
+        cchBufferLength = cchReturnLength + MAX_PATH;   // Add a bit as some comments seem to indicate that the wrong length may be returned on some Windows versions
+        volumePathNames = (char *)malloc(cchBufferLength * sizeof(char));
+        if (volumePathNames != NULL)
         {
-            hasDesiredMountPoint = 1;
+            volumePathNames[0] = 0; volumePathNames[1] = 0; // Initialize as a zero-length list of strings
+            GetVolumePathNamesForVolumeNameA(device.volumeName.c_str(), volumePathNames, cchBufferLength, &cchReturnLength);
         }
-        if (volumePath.length() == 0)
+
+        // Scan existing mount points
+        int numMountPoints = 0;
+        char hasDesiredMountPoint = 0;
+        for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
         {
-            volumePath = name;
+            numMountPoints++;
+            if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, desiredVolumePath) == 0)
+            {
+                hasDesiredMountPoint = 1;
+            }
+            if (volumePath.length() == 0)
+            {
+                volumePath = name;
 #ifdef DEBUG_MOUNT
 OmLog(1, "1a: Found non-initial point: %s\n", volumePath.c_str());
 #endif
+            }
         }
-    }
 
-    // If we don't have the desired mount point, try to add it
-    if (!hasDesiredMountPoint)
-    {
+        // If we don't have the desired mount point, try to add it
+        if (!hasDesiredMountPoint)
+        {
 #ifdef DEBUG_MOUNT
 OmLog(1, "4: Creating desired mount point...\n");
 #endif
-        // Make root folder if it doesn't exist
-        if (root != NULL && root[0] != '\0')
-        {
-            DWORD attribs = GetFileAttributesA(root);
-            if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY))
-            { 
+            // Make root folder if it doesn't exist
+            if (root != NULL && root[0] != '\0')
+            {
+                DWORD attribs = GetFileAttributesA(root);
+                if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY))
+                { 
 #ifdef DEBUG_MOUNT
 OmLog(1, "5: Creating mount point root...\n");
 #endif
-                if (!CreateDirectoryA(root, NULL)) 
-                { 
+                    if (!CreateDirectoryA(root, NULL)) 
+                    { 
 #ifdef DEBUG_MOUNT
 OmLog(1, "5a: Failed to create mount point root...\n");
 #endif
-                    desiredVolumePath[0] = '\0'; 
-                } 
+                        desiredVolumePath[0] = '\0'; 
+                    } 
+                }
             }
-        }
 
-        // Make mount folder if it doesn't exist
-        if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0')
-        {
-            DWORD attribs = GetFileAttributesA(desiredVolumePath);
-            if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY)) 
-            { 
+            // Make mount folder if it doesn't exist
+            if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0')
+            {
+                DWORD attribs = GetFileAttributesA(desiredVolumePath);
+                if (attribs == INVALID_FILE_ATTRIBUTES || !(attribs & FILE_ATTRIBUTE_DIRECTORY)) 
+                { 
 #ifdef DEBUG_MOUNT
 OmLog(1, "6: Creating mount point...\n");
 #endif
-                if (!CreateDirectoryA(desiredVolumePath, NULL)) 
-                { 
+                    if (!CreateDirectoryA(desiredVolumePath, NULL)) 
+                    { 
 #ifdef DEBUG_MOUNT
 OmLog(1, "6a: Failed to create mount point...\n");
 #endif
-                    desiredVolumePath[0] = '\0'; 
-                } 
+                        desiredVolumePath[0] = '\0'; 
+                    } 
+                }
             }
-        }
 
-        // Set the volume mount point
-        if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0')
-        {
+            // Set the volume mount point
+            if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0')
+            {
 #ifdef DEBUG_MOUNT
 OmLog(1, "7: Setting mount point... SetVolumeMountPointA(\"%s\", \"%s\");\n", desiredVolumePath, device.volumeName.c_str());
 #endif
-            if (SetVolumeMountPointA(desiredVolumePath, device.volumeName.c_str()))
-            {
+                if (SetVolumeMountPointA(desiredVolumePath, device.volumeName.c_str()))
+                {
 #ifdef DEBUG_MOUNT
 OmLog(1, "7b: Set mount point...\n");
 #endif
-                hasDesiredMountPoint = 1;
-            }
-            else
-            {
-                DWORD err = GetLastError();
-                if (err == 0x00000005)
-                {
-OmLog(1, "7a: Failed to set mount point... access denied, must run as an Administrator for re-mounting.\n");
+                    hasDesiredMountPoint = 1;
                 }
+                else
+                {
+                    DWORD err = GetLastError();
+                    if (err == 0x00000005)
+                    {
+OmLog(1, "7a: Failed to set mount point... access denied, must run as an Administrator for re-mounting.\n");
+                    }
 #ifdef DEBUG_MOUNT
 else OmLog(1, "7a: Failed to set mount point... %08x\n", err);
 #endif
+                }
             }
         }
-    }
 
-    // If we have the desired mount point, use that in preference to any other first-found mount point
-    if (hasDesiredMountPoint)
-    {
-        volumePath = desiredVolumePath;
-#ifdef DEBUG_MOUNT
-OmLog(1, "8: Has mount point: %s\n", volumePath.c_str());
-#endif
-    }
-
-#if 1
-    // Un-mount any other (unused) mount points
-    for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
-    {
-        //numMountPoints++;
-        if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, volumePath.c_str()) != 0)
+        // If we have the desired mount point, use that in preference to any other first-found mount point
+        if (hasDesiredMountPoint)
         {
-            OmLog(1, "DEBUG: Un-mounting unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
-            if (!DeleteVolumeMountPointA(name))
+            volumePath = desiredVolumePath;
+    #ifdef DEBUG_MOUNT
+    OmLog(1, "8: Has mount point: %s\n", volumePath.c_str());
+    #endif
+        }
+
+#if 0
+        // Un-mount any other (unused) mount points
+        for (char *name = volumePathNames; name != NULL && name[0] != '\0'; name += strlen(name) + 1)
+        {
+            //numMountPoints++;
+            if (desiredVolumePath != NULL && desiredVolumePath[0] != '\0' && stricmp(name, volumePath.c_str()) != 0)
             {
-                OmLog(1, "WARNING: Failed to un-mount unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
+                OmLog(1, "DEBUG: Un-mounting unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
+                if (!DeleteVolumeMountPointA(name))
+                {
+                    OmLog(1, "WARNING: Failed to un-mount unused mount point: %s  -- using: %s\n", name, volumePath.c_str());
+                }
             }
         }
-    }
 #endif
 
-    // Free mount point list
-    if (volumePathNames != NULL) { free(volumePathNames); }
+        // Free mount point list
+        if (volumePathNames != NULL) { free(volumePathNames); }
+
+    }
 
     // Call the device discovery using the found volume
     OmDeviceDiscovery(OM_DEVICE_CONNECTED, device.serialNumber, device.port.c_str(), volumePath.c_str());
