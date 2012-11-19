@@ -173,7 +173,7 @@ OmLog(1, "7b: Set mount point...\n");
                     DWORD err = GetLastError();
                     if (err == 0x00000005)
                     {
-OmLog(1, "7a: Failed to set mount point... access denied, must run as an Administrator for re-mounting.\n");
+OmLog(1, "7a: Didn't set mount point... must run as an Administrator for re-mounting.\n");
                     }
 #ifdef DEBUG_MOUNT
 else OmLog(1, "7a: Failed to set mount point... %08x\n", err);

@@ -411,7 +411,7 @@ bool DeviceFinder::MappingUsbToPort(unsigned int vidPid, std::map<std::string, s
             char usbId[256];
             wcstombs_s(NULL, usbId, scratch, 256);
 
-//Log(1, "[PORT:USB] %s\n", usbId);
+//Log(3, "[PORT:USB] %s\n", usbId);
 
             // If this is the device we're after
             if (strncmp(usbId, prefix, strlen(prefix)) == 0)
@@ -451,11 +451,11 @@ bool DeviceFinder::MappingUsbToPort(unsigned int vidPid, std::map<std::string, s
                 strcpy(usbUnique, GetUniquePart(usbId).c_str());
 
                 // Store mapping
-//Log(2, "[PORT:KEY] %s\n", key);
-//Log(2, "[PORT:NAME] %s\n", portName);
+//Log(3, "[PORT:KEY] %s\n", key);
+//Log(3, "[PORT:NAME] %s\n", portName);
 
 #ifdef DEBUG_PRINT
-    Log(2, "[USB->PORT] %s -> %s\n", usbUnique, portName);
+    Log(3, "[USB->PORT] %s -> %s\n", usbUnique, portName);
 #endif
 
                 usbToPortMap[usbUnique] = portName;
@@ -517,7 +517,7 @@ bool DeviceFinder::MappingUsbToUsbstorAndUsbComposite(unsigned int vidPid, std::
             }
         }
 
-        Log(2, "[DRIVEMAP:PATH] %s\n", path);
+        Log(3, "[DRIVEMAP:PATH] %s\n", path);
 #endif
 
         // Move up one level to get to the "USB" level
@@ -527,7 +527,7 @@ bool DeviceFinder::MappingUsbToUsbstorAndUsbComposite(unsigned int vidPid, std::
         CM_Get_Device_IDW(parent, scratch, 256, 0);
         char usbId[256];
         wcstombs_s(NULL, usbId, scratch, 256);
-        //Log(2, "[DRIVEMAP:USB] %s\n", usbId);
+        //Log(3, "[DRIVEMAP:USB] %s\n", usbId);
 
         // If this is the device we're after
         if (strncmp(usbId, prefix, strlen(prefix)) == 0)
@@ -555,11 +555,11 @@ bool DeviceFinder::MappingUsbToUsbstorAndUsbComposite(unsigned int vidPid, std::
             strcpy(usbUnique, GetUniquePart(usbId).c_str());
 
             // Store mapping
-//Log(2, "[DRIVEMAP:KEY] %s\n", key);
-//Log(2, "[DRIVEMAP:USBSTOR] %s\n", usbstorId);
+//Log(3, "[DRIVEMAP:KEY] %s\n", key);
+//Log(3, "[DRIVEMAP:USBSTOR] %s\n", usbstorId);
 
 #ifdef DEBUG_PRINT
-            Log(2, "[USB->USBSTOR] %s -> %s\n", usbUnique, usbstorId);
+            Log(3, "[USB->USBSTOR] %s -> %s\n", usbUnique, usbstorId);
 #endif
 
             usbToUsbstorMap[usbUnique] = usbstorId;
@@ -622,7 +622,7 @@ bool DeviceFinder::MappingUsbstorToDeviceNumber(std::map<std::string, int>& usbS
             //DiskDriveToLogicalDrive(deviceId);
 
 #ifdef DEBUG_PRINT
-            Log(2, "[USBSTOR->DEVICEID->DEVICENUMBER] %s -> %s -> %u\n", usbstorId, deviceId, deviceNumber);
+            Log(3, "[USBSTOR->DEVICEID->DEVICENUMBER] %s -> %s -> %u\n", usbstorId, deviceId, deviceNumber);
 #endif
             usbStorToDeviceMap[usbstorId] = deviceNumber;
 
@@ -671,7 +671,7 @@ bool DeviceFinder::MappingDeviceNumberToPhysicalVolume(std::map<int, std::string
                     char physicalVolume[MAX_PATH + 1];
                     wcstombs(physicalVolume, buf, MAX_PATH);
 #ifdef DEBUG_PRINT
-    Log(2, "[DEVICE->PHYSICALVOLUME] %u [%s] -> %s\n", volumeDeviceNumber, dp, physicalVolume);
+    Log(3, "[DEVICE->PHYSICALVOLUME] %u [%s] -> %s\n", volumeDeviceNumber, dp, physicalVolume);
 #endif
 #ifdef DGJ_FIX
     // TODO: Match on USBSTOR "USBSTOR\DISK&VEN_AX3&PROD_AX3_MASS_STORAGE&REV_0017\8&10A9691A&0&CWA17_01808&0"
@@ -706,7 +706,7 @@ bool DeviceFinder::MappingPhysicalVolumeToVolumeName(std::map<std::string, std::
 #ifdef DEBUG_PRINT
             char volumeName[MAX_PATH];
             wcstombs(volumeName, volumeNameW, MAX_PATH);
-            Log(2, "[PHYSICALVOLUME->VOLUMENAME volume-name non-matched, skipped] %s\n", volumeName);
+            Log(3, "[PHYSICALVOLUME->VOLUMENAME volume-name non-matched, skipped] %s\n", volumeName);
 #endif
         }
         else
@@ -731,14 +731,14 @@ bool DeviceFinder::MappingPhysicalVolumeToVolumeName(std::map<std::string, std::
                 if (physicalVolume[0] == '\0')
                 {
                     wcstombs(physicalVolume, pv, MAX_PATH);
-                    Log(2, "[PHYSICALVOLUME->VOLUMENAME] Using #%d %s -> %s\n", pvcount, physicalVolume, volumeName);
+                    Log(3, "[PHYSICALVOLUME->VOLUMENAME] Using #%d %s -> %s\n", pvcount, physicalVolume, volumeName);
                 }
                 else
                 {
 #ifdef DEBUG_PRINT
                     char pva[MAX_PATH];
                     wcstombs(pva, pv, MAX_PATH);
-                    Log(2, "[PHYSICALVOLUME->VOLUMENAME] Other #%d %s -> %s\n", pvcount, pva, volumeName);
+                    Log(3, "[PHYSICALVOLUME->VOLUMENAME] Other #%d %s -> %s\n", pvcount, pva, volumeName);
 #endif
                     ;
                 }
@@ -749,7 +749,7 @@ bool DeviceFinder::MappingPhysicalVolumeToVolumeName(std::map<std::string, std::
             if (physicalVolume[0] == '\0')
             {
 #ifdef DEBUG_PRINT
-            Log(2, "[PHYSICALVOLUME->VOLUMENAME] <none> -> %s\n", volumeName);
+            Log(3, "[PHYSICALVOLUME->VOLUMENAME] <none> -> %s\n", volumeName);
 #endif
                 ;
             }
@@ -1266,7 +1266,7 @@ bool DeviceFinder::RescanDevices(void)
     for (set<int>::const_iterator i = removed.begin(); i != removed.end(); ++i)
     {
         if (removedCallback != NULL) removedCallback(callbackReference, deviceMap[*i]);   // Call the device handler
-//Log(2, "REMOVED: %s\n", deviceMap[*i].ToString().c_str());
+//Log(3, "REMOVED: %s\n", deviceMap[*i].ToString().c_str());
         deviceMap.erase(*i);        // Remove the element
     }
 
@@ -1274,11 +1274,11 @@ bool DeviceFinder::RescanDevices(void)
     for (set<int>::const_iterator i = added.begin(); i != added.end(); ++i)
     {
         deviceMap[*i] = newDeviceMap[*i]; // Add the element
-//Log(2, "ADDED: %s\n", newDeviceMap[*i].ToString().c_str());
+//Log(3, "ADDED: %s\n", newDeviceMap[*i].ToString().c_str());
         if (addedCallback != NULL) addedCallback(callbackReference, deviceMap[*i]);   // Call the device handler
     }
 
-//Log(2, "---\n");
+//Log(3, "---\n");
 
     return true;
 }
