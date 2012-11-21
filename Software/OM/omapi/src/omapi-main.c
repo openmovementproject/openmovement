@@ -116,6 +116,7 @@ int OmStartup(int version)
 int OmShutdown(void)
 {
     int i;
+    OmLog(3, "OmShutdown() started.\n");
 
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
     om.initialized = 0;
@@ -131,6 +132,7 @@ int OmShutdown(void)
             // Cancel any pending downloads
             if (om.devices[i]->deviceStatus == OM_DEVICE_CONNECTED)
             {
+                OmLog(3, "OmCancelDownload(%d)...\n", i);
                 OmCancelDownload(i);
             }
 
@@ -143,6 +145,7 @@ int OmShutdown(void)
     mutex_destroy(&om.portMutex);
     mutex_destroy(&om.downloadMutex);
 
+    OmLog(3, "OmShutdown() done.\n");
     return OM_OK;
 }
 

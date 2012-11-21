@@ -1199,13 +1199,16 @@ bool DeviceFinder::Start(bool continuous, DeviceFinderCallback addedCallback, De
 
 void DeviceFinder::Stop(void)
 {
+    Log(4, "THREAD: Stopping DeviceFinder...\n");
     // Signal then join thread, wait for end
     quitFlag = true;
     while (hWndDeviceFinder != NULL)
     {
         PostMessage((HWND)hWndDeviceFinder, WM_CLOSE, NULL, NULL);
+        Log(4, "THREAD: Waiting for DeviceFinder to close...\n");
         if (WaitForSingleObject((HANDLE)thread, INFINITE) != WAIT_OBJECT_0) { ; }
     }
+    Log(4, "THREAD: DeviceFinder closed.\n");
 }
 
 

@@ -252,10 +252,12 @@ int downloadmem(void)
      * The callbacks will allow any existing and future devices connected to have their 
      * data downloaded simultaneously. */
     getchar();
+    printf("Key pressed, shutting down...\n");
 
     /* Shutdown the API (this will cleanly cancel any partial downloads). */
     result = OmShutdown();
     if (OM_FAILED(result)) { printf("ERROR: OmShutdown() %s\n", OmErrorString(result)); return -1; }
+    printf("End.\n");
 
     return 0;
 }

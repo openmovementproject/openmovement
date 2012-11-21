@@ -61,6 +61,47 @@ int OmLog(int level, const char *format, ...)
 }
 
 
+#ifdef _WIN32
+#ifdef OM_DEBUG_MUTEX
+int OmDebugMutexLock(mutex_t *mutex, const char *mutexName, const char *source, int line, const char *caller, int deviceId)
+{
+    DWORD dwTimeout = 1000;
+    OmLog(3, "LOCK: #%d %.0s:%d %s() mutex_lock(%s) called\n", deviceId, source, line, caller, mutexName);
+    for(;;)
+    {
+        HRESULT hr = WaitForSingleObject(*(mutex), dwTimeout);
+        const char *status = "<unknown>";
+        if (hr == WAIT_OBJECT_0) { break; }
+
+        if (hr == WAIT_TIMEOUT) { status = "WAIT_TIMEOUT"; }
+        else if (hr == WAIT_FAILED) { status = "WAIT_FAILED"; }
+        else if (hr == WAIT_ABANDONED) { status = "WAIT_ABANDONED"; }
+
+        if (hr == WAIT_OBJECT_0) { break; }
+        OmLog(3, "LOCK: #%d %.0s:%d %s() mutex_lock(%s) 0x%8x=%s @%d\n", deviceId, source, line, caller, mutexName, hr, status, dwTimeout);
+        dwTimeout *= 2;     // double the timeout each time to prevent log pollution
+    }
+    OmLog(3, "LOCK: #%d %.0s:%d %s() mutex_lock(%s) complete\n", deviceId, source, line, caller, mutexName);
+    return 0;
+}
+
+int OmDebugMutexUnlock(mutex_t *mutex, const char *mutexName, const char *source, int line, const char *caller, int deviceId)
+{
+    OmLog(3, "UNLOCK: #%d %.0s:%d %s() mutex_unlock(%s) called\n", deviceId, source, line, caller, mutexName);
+    if (ReleaseMutex(*(mutex)) == 0)
+    {
+        OmLog(3, "UNLOCK: #%d %.0s:%d %s() mutex_unlock(%s) failed\n", deviceId, source, line, caller, mutexName);
+        return 1;
+    }
+    else
+    {
+        OmLog(3, "UNLOCK: #%d %.0s:%d %s() mutex_unlock(%s) complete\n", deviceId, source, line, caller, mutexName);
+        return 0;
+    }
+}
+#endif
+#endif
+
 /** Internal, method for handling device discovery. */
 void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, const char *port, const char *volumePath)
 {
@@ -549,7 +590,7 @@ int OmPortWrite(unsigned short deviceId, const char *command)
     fd = om.devices[deviceId]->fd;
     if (fd < 0) { return OM_E_FAIL; }
     if (command == NULL) { return OM_E_POINTER; }
-OmLog(3, "OmPortWrite(%d, \"%s\");", deviceId, command);
+OmLog(3, "OmPortWrite(%d, \"%s\");\n", deviceId, command);
     if (write(fd, command, strlen(command)) != strlen(command)) { return OM_E_FAIL; }
     return OM_OK;
 }
@@ -566,7 +607,7 @@ int OmPortAcquire(unsigned short deviceId)
     if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
 
     // Open port
-    mutex_lock(&om.portMutex);
+    mutex_lock(&om.portMutex);              // Lock port mutex to open the port
     do          // This is only a 'do' to allow a single code path to hit the mutex unlock with any exceptional 'break's
     {
         // Check if already open
@@ -580,7 +621,7 @@ int OmPortAcquire(unsigned short deviceId)
 
         status = OM_OK;
     } while (0);
-    mutex_unlock(&om.portMutex);        // Release the mutex
+    mutex_unlock(&om.portMutex);            // Release port mutex after opening the port
 
     return status;
 }
@@ -593,13 +634,13 @@ int OmPortRelease(unsigned short deviceId)
     if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
 
     // Close port
-    mutex_lock(&om.portMutex);          // Acquire the mutex
+    mutex_lock(&om.portMutex);              // Lock port mutex to close the port
     if (om.devices[deviceId]->fd >= 0)
     { 
         close(om.devices[deviceId]->fd);
         om.devices[deviceId]->fd = -1;
     }
-    mutex_unlock(&om.portMutex);        // Release the mutex
+    mutex_unlock(&om.portMutex);            // Release port mutex after closing the port
     return OM_OK;
 }
 
