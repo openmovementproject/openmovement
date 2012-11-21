@@ -54,8 +54,17 @@
     // Mutex
 	#define mutex_t HANDLE
     #define mutex_init(mutex, attr_ignored) ((*(mutex) = CreateMutex(attr_ignored, FALSE, NULL)) == NULL)
+#define OM_DEBUG_MUTEX
+#ifdef OM_DEBUG_MUTEX
+    int OmDebugMutexLock(mutex_t *mutex, const char *mutexName, const char *source, int line, const char *caller, int deviceId);
+    int OmDebugMutexUnlock(mutex_t *mutex, const char *mutexName, const char *source, int line, const char *caller, int deviceId);
+    #define OM_DEBUG_MUTEX_STRINGIFY(T) #T
+    #define mutex_lock(mutex) OmDebugMutexLock(mutex, "" OM_DEBUG_MUTEX_STRINGIFY(mutex) "", "" __FILE__ "", __LINE__, __FUNCTION__, deviceId)
+    #define mutex_unlock(mutex) OmDebugMutexUnlock(mutex, "" OM_DEBUG_MUTEX_STRINGIFY(mutex) "", "" __FILE__ "", __LINE__, __FUNCTION__, deviceId)
+#else
     #define mutex_lock(mutex) (WaitForSingleObject(*(mutex), INFINITE) != WAIT_OBJECT_0)
     #define mutex_unlock(mutex) (ReleaseMutex(*(mutex)) == 0)
+#endif
     #define mutex_destroy(mutex) (CloseHandle(*(mutex)) == 0)
 
     // Sleep

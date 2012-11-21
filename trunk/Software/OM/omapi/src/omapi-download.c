@@ -45,10 +45,10 @@ static int OmDoDownloadUpdate(unsigned short deviceId, OM_DOWNLOAD_STATUS downlo
     device = om.devices[deviceId];
 
     // Acquire download mutex here (otherwise there is a small window here in which the state will become unknown if accessed from another thread)
-    mutex_lock(&om.downloadMutex);
+    mutex_lock(&om.downloadMutex);          // Lock download mutex to update device state structure
     device->downloadStatus = downloadStatus;
     device->downloadValue = downloadValue;
-    mutex_unlock(&om.downloadMutex);       // Release download mutex
+    mutex_unlock(&om.downloadMutex);        // Release download mutex after updating device state structure
 
     // Call user-supplied callback
     if (om.downloadCallback != NULL)
@@ -184,6 +184,7 @@ int OmGetDataFilename(int deviceId, char *filenameBuffer)
     strcat(filenameBuffer, OM_DEFAULT_FILENAME);
 
     // Check file existence/properties
+#if 0
     {
         struct stat s;
         int result;
@@ -195,6 +196,7 @@ int OmGetDataFilename(int deviceId, char *filenameBuffer)
         //buf.st_size       // file size
         //buf.st_mtime
     }
+#endif
 
     return OM_OK;
 }
@@ -244,7 +246,7 @@ int OmBeginDownloadingReference(int deviceId, int dataOffsetBlocks, int dataLeng
     if (destinationFile != NULL && !strlen(destinationFile)) return OM_E_INVALID_ARG;
 
     // Acquire download mutex here (otherwise there is a small window here in which the state will become unknown if two threads start a download at exactly the same time).
-    mutex_lock(&om.downloadMutex);
+    mutex_lock(&om.downloadMutex);          // Lock download mutex to begin download thread
     do          // This is only a 'do' to allow a single code path to hit the mutex unlock with any exceptional 'break's
     {
         int fileTotalBlocks;
@@ -299,12 +301,12 @@ int OmBeginDownloadingReference(int deviceId, int dataOffsetBlocks, int dataLeng
         device->downloadBlocksCopied = 0;
         device->downloadCancel = 0;
         device->downloadReference = reference;
-        OmDoDownloadUpdate(device->id, OM_DOWNLOAD_PROGRESS, 0);        // Initial update
+        //OmDoDownloadUpdate(device->id, OM_DOWNLOAD_PROGRESS, 0);        // Removed - don't do an initial update here, one is done in OmDownloadThread anyway, and don't want to call out to user code with the download mutex held
         thread_create(&device->downloadThread, NULL, OmDownloadThread, device);
 
         status = OM_OK;
     } while(0);
-    mutex_unlock(&om.downloadMutex);       // Release download mutex
+    mutex_unlock(&om.downloadMutex);        // Release download mutex after updating beginning download thread
 
     return status;
 }
@@ -323,12 +325,12 @@ int OmQueryDownload(int deviceId, OM_DOWNLOAD_STATUS *downloadStatus, int *downl
     device = om.devices[deviceId];
 
     // Acquire download mutex here (otherwise there's a small chance the status and value may be inconsistent and invalidated by a download start/update/stop).
-    mutex_lock(&om.downloadMutex);
+    mutex_lock(&om.downloadMutex);          // Lock download mutex to query device state structure
     {
         dStatus = device->downloadStatus;
         value = device->downloadValue;
     }
-    mutex_unlock(&om.downloadMutex);       // Release download mutex
+    mutex_unlock(&om.downloadMutex);        // Release download mutex after querying device state structure
 
     // Output values
     if (downloadStatus != NULL) { *downloadStatus = dStatus; }
@@ -345,6 +347,7 @@ int OmWaitForDownload(int deviceId, OM_DOWNLOAD_STATUS *downloadStatus, int *dow
     int status;
 
     // Check download state
+    OmLog(3, "OmWaitForDownload() started.\n");
     status = OmQueryDownload(deviceId, &dStatus, &dValue);
     if (OM_FAILED(status)) { return status; }
 
@@ -352,10 +355,12 @@ int OmWaitForDownload(int deviceId, OM_DOWNLOAD_STATUS *downloadStatus, int *dow
     if (dStatus == OM_DOWNLOAD_PROGRESS && om.devices[deviceId]->downloadThread != NULL)
     {
         // Wait for download thread to terminate
+        OmLog(3, "OmWaitForDownload() waiting for download thread to terminate...\n");
         thread_join(&om.devices[deviceId]->downloadThread, NULL);
     }
 
     // Check completed download state
+    OmLog(3, "OmWaitForDownload() checking status...\n");
     status = OmQueryDownload(deviceId, &dStatus, &dValue);
     if (OM_FAILED(status)) { return status; }
 

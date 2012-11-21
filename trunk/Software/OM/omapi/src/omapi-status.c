@@ -326,7 +326,7 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
         for (i = 0; i < parseMax; i++) { parseParts[i] = NULL; }
     }
 
-OmLog(3, "OmCommand(%d, \"%s\", _, _, \"%s\", %d, _, _);", deviceId, command, expected, timeoutMs);
+OmLog(3, "OmCommand(%d, \"%s\", _, _, \"%s\", %d, _, _);\n", deviceId, command, expected, timeoutMs);
 
     // (Checks the system and device state first, then) acquire the lock and open the port
     status = OmPortAcquire(deviceId);
@@ -393,7 +393,7 @@ OmLog(2, "- Read line: \"%s\"", p);
             if (expected != NULL && strncmp(expected, p, strlen(expected)) == 0)
             {
                 // Expected prefix found
-OmLog(2, "- Expected prefix found: \"%s\"", expected);
+OmLog(2, "- Expected prefix found: \"%s\"\n", expected);
                 expectedPosition = p;
                 break;
             }
