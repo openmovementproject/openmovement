@@ -1,0 +1,12 @@
+You may now connect WAX3 devices.
+
+Troubleshooting tips:
+
+* You should re-connect any devices that are already connected.
+
+* The devices must either be directly connected to the PC or connected via a hub or docking station that is powered.
+
+* Check in Windows Device Manager - correctly installed devices should appear under "Ports".
+
+* If the devices are listed under "Unknown Devices", right-click and select "Update Driver Software" (requires administrator privileges).  If "Search Automatically" does not work, try "Browse my computer" and choose the installation folder.
+
