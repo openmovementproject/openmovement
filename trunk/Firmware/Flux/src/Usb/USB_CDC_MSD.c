@@ -48,8 +48,11 @@
 	unsigned char inHead = 0, inTail = 0;
 	unsigned char outHead = 0, outTail = 0;
 	
+#ifndef OWN_CDC_BUFFER_SIZES
+	//#warning "Using default buffer sizes"
 	#define IN_BUFFER_CAPACITY 128
 	#define OUT_BUFFER_CAPACITY 256
+#endif
 	static unsigned char inBuffer[IN_BUFFER_CAPACITY];
 	static unsigned char outBuffer[OUT_BUFFER_CAPACITY];
 	
@@ -153,6 +156,12 @@ void USBInitializeSystem(void)
 	    return v;
 	}
 	
+	// USB-specific char ready
+	char usb_haschar(void)
+	{
+	    return (inHead != inTail);
+	}
+    
 	// Waits processing IO until buffer is empty
 	void USBCDCWait(void)
 	{

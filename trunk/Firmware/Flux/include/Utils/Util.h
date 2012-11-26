@@ -41,6 +41,7 @@ extern const char *_user_gets(void);
 // String utility functions
 extern const char *my_itoa(int );
 extern const char *my_ultoa(unsigned long );
+extern const char *fixed_itoa(short value, char n);
 extern unsigned long my_atoi(const char *s);
 extern int strnicmp(const char *a, const char *b, int max);
 
