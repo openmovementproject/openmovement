@@ -43,7 +43,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	dateArray = mxGetPr(plhs[0]);
 
 	dateArray[0] = OM_DATETIME_YEAR(dateInt);
-	dateArray[1] = OM_DATETIME_MONTH(dateInt)-1;
+	dateArray[1] = OM_DATETIME_MONTH(dateInt);
 	dateArray[2] = OM_DATETIME_DAY(dateInt);
 	dateArray[3] = OM_DATETIME_HOURS(dateInt);
 	dateArray[4] = OM_DATETIME_MINUTES(dateInt);

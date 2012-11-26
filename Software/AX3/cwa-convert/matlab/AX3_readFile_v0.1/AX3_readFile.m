@@ -290,6 +290,10 @@ function data = readFile(filename, options)
         data.ACC = data.ACC(1:(cnt-2)*120,:); % drop last two packets
         % interpolate using TIME, linearly between known sample-based
         % timestamp locations.
+        
+        % clean TIME so that they are in strict monotonic order
+        TIME = TIME([diff(TIME(:,1))~=0 ; true],:);
+        
         data.ACC(:,1) = interp1(TIME(:,1),TIME(:,2),1:length(data.ACC),'linear',0);
         % clean up cases outside of known timestamps
         data.ACC = data.ACC(data.ACC(:,1)>0,:);
@@ -429,7 +433,7 @@ function datearr = parseDateML(t)
    
     %%% 'idivide' version -- think this fixes potential problems with initial version
     datearr(1) = idivide(t, 67108864, 'floor') + 2000;
-    datearr(2) = mod(idivide(t, 4194304, 'floor'), 16) - 1;
+    datearr(2) = mod(idivide(t, 4194304, 'floor'), 16);
     datearr(3) = mod(idivide(t, 131072, 'floor'), 32);
     datearr(4) = mod(idivide(t, 4096, 'floor'), 32);
     datearr(5) = mod(idivide(t, 64, 'floor'), 64);
