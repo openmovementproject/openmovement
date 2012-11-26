@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2012, Newcastle University, UK.
+ * Copyright (c) 2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,41 +23,31 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// USB CDC and MSD handler
-// Dan Jackson, Karim Ladha, 2010-2012.
+// Humidicon device driver
+// KL 06-01-2012
 
-#ifndef USB_MSD_CDC_H
-#define USB_MSD_CDC_H
+// Functions
+char Humidicon_init(void); 
+char Humidicon_measurement_request(void); 
+void Humidicon_read(void);
 
-#include "USB/usb.h"
+short Humidicon_Convert_centiC(unsigned short value);
+unsigned short Humidicon_Convert_percentage(unsigned short value);
 
-void usb_putchar(unsigned char);
-int usb_getchar(void);
-char usb_haschar(void);
-void USBCDCWait(void);
-void USBProcessIO(void);
-void USBSerialIO(void);
-unsigned char GetCDCBytesToCircularBuffer(void);
-void USBInitializeSystem(void);
+// Typedef
+typedef struct
+{
+	char status;			// (0 = normal, 1 = stale, 2 = command mode, 3 = diagnostic, -1 = not present)
+ 	unsigned short humidity;
+	unsigned short temperature; 
+} humidicon_t;
 
-#if defined(USB_CDC_SET_LINE_CODING_HANDLER)
-extern void mySetLineCodingHandler(void);
-#endif
-//void USBDeviceTasks(void);
-void USBCBWakeFromSuspend(void);
-void USBCB_SOF_Handler(void);
-void USBCBErrorHandler(void);
-void USBCBCheckOtherReq(void);
-void USBCBStdSetDscHandler(void);
-void USBCBInitEP(void);
-void USBCBSendResume(void);
-void USBCBSuspend(void);
-BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
-#define BlinkUSBStatus()
-
-#if 0 // use following for isr - see .c file
-extern void __attribute__ ((interrupt)) _USB1Interrupt(void)
-#endif
+// Globals
+extern char humPresent;
+extern humidicon_t gHumResults;
 
 
-#endif   
+//EOF
+
+
+

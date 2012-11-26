@@ -140,6 +140,33 @@ const char *my_ultoa(unsigned long v)
 }
 
 
+// Signed *10^n fixed-point integer to ASCII (e.g. n = 2: "-327.68" to "327.67")
+const char *fixed_itoa(short value, char n)
+{
+	static char buffer[8];
+	char negative;
+	unsigned short v;
+	int p;
+	int i = 8;
+
+	if (value < 0) { negative = 1; v = (unsigned short)-value; }
+	else { negative = 0; v = (unsigned short)value; }
+
+	buffer[--i] = '\0';
+	for (p = 0; p < 6 && (p <= n || v != 0); p++, v /= 10)
+	{
+		if (p == n)
+		{
+			buffer[--i] = '.';
+		}
+		buffer[--i] = '0' + (v % 10);
+	}
+	if (negative) { buffer[--i] = '-'; }
+
+	return &buffer[i];
+}
+
+
 // Macro to lower-case an ASCII character
 #define _CHAR_TO_LOWER(_c) (((_c) >= 'A' && (_c) <= 'Z') ? ((_c) + 'a' - 'A') : (_c))
 

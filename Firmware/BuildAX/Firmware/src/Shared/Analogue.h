@@ -23,41 +23,48 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// USB CDC and MSD handler
-// Dan Jackson, Karim Ladha, 2010-2012.
+// Analogue to digital conversion
+// Karim Ladha, Dan Jackson, 2011-2012
+// Ported to TEDDI 1.1 hardware - this should not be used for any other hardware
 
-#ifndef USB_MSD_CDC_H
-#define USB_MSD_CDC_H
+#ifndef ANALOG_H
+#define ANALOG_H
 
-#include "USB/usb.h"
+// Global result
+typedef union
+{
+    unsigned short values[7]; 
+    struct
+    {
+        unsigned short pir, temp, light, batt, mic_ave, mic_peak, mic_raw;
+    };
+} adc_results_t;
+extern adc_results_t adcResult;
 
-void usb_putchar(unsigned char);
-int usb_getchar(void);
-char usb_haschar(void);
-void USBCDCWait(void);
-void USBProcessIO(void);
-void USBSerialIO(void);
-unsigned char GetCDCBytesToCircularBuffer(void);
-void USBInitializeSystem(void);
+// ADC On/off
+void AdcInit(unsigned char clock_select);
+void AdcOff(void);
 
-#if defined(USB_CDC_SET_LINE_CODING_HANDLER)
-extern void mySetLineCodingHandler(void);
+// Valid clock_select values
+#define ADC_CLOCK_SYSTEM_PLL	0
+#define ADC_CLOCK_SYSTEM		1
+#define ADC_CLOCK_RC			2
+
+// ADC Sampling
+unsigned short *AdcSampleWait(void);    // Handles LDR/Temp on/off
+unsigned short *AdcSampleNow(void);     // LDR/Temp handled externally
+
+// Conversion functions
+unsigned int AdcBattToPercent(unsigned int Vbat);
+unsigned short AdcToMillivolt(unsigned short value);
+unsigned int AdcLdrToLux(unsigned short value);
+short AdcTempToTenthDegreeC(unsigned short value);
+
+// This relies on the interrupt clearing the ASAMP bit - Call init first, resead results in ADC1 int, then call adc off
+void AdcStartConversion(void);
+void ADC1tasks(void);
+
+void AdcInitJustMic(void);
+
 #endif
-//void USBDeviceTasks(void);
-void USBCBWakeFromSuspend(void);
-void USBCB_SOF_Handler(void);
-void USBCBErrorHandler(void);
-void USBCBCheckOtherReq(void);
-void USBCBStdSetDscHandler(void);
-void USBCBInitEP(void);
-void USBCBSendResume(void);
-void USBCBSuspend(void);
-BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
-#define BlinkUSBStatus()
 
-#if 0 // use following for isr - see .c file
-extern void __attribute__ ((interrupt)) _USB1Interrupt(void)
-#endif
-
-
-#endif   

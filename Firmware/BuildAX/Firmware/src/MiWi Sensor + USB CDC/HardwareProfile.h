@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2009-2012, Newcastle University, UK.
+ * Copyright (c) 2012, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -23,41 +23,25 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  */
 
-// USB CDC and MSD handler
-// Dan Jackson, Karim Ladha, 2010-2012.
+// HardwareProfile.h - Hardware Profile header.
+// Based on Microchip Technology file 'HardwareProfile.h' from "USB Device - Composite - MSD + CDC" example.
 
-#ifndef USB_MSD_CDC_H
-#define USB_MSD_CDC_H
+#ifndef HARDWAREPROFILE_H
+#define HARDWAREPROFILE_H
 
-#include "USB/usb.h"
+    #define SENSOR
+	#define USE_USB_CDC
+	//#define RADIO_PLL
 
-void usb_putchar(unsigned char);
-int usb_getchar(void);
-char usb_haschar(void);
-void USBCDCWait(void);
-void USBProcessIO(void);
-void USBSerialIO(void);
-unsigned char GetCDCBytesToCircularBuffer(void);
-void USBInitializeSystem(void);
+   	// For testing, initial device ID if none is set
+   	#define INITIAL_DEVICE_ID 42
 
-#if defined(USB_CDC_SET_LINE_CODING_HANDLER)
-extern void mySetLineCodingHandler(void);
+    #include "ConfigApp.h"
+
+    #if defined(__C30__) && defined(__PIC24FJ256GB106__)
+    	#include "HardwareProfile - TEDDIv1.1.h"
+    #else
+    	#error "Unexpected compiler or device."
+    #endif
+
 #endif
-//void USBDeviceTasks(void);
-void USBCBWakeFromSuspend(void);
-void USBCB_SOF_Handler(void);
-void USBCBErrorHandler(void);
-void USBCBCheckOtherReq(void);
-void USBCBStdSetDscHandler(void);
-void USBCBInitEP(void);
-void USBCBSendResume(void);
-void USBCBSuspend(void);
-BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
-#define BlinkUSBStatus()
-
-#if 0 // use following for isr - see .c file
-extern void __attribute__ ((interrupt)) _USB1Interrupt(void)
-#endif
-
-
-#endif   
