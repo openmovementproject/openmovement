@@ -52,8 +52,20 @@
 #include "omapi.h"
 
 
+/* Tee - duplicate output to stderr */
+char tee = 0;
+#define printf(...) { fprintf(stdout, __VA_ARGS__); fflush(stdout); if (tee) { fprintf(stderr, __VA_ARGS__); } }
+
+
 /* Globals */
 static const char *downloadPath = ".";
+
+
+/* Logging callback */
+void logCallback(void *reference, const char *message)
+{
+	printf("%s", message);
+}
 
 
 /* Device updated */
@@ -166,6 +178,10 @@ int download(const char *outpath)
     /* Set the global path (used by the device callback) */
     downloadPath = outpath;
 
+	/* Sets the callback function that is called whenever an API log message is written. */
+	OmSetLogStream(-1);
+	OmSetLogCallback(logCallback, NULL);
+
     /* Set device callback before API startup to get initially-connected devices through the callback */
     OmSetDeviceCallback(download_DeviceCallback, NULL);
 
@@ -196,11 +212,19 @@ int download(const char *outpath)
 /* Main function */
 int download_main(int argc, char *argv[])
 {
-    printf("DOWNLOAD: download data from all devices containing data.\n");
+	const char *outpath = NULL;
+	int i;
+
+	printf("DOWNLOAD: download data from all devices containing data.\n");
     printf("\n");
-    if (argc > 1)
+
+	for (i = 1; i < argc; i++)
+	{
+		if (argv[i][0] == '-' && argv[i][1] == 't' && argv[i][2] == 'e' && argv[i][3] == 'e' && argv[i][4] == '\0') { tee = 1; }
+		else { outpath = argv[i]; }
+	}
+    if (outpath != NULL)
     {
-        const char *outpath = argv[1];
         return download(outpath);
     }
     else

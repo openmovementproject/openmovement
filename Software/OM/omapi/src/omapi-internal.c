@@ -46,6 +46,7 @@ int OmLog(int level, const char *format, ...)
         va_start(args, format);
         ret = vfprintf(om.log, format, args);
         va_end(args);
+		fflush(om.log);
     }
     if (om.logCallback != NULL)
     {

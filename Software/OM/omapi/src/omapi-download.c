@@ -77,10 +77,13 @@ static thread_return_t OmDownloadThread(void *arg)
     }
     else
     {
+		int lastDownloadValue;
+
         // Initial status update
         downloadStatus = OM_DOWNLOAD_PROGRESS;
         downloadValue = 0;
         OmDoDownloadUpdate(deviceState->id, downloadStatus, downloadValue);
+		lastDownloadValue = downloadValue;
 
         // Copy loop
         while (downloadStatus == OM_DOWNLOAD_PROGRESS)
@@ -131,7 +134,11 @@ static thread_return_t OmDownloadThread(void *arg)
             deviceState->downloadBlocksCopied += blocksWritten;
             if (deviceState->downloadBlocksTotal == 0) { downloadValue = 0; }
             else { downloadValue = (int)(deviceState->downloadBlocksCopied * 100UL / deviceState->downloadBlocksTotal); }
-            OmDoDownloadUpdate(deviceState->id, downloadStatus, downloadValue);
+			if (downloadValue != lastDownloadValue)
+			{
+				OmDoDownloadUpdate(deviceState->id, downloadStatus, downloadValue);
+				lastDownloadValue = downloadValue;
+			}
         }
     }
 
