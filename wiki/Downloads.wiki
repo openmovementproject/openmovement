@@ -15,9 +15,9 @@ The below downloads are also listed on the [http://code.google.com/p/openmovemen
 
 Some of these utilities require the [http://www.microsoft.com/download/en/details.aspx?id=22 .NET Framework 3.5 SP1]:
 
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-GUI-beta-8.exe AX3 GUI Beta 8 (Windows)] (Includes driver and CSV converter)
   * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-Utils-Win-2.zip AX3 Utilities r2 (Windows)]
   * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-Utils-Win.zip WAX3 Utilities (Windows)]
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-GUI-beta-8.exe AX3 GUI Beta 8 (Windows)]
 
 Drivers:
 
