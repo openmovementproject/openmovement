@@ -674,10 +674,11 @@ bool DeviceFinder::MappingDeviceNumberToPhysicalVolume(std::map<int, std::string
     Log(3, "[DEVICE->PHYSICALVOLUME] %u [%s] -> %s\n", volumeDeviceNumber, dp, physicalVolume);
 #endif
 #ifdef DGJ_FIX
-    // TODO: Match on USBSTOR "USBSTOR\DISK&VEN_AX3&PROD_AX3_MASS_STORAGE&REV_0017\8&10A9691A&0&CWA17_01808&0"
+    // TODO: Match on USBSTOR prefix+"USBSTOR\DISK&VEN_AX3&PROD_AX3_MASS_STORAGE&REV_0017\8&10A9691A&0&CWA17_01808&0"
+    // TODO: WinXP matches on "\\?\storage#removablemedia#8&75ad516&0&rm#{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
     //       ...the devicePath has a prefix "\\?\storage#volume#_??_" and is the same as the USBSTOR but in lower-case and '\' substituted for '#', then ends with "#{GUID}#{GUID}"
 // TEMPORARY HACK: If we don't have a mapping, or this one seems better
-if (deviceNumberToPhysicalVolumeMap.find(volumeDeviceNumber) == deviceNumberToPhysicalVolumeMap.end() || strstr(dp, "&ven_ax3&") != NULL) 
+if (deviceNumberToPhysicalVolumeMap.find(volumeDeviceNumber) == deviceNumberToPhysicalVolumeMap.end() || strstr(dp, "&ven_ax3&") != NULL || strstr(dp, "#removablemedia#") != NULL) 
 #endif
                     deviceNumberToPhysicalVolumeMap[volumeDeviceNumber] = physicalVolume;
                 }

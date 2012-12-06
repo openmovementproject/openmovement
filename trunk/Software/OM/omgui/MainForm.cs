@@ -307,6 +307,7 @@ namespace OmGui
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            ;
         }
 
         private void View_CheckChanged(object sender, EventArgs e)
@@ -496,7 +497,12 @@ namespace OmGui
 
         public void DataFileAdd(string file)
         {
-            OmSource device = OmReader.Open(file);
+            OmSource device = null;
+            try
+            {
+                device = OmReader.Open(file);
+            } catch (Exception) { Console.Error.WriteLine("ERROR: Problem reading file: " + file); }
+
             if (device != null)
             {
                 ListViewItem listViewItem = new ListViewItem();
@@ -804,6 +810,11 @@ namespace OmGui
             string folder = GetPath(OmGui.Properties.Settings.Default.DownloadPath);
             ExportForm exportForm = new ExportForm(filesArray[0], folder, blockStart, blockCount);
             DialogResult result = exportForm.ShowDialog(this);
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Om.Instance.Dispose();
         }
 
 

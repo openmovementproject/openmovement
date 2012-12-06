@@ -3,8 +3,8 @@
 [Setup]
 AppId={{35C03686-D04D-4807-A60C-52B03087436C}
 AppName=OmGui
-AppVersion=1.0.0.7
-AppVerName=OmGui Beta 7
+AppVersion=1.0.0.8
+AppVerName=OmGui Beta 8
 AppPublisher=Open Movement
 CreateAppDir=yes
 DefaultDirName={pf}\OmGui

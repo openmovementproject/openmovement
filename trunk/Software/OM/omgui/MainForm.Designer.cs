@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup3 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
@@ -111,47 +112,53 @@
             System.Windows.Forms.ListViewGroup listViewGroup80 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup81 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup82 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup83 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup84 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup85 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup86 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup87 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup88 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup83 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup84 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup85 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup86 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup87 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup88 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup89 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup90 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup91 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup92 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup93 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup94 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup95 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup96 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup93 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup94 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup95 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup96 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup97 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup98 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup99 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup100 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup101 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup102 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup103 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup104 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup105 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup106 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup107 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup108 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup109 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup110 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup111 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup112 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup113 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup114 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            System.Windows.Forms.ListViewGroup listViewGroup99 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup100 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup101 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup102 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup103 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup104 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup105 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup106 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup107 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup108 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup109 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup110 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup111 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup112 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup113 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup114 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup115 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup116 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup117 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup118 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup119 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup120 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup121 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup122 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup123 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.statusStripMain = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelMain = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainerLog = new System.Windows.Forms.SplitContainer();
             this.splitContainerPreview = new System.Windows.Forms.SplitContainer();
-            this.dataViewer = new OmGui.DataViewer();
             this.splitContainerDevices = new System.Windows.Forms.SplitContainer();
-            this.listView = new OmGui.DeviceListView();
             this.propertyGridDevice = new System.Windows.Forms.PropertyGrid();
             this.textBoxLog = new System.Windows.Forms.TextBox();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
@@ -197,6 +204,8 @@
             this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
+            this.dataViewer = new OmGui.DataViewer();
+            this.listView = new OmGui.DeviceListView();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -298,17 +307,6 @@
             this.splitContainerPreview.SplitterDistance = 122;
             this.splitContainerPreview.TabIndex = 0;
             // 
-            // dataViewer
-            // 
-            this.dataViewer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataViewer.Location = new System.Drawing.Point(0, 0);
-            this.dataViewer.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.dataViewer.Mode = OmGui.DataViewer.ModeType.Zoom;
-            this.dataViewer.Name = "dataViewer";
-            this.dataViewer.Reader = null;
-            this.dataViewer.Size = new System.Drawing.Size(1140, 122);
-            this.dataViewer.TabIndex = 0;
-            // 
             // splitContainerDevices
             // 
             this.splitContainerDevices.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -326,368 +324,6 @@
             this.splitContainerDevices.Size = new System.Drawing.Size(1140, 296);
             this.splitContainerDevices.SplitterDistance = 809;
             this.splitContainerDevices.TabIndex = 1;
-            // 
-            // listView
-            // 
-            this.listView.AllowColumnReorder = true;
-            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView.FullRowSelect = true;
-            this.listView.GridLines = true;
-            listViewGroup1.Header = "Devices";
-            listViewGroup1.Name = "Other";
-            listViewGroup2.Header = "New Data";
-            listViewGroup2.Name = "NewData";
-            listViewGroup3.Header = "Downloading";
-            listViewGroup3.Name = "Downloading";
-            listViewGroup4.Header = "Downloaded";
-            listViewGroup4.Name = "Downloaded";
-            listViewGroup5.Header = "Charging";
-            listViewGroup5.Name = "Charging";
-            listViewGroup6.Header = "Standby";
-            listViewGroup6.Name = "Standby";
-            listViewGroup7.Header = "Outbox";
-            listViewGroup7.Name = "Outbox";
-            listViewGroup8.Header = "Removed";
-            listViewGroup8.Name = "Removed";
-            listViewGroup9.Header = "Files";
-            listViewGroup9.Name = "File";
-            listViewGroup10.Header = "Devices";
-            listViewGroup10.Name = "Other";
-            listViewGroup11.Header = "New Data";
-            listViewGroup11.Name = "NewData";
-            listViewGroup12.Header = "Downloading";
-            listViewGroup12.Name = "Downloading";
-            listViewGroup13.Header = "Downloaded";
-            listViewGroup13.Name = "Downloaded";
-            listViewGroup14.Header = "Charging";
-            listViewGroup14.Name = "Charging";
-            listViewGroup15.Header = "Standby";
-            listViewGroup15.Name = "Standby";
-            listViewGroup16.Header = "Outbox";
-            listViewGroup16.Name = "Outbox";
-            listViewGroup17.Header = "Removed";
-            listViewGroup17.Name = "Removed";
-            listViewGroup18.Header = "Files";
-            listViewGroup18.Name = "File";
-            listViewGroup19.Header = "Devices";
-            listViewGroup19.Name = "Other";
-            listViewGroup20.Header = "New Data";
-            listViewGroup20.Name = "NewData";
-            listViewGroup21.Header = "Downloading";
-            listViewGroup21.Name = "Downloading";
-            listViewGroup22.Header = "Downloaded";
-            listViewGroup22.Name = "Downloaded";
-            listViewGroup23.Header = "Charging";
-            listViewGroup23.Name = "Charging";
-            listViewGroup24.Header = "Standby";
-            listViewGroup24.Name = "Standby";
-            listViewGroup25.Header = "Outbox";
-            listViewGroup25.Name = "Outbox";
-            listViewGroup26.Header = "Removed";
-            listViewGroup26.Name = "Removed";
-            listViewGroup27.Header = "Files";
-            listViewGroup27.Name = "File";
-            listViewGroup28.Header = "Devices";
-            listViewGroup28.Name = "Other";
-            listViewGroup29.Header = "New Data";
-            listViewGroup29.Name = "NewData";
-            listViewGroup30.Header = "Downloading";
-            listViewGroup30.Name = "Downloading";
-            listViewGroup31.Header = "Downloaded";
-            listViewGroup31.Name = "Downloaded";
-            listViewGroup32.Header = "Charging";
-            listViewGroup32.Name = "Charging";
-            listViewGroup33.Header = "Standby";
-            listViewGroup33.Name = "Standby";
-            listViewGroup34.Header = "Outbox";
-            listViewGroup34.Name = "Outbox";
-            listViewGroup35.Header = "Removed";
-            listViewGroup35.Name = "Removed";
-            listViewGroup36.Header = "Files";
-            listViewGroup36.Name = "File";
-            listViewGroup37.Header = "Devices";
-            listViewGroup37.Name = "Other";
-            listViewGroup38.Header = "New Data";
-            listViewGroup38.Name = "NewData";
-            listViewGroup39.Header = "Downloading";
-            listViewGroup39.Name = "Downloading";
-            listViewGroup40.Header = "Downloaded";
-            listViewGroup40.Name = "Downloaded";
-            listViewGroup41.Header = "Charging";
-            listViewGroup41.Name = "Charging";
-            listViewGroup42.Header = "Standby";
-            listViewGroup42.Name = "Standby";
-            listViewGroup43.Header = "Outbox";
-            listViewGroup43.Name = "Outbox";
-            listViewGroup44.Header = "Removed";
-            listViewGroup44.Name = "Removed";
-            listViewGroup45.Header = "Files";
-            listViewGroup45.Name = "File";
-            listViewGroup46.Header = "Devices";
-            listViewGroup46.Name = "Other";
-            listViewGroup47.Header = "New Data";
-            listViewGroup47.Name = "NewData";
-            listViewGroup48.Header = "Downloading";
-            listViewGroup48.Name = "Downloading";
-            listViewGroup49.Header = "Downloaded";
-            listViewGroup49.Name = "Downloaded";
-            listViewGroup50.Header = "Charging";
-            listViewGroup50.Name = "Charging";
-            listViewGroup51.Header = "Standby";
-            listViewGroup51.Name = "Standby";
-            listViewGroup52.Header = "Outbox";
-            listViewGroup52.Name = "Outbox";
-            listViewGroup53.Header = "Removed";
-            listViewGroup53.Name = "Removed";
-            listViewGroup54.Header = "Files";
-            listViewGroup54.Name = "File";
-            listViewGroup55.Header = "Devices";
-            listViewGroup55.Name = "Other";
-            listViewGroup56.Header = "New Data";
-            listViewGroup56.Name = "NewData";
-            listViewGroup57.Header = "Downloading";
-            listViewGroup57.Name = "Downloading";
-            listViewGroup58.Header = "Downloaded";
-            listViewGroup58.Name = "Downloaded";
-            listViewGroup59.Header = "Charging";
-            listViewGroup59.Name = "Charging";
-            listViewGroup60.Header = "Standby";
-            listViewGroup60.Name = "Standby";
-            listViewGroup61.Header = "Outbox";
-            listViewGroup61.Name = "Outbox";
-            listViewGroup62.Header = "Removed";
-            listViewGroup62.Name = "Removed";
-            listViewGroup63.Header = "Files";
-            listViewGroup63.Name = "File";
-            listViewGroup64.Header = "Devices";
-            listViewGroup64.Name = "Other";
-            listViewGroup65.Header = "New Data";
-            listViewGroup65.Name = "NewData";
-            listViewGroup66.Header = "Downloading";
-            listViewGroup66.Name = "Downloading";
-            listViewGroup67.Header = "Downloaded";
-            listViewGroup67.Name = "Downloaded";
-            listViewGroup68.Header = "Charging";
-            listViewGroup68.Name = "Charging";
-            listViewGroup69.Header = "Standby";
-            listViewGroup69.Name = "Standby";
-            listViewGroup70.Header = "Outbox";
-            listViewGroup70.Name = "Outbox";
-            listViewGroup71.Header = "Removed";
-            listViewGroup71.Name = "Removed";
-            listViewGroup72.Header = "Files";
-            listViewGroup72.Name = "File";
-            listViewGroup73.Header = "Devices";
-            listViewGroup73.Name = "Other";
-            listViewGroup74.Header = "New Data";
-            listViewGroup74.Name = "NewData";
-            listViewGroup75.Header = "Downloading";
-            listViewGroup75.Name = "Downloading";
-            listViewGroup76.Header = "Downloaded";
-            listViewGroup76.Name = "Downloaded";
-            listViewGroup77.Header = "Charging";
-            listViewGroup77.Name = "Charging";
-            listViewGroup78.Header = "Standby";
-            listViewGroup78.Name = "Standby";
-            listViewGroup79.Header = "Outbox";
-            listViewGroup79.Name = "Outbox";
-            listViewGroup80.Header = "Removed";
-            listViewGroup80.Name = "Removed";
-            listViewGroup81.Header = "Files";
-            listViewGroup81.Name = "File";
-            listViewGroup82.Header = "Devices";
-            listViewGroup82.Name = "groupDevices";
-            listViewGroup83.Header = "Removed";
-            listViewGroup83.Name = "groupRemoved";
-            listViewGroup84.Header = "Files";
-            listViewGroup84.Name = "groupFiles";
-            listViewGroup85.Header = "Devices";
-            listViewGroup85.Name = "groupDevices";
-            listViewGroup86.Header = "Removed";
-            listViewGroup86.Name = "groupRemoved";
-            listViewGroup87.Header = "Files";
-            listViewGroup87.Name = "groupFiles";
-            listViewGroup88.Header = "Devices";
-            listViewGroup88.Name = "groupDevices";
-            listViewGroup89.Header = "Removed";
-            listViewGroup89.Name = "groupRemoved";
-            listViewGroup90.Header = "Files";
-            listViewGroup90.Name = "groupFiles";
-            listViewGroup91.Header = "Devices";
-            listViewGroup91.Name = "groupDevices";
-            listViewGroup92.Header = "Removed";
-            listViewGroup92.Name = "groupRemoved";
-            listViewGroup93.Header = "Devices";
-            listViewGroup93.Name = "groupDevices";
-            listViewGroup94.Header = "Removed";
-            listViewGroup94.Name = "groupRemoved";
-            listViewGroup95.Header = "Devices";
-            listViewGroup95.Name = "groupDevices";
-            listViewGroup96.Header = "Removed";
-            listViewGroup96.Name = "groupRemoved";
-            listViewGroup97.Header = "Devices";
-            listViewGroup97.Name = "groupDevices";
-            listViewGroup98.Header = "Removed";
-            listViewGroup98.Name = "groupRemoved";
-            listViewGroup99.Header = "Devices";
-            listViewGroup99.Name = "groupDevices";
-            listViewGroup100.Header = "Removed";
-            listViewGroup100.Name = "groupRemoved";
-            listViewGroup101.Header = "Devices";
-            listViewGroup101.Name = "groupDevices";
-            listViewGroup102.Header = "Removed";
-            listViewGroup102.Name = "groupRemoved";
-            listViewGroup103.Header = "Devices";
-            listViewGroup103.Name = "groupDevices";
-            listViewGroup104.Header = "Removed";
-            listViewGroup104.Name = "groupRemoved";
-            listViewGroup105.Header = "Devices";
-            listViewGroup105.Name = "groupDevices";
-            listViewGroup106.Header = "Removed";
-            listViewGroup106.Name = "groupRemoved";
-            listViewGroup107.Header = "Devices";
-            listViewGroup107.Name = "groupDevices";
-            listViewGroup108.Header = "Removed";
-            listViewGroup108.Name = "groupRemoved";
-            listViewGroup109.Header = "Devices";
-            listViewGroup109.Name = "groupDevices";
-            listViewGroup110.Header = "Removed";
-            listViewGroup110.Name = "groupRemoved";
-            listViewGroup111.Header = "Devices";
-            listViewGroup111.Name = "groupDevices";
-            listViewGroup112.Header = "Removed";
-            listViewGroup112.Name = "groupRemoved";
-            listViewGroup113.Header = "Devices";
-            listViewGroup113.Name = "groupDevices";
-            listViewGroup114.Header = "Removed";
-            listViewGroup114.Name = "groupRemoved";
-            this.listView.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup1,
-            listViewGroup2,
-            listViewGroup3,
-            listViewGroup4,
-            listViewGroup5,
-            listViewGroup6,
-            listViewGroup7,
-            listViewGroup8,
-            listViewGroup9,
-            listViewGroup10,
-            listViewGroup11,
-            listViewGroup12,
-            listViewGroup13,
-            listViewGroup14,
-            listViewGroup15,
-            listViewGroup16,
-            listViewGroup17,
-            listViewGroup18,
-            listViewGroup19,
-            listViewGroup20,
-            listViewGroup21,
-            listViewGroup22,
-            listViewGroup23,
-            listViewGroup24,
-            listViewGroup25,
-            listViewGroup26,
-            listViewGroup27,
-            listViewGroup28,
-            listViewGroup29,
-            listViewGroup30,
-            listViewGroup31,
-            listViewGroup32,
-            listViewGroup33,
-            listViewGroup34,
-            listViewGroup35,
-            listViewGroup36,
-            listViewGroup37,
-            listViewGroup38,
-            listViewGroup39,
-            listViewGroup40,
-            listViewGroup41,
-            listViewGroup42,
-            listViewGroup43,
-            listViewGroup44,
-            listViewGroup45,
-            listViewGroup46,
-            listViewGroup47,
-            listViewGroup48,
-            listViewGroup49,
-            listViewGroup50,
-            listViewGroup51,
-            listViewGroup52,
-            listViewGroup53,
-            listViewGroup54,
-            listViewGroup55,
-            listViewGroup56,
-            listViewGroup57,
-            listViewGroup58,
-            listViewGroup59,
-            listViewGroup60,
-            listViewGroup61,
-            listViewGroup62,
-            listViewGroup63,
-            listViewGroup64,
-            listViewGroup65,
-            listViewGroup66,
-            listViewGroup67,
-            listViewGroup68,
-            listViewGroup69,
-            listViewGroup70,
-            listViewGroup71,
-            listViewGroup72,
-            listViewGroup73,
-            listViewGroup74,
-            listViewGroup75,
-            listViewGroup76,
-            listViewGroup77,
-            listViewGroup78,
-            listViewGroup79,
-            listViewGroup80,
-            listViewGroup81,
-            listViewGroup82,
-            listViewGroup83,
-            listViewGroup84,
-            listViewGroup85,
-            listViewGroup86,
-            listViewGroup87,
-            listViewGroup88,
-            listViewGroup89,
-            listViewGroup90,
-            listViewGroup91,
-            listViewGroup92,
-            listViewGroup93,
-            listViewGroup94,
-            listViewGroup95,
-            listViewGroup96,
-            listViewGroup97,
-            listViewGroup98,
-            listViewGroup99,
-            listViewGroup100,
-            listViewGroup101,
-            listViewGroup102,
-            listViewGroup103,
-            listViewGroup104,
-            listViewGroup105,
-            listViewGroup106,
-            listViewGroup107,
-            listViewGroup108,
-            listViewGroup109,
-            listViewGroup110,
-            listViewGroup111,
-            listViewGroup112,
-            listViewGroup113,
-            listViewGroup114});
-            this.listView.HideSelection = false;
-            this.listView.LabelWrap = false;
-            this.listView.Location = new System.Drawing.Point(0, 0);
-            this.listView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(809, 296);
-            this.listView.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.listView.TabIndex = 1;
-            this.listView.UseCompatibleStateImageBehavior = false;
-            this.listView.View = System.Windows.Forms.View.Details;
-            this.listView.ItemActivate += new System.EventHandler(this.listViewDevices_ItemActivate);
-            this.listView.SelectedIndexChanged += new System.EventHandler(this.listViewDevices_SelectedIndexChanged);
             // 
             // propertyGridDevice
             // 
@@ -1094,6 +730,406 @@
             this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Deleted);
             this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcher_Renamed);
             // 
+            // dataViewer
+            // 
+            this.dataViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataViewer.Location = new System.Drawing.Point(0, 0);
+            this.dataViewer.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.dataViewer.Mode = OmGui.DataViewer.ModeType.Zoom;
+            this.dataViewer.Name = "dataViewer";
+            this.dataViewer.Reader = null;
+            this.dataViewer.Size = new System.Drawing.Size(1140, 122);
+            this.dataViewer.TabIndex = 0;
+            // 
+            // listView
+            // 
+            this.listView.AllowColumnReorder = true;
+            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView.FullRowSelect = true;
+            this.listView.GridLines = true;
+            listViewGroup1.Header = "Devices";
+            listViewGroup1.Name = "Other";
+            listViewGroup2.Header = "New Data";
+            listViewGroup2.Name = "NewData";
+            listViewGroup3.Header = "Downloading";
+            listViewGroup3.Name = "Downloading";
+            listViewGroup4.Header = "Downloaded";
+            listViewGroup4.Name = "Downloaded";
+            listViewGroup5.Header = "Charging";
+            listViewGroup5.Name = "Charging";
+            listViewGroup6.Header = "Standby";
+            listViewGroup6.Name = "Standby";
+            listViewGroup7.Header = "Outbox";
+            listViewGroup7.Name = "Outbox";
+            listViewGroup8.Header = "Removed";
+            listViewGroup8.Name = "Removed";
+            listViewGroup9.Header = "Files";
+            listViewGroup9.Name = "File";
+            listViewGroup10.Header = "Devices";
+            listViewGroup10.Name = "Other";
+            listViewGroup11.Header = "New Data";
+            listViewGroup11.Name = "NewData";
+            listViewGroup12.Header = "Downloading";
+            listViewGroup12.Name = "Downloading";
+            listViewGroup13.Header = "Downloaded";
+            listViewGroup13.Name = "Downloaded";
+            listViewGroup14.Header = "Charging";
+            listViewGroup14.Name = "Charging";
+            listViewGroup15.Header = "Standby";
+            listViewGroup15.Name = "Standby";
+            listViewGroup16.Header = "Outbox";
+            listViewGroup16.Name = "Outbox";
+            listViewGroup17.Header = "Removed";
+            listViewGroup17.Name = "Removed";
+            listViewGroup18.Header = "Files";
+            listViewGroup18.Name = "File";
+            listViewGroup19.Header = "Devices";
+            listViewGroup19.Name = "Other";
+            listViewGroup20.Header = "New Data";
+            listViewGroup20.Name = "NewData";
+            listViewGroup21.Header = "Downloading";
+            listViewGroup21.Name = "Downloading";
+            listViewGroup22.Header = "Downloaded";
+            listViewGroup22.Name = "Downloaded";
+            listViewGroup23.Header = "Charging";
+            listViewGroup23.Name = "Charging";
+            listViewGroup24.Header = "Standby";
+            listViewGroup24.Name = "Standby";
+            listViewGroup25.Header = "Outbox";
+            listViewGroup25.Name = "Outbox";
+            listViewGroup26.Header = "Removed";
+            listViewGroup26.Name = "Removed";
+            listViewGroup27.Header = "Files";
+            listViewGroup27.Name = "File";
+            listViewGroup28.Header = "Devices";
+            listViewGroup28.Name = "Other";
+            listViewGroup29.Header = "New Data";
+            listViewGroup29.Name = "NewData";
+            listViewGroup30.Header = "Downloading";
+            listViewGroup30.Name = "Downloading";
+            listViewGroup31.Header = "Downloaded";
+            listViewGroup31.Name = "Downloaded";
+            listViewGroup32.Header = "Charging";
+            listViewGroup32.Name = "Charging";
+            listViewGroup33.Header = "Standby";
+            listViewGroup33.Name = "Standby";
+            listViewGroup34.Header = "Outbox";
+            listViewGroup34.Name = "Outbox";
+            listViewGroup35.Header = "Removed";
+            listViewGroup35.Name = "Removed";
+            listViewGroup36.Header = "Files";
+            listViewGroup36.Name = "File";
+            listViewGroup37.Header = "Devices";
+            listViewGroup37.Name = "Other";
+            listViewGroup38.Header = "New Data";
+            listViewGroup38.Name = "NewData";
+            listViewGroup39.Header = "Downloading";
+            listViewGroup39.Name = "Downloading";
+            listViewGroup40.Header = "Downloaded";
+            listViewGroup40.Name = "Downloaded";
+            listViewGroup41.Header = "Charging";
+            listViewGroup41.Name = "Charging";
+            listViewGroup42.Header = "Standby";
+            listViewGroup42.Name = "Standby";
+            listViewGroup43.Header = "Outbox";
+            listViewGroup43.Name = "Outbox";
+            listViewGroup44.Header = "Removed";
+            listViewGroup44.Name = "Removed";
+            listViewGroup45.Header = "Files";
+            listViewGroup45.Name = "File";
+            listViewGroup46.Header = "Devices";
+            listViewGroup46.Name = "Other";
+            listViewGroup47.Header = "New Data";
+            listViewGroup47.Name = "NewData";
+            listViewGroup48.Header = "Downloading";
+            listViewGroup48.Name = "Downloading";
+            listViewGroup49.Header = "Downloaded";
+            listViewGroup49.Name = "Downloaded";
+            listViewGroup50.Header = "Charging";
+            listViewGroup50.Name = "Charging";
+            listViewGroup51.Header = "Standby";
+            listViewGroup51.Name = "Standby";
+            listViewGroup52.Header = "Outbox";
+            listViewGroup52.Name = "Outbox";
+            listViewGroup53.Header = "Removed";
+            listViewGroup53.Name = "Removed";
+            listViewGroup54.Header = "Files";
+            listViewGroup54.Name = "File";
+            listViewGroup55.Header = "Devices";
+            listViewGroup55.Name = "Other";
+            listViewGroup56.Header = "New Data";
+            listViewGroup56.Name = "NewData";
+            listViewGroup57.Header = "Downloading";
+            listViewGroup57.Name = "Downloading";
+            listViewGroup58.Header = "Downloaded";
+            listViewGroup58.Name = "Downloaded";
+            listViewGroup59.Header = "Charging";
+            listViewGroup59.Name = "Charging";
+            listViewGroup60.Header = "Standby";
+            listViewGroup60.Name = "Standby";
+            listViewGroup61.Header = "Outbox";
+            listViewGroup61.Name = "Outbox";
+            listViewGroup62.Header = "Removed";
+            listViewGroup62.Name = "Removed";
+            listViewGroup63.Header = "Files";
+            listViewGroup63.Name = "File";
+            listViewGroup64.Header = "Devices";
+            listViewGroup64.Name = "Other";
+            listViewGroup65.Header = "New Data";
+            listViewGroup65.Name = "NewData";
+            listViewGroup66.Header = "Downloading";
+            listViewGroup66.Name = "Downloading";
+            listViewGroup67.Header = "Downloaded";
+            listViewGroup67.Name = "Downloaded";
+            listViewGroup68.Header = "Charging";
+            listViewGroup68.Name = "Charging";
+            listViewGroup69.Header = "Standby";
+            listViewGroup69.Name = "Standby";
+            listViewGroup70.Header = "Outbox";
+            listViewGroup70.Name = "Outbox";
+            listViewGroup71.Header = "Removed";
+            listViewGroup71.Name = "Removed";
+            listViewGroup72.Header = "Files";
+            listViewGroup72.Name = "File";
+            listViewGroup73.Header = "Devices";
+            listViewGroup73.Name = "Other";
+            listViewGroup74.Header = "New Data";
+            listViewGroup74.Name = "NewData";
+            listViewGroup75.Header = "Downloading";
+            listViewGroup75.Name = "Downloading";
+            listViewGroup76.Header = "Downloaded";
+            listViewGroup76.Name = "Downloaded";
+            listViewGroup77.Header = "Charging";
+            listViewGroup77.Name = "Charging";
+            listViewGroup78.Header = "Standby";
+            listViewGroup78.Name = "Standby";
+            listViewGroup79.Header = "Outbox";
+            listViewGroup79.Name = "Outbox";
+            listViewGroup80.Header = "Removed";
+            listViewGroup80.Name = "Removed";
+            listViewGroup81.Header = "Files";
+            listViewGroup81.Name = "File";
+            listViewGroup82.Header = "Devices";
+            listViewGroup82.Name = "Other";
+            listViewGroup83.Header = "New Data";
+            listViewGroup83.Name = "NewData";
+            listViewGroup84.Header = "Downloading";
+            listViewGroup84.Name = "Downloading";
+            listViewGroup85.Header = "Downloaded";
+            listViewGroup85.Name = "Downloaded";
+            listViewGroup86.Header = "Charging";
+            listViewGroup86.Name = "Charging";
+            listViewGroup87.Header = "Standby";
+            listViewGroup87.Name = "Standby";
+            listViewGroup88.Header = "Outbox";
+            listViewGroup88.Name = "Outbox";
+            listViewGroup89.Header = "Removed";
+            listViewGroup89.Name = "Removed";
+            listViewGroup90.Header = "Files";
+            listViewGroup90.Name = "File";
+            listViewGroup91.Header = "Devices";
+            listViewGroup91.Name = "groupDevices";
+            listViewGroup92.Header = "Removed";
+            listViewGroup92.Name = "groupRemoved";
+            listViewGroup93.Header = "Files";
+            listViewGroup93.Name = "groupFiles";
+            listViewGroup94.Header = "Devices";
+            listViewGroup94.Name = "groupDevices";
+            listViewGroup95.Header = "Removed";
+            listViewGroup95.Name = "groupRemoved";
+            listViewGroup96.Header = "Files";
+            listViewGroup96.Name = "groupFiles";
+            listViewGroup97.Header = "Devices";
+            listViewGroup97.Name = "groupDevices";
+            listViewGroup98.Header = "Removed";
+            listViewGroup98.Name = "groupRemoved";
+            listViewGroup99.Header = "Files";
+            listViewGroup99.Name = "groupFiles";
+            listViewGroup100.Header = "Devices";
+            listViewGroup100.Name = "groupDevices";
+            listViewGroup101.Header = "Removed";
+            listViewGroup101.Name = "groupRemoved";
+            listViewGroup102.Header = "Devices";
+            listViewGroup102.Name = "groupDevices";
+            listViewGroup103.Header = "Removed";
+            listViewGroup103.Name = "groupRemoved";
+            listViewGroup104.Header = "Devices";
+            listViewGroup104.Name = "groupDevices";
+            listViewGroup105.Header = "Removed";
+            listViewGroup105.Name = "groupRemoved";
+            listViewGroup106.Header = "Devices";
+            listViewGroup106.Name = "groupDevices";
+            listViewGroup107.Header = "Removed";
+            listViewGroup107.Name = "groupRemoved";
+            listViewGroup108.Header = "Devices";
+            listViewGroup108.Name = "groupDevices";
+            listViewGroup109.Header = "Removed";
+            listViewGroup109.Name = "groupRemoved";
+            listViewGroup110.Header = "Devices";
+            listViewGroup110.Name = "groupDevices";
+            listViewGroup111.Header = "Removed";
+            listViewGroup111.Name = "groupRemoved";
+            listViewGroup112.Header = "Devices";
+            listViewGroup112.Name = "groupDevices";
+            listViewGroup113.Header = "Removed";
+            listViewGroup113.Name = "groupRemoved";
+            listViewGroup114.Header = "Devices";
+            listViewGroup114.Name = "groupDevices";
+            listViewGroup115.Header = "Removed";
+            listViewGroup115.Name = "groupRemoved";
+            listViewGroup116.Header = "Devices";
+            listViewGroup116.Name = "groupDevices";
+            listViewGroup117.Header = "Removed";
+            listViewGroup117.Name = "groupRemoved";
+            listViewGroup118.Header = "Devices";
+            listViewGroup118.Name = "groupDevices";
+            listViewGroup119.Header = "Removed";
+            listViewGroup119.Name = "groupRemoved";
+            listViewGroup120.Header = "Devices";
+            listViewGroup120.Name = "groupDevices";
+            listViewGroup121.Header = "Removed";
+            listViewGroup121.Name = "groupRemoved";
+            listViewGroup122.Header = "Devices";
+            listViewGroup122.Name = "groupDevices";
+            listViewGroup123.Header = "Removed";
+            listViewGroup123.Name = "groupRemoved";
+            this.listView.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
+            listViewGroup1,
+            listViewGroup2,
+            listViewGroup3,
+            listViewGroup4,
+            listViewGroup5,
+            listViewGroup6,
+            listViewGroup7,
+            listViewGroup8,
+            listViewGroup9,
+            listViewGroup10,
+            listViewGroup11,
+            listViewGroup12,
+            listViewGroup13,
+            listViewGroup14,
+            listViewGroup15,
+            listViewGroup16,
+            listViewGroup17,
+            listViewGroup18,
+            listViewGroup19,
+            listViewGroup20,
+            listViewGroup21,
+            listViewGroup22,
+            listViewGroup23,
+            listViewGroup24,
+            listViewGroup25,
+            listViewGroup26,
+            listViewGroup27,
+            listViewGroup28,
+            listViewGroup29,
+            listViewGroup30,
+            listViewGroup31,
+            listViewGroup32,
+            listViewGroup33,
+            listViewGroup34,
+            listViewGroup35,
+            listViewGroup36,
+            listViewGroup37,
+            listViewGroup38,
+            listViewGroup39,
+            listViewGroup40,
+            listViewGroup41,
+            listViewGroup42,
+            listViewGroup43,
+            listViewGroup44,
+            listViewGroup45,
+            listViewGroup46,
+            listViewGroup47,
+            listViewGroup48,
+            listViewGroup49,
+            listViewGroup50,
+            listViewGroup51,
+            listViewGroup52,
+            listViewGroup53,
+            listViewGroup54,
+            listViewGroup55,
+            listViewGroup56,
+            listViewGroup57,
+            listViewGroup58,
+            listViewGroup59,
+            listViewGroup60,
+            listViewGroup61,
+            listViewGroup62,
+            listViewGroup63,
+            listViewGroup64,
+            listViewGroup65,
+            listViewGroup66,
+            listViewGroup67,
+            listViewGroup68,
+            listViewGroup69,
+            listViewGroup70,
+            listViewGroup71,
+            listViewGroup72,
+            listViewGroup73,
+            listViewGroup74,
+            listViewGroup75,
+            listViewGroup76,
+            listViewGroup77,
+            listViewGroup78,
+            listViewGroup79,
+            listViewGroup80,
+            listViewGroup81,
+            listViewGroup82,
+            listViewGroup83,
+            listViewGroup84,
+            listViewGroup85,
+            listViewGroup86,
+            listViewGroup87,
+            listViewGroup88,
+            listViewGroup89,
+            listViewGroup90,
+            listViewGroup91,
+            listViewGroup92,
+            listViewGroup93,
+            listViewGroup94,
+            listViewGroup95,
+            listViewGroup96,
+            listViewGroup97,
+            listViewGroup98,
+            listViewGroup99,
+            listViewGroup100,
+            listViewGroup101,
+            listViewGroup102,
+            listViewGroup103,
+            listViewGroup104,
+            listViewGroup105,
+            listViewGroup106,
+            listViewGroup107,
+            listViewGroup108,
+            listViewGroup109,
+            listViewGroup110,
+            listViewGroup111,
+            listViewGroup112,
+            listViewGroup113,
+            listViewGroup114,
+            listViewGroup115,
+            listViewGroup116,
+            listViewGroup117,
+            listViewGroup118,
+            listViewGroup119,
+            listViewGroup120,
+            listViewGroup121,
+            listViewGroup122,
+            listViewGroup123});
+            this.listView.HideSelection = false;
+            this.listView.LabelWrap = false;
+            this.listView.Location = new System.Drawing.Point(0, 0);
+            this.listView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.listView.Name = "listView";
+            this.listView.Size = new System.Drawing.Size(809, 296);
+            this.listView.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.listView.TabIndex = 1;
+            this.listView.UseCompatibleStateImageBehavior = false;
+            this.listView.View = System.Windows.Forms.View.Details;
+            this.listView.ItemActivate += new System.EventHandler(this.listViewDevices_ItemActivate);
+            this.listView.SelectedIndexChanged += new System.EventHandler(this.listViewDevices_SelectedIndexChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1105,6 +1141,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "MainForm";
             this.Text = "Open Movement (Beta Testing Version)";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
