@@ -1023,14 +1023,9 @@ namespace OmGui
                     if (result >= cache.Keys.Count) { result--; }
                     if (result < 0 || result >= cache.Keys.Count) { tolerance = 0; return Aggregate.Zero; }
                     tolerance = Math.Abs(result - blockNumber);
-                    try
-                    {
-                        return cache.ElementAt(result).Value.Aggregate;
-                    }
-                    catch (NullReferenceException)
-                    {
-                        return Aggregate.Zero;
-                    }
+                    KeyValuePair<int, DataBlock> d = cache.ElementAt(result);
+                    if (d.Value == null) { return Aggregate.Zero; }
+                    return d.Value.Aggregate;
                 }
             }
 
