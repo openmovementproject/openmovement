@@ -487,7 +487,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 							if (freq <= 0.0f) { freq = 1.0f; }
 							offsetStart = -dataPacket->timestampOffset / freq;
 
-#if 1
+#if 0
                             // If we have a fractional offset
                             if (dataPacket->deviceId & 0x8000)
                             {

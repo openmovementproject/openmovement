@@ -1274,7 +1274,7 @@ typedef struct
 {
 	unsigned short packetHeader;	    /**< @ 0 +2  ASCII "AX", little-endian (0x5841) */
 	unsigned short packetLength;	    /**< @ 2 +2  Packet length (508 bytes, with header (4) = 512 bytes total) */
-	unsigned short deviceId;		    /**< @ 4 +2  Device identifier, 0 = unknown */
+	unsigned short deviceFractional;	/**< @ 4 +2  Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown; */
     unsigned int sessionId;			    /**< @ 6 +4  Unique session identifier, 0 = unknown */
     unsigned int sequenceId;		    /**< @10 +4  Sequence counter, each packet has a new number (reset if restarted) */
     OM_DATETIME timestamp;			    /**< @14 +4  Last reported RTC value, 0 = unknown */

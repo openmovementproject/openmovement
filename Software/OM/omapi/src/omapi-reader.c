@@ -366,6 +366,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
     }
 
     // Frequency
+// TODO: This method only works down to 25 Hz, use float to support 12.5, 6.25 rates
     sampleRate = 3200 / ((unsigned short)1 << (15 - (state->data[24] & 0x0f)));     // @24 sampleRate -- (3200/(1<<(15-(rate & 0x0f)))) Hz
 
     // Extract timestamps
@@ -373,12 +374,33 @@ int OmReaderNextBlock(OmReaderHandle reader)
         OM_DATETIME timestamp;
         short timestampOffset;
         unsigned long long t;
+        unsigned short fractionalPart;
 
         // timestamp        @14 +4  Last reported RTC value, 0 = unknown
         timestamp = (unsigned long)state->data[14] | ((unsigned long)state->data[15] << 8) | ((unsigned long)state->data[16] << 16) | ((unsigned long)state->data[17] << 24);
+        fractionalPart = 0;
 
         // timestampOffset  @26 +2  (Signed) relative sample index from the start of the buffer where the whole-second timestamp is valid
         timestampOffset = (short)((unsigned short)state->data[26] | ((unsigned short)state->data[27] << 8));
+
+#if 0
+        {
+            unsigned short deviceFractional = (unsigned short)((unsigned short)state->data[4] | ((unsigned short)state->data[5] << 8));
+            // If we have a fractional offset
+            if (deviceFractional & 0x8000)
+            {
+                // Need to undo backwards-compatible shim: Take into account how many whole samples the fractional part of timestamp accounts for:  relativeOffset = fifoLength - (short)(((unsigned long)timeFractional * AccelFrequency()) >> 16);
+                // relativeOffset = fifoLength - (short)(((unsigned long)timeFractional * AccelFrequency()) >> 16);
+                //                         nearest whole sample
+                //          whole-sec       | /fifo-pos@time
+                //           |              |/
+                // [0][1][2][3][4][5][6][7][8][9]
+                fractionalPart = ((deviceFractional & 0x7fff) << 1);	// use 15-bits as 16-bit fractional time
+                // Remove the "ideal sample" offset that was estimated (for the whole part of the timestamp), now the offset will be for the full timestamp
+                timestampOffset += (short)(((unsigned long)fractionalPart * (unsigned short)(sampleRate)) >> 16);
+            }
+        }
+#endif
 
         // Calculate the time in ticks
         {
@@ -392,9 +414,11 @@ int OmReaderNextBlock(OmReaderHandle reader)
             tParts.tm_sec = OM_DATETIME_SECONDS(timestamp);
             tSec = timegm(&tParts);                 // Pack from YMDHMS
             t = (unsigned long long)tSec << 16;     // Shift for fractional part
+            t += fractionalPart;
         }
 
         // Calculate times at start and end of block
+        // NOTE: This assumes the ideal sample rate
         state->blockStart = t - ((long long)timestampOffset * 0x10000 / sampleRate);
         state->blockEnd = state->blockStart + (unsigned long long)state->numSamples * 0x10000 / sampleRate;
 
@@ -511,7 +535,7 @@ int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
     switch (valueType)
     {
         // Raw values
-        case OM_VALUE_DEVICEID:         return dataPacket->deviceId;
+        case OM_VALUE_DEVICEID:         if (dataPacket->deviceFractional & 0x8000) { return 0; } else { return dataPacket->deviceFractional; }
         case OM_VALUE_SESSIONID:        return dataPacket->sessionId;
         case OM_VALUE_SEQUENCEID:       return dataPacket->sequenceId;
         case OM_VALUE_LIGHT:            return dataPacket->light; 
