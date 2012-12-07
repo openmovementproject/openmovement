@@ -539,7 +539,7 @@ void RunLogging(void)
 	
 	                // Initialize the ADXL and enable ADXL interrupts
 	                AccelStartup(settings.sampleRate);
-	                AccelEnableInterrupts(ACCEL_INT_SOURCE_WATERMARK | ACCEL_INT_SOURCE_OVERRUN | ACCEL_INT_SOURCE_DOUBLE_TAP, 0x00);
+	                AccelEnableInterrupts(ACCEL_INT_SOURCE_WATERMARK | ACCEL_INT_SOURCE_OVERRUN, 0x00);	/* ACCEL_INT_SOURCE_DOUBLE_TAP removed */
 #ifdef USE_GYRO
                     GyroStartupFifoInterrupts();
 #endif

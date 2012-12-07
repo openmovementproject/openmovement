@@ -80,11 +80,13 @@ typedef struct
     // Options read from NVM
     unsigned short lockCode;            // Comms lock when non-zero
     char dataEcc;                       // Apply error-correction code to recorded data sectors
+    char fractional;                    // Store fractional timestamps
 
 } Status;
 
 #define BATT_FULL_INTERVAL 60       // 60 seconds over 'full' level before reporting battery as full
 #define CONFIG_ECC_DEFAULT 1        // 0 = ECC off for data sectors, 1 = ECC on for data sectors
+#define CONFIG_FRACTIONAL_DEFAULT 1 // 0 = Fractional timestamps off, 1 = fractional timestamps on
 
 extern Status status;
 
@@ -146,8 +148,9 @@ const char *SettingsGetLogEntry(int index, unsigned short *status, unsigned long
 
 
 // Configuration
-#define CONFIG_LOCK 0
-#define CONFIG_ECC  1
+#define CONFIG_LOCK       0
+#define CONFIG_ECC        1
+#define CONFIG_FRACTIONAL 2
 #define CONFIG_UNDEFINED 0xffff
 unsigned short SettingsGetConfigValue(unsigned int index);
 char SettingsSetConfigValue(unsigned int index, unsigned short value);

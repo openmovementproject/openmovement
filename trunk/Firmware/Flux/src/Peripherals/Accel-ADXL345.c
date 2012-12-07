@@ -262,7 +262,14 @@ WriteSPIx(10);	// Inactivity Time: 1 sec/LSB [0x0a = 10s]
 	// d5 = Trigger (0 = Trigger event to INT1 pin. 1 = event to INT2 pin)
 	// d4-0 = Samples (0. Dont care as not using the FIFO. Table 20 datasheet)
     //                                                                          Enables FIFO in 'stream' mode interrupting on ADXL-INT1 
-	WriteSPIx(0x80 + ACCEL_DEFAULT_WATERMARK);                                  // ... sets water mark to 25 (of 32)
+    if ((samplingRate & 0x1f) == ACCEL_RATE_800 || (samplingRate & 0x1f) == ACCEL_RATE_1600 || (samplingRate & 0x1f) == ACCEL_RATE_3200)
+    {
+		WriteSPIx(0x80 + ACCEL_HIGH_SPEED_WATERMARK);                               // ... sets water mark to 10 (of 32)
+    }
+    else
+    {
+		WriteSPIx(0x80 + ACCEL_DEFAULT_WATERMARK);                                  // ... sets water mark to 25 (of 32)
+    }
 
 	ACCEL_CS = 1;		// active low
 	CloseSPIx();

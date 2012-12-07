@@ -217,8 +217,8 @@ extern void SystemPwrSave(unsigned long NapSetting);
     #define BATT_CHARGE_ZERO		614
 	#define BATT_CHARGE_MIN_LOG		517		// minimum level to update log
 	#define BATT_CHARGE_MIN_SAFE	520		// minimum safe running voltage (5%), avoids unwanted RTC resets and file corruptions etc.
-    #define BATT_CHARGE_MID_USB		650     // level to count towards recharge cycle counter
-    #define BATT_CHARGE_FULL_USB	670
+    #define BATT_CHARGE_MID_USB		688     // (was 650) 80% - level to count towards recharge cycle counter
+    #define BATT_CHARGE_FULL_USB	708     // was 670 ?!
     #define BATT_CHARGE_FULL		708
 
 
