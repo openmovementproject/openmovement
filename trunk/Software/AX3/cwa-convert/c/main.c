@@ -486,6 +486,25 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 							freq = 3200.0f / (1 << (15 - (dataPacket->sampleRate & 0x0f)));
 							if (freq <= 0.0f) { freq = 1.0f; }
 							offsetStart = -dataPacket->timestampOffset / freq;
+
+#if 1
+                            // If we have a fractional offset
+                            if (dataPacket->deviceId & 0x8000)
+                            {
+                                // Need to undo backwards-compatible shim: Take into account how many whole samples the fractional part of timestamp accounts for:  relativeOffset = fifoLength - (short)(((unsigned long)timeFractional * AccelFrequency()) >> 16);
+                                // relativeOffset = fifoLength - (short)(((unsigned long)timeFractional * AccelFrequency()) >> 16);
+                                //                         nearest whole sample
+                                //          whole-sec       | /fifo-pos@time
+                                //           |              |/
+                                // [0][1][2][3][4][5][6][7][8][9]
+                                unsigned short timeFractional = ((dataPacket->deviceId & 0x7fff) << 1);	// use 15-bits as 16-bit fractional time
+                                // Remove the "ideal sample" offset that was estimated (for the whole part of the timestamp)
+                                offsetStart += (short)(((unsigned long)timeFractional * (unsigned short)(freq)) >> 16) / freq;
+                                // Now take into account the actual fractional time
+    							offsetStart = -dataPacket->timestampOffset / freq;
+                            }
+#endif
+
 						}
 						time0 += (int)floor(offsetStart);			// Fix so time0 takes negative offset into account (for < :00 s boundaries)
 						offsetStart -= (float)floor(offsetStart);	// ...and so offsetStart is always positive

@@ -45,7 +45,7 @@ typedef struct DataPacket_t
 {
 	unsigned short packetHeader;	// [2] = 0x5841 (ASCII "AX", little-endian)
 	unsigned short packetLength;	// [2] = 508 bytes (contents of this packet is 508 bytes long, + 2 + 2 = 512 bytes total)
-	unsigned short deviceId;		// [2] (16-bit device identifier, 0 = unknown)
+	unsigned short deviceId;		// [2] Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown; 
     unsigned int sessionId;			// [4] (32-bit unique session identifier, 0 = unknown)
     unsigned int sequenceId;		// [4] (32-bit sequence counter, each packet has a new number -- reset if restarted?)
     unsigned int timestamp;			// [4] (last reported RTC value, 0 = unknown)
