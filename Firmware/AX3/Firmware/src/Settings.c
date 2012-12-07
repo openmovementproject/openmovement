@@ -175,6 +175,7 @@ const char *SettingsGetLogEntry(int index, unsigned short *status, unsigned long
 
     if (status != NULL) *status = *(unsigned short *)(scratchBuffer + (1 + index) * LOG_SIZE);
     if (timestamp != NULL) *timestamp = *(unsigned long *)(scratchBuffer + (1 + index) * LOG_SIZE + sizeof(unsigned short));
+    *(scratchBuffer + (1 + index) * LOG_SIZE + sizeof(unsigned short) + sizeof(unsigned long) + LOG_SIZE - 1) = '\0';	// Ensure entry is null-terminated
     return (const char *)(scratchBuffer + (1 + index) * LOG_SIZE + sizeof(unsigned short) + sizeof(unsigned long));
 }
 
@@ -195,7 +196,11 @@ unsigned short SettingsGetConfigValue(unsigned int index)
 // Set a config value
 char SettingsSetConfigValue(unsigned int index, unsigned short value)
 {
-     // Read existing data to RAM
+	// Short-cut if value is already set correctly
+	unsigned short existing = SettingsGetConfigValue(index);
+	if (existing == value) { return 1; }
+	
+    // Read existing data to RAM
     ReadProgram(SETTINGS_ADDRESS, scratchBuffer, 512);
 
     // Update value
@@ -265,6 +270,7 @@ void SettingsInitialize(void)
     // Configuration
     status.lockCode = 0x0000;
     status.dataEcc = CONFIG_ECC_DEFAULT;
+    status.fractional = CONFIG_FRACTIONAL_DEFAULT;
 
     // "Initial lock" value
     {
@@ -287,6 +293,15 @@ void SettingsInitialize(void)
         }
     } 
 
+    // Fractional
+    {
+        unsigned short value;
+        value = SettingsGetConfigValue(CONFIG_FRACTIONAL);
+        if (value != 0xffff)
+        {
+		    status.fractional = (char)value;
+        }
+    } 
     
 }
 
@@ -1178,6 +1193,24 @@ char SettingsCommand(const char *line, SettingsMode mode)
         else
         {
             printf("ECC=%d\r\n", status.dataEcc);
+        }
+    }
+    else if (strnicmp(line, "fractional", 10) == 0)
+    {
+        if (line[10] != '\0')
+        {
+            if (locked) { printf("ERROR: Locked.\r\n"); }
+            else
+            {
+                unsigned int i = (unsigned int)my_atoi(line + 4);
+                status.fractional = i;
+                if (mode != SETTINGS_BATCH) { SettingsSetConfigValue(CONFIG_FRACTIONAL, status.fractional); }
+                printf("FRACTIONAL=%d\r\n", status.fractional);
+            }
+        }
+        else
+        {
+        	printf("FRACTIONAL=%d\r\n", status.fractional);
         }
     }
     else if (mode != SETTINGS_BATCH && strnicmp(line, "reset", 5) == 0)

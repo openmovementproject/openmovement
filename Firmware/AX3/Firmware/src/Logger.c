@@ -603,6 +603,7 @@ short LoggerWrite(void)
             short relativeOffset;
             unsigned short i;
             unsigned short battery;
+            unsigned short timeFractional;
 
             if (settings.debuggingInfo >= 3 || (settings.debuggingInfo >= 2 && status.debugFlashCount)) { LED_SET(LED_GREEN); }
             if (status.debugFlashCount) { status.debugFlashCount--; }
@@ -619,7 +620,6 @@ short LoggerWrite(void)
 
             // Calculate timestamp and offset
             {
-                unsigned short timeFractional;
                 unsigned short fifoLength;
                 ACCEL_INT_DISABLE();
                 DataTimestamp(&accelStream, &timestamp, &timeFractional, &fifoLength);
@@ -631,6 +631,10 @@ short LoggerWrite(void)
             dp->packetHeader = 0x5841;              // [2] = 0x5841 (ASCII "AX", little-endian)
             dp->packetLength = 0x01FC;              // [2] = 0x01FC (contents of this packet is 508 bytes long, + 2 + 2 header = 512 bytes total)
             dp->deviceId = settings.deviceId;     	// [2] (16-bit device identifier, 0 = unknown)
+            if (status.fractional)
+            {
+	            dp->deviceId = 0x8000 | (timeFractional >> 1);	// [2] Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown; 
+            } 
             dp->sessionId = settings.sessionId;     // [4] (32-bit unique session identifier, 0 = unknown)
             dp->sequenceId = (status.accelSequenceId++);	// [4] (32-bit sequence counter, each packet has a new number -- reset if restarted?)
             dp->timestamp = timestamp;              // [4] (last reported RTC value, 0 = unknown) [YYYYYYMM MMDDDDDh hhhhmmmm mmssssss]
@@ -689,6 +693,7 @@ short LoggerWrite(void)
             unsigned long timestamp;
             short relativeOffset;
             unsigned short battery;
+            unsigned short timeFractional;
 
             if (settings.debuggingInfo >= 3 || (settings.debuggingInfo >= 2 && status.debugFlashCount)) { LED_SET(LED_BLUE); }
 
@@ -704,7 +709,6 @@ short LoggerWrite(void)
 
             // Calculate timestamp and offset
             {
-                unsigned short timeFractional;
                 unsigned short fifoLength;
                 GYRO_INT_DISABLE();
                 DataTimestamp(&gyroStream, &timestamp, &timeFractional, &fifoLength);
@@ -716,6 +720,10 @@ short LoggerWrite(void)
             dp->packetHeader = 0x5947;              // [2] = 0x5947 (ASCII "GY", little-endian)
             dp->packetLength = 0x01FC;              // [2] = 0x01FC (contents of this packet is 508 bytes long, + 2 + 2 header = 512 bytes total)
             dp->deviceId = settings.deviceId;     	// [2] (16-bit device identifier, 0 = unknown)
+            if (status.fractional)
+            {
+	            dp->deviceId = 0x8000 | (timeFractional >> 1);	// [2] Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown; 
+            } 
             dp->sessionId = settings.sessionId;     // [4] (32-bit unique session identifier, 0 = unknown)
             dp->sequenceId = (status.gyroSequenceId++);	// [4] (32-bit sequence counter, each packet has a new number -- reset if restarted?)
             dp->timestamp = timestamp;              // [4] (last reported RTC value, 0 = unknown) [YYYYYYMM MMDDDDDh hhhhmmmm mmssssss]

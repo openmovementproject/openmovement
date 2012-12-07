@@ -36,7 +36,8 @@
 /*Default settings - legacy*/
 // Default settings
 #define ACCEL_DEFAULT_RATE      (ACCEL_RATE_100 | ACCEL_RANGE_8G)   // ACCEL_RATE_LOW_POWER
-#define ACCEL_DEFAULT_WATERMARK 25          // up to 31
+#define ACCEL_DEFAULT_WATERMARK 25          // Define default watermark (up to 31)
+#define ACCEL_HIGH_SPEED_WATERMARK 10		// Define high speed watermark (up to 31)
 
 /*For all accelerometers*/
 // Accelerometer sampling rate codes (current shown as normal / low-power mode)

@@ -156,12 +156,6 @@ void USBInitializeSystem(void)
 	    return v;
 	}
 	
-	// USB-specific char ready
-	char usb_haschar(void)
-	{
-	    return (inHead != inTail);
-	}
-    
 	// Waits processing IO until buffer is empty
 	void USBCDCWait(void)
 	{
