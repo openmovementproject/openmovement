@@ -96,7 +96,7 @@ typedef struct {
 #define FTL_PAGEINFO_SIZE 12    // == sizeof(FtlPageInfo)
 
 #ifdef FTL_ECC
-	#if (FTL_PAGEINFO_SIZE + FTL_SECTORS_PER_PAGE * ECC_SIZE) > FTL_SPARE_BYTES_PER_PAGE
+	#if (FTL_PAGEINFO_SIZE + FTL_SECTORS_PER_PAGE * ECC_SIZE_512) > FTL_SPARE_BYTES_PER_PAGE
 		#error "Metadata (including ECC) too large to fit in the spare bytes"
 	#endif
 #else
@@ -1734,7 +1734,7 @@ unsigned short FtlMapLoadBank(unsigned short logicalBlock)
 										{
 											unsigned short j;
 											FtlWarning("BAM copy to new block failed, dropping whole BAM (will re-scan).");
-											NandEraseBlock(oldBamBlock);
+											//NandEraseBlock(oldBamBlock);
 											FtlMarkBadBlock(ftlContext.bamBlock);
 											// Invalidate BAM
 											ftlContext.bamBlock = 0;
@@ -1758,6 +1758,8 @@ unsigned short FtlMapLoadBank(unsigned short logicalBlock)
 								}
 								if (bamError) { break; }
 							}
+							// [dgj] Added: Erase old BAM block now that we've moved the contents
+							NandEraseBlock(oldBamBlock);
 						}
 					}
 					else

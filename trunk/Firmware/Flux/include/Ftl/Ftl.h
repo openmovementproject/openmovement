@@ -40,7 +40,7 @@
 //#define FTL_BAM_IN_RAM            // Store the whole BAM in RAM (8 kB buffer for 512 MB Hynix)
 #define FTL_BAM_RECOVER			    // Re-use an existing banked BAM
 #define FTL_BAM_PRELOAD             // Pre-load any missing entries from the banked BAM table at start-up (slower startup, but more even run-time performance)
-#define FTL_BAM_CACHE 3			    // Number of BAM entries to cache before accessing BAM bank
+#define FTL_BAM_CACHE 3			    // Cache first N BAM entries
 
 
 // Block address map is loaded in banks
