@@ -38,6 +38,12 @@
 	// No legacy defines for this code
 	#define NO_LEGACY
 
+    // Continue on USB if NAND or Accelerometer not found -- WARNING: Not recommended (filesystem/accelerometer code could hang)
+    //#define IGNORE_UNRECOGNIZED_PERIPHERALS
+    #ifdef IGNORE_UNRECOGNIZED_PERIPHERALS
+    	#warning "IGNORE_UNRECOGNIZED_PERIPHERALS could be dangerous."
+    #endif
+    
     // Include CWA hardware profile
     #include "Hardware/HardwareProfile-CWA.h"
     

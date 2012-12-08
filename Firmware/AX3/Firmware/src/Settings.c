@@ -563,6 +563,15 @@ char SettingsCommand(const char *line, SettingsMode mode)
             if (!z) USBCDCWait();
         }
 
+        if (!z || z == 7)
+        {
+		    // Read NAND parameters
+		    unsigned char id[6] = {0};
+		    NandReadDeviceId(id);
+            printf("NANDID=%02x:%02x:%02x:%02x:%02x:%02x\r\n", id[0], id[1], id[2], id[3], id[4], id[5]);
+            if (!z) USBCDCWait();
+        }
+
     }
     else if (strnicmp(line, "time", 4) == 0)
     {
