@@ -164,10 +164,22 @@ int main(void)
 #endif
 
     // If we haven't detected the NAND or accelerometer this could be the wrong firmware for this device (reset to bootloader)
-    if (!nandPresent || !accelPresent)
+    if (!nandPresent)
+    {
+        int i;
+        for (i = 0; i < 5 * 3; i++) { LED_SET(LED_MAGENTA); DelayMs(111); LED_SET(LED_CYAN); DelayMs(111); LED_SET(LED_YELLOW); DelayMs(111); }
+        #ifdef IGNORE_UNRECOGNIZED_PERIPHERALS
+        if (!USB_BUS_SENSE)      // If IGNORE_UNRECOGNIZED_PERIPHERALS set, don't reset if connected to USB
+        #endif
+    	Reset();                // Reset
+    }
+    if (!accelPresent)
     {
         int i;
         for (i = 0; i < 5 * 3; i++) { LED_SET(LED_RED); DelayMs(111); LED_SET(LED_GREEN); DelayMs(111); LED_SET(LED_BLUE); DelayMs(111); }
+        #ifdef IGNORE_UNRECOGNIZED_PERIPHERALS
+        if (!USB_BUS_SENSE)      // If IGNORE_UNRECOGNIZED_PERIPHERALS set, don't reset if connected to USB
+        #endif
     	Reset();                // Reset
     }
 

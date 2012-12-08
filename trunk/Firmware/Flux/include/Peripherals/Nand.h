@@ -39,7 +39,7 @@ char NandShutdown(void);
 // Read the device id (6 bytes)
 extern const unsigned char NAND_DEVICE_HY27UF084G2B[6];
 extern const unsigned char NAND_DEVICE_MT29F8G08AAA[6];
-char NandReadId(unsigned char* destination);
+char NandReadDeviceId(unsigned char* destination);
 
 // Verify the device id
 unsigned char NandVerifyDeviceId(void);
