@@ -20,7 +20,7 @@ namespace OmGui
         {
             InitializeComponent();
 
-            //saveFileDialog.InitialDirectory = downloadPath;
+            saveFileDialog.InitialDirectory = downloadPath;
 
             textBoxSourceFile.Text = inputFilename;
             textBoxOutputFile.Text = Path.Combine(downloadPath, Path.ChangeExtension(Path.GetFileName(inputFilename), saveFileDialog.DefaultExt));
@@ -38,9 +38,11 @@ namespace OmGui
 
         private void ExportForm_Load(object sender, EventArgs e)
         {
+            //TS - [P] - Commented out because now just uses working folder.
             if (Browse(Path.GetFileName(textBoxOutputFile.Text)) != DialogResult.OK) { this.Close(); }
         }
 
+        //TS - [P] - As explaind above this isn't 
         private DialogResult Browse(string filename)
         {
             // Output file

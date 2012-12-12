@@ -2,8 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="OmGui.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="DownloadPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">{MyDocuments}\AX3</Value>
+    <Setting Name="DefaultWorkingFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\</Value>
+    </Setting>
+    <Setting Name="CurrentWorkingFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CurrentPluginFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">J:\New OM\Plugins</Value>
     </Setting>
   </Settings>
 </SettingsFile>
