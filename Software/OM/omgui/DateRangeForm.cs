@@ -15,10 +15,23 @@ namespace OmGui
         {
             InitializeComponent();
             Text = title;
-            labelPrompt.Text = prompt;
+            //labelPrompt.Text = prompt;
             FromDate = DateTime.MinValue;
-            UntilDate = DateTime.MaxValue;
+            //UntilDate = DateTime.MaxValue;
         }
+
+        public bool Always { get; set; }
+
+        public int SessionID { get; set; }
+
+        public enum SyncTimeType
+        {
+            None,
+            PC = 1,
+            Zero = 2
+        }
+
+        public SyncTimeType SyncTime { get; set; }
 
         public DateTime FromDate
         {
@@ -47,36 +60,42 @@ namespace OmGui
             }
         }
 
-        public DateTime UntilDate
-        {
-            get 
-            {
-                if (!dateTimePickerUntil.Checked) { return DateTime.MaxValue; }
-                return dateTimePickerUntil.Value; 
-            }
-            set
-            {
-                if (value < dateTimePickerUntil.MinDate)
-                {
-                    dateTimePickerUntil.Checked = false;
-                    dateTimePickerUntil.Value = dateTimePickerUntil.MinDate;
-                }
-                else if (value > dateTimePickerUntil.MaxDate)
-                {
-                    dateTimePickerUntil.Checked = false;
-                    dateTimePickerUntil.Value = dateTimePickerUntil.MaxDate;
-                }
-                else
-                {
-                    dateTimePickerUntil.Value = value;
-                }
+        //public DateTime UntilDate
+        //{
+        //    get 
+        //    {
+        //        if (!dateTimePickerUntil.Checked) { return DateTime.MaxValue; }
+        //        return dateTimePickerUntil.Value; 
+        //    }
+        //    set
+        //    {
+        //        if (value < dateTimePickerUntil.MinDate)
+        //        {
+        //            dateTimePickerUntil.Checked = false;
+        //            dateTimePickerUntil.Value = dateTimePickerUntil.MinDate;
+        //        }
+        //        else if (value > dateTimePickerUntil.MaxDate)
+        //        {
+        //            dateTimePickerUntil.Checked = false;
+        //            dateTimePickerUntil.Value = dateTimePickerUntil.MaxDate;
+        //        }
+        //        else
+        //        {
+        //            dateTimePickerUntil.Value = value;
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
+            if (syncToPCCheckBox.Checked)
+                SyncTime = SyncTimeType.PC;
+            else
+                SyncTime = SyncTimeType.Zero;
+
+            SessionID = Int32.Parse(sessionIdTextBox.Text);
             DialogResult = System.Windows.Forms.DialogResult.OK;
             Close();
         }
@@ -89,7 +108,26 @@ namespace OmGui
 
         private void DateRangeForm_Load(object sender, EventArgs e)
         {
+            Always = false;
+            SyncTime = SyncTimeType.None;
+        }
 
+        private void alwaysCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (alwaysCheckBox.Checked)
+            {
+                dateTimePickerFrom.Enabled = false;
+                comboBoxDays.Enabled = false;
+                comboBoxHours.Enabled = false;
+                comboBoxMinutes.Enabled = false;
+            }
+            else
+            {
+                dateTimePickerFrom.Enabled = true;
+                comboBoxDays.Enabled = true;
+                comboBoxHours.Enabled = true;
+                comboBoxMinutes.Enabled = true;
+            }
         }
     }
 }

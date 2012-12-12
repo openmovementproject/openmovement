@@ -79,6 +79,12 @@ namespace OmApiNet
             return new OmReader(Om.Instance, filename, handle);
         }
 
+        //TS - TODO - Doesn't check if it is already open or not.
+        public static void Close(OmReader reader)
+        {
+            OmApi.OmReaderClose(reader.Handle);
+        }
+
         // Factory method to open a device data stream
         public static OmReader Open(ushort deviceId)
         {

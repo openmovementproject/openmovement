@@ -31,14 +31,19 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonOk = new System.Windows.Forms.Button();
-            this.labelPrompt = new System.Windows.Forms.Label();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.dateTimePickerUntil = new System.Windows.Forms.DateTimePicker();
-            this.labelUntil = new System.Windows.Forms.Label();
+            this.alwaysCheckBox = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.sessionIdTextBox = new System.Windows.Forms.TextBox();
             this.dateTimePickerFrom = new System.Windows.Forms.DateTimePicker();
             this.labelFrom = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.comboBoxDays = new System.Windows.Forms.ComboBox();
+            this.comboBoxHours = new System.Windows.Forms.ComboBox();
+            this.comboBoxMinutes = new System.Windows.Forms.ComboBox();
+            this.syncToPCCheckBox = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -47,16 +52,18 @@
             this.panel1.Controls.Add(this.buttonCancel);
             this.panel1.Controls.Add(this.buttonOk);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 81);
+            this.panel1.Location = new System.Drawing.Point(0, 200);
+            this.panel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(739, 80);
+            this.panel1.Size = new System.Drawing.Size(653, 58);
             this.panel1.TabIndex = 1;
             // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(612, 21);
+            this.buttonCancel.Location = new System.Drawing.Point(528, 10);
+            this.buttonCancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(113, 37);
             this.buttonCancel.TabIndex = 6;
@@ -67,7 +74,8 @@
             // buttonOk
             // 
             this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonOk.Location = new System.Drawing.Point(493, 21);
+            this.buttonOk.Location = new System.Drawing.Point(409, 10);
+            this.buttonOk.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(113, 37);
             this.buttonOk.TabIndex = 5;
@@ -75,63 +83,36 @@
             this.buttonOk.UseVisualStyleBackColor = true;
             this.buttonOk.Click += new System.EventHandler(this.buttonOk_Click);
             // 
-            // labelPrompt
+            // alwaysCheckBox
             // 
-            this.labelPrompt.AutoSize = true;
-            this.labelPrompt.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelPrompt.Location = new System.Drawing.Point(0, 0);
-            this.labelPrompt.Name = "labelPrompt";
-            this.labelPrompt.Padding = new System.Windows.Forms.Padding(10);
-            this.labelPrompt.Size = new System.Drawing.Size(104, 37);
-            this.labelPrompt.TabIndex = 0;
-            this.labelPrompt.Text = "Date Range";
+            this.alwaysCheckBox.AutoSize = true;
+            this.alwaysCheckBox.Location = new System.Drawing.Point(571, 75);
+            this.alwaysCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.alwaysCheckBox.Name = "alwaysCheckBox";
+            this.alwaysCheckBox.Size = new System.Drawing.Size(73, 21);
+            this.alwaysCheckBox.TabIndex = 4;
+            this.alwaysCheckBox.Text = "Always";
+            this.alwaysCheckBox.UseVisualStyleBackColor = true;
+            this.alwaysCheckBox.CheckedChanged += new System.EventHandler(this.alwaysCheckBox_CheckedChanged);
             // 
-            // tableLayoutPanel1
+            // label1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 4;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.dateTimePickerUntil, 3, 0);
-            this.tableLayoutPanel1.Controls.Add(this.labelUntil, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.dateTimePickerFrom, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.labelFrom, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 40);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(713, 35);
-            this.tableLayoutPanel1.TabIndex = 3;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(13, 124);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(75, 17);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "Session ID";
             // 
-            // dateTimePickerUntil
+            // sessionIdTextBox
             // 
-            this.dateTimePickerUntil.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.dateTimePickerUntil.Checked = false;
-            this.dateTimePickerUntil.CustomFormat = "dd/MM/yyyy HH:mm:ss";
-            this.dateTimePickerUntil.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerUntil.Location = new System.Drawing.Point(420, 4);
-            this.dateTimePickerUntil.Margin = new System.Windows.Forms.Padding(4);
-            this.dateTimePickerUntil.MaxDate = new System.DateTime(2063, 12, 31, 0, 0, 0, 0);
-            this.dateTimePickerUntil.MinDate = new System.DateTime(2000, 3, 1, 0, 0, 0, 0);
-            this.dateTimePickerUntil.Name = "dateTimePickerUntil";
-            this.dateTimePickerUntil.ShowCheckBox = true;
-            this.dateTimePickerUntil.Size = new System.Drawing.Size(289, 22);
-            this.dateTimePickerUntil.TabIndex = 4;
-            // 
-            // labelUntil
-            // 
-            this.labelUntil.AutoSize = true;
-            this.labelUntil.Location = new System.Drawing.Point(360, 0);
-            this.labelUntil.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelUntil.Name = "labelUntil";
-            this.labelUntil.Size = new System.Drawing.Size(40, 17);
-            this.labelUntil.TabIndex = 3;
-            this.labelUntil.Text = "Until:";
+            this.sessionIdTextBox.Location = new System.Drawing.Point(96, 121);
+            this.sessionIdTextBox.Margin = new System.Windows.Forms.Padding(4);
+            this.sessionIdTextBox.Name = "sessionIdTextBox";
+            this.sessionIdTextBox.Size = new System.Drawing.Size(213, 22);
+            this.sessionIdTextBox.TabIndex = 6;
+            this.sessionIdTextBox.Text = "0";
             // 
             // dateTimePickerFrom
             // 
@@ -140,34 +121,105 @@
             this.dateTimePickerFrom.Checked = false;
             this.dateTimePickerFrom.CustomFormat = "dd/MM/yyyy HH:mm:ss";
             this.dateTimePickerFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTimePickerFrom.Location = new System.Drawing.Point(64, 4);
+            this.dateTimePickerFrom.Location = new System.Drawing.Point(61, 29);
             this.dateTimePickerFrom.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePickerFrom.MaxDate = new System.DateTime(2063, 12, 31, 0, 0, 0, 0);
             this.dateTimePickerFrom.MinDate = new System.DateTime(2000, 3, 1, 0, 0, 0, 0);
             this.dateTimePickerFrom.Name = "dateTimePickerFrom";
-            this.dateTimePickerFrom.ShowCheckBox = true;
-            this.dateTimePickerFrom.Size = new System.Drawing.Size(288, 22);
-            this.dateTimePickerFrom.TabIndex = 2;
+            this.dateTimePickerFrom.Size = new System.Drawing.Size(153, 22);
+            this.dateTimePickerFrom.TabIndex = 9;
             // 
             // labelFrom
             // 
             this.labelFrom.AutoSize = true;
-            this.labelFrom.Location = new System.Drawing.Point(4, 0);
+            this.labelFrom.Location = new System.Drawing.Point(15, 29);
             this.labelFrom.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFrom.Name = "labelFrom";
-            this.labelFrom.Size = new System.Drawing.Size(44, 17);
-            this.labelFrom.TabIndex = 1;
-            this.labelFrom.Text = "From:";
+            this.labelFrom.Size = new System.Drawing.Size(38, 17);
+            this.labelFrom.TabIndex = 8;
+            this.labelFrom.Text = "Date";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(15, 76);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(40, 17);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Days";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(372, 76);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(57, 17);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "Minutes";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(189, 76);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(46, 17);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "Hours";
+            // 
+            // comboBoxDays
+            // 
+            this.comboBoxDays.FormattingEnabled = true;
+            this.comboBoxDays.Location = new System.Drawing.Point(61, 73);
+            this.comboBoxDays.Name = "comboBoxDays";
+            this.comboBoxDays.Size = new System.Drawing.Size(121, 24);
+            this.comboBoxDays.TabIndex = 13;
+            // 
+            // comboBoxHours
+            // 
+            this.comboBoxHours.FormattingEnabled = true;
+            this.comboBoxHours.Location = new System.Drawing.Point(241, 73);
+            this.comboBoxHours.Name = "comboBoxHours";
+            this.comboBoxHours.Size = new System.Drawing.Size(121, 24);
+            this.comboBoxHours.TabIndex = 14;
+            // 
+            // comboBoxMinutes
+            // 
+            this.comboBoxMinutes.FormattingEnabled = true;
+            this.comboBoxMinutes.Location = new System.Drawing.Point(435, 73);
+            this.comboBoxMinutes.Name = "comboBoxMinutes";
+            this.comboBoxMinutes.Size = new System.Drawing.Size(121, 24);
+            this.comboBoxMinutes.TabIndex = 15;
+            // 
+            // syncToPCCheckBox
+            // 
+            this.syncToPCCheckBox.AutoSize = true;
+            this.syncToPCCheckBox.Location = new System.Drawing.Point(18, 164);
+            this.syncToPCCheckBox.Name = "syncToPCCheckBox";
+            this.syncToPCCheckBox.Size = new System.Drawing.Size(134, 21);
+            this.syncToPCCheckBox.TabIndex = 16;
+            this.syncToPCCheckBox.Text = "Sync to PC Time";
+            this.syncToPCCheckBox.UseVisualStyleBackColor = true;
             // 
             // DateRangeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(739, 161);
-            this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.labelPrompt);
+            this.ClientSize = new System.Drawing.Size(653, 258);
+            this.Controls.Add(this.syncToPCCheckBox);
+            this.Controls.Add(this.comboBoxMinutes);
+            this.Controls.Add(this.comboBoxHours);
+            this.Controls.Add(this.comboBoxDays);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.dateTimePickerFrom);
+            this.Controls.Add(this.labelFrom);
+            this.Controls.Add(this.sessionIdTextBox);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.alwaysCheckBox);
             this.Controls.Add(this.panel1);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DateRangeForm";
@@ -177,8 +229,6 @@
             this.Text = "Date Range";
             this.Load += new System.EventHandler(this.DateRangeForm_Load);
             this.panel1.ResumeLayout(false);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -189,11 +239,17 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonOk;
-        private System.Windows.Forms.Label labelPrompt;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.DateTimePicker dateTimePickerUntil;
-        private System.Windows.Forms.Label labelUntil;
+        private System.Windows.Forms.CheckBox alwaysCheckBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox sessionIdTextBox;
         private System.Windows.Forms.DateTimePicker dateTimePickerFrom;
         private System.Windows.Forms.Label labelFrom;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox comboBoxDays;
+        private System.Windows.Forms.ComboBox comboBoxHours;
+        private System.Windows.Forms.ComboBox comboBoxMinutes;
+        private System.Windows.Forms.CheckBox syncToPCCheckBox;
     }
 }

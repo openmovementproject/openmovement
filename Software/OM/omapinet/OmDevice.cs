@@ -148,6 +148,25 @@ category = SourceCategory.Other;
             get { return Connected && DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_PROGRESS; }
         }
 
+        //TS - Added IsRecording instead of using the logic Dan had in MainForm everywhere.
+        public enum RecordStatus
+        {
+            Stopped,
+            Always,
+            Interval
+        }
+
+        public RecordStatus IsRecording
+        {
+            get
+            {
+                if (StartTime >= StopTime) { return RecordStatus.Stopped; }
+                else if (StartTime == DateTime.MinValue && StopTime == DateTime.MaxValue) { return RecordStatus.Always; }
+                else { return RecordStatus.Interval; }
+            }
+        }
+        //TS - End Of IsRecording.
+
         private bool connected;
         public bool Connected { get { return connected; } }
         internal void SetConnected(bool value)
@@ -225,10 +244,15 @@ category = SourceCategory.Other;
             return true;
         }
 
-        public bool SyncTime()
+        public bool SyncTime(int now)
         {
-            DateTime now = DateTime.Now;
-            if (OmApi.OM_FAILED(OmApi.OmSetTime(deviceId, OmApi.OmDateTimePack(now))))
+            DateTime time;
+            if(now == 1)
+                time = DateTime.Now;
+            else
+                time = new DateTime(0);
+
+            if (OmApi.OM_FAILED(OmApi.OmSetTime(deviceId, OmApi.OmDateTimePack(time))))
             {
                 return false;
             }
