@@ -56,6 +56,9 @@ char NandLoadPageRead(unsigned short block, unsigned char page);
 // Read in from the page buffer
 char NandReadBuffer(unsigned short offset, unsigned char *buffer, unsigned short length);
 
+// Write page directly -- KL, ADDED - This is basic functionality and should always be supported
+char NandWritePage(unsigned short destBlock, unsigned char destPage, unsigned char *buffer);
+
 // Load a page in to the buffer for writing to the specified location
 char NandLoadPageWrite(unsigned short srcBlock, unsigned char srcPage, unsigned short destBlock, unsigned char destPage);
 

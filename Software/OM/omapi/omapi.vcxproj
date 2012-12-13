@@ -61,6 +61,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="examples\record.c" />
     <ClCompile Include="src\DeviceFinder.cpp" />
     <ClCompile Include="src\omapi-devicefinder.cpp" />
     <ClCompile Include="src\omapi-download.c" />

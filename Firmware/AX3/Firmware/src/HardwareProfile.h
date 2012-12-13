@@ -33,7 +33,7 @@
 	#define HARDWARE_SELECT 0x17
     
     // Define firmware version
-    #define SOFTWARE_VERSION 35
+    #define SOFTWARE_VERSION 36
 
 	// No legacy defines for this code
 	#define NO_LEGACY

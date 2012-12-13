@@ -568,7 +568,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
 		    // Read NAND parameters
 		    unsigned char id[6] = {0};
 		    NandReadDeviceId(id);
-            printf("NANDID=%02x:%02x:%02x:%02x:%02x:%02x\r\n", id[0], id[1], id[2], id[3], id[4], id[5]);
+            printf("NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent);
             if (!z) USBCDCWait();
         }
 
