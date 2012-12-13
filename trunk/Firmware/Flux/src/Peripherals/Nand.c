@@ -39,6 +39,12 @@
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 
+#if defined NAND_NO_RCB && !defined NAND_BYTES_PER_PAGE
+	#warning "Define the number of bytes per page in the hardware profile - assuming HY27UF084G2B/M"
+	#define NAND_BYTES_PER_PAGE 2112 /*2048 + 64 extra*/
+#endif 
+
+
 // Actual code for the hardware
 // --- Low-level NAND Flash functions ---
 // Nand flash memory chip commands - micron and hynix same
@@ -288,7 +294,10 @@ typedef union
 	};			
 }nand_flash_parameters_t;
 
+const unsigned char NAND_DEVICE_DONT_CARE[6] = 	  {0x00}; 							// KL - ADDED
+//const unsigned char NAND_DEVICE_HY27UF084G2M[6] = {0xAD,0xDC,0x80,0x95,0xAD,0x00}; 	// KL - ADDED
 const unsigned char NAND_DEVICE_HY27UF084G2B[6] = {0xAD,0xDC,0x10,0x95,0x54,0x00};
+const unsigned char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00}; 		// KL - ADDED
 const unsigned char NAND_DEVICE_MT29F8G08AAA[6] = {0x2C,0xD3,0x90,0x2E,0x64,0x00};
 
 // Read chip parameters
@@ -313,6 +322,9 @@ char NandReadDeviceId(unsigned char *destination)
 
 // Globals..
 char nandPresent = 0;       // NAND present (call NandVerifyDeviceId() once to set this)
+#ifdef NAND_NO_RCB
+static unsigned char nandNoRCB = 0;
+#endif
 
 
 #ifndef NAND_DEVICE
@@ -325,10 +337,34 @@ unsigned char NandVerifyDeviceId(void)
     nandPresent = 0;
     if (NandReadDeviceId(id))
     {
-        if (id[0] == NAND_DEVICE[0] && id[1] == NAND_DEVICE[1] && id[2] == NAND_DEVICE[2] && id[3] == NAND_DEVICE[3] && id[4] == NAND_DEVICE[4])
-        {
-            nandPresent = 1;
-        }
+		// KL - ADDED, to support variable length id's upto 6 chars
+		int i;
+		nandPresent = 0; 					// Assume not
+		for(i=0;i<6;i++)
+		{
+			if (NAND_DEVICE[i] == '\0') 	{nandPresent = 1; break;}	// Successful end of id string
+			if (id[i] != NAND_DEVICE[i]) 	{ break; } 					// Character mismatch
+		}
+
+#ifdef NAND_DEVICE_ALT
+		if (!nandPresent)
+		{
+			for(i=0;i<6;i++)
+			{
+				if (NAND_DEVICE_ALT[i] == '\0') 	{nandPresent = 2; break;}	// Successful end of id string
+				if (id[i] != NAND_DEVICE_ALT[i]) 	{ break; } 					// Character mismatch
+			}
+#ifdef NAND_NO_RCB
+			if (nandPresent) { nandNoRCB = 1; }
+#endif
+			
+		}
+#endif
+
+        //if (id[0] == NAND_DEVICE[0] && id[1] == NAND_DEVICE[1] && id[2] == NAND_DEVICE[2] && id[3] == NAND_DEVICE[3] && id[4] == NAND_DEVICE[4])
+        //{
+        //   nandPresent = 1;
+        //}
     }
     return (unsigned char)nandPresent;
 }
@@ -345,28 +381,6 @@ char NandEraseBlock(unsigned short block)
 	NandWriteCommand(FLASH_BLOCK_ERASE_2);	
 	FLASH_CE = 1;                                       // Chip deselect
 	return (TRUE);                                      // Internal block erase does not throw errors
-}
-
-// Copy a page
-char NandCopyPage(unsigned short srcBlock, unsigned char srcPage, unsigned short destBlock, unsigned char destPage)            // Copes with unknown source
-{
-	unsigned char status;
-	FormAddressBP(srcBlock,srcPage);                    // See macro
-	FLASH_CE = 0;                                       // Chip enable
-    FLASH_WAIT_RB();                                    // Wait for previous operations
-	NandWriteCommand(FLASH_READ_COMMAND_COPY_BACK_1);	// Read for copy back
-	NandWriteAddress5B();                               // Specify source address
-	NandWriteCommand(FLASH_READ_COMMAND_COPY_BACK_2);
-	FormAddressBP(destBlock,destPage);                  // See macro
-    FLASH_WAIT_RB();                                    // Wait for page to load
-	NandWriteCommand(FLASH_PAGE_PROGRAM_COPY_BACK_1);
-	NandWriteAddress5B();                               // Specify destination address
-	NandWriteCommand(FLASH_PAGE_PROGRAM_COPY_BACK_2);
-	FLASH_CE = 1;                                       // Deselect
-    FLASH_WAIT_RB();                                    // Wait for page program
-	status = FlashReadStatus();                         // Get status
-	if (status & FLASH_STATUS_FLAG_FAILED) return (FALSE); 	// Failed
-	else	return (TRUE);                              // Pass
 }
 
 // Load a page in to the buffer for reading
@@ -442,9 +456,129 @@ char NandReadBuffer(unsigned short offset, unsigned char *buffer, unsigned short
 	return (TRUE);                                      // No errors possible on read
 }
 
+// Write page directly -- KL, ADDED - This is basic functionality and should always be supported
+char NandWritePage(unsigned short srcBlock, unsigned char srcPage, unsigned char *buffer)
+{
+	unsigned char status;
+	unsigned short length = NAND_BYTES_PER_PAGE;
+	FormAddressBP(srcBlock,srcPage);                    // See macro
+	FLASH_CE = 0;                                       // Chip enable
+    FLASH_WAIT_RB();                                    // Wait for previous operations
+	NandWriteCommand(FLASH_PAGE_PROGRAM_1);				// Write page
+	NandWriteAddress5B();                               // Specify source address
+#ifdef NAND_OPTIMIZE
+	for (;length >= 32; length-=32)
+	{
+		NandWriteRaw(buffer[ 0]);NandWriteRaw(buffer[ 1]);NandWriteRaw(buffer[ 2]);NandWriteRaw(buffer[ 3]);
+		NandWriteRaw(buffer[ 4]);NandWriteRaw(buffer[ 5]);NandWriteRaw(buffer[ 6]);NandWriteRaw(buffer[ 7]);
+		NandWriteRaw(buffer[ 8]);NandWriteRaw(buffer[ 9]);NandWriteRaw(buffer[10]);NandWriteRaw(buffer[11]);
+		NandWriteRaw(buffer[12]);NandWriteRaw(buffer[13]);NandWriteRaw(buffer[14]);NandWriteRaw(buffer[15]);
+		NandWriteRaw(buffer[16]);NandWriteRaw(buffer[17]);NandWriteRaw(buffer[18]);NandWriteRaw(buffer[19]);
+		NandWriteRaw(buffer[20]);NandWriteRaw(buffer[21]);NandWriteRaw(buffer[22]);NandWriteRaw(buffer[23]);
+		NandWriteRaw(buffer[24]);NandWriteRaw(buffer[25]);NandWriteRaw(buffer[26]);NandWriteRaw(buffer[27]);
+		NandWriteRaw(buffer[28]);NandWriteRaw(buffer[29]);NandWriteRaw(buffer[30]);NandWriteRaw(buffer[31]);
+		buffer += 32;
+	}
+#endif
+	for (;length > 0; length--)
+	{
+		NandWriteRaw(*buffer);
+		buffer++;
+	}
+	NandWriteCommand(FLASH_PAGE_PROGRAM_2);
+	FLASH_CE = 1;                                       // Deselect
+    FLASH_WAIT_RB();                                    // Wait for page program
+	status = FlashReadStatus();                         // Get status
+	if (status & FLASH_STATUS_FLAG_FAILED) return (FALSE); 	// Failed
+	else	return (TRUE);    
+}
+
+
+// Read copy back disabled, write buffer in MCU ram
+#ifdef NAND_NO_RCB
+
+// Page buffer for noRCB functionality KL - Added
+static unsigned char __attribute__((aligned(2))) pageBuffer[NAND_BYTES_PER_PAGE];
+static unsigned short _RCBdestBlock, _RCBdestPage;
+
+// Copy a page - this copies via MCU buffer
+char rcb_NandCopyPage(unsigned short srcBlock, unsigned char srcPage, unsigned short destBlock, unsigned char destPage)            // Copes with unknown source
+{
+	unsigned char retval = 1;
+	retval &= NandLoadPageRead(srcBlock, srcPage);					// Load page to NAND ram
+	retval &= NandReadBuffer(0, pageBuffer, NAND_BYTES_PER_PAGE);	// Read into MCU buffer
+	retval &= NandWritePage(destBlock, destPage, pageBuffer);		// Copy back to desination
+	return (retval); 												// Any fails will report fail
+}
+
+// Load a page in to the buffer for writing to the specified location
+char rcb_NandLoadPageWrite(unsigned short srcBlock, unsigned char srcPage, unsigned short destBlock, unsigned char destPage)
+{
+	unsigned char retval = 1;
+	_RCBdestBlock = destBlock;										// Store the desination here for now
+	_RCBdestPage = destPage;										// Store the desination here for now
+	retval &= NandLoadPageRead(srcBlock, srcPage);					// Load page to NAND ram
+	retval &= NandReadBuffer(0, pageBuffer, NAND_BYTES_PER_PAGE);	// Read into MCU buffer
+	return (retval); 
+}
+
+// Write in to the page buffer
+char rcb_NandWriteBuffer(unsigned short offset, const unsigned char *buffer, unsigned short length)
+{
+	unsigned char* pageBufferPtr = pageBuffer;			// Pointer to page buffer
+	pageBufferPtr += offset;							// Add offset
+	memcpy(pageBufferPtr, buffer, length);				// Copy in new data
+	return (TRUE);                                      // No errors possible
+}
+
+// Commit the loaded page buffer
+char rcb_NandStorePage(void)
+{
+	unsigned char retval = NandWritePage(_RCBdestBlock, _RCBdestPage, pageBuffer);	// Copy back to desination
+	return (retval); 																// Report result
+}
+
+// Commit the loaded page buffer to a different destination
+char rcb_NandStorePageRepeat(unsigned short destBlock, unsigned char destPage)
+{
+	unsigned char retval = NandWritePage(destBlock, destPage, pageBuffer);	// Copy back to desination
+	return (retval); 														// Report result
+}
+
+#endif
+
+
+// Copy a page
+char NandCopyPage(unsigned short srcBlock, unsigned char srcPage, unsigned short destBlock, unsigned char destPage)            // Copes with unknown source
+{
+	unsigned char status;
+#ifdef NAND_NO_RCB
+	if (nandNoRCB) return rcb_NandCopyPage(srcBlock, srcPage, destBlock, destPage);
+#endif
+	FormAddressBP(srcBlock,srcPage);                    // See macro
+	FLASH_CE = 0;                                       // Chip enable
+    FLASH_WAIT_RB();                                    // Wait for previous operations
+	NandWriteCommand(FLASH_READ_COMMAND_COPY_BACK_1);	// Read for copy back
+	NandWriteAddress5B();                               // Specify source address
+	NandWriteCommand(FLASH_READ_COMMAND_COPY_BACK_2);
+	FormAddressBP(destBlock,destPage);                  // See macro
+    FLASH_WAIT_RB();                                    // Wait for page to load
+	NandWriteCommand(FLASH_PAGE_PROGRAM_COPY_BACK_1);
+	NandWriteAddress5B();                               // Specify destination address
+	NandWriteCommand(FLASH_PAGE_PROGRAM_COPY_BACK_2);
+	FLASH_CE = 1;                                       // Deselect
+    FLASH_WAIT_RB();                                    // Wait for page program
+	status = FlashReadStatus();                         // Get status
+	if (status & FLASH_STATUS_FLAG_FAILED) return (FALSE); 	// Failed
+	else	return (TRUE);                              // Pass
+}
+
 // Load a page in to the buffer for writing to the specified location
 char NandLoadPageWrite(unsigned short srcBlock, unsigned char srcPage, unsigned short destBlock, unsigned char destPage)
 {
+#ifdef NAND_NO_RCB
+	if (nandNoRCB) return rcb_NandLoadPageWrite(srcBlock, srcPage, destBlock, destPage);
+#endif
 	FormAddressBP(srcBlock,srcPage);                    // See macro
 	FLASH_CE = 0;                                       // Chip select
     FLASH_WAIT_RB();                                    // Wait for previous operations
@@ -462,6 +596,9 @@ char NandLoadPageWrite(unsigned short srcBlock, unsigned char srcPage, unsigned 
 // Write in to the page buffer
 char NandWriteBuffer(unsigned short offset, const unsigned char *buffer, unsigned short length)
 {
+#ifdef NAND_NO_RCB
+	if (nandNoRCB) return rcb_NandWriteBuffer(offset, buffer, length);
+#endif
 	FLASH_CE = 0;                                       // Chip select
 	NandWriteCommand(FLASH_PAGE_PROGRAM_COPY_BACK_1 );
 	NandWriteAddress2B(offset);                         // Specify offset
@@ -477,6 +614,9 @@ char NandWriteBuffer(unsigned short offset, const unsigned char *buffer, unsigne
 char NandStorePage(void)
 {
 	unsigned char status;
+#ifdef NAND_NO_RCB
+	if (nandNoRCB) return rcb_NandStorePage();
+#endif
 	FLASH_CE = 0;                                       // Chip select
 	NandWriteCommand(FLASH_PAGE_PROGRAM_COPY_BACK_2 );
 	FLASH_CE = 1;                                       // Chip deselect
@@ -490,6 +630,9 @@ char NandStorePage(void)
 char NandStorePageRepeat(unsigned short destBlock, unsigned char destPage)
 {
 	unsigned char status;
+#ifdef NAND_NO_RCB
+	if (nandNoRCB) return rcb_NandStorePageRepeat(destBlock, destPage);
+#endif
 	FormAddressBP(destBlock,destPage);                  // See macro
     FLASH_WAIT_RB();                                    // Wait for previous operations
 	FLASH_CE = 0;                                       // Chip select
@@ -502,6 +645,7 @@ char NandStorePageRepeat(unsigned short destBlock, unsigned char destPage)
 	if (status & FLASH_STATUS_FLAG_FAILED) return (FALSE); 	// Failed
 	else	return (TRUE);                              // Pass
 }
+
 
 
 // Extract parameters from device ID rather than ONFI parameter page

@@ -55,6 +55,7 @@ extern int downloadmem_main(int argc, char *argv[]);
 extern int clear_main(int argc, char *argv[]);
 extern int convert_main(int argc, char *argv[]);
 extern int verify_main(int argc, char *argv[]);
+extern int record_main(int argc, char *argv[]);
 
 
 /* Main function just chains to the required example code */
@@ -72,9 +73,10 @@ int main(int argc, char *argv[])
     else if (argc > 1 && !strcmp(argv[1], "clear"))       { ret =    clear_main(argc - 1, argv + 1); }
     else if (argc > 1 && !strcmp(argv[1], "convert"))     { ret =  convert_main(argc - 1, argv + 1); }
     else if (argc > 1 && !strcmp(argv[1], "verify"))      { ret =   verify_main(argc - 1, argv + 1); }
+    else if (argc > 1 && !strcmp(argv[1], "record"))      { ret =   record_main(argc - 1, argv + 1); }
     else
     {
-        fprintf(stderr, "Usage: omapi <test|deploy|download|downloadmem|clear|convert|verify> [parameters...]\n");
+        fprintf(stderr, "Usage: omapi <test|deploy|download|downloadmem|clear|convert|verify|record> [parameters...]\n");
         fprintf(stderr, "\n");
         ret = -1;
     }
