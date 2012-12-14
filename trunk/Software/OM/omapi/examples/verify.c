@@ -487,9 +487,9 @@ if (startStopFail) { retval |= 0x200000; }
         fprintf(stderr, "Summary info-3: minLight=%d, Bmax=%d%%, Bmin=%d%%, intervalFail=%d\n", minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
         fprintf(stderr, "---\n");
 
-#define HEADER        "VERIFY," "id,"     "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv," "minInterval,"          "maxInterval,"          "duration,"                              "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail\n"
-        sprintf(line, "VERIFY," "\"%s\"," "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%0.1f,"     "%0.4f," "%0.3f,"                "%0.3f,"                "%0.4f,"                                 "%d,"       "%d,"                "%d,"                "%d\n",
-                                label,      errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,   minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail);
+#define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail\n"
+        sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d\n",
+                                label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail);
 
         fprintf(stderr, line);
         if (outfile != NULL)
@@ -534,8 +534,8 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
 
 
         /* Set the session id (use the deviceId) */
-        result = OmSetSessionId(deviceId, deviceId);
-        fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, deviceId);
+        result = OmSetSessionId(deviceId, 0);
+        fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, 0);
         if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); }
 
         /* Set the delayed start/stop times */
