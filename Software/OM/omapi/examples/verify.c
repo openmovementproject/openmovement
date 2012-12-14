@@ -624,7 +624,7 @@ int verify_main(int argc, char *argv[])
         }
 
         /* Open the input and output files */
-        if (outfile != NULL)
+        if (outfilename != NULL)
         {
             outfile = fopen(outfilename, "at");
         }
