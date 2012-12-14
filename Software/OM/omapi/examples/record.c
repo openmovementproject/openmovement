@@ -64,52 +64,66 @@ int record_setup(int deviceId)
 {
     int result;
     char timeString[32];
+    time_t now;
+    struct tm *tm;
+    OM_DATETIME nowTime;
+    int firmwareVersion, hardwareVersion;
+    int battery;
+
+    /* Check hardware and firmware versions */
+    result = OmGetVersion(deviceId, &firmwareVersion, &hardwareVersion);
+    if (OM_FAILED(result)) { printf("ERROR: OmGetVersion() %s\n", OmErrorString(result)); return 0; }
+    printf("RECORD #%d: Firmware %d, Hardware %d\n", deviceId, firmwareVersion, hardwareVersion);
+
+    /* Check battery level */
+    battery = OmGetBatteryLevel(deviceId);
+    if (OM_FAILED(battery)) { printf("ERROR: OmGetBatteryLevel() %s\n", OmErrorString(battery)); return 0; }
+    else
+    {
+        printf("RECORD #%d: Battery at %d%% (%s)\n", deviceId, battery, (battery >= 100) ? "charged" : "charging");
+    }
 
     /* Synchronize the time */
-    {
-        time_t now;
-        struct tm *tm;
-        OM_DATETIME nowTime;
+    now = time(NULL);
+    tm = localtime(&now);
+    nowTime = OM_DATETIME_FROM_YMDHMS(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+    sprintf(timeString, "%04d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-        /* Get the current time */
-        now = time(NULL);
-        tm = localtime(&now);
-        nowTime = OM_DATETIME_FROM_YMDHMS(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-        sprintf(timeString, "%04d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-
-        fprintf(stderr, "RECORD #%d: Synchronizing the time...\n", deviceId);
-        result = OmSetTime(deviceId, nowTime);
-    }
+    fprintf(stderr, "RECORD #%d: Synchronizing the time...\n", deviceId);
+    result = OmSetTime(deviceId, nowTime);
     if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetTime() %s\n", OmErrorString(result)); return 0; }
 
+    /* Set the accelerometer configuration */
+    result = OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, OM_ACCEL_DEFAULT_RANGE);
+    fprintf(stderr, "RECORD #%d: Setting accelerometer configuration...\n", deviceId);
+    if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetAccelConfig() %s\n", OmErrorString(result)); return 0; }
+
+    /* Set the session id (use the deviceId) */
+    result = OmSetSessionId(deviceId, deviceId);
+    fprintf(stderr, "RECORD #%d: Setting session id: %u\n", deviceId, deviceId);
+    if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); return 0; }
+
     /* Set the delayed start/stop times */
+    fprintf(stderr, "RECORD #%d: Setting start/stop: ZERO/INFINITY\n", deviceId);
+    result = OmSetDelays(deviceId, OM_DATETIME_ZERO, OM_DATETIME_INFINITE);
+    if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); return 0; }
+
+    /* Commit the new settings */
+    fprintf(stderr, "RECORD #%d: Committing new settings...\n", deviceId);
+    result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
+    if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); return 0; }
+
+    /* The device is ready for recording */
+    fprintf(stderr, "RECORD,%u,%s,%d,%d\n", deviceId, timeString, battery, firmwareVersion);
+    printf("RECORD,%u,%s,%d,%d\n", deviceId, timeString, battery, firmwareVersion);
+    if (ofp != NULL)
     {
-        /* Set the delayed start/stop times */
-        fprintf(stderr, "RECORD #%d: Setting start/stop: ZERO/INFINITE\n", deviceId);
-        result = OmSetDelays(deviceId, OM_DATETIME_ZERO, OM_DATETIME_INFINITE);
-        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); return 0; }
-
-        /* Set the session id (use the deviceId) */
-        result = OmSetSessionId(deviceId, deviceId);
-        fprintf(stderr, "RECORD #%d: Setting session id: %u\n", deviceId, deviceId);
-        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); return 0; }
-
-        /* Commit the new settings */
-        fprintf(stderr, "RECORD #%d: Committing new settings...\n", deviceId);
-        OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
-
-        /* The device is ready for recording */
-        fprintf(stderr, "RECORD,%u,%s\n", deviceId, timeString);
-        printf("%u,%s\n", deviceId, timeString);
-        if (ofp != NULL)
-        {
-            fprintf(ofp, "%u,%s\n", deviceId, timeString);
-            fflush(ofp);
-        }
-
-        /* The device is prepared for recording - set the LED to magenta. */
-        OmSetLed(deviceId, OM_LED_MAGENTA);
+        fprintf(ofp, "RECORD,%u,%s,%d,%d\n", deviceId, timeString, battery, firmwareVersion);
+        fflush(ofp);
     }
+
+    /* The device is prepared for recording - set the LED to magenta. */
+    OmSetLed(deviceId, OM_LED_MAGENTA);
 
     return 1;
 }

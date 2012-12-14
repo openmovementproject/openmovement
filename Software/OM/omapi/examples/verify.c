@@ -65,6 +65,8 @@
 #define AVERAGE_RANGE_OFF 0.300
 
 
+FILE *outfile;
+
 // Calculate the time in ticks from a packed time
 time_t TimeSerial(OM_DATETIME timestamp)
 {
@@ -91,8 +93,9 @@ unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
 
 
 /* Conversion function */
-int verify(const char *infile, char output)
+int verify_process(int id, const char *infile)
 {
+    char output = 0;
     OmReaderHandle reader;
     int batteryStartPercent = 0, batteryEndPercent = 0;
     int batteryMaxPercent = -1, batteryMinPercent = -1;
@@ -117,8 +120,19 @@ int verify(const char *infile, char output)
     int restarts = 0;
     OM_READER_HEADER_PACKET *hp;
     char outOfRange = 0;
+    char label[256];
+    char line[768];
+    int retval;
 
     fprintf(stderr, "FILE: %s\n", infile);
+    sprintf(label, infile);
+    if (id >= 0) { sprintf(label, "%d", id); }
+
+    if (infile == NULL || infile[0] == '\0')
+    {
+        fprintf(stderr, "ERROR: File not specified\n");
+        return -2;
+    }
 
     /* Open the binary file reader on the input file */
     reader = OmReaderOpen(infile);
@@ -141,8 +155,8 @@ int verify(const char *infile, char output)
 
         /* Report progress: minute */
         if (block != 0 && block %    50 == 0) { fprintf(stderr, "."); }   /* Approx. 1 minute */
-        /*if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }     */          /* Approx. 1 hour */
-        /*if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }   */          /* Approx. 1 day */
+        if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }               /* Approx. 1 hour */
+        if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }             /* Approx. 1 day */
 
         /* Read the next block */
         numSamples = OmReaderNextBlock(reader);
@@ -328,7 +342,7 @@ int verify(const char *infile, char output)
             }
 
             /* Output the data */
-            if (output) { fprintf(stdout, "%s,%d,%d,%d\n", timeString, x, y, z); }
+//            if (output) { fprintf(stdout, "%s,%d,%d,%d\n", timeString, x, y, z); }
 
             {
                 static int lastHour = -1;
@@ -345,7 +359,7 @@ int verify(const char *infile, char output)
             if (seconds != lastSecond)
             {
                 if (firstPacket) { /* fprintf(stderr, "!"); */ firstPacket = 0; }
-                else if (packetCount >= 90 && packetCount <= 110) { /* fprintf(stderr, "#"); */ }
+                else if (packetCount >= 88 && packetCount <= 112) { /* fprintf(stderr, "#"); */ }
                 else
                 { 
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
@@ -446,35 +460,152 @@ int verify(const char *infile, char output)
             }
         }
 
+retval = 0;
+if (errorFile > 1)   { retval |= 0x001000; } else if (errorFile > 0)   { retval |= 0x000001; }
+if (errorEvent > 1)  { retval |= 0x002000; } else if (errorEvent > 0)  { retval |= 0x000002; }
+if (errorStuck > 0)  { retval |= 0x004000; }
+if (errorRange > 1)  { retval |= 0x008000; } else if (errorRange > 0)  { retval |= 0x000008; }
+if (errorRate > 2)   { retval |= 0x010000; } else if (errorRate > 0)   { retval |= 0x000010; }
+if (errorBreaks > 1) { retval |= 0x020000; } else if (errorBreaks > 0) { retval |= 0x000020; }
+if (restarts > 1)    { retval |= 0x040000; } else if (restarts > 0)    { retval |= 0x000040; }
+if (minLight < 50)   { retval |= 0x080000; } else if (minLight < 140)  { retval |= 0x000080; }
+// Discharge
+{
+    float hours = ((totalDuration >> 16) / 60.0f / 60.0f);
+    float percentLoss = batteryMaxPercent - batteryMinPercent;
+    float percentPerHour = 0;
+    if (hours > 0) { percentPerHour = percentLoss / hours; }
+    if (percentPerHour >= 0.25f) { retval |= 0x100000; } else if (percentPerHour >= 0.20f)  { retval |= 0x000100; }
+}
+if (startStopFail) { retval |= 0x200000; } 
+
         fprintf(stderr, "---\n");
-        fprintf(stderr, "Input file: \"%s\"\n", infile);
+        fprintf(stderr, "Input file,%d,\"%s\",%d\n", id, infile, retval);
         fprintf(stderr, "Summary errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, breaks=%d\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks);
         fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
         fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f));
         fprintf(stderr, "Summary info-3: minLight=%d, Bmax=%d%%, Bmin=%d%%, intervalFail=%d\n", minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
         fprintf(stderr, "---\n");
 
-#define HEADER          "filename,      file,      event,      stuck,      range,      rate,      breaks, restarts, breakTime, maxAv, minInterval,            maxInterval,                   duration,                         minLight, batteryMaxPercent, batteryMinPercent,  intervalFail\n"
-        fprintf(stdout, "  \"%s\",        %d,         %d,         %d,         %d,        %d,          %d,       %d,     %0.1f, %0.4f,       %0.3f,                  %0.3f,                      %0.4f,                               %d,                %d,                %d,            %d\n",
-                           infile, errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts, breakTime, maxAv, minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
-    }
+#define HEADER        "VERIFY," "id,"     "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv," "minInterval,"          "maxInterval,"          "duration,"                              "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail\n"
+        sprintf(line, "VERIFY," "\"%s\"," "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%0.1f,"     "%0.4f," "%0.3f,"                "%0.3f,"                "%0.4f,"                                 "%d,"       "%d,"                "%d,"                "%d\n",
+                                label,      errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,   minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail);
 
+        fprintf(stderr, line);
+        if (outfile != NULL)
+        { 
+            fprintf(outfile, line); 
+            fflush(outfile);
+        }
+        printf(line);
+    }
 
     /* Close the files */
     OmReaderClose(reader);
-    return 0;
+    return retval;
+}
+
+
+
+/* Device updated */
+static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS status)
+{
+    char filename[OM_MAX_PATH];
+    int result, verifyResult;
+
+    if (status == OM_DEVICE_CONNECTED)
+    {
+        fprintf(stderr, "VERIFY #%d: Device CONNECTED\n", deviceId);
+        
+        /* Setup */
+        OmSetLed(deviceId, OM_LED_BLUE);
+
+        filename[0] = '\0';
+        result = OmGetDataFilename(deviceId, filename);
+        if (OM_FAILED(result))
+        { 
+            fprintf(stderr, "ERROR: OmGetDataFilename() %s\n", OmErrorString(result)); 
+            verifyResult = -3;
+        }
+        else
+        {
+            verifyResult = verify_process(deviceId, filename);
+        }
+
+
+        /* Set the session id (use the deviceId) */
+        result = OmSetSessionId(deviceId, deviceId);
+        fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, deviceId);
+        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); }
+
+        /* Set the delayed start/stop times */
+        fprintf(stderr, "VERIFY #%d: Setting start/stop: INFINITY/ZERO\n", deviceId);
+        result = OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_ZERO);
+        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); }
+
+        /* Commit the new settings */
+        fprintf(stderr, "VERIFY #%d: Committing new settings...\n", deviceId);
+        result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
+        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
+
+        if (verifyResult < 0) { OmSetLed(deviceId, OM_LED_MAGENTA); }                   // Error accessing data
+        else if (verifyResult & 0xfffff000) { OmSetLed(deviceId, OM_LED_RED); }         // Looks like a problem
+        else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, OM_LED_YELLOW); }      // Warning
+        else { OmSetLed(deviceId, OM_LED_CYAN); }                                       // Everything ok
+    }
+    else if (status == OM_DEVICE_REMOVED)
+    {
+        fprintf(stderr, "VERIFY #%d: Device REMOVED\n", deviceId);
+    }
+    else
+    {
+        fprintf(stderr, "VERIFY #%d: Error, unexpected status %d\n", deviceId, status);
+    }
+    return;
+}
+
+
+
+/* Record function */
+int verify(void)
+{
+    int result;
+
+    /* Set device callback before API startup to get initially-connected devices through the callback */
+    OmSetDeviceCallback(verify_DeviceCallback, NULL);
+
+    /* Start the API */
+    result = OmStartup(OM_VERSION);
+    if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmStartup() %s\n", OmErrorString(result)); return -1; }
+
+    for (;;)
+    {
+        /* Wait 5 seconds */
+        Sleep(5000);
+        fprintf(stderr, ".\n");
+    }
+
+    /* Shutdown the API */
+    result = OmShutdown();
+    if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmShutdown() %s\n", OmErrorString(result)); return -1; }
+
+    /* Close the input and output files */
+    if (outfile != NULL) { fclose(outfile); }
 }
 
 
 /* Main function */
 int verify_main(int argc, char *argv[])
 {
+    const char *outfilename = NULL;
+    int ret = -1;
+    int mode = 0;
     fprintf(stderr, "VERIFY: verify a specified binary data file contains sensible data.\n");
     fprintf(stderr, "\n");
     if (argc > 1)
     {
         const char *infile;
-        char output = 0;
+        //char output = 0;
 
         if (!strcmp(argv[1], "-headeronly"))
         {
@@ -482,13 +613,42 @@ int verify_main(int argc, char *argv[])
             return -2;
         }
 
-        infile = argv[1];
-        if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
-        return verify(infile, output);
+        if (!strcmp(argv[1], "-stop-clear-all"))
+        {
+            mode = 1;
+            if (argc > 2) { outfilename = argv[2]; }
+        }
+        else
+        {
+            infile = argv[1];
+        }
+
+        /* Open the input and output files */
+        if (outfile != NULL)
+        {
+            outfile = fopen(outfilename, "at");
+        }
+
+        //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
+        if (mode == 0)
+        {
+            ret = verify_process(-1, infile);
+        }
+        else
+        {
+            for (;;)
+            {
+                /* Wait 5 seconds */
+                Sleep(5000);
+                fprintf(stderr, ".\n");
+            }
+        }
+
+        if (outfile != NULL) { fclose(outfile); }
     }
     else
     {
-        fprintf(stderr, "Usage: verify <binary-input-file | -headeronly> [-output]\n");
+        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> outfile.csv | <-headeronly>\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
         fprintf(stderr, "\n");
@@ -500,6 +660,6 @@ int verify_main(int argc, char *argv[])
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
 #endif
 
-    return -1;
+    return ret;
 }
 

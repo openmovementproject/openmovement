@@ -145,7 +145,7 @@ extern "C" {
 
 /** Data block size in bytes */
 #define OM_BLOCK_SIZE 512
-#define OM_DEBUG_DEFAULT 1
+#define OM_DEBUG_DEFAULT 0
 
 // Helpful command macros
 #define OM_COMMAND(deviceId, output, response, expected, timeout, parts)  OmCommand(deviceId, output, response, sizeof(response)/sizeof(response[0]), expected, timeout, parts, sizeof(parts)/sizeof(parts[0]))
