@@ -472,7 +472,7 @@ if (minLight < 50)   { retval |= 0x080000; } else if (minLight < 140)  { retval 
 // Discharge
 {
     float hours = ((totalDuration >> 16) / 60.0f / 60.0f);
-    float percentLoss = batteryMaxPercent - batteryMinPercent;
+    float percentLoss = (float)batteryMaxPercent - batteryMinPercent;
     float percentPerHour = 0;
     if (hours > 0) { percentPerHour = percentLoss / hours; }
     if (percentPerHour >= 0.25f) { retval |= 0x100000; } else if (percentPerHour >= 0.20f)  { retval |= 0x000100; }
@@ -636,12 +636,7 @@ int verify_main(int argc, char *argv[])
         }
         else
         {
-            for (;;)
-            {
-                /* Wait 5 seconds */
-                Sleep(5000);
-                fprintf(stderr, ".\n");
-            }
+            verify();
         }
 
         if (outfile != NULL) { fclose(outfile); }
