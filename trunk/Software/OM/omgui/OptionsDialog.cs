@@ -19,10 +19,13 @@ namespace OmGui
             btnCancel.DialogResult = DialogResult.Cancel;
 
             textBoxDefaultFolder.Text = currentDefault;
+
+            textBoxDefaultPlugin.Text = Properties.Settings.Default.CurrentPluginFolder;
         }
 
         //Properties
-        public String FolderName { get; set; }
+        public String DefaultFolderName { get; set; }
+        public String DefaultPluginName { get; set; }
 
         private void btnBrowse_Click(object sender, EventArgs e)
         {
@@ -31,8 +34,20 @@ namespace OmGui
 
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
-                FolderName = fbd.SelectedPath;
-                textBoxDefaultFolder.Text = FolderName;
+                DefaultFolderName = fbd.SelectedPath;
+                textBoxDefaultFolder.Text = DefaultFolderName;
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            DialogResult dr = fbd.ShowDialog();
+
+            if (dr == System.Windows.Forms.DialogResult.OK)
+            {
+                DefaultPluginName = fbd.SelectedPath;
+                textBoxDefaultPlugin.Text = DefaultPluginName;
             }
         }
     }

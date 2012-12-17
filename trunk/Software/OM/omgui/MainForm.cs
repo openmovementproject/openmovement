@@ -655,6 +655,9 @@ namespace OmGui
                 devicesToolStripButtonIdentify.Enabled = true;
             }
 
+            //DEBUG - Making Plugins button always work:
+            devicesToolStripButtonPlugins.Enabled = true;
+
             return selected.ToArray();
         }
 
@@ -726,8 +729,11 @@ namespace OmGui
 
             if (dr == DialogResult.OK)
             {
-                OmGui.Properties.Settings.Default.DefaultWorkingFolder = optionsDialog.FolderName;
+                OmGui.Properties.Settings.Default.DefaultWorkingFolder = optionsDialog.DefaultFolderName;
+                OmGui.Properties.Settings.Default.CurrentPluginFolder = optionsDialog.DefaultPluginName;
+
                 Console.WriteLine(Properties.Settings.Default.DefaultWorkingFolder);
+                Console.WriteLine(Properties.Settings.Default.CurrentPluginFolder);
                 OmGui.Properties.Settings.Default.Save();
             }
             else
@@ -1303,6 +1309,12 @@ namespace OmGui
         {
             Console.WriteLine("Default: " + Properties.Settings.Default.DefaultWorkingFolder);
             Console.WriteLine("Current: " + Properties.Settings.Default.CurrentWorkingFolder);
+            Console.WriteLine("Current Plugin: " + Properties.Settings.Default.CurrentPluginFolder);
+
+            if(Properties.Settings.Default.CurrentPluginFolder == "")
+                //TODO - HACK: Doesn't work.
+                Properties.Settings.Default.CurrentPluginFolder = @"C:\";
+
             //TS - Working Folder logic
             if (Properties.Settings.Default.CurrentWorkingFolder != "" && Properties.Settings.Default.CurrentWorkingFolder != Properties.Settings.Default.DefaultWorkingFolder)
             {
@@ -1425,34 +1437,54 @@ namespace OmGui
 
             DirectoryInfo d = new DirectoryInfo(folder);
 
-            List<FileInfo> paramFiles = new List<FileInfo>();
+            List<FileInfo> htmlFiles = new List<FileInfo>();
 
             FileInfo[] files = d.GetFiles("*.*");
 
             //Find XML files
             foreach (FileInfo f in files)
             {
-                if (f.Extension == ".xml")
-                    paramFiles.Add(f);
+                if (f.Extension == ".html")
+                    htmlFiles.Add(f);
             }
             
 
             List<Plugin> plugins = new List<Plugin>();
 
-            //Find matching other files and add to plugins dictionary
-            foreach (FileInfo f in files)
+            try
             {
-                if (f.Extension != ".xml")
-                    foreach (FileInfo paramFile in paramFiles)
-                        if (Path.GetFileNameWithoutExtension(f.Name).Equals(Path.GetFileNameWithoutExtension(paramFile.Name)))
-                            plugins.Add(new Plugin(f, paramFile));
+                //Find matching other files and add to plugins dictionary
+                foreach (FileInfo f in files)
+                {
+                    if (f.Extension != ".html" && f.Extension != ".xml")
+                        foreach (FileInfo htmlFile in htmlFiles)
+                        {
+                            string name = Path.GetFileNameWithoutExtension(f.Name);
+                            string xmlName = Path.GetDirectoryName(f.FullName) + "\\" + name + ".xml";
+
+                            FileInfo xmlFile = new FileInfo(xmlName);
+
+                            if (Path.GetFileNameWithoutExtension(f.Name).Equals(Path.GetFileNameWithoutExtension(htmlFile.Name)))
+                                plugins.Add(new Plugin(f, xmlFile, htmlFile));
+                        }
+                }
+            }
+            catch (PluginExtTypeException extError)
+            {
+                MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            //Now that we have our plugins, open the plugin form
-            PluginsForm pluginsForm = new PluginsForm(plugins);
-            pluginsForm.ShowDialog(this);
-
-            //ExportDataConstruct(OmSource.SourceCategory.Standby);
+            if (plugins.Count > 0)
+            {
+                //Now that we have our plugins, open the plugin form
+                PluginsForm pluginsForm = new PluginsForm(plugins);
+                pluginsForm.ShowDialog(this);
+            }
+            //No files so do a dialog.
+            else
+            {
+                MessageBox.Show("No plugins found, put plugins in the current plugins folder or change your plugin folder in the Options", "No Plugins", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void exportFileToolStripButton_Click(object sender, EventArgs e)

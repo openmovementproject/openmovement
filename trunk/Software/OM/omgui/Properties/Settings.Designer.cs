@@ -37,7 +37,7 @@ namespace OmGui.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
         public string CurrentWorkingFolder {
             get {
                 return ((string)(this["CurrentWorkingFolder"]));
@@ -47,12 +47,15 @@ namespace OmGui.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("J:\\New OM\\Plugins")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
         public string CurrentPluginFolder {
             get {
                 return ((string)(this["CurrentPluginFolder"]));
+            }
+            set {
+                this["CurrentPluginFolder"] = value;
             }
         }
     }
