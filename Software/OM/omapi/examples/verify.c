@@ -123,6 +123,7 @@ int verify_process(int id, const char *infile)
     char label[256];
     char line[768];
     int retval;
+    float percentPerHour = 0;
 
     fprintf(stderr, "FILE: %s\n", infile);
     sprintf(label, infile);
@@ -473,8 +474,8 @@ if (minLight < 50)   { retval |= 0x080000; } else if (minLight < 140)  { retval 
 {
     float hours = ((totalDuration >> 16) / 60.0f / 60.0f);
     float percentLoss = (float)batteryMaxPercent - batteryMinPercent;
-    float percentPerHour = 0;
-    if (hours > 0) { percentPerHour = percentLoss / hours; }
+    percentPerHour = 0;
+    if (hours > 0) { percentPerHour = percentLoss / hours; } else { percentPerHour = 0; }
     if (percentPerHour >= 0.25f) { retval |= 0x100000; } else if (percentPerHour >= 0.20f)  { retval |= 0x000100; }
 }
 if (startStopFail) { retval |= 0x200000; } 
@@ -487,9 +488,9 @@ if (startStopFail) { retval |= 0x200000; }
         fprintf(stderr, "Summary info-3: minLight=%d, Bmax=%d%%, Bmin=%d%%, intervalFail=%d\n", minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
         fprintf(stderr, "---\n");
 
-#define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail\n"
-        sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d\n",
-                                label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail);
+#define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail," "percentLoss\n"
+        sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d,"           "%f\n",
+                                label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail, percentPerHour);
 
         fprintf(stderr, line);
         if (outfile != NULL)
@@ -507,31 +508,24 @@ if (startStopFail) { retval |= 0x200000; }
 
 
 
-/* Device updated */
-static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS status)
+
+
+/* Download updated */
+static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_STATUS status, int value)
 {
-    char filename[OM_MAX_PATH];
-    int result, verifyResult;
+    if (status == OM_DOWNLOAD_PROGRESS)
+    { 
+        //printf("VERIFY #%d: Progress %d%%.\n", deviceId, value);
+    }
+    else if (status == OM_DOWNLOAD_COMPLETE)
+    { 
+        const char *file = (const char *)reference;
+        int verifyResult;
+        int result;
 
-    if (status == OM_DEVICE_CONNECTED)
-    {
-        fprintf(stderr, "VERIFY #%d: Device CONNECTED\n", deviceId);
-        
-        /* Setup */
-        OmSetLed(deviceId, OM_LED_BLUE);
+        printf("VERIFY #%d: Download complete, verify starting...\n", deviceId);
 
-        filename[0] = '\0';
-        result = OmGetDataFilename(deviceId, filename);
-        if (OM_FAILED(result))
-        { 
-            fprintf(stderr, "ERROR: OmGetDataFilename() %s\n", OmErrorString(result)); 
-            verifyResult = -3;
-        }
-        else
-        {
-            verifyResult = verify_process(deviceId, filename);
-        }
-
+        verifyResult = verify_process(deviceId, file);
 
         /* Set the session id (use the deviceId) */
         result = OmSetSessionId(deviceId, 0);
@@ -553,14 +547,97 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
         else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, OM_LED_YELLOW); }      // Warning
         else { OmSetLed(deviceId, OM_LED_CYAN); }                                       // Everything ok
     }
-    else if (status == OM_DEVICE_REMOVED)
-    {
-        fprintf(stderr, "VERIFY #%d: Device REMOVED\n", deviceId);
+    else if (status == OM_DOWNLOAD_CANCELLED)
+    { 
+        printf("VERIFY #%d: Cancelled.\n", deviceId);
+        OmSetLed(deviceId, OM_LED_MAGENTA);
+    }
+    else if (status == OM_DOWNLOAD_ERROR) 
+    { 
+        printf("VERIFY #%d: Error. (Diagnostic 0x%04x)\n", deviceId, value);
+        OmSetLed(deviceId, OM_LED_MAGENTA);
     }
     else
     {
-        fprintf(stderr, "VERIFY #%d: Error, unexpected status %d\n", deviceId, status);
+        printf("VERIFY #%d: Unexpected status %d / 0x%04x\n", deviceId, status, value);
+        OmSetLed(deviceId, OM_LED_MAGENTA);
     }
+    return;
+}
+
+
+/* Device updated */
+static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS status)
+{
+    if (status == OM_DEVICE_CONNECTED)
+    {
+        int result;
+        int dataBlockSize = 0, dataOffsetBlocks = 0, dataNumBlocks = 0;
+        OM_DATETIME startTime = 0, endTime = 0;
+
+        printf("VERIFY #%d: Device CONNECTED\n", deviceId);
+
+        /* Get the data range */
+        result = OmGetDataRange(deviceId, &dataBlockSize, &dataOffsetBlocks, &dataNumBlocks, &startTime, &endTime);
+        if (OM_FAILED(result)) { printf("ERROR: OmGetDataRange() %s\n", OmErrorString(result)); return; }
+        printf("VERIFY #%d: %d blocks data, at offset %d blocks (1 block = %d bytes)\n", deviceId, dataNumBlocks, dataOffsetBlocks, dataBlockSize);
+        /* Display the data start and end times */
+        {
+            char startString[OM_DATETIME_BUFFER_SIZE], endString[OM_DATETIME_BUFFER_SIZE];
+            OmDateTimeToString(startTime, startString);
+            OmDateTimeToString(endTime, endString);
+            printf("VERIFY #%d: ... %s --> %s\n", deviceId, startString, endString);
+        }
+
+        /* Check if there's any data blocks stored (not just the headers) */
+        if (dataNumBlocks - dataOffsetBlocks <= 0)
+        {
+            printf("VERIFY #%d: Ignoring - no data stored.\n");
+            OmSetLed(deviceId, OM_LED_RED);                   // Error accessing data
+        }
+        else
+        {
+            const char *downloadPath = ".";
+            char *file;
+
+            /* Allocate filename string */
+            file = (char *)malloc(strlen(downloadPath) + 32);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
+
+            /* Copy path, and platform-specific path separator char */
+            strcpy(file, downloadPath);
+            #ifdef _WIN32
+                if (file[strlen(file) - 1] != '\\') strcat(file, "\\");
+            #else
+                if (file[strlen(file) - 1] != '/') strcat(file, "/");
+            #endif
+
+            /* Append session-id and device-id as part of the filename */
+            sprintf(file + strlen(file), "CWA-%04u.CWA", deviceId);
+
+            /* Setup */
+            OmSetLed(deviceId, OM_LED_BLUE);
+
+            /* Begin download */
+            printf("VERIFY #%d: Starting download to file: %s\n", deviceId, file);
+            result = OmBeginDownloadingReference(deviceId, 0, -1, file, file);
+            if (OM_FAILED(result)) { printf("ERROR: OmBeginDownloading() %s\n", OmErrorString(result)); }
+
+            /* Leave filename string for download complete to free... */
+            //free(file);
+        }
+    }
+    else if (status == OM_DEVICE_REMOVED)
+    {
+        printf("VERIFY #%d: Device REMOVED\n", deviceId);
+        /* The download will have already been cancelled in the event of a device removal */
+        /*OmCancelDownload(deviceId);*/
+    }
+    else
+    {
+        printf("VERIFY #%d: Error, unexpected status %d\n", deviceId, status);
+        OmSetLed(deviceId, OM_LED_MAGENTA);                   // Error accessing data
+    }
+
     return;
 }
 
@@ -573,6 +650,9 @@ int verify(void)
 
     /* Set device callback before API startup to get initially-connected devices through the callback */
     OmSetDeviceCallback(verify_DeviceCallback, NULL);
+
+    /* Set download callback */
+    OmSetDownloadCallback(verify_DownloadCallback, NULL);
 
     /* Start the API */
     result = OmStartup(OM_VERSION);
