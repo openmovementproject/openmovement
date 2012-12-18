@@ -516,6 +516,7 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
     if (status == OM_DOWNLOAD_PROGRESS)
     { 
         //printf("VERIFY #%d: Progress %d%%.\n", deviceId, value);
+        if (value % 5 == 0) { printf("<#%d@%d%%>", deviceId, value); } // report every 5%
     }
     else if (status == OM_DOWNLOAD_COMPLETE)
     { 
@@ -661,8 +662,8 @@ int verify(void)
     for (;;)
     {
         /* Wait 5 seconds */
-        Sleep(5000);
-        fprintf(stderr, ".\n");
+        Sleep(60000);
+        fprintf(stderr, "<.>");
     }
 
     /* Shutdown the API */
