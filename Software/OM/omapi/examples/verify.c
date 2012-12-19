@@ -563,9 +563,9 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
         result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
         if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
 
-        if (verifyResult < 0) { OmSetLed(deviceId, OM_LED_MAGENTA); }                   // Error accessing data
+        if (verifyResult < 0) { OmSetLed(deviceId, OM_LED_YELLOW); }                    // Error accessing data
         else if (verifyResult & 0xfffff000) { OmSetLed(deviceId, OM_LED_RED); }         // Looks like a problem
-        else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, OM_LED_YELLOW); }      // Warning
+        else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, OM_LED_MAGENTA); }     // Warning
         else { OmSetLed(deviceId, OM_LED_CYAN); }                                       // Everything ok
     }
     else if (status == OM_DOWNLOAD_CANCELLED)
