@@ -124,6 +124,12 @@ int verify_process(int id, const char *infile)
     char line[768];
     int retval;
     float percentPerHour = 0;
+    // old statics
+    short lx = 0, ly = 0, lz = 0, stuck = 0;
+    char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
+    int seconds, packetCount = 0;
+    double av = 0.0;
+    int lastHour = -1;
 
     fprintf(stderr, "FILE: %s\n", infile);
     sprintf(label, infile);
@@ -156,8 +162,8 @@ int verify_process(int id, const char *infile)
 
         /* Report progress: minute */
         if (block != 0 && block %    50 == 0) { fprintf(stderr, "."); }   /* Approx. 1 minute */
-        if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }               /* Approx. 1 hour */
-        if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }             /* Approx. 1 day */
+        //if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }               /* Approx. 1 hour */
+        //if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }             /* Approx. 1 day */
 
         /* Read the next block */
         numSamples = OmReaderNextBlock(reader);
@@ -276,112 +282,104 @@ int verify_process(int id, const char *infile)
         lastBlockStart = blockStart;
 
         buffer = OmReaderBuffer(reader);
-        if (1)      // Test
+        for (i = 0; i < numSamples; i++)
         {
-            short lx = 0, ly = 0, lz = 0, stuck = 0;
-            int seconds, packetCount = 0;
-            double av = 0.0;
-            int lastHour = -1;
-            for (i = 0; i < numSamples; i++)
-            {
-                OM_DATETIME dateTime;
-                unsigned short fractional;
-                short x, y, z;
-                char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
-                double v;
+            OM_DATETIME dateTime;
+            unsigned short fractional;
+            short x, y, z;
+            double v;
 
-                totalSamples++;
+            totalSamples++;
 
-                /* Get the date/time value for this sample, and the 1/65536th fractions of a second */
-                dateTime = OmReaderTimestamp(reader, i, &fractional);
-                sprintf(timeString, "%04d-%02d-%02d %02d:%02d:%02d.%03d", 
-                        OM_DATETIME_YEAR(dateTime), OM_DATETIME_MONTH(dateTime), OM_DATETIME_DAY(dateTime), 
-                        OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), 
-                        (int)fractional * 1000 / 0xffff);
+            /* Get the date/time value for this sample, and the 1/65536th fractions of a second */
+            dateTime = OmReaderTimestamp(reader, i, &fractional);
+            sprintf(timeString, "%04d-%02d-%02d %02d:%02d:%02d.%03d", 
+                    OM_DATETIME_YEAR(dateTime), OM_DATETIME_MONTH(dateTime), OM_DATETIME_DAY(dateTime), 
+                    OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), 
+                    (int)fractional * 1000 / 0xffff);
 
-                /* Get the x/y/z/ values */
-                x = buffer[3 * i + 0];
-                y = buffer[3 * i + 1];
-                z = buffer[3 * i + 2];
+            /* Get the x/y/z/ values */
+            x = buffer[3 * i + 0];
+            y = buffer[3 * i + 1];
+            z = buffer[3 * i + 2];
 
-                /* Detect stuck values */
-                if (x == lx && y == ly && z == lz)
-                { 
-                    stuck++;
-                    if (stuck == STUCK_COUNT)
-                    {
-                        fprintf(stderr, "\nERROR: Readings could be stuck at (%d, %d, %d); has been for %d consecutive readings. ", lx, ly, lz, stuck);
-                        errorStuck++;
-                    }
-                }
-                else
+            /* Detect stuck values */
+            if (x == lx && y == ly && z == lz)
+            { 
+                stuck++;
+                if (stuck == STUCK_COUNT)
                 {
-                    if (stuck >= STUCK_COUNT)
-                    {
-                        fprintf(stderr, "\nNOTE: Readings now changed -- were at (%d, %d, %d) for total of %d consecutive readings. ", lx, ly, lz, stuck);
-                    }
-                    lx = x; ly = y; lz = z;
-                    stuck = 0;
+                    fprintf(stderr, "\nERROR: Readings could be stuck at (%d, %d, %d); has been for %d consecutive readings. ", lx, ly, lz, stuck);
+                    errorStuck++;
                 }
-
-                /* Get the SVM - 1 */
-                v = sqrt((x / 256.0) * (x / 256.0) + (y / 256.0) * (y / 256.0) + (z / 256.0) * (z / 256.0)) - 1.0;
-                av = ((1.0 - AVERAGE_FACTOR) * av) + (AVERAGE_FACTOR * v);
-                if (fabs(av) > peakAv) { peakAv = fabs(av); }
-                if (fabs(av) > maxAv) { maxAv = fabs(av); }
-                if (fabs(av) > AVERAGE_RANGE_MAX)
-                {
-                    if (!outOfRange)
-                    {
-                        errorRange++;
-                        outOfRange = 1;
-                        peakAv = fabs(av);
-                        fprintf(stderr, "WARNING: Average SVM gone out-of-normal-range abs(avg(svm-1)): %0.3f\n", fabs(av));
-                    }
-                } 
-                else if (fabs(av) < AVERAGE_RANGE_OFF && outOfRange) 
-                { 
-                    outOfRange = 0; 
-                    fprintf(stderr, "WARNING: Average SVM back in normal range, peak was abs(avg(svm-1)): %0.3f\n", peakAv);
-                }
-
-                /* Output the data */
-    //            if (output) { fprintf(stdout, "%s,%d,%d,%d\n", timeString, x, y, z); }
-
-                {
-                    int hour = OM_DATETIME_HOURS(dateTime);
-                    if (hour != lastHour)
-                    {
-                        fprintf(stderr, "\n%02d-%02d %02d:%02d:%02d.%02d", /*OM_DATETIME_YEAR(dateTime) % 100, */ OM_DATETIME_MONTH(dateTime), OM_DATETIME_DAY(dateTime), OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), (int)fractional * 100 / 0xffff);
-                        lastHour = hour;
-                    }
-                }
-
-                seconds = OM_DATETIME_SECONDS(dateTime);
-                if (lastSecond == -1) { lastSecond = seconds; };
-                if (seconds != lastSecond)
-                {
-                    if (firstPacket) { /* fprintf(stderr, "!"); */ firstPacket = 0; }
-                    else if (packetCount >= 88 && packetCount <= 112) { /* fprintf(stderr, "#"); */ }
-                    else
-                    { 
-                        if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
-                        {
-                            errorRate++;
-                            fprintf(stderr, "WARNING: 'Out of range' %d samples in second :%02d before %s]\n", packetCount, lastSecond, timeString);
-                        }
-                        else
-                        {
-                            errorBreaks++;
-                            fprintf(stderr, "WARNING: Non-sequential second jump (%d samples in second :%02d before %s)]\n", packetCount, lastSecond, timeString);
-                        }
-                    }
-                    lastSecond = seconds;
-                    packetCount = 0;
-                }
-                packetCount++;
-
             }
+            else
+            {
+                if (stuck >= STUCK_COUNT)
+                {
+                    fprintf(stderr, "\nNOTE: Readings now changed -- were at (%d, %d, %d) for total of %d consecutive readings. ", lx, ly, lz, stuck);
+                }
+                lx = x; ly = y; lz = z;
+                stuck = 0;
+            }
+
+            /* Get the SVM - 1 */
+            v = sqrt((x / 256.0) * (x / 256.0) + (y / 256.0) * (y / 256.0) + (z / 256.0) * (z / 256.0)) - 1.0;
+            av = ((1.0 - AVERAGE_FACTOR) * av) + (AVERAGE_FACTOR * v);
+            if (fabs(av) > peakAv) { peakAv = fabs(av); }
+            if (fabs(av) > maxAv) { maxAv = fabs(av); }
+            if (fabs(av) > AVERAGE_RANGE_MAX)
+            {
+                if (!outOfRange)
+                {
+                    errorRange++;
+                    outOfRange = 1;
+                    peakAv = fabs(av);
+                    fprintf(stderr, "WARNING: Average SVM gone out-of-normal-range abs(avg(svm-1)): %0.3f\n", fabs(av));
+                }
+            } 
+            else if (fabs(av) < AVERAGE_RANGE_OFF && outOfRange) 
+            { 
+                outOfRange = 0; 
+                fprintf(stderr, "WARNING: Average SVM back in normal range, peak was abs(avg(svm-1)): %0.3f\n", peakAv);
+            }
+
+            /* Output the data */
+//            if (output) { fprintf(stdout, "%s,%d,%d,%d\n", timeString, x, y, z); }
+
+            {
+                int hour = OM_DATETIME_HOURS(dateTime);
+                if (hour != lastHour)
+                {
+                    fprintf(stderr, "\n%02d-%02d %02d:%02d:%02d.%02d", /*OM_DATETIME_YEAR(dateTime) % 100, */ OM_DATETIME_MONTH(dateTime), OM_DATETIME_DAY(dateTime), OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), (int)fractional * 100 / 0xffff);
+                    lastHour = hour;
+                }
+            }
+
+            seconds = OM_DATETIME_SECONDS(dateTime);
+            if (lastSecond == -1) { lastSecond = seconds; };
+            if (seconds != lastSecond)
+            {
+                if (firstPacket) { /* fprintf(stderr, "!"); */ firstPacket = 0; }
+                else if (packetCount >= 88 && packetCount <= 112) { /* fprintf(stderr, "#"); */ }
+                else
+                { 
+                    if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))
+                    {
+                        errorRate++;
+                        fprintf(stderr, "WARNING: 'Out of range' %d samples in second :%02d before %s]\n", packetCount, lastSecond, timeString);
+                    }
+                    else
+                    {
+                        errorBreaks++;
+                        fprintf(stderr, "WARNING: Non-sequential second jump (%d samples in second :%02d before %s)]\n", packetCount, lastSecond, timeString);
+                    }
+                }
+                lastSecond = seconds;
+                packetCount = 0;
+            }
+            packetCount++;
+
         }
 
         // Store the current sequence id
