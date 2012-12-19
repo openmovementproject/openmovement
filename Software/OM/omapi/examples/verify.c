@@ -64,6 +64,9 @@
 #define AVERAGE_RANGE_MAX 0.400
 #define AVERAGE_RANGE_OFF 0.300
 
+#define IGNORE_RECENT_RESTARTS (6*60*60)        // Enable this if the devices have been connected/disconnected recently (causing a break in the data)
+
+
 
 FILE *outfile;
 
@@ -234,11 +237,27 @@ int verify_process(int id, const char *infile)
             {
                 long long recordingLength = (long long)(lastTime - firstTime);
                 long long diff = (long long)(blockStart - previousBlockEnd);
-                fprintf(stderr, "NOTE: Recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
-                restarts++;
-                totalDuration += recordingLength;
-                breakTime += (float)diff / 65536.0f;
 
+#ifdef IGNORE_RECENT_RESTARTS
+                time_t allowed = time(NULL) - IGNORE_RECENT_RESTARTS;
+                struct tm *tm = localtime(&allowed);
+                OM_DATETIME allowedRestartTime = OM_DATETIME_FROM_YMDHMS(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+                if (dp->timestamp >= allowedRestartTime)
+                {
+                    // Recalculate allowed restart time
+
+                    fprintf(stderr, "NOTE: Permitted recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
+                }
+                else
+#endif
+                {
+                    fprintf(stderr, "NOTE: Recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
+                    restarts++;
+                    breakTime += (float)diff / 65536.0f;
+                }
+
+                totalDuration += recordingLength;
                 lastBlockStart = 0;
                 firstPacket = 1;
                 lastSecond = -1;
