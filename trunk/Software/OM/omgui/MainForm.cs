@@ -656,7 +656,7 @@ namespace OmGui
             }
 
             //DEBUG - Making Plugins button always work:
-            devicesToolStripButtonPlugins.Enabled = true;
+            //devicesToolStripButtonPlugins.Enabled = true;
 
             return selected.ToArray();
         }

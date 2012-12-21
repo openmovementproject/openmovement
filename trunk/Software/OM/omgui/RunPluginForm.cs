@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace OmGui
 {
@@ -108,7 +109,16 @@ namespace OmGui
                     }
 
                     //Now we've got key value pairs we can run the exe
-                    System.Diagnostics.Process.Start(Plugin.RunFile.FullName + parametersStr);
+                    //System.Diagnostics.Process.Start(Plugin.RunFile.FullName + parametersStr);
+
+                    Process p = new Process();
+                    p.StartInfo.FileName = Plugin.RunFile.FullName;
+                    p.StartInfo.Arguments = parametersStr;
+
+                    p.Start();
+
+                    p.WaitForExit();
+                    p.Close();
                 }
                 else
                     firstGone = true;

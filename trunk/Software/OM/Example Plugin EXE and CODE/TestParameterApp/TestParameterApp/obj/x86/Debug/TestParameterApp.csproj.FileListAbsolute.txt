@@ -1,0 +1,4 @@
+c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\bin\Debug\TestParameterApp.exe
+c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\bin\Debug\TestParameterApp.pdb
+c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\obj\x86\Debug\TestParameterApp.exe
+c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\obj\x86\Debug\TestParameterApp.pdb
