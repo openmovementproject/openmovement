@@ -1,0 +1,40 @@
+<?xml version='1.0'?>
+<!-- This is a sample XML document -->
+<Plugin>
+	<item name="type" ext="exe">matlab</item>
+	<item name="description">This is a test plugin.</item>
+	<item name="inputFile">null</item>
+	<item name="outputFile">null</item>
+</Plugin>
+
+<!-- Old parameter style, now in HTML -->
+<!-- Parameters -->
+	<!--<item input="true"  type="string" column="1" row="1">String 1</item>
+	<item input="true" type="string" column="1" row="2">String 2</item>
+	<item input="true" type="combo" values="item1,item2,item3" column="1" row="3">My Combo Box</item>-->
+	
+	
+	
+<!-- 
+
+Take out Sync Time button and put it into Record Dialog X
+		2 Types:
+			1. Sync to Local PC (Have it ticked in record dialog)
+			2. Sync to Zero (like starting a counter)
+			
+	PROBLEM: SyncTime() method doesn't like syncing to lowest. XX
+
+Make Identify time longer XX
+
+Ask Nils about putting names in metadata etc.
+
+Talk to Nils about Web thing in general
+
+10.67.33.86:3000 - Nils' web thing.
+
+TODO:
+
+	Problem with Sync Time XX
+	Problem with hasData (After "Stop Recording" hasData is false but then a second later it is true).
+
+-->

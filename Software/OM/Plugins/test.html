@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<title>Test</title>
+<script>
+    var $ = function (e) { return document.getElementById(e); }
+    function submit()
+    {
+		alert('woo');
+        var hash = "?";
+        for (var i = 0; i < document.forms[0].elements.length; i++)
+        {
+            if (i != 0) { hash = hash + "&"; }
+            hash = hash + urlencode(document.forms[0].elements[i].name) + "=" + urlencode(document.forms[0].elements[i].value);
+        }
+        window.location.hash = hash;
+        return 0;
+    }
+</script>
+</head>
+<body>
+
+<form name="Form1" onsubmit="return submit();">
+    <div><label for="name">Name:</label><input id="name" name="name" type="text" value="default" /></div>
+    <div><label for="age">Age:</label><input id="age" name="age" type="text" value="123" /></div>
+	<div><input type="submit" value="Enter" /></div>
+</form>
+
+</body>
+</html>

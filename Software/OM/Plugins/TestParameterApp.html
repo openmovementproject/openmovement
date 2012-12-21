@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<title>Test</title>
+
+<!-- Leave this script as it is otherwise the program won't pick it up and it won't run. -->
+<!-- Still TODO: Form Validation for floats/ints/strings/etc. -->
+<script>
+    var $ = function (e) { return document.getElementById(e); }
+    function submit()
+    {
+        var hash = "?";
+        for (var i = 0; i < document.forms[0].elements.length; i++)
+        {
+            if (i != 0) { hash = hash + "&"; }
+            hash = hash + urlencode(document.forms[i].elements[0].name) + "=" + urlencode(document.forms[i].elements[0].value);
+        }
+		alert("hash: " + hash);
+        window.location.hash = hash;
+        return 0;
+    }
+</script>
+</head>
+<body>
+
+<!-- Put your form here, name it Form1 and have the onsubmit as such" -->
+<!-- Also add labels for each form field as shown here and put the 'id' and 'name' fields as the same name as the 'for' field in the <label> -->
+<!-- Basically just copy and paste this document and change the inputs -->
+<form name="Form1" onsubmit="return submit();">
+    <div><label for="name">Name:</label><input id="name" name="name" type="text" value="default" /></div>
+    <div><label for="age">Age:</label><input id="age" name="age" type="text" value="123" /></div>
+	<div><label for"comment">Comment:</label><textarea id="comment" name="comment" height="20" width="30"></textarea></div>
+	<div><input type="submit" value="Enter" /></div>
+</form>
+
+</body>
+</html>
