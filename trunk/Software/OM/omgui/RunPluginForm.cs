@@ -47,40 +47,6 @@ namespace OmGui
             //Also returns DialogResult.OK
         }
 
-        private void RunPluginForm_Load(object sender, EventArgs e)
-        {
-            //int x = 10;
-            //int y = 40;
-
-            //TS - Old dynamic controls-adding - now using webbrowser.
-            ////Create text boxes.
-            //foreach (KeyValuePair<string, string> pair in Plugin.ActualParameters)
-            //{
-            //    Label label = new Label();
-            //    label.Text = pair.Key;
-            //    label.Location = new Point(x, y);
-            //    this.Controls.Add(label);
-
-            //    x += 20;
-
-            //    if (pair.Value == "string")
-            //    {
-            //        TextBox textBox = new TextBox();
-            //        textBox.Location = new Point(x, y);
-            //        textBox.Size = new Size(184, 72);
-            //        this.Controls.Add(textBox);
-            //    }
-            //    else if (pair.Value == "combo")
-            //    {
-            //        ComboBox comboBox = new ComboBox();
-            //    }
-
-            //    x -= 20;
-
-            //    y += 30;
-            //}
-        }
-
         //TODO Got a problem that it will hit here twice.
         private void webBrowser1_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
@@ -111,18 +77,56 @@ namespace OmGui
                     //Now we've got key value pairs we can run the exe
                     //System.Diagnostics.Process.Start(Plugin.RunFile.FullName + parametersStr);
 
-                    Process p = new Process();
-                    p.StartInfo.FileName = Plugin.RunFile.FullName;
-                    p.StartInfo.Arguments = parametersStr;
-
-                    p.Start();
-
-                    p.WaitForExit();
-                    p.Close();
+                    RunProcess(parametersStr);
                 }
                 else
                     firstGone = true;
             }
+        }
+
+        private void RunProcess(string parametersAsString)
+        {
+            Process p = new Process();
+            p.StartInfo.FileName = Plugin.RunFile.FullName;
+            p.StartInfo.Arguments = parametersAsString;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.CreateNoWindow = true;
+
+            p.Start();
+
+            //READ STD OUT OF PLUGIN
+            //We want to read the info and decide what to do based on it.
+            //p - If it starts with p then percentage. [p 10%]
+            //s - If it starts with s then status update. [status New Status Here]
+            while (!p.HasExited)
+            {
+                string outputLine = p.StandardOutput.ReadLine();
+
+                //OUTPUT
+                if (outputLine != null)
+                {
+                    if (outputLine[0] == 'p')
+                    {
+                        string percentage = outputLine.Split(' ').Last();
+                        runPluginProgressBar.Value = Int32.Parse(percentage);
+                    }
+                    else if (outputLine[0] == 's')
+                    {
+                        string message = outputLine.Split(new char[] { ' ' }, 2).Last();
+                        labelStatus.Text = message;
+                    }
+                }
+
+                Console.WriteLine("o: " + outputLine);
+
+                runPluginProgressBar.Invalidate(true);
+                labelStatus.Invalidate(true);
+            }
+
+            p.WaitForExit();
+            p.Close();
         }
     }
 }
