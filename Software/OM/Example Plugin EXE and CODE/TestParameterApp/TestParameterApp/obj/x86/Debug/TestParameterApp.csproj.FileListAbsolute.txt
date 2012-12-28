@@ -2,3 +2,7 @@ c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParam
 c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\bin\Debug\TestParameterApp.pdb
 c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\obj\x86\Debug\TestParameterApp.exe
 c:\users\thomas\documents\visual studio 2010\Projects\TestParameterApp\TestParameterApp\obj\x86\Debug\TestParameterApp.pdb
+H:\OM\Example Plugin EXE and CODE\TestParameterApp\TestParameterApp\obj\x86\Debug\TestParameterApp.exe
+H:\OM\Example Plugin EXE and CODE\TestParameterApp\TestParameterApp\obj\x86\Debug\TestParameterApp.pdb
+H:\OM\Example Plugin EXE and CODE\TestParameterApp\TestParameterApp\bin\Debug\TestParameterApp.exe
+H:\OM\Example Plugin EXE and CODE\TestParameterApp\TestParameterApp\bin\Debug\TestParameterApp.pdb

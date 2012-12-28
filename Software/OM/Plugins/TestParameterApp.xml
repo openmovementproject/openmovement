@@ -3,7 +3,7 @@
 <!-- So far we only recognize EXE types but still put it in as shown here. Then add in description, input file and output file types as shown. -->
 <Plugin>
 	<item name="type" ext="exe">exe</item>
-	<item name="description">This is a test plugin that asks for 3 strings of information. There is no input or output file.</item>
+	<item name="description">This is a test plugin that asks for 5 strings of information. There is no input or output file.</item>
 	<item name="inputFile">null</item>
 	<item name="outputFile">null</item>
 </Plugin>

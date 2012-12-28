@@ -25,6 +25,8 @@ namespace OmGui
             {
                 pluginsComboBox.Items.Add(plugin.Type + " -- " + plugin.Name);
             }
+
+            pluginsComboBox.SelectedIndex = 0;
         }
 
         private void pluginsComboBox_SelectedIndexChanged(object sender, EventArgs e)

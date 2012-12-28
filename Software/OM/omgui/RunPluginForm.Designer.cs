@@ -30,7 +30,7 @@
         {
             this.button1 = new System.Windows.Forms.Button();
             this.runPluginProgressBar = new System.Windows.Forms.ProgressBar();
-            this.label1 = new System.Windows.Forms.Label();
+            this.labelStatus = new System.Windows.Forms.Label();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.SuspendLayout();
             // 
@@ -39,7 +39,7 @@
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button1.Location = new System.Drawing.Point(456, 490);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(100, 28);
             this.button1.TabIndex = 0;
@@ -50,21 +50,21 @@
             // runPluginProgressBar
             // 
             this.runPluginProgressBar.Location = new System.Drawing.Point(13, 454);
-            this.runPluginProgressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.runPluginProgressBar.Margin = new System.Windows.Forms.Padding(4);
             this.runPluginProgressBar.Name = "runPluginProgressBar";
             this.runPluginProgressBar.Size = new System.Drawing.Size(548, 28);
             this.runPluginProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.runPluginProgressBar.TabIndex = 3;
             // 
-            // label1
+            // labelStatus
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 501);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(49, 17);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Ready";
+            this.labelStatus.AutoSize = true;
+            this.labelStatus.Location = new System.Drawing.Point(13, 501);
+            this.labelStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelStatus.Name = "labelStatus";
+            this.labelStatus.Size = new System.Drawing.Size(49, 17);
+            this.labelStatus.TabIndex = 4;
+            this.labelStatus.Text = "Ready";
             // 
             // webBrowser1
             // 
@@ -81,13 +81,12 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(572, 533);
             this.Controls.Add(this.webBrowser1);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.runPluginProgressBar);
             this.Controls.Add(this.button1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "RunPluginForm";
             this.Text = "RunPluginForm";
-            this.Load += new System.EventHandler(this.RunPluginForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -97,7 +96,7 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ProgressBar runPluginProgressBar;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.WebBrowser webBrowser1;
     }
 }
