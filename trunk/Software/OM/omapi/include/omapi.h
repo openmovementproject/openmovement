@@ -753,7 +753,7 @@ OM_EXPORT int OmGetAccelConfig(int deviceId, int *rate, int *range);
  * @param rate Sampling rate value in Hz (50, 100, 200)
  * @param range Sampling range value in +/- G (2, 4, 8, 16)
  * @return \a OM_OK if successful, an error code otherwise.
- * @see OmGetRate()
+ * @see OmGetAccelConfig()
  * @since 1.3
  */
 OM_EXPORT int OmSetAccelConfig(int deviceId, int rate, int range);

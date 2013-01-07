@@ -47,7 +47,7 @@ namespace OmApiNet
         public enum OM_DEVICE_STATUS { OM_DEVICE_REMOVED, OM_DEVICE_CONNECTED };
         [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)] public delegate void OmDeviceCallback(IntPtr reference, int deviceId, OM_DEVICE_STATUS status);
         [DllImport("libomapi.dll")] public static extern int OmSetDeviceCallback(OmDeviceCallback deviceCallback, IntPtr reference);
-        [DllImport("libomapi.dll")] public static extern int OmGetDeviceIds(/*ref */ int[] deviceIds, int maxDevices);
+        [DllImport("libomapi.dll")] public static extern int OmGetDeviceIds(ref int[] deviceIds, int maxDevices);
         [DllImport("libomapi.dll")] public static extern int OmGetVersion(int deviceId, out int firmwareVersion, out int hardwareVersion);
         [DllImport("libomapi.dll")] public static extern int OmGetBatteryLevel(int deviceId);
         [DllImport("libomapi.dll")] public static extern int OmSelfTest(int deviceId);
