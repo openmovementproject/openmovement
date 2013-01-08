@@ -79,7 +79,7 @@ namespace OmGui
             {
                 Ext = (ExtType) Enum.Parse(typeof(ExtType), RawParameters["ext"], true);
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 throw new PluginExtTypeException();
             }
