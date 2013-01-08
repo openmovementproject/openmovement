@@ -1055,7 +1055,7 @@ namespace OmGui
         private void toolStripButtonClear_Click(object sender, EventArgs e)
         {
             //TS - Record which are cleared and stopped if multiple selected.
-            int devicesClearing = 0;
+//            int devicesClearing = 0;
 
             if (EnsureNoSelectedDownloading())
             {
@@ -1469,7 +1469,7 @@ namespace OmGui
                         }
                 }
             }
-            catch (PluginExtTypeException extError)
+            catch (PluginExtTypeException)
             {
                 MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
