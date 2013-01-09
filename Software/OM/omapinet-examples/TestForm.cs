@@ -40,13 +40,20 @@ namespace omapinet_examples
             Console.WriteLine("OmGetDeviceIds() = {0}", ret);
 
             // Get device IDs
-            devices = new int[ret];
+            int numDevices = ret;
+            devices = new int[numDevices];
             ret = OmApi.OmGetDeviceIds(devices, devices.Length);
             Console.WriteLine("OmGetDeviceIds() = {0}", ret);
             if (ret > devices.Length) { ret = devices.Length; } // ignore any devices added since last call
-            for (int i = 0; i < ret; i++)
+            numDevices = ret;
+            for (int i = 0; i < numDevices; i++)
             {
-                Console.WriteLine("Device {0} = #{1}", i + 1, devices[i]);
+                Console.WriteLine("Device-{0} = #{1}", i + 1, devices[i]);
+
+                // Set device LED to something random...
+                int col = (new Random()).Next(7) + 1;
+                ret = OmApi.OmSetLed(devices[i], col);
+                Console.WriteLine("OmSetDeviceLed({0}) = {1}", col, ret);
             }
 
             // Shutdown the API
