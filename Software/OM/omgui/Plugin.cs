@@ -29,11 +29,18 @@ namespace OmGui
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
         public ExtType Ext { get; set; }
+        public int Height { get; set; }
+        public int Width { get; set; }
         private Dictionary<string, string> RawParameters { get; set; }
         public Dictionary<string, string> ActualParameters { get; set; }
 
         public Plugin(FileInfo run, FileInfo xml, FileInfo html)
         {
+            //Set defaults:
+            Height = 600;
+            Width = 800;
+            //end of set defaults
+
             XMLFile = xml;
 
             HTMLFile = html;
@@ -88,6 +95,12 @@ namespace OmGui
             InputFile = RawParameters["inputFile"];
             OutputFile = RawParameters["outputFile"];
             Type = RawParameters["type"];
+
+            if(RawParameters.ContainsKey("height"))
+                Height = int.Parse(RawParameters["height"]);
+
+            if(RawParameters.ContainsKey("width"))
+                Width = int.Parse(RawParameters["width"]);
             Name = Path.GetFileNameWithoutExtension(XMLFile.Name);
         }
     }

@@ -570,9 +570,10 @@ namespace OmGui
 
                 devicesToolStripButtonPlugins.Enabled = !downloading && !isRecording && !isSetupForRecord;
 
-                devicesToolStripButtonIdentify.Enabled = true;
+                //DEBUG - Set it to always true for debug.
+                devicesToolStripButtonPlugins.Enabled = true;
 
-                //toolStripMenuItemConvert.Enabled = any; //TS - TODO - Sort this out.
+                devicesToolStripButtonIdentify.Enabled = true;
 
                 selected.Add(device);
             }
@@ -1333,6 +1334,9 @@ namespace OmGui
             {
                 LoadWorkingFolder(true);
             }
+
+            //DEBUG - Make Plugins button always enabled for debug.
+            devicesToolStripButtonPlugins.Enabled = true;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
