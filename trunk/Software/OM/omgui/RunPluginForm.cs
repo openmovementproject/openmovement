@@ -23,6 +23,9 @@ namespace OmGui
 
             Plugin = plugin;
 
+            Height = Plugin.Height;
+            Width = Plugin.Width;
+
             Go(Plugin.HTMLFile.FullName);
         }
 
@@ -52,14 +55,14 @@ namespace OmGui
         {
             Console.WriteLine("Location: " + e.Url.ToString());
 
-            string[] url = e.Url.ToString().Split(new string[] { "%3F" }, StringSplitOptions.None);
+            string[] url = e.Url.ToString().Split(new string[] { "#" }, StringSplitOptions.None);
 
             //Url will be of length 1 first time, after JavaScript 'enter' it will be length 2
             if (url.Length == 2)
             {
                 //HACK - solve the hit here twice problem.
-                if (firstGone)
-                {
+                //if (firstGone)
+                //{
                     string[] keypairs = url[1].Split('&');
 
                     Dictionary<string, string> keypairdic = new Dictionary<string, string>();
@@ -78,9 +81,9 @@ namespace OmGui
                     //System.Diagnostics.Process.Start(Plugin.RunFile.FullName + parametersStr);
 
                     RunProcess(parametersStr);
-                }
-                else
-                    firstGone = true;
+                //}
+                //else
+                    //firstGone = true;
             }
         }
 
