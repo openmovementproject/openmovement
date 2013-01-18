@@ -132,6 +132,7 @@ int OmSelfTest(int deviceId)
     // "TEST=xxxx"
     if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     status = strtol(parts[1], NULL, 16);
+    status &= ~0x0002;      // Ignore flag that signifies the alternative NAND -- if the NAND was actually incompatible, the device would not have started.
     return status;
 } 
 
