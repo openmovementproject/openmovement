@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 
 namespace TestParameterApp
 {
@@ -13,6 +14,12 @@ namespace TestParameterApp
             int i = 0;
 
             Console.WriteLine("status: Getting Inputs...");
+
+            string argsString = "";
+            foreach(string arg in args)
+                argsString += arg + " ";
+
+            Console.WriteLine("args string: " + argsString);
 
             foreach(string arg in args)
             {

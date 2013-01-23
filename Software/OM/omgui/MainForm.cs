@@ -1437,57 +1437,68 @@ namespace OmGui
             //6. Have "Execute" button that runs program
             //7. Get success message back.
 
-            string folder = Properties.Settings.Default.CurrentPluginFolder;
-
-            DirectoryInfo d = new DirectoryInfo(folder);
-
-            List<FileInfo> htmlFiles = new List<FileInfo>();
-
-            FileInfo[] files = d.GetFiles("*.*");
-
-            //Find XML files
-            foreach (FileInfo f in files)
+            if (filesListView.SelectedItems.Count > 0)
             {
-                if (f.Extension == ".html")
-                    htmlFiles.Add(f);
-            }
-            
+                ListViewItem i = filesListView.SelectedItems[0];
 
-            List<Plugin> plugins = new List<Plugin>();
+                OmReader reader = (OmReader)i.Tag;
 
-            try
-            {
-                //Find matching other files and add to plugins dictionary
+                string folder = Properties.Settings.Default.CurrentPluginFolder;
+
+                DirectoryInfo d = new DirectoryInfo(folder);
+
+                List<FileInfo> htmlFiles = new List<FileInfo>();
+
+                FileInfo[] files = d.GetFiles("*.*");
+
+                //Find XML files
                 foreach (FileInfo f in files)
                 {
-                    if (f.Extension != ".html" && f.Extension != ".xml")
-                        foreach (FileInfo htmlFile in htmlFiles)
-                        {
-                            string name = Path.GetFileNameWithoutExtension(f.Name);
-                            string xmlName = Path.GetDirectoryName(f.FullName) + "\\" + name + ".xml";
+                    if (f.Extension == ".html")
+                        htmlFiles.Add(f);
+                }
 
-                            FileInfo xmlFile = new FileInfo(xmlName);
 
-                            if (Path.GetFileNameWithoutExtension(f.Name).Equals(Path.GetFileNameWithoutExtension(htmlFile.Name)))
-                                plugins.Add(new Plugin(f, xmlFile, htmlFile));
-                        }
+                List<Plugin> plugins = new List<Plugin>();
+
+                try
+                {
+                    //Find matching other files and add to plugins dictionary
+                    foreach (FileInfo f in files)
+                    {
+                        if (f.Extension != ".html" && f.Extension != ".xml")
+                            foreach (FileInfo htmlFile in htmlFiles)
+                            {
+                                string name = Path.GetFileNameWithoutExtension(f.Name);
+                                string xmlName = Path.GetDirectoryName(f.FullName) + "\\" + name + ".xml";
+
+                                FileInfo xmlFile = new FileInfo(xmlName);
+
+                                if (Path.GetFileNameWithoutExtension(f.Name).Equals(Path.GetFileNameWithoutExtension(htmlFile.Name)))
+                                    plugins.Add(new Plugin(f, xmlFile, htmlFile));
+                            }
+                    }
+                }
+                catch (PluginExtTypeException)
+                {
+                    MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                if (plugins.Count > 0)
+                {
+                    //Now that we have our plugins, open the plugin form
+                    PluginsForm pluginsForm = new PluginsForm(plugins, reader.Filename);
+                    pluginsForm.ShowDialog(this);
+                }
+                //No files so do a dialog.
+                else
+                {
+                    MessageBox.Show("No plugins found, put plugins in the current plugins folder or change your plugin folder in the Options", "No Plugins", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch (PluginExtTypeException)
-            {
-                MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            if (plugins.Count > 0)
-            {
-                //Now that we have our plugins, open the plugin form
-                PluginsForm pluginsForm = new PluginsForm(plugins);
-                pluginsForm.ShowDialog(this);
-            }
-            //No files so do a dialog.
             else
             {
-                MessageBox.Show("No plugins found, put plugins in the current plugins folder or change your plugin folder in the Options", "No Plugins", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please choose a file to run a plugin on.");
             }
         }
 

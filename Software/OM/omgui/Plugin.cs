@@ -28,6 +28,7 @@ namespace OmGui
         public FileInfo RunFile { get; set; }
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
+        public string OutputExt { get; set; }
         public ExtType Ext { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
@@ -93,7 +94,14 @@ namespace OmGui
             
             Description = RawParameters["description"];
             InputFile = RawParameters["inputFile"];
-            OutputFile = RawParameters["outputFile"];
+
+            if(RawParameters.ContainsKey("outputFile"))
+                OutputFile = RawParameters["outputFile"];
+
+            if(RawParameters.ContainsKey("outputExtension"))
+                OutputExt = RawParameters["outputExtension"];
+
+
             Type = RawParameters["type"];
 
             if(RawParameters.ContainsKey("height"))
