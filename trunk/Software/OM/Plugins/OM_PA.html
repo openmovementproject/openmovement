@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Test</title>
+	
+	<style type="text/css">
+		.input
+		{
+			font-family:Arial,Helvetica,Georgia;
+			color:rgb(88, 88, 90);
+			margin-right:10px;
+		}
+	</style>
+</head>
+
+
+
+<!-- Leave this script as it is otherwise the program won't pick it up and it won't run. -->
+<!-- Still TODO: Form Validation for floats/ints/strings/etc. -->
+<script type="text/javascript">
+    //var $ = function (e) { return document.getElementById(e); }
+	
+	var site = "1";
+	var side = "1";
+	
+	var mass = 80;
+	
+	var outputfile = "";
+	
+    function func()
+    {
+		//Add 'site' and 'side' to the hash.
+		var hash ="\"site\"=" + site + "&" + "\"side\"=" + side + "&";
+		
+        for (var i = 0; i < document.forms[0].elements.length; i++)
+        {
+			var name = document.forms[0].elements[i].name;
+			var value = document.forms[0].elements[i].value;
+			
+			if(name != "outputfile" && name != "weightSelect")
+			{
+				if(name == "bodyFat")
+				{
+					value /= 100;
+				}
+				
+				if(name == "mass")
+				{
+					var select = document.getElementById("weightSelect");
+					
+					if(select.options[select.selectedIndex].text == "lbs")
+					{
+						alert("weight before: " + value);
+						value /= 2.2;
+						alert("weight after: " + value);
+					}
+				}
+				
+				if (i != 0) { hash = hash + "&"; }
+			
+				hash = hash + "\"" + name + "\"" + "=" + value;
+			}
+			else
+			{
+				outputfile = document.forms[0].elements[i].value;
+			}
+        }
+		
+		//Add outputfile
+		if(outputfile != "")
+		{
+			hash = hash + "&" + "\"csv\"="  + outputfile + ".csv";
+		}
+		
+        window.location.hash = hash;
+        return 0;
+    }
+	
+	
+	
+	function bodyPart(partID)
+	{
+		switch(partID)
+		{
+		//Right hand
+		case 1:
+			site = 1;
+			side = 2;
+			break;	
+		//Left Hand
+		case 2:
+			site = 1;
+			side = 1;
+			break;	
+		//Right Waist
+		case 3:
+			site = 2;
+			side = 2;
+			break;	
+		//Left Waist
+		case 4:
+			site = 2;
+			side = 1;
+			break;	
+		}
+	}
+</script>
+
+<body>
+
+<img src="images/Banner.png" />
+
+<!-- Put your form here, name it Form1 and have the onsubmit as such" -->
+<!-- Also add labels for each form field as shown here and put the 'id' and 'name' fields as the same name as the 'for' field in the <label> -->
+<!-- Basically just copy and paste this document and change the inputs -->
+<form name="Form1" onsubmit="return func()">
+	<div><label class="input" style="margin-bottom:3px;" for="mass">Body Mass</label><br /><input class="input" id="mass" name="mass" type="text" value="80" /><select id="weightSelect" name="weightSelect"><option name="kg" selected>kg</option><option name="lbs">lbs</option></select></div>
+	<div><label class="input" style="margin-bottom:3px;" for="bodyFat">Body Fat Percentage</label><br /><input class="input" id="bodyFat" name="bodyFat" type="text" value="22" /><span class="input">%</span></div>
+	<div><label class="input" style="margin-bottom:3px;" for="epoch">Epoch Period</label><br /><input class="input" id="epoch" name="epoch" type="text" value="60" /><span class="input">seconds</span></div>
+	<div><label class="input" style="margin-bottom:3px;" for="outputfile">Output Filename</label><br /><input class="input" id="outputfile" name="outputfile" type="text" /></div>
+	
+	<!-- Image Map -->
+	<div style="text-align:center; width:356px; margin-left:auto; margin-right:auto;">
+	<img id="image_for_map" src="images/Body.png" usemap="#map" border="0" width="356" height="285" alt="" />
+	<map id="map" name="map">
+	<area shape="rect" coords="179,158,308,195" href="javascript:bodyPart(4)" alt="Left Waist" title="Left Waist"    />
+	<area shape="rect" coords="50,158,179,195" href="javascript:bodyPart(3)" alt="Right Waist" title="Right Waist"    />
+	<area shape="rect" coords="222,81,351,162" href="javascript:bodyPart(2)" alt="Left Hand" title="Left Hand"    />
+	<area shape="rect" coords="0,79,129,160" href="javascript:bodyPart(1)" alt="Right Hand" title="Right Hand"    />
+	</map>
+</div>
+	<input type="image" src="images/Submit.png" />
+</form>
+
+</body>
+</html>

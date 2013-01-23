@@ -14,8 +14,9 @@ namespace OmGui
     {
         private List<Plugin> plugins = new List<Plugin>();
         private Plugin SelectedPlugin { get; set; }
+        private string CWAFilename { get; set; }
 
-        public PluginsForm(List<Plugin> plugins)
+        public PluginsForm(List<Plugin> plugins, string fileName)
         {
             InitializeComponent();
 
@@ -27,6 +28,8 @@ namespace OmGui
             }
 
             pluginsComboBox.SelectedIndex = 0;
+
+            CWAFilename = fileName;
         }
 
         private void pluginsComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -60,7 +63,7 @@ namespace OmGui
         private void btnRun_Click(object sender, EventArgs e)
         {
             //Want to pop up Input and Run Window.
-            RunPluginForm rpf = new RunPluginForm(SelectedPlugin);
+            RunPluginForm rpf = new RunPluginForm(SelectedPlugin, CWAFilename);
             rpf.ShowDialog();
         }
 
