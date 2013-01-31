@@ -57,10 +57,12 @@ namespace OmApiNet
         {
             // Register our log callback handler first (before startup)
             logCallbackDelegate = new OmApi.OmLogCallback(LogCallback);
+            GC.SuppressFinalize(logCallbackDelegate);
             OmApi.OmSetLogCallback(logCallbackDelegate, IntPtr.Zero);
 
             // Register our device callback handler (before startup, so we get the initial set of devices)
             deviceCallbackDelegate = new OmApi.OmDeviceCallback(DeviceCallback);
+            GC.SuppressFinalize(deviceCallbackDelegate);
             OmApi.OmSetDeviceCallback(deviceCallbackDelegate, IntPtr.Zero);
 
             // Startup the API
@@ -112,6 +114,10 @@ namespace OmApiNet
 
                 // Clean up unmanaged resources
                 OmApi.OmShutdown();
+
+                // Allow finalizing
+                if (logCallbackDelegate != null) { GC.ReRegisterForFinalize(logCallbackDelegate); }
+                if (deviceCallbackDelegate != null) { GC.ReRegisterForFinalize(deviceCallbackDelegate); }
 
                 // Disposing complete
                 disposed = true;
