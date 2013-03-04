@@ -83,6 +83,7 @@ namespace OmApiNet
             */
 
             downloadCallbackDelegate = new OmApi.OmDownloadCallback(DownloadCallback);
+            GC.SuppressFinalize(downloadCallbackDelegate);
             OmApi.OmSetDownloadCallback(downloadCallbackDelegate, IntPtr.Zero);
         }
 
