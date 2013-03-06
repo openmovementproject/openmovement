@@ -13,8 +13,10 @@ namespace OmGui
     public partial class PluginsForm : Form
     {
         private List<Plugin> plugins = new List<Plugin>();
-        private Plugin SelectedPlugin { get; set; }
-        private string CWAFilename { get; set; }
+        public Plugin SelectedPlugin { get; set; }
+        public Dictionary<string, string> SelectedParameters { get; set; }
+        public string CWAFilename { get; set; }
+        public RunPluginForm rpf { get; set; }
 
         public PluginsForm(List<Plugin> plugins, string fileName)
         {
@@ -63,8 +65,13 @@ namespace OmGui
         private void btnRun_Click(object sender, EventArgs e)
         {
             //Want to pop up Input and Run Window.
-            RunPluginForm rpf = new RunPluginForm(SelectedPlugin, CWAFilename);
+            rpf = new RunPluginForm(SelectedPlugin, CWAFilename);
             rpf.ShowDialog();
+
+            if (rpf.DialogResult == System.Windows.Forms.DialogResult.OK)
+            {
+                SelectedParameters = rpf.SelectedParameters;
+            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)

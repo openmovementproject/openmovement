@@ -7,17 +7,26 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using OmApiNet;
+
 namespace OmGui
 {
     public partial class DateRangeForm : Form
     {
-        public DateRangeForm(string title, string prompt)
+        private DateRangeMetadataForm drmf;
+
+        bool setOK = false;
+
+        public DateRangeForm(string title, string prompt, OmDevice device)
         {
             InitializeComponent();
             Text = title;
             //labelPrompt.Text = prompt;
             FromDate = DateTime.MinValue;
             //UntilDate = DateTime.MaxValue;
+
+            timePicker.Format = DateTimePickerFormat.Time;
+            timePicker.ShowUpDown = true;
         }
 
         public bool Always { get; set; }
@@ -37,26 +46,34 @@ namespace OmGui
         {
             get
             {
-                if (!dateTimePickerFrom.Checked) { return DateTime.MinValue; }
-                return dateTimePickerFrom.Value; 
+                if (!datePicker.Checked) { return DateTime.MinValue; }
+                return datePicker.Value; 
             }
             set
             {
-                if (value < dateTimePickerFrom.MinDate)
+                if (value < datePicker.MinDate)
                 {
-                    dateTimePickerFrom.Checked = false;
-                    dateTimePickerFrom.Value = dateTimePickerFrom.MinDate;
+                    datePicker.Checked = false;
+                    datePicker.Value = datePicker.MinDate;
                 }
-                else if (value > dateTimePickerFrom.MaxDate)
+                else if (value > datePicker.MaxDate)
                 {
-                    dateTimePickerFrom.Checked = false;
-                    dateTimePickerFrom.Value = dateTimePickerFrom.MaxDate;
+                    datePicker.Checked = false;
+                    datePicker.Value = datePicker.MaxDate;
                 }
                 else
                 {
-                    dateTimePickerFrom.Value = value;
+                    datePicker.Value = value;
                 }
 
+            }
+        }
+
+        public DateTime UntilDate
+        {
+            get
+            {
+                return DateTime.Now;
             }
         }
 
@@ -90,6 +107,8 @@ namespace OmGui
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
+            setOK = true;
+
             if (syncToPCCheckBox.Checked)
                 SyncTime = SyncTimeType.PC;
             else
@@ -97,7 +116,8 @@ namespace OmGui
 
             SessionID = Int32.Parse(sessionIdTextBox.Text);
             DialogResult = System.Windows.Forms.DialogResult.OK;
-            Close();
+
+            //TS - TODO - Build UntilDate from the data provided.
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
@@ -116,17 +136,69 @@ namespace OmGui
         {
             if (alwaysCheckBox.Checked)
             {
-                dateTimePickerFrom.Enabled = false;
-                comboBoxDays.Enabled = false;
-                comboBoxHours.Enabled = false;
-                comboBoxMinutes.Enabled = false;
+                datePicker.Enabled = false;
+                timePicker.Enabled = false;
+                dayPicker.Enabled = false;
+                hoursPicker.Enabled = false;
+                minutesPicker.Enabled = false;
             }
             else
             {
-                dateTimePickerFrom.Enabled = true;
-                comboBoxDays.Enabled = true;
-                comboBoxHours.Enabled = true;
-                comboBoxMinutes.Enabled = true;
+                datePicker.Enabled = true;
+                timePicker.Enabled = true;
+                dayPicker.Enabled = true;
+                hoursPicker.Enabled = true;
+                minutesPicker.Enabled = true;
+            }
+        }
+
+        private void buttonSetupMetadata_Click(object sender, EventArgs e)
+        {
+            //Using the same form so we can store data in it rather than mirroring data here.
+            if(drmf == null)
+                drmf = new DateRangeMetadataForm();
+
+            drmf.ShowDialog();
+        }
+
+        // Roughly estimate battery life (in seconds) based on percentage remaining and sampling frequency
+        static double EstimateBatteryLife(int percent, int rate)
+        {
+            const int percentReserved = 10;
+            const double dischargeRate100Hz = 0.15;
+            double dischargeRate;
+            if (rate <= 100) { dischargeRate = dischargeRate100Hz; }
+            else { dischargeRate = dischargeRate100Hz * rate / 100; }
+            if (percent < percentReserved) { return 0; }
+            return (percent - percentReserved) / dischargeRate * 60 * 60;
+        }
+
+        static double EstimateCapacityFromBytesFree(long bytesFree, int rate)
+        {
+            long clustersFree = (bytesFree / 32768);
+            if (clustersFree <= 0) { return 0; }
+            long numSamples = (clustersFree * (32768 / 512) - 2) * 120;    // assume 32kB clusters, 120 samples per sector, reserve two sectors for header
+            return (numSamples / (1.06 * rate));      // assume actual sampling rate could be up to 6% over
+        }
+
+        private void DateRangeForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //TS - TODO - Do warnings
+            DateTime startDate = datePicker.Value;
+            DateTime endDate = startDate.Add(new TimeSpan((int)dayPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
+
+
+            //Only show warnings if we are closing because of OK
+            if (setOK)
+            {
+                //If more than 25 days give warning
+                if (dayPicker.Value > 25)
+                {
+                    DialogResult dr = MessageBox.Show("The record length is very long and the device may not last this long", "Warning - Record length", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                    if (dr != System.Windows.Forms.DialogResult.OK)
+                        e.Cancel = true;
+                }
             }
         }
     }

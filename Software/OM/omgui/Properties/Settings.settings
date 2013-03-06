@@ -6,10 +6,13 @@
       <Value Profile="(Default)">C:\</Value>
     </Setting>
     <Setting Name="CurrentWorkingFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="CurrentPluginFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\</Value>
+      <Value Profile="(Default)">F:\OM\Plugins</Value>
+    </Setting>
+    <Setting Name="CurrentProfileDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">F:\OM\Profiles</Value>
     </Setting>
   </Settings>
 </SettingsFile>
