@@ -18,13 +18,17 @@ namespace OmGui
         Plugin Plugin { get; set; }
 
         private string CWAFilename { get; set; }
-        private string TempCWAFilePath { get; set; }
+        public string TempCWAFilePath { get; set; }
 
         private string OutputName { get; set; }
-        private string OriginalOutputName { get; set; }
+        public string OriginalOutputName { get; set; }
+
+        public string ParameterString { get; set; }
+
+        public Dictionary<string, string> SelectedParameters { get; set; }
 
         //Temp folder for Matlab Hack
-        string destFolder = "C:\\OM\\PluginTemp\\";
+        public string destFolder = "C:\\OM\\PluginTemp\\";
 
         public RunPluginForm(Plugin plugin, string filename)
         {
@@ -75,9 +79,9 @@ namespace OmGui
             {
                 string[] keypairs = url[1].Split('&');
 
-                Dictionary<string, string> keypairdic = new Dictionary<string, string>();
+                SelectedParameters = new Dictionary<string, string>();
 
-                string parametersStr = TempCWAFilePath;
+                ParameterString = TempCWAFilePath;
 
                 foreach (string keypair in keypairs)
                 {
@@ -85,7 +89,7 @@ namespace OmGui
 
                     if (keyvalue.Length > 1)
                     {
-                        keypairdic.Add(keyvalue[0], keyvalue[1]);
+                        SelectedParameters.Add(keyvalue[0], keyvalue[1]);
 
                         //If there is an output file:
                         if (Plugin.OutputFile != "")
@@ -95,11 +99,11 @@ namespace OmGui
                                 //Original name
                                 OriginalOutputName = keyvalue[1];
 
-                                parametersStr += " " + destFolder + "temp.csv";
+                                ParameterString += " " + destFolder + "temp.csv";
                             }
                             else
                             {
-                                parametersStr += " " + keyvalue[1];
+                                ParameterString += " " + keyvalue[1];
                             }
                         }
                     }
@@ -113,8 +117,9 @@ namespace OmGui
 
                 //Stick the .CWA in the temp folder
                 System.IO.File.Copy(sourceFile, TempCWAFilePath, true);
-                    
-                RunProcess(parametersStr);
+                  
+                //TODO - Instead of RunProcess: we want to return a dialogresult with the data...
+                DialogResult = System.Windows.Forms.DialogResult.OK;
             }
         }
 
@@ -155,8 +160,8 @@ namespace OmGui
 
                 parseMessage(outputLine);
 
-                runPluginProgressBar.Invalidate(true);
-                labelStatus.Invalidate(true);
+                //runPluginProgressBar.Invalidate(true);
+                //labelStatus.Invalidate(true);
             }
 
             p.WaitForExit();
@@ -188,12 +193,12 @@ namespace OmGui
                 if (outputLine[0] == 'p')
                 {
                     string percentage = outputLine.Split(' ').ElementAt(1);
-                    runPluginProgressBar.Value = Int32.Parse(percentage);
+                    //runPluginProgressBar.Value = Int32.Parse(percentage);
                 }
                 else if (outputLine[0] == 's')
                 {
                     string message = outputLine.Split(new char[] { ' ' }, 2).Last();
-                    labelStatus.Text = message;
+                    //labelStatus.Text = message;
                 }
             }
             Console.WriteLine("o: " + outputLine);

@@ -33,26 +33,28 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxDefaultFolder = new System.Windows.Forms.TextBox();
             this.btnBrowse = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonBrowse2 = new System.Windows.Forms.Button();
             this.textBoxDefaultPlugin = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.buttonSetCurrent = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnOK
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOK.Location = new System.Drawing.Point(316, 173);
+            this.btnOK.Location = new System.Drawing.Point(429, 173);
             this.btnOK.Margin = new System.Windows.Forms.Padding(4);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(100, 28);
             this.btnOK.TabIndex = 0;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
             // btnCancel
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(433, 173);
+            this.btnCancel.Location = new System.Drawing.Point(546, 173);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(100, 28);
@@ -89,16 +91,16 @@
             this.btnBrowse.UseVisualStyleBackColor = true;
             this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
-            // button1
+            // buttonBrowse2
             // 
-            this.button1.Location = new System.Drawing.Point(433, 111);
-            this.button1.Margin = new System.Windows.Forms.Padding(4);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(100, 28);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "Browse...";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.buttonBrowse2.Location = new System.Drawing.Point(433, 111);
+            this.buttonBrowse2.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonBrowse2.Name = "buttonBrowse2";
+            this.buttonBrowse2.Size = new System.Drawing.Size(100, 28);
+            this.buttonBrowse2.TabIndex = 7;
+            this.buttonBrowse2.Text = "Browse...";
+            this.buttonBrowse2.UseVisualStyleBackColor = true;
+            this.buttonBrowse2.Click += new System.EventHandler(this.buttonBrowse2_Click);
             // 
             // textBoxDefaultPlugin
             // 
@@ -118,12 +120,24 @@
             this.label2.TabIndex = 5;
             this.label2.Text = "Default Plugin Folder";
             // 
+            // buttonSetCurrent
+            // 
+            this.buttonSetCurrent.Location = new System.Drawing.Point(546, 40);
+            this.buttonSetCurrent.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonSetCurrent.Name = "buttonSetCurrent";
+            this.buttonSetCurrent.Size = new System.Drawing.Size(100, 28);
+            this.buttonSetCurrent.TabIndex = 8;
+            this.buttonSetCurrent.Text = "Set Current";
+            this.buttonSetCurrent.UseVisualStyleBackColor = true;
+            this.buttonSetCurrent.Click += new System.EventHandler(this.buttonSetCurrent_Click);
+            // 
             // OptionsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(549, 216);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(662, 216);
+            this.Controls.Add(this.buttonSetCurrent);
+            this.Controls.Add(this.buttonBrowse2);
             this.Controls.Add(this.textBoxDefaultPlugin);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnBrowse);
@@ -146,8 +160,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxDefaultFolder;
         private System.Windows.Forms.Button btnBrowse;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonBrowse2;
         private System.Windows.Forms.TextBox textBoxDefaultPlugin;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button buttonSetCurrent;
     }
 }

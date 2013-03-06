@@ -11,14 +11,17 @@ namespace OmGui
 {
     public partial class OptionsDialog : Form
     {
-        public OptionsDialog(string currentDefault)
+        public OptionsDialog()
         {
             InitializeComponent();
 
             btnOK.DialogResult = DialogResult.OK;
             btnCancel.DialogResult = DialogResult.Cancel;
 
-            textBoxDefaultFolder.Text = currentDefault;
+            textBoxDefaultFolder.Text = Properties.Settings.Default.DefaultWorkingFolder;
+
+            DefaultFolderName = Properties.Settings.Default.DefaultWorkingFolder;
+            DefaultPluginName = Properties.Settings.Default.CurrentPluginFolder;
 
             textBoxDefaultPlugin.Text = Properties.Settings.Default.CurrentPluginFolder;
         }
@@ -39,7 +42,7 @@ namespace OmGui
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonBrowse2_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             DialogResult dr = fbd.ShowDialog();
@@ -49,6 +52,19 @@ namespace OmGui
                 DefaultPluginName = fbd.SelectedPath;
                 textBoxDefaultPlugin.Text = DefaultPluginName;
             }
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.DefaultWorkingFolder = DefaultFolderName;
+            Properties.Settings.Default.CurrentPluginFolder = DefaultPluginName;
+        }
+
+        private void buttonSetCurrent_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.DefaultWorkingFolder = Properties.Settings.Default.CurrentWorkingFolder;
+            DefaultFolderName = Properties.Settings.Default.DefaultWorkingFolder;
+            textBoxDefaultFolder.Text = DefaultFolderName;
         }
     }
 }

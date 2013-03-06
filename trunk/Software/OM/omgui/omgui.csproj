@@ -55,16 +55,37 @@
   <PropertyGroup>
     <ApplicationManifest>Resources\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>OmGui.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Deployment">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutBox.cs">
@@ -84,6 +105,12 @@
     </Compile>
     <Compile Include="DateRangeForm.Designer.cs">
       <DependentUpon>DateRangeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DateRangeMetadataForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DateRangeMetadataForm.Designer.cs">
+      <DependentUpon>DateRangeMetadataForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Device.cs" />
     <Compile Include="DeviceListView.cs">
@@ -118,6 +145,7 @@
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Plugin.cs" />
+    <Compile Include="PluginQueueItem.cs" />
     <Compile Include="PluginsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -154,6 +182,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DateRangeForm.resx">
       <DependentUpon>DateRangeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateRangeMetadataForm.resx">
+      <DependentUpon>DateRangeMetadataForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceListView.resx">
       <DependentUpon>DeviceListView.cs</DependentUpon>

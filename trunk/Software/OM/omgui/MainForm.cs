@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.IO;
+using System.Threading;
+using System.Xml;
 
 namespace OmGui
 {
@@ -24,6 +26,9 @@ namespace OmGui
 
         private uint queryCancelAutoPlayID;
 
+        //PluginQueue
+        Queue<PluginQueueItem> pluginQueueItems = new Queue<PluginQueueItem>();
+
         protected override void WndProc(ref Message msg)
         {
             base.WndProc(ref msg);
@@ -32,7 +37,6 @@ namespace OmGui
                 msg.Result = (IntPtr)1;    // Cancel autoplay
             }
         }
-
 
         private bool QueryAdminElevate(bool always)
         {
@@ -568,11 +572,6 @@ namespace OmGui
 
                 toolStripButtonInterval.Enabled = !downloading && (!isRecording && !isSetupForRecord); //If any selected and not downloading then can set up interval.
 
-                devicesToolStripButtonPlugins.Enabled = !downloading && !isRecording && !isSetupForRecord;
-
-                //DEBUG - Set it to always true for debug.
-                devicesToolStripButtonPlugins.Enabled = true;
-
                 devicesToolStripButtonIdentify.Enabled = true;
 
                 selected.Add(device);
@@ -651,13 +650,8 @@ namespace OmGui
                 toolStripButtonInterval.Enabled = !allDownloading && !allRecording && !allSetupForRecord; //If any selected and not downloading then can set up interval.
                 //toolStripButtonSessionId.Enabled = !allDownloading && !allRecording && !allSetupForRecord; //If multiple or single and none are downloading then can set session ID.
 
-                devicesToolStripButtonPlugins.Enabled = !allDownloading && !allRecording && !allSetupForRecord && (someHaveData || allHaveData);
-
                 devicesToolStripButtonIdentify.Enabled = true;
             }
-
-            //DEBUG - Making Plugins button always work:
-            //devicesToolStripButtonPlugins.Enabled = true;
 
             return selected.ToArray();
         }
@@ -676,12 +670,10 @@ namespace OmGui
             toolStripButtonInterval.Enabled = false;
             //toolStripButtonSessionId.Enabled = false;
 
-            devicesToolStripButtonPlugins.Enabled = false;
-
             devicesToolStripButtonIdentify.Enabled = false;
         }
 
-
+        
         private void listViewDevices_SelectedIndexChanged(object sender, EventArgs e)
         {
             //TS - [P] - Get the list of selected sources and in turn change the toolbar enabled/disabled.
@@ -722,7 +714,7 @@ namespace OmGui
 
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OptionsDialog optionsDialog = new OptionsDialog(Properties.Settings.Default.DefaultWorkingFolder);
+            OptionsDialog optionsDialog = new OptionsDialog();
             DialogResult dr = optionsDialog.ShowDialog(this);
 
             //PropertyEditor propertyEditor = new PropertyEditor("Options", OmGui.Properties.Settings.Default, true);
@@ -957,20 +949,24 @@ namespace OmGui
                 DateTime start = DateTime.MinValue;
                 DateTime stop = DateTime.MaxValue;
 
-                DateRangeForm rangeForm = new DateRangeForm("Session Range", "Session Range");
+                OmDevice device = (OmDevice)devicesListView.SelectedItems[0].Tag;
+
+                DateRangeForm rangeForm = new DateRangeForm("Session Range", "Session Range", device);
                 DialogResult dr = rangeForm.ShowDialog();
                 start = rangeForm.FromDate;
-                //stop = rangeForm.UntilDate;
+                stop = rangeForm.UntilDate; //TS - TODO - stop needs to be got from dialog.
 
                 if (dr == System.Windows.Forms.DialogResult.OK)
                 {
                     dataViewer.CancelPreview();
                     Cursor.Current = Cursors.WaitCursor;
-                    foreach (ListViewItem i in devicesListView.SelectedItems)
-                    {
-                        OmSource device = (OmSource)i.Tag;
+
+                    //Don't want it to be able to work on multiple do we because of metadata??
+                    //foreach (ListViewItem i in devicesListView.SelectedItems)
+                    //{                        
                         if (device is OmDevice && !((OmDevice)device).IsDownloading)
                         {
+                            //Set Date
                             if (rangeForm.Always)
                             {
                                 //TS - Taken from Record button
@@ -987,36 +983,35 @@ namespace OmGui
                             if (!((OmDevice)device).SetSessionId((uint)rangeForm.SessionID))
                                 fails.Add(device.DeviceId.ToString());
 
-                            //TS - Record the number of devices that can record due to their status.
-                            devicesCanRecord++;
+                            //TODO - Set Metadata
+                            
                         }
                     }
                     Cursor.Current = Cursors.Default;
-                }
 
-                if (fails.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
+                //if (fails.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
             //}
 
                 //TS - If more than 1 device selected then show which could and couldn't be set up.
-                if (devicesListView.SelectedItems.Count > 1)
-                {
-                    MessageBox.Show(devicesCanRecord + " devices setup record from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Record Status", MessageBoxButtons.OK);
-                }
+                //if (devicesListView.SelectedItems.Count > 1)
+                //{
+                //    MessageBox.Show(devicesCanRecord + " devices setup record from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Record Status", MessageBoxButtons.OK);
+                //}
 
             //Do Sync Time
             if (rangeForm.SyncTime != DateRangeForm.SyncTimeType.None)
             {
                 List<string> fails2 = new List<string>();
                 Cursor.Current = Cursors.WaitCursor;
-                foreach (ListViewItem i in devicesListView.SelectedItems)
-                {
-                    OmSource device = (OmSource)i.Tag;
+                //foreach (ListViewItem i in devicesListView.SelectedItems)
+                //{
+                //    OmSource device = (OmSource)i.Tag;
                     if (device is OmDevice && ((OmDevice)device).Connected)
                     {
                         if (!((OmDevice)device).SyncTime((int) rangeForm.SyncTime))
                             fails2.Add(device.DeviceId.ToString());
                     }
-                }
+                //}
                 Cursor.Current = Cursors.Default;
                 if (fails2.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails2.Count + " device(s):\r\n" + string.Join("; ", fails2.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
             }
@@ -1250,6 +1245,12 @@ namespace OmGui
 
         private void LoadWorkingFolder(bool defaultFolder)
         {
+            //If first time then change to my documents
+            if (Properties.Settings.Default.DefaultWorkingFolder.Equals("C:\\"))
+            {
+                Properties.Settings.Default.DefaultWorkingFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            }
+
             if (defaultFolder)
                 Properties.Settings.Default.CurrentWorkingFolder = Properties.Settings.Default.DefaultWorkingFolder;
 
@@ -1268,19 +1269,24 @@ namespace OmGui
             try
             {
                 string folder = GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder);
-                fileSystemWatcher.Path = folder;
 
                 if (!System.IO.Directory.Exists(folder))
                 {
                     System.IO.Directory.CreateDirectory(folder);
                 }
+
+                fileSystemWatcher.Path = folder;
+
                 string[] filePaths = System.IO.Directory.GetFiles(folder, fileSystemWatcher.Filter, System.IO.SearchOption.TopDirectoryOnly);
                 foreach (string f in filePaths)
                 {
                     FileListViewAdd(f);
                 }
             }
-            catch (Exception) { ; }
+            catch (Exception e) 
+            {
+                Console.WriteLine(e.Message); 
+            }
 
             //Add files in project to list.
             //if (downloadedFiles.Length > 0)
@@ -1306,17 +1312,26 @@ namespace OmGui
 
         #endregion
 
+        //TS - TODO - This is hard-coded at the moment for testing purposes.
+        private const string PLUGIN_PROFILE_FILE = "profile.xml";
+
         private void MainForm_Load(object sender, EventArgs e)
         {
+            FilesResetToolStripButtons();
+
+            //TS - Working Folder logic
+            //If current plugin folder is empty then make it My Documents.
+            if (Properties.Settings.Default.CurrentPluginFolder == "")
+                Properties.Settings.Default.CurrentPluginFolder = GetPath("C:\\OM\\DefaultPlugins\\");
+
+            //If there is no default folder then make it My Documents
+            if (Properties.Settings.Default.DefaultWorkingFolder == "")
+                Properties.Settings.Default.DefaultWorkingFolder = GetPath("{MyDocuments}");
+
             Console.WriteLine("Default: " + Properties.Settings.Default.DefaultWorkingFolder);
             Console.WriteLine("Current: " + Properties.Settings.Default.CurrentWorkingFolder);
             Console.WriteLine("Current Plugin: " + Properties.Settings.Default.CurrentPluginFolder);
 
-            if(Properties.Settings.Default.CurrentPluginFolder == "")
-                //TODO - HACK: Doesn't work.
-                Properties.Settings.Default.CurrentPluginFolder = @"C:\";
-
-            //TS - Working Folder logic
             if (Properties.Settings.Default.CurrentWorkingFolder != "" && Properties.Settings.Default.CurrentWorkingFolder != Properties.Settings.Default.DefaultWorkingFolder)
             {
                 DialogResult dr = MessageBox.Show("Do you want to load the last opened Working Folder?\r\n\r\nLast Folder:\r\n" + Properties.Settings.Default.CurrentWorkingFolder, "Open Last Working Folder?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -1335,8 +1350,90 @@ namespace OmGui
                 LoadWorkingFolder(true);
             }
 
-            //DEBUG - Make Plugins button always enabled for debug.
-            devicesToolStripButtonPlugins.Enabled = true;
+            //TS - Add tool strip buttons for "default" profiles
+            StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentProfileDirectory + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
+            string pluginProfileAsString = pluginProfile.ReadToEnd();
+
+                //Parse
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(pluginProfileAsString);
+            XmlNodeList items = xmlDoc.SelectNodes("Profile/Plugin");
+            
+            //Used to add seperator.
+            bool isFirst = true;
+
+            //Each <Plugin>
+            foreach (XmlNode node in items)
+            {
+                string name = "";
+                string files = "";
+
+                //Each < /> inside <Plugin>
+                foreach (XmlNode childNode in node.ChildNodes)
+                {
+                    switch (childNode.Name)
+                    {
+                        case "name":
+                            name = childNode.InnerText;
+                            break;
+                        case "files":
+                            files = childNode.InnerText;
+                            break;
+                    }
+                }
+
+                FileInfo[] pluginInfo = getPluginInfo(files);
+
+                if (pluginInfo != null)
+                {
+                    if (pluginInfo[0] != null && pluginInfo[1] != null && pluginInfo[2] != null)
+                    {
+                        Plugin plugin = new Plugin(pluginInfo[0], pluginInfo[1], pluginInfo[2]);
+
+                        ToolStripButton tsb = new ToolStripButton();
+                        tsb.Text = name;
+                        tsb.Tag = plugin;
+
+                        tsb.Click += new EventHandler(tsb_Click);
+
+                        if (isFirst)
+                        {
+                            toolStripMain.Items.Add(new ToolStripSeparator());
+                            isFirst = false;
+                        }
+
+                        toolStripMain.Items.Add(tsb);
+                    }
+                }
+            }
+
+            //Now we have our plugins, build them as plugins
+            
+        }
+
+
+        //Click event handler for the tool strip default plugins that comes from the profile file...
+        void tsb_Click(object sender, EventArgs e)
+        {
+            ToolStripButton tsb = sender as ToolStripButton;
+
+            if (tsb != null && tsb.Tag != null)
+            {
+                if(filesListView.SelectedItems.Count > 0)
+                {
+                    OmReader reader = (OmReader) filesListView.SelectedItems[0].Tag;
+
+                    string CWAFilename = reader.Filename;
+                    Plugin p = (Plugin) tsb.Tag;
+
+                    RunPluginForm rpf = new RunPluginForm(p, CWAFilename);
+                    rpf.ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show("Please choose a file to run a plugin on.");
+                }
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -1368,7 +1465,11 @@ namespace OmGui
             //TS - If a file has been selected then deselect all rows of Devices list.
             if (filesListView.SelectedItems.Count > 0)
             {
+                //TS - TODO - The text goes from Red to Black...
                 devicesListView.SelectedItems.Clear();
+
+                pluginsToolStripButton.Enabled = true;
+                DeleteFilesToolStripButton.Enabled = true;
             }
             else
             {
@@ -1379,7 +1480,7 @@ namespace OmGui
         private void FilesResetToolStripButtons()
         {
             DeleteFilesToolStripButton.Enabled = false;
-            exportFileToolStripButton.Enabled = false;
+            pluginsToolStripButton.Enabled = false;
         }
 
         private void DeleteFilesToolStripButton_Click(object sender, EventArgs e)
@@ -1429,17 +1530,56 @@ namespace OmGui
         //TS - Now the plugins button
         private void devicesToolStripButtonExport_Click(object sender, EventArgs e)
         {
-            //1. Look in folder for plugin param files
-            //2. Find matching files by name (without extension)
-            //3. Only load the ones with both files
-            //4. Look at XML param file and parse out data
-            //5. Build window based on info
-            //6. Have "Execute" button that runs program
-            //7. Get success message back.
+            RunPluginsProcess(devicesListView.SelectedItems);
+        }
 
-            if (filesListView.SelectedItems.Count > 0)
+        #region Plugin Stuff
+
+        private FileInfo[] getPluginInfo(string pluginName)
+        {
+            FileInfo[] pluginInfo = new FileInfo[3];
+
+            string folder = Properties.Settings.Default.CurrentPluginFolder;
+
+            DirectoryInfo d = new DirectoryInfo(folder);
+
+            FileInfo[] allFiles = d.GetFiles("*.*");
+
+            foreach (FileInfo f in allFiles)
             {
-                ListViewItem i = filesListView.SelectedItems[0];
+                if (Path.GetFileNameWithoutExtension(f.Name).Equals(pluginName))
+                {
+                    //We've found our plugin.
+                    if (f.Extension.Equals(".html"))
+                    {
+                        pluginInfo[2] = f;
+                    }
+                    else if (f.Extension.Equals(".xml"))
+                    {
+                        pluginInfo[1] = f;
+                    }
+                    else if (f.Extension.Equals(".exe"))
+                    {
+                        pluginInfo[0] = f;
+                    }
+                }
+            }
+
+            //We should have our FileInfo array by now
+            if (pluginInfo[0] != null && pluginInfo[1] != null && pluginInfo[2] != null)
+            {
+                return pluginInfo;
+            }
+
+            return null;
+        }
+
+        private void RunPluginsProcess(ListView.SelectedListViewItemCollection listItems)
+        {
+            //Find plugins and build form.
+            if (listItems.Count > 0)
+            {
+                ListViewItem i = listItems[0];
 
                 OmReader reader = (OmReader)i.Tag;
 
@@ -1484,11 +1624,19 @@ namespace OmGui
                     MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
+                //If there is more than 1 plugin then show the form otherwise give error.
                 if (plugins.Count > 0)
                 {
                     //Now that we have our plugins, open the plugin form
                     PluginsForm pluginsForm = new PluginsForm(plugins, reader.Filename);
                     pluginsForm.ShowDialog(this);
+
+                    //Run the process
+                    if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                    {
+                        //if the plugin has an output file    
+                        RunProcess(pluginsForm.SelectedPlugin, pluginsForm.rpf.ParameterString, pluginsForm.rpf.OriginalOutputName, reader.Filename);
+                    }
                 }
                 //No files so do a dialog.
                 else
@@ -1502,16 +1650,158 @@ namespace OmGui
             }
         }
 
-        private void exportFileToolStripButton_Click(object sender, EventArgs e)
+        //PLUGIN PROCESS RUNNING
+        private void RunProcess(Plugin plugin, string parametersAsString, string originalOutputName, string inputName)
         {
-            ExportDataConstruct(OmSource.SourceCategory.File);
+            //TOM TODO - Add in so we can run PY and JAR files as well as EXE
+            //if (Plugin.Ext == Plugin.ExtType.PY)
+            //{
+            //    p.StartInfo.FileName = "python " + Plugin.RunFile.FullName;
+            //}
+
+            PluginQueueItem pqi = new PluginQueueItem(plugin, parametersAsString, inputName);
+
+            if (originalOutputName != "")
+            {
+                pqi.OriginalOutputName = originalOutputName;
+            }
+
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = plugin.RunFile.FullName;
+            //psi.FileName = @"H:\OM\Plugins\TestParameterApp.exe";
+
+            psi.Arguments = parametersAsString;
+
+            Console.WriteLine("arg: " + psi.Arguments);
+
+            psi.RedirectStandardOutput = true;
+            psi.RedirectStandardError = true;
+
+            psi.UseShellExecute = false;
+            psi.Verb = "runas";
+            psi.CreateNoWindow = true;
+
+            pqi.StartInfo = psi;
+
+            //Add PQI to file queue
+            listViewFileQueue.Items.Add(new ListViewItem(new string[] { pqi.Name, pqi.File, "0", "Cancel" }));
+
+            BackgroundWorker pluginQueueWorker = new BackgroundWorker();
+
+            pluginQueueWorker.DoWork += new DoWorkEventHandler(pluginQueueWorker_DoWork);
+            pluginQueueWorker.ProgressChanged += new ProgressChangedEventHandler(pluginQueueWorker_ProgressChanged);
+
+            pluginQueueWorker.RunWorkerAsync(pqi);
+
+            //READ STD OUT OF PLUGIN
+            //We want to read the info and decide what to do based on it.
+            //p - If it starts with p then percentage. [p 10%]
+            //s - If it starts with s then status update. [status New Status Here]
+            /*while (!p.HasExited)
+            {
+                string outputLine = p.StandardOutput.ReadLine();
+
+                parseMessage(outputLine);
+
+                //runPluginProgressBar.Invalidate(true);
+                //labelStatus.Invalidate(true);
+            }*/
         }
+
+        void pluginQueueWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            Console.WriteLine("Progress Percentage: " + e.ProgressPercentage);
+        }
+
+        void pluginQueueWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            PluginQueueItem pqi = (PluginQueueItem) e.Argument;
+
+            try
+            {
+                Process p = Process.Start(pqi.StartInfo);
+
+                p.Start();
+
+                //Hack - Sometimes we don't get the last stdout line
+                //string lastLine = p.StandardOutput.ReadLine();
+                //parseMessage(lastLine);
+
+                p.WaitForExit();
+
+                p.Close();
+
+                //If there is an output file:
+                if (pqi.OriginalOutputName != "")
+                {
+                    //HACK - Copy the output file back into the working directory.
+                    string outputFileLocation = System.IO.Path.Combine(Properties.Settings.Default.CurrentWorkingFolder, pqi.OriginalOutputName);
+                    System.IO.File.Copy(pqi.destFolder + "temp.csv", outputFileLocation);
+
+                    //Delete the test csv and temp cwa
+                    //System.IO.File.Delete(pqi.destFolder + "temp.csv");
+                    //System.IO.File.Delete(tempCWAFilePath);
+                }
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine("IOE: " + ioe.Message);
+            }
+            catch (System.ComponentModel.Win32Exception w32e)
+            {
+                Console.WriteLine("w32e: " + w32e.Message);
+            }
+            catch (Exception e2)
+            {
+                Console.WriteLine("e: " + e2.Message);
+            }
+        }
+
+        private void parseMessage(string outputLine)
+        {
+            //OUTPUT
+            if (outputLine != null)
+            {
+                if (outputLine[0] == 'p')
+                {
+                    string percentage = outputLine.Split(' ').ElementAt(1);
+                    //runPluginProgressBar.Value = Int32.Parse(percentage);
+                }
+                else if (outputLine[0] == 's')
+                {
+                    string message = outputLine.Split(new char[] { ' ' }, 2).Last();
+                    //labelStatus.Text = message;
+                }
+            }
+            Console.WriteLine("o: " + outputLine);
+        }
+
+        #endregion
+
+        //TS - This will become a plugin so keep the code here for now just so we can see the Form.
+        //ExportDataConstruct(OmSource.SourceCategory.File);
 
         private void gotoDefaultFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default.CurrentWorkingFolder = Properties.Settings.Default.DefaultWorkingFolder;
 
             LoadWorkingFolder(true);
+        }
+
+        private void setDefaultWorkingFolderToCurrentWorkingFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.DefaultWorkingFolder = Properties.Settings.Default.CurrentWorkingFolder;
+        }
+
+        private void pluginsToolStripButton_Click(object sender, EventArgs e)
+        {
+            RunPluginsProcess(filesListView.SelectedItems);
+        }
+
+        private void openCurrentWorkingFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.ShowDialog();
         }
    }
 }
