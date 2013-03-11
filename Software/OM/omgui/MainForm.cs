@@ -653,6 +653,9 @@ namespace OmGui
                 devicesToolStripButtonIdentify.Enabled = true;
             }
 
+            //TS - DEBUG - Record always lit
+            toolStripButtonInterval.Enabled = true;
+
             return selected.ToArray();
         }
 
