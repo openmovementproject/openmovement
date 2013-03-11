@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
+using System.Xml;
 
 using OmApiNet;
 
@@ -17,6 +19,10 @@ namespace OmGui
 
         bool setOK = false;
 
+        private XmlDocument SettingsProfileXML { get; set; }
+        private Dictionary<string, string> SettingsProfileDictionary { get; set; }
+        private string settingsProfileFilePath;
+
         public DateRangeForm(string title, string prompt, OmDevice device)
         {
             InitializeComponent();
@@ -27,6 +33,173 @@ namespace OmGui
 
             timePicker.Format = DateTimePickerFormat.Time;
             timePicker.ShowUpDown = true;
+
+            //Try and load in record dialog settings.
+            XmlDocument doc;
+            SettingsProfileDictionary = loadSettingsProfile(out doc);
+            SettingsProfileXML = doc;
+            resetFieldsToDictionary(SettingsProfileDictionary);
+            if (SettingsProfileDictionary != null)
+            {
+                settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + Path.PathSeparator + "recordSetup.xml";
+            }
+        }
+
+        private Dictionary<string, string> loadSettingsProfile(out XmlDocument xmlDocument)
+        {
+            xmlDocument = new XmlDocument();
+
+            //Want to look if the XML exists in this working directory and if it does then we want to load the defaults in.
+            if (File.Exists(Properties.Settings.Default.CurrentWorkingFolder + Path.PathSeparator + "recordSetup.xml"))
+            {
+                Dictionary<string, string> settingsDictionary = new Dictionary<string, string>();
+
+                StreamReader recordProfile = new StreamReader(Properties.Settings.Default.CurrentWorkingFolder +
+                    Path.DirectorySeparatorChar + "recordSetup.xml");
+                String profileAsString = recordProfile.ReadToEnd();
+                xmlDocument.LoadXml(profileAsString);
+
+                //Loop through xml and add items to dictionary
+                foreach (XmlNode node in xmlDocument.SelectNodes("RecordProfile"))
+                {
+                    settingsDictionary.Add(node.Name, node.InnerText);
+                }
+
+                return settingsDictionary;
+            }
+
+            return null;
+        }
+
+        private void saveDictionaryFromFields(Dictionary<string, string> settingsDictionary)
+        {
+            foreach (KeyValuePair<string, string> pair in settingsDictionary)
+            {
+                if (pair.Key.Equals("StudyCentre"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxStudyCentre.Text);
+                }
+                else if (pair.Key.Equals("StudyCode"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxStudyCode.Text);
+                }
+                else if (pair.Key.Equals("StudyInvestigator"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxStudyInvestigator.Text);
+                }
+                else if (pair.Key.Equals("StudyExerciseType"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxStudyExerciseType.Text);
+                }
+                else if (pair.Key.Equals("StudyOperator"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxStudyOperator.Text);
+                }
+                else if (pair.Key.Equals("StudyNotes"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxStudyNotes.Text);
+                }
+                else if (pair.Key.Equals("SubjectCode"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, textBoxSubjectCode.Text);
+                }
+                else if (pair.Key.Equals("SubjectSex"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, comboBoxSubjectSex.SelectedIndex.ToString());
+                }
+                else if (pair.Key.Equals("SubjectHeight"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, numericUpDownSubjectHeight.Value.ToString());
+                }
+                else if (pair.Key.Equals("SubjectWeight"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, numericUpDownSubjectWeight.Value.ToString());
+                }
+                else if (pair.Key.Equals("SubjectHandedness"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, comboBoxSubjectHandedness.SelectedIndex.ToString());
+                }
+                else if (pair.Key.Equals("SubjectTimezone"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, comboBoxSubjectTimezone.SelectedIndex.ToString());
+                }
+            }
+        }
+        
+        private void resetFieldsToDictionary(Dictionary<string, string> settingsDictionary)
+        {
+            //Now we have the dictionary we pre-fill the fields.
+            foreach (KeyValuePair<string, string> pair in settingsDictionary)
+            {
+                if (pair.Key.Equals("StudyCentre"))
+                {
+                    textBoxStudyCentre.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("StudyCode"))
+                {
+                    textBoxStudyCode.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("StudyInvestigator"))
+                {
+                    textBoxStudyInvestigator.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("StudyExerciseType"))
+                {
+                    textBoxStudyExerciseType.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("StudyOperator"))
+                {
+                    textBoxStudyOperator.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("StudyNotes"))
+                {
+                    textBoxStudyNotes.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("SubjectCode"))
+                {
+                    textBoxSubjectCode.Text = pair.Value;
+                }
+                else if (pair.Key.Equals("SubjectSex"))
+                {
+                    comboBoxSubjectSex.SelectedIndex = Int32.Parse(pair.Value);
+                }
+                else if (pair.Key.Equals("SubjectHeight"))
+                {
+                    numericUpDownSubjectHeight.Value = Int32.Parse(pair.Key);
+                }
+                else if (pair.Key.Equals("SubjectWeight"))
+                {
+                    numericUpDownSubjectWeight.Value = Int32.Parse(pair.Value);
+                }
+                else if (pair.Key.Equals("SubjectHandedness"))
+                {
+                    comboBoxSubjectHandedness.SelectedIndex = Int32.Parse(pair.Value);
+                }
+                else if (pair.Key.Equals("SubjectTimezone"))
+                {
+                    comboBoxSubjectTimezone.SelectedIndex = Int32.Parse(pair.Value);
+                }
+            }
+        }
+
+        private void saveDictionaryToXML(Dictionary<string, string> settingsDictionary)
+        {
+            if (settingsProfileFilePath != null)
+            {
+                SettingsProfileXML.Save(settingsProfileFilePath);
+            }
         }
 
         public bool Always { get; set; }
@@ -109,12 +282,13 @@ namespace OmGui
         {
             setOK = true;
 
-            if (syncToPCCheckBox.Checked)
-                SyncTime = SyncTimeType.PC;
-            else
-                SyncTime = SyncTimeType.Zero;
+            SyncTime = SyncTimeType.PC;
 
-            SessionID = Int32.Parse(sessionIdTextBox.Text);
+            SessionID = (int) numericUpDownSessionID.Value;
+
+            saveDictionaryFromFields(SettingsProfileDictionary);
+            saveDictionaryToXML(SettingsProfileDictionary);
+
             DialogResult = System.Windows.Forms.DialogResult.OK;
 
             //TS - TODO - Build UntilDate from the data provided.
