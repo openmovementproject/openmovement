@@ -654,7 +654,7 @@ namespace OmGui
             }
 
             //TS - DEBUG - Record always lit
-            toolStripButtonInterval.Enabled = true;
+            //toolStripButtonInterval.Enabled = true;
 
             return selected.ToArray();
         }
@@ -1353,15 +1353,21 @@ namespace OmGui
                 LoadWorkingFolder(true);
             }
 
+            //Add Profile Plugins
+            AddProfilePluginsToToolStrip();
+        }
+
+        private void AddProfilePluginsToToolStrip()
+        {
             //TS - Add tool strip buttons for "default" profiles
             StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentProfileDirectory + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
             string pluginProfileAsString = pluginProfile.ReadToEnd();
 
-                //Parse
+            //Parse
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(pluginProfileAsString);
             XmlNodeList items = xmlDoc.SelectNodes("Profile/Plugin");
-            
+
             //Used to add seperator.
             bool isFirst = true;
 
@@ -1401,19 +1407,16 @@ namespace OmGui
 
                         if (isFirst)
                         {
-                            toolStripMain.Items.Add(new ToolStripSeparator());
+                            toolStripFiles.Items.Add(new ToolStripSeparator());
                             isFirst = false;
                         }
 
-                        toolStripMain.Items.Add(tsb);
+                        toolStripFiles.Items.Add(tsb);
+                        toolStripFiles.Items[toolStripFiles.Items.Count - 1].Enabled = false;
                     }
                 }
             }
-
-            //Now we have our plugins, build them as plugins
-            
         }
-
 
         //Click event handler for the tool strip default plugins that comes from the profile file...
         void tsb_Click(object sender, EventArgs e)
@@ -1473,10 +1476,23 @@ namespace OmGui
 
                 pluginsToolStripButton.Enabled = true;
                 DeleteFilesToolStripButton.Enabled = true;
+
+                //Enable plugins
+                for (int i = 0; i < toolStripFiles.Items.Count - 3; i++)
+                {
+                    toolStripFiles.Items[i + 3].Enabled = true;
+                }
             }
             else
             {
                 FilesResetToolStripButtons();
+            }
+
+            //Open DataViewer
+            if(filesListView.SelectedItems.Count == 1)
+            {
+                OmReader reader = (OmReader)filesListView.SelectedItems[0].Tag;
+                dataViewer.Open(reader.Filename);
             }
         }
 
@@ -1484,6 +1500,12 @@ namespace OmGui
         {
             DeleteFilesToolStripButton.Enabled = false;
             pluginsToolStripButton.Enabled = false;
+
+            //Disable plugins
+            for (int i = 0; i < toolStripFiles.Items.Count - 3; i++)
+            {
+                toolStripFiles.Items[i + 3].Enabled = false;
+            }
         }
 
         private void DeleteFilesToolStripButton_Click(object sender, EventArgs e)
@@ -1630,9 +1652,26 @@ namespace OmGui
                 //If there is more than 1 plugin then show the form otherwise give error.
                 if (plugins.Count > 0)
                 {
-                    //Now that we have our plugins, open the plugin form
-                    PluginsForm pluginsForm = new PluginsForm(plugins, reader.Filename);
-                    pluginsForm.ShowDialog(this);
+                    float blockStart = -1;
+                    float blockCount = -1;
+
+                    PluginsForm pluginsForm;
+
+                    //Now see if we've got a selection on the dataViewer
+                    if(dataViewer.HasSelection)
+                    {
+                        blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
+                        blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+
+                        pluginsForm = new PluginsForm(plugins, reader.Filename, blockStart, blockCount);
+                        pluginsForm.ShowDialog(this);
+                    }
+                    else
+                    {
+                        //Now that we have our plugins, open the plugin form
+                        pluginsForm = new PluginsForm(plugins, reader.Filename, - 1, -1);
+                        pluginsForm.ShowDialog(this);
+                    }
 
                     //Run the process
                     if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
@@ -1805,6 +1844,29 @@ namespace OmGui
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.ShowDialog();
+        }
+
+        private void toolStripMain_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void DeleteFilesToolStripButton_Click_1(object sender, EventArgs e)
+        {
+            if (filesListView.SelectedItems.Count > 0)
+            {
+                DialogResult d = MessageBox.Show("Are you sure you want to delete?", "Delete", MessageBoxButtons.OKCancel);
+
+                if (d == System.Windows.Forms.DialogResult.OK)
+                {
+                    for (int i = 0; i < filesListView.SelectedItems.Count; i++)
+                    {
+                        OmReader r = (OmReader)filesListView.SelectedItems[i].Tag;
+
+                        FileListViewRemove(r.Filename, true);
+                    }
+                }
+            }
         }
    }
 }

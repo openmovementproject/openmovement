@@ -18,9 +18,16 @@ namespace OmGui
         public string CWAFilename { get; set; }
         public RunPluginForm rpf { get; set; }
 
-        public PluginsForm(List<Plugin> plugins, string fileName)
+        public float BlockStart { get; set; }
+        public float BlockCount { get; set; }
+
+        public PluginsForm(List<Plugin> plugins, string fileName, float blockStart, float blockCount)
         {
             InitializeComponent();
+
+            //Blocks from dataViewer...
+            BlockStart = blockStart;
+            BlockCount = blockCount;
 
             this.plugins = plugins;
 
@@ -64,6 +71,13 @@ namespace OmGui
 
         private void btnRun_Click(object sender, EventArgs e)
         {
+            //See now if we want the dataViewer selection.
+            if (SelectedPlugin.CanSelection && BlockCount > -1 && BlockStart > -1)
+            {
+                SelectedPlugin.BlockStart = BlockStart;
+                SelectedPlugin.BlockCount = BlockCount;
+            }  
+
             //Want to pop up Input and Run Window.
             rpf = new RunPluginForm(SelectedPlugin, CWAFilename);
             rpf.ShowDialog();

@@ -15,13 +15,12 @@ namespace OmGui
 {
     public partial class DateRangeForm : Form
     {
-        private DateRangeMetadataForm drmf;
-
         bool setOK = false;
 
         private XmlDocument SettingsProfileXML { get; set; }
         private Dictionary<string, string> SettingsProfileDictionary { get; set; }
         private string settingsProfileFilePath;
+        private OmDevice Device { get; set; }
 
         public DateRangeForm(string title, string prompt, OmDevice device)
         {
@@ -31,18 +30,52 @@ namespace OmGui
             FromDate = DateTime.MinValue;
             //UntilDate = DateTime.MaxValue;
 
-            timePicker.Format = DateTimePickerFormat.Time;
-            timePicker.ShowUpDown = true;
+            timePickerStart.ShowUpDown = true;
+            timePickerEnd.ShowUpDown = true;
 
             //Try and load in record dialog settings.
             XmlDocument doc;
             SettingsProfileDictionary = loadSettingsProfile(out doc);
             SettingsProfileXML = doc;
-            resetFieldsToDictionary(SettingsProfileDictionary);
             if (SettingsProfileDictionary != null)
             {
+                resetFieldsToDictionary(SettingsProfileDictionary);
                 settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + Path.PathSeparator + "recordSetup.xml";
             }
+
+            //Set the height/weight enabled
+            checkBoxHeight.Checked = true;
+            checkBoxWeight.Checked = true;
+
+            //Device
+            Device = device;
+
+            //Set radio buttons enabled
+            radioButtonImmediately.Checked = true;
+
+            //Set default recording times
+            datePickerEndIgnoreEvent = true;
+            datePickerStartIgnoreEvent = true;
+            timePickerEndIgnoreEvent = true;
+            timePickerStartIgnoreEvent = true;
+            dayPickerIgnoreEvent = true;
+            minutePickerIgnoreEvent = true;
+            hourPickerIgnoreEvent = true;
+
+            datePickerStart.Value = DateTime.Now.Date;
+            timePickerStart.Value = DateTime.Now.Add(new TimeSpan(1, 0, 0));
+            datePickerEnd.Value = datePickerStart.Value.Add(new TimeSpan(1, 0, 0, 0, 0));
+            timePickerEnd.Value = timePickerStart.Value;
+
+            datePickerEndIgnoreEvent = false;
+            datePickerStartIgnoreEvent = false;
+            timePickerEndIgnoreEvent = false;
+            timePickerStartIgnoreEvent = false;
+            dayPickerIgnoreEvent = false;
+            minutePickerIgnoreEvent = false;
+            hourPickerIgnoreEvent = false;
+
+            updateWarningMessages();
         }
 
         private Dictionary<string, string> loadSettingsProfile(out XmlDocument xmlDocument)
@@ -135,6 +168,16 @@ namespace OmGui
                     settingsDictionary.Remove(pair.Key);
                     settingsDictionary.Add(pair.Key, comboBoxSubjectTimezone.SelectedIndex.ToString());
                 }
+                else if (pair.Key.Equals("SubjectSite"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, comboBoxSite.SelectedIndex.ToString());
+                }
+                else if (pair.Key.Equals("SubjectSide"))
+                {
+                    settingsDictionary.Remove(pair.Key);
+                    settingsDictionary.Add(pair.Key, comboBoxSide.SelectedIndex.ToString());
+                }
             }
         }
         
@@ -191,6 +234,14 @@ namespace OmGui
                 {
                     comboBoxSubjectTimezone.SelectedIndex = Int32.Parse(pair.Value);
                 }
+                else if (pair.Key.Equals("SubjectSite"))
+                {
+                    comboBoxSite.SelectedIndex = Int32.Parse(pair.Value);
+                }
+                else if (pair.Key.Equals("SubjectSide"))
+                {
+                    comboBoxSide.SelectedIndex = Int32.Parse(pair.Value);
+                }
             }
         }
 
@@ -219,24 +270,24 @@ namespace OmGui
         {
             get
             {
-                if (!datePicker.Checked) { return DateTime.MinValue; }
-                return datePicker.Value; 
+                if (!datePickerStart.Checked) { return DateTime.MinValue; }
+                return datePickerStart.Value; 
             }
             set
             {
-                if (value < datePicker.MinDate)
+                if (value < datePickerStart.MinDate)
                 {
-                    datePicker.Checked = false;
-                    datePicker.Value = datePicker.MinDate;
+                    datePickerStart.Checked = false;
+                    datePickerStart.Value = datePickerStart.MinDate;
                 }
-                else if (value > datePicker.MaxDate)
+                else if (value > datePickerStart.MaxDate)
                 {
-                    datePicker.Checked = false;
-                    datePicker.Value = datePicker.MaxDate;
+                    datePickerStart.Checked = false;
+                    datePickerStart.Value = datePickerStart.MaxDate;
                 }
                 else
                 {
-                    datePicker.Value = value;
+                    datePickerStart.Value = value;
                 }
 
             }
@@ -294,47 +345,6 @@ namespace OmGui
             //TS - TODO - Build UntilDate from the data provided.
         }
 
-        private void buttonCancel_Click(object sender, EventArgs e)
-        {
-            DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            Close();
-        }
-
-        private void DateRangeForm_Load(object sender, EventArgs e)
-        {
-            Always = false;
-            SyncTime = SyncTimeType.None;
-        }
-
-        private void alwaysCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (alwaysCheckBox.Checked)
-            {
-                datePicker.Enabled = false;
-                timePicker.Enabled = false;
-                dayPicker.Enabled = false;
-                hoursPicker.Enabled = false;
-                minutesPicker.Enabled = false;
-            }
-            else
-            {
-                datePicker.Enabled = true;
-                timePicker.Enabled = true;
-                dayPicker.Enabled = true;
-                hoursPicker.Enabled = true;
-                minutesPicker.Enabled = true;
-            }
-        }
-
-        private void buttonSetupMetadata_Click(object sender, EventArgs e)
-        {
-            //Using the same form so we can store data in it rather than mirroring data here.
-            if(drmf == null)
-                drmf = new DateRangeMetadataForm();
-
-            drmf.ShowDialog();
-        }
-
         // Roughly estimate battery life (in seconds) based on percentage remaining and sampling frequency
         static double EstimateBatteryLife(int percent, int rate)
         {
@@ -358,22 +368,343 @@ namespace OmGui
         private void DateRangeForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             //TS - TODO - Do warnings
-            DateTime startDate = datePicker.Value;
+            DateTime startDate = datePickerStart.Value;
             DateTime endDate = startDate.Add(new TimeSpan((int)dayPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
+        }
 
+        #region Height/Weight Checkbox Logic
+        //checkbox enabling logic for height/weight
+        private void checkBoxHeight_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cbHeight = (CheckBox)sender;
 
-            //Only show warnings if we are closing because of OK
-            if (setOK)
+            if (cbHeight.Checked)
+                numericUpDownSubjectHeight.Enabled = true;
+            else
+                numericUpDownSubjectHeight.Enabled = false;
+        }
+
+        private void checkBoxWeight_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cbWeight = (CheckBox)sender;
+
+            if (cbWeight.Checked)
+                numericUpDownSubjectWeight.Enabled = true;
+            else
+                numericUpDownSubjectWeight.Enabled = false;
+        }
+        #endregion
+
+        #region RecordingTime Radio Button Logic
+        private void radioButtonImmediately_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = (RadioButton)sender;
+
+            if (rb.Checked)
             {
-                //If more than 25 days give warning
-                if (dayPicker.Value > 25)
-                {
-                    DialogResult dr = MessageBox.Show("The record length is very long and the device may not last this long", "Warning - Record length", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                datePickerStart.Enabled = false;
+                timePickerStart.Enabled = false;
+                datePickerEnd.Enabled = false;
+                timePickerEnd.Enabled = false;
 
-                    if (dr != System.Windows.Forms.DialogResult.OK)
-                        e.Cancel = true;
+                dayPicker.Enabled = false;
+                hoursPicker.Enabled = false;
+                minutesPicker.Enabled = false;
+            }
+            else
+            {
+                datePickerStart.Enabled = true;
+                timePickerStart.Enabled = true;
+                datePickerEnd.Enabled = true;
+                timePickerEnd.Enabled = true;
+
+                dayPicker.Enabled = true;
+                hoursPicker.Enabled = true;
+                minutesPicker.Enabled = true;
+            }
+        }
+        #endregion
+
+        #region UpdateWarningMessage Events & Change Duration/End Date Events
+        bool datePickerEndIgnoreEvent = false;
+        bool timePickerEndIgnoreEvent = false;
+        bool datePickerStartIgnoreEvent = false;
+        bool timePickerStartIgnoreEvent = false;
+        bool dayPickerIgnoreEvent = false;
+        bool hourPickerIgnoreEvent = false;
+        bool minutePickerIgnoreEvent = false;
+
+        //Start date
+        private void datePickerStart_ValueChanged(object sender, EventArgs e)
+        {
+            if (datePickerStartIgnoreEvent)
+                return;
+
+            TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
+
+            if (ts.Days < 0)
+            {
+                MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                datePickerEnd.Value = datePickerStart.Value;
+            }
+            else
+            {
+                if(ts.Days > (int) dayPicker.Maximum)
+                {
+                    dayPickerIgnoreEvent = true;
+                    dayPicker.Value = dayPicker.Maximum;
+                    dayPickerIgnoreEvent = false;
+                }
+                else
+                {
+                    dayPickerIgnoreEvent = true;
+                    dayPicker.Value = ts.Days;
+                    dayPickerIgnoreEvent = false;
+                }
+            }
+
+            updateWarningMessages();
+        }
+
+        private void timePickerStart_ValueChanged(object sender, EventArgs e)
+        {
+            if (timePickerStartIgnoreEvent)
+                return;
+
+            TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
+
+            //If dates same then can still be in past...
+            if (datePickerEnd.Value.Equals(datePickerStart.Value))
+            {
+                //Dates same, see if hours are less.
+                if (ts.Hours < 0)
+                {
+                    MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    timePickerEnd.Value = timePickerStart.Value;
+                }
+                else if (ts.Hours == 0)
+                {
+                    //If hours are equal then see if minutes are less
+                    if (ts.Minutes < 0)
+                    {
+                        MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        timePickerEnd.Value = timePickerStart.Value;
+                    }
+                }
+
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = ts.Hours;
+                hourPickerIgnoreEvent = false;
+
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = ts.Minutes;
+                minutePickerIgnoreEvent = false;
+            }
+            //Everything is okay so update hours and minutes...
+            else
+            {
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = ts.Hours;
+                hourPickerIgnoreEvent = false;
+
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = ts.Minutes;
+                minutePickerIgnoreEvent = false;
+            }
+
+            updateWarningMessages();
+        }
+
+        //End Date
+        private void datePickerEnd_ValueChanged(object sender, EventArgs e)
+        {
+            if (datePickerEndIgnoreEvent)
+                return;
+
+            TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
+
+            if (ts.Days < 0)
+            {
+                MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                datePickerEnd.Value = datePickerStart.Value;
+            }
+            else
+            {
+                dayPickerIgnoreEvent = true;
+                dayPicker.Value = ts.Days;
+                dayPickerIgnoreEvent = false;
+            }
+
+            updateWarningMessages();
+        }
+
+        private void timePickerEnd_ValueChanged(object sender, EventArgs e)
+        {
+            if (timePickerEndIgnoreEvent)
+                return;
+
+            TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
+
+            //If dates same then can still be in past...
+            if (datePickerEnd.Value.Equals(datePickerStart.Value))
+            {
+                //Dates same, see if hours are less.
+                if (ts.Hours < 0)
+                {
+                    MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    timePickerEnd.Value = timePickerStart.Value;
+                }
+                else if (ts.Hours == 0)
+                {
+                    //If hours are equal then see if minutes are less
+                    if (ts.Minutes < 0)
+                    {
+                        MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        timePickerEnd.Value = timePickerStart.Value;
+                    }
+                }
+            }
+            //Everything is okay so update hours and minutes...
+            else
+            {
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = ts.Hours;
+                hourPickerIgnoreEvent = false;
+
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = ts.Minutes;
+                minutePickerIgnoreEvent = false;
+            }
+
+            updateWarningMessages();
+        }
+
+        int hoursPickerLastValue = 0;
+        private void hoursPicker_ValueChanged(object sender, EventArgs e)
+        {
+            if (hourPickerIgnoreEvent)
+                return;
+
+            int change = (int)hoursPicker.Value - hoursPickerLastValue;
+            hoursPickerLastValue = (int)hoursPicker.Value;
+
+            DateTime d = timePickerEnd.Value.Add(new TimeSpan(change, 0, 0));
+
+            timePickerEndIgnoreEvent = true;
+            timePickerEnd.Value = d;
+            timePickerEndIgnoreEvent = false;
+
+            updateWarningMessages();
+        }
+
+        int minutesPickerLastValue = 0;
+        private void minutesPicker_ValueChanged(object sender, EventArgs e)
+        {
+            if (minutePickerIgnoreEvent)
+                return;
+
+            int change = (int)minutesPicker.Value - minutesPickerLastValue;
+            minutesPickerLastValue = (int)minutesPicker.Value;
+
+            DateTime d = timePickerEnd.Value.Add(new TimeSpan(0, change, 0));
+
+            timePickerEndIgnoreEvent = true;
+            timePickerEnd.Value = d;
+            timePickerEndIgnoreEvent = false;
+
+            updateWarningMessages();
+        }
+
+        int dayPickerLastValue = 1;
+        private void dayPicker_ValueChanged(object sender, EventArgs e)
+        {
+            if (dayPickerIgnoreEvent)
+                return;
+
+            int change = (int) dayPicker.Value - dayPickerLastValue;
+            dayPickerLastValue = (int)dayPicker.Value;
+
+            DateTime d = datePickerEnd.Value.Add(new TimeSpan(change, 0, 0, 0));
+
+            datePickerEndIgnoreEvent = true;
+            datePickerEnd.Value = d;
+            datePickerEndIgnoreEvent = false;
+
+            updateWarningMessages();
+        }
+        #endregion
+
+        #region Warning Message Logic
+        bool[] warningMessagesFlags = { false, false, false, false, false, false, false };
+        string[] warningMessages = {"Device not fully charged",
+                                    "Device not fully cleared",
+                                    "Duration could be limited by device capacity",
+                                    "Duration could be liited by remaining battery",
+                                    "Delayed start time is more than 14 days in the future",
+                                    "End time is in the past",
+                                    "Start time is in the past"};
+        private void updateWarningMessages()
+        {
+            if (Device != null)
+            {
+                //Make date start and end from dates and times;
+                DateTime startDate = datePickerStart.Value.Date + timePickerStart.Value.TimeOfDay;
+                DateTime endDate = datePickerEnd.Value.Date + timePickerEnd.Value.TimeOfDay;
+
+                for (int i = 0; i < warningMessagesFlags.Length; i++)
+                {
+                    warningMessagesFlags[i] = false;
+                }
+
+                //Not fully charged.
+                if (Device.BatteryLevel < 95)
+                    warningMessagesFlags[0] = true;
+
+                //Not fully cleared
+                if (Device.HasNewData)
+                    warningMessagesFlags[1] = true;
+
+                //Duration could be limited by device capacity
+                //TS - TODO
+
+                //Duration could be limited by battery (on rate)
+                double estimateBatteryInSeconds = EstimateBatteryLife(Device.BatteryLevel, Int32.Parse(comboBoxSamplingFreq.Text));
+                TimeSpan ts = endDate - startDate;
+                if (ts.TotalSeconds > estimateBatteryInSeconds)
+                    warningMessagesFlags[3] = true;
+
+                //Delayed start time is more than 14 days in the future
+                if (startDate > (DateTime.Now.Add(new TimeSpan(14, 0, 0, 0))))
+                    warningMessagesFlags[4] = true;
+
+                //End time is in the past.
+                if (endDate < DateTime.Now)
+                    warningMessagesFlags[5] = true;
+
+                //Start date is more than a day in the past
+                if (startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0)))
+                    warningMessagesFlags[6] = true;
+
+
+                //Now that we have the flags, we can build the string.
+                StringBuilder s = new StringBuilder();
+                for (int i = 0; i < warningMessagesFlags.Length; i++)
+                {
+                    if (warningMessagesFlags[i])
+                        s.AppendLine("\u2022 " + warningMessages[i]);
+                }
+
+                //If we have no warnings then display message
+                if (s.ToString().Length == 0)
+                {
+                    richTextBoxWarning.Text = "WARNINGS\nNo warnings";
+                }
+                else
+                {
+                    richTextBoxWarning.Text = "WARNINGS\n" + s.ToString();
                 }
             }
         }
+        #endregion
     }
 }
