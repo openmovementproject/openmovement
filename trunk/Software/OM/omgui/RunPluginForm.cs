@@ -49,6 +49,15 @@ namespace OmGui
         public void Go(String file)
         {
             string url = "file:///" + file.Replace("\\", "/");
+
+            //Add block parameters if needed
+            if (Plugin.CanSelection && Plugin.BlockStart > -1 && Plugin.BlockCount > -1)
+            {
+                url += "?";
+                url += "blockStart=" + Plugin.BlockStart;
+                url += "&blockCount=" + Plugin.BlockCount;
+            }
+
             this.webBrowser1.Url = new System.Uri(url, System.UriKind.RelativeOrAbsolute);
         }
 

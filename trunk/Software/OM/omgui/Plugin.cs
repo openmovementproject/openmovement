@@ -34,9 +34,18 @@ namespace OmGui
         public int Width { get; set; }
         private Dictionary<string, string> RawParameters { get; set; }
         public Dictionary<string, string> ActualParameters { get; set; }
+        public bool CanSelection { get; set; }
+
+        public float BlockStart { get; set; }
+        public float BlockCount { get; set; }
 
         public Plugin(FileInfo run, FileInfo xml, FileInfo html)
         {
+            //Default false
+            CanSelection = false;
+            BlockStart = -1;
+            BlockCount = -1;
+
             //Set defaults:
             Height = 600;
             Width = 800;
@@ -110,6 +119,9 @@ namespace OmGui
             if(RawParameters.ContainsKey("width"))
                 Width = int.Parse(RawParameters["width"]);
             Name = Path.GetFileNameWithoutExtension(XMLFile.Name);
+
+            if (RawParameters.ContainsKey("canSelection"))
+                CanSelection = Boolean.Parse(RawParameters["canSelection"]);
         }
     }
 

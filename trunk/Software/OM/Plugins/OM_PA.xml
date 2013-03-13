@@ -9,4 +9,5 @@
 	<item name="inputFile">This input file needs to be a CWA.</item>
 	<item name="outputFile">Choose where to save the file.</item>
 	<item name="outputExtension">csv</item>
+	<item name="canSelection">true</item>
 </Plugin>

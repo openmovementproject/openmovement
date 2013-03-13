@@ -106,12 +106,6 @@
     <Compile Include="DateRangeForm.Designer.cs">
       <DependentUpon>DateRangeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DateRangeMetadataForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DateRangeMetadataForm.Designer.cs">
-      <DependentUpon>DateRangeMetadataForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Device.cs" />
     <Compile Include="DeviceListView.cs">
       <SubType>Component</SubType>
@@ -182,9 +176,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DateRangeForm.resx">
       <DependentUpon>DateRangeForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DateRangeMetadataForm.resx">
-      <DependentUpon>DateRangeMetadataForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceListView.resx">
       <DependentUpon>DeviceListView.cs</DependentUpon>
