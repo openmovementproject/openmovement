@@ -42,6 +42,10 @@ namespace OmGui
                 resetFieldsToDictionary(SettingsProfileDictionary);
                 settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + Path.PathSeparator + "recordSetup.xml";
             }
+            else
+            {
+                SettingsProfileDictionary = new Dictionary<string, string>();
+            }
 
             //Set the height/weight enabled
             checkBoxHeight.Checked = true;
@@ -412,6 +416,9 @@ namespace OmGui
                 dayPicker.Enabled = false;
                 hoursPicker.Enabled = false;
                 minutesPicker.Enabled = false;
+
+                //Set always
+                Always = true;
             }
             else
             {
@@ -423,6 +430,8 @@ namespace OmGui
                 dayPicker.Enabled = true;
                 hoursPicker.Enabled = true;
                 minutesPicker.Enabled = true;
+
+                Always = false;
             }
         }
         #endregion

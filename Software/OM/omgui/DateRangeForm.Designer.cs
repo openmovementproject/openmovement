@@ -642,6 +642,7 @@
             // 
             // comboBoxSite
             // 
+            this.comboBoxSite.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxSite.FormattingEnabled = true;
             this.comboBoxSite.Items.AddRange(new object[] {
             "",
@@ -767,6 +768,7 @@
             // 
             // comboBoxSubjectHandedness
             // 
+            this.comboBoxSubjectHandedness.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxSubjectHandedness.FormattingEnabled = true;
             this.comboBoxSubjectHandedness.Items.AddRange(new object[] {
             "",
@@ -800,6 +802,7 @@
             // 
             // comboBoxSubjectSex
             // 
+            this.comboBoxSubjectSex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxSubjectSex.FormattingEnabled = true;
             this.comboBoxSubjectSex.Items.AddRange(new object[] {
             "",
