@@ -62,10 +62,21 @@ namespace OmGui
             minutePickerIgnoreEvent = true;
             hourPickerIgnoreEvent = true;
 
+            //Initial Values
+            datePickerEndIgnoreEvent = true;
+            datePickerStartIgnoreEvent = true;
+            timePickerEndIgnoreEvent = true;
+            timePickerStartIgnoreEvent = true;
+
             datePickerStart.Value = DateTime.Now.Date;
-            timePickerStart.Value = DateTime.Now.Add(new TimeSpan(1, 0, 0));
-            datePickerEnd.Value = datePickerStart.Value.Add(new TimeSpan(1, 0, 0, 0, 0));
-            timePickerEnd.Value = timePickerStart.Value;
+            timePickerStart.Value = DateTime.Now;
+            datePickerEnd.Value = DateTime.Now.Date;
+            timePickerEnd.Value = DateTime.Now.Add(new TimeSpan(1, 0, 0));
+
+            datePickerEndIgnoreEvent = false;
+            datePickerStartIgnoreEvent = false;
+            timePickerEndIgnoreEvent = false;
+            timePickerStartIgnoreEvent = false;
 
             datePickerEndIgnoreEvent = false;
             datePickerStartIgnoreEvent = false;
@@ -173,11 +184,6 @@ namespace OmGui
                     settingsDictionary.Remove(pair.Key);
                     settingsDictionary.Add(pair.Key, comboBoxSite.SelectedIndex.ToString());
                 }
-                else if (pair.Key.Equals("SubjectSide"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, comboBoxSide.SelectedIndex.ToString());
-                }
             }
         }
         
@@ -237,10 +243,6 @@ namespace OmGui
                 else if (pair.Key.Equals("SubjectSite"))
                 {
                     comboBoxSite.SelectedIndex = Int32.Parse(pair.Value);
-                }
-                else if (pair.Key.Equals("SubjectSide"))
-                {
-                    comboBoxSide.SelectedIndex = Int32.Parse(pair.Value);
                 }
             }
         }
@@ -440,7 +442,27 @@ namespace OmGui
             if (datePickerStartIgnoreEvent)
                 return;
 
-            TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
+            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
+            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
+
+            TimeSpan difference = t.Subtract(t2);
+
+            if (difference.Days < 1000)
+            {
+                dayPickerIgnoreEvent = true;
+                dayPicker.Value = difference.Days;
+                dayPickerIgnoreEvent = false;
+
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = difference.Hours;
+                hourPickerIgnoreEvent = false;
+
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = difference.Minutes;
+                minutePickerIgnoreEvent = false;
+            }
+
+            /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
 
             if (ts.Days < 0)
             {
@@ -461,7 +483,7 @@ namespace OmGui
                     dayPicker.Value = ts.Days;
                     dayPickerIgnoreEvent = false;
                 }
-            }
+            }*/
 
             updateWarningMessages();
         }
@@ -471,7 +493,25 @@ namespace OmGui
             if (timePickerStartIgnoreEvent)
                 return;
 
-            TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
+            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
+            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
+
+            TimeSpan difference = t.Subtract(t2);
+
+            dayPickerIgnoreEvent = true;
+            dayPicker.Value = difference.Days;
+            dayPickerIgnoreEvent = false;
+
+            hourPickerIgnoreEvent = true;
+            hoursPicker.Value = difference.Hours;
+            hourPickerIgnoreEvent = false;
+
+            minutePickerIgnoreEvent = true;
+            minutesPicker.Value = difference.Minutes;
+            minutePickerIgnoreEvent = false;
+
+            /*
+            //TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
 
             //If dates same then can still be in past...
             if (datePickerEnd.Value.Equals(datePickerStart.Value))
@@ -510,7 +550,7 @@ namespace OmGui
                 minutePickerIgnoreEvent = true;
                 minutesPicker.Value = ts.Minutes;
                 minutePickerIgnoreEvent = false;
-            }
+            }*/
 
             updateWarningMessages();
         }
@@ -521,7 +561,24 @@ namespace OmGui
             if (datePickerEndIgnoreEvent)
                 return;
 
-            TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
+            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
+            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
+
+            TimeSpan difference = t.Subtract(t2);
+
+            dayPickerIgnoreEvent = true;
+            dayPicker.Value = difference.Days;
+            dayPickerIgnoreEvent = false;
+
+            hourPickerIgnoreEvent = true;
+            hoursPicker.Value = difference.Hours;
+            hourPickerIgnoreEvent = false;
+
+            minutePickerIgnoreEvent = true;
+            minutesPicker.Value = difference.Minutes;
+            minutePickerIgnoreEvent = false;
+
+            /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
 
             if (ts.Days < 0)
             {
@@ -533,7 +590,7 @@ namespace OmGui
                 dayPickerIgnoreEvent = true;
                 dayPicker.Value = ts.Days;
                 dayPickerIgnoreEvent = false;
-            }
+            }*/
 
             updateWarningMessages();
         }
@@ -543,7 +600,24 @@ namespace OmGui
             if (timePickerEndIgnoreEvent)
                 return;
 
-            TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
+            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
+            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
+
+            TimeSpan difference = t.Subtract(t2);
+
+            dayPickerIgnoreEvent = true;
+            dayPicker.Value = difference.Days;
+            dayPickerIgnoreEvent = false;
+
+            hourPickerIgnoreEvent = true;
+            hoursPicker.Value = difference.Hours;
+            hourPickerIgnoreEvent = false;
+
+            minutePickerIgnoreEvent = true;
+            minutesPicker.Value = difference.Minutes;
+            minutePickerIgnoreEvent = false;
+
+            /*TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
 
             //If dates same then can still be in past...
             if (datePickerEnd.Value.Equals(datePickerStart.Value))
@@ -574,7 +648,7 @@ namespace OmGui
                 minutePickerIgnoreEvent = true;
                 minutesPicker.Value = ts.Minutes;
                 minutePickerIgnoreEvent = false;
-            }
+            }*/
 
             updateWarningMessages();
         }

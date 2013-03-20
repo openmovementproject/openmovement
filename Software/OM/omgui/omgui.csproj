@@ -232,6 +232,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ObjectListViewFull-2.5.1\ObjectListViewDemo\ObjectListView\ObjectListView2010.csproj">
+      <Project>{18FEDA0C-D147-4286-B39A-01204808106A}</Project>
+      <Name>ObjectListView2010</Name>
+    </ProjectReference>
     <ProjectReference Include="..\omapinet\omapinet.csproj">
       <Project>{292262D5-D4C9-458D-B8F1-1C0F4C19A74C}</Project>
       <Name>omapinet</Name>
@@ -243,6 +247,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="OmGui.ico" />
+    <None Include="Resources\DeleteHS.png" />
+    <None Include="Resources\Export.png" />
     <Content Include="utils\cwa-convert.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
