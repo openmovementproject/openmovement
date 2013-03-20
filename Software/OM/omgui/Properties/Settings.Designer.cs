@@ -49,7 +49,7 @@ namespace OmGui.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("F:\\OM\\Plugins")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
         public string CurrentPluginFolder {
             get {
                 return ((string)(this["CurrentPluginFolder"]));
@@ -61,7 +61,7 @@ namespace OmGui.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("F:\\OM\\Profiles")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
         public string CurrentProfileDirectory {
             get {
                 return ((string)(this["CurrentProfileDirectory"]));

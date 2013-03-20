@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Xml;
 using System.Runtime.Serialization;
+using System.Drawing;
 
 namespace OmGui
 {
@@ -22,6 +23,7 @@ namespace OmGui
         //Properties
         public string Description { get; set; }
         public string Name { get; set; }
+        public string ReadableName { get; set; }
         public string Type { get; set; }
         public FileInfo XMLFile { get; set; }
         public FileInfo HTMLFile { get; set; }
@@ -35,6 +37,8 @@ namespace OmGui
         private Dictionary<string, string> RawParameters { get; set; }
         public Dictionary<string, string> ActualParameters { get; set; }
         public bool CanSelection { get; set; }
+        public string IconName { get; set; }
+        public Image Icon { get; set; }
 
         public float BlockStart { get; set; }
         public float BlockCount { get; set; }
@@ -79,49 +83,70 @@ namespace OmGui
                 //}
                 //else
                 //{
-                    RawParameters.Add(node.Attributes["name"].Value, node.InnerText);
+                RawParameters.Add(node.Attributes["name"].Value, node.InnerText);
 
-                    if (node.Attributes["ext"] != null)
-                    {
-                        string ext = node.Attributes["ext"].Value;
+                if (node.Attributes["ext"] != null)
+                {
+                    string ext = node.Attributes["ext"].Value;
 
-                        RawParameters.Add("ext", ext);
-                    }
+                    RawParameters.Add("ext", ext);
+                }
                 //}
             }
 
             //Now have all raw parameters to pull them out
-            
+
             try
             {
-                Ext = (ExtType) Enum.Parse(typeof(ExtType), RawParameters["ext"], true);
+                Ext = (ExtType)Enum.Parse(typeof(ExtType), RawParameters["ext"], true);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw new PluginExtTypeException();
             }
-            
+
             Description = RawParameters["description"];
             InputFile = RawParameters["inputFile"];
 
-            if(RawParameters.ContainsKey("outputFile"))
+            if (RawParameters.ContainsKey("outputFile"))
                 OutputFile = RawParameters["outputFile"];
 
-            if(RawParameters.ContainsKey("outputExtension"))
+            if (RawParameters.ContainsKey("outputExtension"))
                 OutputExt = RawParameters["outputExtension"];
 
+            if (RawParameters.ContainsKey("readableName"))
+                ReadableName = RawParameters["readableName"];
+
+            if (RawParameters.ContainsKey("iconName"))
+                IconName = RawParameters["iconName"];
+
+            //Load in icon;
+            loadIcon(IconName);
 
             Type = RawParameters["type"];
 
-            if(RawParameters.ContainsKey("height"))
+            if (RawParameters.ContainsKey("height"))
                 Height = int.Parse(RawParameters["height"]);
 
-            if(RawParameters.ContainsKey("width"))
+            if (RawParameters.ContainsKey("width"))
                 Width = int.Parse(RawParameters["width"]);
             Name = Path.GetFileNameWithoutExtension(XMLFile.Name);
 
             if (RawParameters.ContainsKey("canSelection"))
                 CanSelection = Boolean.Parse(RawParameters["canSelection"]);
+        }
+
+        private void loadIcon(string name)
+        {
+            string filePath = Properties.Settings.Default.CurrentPluginFolder + Path.DirectorySeparatorChar + name;
+            try
+            {
+                Icon = Image.FromFile(filePath);
+            }
+            catch (System.IO.FileNotFoundException e)
+            {
+                Console.WriteLine("No Icon: " + e.Message);
+            }
         }
     }
 
