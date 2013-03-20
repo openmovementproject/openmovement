@@ -169,6 +169,8 @@ namespace OmGui
 
                 parseMessage(outputLine);
 
+                //labelStatus.Text = parseMessage(outputLine);
+
                 //runPluginProgressBar.Invalidate(true);
                 //labelStatus.Invalidate(true);
             }
@@ -209,8 +211,20 @@ namespace OmGui
                     string message = outputLine.Split(new char[] { ' ' }, 2).Last();
                     //labelStatus.Text = message;
                 }
+                else if (outputLine[0] == 'e')
+                {
+                    string message = outputLine.Split(new char[] { ' ' }, 2).Last();
+                    //labelStatus.ForeColor = Color.Red;
+                    //labelStatus.Text = message;
+                }
+
+                Console.WriteLine("o: " + outputLine);
             }
-            Console.WriteLine("o: " + outputLine);
+        }
+
+        private void RunPluginForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+        
         }
     }
 }

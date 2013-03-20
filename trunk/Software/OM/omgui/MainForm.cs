@@ -942,9 +942,6 @@ namespace OmGui
 
         private void toolStripButtonInterval_Click(object sender, EventArgs e)
         {
-            //TS - Record devices that can't record for a prompt box later.
-            int devicesCanRecord = 0;
-
             //if (EnsureNoSelectedDownloading())
             //{
                 List<string> fails = new List<string>();
@@ -1360,61 +1357,68 @@ namespace OmGui
         private void AddProfilePluginsToToolStrip()
         {
             //TS - Add tool strip buttons for "default" profiles
-            StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentProfileDirectory + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
-            string pluginProfileAsString = pluginProfile.ReadToEnd();
-
-            //Parse
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(pluginProfileAsString);
-            XmlNodeList items = xmlDoc.SelectNodes("Profile/Plugin");
-
-            //Used to add seperator.
-            bool isFirst = true;
-
-            //Each <Plugin>
-            foreach (XmlNode node in items)
+            try
             {
-                string name = "";
-                string files = "";
+                StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentProfileDirectory + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
+                string pluginProfileAsString = pluginProfile.ReadToEnd();
 
-                //Each < /> inside <Plugin>
-                foreach (XmlNode childNode in node.ChildNodes)
+                //Parse
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(pluginProfileAsString);
+                XmlNodeList items = xmlDoc.SelectNodes("Profile/Plugin");
+
+                //Used to add seperator.
+                bool isFirst = true;
+
+                //Each <Plugin>
+                foreach (XmlNode node in items)
                 {
-                    switch (childNode.Name)
+                    string name = "";
+                    string files = "";
+
+                    //Each < /> inside <Plugin>
+                    foreach (XmlNode childNode in node.ChildNodes)
                     {
-                        case "name":
-                            name = childNode.InnerText;
-                            break;
-                        case "files":
-                            files = childNode.InnerText;
-                            break;
-                    }
-                }
-
-                FileInfo[] pluginInfo = getPluginInfo(files);
-
-                if (pluginInfo != null)
-                {
-                    if (pluginInfo[0] != null && pluginInfo[1] != null && pluginInfo[2] != null)
-                    {
-                        Plugin plugin = new Plugin(pluginInfo[0], pluginInfo[1], pluginInfo[2]);
-
-                        ToolStripButton tsb = new ToolStripButton();
-                        tsb.Text = name;
-                        tsb.Tag = plugin;
-
-                        tsb.Click += new EventHandler(tsb_Click);
-
-                        if (isFirst)
+                        switch (childNode.Name)
                         {
-                            toolStripFiles.Items.Add(new ToolStripSeparator());
-                            isFirst = false;
+                            case "name":
+                                name = childNode.InnerText;
+                                break;
+                            case "files":
+                                files = childNode.InnerText;
+                                break;
                         }
+                    }
 
-                        toolStripFiles.Items.Add(tsb);
-                        toolStripFiles.Items[toolStripFiles.Items.Count - 1].Enabled = false;
+                    FileInfo[] pluginInfo = getPluginInfo(files);
+
+                    if (pluginInfo != null)
+                    {
+                        if (pluginInfo[0] != null && pluginInfo[1] != null && pluginInfo[2] != null)
+                        {
+                            Plugin plugin = new Plugin(pluginInfo[0], pluginInfo[1], pluginInfo[2]);
+
+                            ToolStripButton tsb = new ToolStripButton();
+                            tsb.Text = name;
+                            tsb.Tag = plugin;
+
+                            tsb.Click += new EventHandler(tsb_Click);
+
+                            if (isFirst)
+                            {
+                                toolStripFiles.Items.Add(new ToolStripSeparator());
+                                isFirst = false;
+                            }
+
+                            toolStripFiles.Items.Add(tsb);
+                            toolStripFiles.Items[toolStripFiles.Items.Count - 1].Enabled = false;
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e.Message);
             }
         }
 
@@ -1434,6 +1438,12 @@ namespace OmGui
 
                     RunPluginForm rpf = new RunPluginForm(p, CWAFilename);
                     rpf.ShowDialog();
+
+                    if (rpf.DialogResult == System.Windows.Forms.DialogResult.OK)
+                    {
+                        //if the plugin has an output file    
+                        RunProcess(p, rpf.ParameterString, rpf.OriginalOutputName, reader.Filename);
+                    }
                 }
                 else
                 {
@@ -1474,13 +1484,10 @@ namespace OmGui
                 //TS - TODO - The text goes from Red to Black...
                 devicesListView.SelectedItems.Clear();
 
-                pluginsToolStripButton.Enabled = true;
-                DeleteFilesToolStripButton.Enabled = true;
-
                 //Enable plugins
-                for (int i = 0; i < toolStripFiles.Items.Count - 3; i++)
+                for (int i = 0; i < toolStripFiles.Items.Count; i++)
                 {
-                    toolStripFiles.Items[i + 3].Enabled = true;
+                    toolStripFiles.Items[i].Enabled = true;
                 }
             }
             else
@@ -1498,13 +1505,10 @@ namespace OmGui
 
         private void FilesResetToolStripButtons()
         {
-            DeleteFilesToolStripButton.Enabled = false;
-            pluginsToolStripButton.Enabled = false;
-
-            //Disable plugins
-            for (int i = 0; i < toolStripFiles.Items.Count - 3; i++)
+            //Disable buttons
+            for (int i = 0; i < toolStripFiles.Items.Count; i++)
             {
-                toolStripFiles.Items[i + 3].Enabled = false;
+                toolStripFiles.Items[i].Enabled = false;
             }
         }
 
@@ -1543,12 +1547,38 @@ namespace OmGui
             }
         }
 
+        bool turnOn = true;
+        int ticks = 0;
         private void identifyTimer_Tick(object sender, EventArgs e)
         {
-            //Turn off lights
-            foreach (OmDevice device in identifyDevices)
+            if (ticks <= 10)
             {
-                device.SetLed(OmApi.OM_LED_STATE.OM_LED_AUTO);
+                //Turn off lights
+                foreach (OmDevice device in identifyDevices)
+                {
+                    if (turnOn)
+                    {
+                        device.SetLed(OmApi.OM_LED_STATE.OM_LED_BLUE);
+                        turnOn = false;
+                    }
+                    else
+                    {
+                        device.SetLed(OmApi.OM_LED_STATE.OM_LED_OFF);
+                        turnOn = true;
+                    }
+                }
+
+                ticks++;
+            }
+            else
+            {
+                foreach (OmDevice device in identifyDevices)
+                {
+                    device.SetLed(OmApi.OM_LED_STATE.OM_LED_AUTO);
+                }
+                ticks = 0;
+                turnOn = true;
+                identifyTimer.Enabled = false;
             }
         }
 
@@ -1665,19 +1695,26 @@ namespace OmGui
 
                         pluginsForm = new PluginsForm(plugins, reader.Filename, blockStart, blockCount);
                         pluginsForm.ShowDialog(this);
+
+                        //Run the process
+                        if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                        {
+                            //if the plugin has an output file    
+                            RunProcess(pluginsForm.SelectedPlugin, pluginsForm.rpf.ParameterString, pluginsForm.rpf.OriginalOutputName, reader.Filename);
+                        }
                     }
                     else
                     {
                         //Now that we have our plugins, open the plugin form
                         pluginsForm = new PluginsForm(plugins, reader.Filename, - 1, -1);
                         pluginsForm.ShowDialog(this);
-                    }
 
-                    //Run the process
-                    if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
-                    {
-                        //if the plugin has an output file    
-                        RunProcess(pluginsForm.SelectedPlugin, pluginsForm.rpf.ParameterString, pluginsForm.rpf.OriginalOutputName, reader.Filename);
+                        //Run the process
+                        if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                        {
+                            //if the plugin has an output file    
+                            RunProcess(pluginsForm.SelectedPlugin, pluginsForm.rpf.ParameterString, pluginsForm.rpf.OriginalOutputName, reader.Filename);
+                        }
                     }
                 }
                 //No files so do a dialog.
@@ -1692,6 +1729,8 @@ namespace OmGui
             }
         }
 
+
+        List<ListViewItem> queueListViewItems = new List<ListViewItem>();
         //PLUGIN PROCESS RUNNING
         private void RunProcess(Plugin plugin, string parametersAsString, string originalOutputName, string inputName)
         {
@@ -1726,12 +1765,18 @@ namespace OmGui
             pqi.StartInfo = psi;
 
             //Add PQI to file queue
-            listViewFileQueue.Items.Add(new ListViewItem(new string[] { pqi.Name, pqi.File, "0", "Cancel" }));
+            ListViewItem lvi = new ListViewItem(new string[] { pqi.Name, pqi.File, "0" });
 
             BackgroundWorker pluginQueueWorker = new BackgroundWorker();
+            pluginQueueWorker.WorkerSupportsCancellation = true;
 
             pluginQueueWorker.DoWork += new DoWorkEventHandler(pluginQueueWorker_DoWork);
             pluginQueueWorker.ProgressChanged += new ProgressChangedEventHandler(pluginQueueWorker_ProgressChanged);
+            pluginQueueWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(pluginQueueWorker_RunWorkerCompleted);
+
+            lvi.Tag = pluginQueueWorker;
+
+            queueListViewItems2.Items.Add(lvi);
 
             pluginQueueWorker.RunWorkerAsync(pqi);
 
@@ -1750,6 +1795,21 @@ namespace OmGui
             }*/
         }
 
+        void pluginQueueWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Result != null)
+            {
+            }
+            else if(e.Cancelled)
+            {
+                //TS - TODO - Do we need a cancel message to pop up?
+            }
+            else if(e.Error != null)
+            {
+                MessageBox.Show("An error has occured in the plugin:\n" + e.Error.Message, "Error in Plugin", MessageBoxButtons.OK);
+            }
+        }
+
         void pluginQueueWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             Console.WriteLine("Progress Percentage: " + e.ProgressPercentage);
@@ -1765,6 +1825,7 @@ namespace OmGui
 
                 p.Start();
 
+                //TS - TODO - This is where we need to get the info and put it into progress bar...
                 //Hack - Sometimes we don't get the last stdout line
                 //string lastLine = p.StandardOutput.ReadLine();
                 //parseMessage(lastLine);
@@ -1868,5 +1929,85 @@ namespace OmGui
                 }
             }
         }
-   }
+
+        #region Dynamic ToolStrip Files Buttons
+
+        //TS - If we have clicked over to the queue tab then change the toolstrip items
+        private void rebuildQueueToolStripItems()
+        {
+            toolStripFiles.Items.Clear();
+            ToolStripButton tsb = new ToolStripButton("Cancel", Properties.Resources.DeleteHS);
+            tsb.Click += new EventHandler(tsb_Click2);
+            tsb.Enabled = false;
+
+            toolStripFiles.Items.Add(tsb);
+        }
+
+        
+        //Tool Strip Cancel button
+        void tsb_Click2(object sender, EventArgs e)
+        {
+            //Delete
+            if (queueListViewItems2.SelectedItems.Count > 0)
+            {
+                foreach(ListViewItem lvi in queueListViewItems2.Items)
+                {
+                    queueListViewItems2.Items.Remove(lvi);
+
+                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                    //TS - TODO - Need to actually know when it is killed or if it is...
+                    bw.CancelAsync();
+                }
+            }
+        }
+
+        private void rebuildFilesToolStripItems()
+        {
+            toolStripFiles.Items.Clear();
+            ToolStripButton tsbPlugins = new ToolStripButton("Plugins", Properties.Resources.Export);
+            tsbPlugins.Click += new EventHandler(devicesToolStripButtonExport_Click);
+            tsbPlugins.Enabled = false;
+
+            ToolStripButton tsbDelete = new ToolStripButton("Delete", Properties.Resources.DeleteHS);
+            tsbDelete.Click += new EventHandler(DeleteFilesToolStripButton_Click);
+            tsbDelete.Enabled = false;
+
+            toolStripFiles.Items.Add(tsbPlugins);
+            toolStripFiles.Items.Add(tsbDelete);
+
+            AddProfilePluginsToToolStrip();
+        }
+
+        private void tabControlFiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControlFiles.SelectedIndex == 0)
+            {
+                rebuildFilesToolStripItems();
+            }
+            else
+            {
+                rebuildQueueToolStripItems();
+            }
+        }
+
+        #endregion
+
+        private void queueListViewItems2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (queueListViewItems2.SelectedItems.Count > 0)
+            {
+                for (int i = 0; i < toolStripFiles.Items.Count; i++)
+                {
+                    toolStripFiles.Items[i].Enabled = true;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < toolStripFiles.Items.Count; i++)
+                {
+                    toolStripFiles.Items[i].Enabled = false;
+                }
+            }
+        }
+    }
 }
