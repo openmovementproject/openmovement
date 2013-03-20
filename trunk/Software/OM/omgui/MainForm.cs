@@ -1780,7 +1780,6 @@ namespace OmGui
             lvi.Tag = pluginQueueWorker;
 
             queueListViewItems2.Items.Add(lvi);
-
             pluginQueueWorker.RunWorkerAsync(pqi);
 
             //READ STD OUT OF PLUGIN
@@ -1821,6 +1820,7 @@ namespace OmGui
         void pluginQueueWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             PluginQueueItem pqi = (PluginQueueItem) e.Argument;
+            BackgroundWorker worker = (BackgroundWorker) sender;
 
             try
             {
@@ -1833,6 +1833,32 @@ namespace OmGui
                 //string lastLine = p.StandardOutput.ReadLine();
                 //parseMessage(lastLine);
 
+                while (!p.HasExited)
+                {
+                    string outputLine = p.StandardOutput.ReadLine();
+                    int progress = -1;
+
+                    parseMessage(outputLine, out progress);
+
+                    if (progress > -1)
+                    {
+                        foreach (ListViewItem lvi in queueListViewItems2.Items)
+                        {
+                            BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                            if (worker.Equals(bw))
+                            {
+                                lvi.SubItems[2].Text = progress.ToString();
+                            }
+                        }
+                    }
+
+
+                    //labelStatus.Text = parseMessage(outputLine);
+
+                    //runPluginProgressBar.Invalidate(true);
+                    //labelStatus.Invalidate(true);
+                }
+
                 p.WaitForExit();
 
                 p.Close();
@@ -1840,6 +1866,7 @@ namespace OmGui
                 //If there is an output file:
                 if (pqi.OriginalOutputName != "")
                 {
+                    
                     //HACK - Copy the output file back into the working directory.
                     string outputFileLocation = System.IO.Path.Combine(Properties.Settings.Default.CurrentWorkingFolder, pqi.OriginalOutputName);
                     System.IO.File.Copy(pqi.destFolder + "temp.csv", outputFileLocation);
@@ -1851,26 +1878,59 @@ namespace OmGui
             }
             catch (InvalidOperationException ioe)
             {
-                Console.WriteLine("IOE: " + ioe.Message);
+                foreach (ListViewItem lvi in queueListViewItems2.Items)
+                {
+                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                    if(worker.Equals(bw))
+                    {
+                        queueListViewItems2.Items.Remove(lvi);
+                    }
+                }
+
+                Console.WriteLine("ioe: " + ioe.Message);
+                MessageBox.Show("Plugin Error: " + ioe.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (System.ComponentModel.Win32Exception w32e)
             {
+                foreach (ListViewItem lvi in queueListViewItems2.Items)
+                {
+                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                    if(worker.Equals(bw))
+                    {
+                        queueListViewItems2.Items.Remove(lvi);
+                    }
+                }
+
                 Console.WriteLine("w32e: " + w32e.Message);
+                MessageBox.Show("Plugin Error: " + w32e.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception e2)
             {
-                Console.WriteLine("e: " + e2.Message);
+                foreach (ListViewItem lvi in queueListViewItems2.Items)
+                {
+                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                    if(worker.Equals(bw))
+                    {
+                        queueListViewItems2.Items.Remove(lvi);
+                    }
+                }
+
+                Console.WriteLine("w32e: " + e2.Message);
+                MessageBox.Show("Plugin Error: " + e2.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void parseMessage(string outputLine)
+        private void parseMessage(string outputLine, out int progress)
         {
+            progress = -1; ;
             //OUTPUT
             if (outputLine != null)
             {
                 if (outputLine[0] == 'p')
                 {
                     string percentage = outputLine.Split(' ').ElementAt(1);
+
+                    progress = Int32.Parse(percentage);
                     //runPluginProgressBar.Value = Int32.Parse(percentage);
                 }
                 else if (outputLine[0] == 's')
