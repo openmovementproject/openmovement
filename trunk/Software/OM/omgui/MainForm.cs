@@ -513,7 +513,7 @@ namespace OmGui
             }
 
             //TS - If multiple devices selected then show which downloaded and which didnt.
-            if (devicesListView.SelectedItems.Count > 1)
+            if (devicesListView.SelectedItems.Count > 0)
             {
                 string message = numDevicesDownloaded + " devices downloaded from a selection of " + (int) (numDevicesNotDownloaded + numDevicesDownloaded) + " devices." + "\r\nFiles:";
 
