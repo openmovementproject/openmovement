@@ -1359,7 +1359,7 @@ namespace OmGui
             //TS - Add tool strip buttons for "default" profiles
             try
             {
-                StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentProfileDirectory + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
+                StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
                 string pluginProfileAsString = pluginProfile.ReadToEnd();
 
                 //Parse
@@ -1401,6 +1401,9 @@ namespace OmGui
                             ToolStripButton tsb = new ToolStripButton();
                             tsb.Text = name;
                             tsb.Tag = plugin;
+
+                            if(plugin.Icon != null)
+                                tsb.Image = plugin.Icon;
 
                             tsb.Click += new EventHandler(tsb_Click);
 
@@ -1602,6 +1605,7 @@ namespace OmGui
 
             foreach (FileInfo f in allFiles)
             {
+                Console.WriteLine("name: " + f.Name);
                 if (Path.GetFileNameWithoutExtension(f.Name).Equals(pluginName))
                 {
                     //We've found our plugin.
@@ -1638,26 +1642,25 @@ namespace OmGui
 
                 OmReader reader = (OmReader)i.Tag;
 
-                string folder = Properties.Settings.Default.CurrentPluginFolder;
-
-                DirectoryInfo d = new DirectoryInfo(folder);
-
-                List<FileInfo> htmlFiles = new List<FileInfo>();
-
-                FileInfo[] files = d.GetFiles("*.*");
-
-                //Find XML files
-                foreach (FileInfo f in files)
-                {
-                    if (f.Extension == ".html")
-                        htmlFiles.Add(f);
-                }
-
-
                 List<Plugin> plugins = new List<Plugin>();
 
                 try
                 {
+                    string folder = Properties.Settings.Default.CurrentPluginFolder;
+
+                    DirectoryInfo d = new DirectoryInfo(folder);
+
+                    List<FileInfo> htmlFiles = new List<FileInfo>();
+
+                    FileInfo[] files = d.GetFiles("*.*");
+
+                    //Find XML files
+                    foreach (FileInfo f in files)
+                    {
+                        if (f.Extension == ".html")
+                            htmlFiles.Add(f);
+                    }
+
                     //Find matching other files and add to plugins dictionary
                     foreach (FileInfo f in files)
                     {

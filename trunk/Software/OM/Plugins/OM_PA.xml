@@ -2,12 +2,12 @@
 <!-- This is a sample XML document -->
 <!-- So far we only recognize EXE types but still put it in as shown here. Then add in description, input file and output file types as shown. -->
 <Plugin>
-	<item name="height">800</item>
+	<item name="height">500</item>
 	<item name="width">600</item>
 	<item name="type" ext="exe">exe</item>
 	<item name="description">OpenMovement plugin...</item>
 	<item name="inputFile">This input file needs to be a CWA.</item>
 	<item name="outputFile">Choose where to save the file.</item>
-	<item name="outputExtension">csv</item>
-	<item name="canSelection">true</item>
+	<item name="readableName">Physical Activity</item>
+	<item name="iconName">OM_PA.gif</item>
 </Plugin>

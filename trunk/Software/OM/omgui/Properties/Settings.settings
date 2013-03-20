@@ -9,10 +9,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="CurrentPluginFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)">F:\OM\Plugins</Value>
+      <Value Profile="(Default)">C:\</Value>
     </Setting>
     <Setting Name="CurrentProfileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">F:\OM\Profiles</Value>
+      <Value Profile="(Default)">C:\</Value>
     </Setting>
   </Settings>
 </SettingsFile>
