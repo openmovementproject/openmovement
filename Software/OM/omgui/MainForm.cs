@@ -1920,17 +1920,17 @@ namespace OmGui
             }
             catch (System.ComponentModel.Win32Exception w32e)
             {
-                foreach (ListViewItem lvi in queueListViewItems2.Items)
+                this.Invoke((MethodInvoker)delegate
                 {
-                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                    if(worker.Equals(bw))
+                    foreach (ListViewItem lvi in queueListViewItems2.Items)
                     {
-                        this.Invoke((MethodInvoker)delegate
+                        BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                        if(worker.Equals(bw))
                         {
                             queueListViewItems2.Items.Remove(lvi);
-                        });
+                        }
                     }
-                }
+            });
 
                 Console.WriteLine("w32e: " + w32e.Message);
                 MessageBox.Show("Plugin Error: " + w32e.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
