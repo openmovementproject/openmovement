@@ -38,7 +38,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.dayPicker = new System.Windows.Forms.NumericUpDown();
+            this.daysPicker = new System.Windows.Forms.NumericUpDown();
             this.hoursPicker = new System.Windows.Forms.NumericUpDown();
             this.minutesPicker = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
@@ -92,7 +92,7 @@
             this.label24 = new System.Windows.Forms.Label();
             this.textBoxSubjectCode = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dayPicker)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.daysPicker)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.hoursPicker)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minutesPicker)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -217,24 +217,24 @@
             this.label5.TabIndex = 18;
             this.label5.Text = "Start Time:";
             // 
-            // dayPicker
+            // daysPicker
             // 
-            this.dayPicker.Location = new System.Drawing.Point(94, 108);
-            this.dayPicker.Margin = new System.Windows.Forms.Padding(2);
-            this.dayPicker.Maximum = new decimal(new int[] {
+            this.daysPicker.Location = new System.Drawing.Point(94, 108);
+            this.daysPicker.Margin = new System.Windows.Forms.Padding(2);
+            this.daysPicker.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
-            this.dayPicker.Name = "dayPicker";
-            this.dayPicker.Size = new System.Drawing.Size(90, 20);
-            this.dayPicker.TabIndex = 20;
-            this.dayPicker.Value = new decimal(new int[] {
+            this.daysPicker.Name = "daysPicker";
+            this.daysPicker.Size = new System.Drawing.Size(90, 20);
+            this.daysPicker.TabIndex = 20;
+            this.daysPicker.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.dayPicker.ValueChanged += new System.EventHandler(this.dayPicker_ValueChanged);
+            this.daysPicker.ValueChanged += new System.EventHandler(this.dayPicker_ValueChanged);
             // 
             // hoursPicker
             // 
@@ -504,7 +504,7 @@
             this.groupBox3.Controls.Add(this.minutesPicker);
             this.groupBox3.Controls.Add(this.label2);
             this.groupBox3.Controls.Add(this.hoursPicker);
-            this.groupBox3.Controls.Add(this.dayPicker);
+            this.groupBox3.Controls.Add(this.daysPicker);
             this.groupBox3.Controls.Add(this.label3);
             this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Location = new System.Drawing.Point(11, 110);
@@ -539,7 +539,7 @@
             this.timePickerEnd.Name = "timePickerEnd";
             this.timePickerEnd.Size = new System.Drawing.Size(117, 20);
             this.timePickerEnd.TabIndex = 28;
-            this.timePickerEnd.Value = new System.DateTime(2013, 3, 13, 12, 0, 0, 0);
+            this.timePickerEnd.Value = new System.DateTime(2011, 4, 17, 23, 0, 0, 0);
             this.timePickerEnd.ValueChanged += new System.EventHandler(this.timePickerEnd_ValueChanged);
             // 
             // label25
@@ -917,7 +917,7 @@
             this.Text = "Date Range";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DateRangeForm_FormClosing);
             this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dayPicker)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.daysPicker)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.hoursPicker)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minutesPicker)).EndInit();
             this.groupBox1.ResumeLayout(false);
@@ -947,7 +947,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.NumericUpDown dayPicker;
+        private System.Windows.Forms.NumericUpDown daysPicker;
         private System.Windows.Forms.NumericUpDown hoursPicker;
         private System.Windows.Forms.NumericUpDown minutesPicker;
         private System.Windows.Forms.Label label6;

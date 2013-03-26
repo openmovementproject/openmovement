@@ -17,9 +17,8 @@ namespace OmGui
     {
         bool setOK = false;
 
-        private XmlDocument SettingsProfileXML { get; set; }
         private Dictionary<string, string> SettingsProfileDictionary { get; set; }
-        private string settingsProfileFilePath;
+        private string settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml";
         private OmDevice Device { get; set; }
 
         public DateRangeForm(string title, string prompt, OmDevice device)
@@ -36,11 +35,9 @@ namespace OmGui
             //Try and load in record dialog settings.
             XmlDocument doc;
             SettingsProfileDictionary = loadSettingsProfile(out doc);
-            SettingsProfileXML = doc;
             if (SettingsProfileDictionary != null)
             {
                 resetFieldsToDictionary(SettingsProfileDictionary);
-                settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + Path.PathSeparator + "recordSetup.xml";
             }
             else
             {
@@ -66,21 +63,13 @@ namespace OmGui
             minutePickerIgnoreEvent = true;
             hourPickerIgnoreEvent = true;
 
-            //Initial Values
-            datePickerEndIgnoreEvent = true;
-            datePickerStartIgnoreEvent = true;
-            timePickerEndIgnoreEvent = true;
-            timePickerStartIgnoreEvent = true;
-
-            datePickerStart.Value = DateTime.Now.Date;
+            datePickerStart.Value = DateTime.Now;
             timePickerStart.Value = DateTime.Now;
-            datePickerEnd.Value = DateTime.Now.Date;
-            timePickerEnd.Value = DateTime.Now.Add(new TimeSpan(1, 0, 0));
-
-            datePickerEndIgnoreEvent = false;
-            datePickerStartIgnoreEvent = false;
-            timePickerEndIgnoreEvent = false;
-            timePickerStartIgnoreEvent = false;
+            datePickerEnd.Value = DateTime.Now;//.AddDays(1);
+            timePickerEnd.Value = DateTime.Now;//.AddDays(1);
+            hoursPicker.Value = 0;
+            minutesPicker.Value = 0;
+            daysPicker.Value = 0;
 
             datePickerEndIgnoreEvent = false;
             datePickerStartIgnoreEvent = false;
@@ -97,20 +86,24 @@ namespace OmGui
         {
             xmlDocument = new XmlDocument();
 
+            Console.WriteLine(Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml");
+
             //Want to look if the XML exists in this working directory and if it does then we want to load the defaults in.
-            if (File.Exists(Properties.Settings.Default.CurrentWorkingFolder + Path.PathSeparator + "recordSetup.xml"))
+            if (File.Exists(Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml"))
             {
                 Dictionary<string, string> settingsDictionary = new Dictionary<string, string>();
 
                 StreamReader recordProfile = new StreamReader(Properties.Settings.Default.CurrentWorkingFolder +
-                    Path.DirectorySeparatorChar + "recordSetup.xml");
+                    "\\" + "recordSetup.xml");
                 String profileAsString = recordProfile.ReadToEnd();
                 xmlDocument.LoadXml(profileAsString);
 
-                //Loop through xml and add items to dictionary
-                foreach (XmlNode node in xmlDocument.SelectNodes("RecordProfile"))
+                XmlNode rootNode = xmlDocument.DocumentElement;
+
+                foreach (XmlNode node in rootNode.ChildNodes)
                 {
-                    settingsDictionary.Add(node.Name, node.InnerText);
+                    if(!node.Name.Equals("RecordProfile"))
+                        settingsDictionary.Add(node.Name, node.InnerText);
                 }
 
                 return settingsDictionary;
@@ -121,74 +114,21 @@ namespace OmGui
 
         private void saveDictionaryFromFields(Dictionary<string, string> settingsDictionary)
         {
-            foreach (KeyValuePair<string, string> pair in settingsDictionary)
-            {
-                if (pair.Key.Equals("StudyCentre"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxStudyCentre.Text);
-                }
-                else if (pair.Key.Equals("StudyCode"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxStudyCode.Text);
-                }
-                else if (pair.Key.Equals("StudyInvestigator"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxStudyInvestigator.Text);
-                }
-                else if (pair.Key.Equals("StudyExerciseType"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxStudyExerciseType.Text);
-                }
-                else if (pair.Key.Equals("StudyOperator"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxStudyOperator.Text);
-                }
-                else if (pair.Key.Equals("StudyNotes"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxStudyNotes.Text);
-                }
-                else if (pair.Key.Equals("SubjectCode"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, textBoxSubjectCode.Text);
-                }
-                else if (pair.Key.Equals("SubjectSex"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, comboBoxSubjectSex.SelectedIndex.ToString());
-                }
-                else if (pair.Key.Equals("SubjectHeight"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, numericUpDownSubjectHeight.Value.ToString());
-                }
-                else if (pair.Key.Equals("SubjectWeight"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, numericUpDownSubjectWeight.Value.ToString());
-                }
-                else if (pair.Key.Equals("SubjectHandedness"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, comboBoxSubjectHandedness.SelectedIndex.ToString());
-                }
-                else if (pair.Key.Equals("SubjectTimezone"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, comboBoxSubjectTimezone.SelectedIndex.ToString());
-                }
-                else if (pair.Key.Equals("SubjectSite"))
-                {
-                    settingsDictionary.Remove(pair.Key);
-                    settingsDictionary.Add(pair.Key, comboBoxSite.SelectedIndex.ToString());
-                }
-            }
+            settingsDictionary.Clear();
+
+            settingsDictionary.Add("StudyCentre", textBoxStudyCentre.Text);
+            settingsDictionary.Add("StudyCode", textBoxStudyCode.Text);
+            settingsDictionary.Add("StudyInvestigator", textBoxStudyInvestigator.Text);
+            settingsDictionary.Add("StudyExerciseType", textBoxStudyExerciseType.Text);
+            settingsDictionary.Add("StudyOperator", textBoxStudyOperator.Text);
+            settingsDictionary.Add("StudyNotes", textBoxStudyNotes.Text);
+            settingsDictionary.Add("SubjectCode", textBoxSubjectCode.Text);
+            settingsDictionary.Add("SubjectSex", comboBoxSubjectSex.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectHeight", numericUpDownSubjectHeight.Value.ToString());
+            settingsDictionary.Add("SubjectWidth", numericUpDownSubjectWeight.Value.ToString());
+            settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectTimezone", comboBoxSubjectTimezone.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex.ToString());
         }
         
         private void resetFieldsToDictionary(Dictionary<string, string> settingsDictionary)
@@ -230,7 +170,7 @@ namespace OmGui
                 }
                 else if (pair.Key.Equals("SubjectHeight"))
                 {
-                    numericUpDownSubjectHeight.Value = Int32.Parse(pair.Key);
+                    numericUpDownSubjectHeight.Value = Int32.Parse(pair.Value);
                 }
                 else if (pair.Key.Equals("SubjectWeight"))
                 {
@@ -253,9 +193,24 @@ namespace OmGui
 
         private void saveDictionaryToXML(Dictionary<string, string> settingsDictionary)
         {
-            if (settingsProfileFilePath != null)
+            XmlDocument xml = new XmlDocument();
+            XmlNode outerNode = xml.CreateElement("RecordProfile");
+            xml.AppendChild(outerNode);
+
+            foreach(KeyValuePair<string, string> kvp in settingsDictionary)
             {
-                SettingsProfileXML.Save(settingsProfileFilePath);
+                XmlNode node = xml.CreateElement(kvp.Key);
+                node.InnerText = kvp.Value;
+                outerNode.AppendChild(node);
+            }
+
+            try
+            {
+                xml.Save(settingsProfileFilePath);
+            }
+            catch (XmlException e)
+            {
+                Console.WriteLine("Xml Error: Could not save recordProfile.xml - " + e.Message);
             }
         }
 
@@ -375,7 +330,7 @@ namespace OmGui
         {
             //TS - TODO - Do warnings
             DateTime startDate = datePickerStart.Value;
-            DateTime endDate = startDate.Add(new TimeSpan((int)dayPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
+            DateTime endDate = startDate.Add(new TimeSpan((int)daysPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
         }
 
         #region Height/Weight Checkbox Logic
@@ -413,7 +368,7 @@ namespace OmGui
                 datePickerEnd.Enabled = false;
                 timePickerEnd.Enabled = false;
 
-                dayPicker.Enabled = false;
+                daysPicker.Enabled = false;
                 hoursPicker.Enabled = false;
                 minutesPicker.Enabled = false;
 
@@ -427,7 +382,7 @@ namespace OmGui
                 datePickerEnd.Enabled = true;
                 timePickerEnd.Enabled = true;
 
-                dayPicker.Enabled = true;
+                daysPicker.Enabled = true;
                 hoursPicker.Enabled = true;
                 minutesPicker.Enabled = true;
 
@@ -446,6 +401,7 @@ namespace OmGui
         bool minutePickerIgnoreEvent = false;
 
         //Start date
+        DateTime previousDateStart = DateTime.Now;
         private void datePickerStart_ValueChanged(object sender, EventArgs e)
         {
             if (datePickerStartIgnoreEvent)
@@ -458,17 +414,28 @@ namespace OmGui
 
             if (difference.Days < 1000)
             {
-                dayPickerIgnoreEvent = true;
-                dayPicker.Value = difference.Days;
-                dayPickerIgnoreEvent = false;
+                //TS - If the end date is before the start date, error at them
+                if (difference.TotalSeconds < 0)
+                {
+                    MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    datePickerStart.Value = previousDateStart;
+                }
+                else
+                {
+                    dayPickerIgnoreEvent = true;
+                    daysPicker.Value = difference.Days;
+                    dayPickerIgnoreEvent = false;
 
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = difference.Hours;
-                hourPickerIgnoreEvent = false;
+                    hourPickerIgnoreEvent = true;
+                    hoursPicker.Value = difference.Hours;
+                    hourPickerIgnoreEvent = false;
 
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = difference.Minutes;
-                minutePickerIgnoreEvent = false;
+                    minutePickerIgnoreEvent = true;
+                    minutesPicker.Value = difference.Minutes;
+                    minutePickerIgnoreEvent = false;
+
+                    previousDateStart = datePickerStart.Value;
+                }
             }
 
             /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
@@ -497,6 +464,7 @@ namespace OmGui
             updateWarningMessages();
         }
 
+        DateTime previousTimeStart = DateTime.Now;
         private void timePickerStart_ValueChanged(object sender, EventArgs e)
         {
             if (timePickerStartIgnoreEvent)
@@ -507,17 +475,28 @@ namespace OmGui
 
             TimeSpan difference = t.Subtract(t2);
 
-            dayPickerIgnoreEvent = true;
-            dayPicker.Value = difference.Days;
-            dayPickerIgnoreEvent = false;
+            //TS - If the end date is before the start date, error at them
+            if (difference.TotalSeconds < 0)
+            {
+                MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                timePickerStart.Value = previousTimeStart;
+            }
+            else
+            {
+                dayPickerIgnoreEvent = true;
+                daysPicker.Value = difference.Days;
+                dayPickerIgnoreEvent = false;
 
-            hourPickerIgnoreEvent = true;
-            hoursPicker.Value = difference.Hours;
-            hourPickerIgnoreEvent = false;
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = difference.Hours;
+                hourPickerIgnoreEvent = false;
 
-            minutePickerIgnoreEvent = true;
-            minutesPicker.Value = difference.Minutes;
-            minutePickerIgnoreEvent = false;
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = difference.Minutes;
+                minutePickerIgnoreEvent = false;
+
+                previousTimeStart = timePickerStart.Value;
+            }
 
             /*
             //TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
@@ -565,6 +544,7 @@ namespace OmGui
         }
 
         //End Date
+        DateTime previousDateEnd = DateTime.Now;
         private void datePickerEnd_ValueChanged(object sender, EventArgs e)
         {
             if (datePickerEndIgnoreEvent)
@@ -575,17 +555,28 @@ namespace OmGui
 
             TimeSpan difference = t.Subtract(t2);
 
-            dayPickerIgnoreEvent = true;
-            dayPicker.Value = difference.Days;
-            dayPickerIgnoreEvent = false;
+            //TS - If the end date is before the start date, error at them
+            if (difference.TotalSeconds < 0)
+            {
+                MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                datePickerEnd.Value = previousDateEnd;
+            }
+            else
+            {
+                dayPickerIgnoreEvent = true;
+                daysPicker.Value = difference.Days;
+                dayPickerIgnoreEvent = false;
 
-            hourPickerIgnoreEvent = true;
-            hoursPicker.Value = difference.Hours;
-            hourPickerIgnoreEvent = false;
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = difference.Hours;
+                hourPickerIgnoreEvent = false;
 
-            minutePickerIgnoreEvent = true;
-            minutesPicker.Value = difference.Minutes;
-            minutePickerIgnoreEvent = false;
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = difference.Minutes;
+                minutePickerIgnoreEvent = false;
+
+                previousDateEnd = datePickerEnd.Value;
+            }
 
             /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
 
@@ -604,6 +595,7 @@ namespace OmGui
             updateWarningMessages();
         }
 
+        DateTime previousTimeEnd = DateTime.Now;
         private void timePickerEnd_ValueChanged(object sender, EventArgs e)
         {
             if (timePickerEndIgnoreEvent)
@@ -614,18 +606,28 @@ namespace OmGui
 
             TimeSpan difference = t.Subtract(t2);
 
-            dayPickerIgnoreEvent = true;
-            dayPicker.Value = difference.Days;
-            dayPickerIgnoreEvent = false;
+            //TS - If the end date is before the start date, error at them
+            if (difference.TotalSeconds < 0)
+            {
+                MessageBox.Show("End date cannot be before start date.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                timePickerEnd.Value = previousTimeEnd;
+            }
+            else
+            {
+                dayPickerIgnoreEvent = true;
+                daysPicker.Value = difference.Days;
+                dayPickerIgnoreEvent = false;
 
-            hourPickerIgnoreEvent = true;
-            hoursPicker.Value = difference.Hours;
-            hourPickerIgnoreEvent = false;
+                hourPickerIgnoreEvent = true;
+                hoursPicker.Value = difference.Hours;
+                hourPickerIgnoreEvent = false;
 
-            minutePickerIgnoreEvent = true;
-            minutesPicker.Value = difference.Minutes;
-            minutePickerIgnoreEvent = false;
+                minutePickerIgnoreEvent = true;
+                minutesPicker.Value = difference.Minutes;
+                minutePickerIgnoreEvent = false;
 
+                previousTimeEnd = timePickerEnd.Value;
+            }
             /*TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
 
             //If dates same then can still be in past...
@@ -698,14 +700,14 @@ namespace OmGui
             updateWarningMessages();
         }
 
-        int dayPickerLastValue = 1;
+        int dayPickerLastValue = 0;
         private void dayPicker_ValueChanged(object sender, EventArgs e)
         {
             if (dayPickerIgnoreEvent)
                 return;
 
-            int change = (int) dayPicker.Value - dayPickerLastValue;
-            dayPickerLastValue = (int)dayPicker.Value;
+            int change = (int) daysPicker.Value - dayPickerLastValue;
+            dayPickerLastValue = (int)daysPicker.Value;
 
             DateTime d = datePickerEnd.Value.Add(new TimeSpan(change, 0, 0, 0));
 
