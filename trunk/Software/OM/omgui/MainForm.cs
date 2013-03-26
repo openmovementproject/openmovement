@@ -407,7 +407,8 @@ namespace OmGui
             string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
 
             System.IO.FileInfo info = new System.IO.FileInfo(path);
-            string fileSize = info.Length.ToString();
+            //MB
+            string fileSize = ((double) (info.Length/1024/1024)).ToString();
             string dateModified = info.CreationTime.ToString("dd/MM/yy HH:mm:ss");
 
             item.SubItems.Clear();
@@ -1446,6 +1447,9 @@ namespace OmGui
                     {
                         //if the plugin has an output file    
                         RunProcess(p, rpf.ParameterString, rpf.OriginalOutputName, reader.Filename);
+
+                        //Change index to the queue
+                        tabControlFiles.SelectedIndex = 1;
                     }
                 }
                 else
@@ -1644,43 +1648,64 @@ namespace OmGui
 
                 List<Plugin> plugins = new List<Plugin>();
 
-                try
+                string folder = Properties.Settings.Default.CurrentPluginFolder;
+
+                DirectoryInfo d = new DirectoryInfo(folder);
+
+                FileInfo[] exeFiles = d.GetFiles("*.exe");
+                FileInfo[] htmlFiles = d.GetFiles("*.html");
+                FileInfo[] xmlFiles= d.GetFiles("*.xml");
+
+                foreach (FileInfo e in exeFiles)
                 {
-                    string folder = Properties.Settings.Default.CurrentPluginFolder;
-
-                    DirectoryInfo d = new DirectoryInfo(folder);
-
-                    List<FileInfo> htmlFiles = new List<FileInfo>();
-
-                    FileInfo[] files = d.GetFiles("*.*");
-
-                    //Find XML files
-                    foreach (FileInfo f in files)
+                    foreach (FileInfo h in htmlFiles)
                     {
-                        if (f.Extension == ".html")
-                            htmlFiles.Add(f);
-                    }
-
-                    //Find matching other files and add to plugins dictionary
-                    foreach (FileInfo f in files)
-                    {
-                        if (f.Extension != ".html" && f.Extension != ".xml")
-                            foreach (FileInfo htmlFile in htmlFiles)
+                        //If the html name is the same as the exe name look for the xml
+                        if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(e.Name)))
+                        {
+                            foreach (FileInfo x in xmlFiles)
                             {
-                                string name = Path.GetFileNameWithoutExtension(f.Name);
-                                string xmlName = Path.GetDirectoryName(f.FullName) + "\\" + name + ".xml";
-
-                                FileInfo xmlFile = new FileInfo(xmlName);
-
-                                if (Path.GetFileNameWithoutExtension(f.Name).Equals(Path.GetFileNameWithoutExtension(htmlFile.Name)))
-                                    plugins.Add(new Plugin(f, xmlFile, htmlFile));
+                                //We've found a plugin!
+                                if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(x.Name)))
+                                {
+                                    plugins.Add(new Plugin(e, x, h));
+                                }
                             }
+                        }
                     }
                 }
-                catch (PluginExtTypeException)
-                {
-                    MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+
+                //    //Find XML files
+                    
+
+                //    List<FileInfo> htmlFiles = new List<FileInfo>();
+
+                //    foreach (FileInfo f in files)
+                //    {
+                //        if (f.Extension == ".html")
+                //            htmlFiles.Add(f);
+                //    }
+
+                //    //Find matching other files and add to plugins dictionary
+                //    foreach (FileInfo f in files)
+                //    {
+                //        if (f.Extension != ".html" && f.Extension != ".xml")
+                //            foreach (FileInfo htmlFile in htmlFiles)
+                //            {
+                //                string name = Path.GetFileNameWithoutExtension(f.Name);
+                //                string xmlName = Path.GetDirectoryName(f.FullName) + "\\" + name + ".xml";
+
+                //                FileInfo xmlFile = new FileInfo(xmlName);
+
+                //                if (Path.GetFileNameWithoutExtension(f.Name).Equals(Path.GetFileNameWithoutExtension(htmlFile.Name)))
+                //                    plugins.Add(new Plugin(f, xmlFile, htmlFile));
+                //            }
+                //    }
+                //}
+                //catch (PluginExtTypeException)
+                //{
+                //    MessageBox.Show("Malformed Plugin file, plugins cannot be loaded until this is resolved.", "Malformed Plugin", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //}
 
                 //If there is more than 1 plugin then show the form otherwise give error.
                 if (plugins.Count > 0)
@@ -1883,7 +1908,10 @@ namespace OmGui
                     BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
                     if(worker.Equals(bw))
                     {
-                        queueListViewItems2.Items.Remove(lvi);
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            queueListViewItems2.Items.Remove(lvi);
+                        });
                     }
                 }
 
@@ -1897,7 +1925,10 @@ namespace OmGui
                     BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
                     if(worker.Equals(bw))
                     {
-                        queueListViewItems2.Items.Remove(lvi);
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            queueListViewItems2.Items.Remove(lvi);
+                        });
                     }
                 }
 
@@ -1911,11 +1942,15 @@ namespace OmGui
                     BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
                     if(worker.Equals(bw))
                     {
-                        queueListViewItems2.Items.Remove(lvi);
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            queueListViewItems2.Items.Remove(lvi);
+                        });
+                        
                     }
                 }
 
-                Console.WriteLine("w32e: " + e2.Message);
+                Console.WriteLine("e2: " + e2.Message);
                 MessageBox.Show("Plugin Error: " + e2.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -1996,62 +2031,36 @@ namespace OmGui
         #region Dynamic ToolStrip Files Buttons
 
         //TS - If we have clicked over to the queue tab then change the toolstrip items
-        private void rebuildQueueToolStripItems()
-        {
-            toolStripFiles.Items.Clear();
-            ToolStripButton tsb = new ToolStripButton("Cancel", Properties.Resources.DeleteHS);
-            tsb.Click += new EventHandler(tsb_Click2);
-            tsb.Enabled = false;
+        //private void rebuildQueueToolStripItems()
+        //{
+        //    toolStripFiles.Items.Clear();
+        //    ToolStripButton tsb = new ToolStripButton("Cancel", Properties.Resources.DeleteHS);
+        //    tsb.Click += new EventHandler(tsb_Click2);
+        //    tsb.Enabled = false;
 
-            toolStripFiles.Items.Add(tsb);
-        }
+        //    toolStripFiles.Items.Add(tsb);
+        //}
 
         
         //Tool Strip Cancel button
-        void tsb_Click2(object sender, EventArgs e)
-        {
-            //Delete
-            if (queueListViewItems2.SelectedItems.Count > 0)
-            {
-                foreach(ListViewItem lvi in queueListViewItems2.Items)
-                {
-                    queueListViewItems2.Items.Remove(lvi);
+        
 
-                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                    //TS - TODO - Need to actually know when it is killed or if it is...
-                    bw.CancelAsync();
-                }
-            }
-        }
+        //private void rebuildFilesToolStripItems()
+        //{
+        //    toolStripFiles.Items.Clear();
+        //    ToolStripButton tsbPlugins = new ToolStripButton("Plugins", Properties.Resources.Export);
+        //    tsbPlugins.Click += new EventHandler(devicesToolStripButtonExport_Click);
+        //    tsbPlugins.Enabled = false;
 
-        private void rebuildFilesToolStripItems()
-        {
-            toolStripFiles.Items.Clear();
-            ToolStripButton tsbPlugins = new ToolStripButton("Plugins", Properties.Resources.Export);
-            tsbPlugins.Click += new EventHandler(devicesToolStripButtonExport_Click);
-            tsbPlugins.Enabled = false;
+        //    ToolStripButton tsbDelete = new ToolStripButton("Delete", Properties.Resources.DeleteHS);
+        //    tsbDelete.Click += new EventHandler(DeleteFilesToolStripButton_Click);
+        //    tsbDelete.Enabled = false;
 
-            ToolStripButton tsbDelete = new ToolStripButton("Delete", Properties.Resources.DeleteHS);
-            tsbDelete.Click += new EventHandler(DeleteFilesToolStripButton_Click);
-            tsbDelete.Enabled = false;
+        //    toolStripFiles.Items.Add(tsbPlugins);
+        //    toolStripFiles.Items.Add(tsbDelete);
 
-            toolStripFiles.Items.Add(tsbPlugins);
-            toolStripFiles.Items.Add(tsbDelete);
-
-            AddProfilePluginsToToolStrip();
-        }
-
-        private void tabControlFiles_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (tabControlFiles.SelectedIndex == 0)
-            {
-                rebuildFilesToolStripItems();
-            }
-            else
-            {
-                rebuildQueueToolStripItems();
-            }
-        }
+        //    AddProfilePluginsToToolStrip();
+        //}
 
         #endregion
 
@@ -2059,16 +2068,26 @@ namespace OmGui
         {
             if (queueListViewItems2.SelectedItems.Count > 0)
             {
-                for (int i = 0; i < toolStripFiles.Items.Count; i++)
-                {
-                    toolStripFiles.Items[i].Enabled = true;
-                }
+                toolStripQueueButtonCancel.Enabled = true;
             }
             else
             {
-                for (int i = 0; i < toolStripFiles.Items.Count; i++)
+                toolStripQueueButtonCancel.Enabled = false;
+            }
+        }
+
+        private void toolStripQueueButtonCancel_Click(object sender, EventArgs e)
+        {
+            //Delete
+            if (queueListViewItems2.SelectedItems.Count > 0)
+            {
+                foreach (ListViewItem lvi in queueListViewItems2.Items)
                 {
-                    toolStripFiles.Items[i].Enabled = false;
+                    queueListViewItems2.Items.Remove(lvi);
+
+                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                    //TS - TODO - Need to actually know when it is killed or if it is...
+                    bw.CancelAsync();
                 }
             }
         }
