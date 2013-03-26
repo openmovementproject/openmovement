@@ -10,4 +10,5 @@
 	<item name="outputFile">Choose where to save the file.</item>
 	<item name="readableName">Physical Activity</item>
 	<item name="iconName">OM_PA.gif</item>
+	<item name="outputExtension">csv</item>
 </Plugin>

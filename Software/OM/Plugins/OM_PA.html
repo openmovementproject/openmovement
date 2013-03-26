@@ -21,6 +21,35 @@
 <script type="text/javascript">
     //var $ = function (e) { return document.getElementById(e); }
 	
+	//Onload to get profile if exists
+	window.onload = function() {
+		
+		var url = document.URL;
+		var pairsString = unescape(url).split('?')[1];
+		var pairs = pairsString.split('&');
+		
+		for (var i = 0; i < pairs.length; i++)
+		{
+			var keyValuePair = pairs[i].split('=');
+			
+			if(keyValuePair[0] == "startBlock")
+			{
+				document.forms[0].elements["startBlock"].value = keyValuePair[1];
+			}
+			
+			if(keyValuePair[0] == "blockCount")
+			{
+				document.forms[0].elements["blockCount"].value = keyValuePair[1];
+			}
+			
+			if(keyValuePair[0] == "mass")
+			{
+				document.forms[0].elements["mass"].value = keyValuePair[1];
+			}
+		}
+	
+	};
+	
 	var site = "1";
 	var side = "1";
 	
