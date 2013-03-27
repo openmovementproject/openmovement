@@ -71,6 +71,7 @@
     <ClCompile Include="download.c" />
     <ClCompile Include="downloadmem.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="record.c" />
     <ClCompile Include="test.c" />
     <ClCompile Include="verify.c" />
   </ItemGroup>
