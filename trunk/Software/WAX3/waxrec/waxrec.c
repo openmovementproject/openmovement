@@ -847,7 +847,7 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
         teddiPacket.deviceId = (unsigned short)(buffer[2] | (((unsigned short)buffer[3]) << 8));
         teddiPacket.version = buffer[4];
 
-        if (((teddiPacket.version & 0x0f) == 0x03 || (teddiPacket.version & 0x0f) == 0x04) && len >= 18)
+        if (((teddiPacket.version & 0x0f) == 0x03 || (teddiPacket.version & 0x0f) >= 0x04) && len >= 18)
         {
             /*
             #define DATA_OFFSET 18
