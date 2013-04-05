@@ -11,4 +11,5 @@
 	<item name="readableName">Physical Activity</item>
 	<item name="iconName">OM_PA.gif</item>
 	<item name="outputExtension">csv</item>
+	<item name="canSelection">true</item>
 </Plugin>

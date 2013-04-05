@@ -17,7 +17,8 @@ namespace OmGui
         {
             EXE,
             M,
-            PY
+            PY,
+            JAR
         }
 
         //Properties
@@ -31,7 +32,6 @@ namespace OmGui
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
         public string[] OutputExts { get; set; }
-        public ExtType Ext { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
         private Dictionary<string, string> RawParameters { get; set; }
@@ -39,9 +39,13 @@ namespace OmGui
         public bool CanSelection { get; set; }
         public string IconName { get; set; }
         public Image Icon { get; set; }
+        public ExtType Ext { get; set; }
 
         public float BlockStart { get; set; }
         public float BlockCount { get; set; }
+
+        public string StartTimeString { get; set; }
+        public string EndTimeString { get; set; }
 
         public Plugin(FileInfo run, FileInfo xml, FileInfo html)
         {

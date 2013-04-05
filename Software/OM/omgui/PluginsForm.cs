@@ -20,14 +20,19 @@ namespace OmGui
 
         public float BlockStart { get; set; }
         public float BlockCount { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
 
-        public PluginsForm(List<Plugin> plugins, string fileName, float blockStart, float blockCount)
+        public PluginsForm(List<Plugin> plugins, string fileName, float blockStart, float blockCount, string startDateTime, string endDateTime)
         {
             InitializeComponent();
 
             //Blocks from dataViewer...
             BlockStart = blockStart;
             BlockCount = blockCount;
+
+            StartTime = startDateTime;
+            EndTime = endDateTime;
 
             this.plugins = plugins;
 
@@ -76,6 +81,12 @@ namespace OmGui
             {
                 SelectedPlugin.BlockStart = BlockStart;
                 SelectedPlugin.BlockCount = BlockCount;
+            }
+
+            if (StartTime != null && EndTime != null)
+            {
+                SelectedPlugin.StartTimeString = StartTime;
+                SelectedPlugin.EndTimeString = EndTime;
             }  
 
             //Want to pop up Input and Run Window.
