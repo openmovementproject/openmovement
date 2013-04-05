@@ -1477,6 +1477,35 @@ namespace OmGui
                     string CWAFilename = reader.Filename;
                     Plugin p = (Plugin)tsb.Tag;
 
+                    float blockStart = -1;
+                    float blockCount = -1;
+                    float blockEnd = -1;
+
+                    DateTime startDateTime;
+                    DateTime endDateTime;
+
+                    blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
+                    blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+                    blockEnd = blockStart + blockCount;
+
+                    startDateTime = dataViewer.TimeForBlock(blockStart);
+                    endDateTime = dataViewer.TimeForBlock(blockEnd);
+                    string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+                    string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+
+                    //See now if we want the dataViewer selection.
+                    if (p.CanSelection && blockCount > -1 && blockStart > -1)
+                    {
+                        p.BlockStart = blockStart;
+                        p.BlockCount = blockCount;
+                    }
+
+                    if (startDateTimeString != null && endDateTimeString != null)
+                    {
+                        p.StartTimeString = startDateTimeString;
+                        p.EndTimeString = endDateTimeString;
+                    } 
+
                     RunPluginForm rpf = new RunPluginForm(p, CWAFilename);
                     rpf.ShowDialog();
 
@@ -1689,23 +1718,53 @@ namespace OmGui
 
                 DirectoryInfo d = new DirectoryInfo(folder);
 
+                FileInfo[] jarFiles = d.GetFiles("*.jar");
+                FileInfo[] pythonFiles = d.GetFiles("*.py");
+                FileInfo[] matlabFiles = d.GetFiles("*.m");
                 FileInfo[] exeFiles = d.GetFiles("*.exe");
                 FileInfo[] htmlFiles = d.GetFiles("*.html");
                 FileInfo[] xmlFiles = d.GetFiles("*.xml");
 
-                foreach (FileInfo e in exeFiles)
+                foreach (FileInfo x in xmlFiles)
                 {
                     foreach (FileInfo h in htmlFiles)
                     {
                         //If the html name is the same as the exe name look for the xml
-                        if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(e.Name)))
+                        if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(x.Name)))
                         {
-                            foreach (FileInfo x in xmlFiles)
+                            foreach (FileInfo e in exeFiles)
                             {
                                 //We've found a plugin!
-                                if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(x.Name)))
+                                if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(e.Name)))
                                 {
                                     plugins.Add(new Plugin(e, x, h));
+                                }
+                            }
+
+                            foreach (FileInfo j in jarFiles)
+                            {
+                                //We've found a plugin!
+                                if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(j.Name)))
+                                {
+                                    plugins.Add(new Plugin(j, x, h));
+                                }
+                            }
+
+                            foreach (FileInfo p in pythonFiles)
+                            {
+                                //We've found a plugin!
+                                if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(p.Name)))
+                                {
+                                    plugins.Add(new Plugin(p, x, h));
+                                }
+                            }
+
+                            foreach (FileInfo m in matlabFiles)
+                            {
+                                //We've found a plugin!
+                                if (Path.GetFileNameWithoutExtension(h.Name).Equals(Path.GetFileNameWithoutExtension(m.Name)))
+                                {
+                                    plugins.Add(new Plugin(m, x, h));
                                 }
                             }
                         }
@@ -1945,14 +2004,17 @@ namespace OmGui
 
                     if (progress > -1)
                     {
-                        foreach (ListViewItem lvi in queueListViewItems2.Items)
+                        this.Invoke((MethodInvoker)delegate
                         {
-                            BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                            if (worker.Equals(bw))
+                            foreach (ListViewItem lvi in queueListViewItems2.Items)
                             {
-                                lvi.SubItems[2].Text = progress.ToString();
+                                BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                                if (worker.Equals(bw))
+                                {
+                                    lvi.SubItems[1].Text = progress.ToString();
+                                }
                             }
-                        }
+                        });
                     }
 
 
@@ -2039,9 +2101,9 @@ namespace OmGui
 
         private void parseMessage(string outputLine, out int progress)
         {
-            progress = -1; ;
+            progress = -1;
             //OUTPUT
-            if (outputLine != null)
+            if (outputLine != null && outputLine.Length > 1)
             {
                 if (outputLine[0] == 'p')
                 {

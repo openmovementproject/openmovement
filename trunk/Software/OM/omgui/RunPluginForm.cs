@@ -168,6 +168,8 @@ namespace OmGui
                         }
                     }
                 }
+
+                ParameterString = ParameterString;
                     
                 //Copy input and output file into directory with no spaces because of the Matlab hack.
                 string sourceFile = CWAFilename;

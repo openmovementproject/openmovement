@@ -363,6 +363,15 @@
             System.Windows.Forms.ListViewGroup listViewGroup331 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup332 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup333 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup334 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup335 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup336 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup337 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup338 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup339 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup340 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup341 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup342 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.toolStripContainer2 = new System.Windows.Forms.ToolStripContainer();
@@ -431,16 +440,16 @@
             this.colFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colProgress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPageOutput = new System.Windows.Forms.TabPage();
-            this.textBoxLog = new System.Windows.Forms.TextBox();
-            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
-            this.identifyTimer = new System.Windows.Forms.Timer(this.components);
-            this.fileSystemWatcherOutput = new System.IO.FileSystemWatcher();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.outputListView = new System.Windows.Forms.ListView();
             this.columnHeaderFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderFilePath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderDateModified = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.textBoxLog = new System.Windows.Forms.TextBox();
+            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
+            this.identifyTimer = new System.Windows.Forms.Timer(this.components);
+            this.fileSystemWatcherOutput = new System.IO.FileSystemWatcher();
             this.devicesListView = new OmGui.DeviceListView();
             this.dataViewer = new OmGui.DataViewer();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
@@ -887,7 +896,7 @@
             // 
             this.splitContainerLog.Panel2.Controls.Add(this.textBoxLog);
             this.splitContainerLog.Size = new System.Drawing.Size(906, 564);
-            this.splitContainerLog.SplitterDistance = 529;
+            this.splitContainerLog.SplitterDistance = 530;
             this.splitContainerLog.SplitterWidth = 3;
             this.splitContainerLog.TabIndex = 0;
             // 
@@ -907,7 +916,7 @@
             // splitContainerPreview.Panel2
             // 
             this.splitContainerPreview.Panel2.Controls.Add(this.splitContainer1);
-            this.splitContainerPreview.Size = new System.Drawing.Size(906, 529);
+            this.splitContainerPreview.Size = new System.Drawing.Size(906, 530);
             this.splitContainerPreview.SplitterDistance = 122;
             this.splitContainerPreview.SplitterWidth = 3;
             this.splitContainerPreview.TabIndex = 0;
@@ -956,7 +965,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tabControlFiles);
-            this.splitContainer1.Size = new System.Drawing.Size(906, 404);
+            this.splitContainer1.Size = new System.Drawing.Size(906, 405);
             this.splitContainer1.SplitterDistance = 206;
             this.splitContainer1.TabIndex = 2;
             // 
@@ -972,7 +981,7 @@
             this.tabControlFiles.Margin = new System.Windows.Forms.Padding(2);
             this.tabControlFiles.Name = "tabControlFiles";
             this.tabControlFiles.SelectedIndex = 0;
-            this.tabControlFiles.Size = new System.Drawing.Size(906, 210);
+            this.tabControlFiles.Size = new System.Drawing.Size(906, 211);
             this.tabControlFiles.TabIndex = 2;
             // 
             // tabPageFiles
@@ -983,7 +992,7 @@
             this.tabPageFiles.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageFiles.Name = "tabPageFiles";
             this.tabPageFiles.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPageFiles.Size = new System.Drawing.Size(898, 184);
+            this.tabPageFiles.Size = new System.Drawing.Size(898, 185);
             this.tabPageFiles.TabIndex = 0;
             this.tabPageFiles.Text = "Files";
             this.tabPageFiles.UseVisualStyleBackColor = true;
@@ -1000,7 +1009,7 @@
             this.dateModifiedColumnHeader});
             this.filesListView.Location = new System.Drawing.Point(2, 30);
             this.filesListView.Name = "filesListView";
-            this.filesListView.Size = new System.Drawing.Size(894, 152);
+            this.filesListView.Size = new System.Drawing.Size(894, 153);
             this.filesListView.TabIndex = 1;
             this.filesListView.UseCompatibleStateImageBehavior = false;
             this.filesListView.View = System.Windows.Forms.View.Details;
@@ -1063,7 +1072,7 @@
             this.tabPageQueue.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageQueue.Name = "tabPageQueue";
             this.tabPageQueue.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPageQueue.Size = new System.Drawing.Size(898, 184);
+            this.tabPageQueue.Size = new System.Drawing.Size(898, 185);
             this.tabPageQueue.TabIndex = 1;
             this.tabPageQueue.Text = "Queue";
             this.tabPageQueue.UseVisualStyleBackColor = true;
@@ -1127,10 +1136,57 @@
             this.tabPageOutput.Controls.Add(this.outputListView);
             this.tabPageOutput.Location = new System.Drawing.Point(4, 22);
             this.tabPageOutput.Name = "tabPageOutput";
-            this.tabPageOutput.Size = new System.Drawing.Size(898, 184);
+            this.tabPageOutput.Size = new System.Drawing.Size(898, 185);
             this.tabPageOutput.TabIndex = 2;
             this.tabPageOutput.Text = "Output";
             this.tabPageOutput.UseVisualStyleBackColor = true;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(898, 25);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // outputListView
+            // 
+            this.outputListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.outputListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeaderFileName,
+            this.columnHeaderFilePath,
+            this.columnHeaderSize,
+            this.columnHeaderDateModified});
+            this.outputListView.FullRowSelect = true;
+            this.outputListView.Location = new System.Drawing.Point(0, 28);
+            this.outputListView.Name = "outputListView";
+            this.outputListView.Size = new System.Drawing.Size(898, 154);
+            this.outputListView.TabIndex = 0;
+            this.outputListView.UseCompatibleStateImageBehavior = false;
+            this.outputListView.View = System.Windows.Forms.View.Details;
+            this.outputListView.DoubleClick += new System.EventHandler(this.outputListView_DoubleClick);
+            // 
+            // columnHeaderFileName
+            // 
+            this.columnHeaderFileName.Text = "File Name";
+            this.columnHeaderFileName.Width = 98;
+            // 
+            // columnHeaderFilePath
+            // 
+            this.columnHeaderFilePath.Text = "File Location";
+            this.columnHeaderFilePath.Width = 120;
+            // 
+            // columnHeaderSize
+            // 
+            this.columnHeaderSize.Text = "File Size (MB)";
+            this.columnHeaderSize.Width = 86;
+            // 
+            // columnHeaderDateModified
+            // 
+            this.columnHeaderDateModified.Text = "Date Modified";
+            this.columnHeaderDateModified.Width = 122;
             // 
             // textBoxLog
             // 
@@ -1143,7 +1199,7 @@
             this.textBoxLog.Name = "textBoxLog";
             this.textBoxLog.ReadOnly = true;
             this.textBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLog.Size = new System.Drawing.Size(906, 32);
+            this.textBoxLog.Size = new System.Drawing.Size(906, 31);
             this.textBoxLog.TabIndex = 0;
             // 
             // toolStripContainer1
@@ -1183,50 +1239,6 @@
             this.fileSystemWatcherOutput.Created += new System.IO.FileSystemEventHandler(this.fileSystemWatcherOutput_Created);
             this.fileSystemWatcherOutput.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemWatcherOutput_Deleted);
             this.fileSystemWatcherOutput.Renamed += new System.IO.RenamedEventHandler(this.fileSystemWatcherOutput_Renamed);
-            // 
-            // outputListView
-            // 
-            this.outputListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeaderFileName,
-            this.columnHeaderFilePath,
-            this.columnHeaderSize,
-            this.columnHeaderDateModified});
-            this.outputListView.FullRowSelect = true;
-            this.outputListView.Location = new System.Drawing.Point(0, 28);
-            this.outputListView.Name = "outputListView";
-            this.outputListView.Size = new System.Drawing.Size(898, 142);
-            this.outputListView.TabIndex = 0;
-            this.outputListView.UseCompatibleStateImageBehavior = false;
-            this.outputListView.View = System.Windows.Forms.View.Details;
-            this.outputListView.DoubleClick += new System.EventHandler(this.outputListView_DoubleClick);
-            // 
-            // columnHeaderFileName
-            // 
-            this.columnHeaderFileName.Text = "File Name";
-            this.columnHeaderFileName.Width = 98;
-            // 
-            // columnHeaderFilePath
-            // 
-            this.columnHeaderFilePath.Text = "File Location";
-            this.columnHeaderFilePath.Width = 120;
-            // 
-            // columnHeaderSize
-            // 
-            this.columnHeaderSize.Text = "File Size (MB)";
-            this.columnHeaderSize.Width = 86;
-            // 
-            // columnHeaderDateModified
-            // 
-            this.columnHeaderDateModified.Text = "Date Modified";
-            this.columnHeaderDateModified.Width = 122;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(898, 25);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
             // 
             // devicesListView
             // 
@@ -1900,6 +1912,24 @@
             listViewGroup332.Name = "Removed";
             listViewGroup333.Header = "Files";
             listViewGroup333.Name = "File";
+            listViewGroup334.Header = "Devices";
+            listViewGroup334.Name = "Other";
+            listViewGroup335.Header = "New Data";
+            listViewGroup335.Name = "NewData";
+            listViewGroup336.Header = "Downloading";
+            listViewGroup336.Name = "Downloading";
+            listViewGroup337.Header = "Downloaded";
+            listViewGroup337.Name = "Downloaded";
+            listViewGroup338.Header = "Charging";
+            listViewGroup338.Name = "Charging";
+            listViewGroup339.Header = "Standby";
+            listViewGroup339.Name = "Standby";
+            listViewGroup340.Header = "Outbox";
+            listViewGroup340.Name = "Outbox";
+            listViewGroup341.Header = "Removed";
+            listViewGroup341.Name = "Removed";
+            listViewGroup342.Header = "Files";
+            listViewGroup342.Name = "File";
             this.devicesListView.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
             listViewGroup1,
             listViewGroup2,
@@ -2233,7 +2263,16 @@
             listViewGroup330,
             listViewGroup331,
             listViewGroup332,
-            listViewGroup333});
+            listViewGroup333,
+            listViewGroup334,
+            listViewGroup335,
+            listViewGroup336,
+            listViewGroup337,
+            listViewGroup338,
+            listViewGroup339,
+            listViewGroup340,
+            listViewGroup341,
+            listViewGroup342});
             this.devicesListView.HideSelection = false;
             this.devicesListView.LabelWrap = false;
             this.devicesListView.Location = new System.Drawing.Point(0, 0);
