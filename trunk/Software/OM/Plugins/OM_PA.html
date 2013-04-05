@@ -21,6 +21,11 @@
 <script type="text/javascript">
     //var $ = function (e) { return document.getElementById(e); }
 	
+	var startBlock = -1;
+	var blockCount = -1;
+	var startTime = -1;
+	var endTime = -1;
+	
 	//Onload to get profile if exists
 	window.onload = function() {
 		
@@ -34,10 +39,21 @@
 			
 			if(keyValuePair[0] == "startBlock")
 			{
-				document.forms[0].elements["startBlock"].value = keyValuePair[1];
+				startBlock = keyValuePair[1];
 			}
-			
-			if(keyValuePair[0] == "mass")
+			else if(keyValuePair[0] == "blockCount")
+			{
+				blockCount = keyValuePair[1];
+			}
+			else if(keyValuePair[0] == "startTime")
+			{
+				startTime = keyValuePair[1];
+			}
+			else if(keyValuePair[0] == "endTime")
+			{
+				endTime = keyValuePair[1];
+			}//Form stuff now:
+			else if(keyValuePair[0] == "mass")
 			{
 				document.forms[0].elements["mass"].value = keyValuePair[1];
 			}
@@ -81,6 +97,11 @@
 					}
 				}
 				
+				if(name == "epoch")
+				{
+					value = document.forms[0].elements[i].options[document.forms[0].elements[i].selectedIndex].text;
+				}
+				
 				if (i != 0) { hash = hash + "&"; }
 			
 				hash = hash + "\"" + name + "\"" + "=" + value;
@@ -90,6 +111,18 @@
 				outputfile = document.forms[0].elements[i].value;
 			}
         }
+		
+		alert("Start time: " + startTime + "\nEnd Time: " + endTime);
+		
+		//add start and end blocks/times
+		if(startTime != -1 && endTime != -1)
+		{
+			hash = hash + "&" + "\"startTime\"=" + startTime + "&\"endTime\"=" + endTime;
+		}
+		else
+		{
+			hash = hash + "&" + "\"startTime\"=fileStart" + "&\"endTime\"=fileEnd";
+		}
 		
 		//Add outputfile
 		if(outputfile != "")
@@ -141,7 +174,13 @@
 <form name="Form1" onsubmit="return func()">
 	<div><label class="input" style="margin-bottom:3px;" for="mass">Body Mass</label><br /><input class="input" id="mass" name="mass" type="text" value="80" /><select id="weightSelect" name="weightSelect"><option name="kg" selected>kg</option><option name="lbs">lbs</option></select></div>
 	<div><label class="input" style="margin-bottom:3px;" for="bodyFat">Body Fat Percentage</label><br /><input class="input" id="bodyFat" name="bodyFat" type="text" value="22" /><span class="input">%</span></div>
-	<div><label class="input" style="margin-bottom:3px;" for="epoch">Epoch Period</label><br /><input class="input" id="epoch" name="epoch" type="text" value="60" /><span class="input">seconds</span></div>
+	<div><label class="input" style="margin-bottom:3px;" for="epoch">Epoch Period</label><br /><select class="input" id="epoch" name="epoch" type="text">
+		<option>secs</option>
+		<option>mins</option>
+		<option>hours</option>
+		<option>days</option>
+		</select>
+	</div>
 	<div><label class="input" style="margin-bottom:3px;" for="outputfile">Output Filename</label><br /><input class="input" id="outputfile" name="outputfile" type="text" /></div>
 	
 	<!-- Image Map -->
