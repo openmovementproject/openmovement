@@ -751,7 +751,7 @@ namespace OmGui
                 string s = selectionLabel;
                 Font font = SystemFonts.DefaultFont;
                 Size stringSize = e.Graphics.MeasureString(s, font).ToSize();
-                Point point = new Point((int)((selectionStart + selectionEnd) / 2 - stringSize.Width / 2), 5);
+                Point point = new Point((int)((selectionStart + selectionEnd) / 2 - stringSize.Width / 2), 16);
                 e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x64, Color.FromKnownColor(KnownColor.Info))), new RectangleF(point, stringSize));
                 e.Graphics.DrawRectangle(Pens.Black, new Rectangle(point, stringSize));
                 e.Graphics.DrawString(s, font, SystemBrushes.InfoText, point);

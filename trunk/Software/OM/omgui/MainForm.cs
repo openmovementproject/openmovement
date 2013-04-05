@@ -65,7 +65,7 @@ namespace OmGui
             if (elevate)
             {
                 try
-                { 
+                {
                     // Start a new instance
                     ProcessStartInfo process = new ProcessStartInfo();
                     process.FileName = Application.ExecutablePath;
@@ -173,6 +173,7 @@ namespace OmGui
 
         IDictionary<ushort, ListViewItem> listViewDevices = new Dictionary<ushort, ListViewItem>();
         IDictionary<string, ListViewItem> listViewFiles = new Dictionary<string, ListViewItem>();
+        IDictionary<string, ListViewItem> listViewOutputFiles = new Dictionary<string, ListViewItem>();
 
         //TS - [P] - Updates the DeviceListViewItem's entry
         //TS - TODO - Work out exactly how this works.
@@ -181,7 +182,7 @@ namespace OmGui
             item.SubItems.Clear();
 
             //TS - Actually does all the forecolors etc.
-            DeviceListViewCreateItem((OmSource) item.Tag, item);
+            DeviceListViewCreateItem((OmSource)item.Tag, item);
 
             //TS - [P] - Get and set the category for the list
             //TS - Don't need this anymore because there aren't groups in one list view but a list view each.
@@ -408,7 +409,7 @@ namespace OmGui
 
             System.IO.FileInfo info = new System.IO.FileInfo(path);
             //MB
-            string fileSize = ((double) (info.Length/1024/1024)).ToString();
+            string fileSize = ((double)((double)info.Length / 1024.0 / 1024.0)).ToString("F");
             string dateModified = info.CreationTime.ToString("dd/MM/yy HH:mm:ss");
 
             item.SubItems.Clear();
@@ -418,6 +419,26 @@ namespace OmGui
             item.SubItems.Add(dateModified);
 
             item.Text = fileName;
+        }
+
+
+        private void UpdateOutputFile(ListViewItem item, string path)
+        {
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+            System.IO.FileInfo info = new FileInfo(path);
+
+            string fileSize = ((double)((double) info.Length / 1024.0 / 1024.0)).ToString("F");
+            string dateModified = info.CreationTime.ToString("dd/MM/yy HH:mm:ss");
+
+            item.SubItems.Clear();
+
+            item.SubItems.Add(path);
+            item.SubItems.Add(fileSize);
+            item.SubItems.Add(dateModified);
+
+            item.Text = fileName;
+
+            item.Tag = path;
         }
 
         int refreshIndex = 0;
@@ -457,7 +478,7 @@ namespace OmGui
 
             foreach (ListViewItem i in devicesListView.SelectedItems)
             {
-                OmDevice device = (OmDevice) i.Tag;
+                OmDevice device = (OmDevice)i.Tag;
                 if (device != null && !device.IsDownloading && device.IsRecording == OmDevice.RecordStatus.Stopped && device.HasData)
                 {
                     bool ok = true;
@@ -516,7 +537,7 @@ namespace OmGui
             //TS - If multiple devices selected then show which downloaded and which didnt.
             if (devicesListView.SelectedItems.Count > 0)
             {
-                string message = numDevicesDownloaded + " devices downloaded from a selection of " + (int) (numDevicesNotDownloaded + numDevicesDownloaded) + " devices." + "\r\nFiles:";
+                string message = numDevicesDownloaded + " devices downloaded from a selection of " + (int)(numDevicesNotDownloaded + numDevicesDownloaded) + " devices." + "\r\nFiles:";
 
                 foreach (string fileName in fileNamesDownloaded)
                 {
@@ -593,10 +614,10 @@ namespace OmGui
                         someDownloading = true;
                     }
                     //If it isn't downloading and allDownloading is true then set it false.
-                    else if(allDownloading)
+                    else if (allDownloading)
                     {
                         allDownloading = false;
-                    }; 
+                    };
 
                     //HASDATA
                     //If it has data then some have data.
@@ -611,19 +632,19 @@ namespace OmGui
                     }
 
                     //ALL RECORDING
-                    if (device.StartTime < device.StopTime) 
+                    if (device.StartTime < device.StopTime)
                     {
                         someRecording = true;
                     }
-                    else if (allRecording) 
-                    { 
-                        allRecording = false; 
+                    else if (allRecording)
+                    {
+                        allRecording = false;
                     }
 
                     //SETUP FOR RECORD
                     if (device.StartTime > DateTime.Now && (device.StartTime != DateTime.MaxValue))
-                    { 
-                        someSetupForRecord = true; 
+                    {
+                        someSetupForRecord = true;
                     }
                     else if (allSetupForRecord)
                     {
@@ -677,7 +698,7 @@ namespace OmGui
             devicesToolStripButtonIdentify.Enabled = false;
         }
 
-        
+
         private void listViewDevices_SelectedIndexChanged(object sender, EventArgs e)
         {
             //TS - [P] - Get the list of selected sources and in turn change the toolbar enabled/disabled.
@@ -790,7 +811,8 @@ namespace OmGui
             try
             {
                 device = OmReader.Open(file);
-            } catch (Exception) { Console.Error.WriteLine("ERROR: Problem reading file: " + file); }
+            }
+            catch (Exception) { Console.Error.WriteLine("ERROR: Problem reading file: " + file); }
 
             if (device != null)
             {
@@ -854,7 +876,7 @@ namespace OmGui
             Cursor.Current = Cursors.Default;
 
             //TS - Show messagebox as there are multiple.
-            if(devicesListView.SelectedItems.Count > 1)
+            if (devicesListView.SelectedItems.Count > 1)
             {
                 MessageBox.Show(devicesCancelling + " devices cancelled downloading from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Cancel Status", MessageBoxButtons.OK);
             }
@@ -885,34 +907,34 @@ namespace OmGui
             //TS - [P] - Removed this check as can now just give prompt box.
             //if (EnsureNoSelectedDownloading())
             //{
-                List<string> fails = new List<string>();
-                dataViewer.CancelPreview();
-                Cursor.Current = Cursors.WaitCursor;
-                foreach (ListViewItem i in devicesListView.SelectedItems)
+            List<string> fails = new List<string>();
+            dataViewer.CancelPreview();
+            Cursor.Current = Cursors.WaitCursor;
+            foreach (ListViewItem i in devicesListView.SelectedItems)
+            {
+                OmSource device = (OmSource)i.Tag;
+                if (device is OmDevice && !((OmDevice)device).IsDownloading && ((OmDevice)device).IsRecording != OmDevice.RecordStatus.Stopped)
                 {
-                    OmSource device = (OmSource)i.Tag;
-                    if (device is OmDevice && !((OmDevice)device).IsDownloading && ((OmDevice) device).IsRecording != OmDevice.RecordStatus.Stopped)
+                    if (!((OmDevice)device).NeverRecord())
                     {
-                        if (!((OmDevice)device).NeverRecord())
-                        {
-                            fails.Add(device.DeviceId.ToString());
-                        }
-                        else
-                        {
-                            //TS - Record device stopped recording.
-                            devicesStoppedRecording++;
-                        }
+                        fails.Add(device.DeviceId.ToString());
+                    }
+                    else
+                    {
+                        //TS - Record device stopped recording.
+                        devicesStoppedRecording++;
                     }
                 }
-                Cursor.Current = Cursors.Default;
-                if (fails.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
+            }
+            Cursor.Current = Cursors.Default;
+            if (fails.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
             //}
 
-                //TS - If multiple devices then show which stopped and which didn't.
-                if (devicesListView.SelectedItems.Count > 1)
-                {
-                    MessageBox.Show(devicesStoppedRecording + " devices stopped recording from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Stop Record Status", MessageBoxButtons.OK);
-                }
+            //TS - If multiple devices then show which stopped and which didn't.
+            if (devicesListView.SelectedItems.Count > 1)
+            {
+                MessageBox.Show(devicesStoppedRecording + " devices stopped recording from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Stop Record Status", MessageBoxButtons.OK);
+            }
 
             devicesListViewUpdateEnabled();
         }
@@ -945,59 +967,59 @@ namespace OmGui
         {
             //if (EnsureNoSelectedDownloading())
             //{
-                List<string> fails = new List<string>();
+            List<string> fails = new List<string>();
 
-                DateTime start = DateTime.MinValue;
-                DateTime stop = DateTime.MaxValue;
+            DateTime start = DateTime.MinValue;
+            DateTime stop = DateTime.MaxValue;
 
-                OmDevice device = (OmDevice)devicesListView.SelectedItems[0].Tag;
+            OmDevice device = (OmDevice)devicesListView.SelectedItems[0].Tag;
 
-                DateRangeForm rangeForm = new DateRangeForm("Session Range", "Session Range", device);
-                DialogResult dr = rangeForm.ShowDialog();
-                start = rangeForm.FromDate;
-                stop = rangeForm.UntilDate; //TS - TODO - stop needs to be got from dialog.
+            DateRangeForm rangeForm = new DateRangeForm("Session Range", "Session Range", device);
+            DialogResult dr = rangeForm.ShowDialog();
+            start = rangeForm.FromDate;
+            stop = rangeForm.UntilDate; //TS - TODO - stop needs to be got from dialog.
 
-                if (dr == System.Windows.Forms.DialogResult.OK)
+            if (dr == System.Windows.Forms.DialogResult.OK)
+            {
+                dataViewer.CancelPreview();
+                Cursor.Current = Cursors.WaitCursor;
+
+                //Don't want it to be able to work on multiple do we because of metadata??
+                //foreach (ListViewItem i in devicesListView.SelectedItems)
+                //{                        
+                if (device is OmDevice && !((OmDevice)device).IsDownloading)
                 {
-                    dataViewer.CancelPreview();
-                    Cursor.Current = Cursors.WaitCursor;
-
-                    //Don't want it to be able to work on multiple do we because of metadata??
-                    //foreach (ListViewItem i in devicesListView.SelectedItems)
-                    //{                        
-                        if (device is OmDevice && !((OmDevice)device).IsDownloading)
-                        {
-                            //Set Date
-                            if (rangeForm.Always)
-                            {
-                                //TS - Taken from Record button
-                                if (!((OmDevice)device).AlwaysRecord())
-                                    fails.Add(device.DeviceId.ToString());
-                            }
-                            else
-                            {
-                                if (!((OmDevice)device).SetInterval(start, stop))
-                                    fails.Add(device.DeviceId.ToString());
-                            }
-
-                            //Set SessionID
-                            if (!((OmDevice)device).SetSessionId((uint)rangeForm.SessionID))
-                                fails.Add(device.DeviceId.ToString());
-
-                            //TODO - Set Metadata
-                            
-                        }
+                    //Set Date
+                    if (rangeForm.Always)
+                    {
+                        //TS - Taken from Record button
+                        if (!((OmDevice)device).AlwaysRecord())
+                            fails.Add(device.DeviceId.ToString());
                     }
-                    Cursor.Current = Cursors.Default;
+                    else
+                    {
+                        if (!((OmDevice)device).SetInterval(start, stop))
+                            fails.Add(device.DeviceId.ToString());
+                    }
 
-                //if (fails.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
+                    //Set SessionID
+                    if (!((OmDevice)device).SetSessionId((uint)rangeForm.SessionID))
+                        fails.Add(device.DeviceId.ToString());
+
+                    //TODO - Set Metadata
+
+                }
+            }
+            Cursor.Current = Cursors.Default;
+
+            //if (fails.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
             //}
 
-                //TS - If more than 1 device selected then show which could and couldn't be set up.
-                //if (devicesListView.SelectedItems.Count > 1)
-                //{
-                //    MessageBox.Show(devicesCanRecord + " devices setup record from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Record Status", MessageBoxButtons.OK);
-                //}
+            //TS - If more than 1 device selected then show which could and couldn't be set up.
+            //if (devicesListView.SelectedItems.Count > 1)
+            //{
+            //    MessageBox.Show(devicesCanRecord + " devices setup record from a selection of " + devicesListView.SelectedItems.Count + " devices.", "Record Status", MessageBoxButtons.OK);
+            //}
 
             //Do Sync Time
             if (rangeForm.SyncTime != DateRangeForm.SyncTimeType.None)
@@ -1007,11 +1029,11 @@ namespace OmGui
                 //foreach (ListViewItem i in devicesListView.SelectedItems)
                 //{
                 //    OmSource device = (OmSource)i.Tag;
-                    if (device is OmDevice && ((OmDevice)device).Connected)
-                    {
-                        if (!((OmDevice)device).SyncTime((int) rangeForm.SyncTime))
-                            fails2.Add(device.DeviceId.ToString());
-                    }
+                if (device is OmDevice && ((OmDevice)device).Connected)
+                {
+                    if (!((OmDevice)device).SyncTime((int)rangeForm.SyncTime))
+                        fails2.Add(device.DeviceId.ToString());
+                }
                 //}
                 Cursor.Current = Cursors.Default;
                 if (fails2.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails2.Count + " device(s):\r\n" + string.Join("; ", fails2.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
@@ -1052,7 +1074,7 @@ namespace OmGui
         private void toolStripButtonClear_Click(object sender, EventArgs e)
         {
             //TS - Record which are cleared and stopped if multiple selected.
-//            int devicesClearing = 0;
+            //            int devicesClearing = 0;
 
             if (EnsureNoSelectedDownloading())
             {
@@ -1131,7 +1153,7 @@ namespace OmGui
 
             //TS - Record how many can be exported. (Little different to the other buttons because this method is used for both files and devices.
             int devicesSelected = -1; //-1 means files.
-            if(devicesListView.SelectedItems.Count > 0)
+            if (devicesListView.SelectedItems.Count > 0)
             {
                 devicesSelected = devicesListView.SelectedItems.Count;
             }
@@ -1151,7 +1173,7 @@ namespace OmGui
                     }
                 }
             }
-            else if(filesListView.SelectedItems.Count > 0)
+            else if (filesListView.SelectedItems.Count > 0)
             {
                 foreach (ListViewItem item in filesListView.SelectedItems)
                 {
@@ -1222,7 +1244,7 @@ namespace OmGui
 
         //TS - Properties
         public string CurrentWorkingFolder { get; set; }
-        
+
         //TS - Fields
         public bool inWorkingFolder = false;
         string defaultTitleText = "Open Movement (Beta Testing Version)";
@@ -1265,6 +1287,7 @@ namespace OmGui
             //Remove files already in list if changed folder
             filesListView.Items.Clear();
             listViewFiles.Clear();
+            listViewOutputFiles.Clear();
 
             //Find files
             try
@@ -1276,6 +1299,20 @@ namespace OmGui
                     System.IO.Directory.CreateDirectory(folder);
                 }
 
+                //Output Watcher
+                if (!File.Exists(folder + "\\output"))
+                {
+                    Directory.CreateDirectory(folder + "\\output");
+                }
+
+                fileSystemWatcherOutput.Path = folder + "\\output";
+                string[] filePathsOutput = System.IO.Directory.GetFiles(folder + "\\output", fileSystemWatcherOutput.Filter, System.IO.SearchOption.TopDirectoryOnly);
+                foreach (string f in filePathsOutput)
+                {
+                    outputListAddItem(f);
+                }
+
+                //Files Watcher
                 fileSystemWatcher.Path = folder;
 
                 string[] filePaths = System.IO.Directory.GetFiles(folder, fileSystemWatcher.Filter, System.IO.SearchOption.TopDirectoryOnly);
@@ -1284,9 +1321,9 @@ namespace OmGui
                     FileListViewAdd(f);
                 }
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
-                Console.WriteLine(e.Message); 
+                Console.WriteLine(e.Message);
             }
 
             //Add files in project to list.
@@ -1403,7 +1440,7 @@ namespace OmGui
                             tsb.Text = name;
                             tsb.Tag = plugin;
 
-                            if(plugin.Icon != null)
+                            if (plugin.Icon != null)
                                 tsb.Image = plugin.Icon;
 
                             tsb.Click += new EventHandler(tsb_Click);
@@ -1433,12 +1470,12 @@ namespace OmGui
 
             if (tsb != null && tsb.Tag != null)
             {
-                if(filesListView.SelectedItems.Count > 0)
+                if (filesListView.SelectedItems.Count > 0)
                 {
-                    OmReader reader = (OmReader) filesListView.SelectedItems[0].Tag;
+                    OmReader reader = (OmReader)filesListView.SelectedItems[0].Tag;
 
                     string CWAFilename = reader.Filename;
-                    Plugin p = (Plugin) tsb.Tag;
+                    Plugin p = (Plugin)tsb.Tag;
 
                     RunPluginForm rpf = new RunPluginForm(p, CWAFilename);
                     rpf.ShowDialog();
@@ -1503,7 +1540,7 @@ namespace OmGui
             }
 
             //Open DataViewer
-            if(filesListView.SelectedItems.Count == 1)
+            if (filesListView.SelectedItems.Count == 1)
             {
                 OmReader reader = (OmReader)filesListView.SelectedItems[0].Tag;
                 dataViewer.Open(reader.Filename);
@@ -1540,7 +1577,7 @@ namespace OmGui
 
             foreach (ListViewItem item in devicesListView.SelectedItems)
             {
-                OmDevice device = (OmDevice) item.Tag;
+                OmDevice device = (OmDevice)item.Tag;
 
                 device.SetLed(OmApi.OM_LED_STATE.OM_LED_BLUE);
 
@@ -1654,7 +1691,7 @@ namespace OmGui
 
                 FileInfo[] exeFiles = d.GetFiles("*.exe");
                 FileInfo[] htmlFiles = d.GetFiles("*.html");
-                FileInfo[] xmlFiles= d.GetFiles("*.xml");
+                FileInfo[] xmlFiles = d.GetFiles("*.xml");
 
                 foreach (FileInfo e in exeFiles)
                 {
@@ -1676,7 +1713,7 @@ namespace OmGui
                 }
 
                 //    //Find XML files
-                    
+
 
                 //    List<FileInfo> htmlFiles = new List<FileInfo>();
 
@@ -1712,16 +1749,26 @@ namespace OmGui
                 {
                     float blockStart = -1;
                     float blockCount = -1;
+                    float blockEnd = -1;
+
+                    DateTime startDateTime;
+                    DateTime endDateTime;
 
                     PluginsForm pluginsForm;
 
                     //Now see if we've got a selection on the dataViewer
-                    if(dataViewer.HasSelection)
+                    if (dataViewer.HasSelection)
                     {
                         blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
                         blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+                        blockEnd = blockStart + blockCount;
 
-                        pluginsForm = new PluginsForm(plugins, reader.Filename, blockStart, blockCount);
+                        startDateTime = dataViewer.TimeForBlock(blockStart);
+                        endDateTime = dataViewer.TimeForBlock(blockEnd);
+                        string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+                        string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+
+                        pluginsForm = new PluginsForm(plugins, reader.Filename, blockStart, blockCount, startDateTimeString, endDateTimeString);
                         pluginsForm.ShowDialog(this);
 
                         //Run the process
@@ -1734,7 +1781,7 @@ namespace OmGui
                     else
                     {
                         //Now that we have our plugins, open the plugin form
-                        pluginsForm = new PluginsForm(plugins, reader.Filename, - 1, -1);
+                        pluginsForm = new PluginsForm(plugins, reader.Filename, -1, -1, null, null);
                         pluginsForm.ShowDialog(this);
 
                         //Run the process
@@ -1762,12 +1809,6 @@ namespace OmGui
         //PLUGIN PROCESS RUNNING
         private void RunProcess(Plugin plugin, string parametersAsString, string originalOutputName, string inputName)
         {
-            //TOM TODO - Add in so we can run PY and JAR files as well as EXE
-            //if (Plugin.Ext == Plugin.ExtType.PY)
-            //{
-            //    p.StartInfo.FileName = "python " + Plugin.RunFile.FullName;
-            //}
-
             PluginQueueItem pqi = new PluginQueueItem(plugin, parametersAsString, inputName);
 
             if (originalOutputName != "")
@@ -1776,8 +1817,28 @@ namespace OmGui
             }
 
             ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = plugin.RunFile.FullName;
+            
             //psi.FileName = @"H:\OM\Plugins\TestParameterApp.exe";
+
+            //TOM TODO - Add in so we can run PY and JAR files as well as EXE
+            if (plugin.Ext == Plugin.ExtType.PY)
+            {
+                psi.FileName = "python";
+                parametersAsString = plugin.RunFile.FullName + parametersAsString;
+            }
+            else if (plugin.Ext == Plugin.ExtType.JAR)
+            {
+                psi.FileName = "java";
+                parametersAsString = "-jar" + plugin.RunFile.FullName + parametersAsString;
+            }
+            else if (plugin.Ext == Plugin.ExtType.EXE)
+            {
+                psi.FileName = plugin.RunFile.FullName;
+            }
+            else
+            {
+                MessageBox.Show("The plugin must be an exe, jar or py.", "Invalid Plugin Type", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
             psi.Arguments = parametersAsString;
 
@@ -1824,14 +1885,31 @@ namespace OmGui
 
         void pluginQueueWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            BackgroundWorker worker = (BackgroundWorker)sender;
             if (e.Result != null)
             {
+                string s = (string)e.Result;
+
+                if (s.Equals("done"))
+                {
+                    foreach (ListViewItem lvi in queueListViewItems2.Items)
+                    {
+                        BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                        if (worker.Equals(bw))
+                        {
+                            this.Invoke((MethodInvoker)delegate
+                            {
+                                lvi.SubItems[1].Text = "Complete";
+                            });
+                        }
+                    }
+                }
             }
-            else if(e.Cancelled)
+            else if (e.Cancelled)
             {
                 //TS - TODO - Do we need a cancel message to pop up?
             }
-            else if(e.Error != null)
+            else if (e.Error != null)
             {
                 MessageBox.Show("An error has occured in the plugin:\n" + e.Error.Message, "Error in Plugin", MessageBoxButtons.OK);
             }
@@ -1844,8 +1922,8 @@ namespace OmGui
 
         void pluginQueueWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            PluginQueueItem pqi = (PluginQueueItem) e.Argument;
-            BackgroundWorker worker = (BackgroundWorker) sender;
+            PluginQueueItem pqi = (PluginQueueItem)e.Argument;
+            BackgroundWorker worker = (BackgroundWorker)sender;
 
             try
             {
@@ -1891,14 +1969,15 @@ namespace OmGui
                 //If there is an output file:
                 if (pqi.OriginalOutputName != "")
                 {
-                    
                     //HACK - Copy the output file back into the working directory.
-                    string outputFileLocation = System.IO.Path.Combine(Properties.Settings.Default.CurrentWorkingFolder, pqi.OriginalOutputName);
+                    string outputFileLocation = System.IO.Path.Combine(Properties.Settings.Default.CurrentWorkingFolder + "\\output", pqi.OriginalOutputName);
                     System.IO.File.Copy(pqi.destFolder + "temp.csv", outputFileLocation);
 
                     //Delete the test csv and temp cwa
-                    //System.IO.File.Delete(pqi.destFolder + "temp.csv");
-                    //System.IO.File.Delete(tempCWAFilePath);
+                    System.IO.File.Delete(pqi.destFolder + "temp.csv");
+
+                    //Set result
+                    e.Result = "done";
                 }
             }
             catch (InvalidOperationException ioe)
@@ -1906,17 +1985,17 @@ namespace OmGui
                 foreach (ListViewItem lvi in queueListViewItems2.Items)
                 {
                     BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                    if(worker.Equals(bw))
+                    if (worker.Equals(bw))
                     {
                         this.Invoke((MethodInvoker)delegate
                         {
                             queueListViewItems2.Items.Remove(lvi);
+
+                            Console.WriteLine("ioe: " + ioe.Message);
+                            MessageBox.Show("Plugin Error: " + ioe.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         });
                     }
                 }
-
-                Console.WriteLine("ioe: " + ioe.Message);
-                MessageBox.Show("Plugin Error: " + ioe.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (System.ComponentModel.Win32Exception w32e)
             {
@@ -1925,33 +2004,36 @@ namespace OmGui
                     foreach (ListViewItem lvi in queueListViewItems2.Items)
                     {
                         BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                        if(worker.Equals(bw))
+                        if (worker.Equals(bw))
                         {
                             queueListViewItems2.Items.Remove(lvi);
                         }
                     }
-            });
 
-                Console.WriteLine("w32e: " + w32e.Message);
-                MessageBox.Show("Plugin Error: " + w32e.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Console.WriteLine("w32e: " + w32e.Message);
+                    MessageBox.Show("Plugin Error: " + w32e.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                });
             }
             catch (Exception e2)
             {
-                foreach (ListViewItem lvi in queueListViewItems2.Items)
+                this.Invoke((MethodInvoker)delegate
                 {
-                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                    if(worker.Equals(bw))
+                    foreach (ListViewItem lvi in queueListViewItems2.Items)
                     {
-                        this.Invoke((MethodInvoker)delegate
+                        BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                        if (worker.Equals(bw))
                         {
-                            queueListViewItems2.Items.Remove(lvi);
-                        });
-                        
-                    }
-                }
+                            this.Invoke((MethodInvoker)delegate
+                            {
+                                queueListViewItems2.Items.Remove(lvi);
+                            });
 
-                Console.WriteLine("e2: " + e2.Message);
-                MessageBox.Show("Plugin Error: " + e2.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+
+                    Console.WriteLine("e2: " + e2.Message);
+                    MessageBox.Show("Plugin Error: " + e2.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                });
             }
         }
 
@@ -2041,9 +2123,9 @@ namespace OmGui
         //    toolStripFiles.Items.Add(tsb);
         //}
 
-        
+
         //Tool Strip Cancel button
-        
+
 
         //private void rebuildFilesToolStripItems()
         //{
@@ -2090,6 +2172,63 @@ namespace OmGui
                     bw.CancelAsync();
                 }
             }
+        }
+
+        private void fileSystemWatcherOutput_Created(object sender, FileSystemEventArgs e)
+        {
+            outputListAddItem(e.FullPath);
+        }
+
+        private void outputListAddItem(string filePath)
+        {
+            ListViewItem item = new ListViewItem();
+
+            UpdateOutputFile(item, filePath);
+
+            outputListView.Items.Add(item);
+            listViewOutputFiles[filePath] = item;
+        }
+
+        private void fileSystemWatcherOutput_Deleted(object sender, FileSystemEventArgs e)
+        {
+            outputListRemoveItem(e.FullPath, false);
+        }
+
+        private void outputListRemoveItem(string file, bool delete)
+        {
+            if (listViewOutputFiles.ContainsKey(file))
+            {
+                outputListView.Items.Remove(listViewOutputFiles[file]);
+                listViewOutputFiles.Remove(file);
+
+                if (delete)
+                {
+                    try
+                    {
+                        System.IO.File.Delete(file);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
+                }
+            }
+        }
+
+        private void fileSystemWatcherOutput_Renamed(object sender, RenamedEventArgs e)
+        {
+            outputListRemoveItem(e.OldFullPath, false);
+            outputListAddItem(e.FullPath);
+        }
+
+        private void outputListView_DoubleClick(object sender, EventArgs e)
+        {
+            ListView lv = sender as ListView;
+
+            ListViewItem item = lv.SelectedItems[0];
+            string filePath = item.Tag.ToString();
+
+            System.Diagnostics.Process.Start(filePath);
         }
     }
 }

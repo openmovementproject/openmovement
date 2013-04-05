@@ -53,11 +53,21 @@ namespace OmGui
             string url = "file:///" + file.Replace("\\", "/");
 
             //Add block parameters if needed
-            if (Plugin.CanSelection && Plugin.BlockStart > -1 && Plugin.BlockCount > -1)
+            if (Plugin.CanSelection)
             {
                 url += "?";
-                url += "blockStart=" + Plugin.BlockStart;
-                url += "&blockCount=" + Plugin.BlockCount;
+
+                if (Plugin.BlockStart > -1 && Plugin.BlockCount > -1)
+                {
+                    url += "blockStart=" + Plugin.BlockStart;
+                    url += "&blockCount=" + Plugin.BlockCount;
+                }
+
+                if (Plugin.StartTimeString != null && Plugin.EndTimeString != null)
+                {
+                    url += "startTime=" + Plugin.StartTimeString;
+                    url += "&endTime=" + Plugin.EndTimeString;
+                }
             }
 
             string profileString = loadXmlProfile();
@@ -238,6 +248,8 @@ namespace OmGui
                         parameterString += node.Name + "=" + node.InnerText;
                     }
                 }
+
+                recordProfile.Close();
             }
 
             return parameterString;
