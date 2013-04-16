@@ -23,9 +23,13 @@ namespace OmGui
         public string StartTime { get; set; }
         public string EndTime { get; set; }
 
-        public PluginsForm(List<Plugin> plugins, string fileName, float blockStart, float blockCount, string startDateTime, string endDateTime)
+        public PluginManager PluginManager { get; set; }
+        
+        public PluginsForm(PluginManager manager, string fileName, float blockStart, float blockCount, string startDateTime, string endDateTime)
         {
             InitializeComponent();
+
+            PluginManager = manager;
 
             //Blocks from dataViewer...
             BlockStart = blockStart;
@@ -34,16 +38,25 @@ namespace OmGui
             StartTime = startDateTime;
             EndTime = endDateTime;
 
-            this.plugins = plugins;
+            plugins = PluginManager.Plugins;
 
-            foreach (Plugin plugin in plugins)
+            if (plugins.Count < 1)
             {
-                pluginsComboBox.Items.Add(plugin.Type + " -- " + plugin.Name);
+                PluginManager.LoadPlugins();
+                plugins = PluginManager.Plugins;
             }
 
-            pluginsComboBox.SelectedIndex = 0;
+            if (plugins.Count > 0)
+            {
+                foreach (Plugin plugin in plugins)
+                {
+                    pluginsComboBox.Items.Add(plugin.ReadableName);
+                }
 
-            CWAFilename = fileName;
+                pluginsComboBox.SelectedIndex = 0;
+
+                CWAFilename = fileName;
+            }
         }
 
         private void pluginsComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -53,40 +66,39 @@ namespace OmGui
 
             descriptionLabel.Text = SelectedPlugin.Description;
 
-            if (SelectedPlugin.InputFile != "null")
-            {
-                inputFileLabel.Text = SelectedPlugin.InputFile;
-            }
-            else
-            {
-                inputFileLabel.Text = "No input file";
-            }
+            //TS - Not worrying about input and output file anymore.
+            //if (SelectedPlugin.InputFile != "null")
+            //{
+            //    inputFileLabel.Text = SelectedPlugin.InputFile;
+            //}
+            //else
+            //{
+            //    inputFileLabel.Text = "No input file";
+            //}
 
-
-            if (SelectedPlugin.OutputFile != "null")
-            {
-                outputFileLabel.Text = SelectedPlugin.InputFile;
-            }
-            else
-            {
-                outputFileLabel.Text = "No output file";
-            }
-            
+            //if (SelectedPlugin.OutputFile != "null")
+            //{
+            //    outputFileLabel.Text = SelectedPlugin.InputFile;
+            //}
+            //else
+            //{
+            //    outputFileLabel.Text = "No output file";
+            //}
         }
 
         private void btnRun_Click(object sender, EventArgs e)
         {
             //See now if we want the dataViewer selection.
-            if (SelectedPlugin.CanSelection && BlockCount > -1 && BlockStart > -1)
+            if (BlockCount > -1 && BlockStart > -1)
             {
-                SelectedPlugin.BlockStart = BlockStart;
-                SelectedPlugin.BlockCount = BlockCount;
+                SelectedPlugin.SelectionBlockStart = BlockStart;
+                SelectedPlugin.SelectionBlockCount = BlockCount;
             }
 
             if (StartTime != null && EndTime != null)
             {
-                SelectedPlugin.StartTimeString = StartTime;
-                SelectedPlugin.EndTimeString = EndTime;
+                SelectedPlugin.SelectionDateTimeStart = StartTime;
+                SelectedPlugin.SelectionDateTimeEnd = EndTime;
             }  
 
             //Want to pop up Input and Run Window.
@@ -104,6 +116,23 @@ namespace OmGui
             this.Close();
 
             //Also returns DialogResult.Cancel
+        }
+
+        private void buttonRefresh_Click(object sender, EventArgs e)
+        {
+            //Refresh the plugins in the manager.
+            PluginManager.LoadPlugins();
+
+            pluginsComboBox.Items.Clear();
+
+            plugins = PluginManager.Plugins;
+
+            foreach (Plugin plugin in plugins)
+            {
+                pluginsComboBox.Items.Add(plugin.ReadableName);
+            }
+
+            pluginsComboBox.SelectedIndex = 0;
         }
     }
 }

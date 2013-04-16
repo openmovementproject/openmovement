@@ -38,6 +38,7 @@
             this.outputFileLabel = new System.Windows.Forms.Label();
             this.btnRun = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.buttonRefresh = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // pluginsComboBox
@@ -45,7 +46,7 @@
             this.pluginsComboBox.FormattingEnabled = true;
             this.pluginsComboBox.Location = new System.Drawing.Point(12, 33);
             this.pluginsComboBox.Name = "pluginsComboBox";
-            this.pluginsComboBox.Size = new System.Drawing.Size(349, 21);
+            this.pluginsComboBox.Size = new System.Drawing.Size(291, 21);
             this.pluginsComboBox.TabIndex = 0;
             this.pluginsComboBox.SelectedIndexChanged += new System.EventHandler(this.pluginsComboBox_SelectedIndexChanged);
             // 
@@ -131,11 +132,22 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // buttonRefresh
+            // 
+            this.buttonRefresh.Image = global::OmGui.Properties.Resources.Refresh;
+            this.buttonRefresh.Location = new System.Drawing.Point(309, 33);
+            this.buttonRefresh.Name = "buttonRefresh";
+            this.buttonRefresh.Size = new System.Drawing.Size(30, 23);
+            this.buttonRefresh.TabIndex = 10;
+            this.buttonRefresh.UseVisualStyleBackColor = true;
+            this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
+            // 
             // PluginsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(373, 306);
+            this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnRun);
             this.Controls.Add(this.outputFileLabel);
@@ -165,5 +177,6 @@
         private System.Windows.Forms.Label outputFileLabel;
         private System.Windows.Forms.Button btnRun;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Button buttonRefresh;
     }
 }

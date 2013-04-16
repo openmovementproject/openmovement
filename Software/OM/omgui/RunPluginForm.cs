@@ -45,7 +45,9 @@ namespace OmGui
 
             TempCWAFilePath = System.IO.Path.Combine(destFolder, "input.cwa");
 
-            Go(Plugin.HTMLFile.FullName);
+            string t = Plugin.FilePath + Plugin.HTMLFilePath;
+            Console.WriteLine("t: " + t);
+            Go(Plugin.FilePath + Path.DirectorySeparatorChar + Plugin.HTMLFilePath);
         }
 
         public void Go(String file)
@@ -53,21 +55,20 @@ namespace OmGui
             string url = "file:///" + file.Replace("\\", "/");
 
             //Add block parameters if needed
-            if (Plugin.CanSelection)
+            url += "?";
+
+            if (Plugin.SelectionBlockStart > -1 && Plugin.SelectionBlockCount > -1)
             {
-                url += "?";
+                url += "startBlock=" + Plugin.SelectionBlockStart;
+                url += "&blockCount=" + Plugin.SelectionBlockCount;
+            }
 
-                if (Plugin.BlockStart > -1 && Plugin.BlockCount > -1)
-                {
-                    url += "blockStart=" + Plugin.BlockStart;
-                    url += "&blockCount=" + Plugin.BlockCount;
-                }
+            if (Plugin.SelectionDateTimeStart != "" && Plugin.SelectionDateTimeEnd != "")
+            {
+                if (url.Length > 1) { url += "&"; }
 
-                if (Plugin.StartTimeString != null && Plugin.EndTimeString != null)
-                {
-                    url += "startTime=" + Plugin.StartTimeString;
-                    url += "&endTime=" + Plugin.EndTimeString;
-                }
+                url += "startTime=" + Plugin.SelectionDateTimeStart;
+                url += "&endTime=" + Plugin.SelectionDateTimeEnd;
             }
 
             string profileString = loadXmlProfile();
@@ -105,95 +106,87 @@ namespace OmGui
             //Url will be of length 1 first time, after JavaScript 'enter' it will be length 2
             if (url.Length == 2)
             {
-                string[] keypairs = url[1].Split('&');
+                
+                NewArgumentCreator(url[1]);
 
-                SelectedParameters = new Dictionary<string, string>();
+                Close();
+            }
+        }
 
-                ParameterString = TempCWAFilePath;
+        //Because the matlab vs. other stuff etc. is so wildly different, it will all now be done in javascript and just come over as a string.
+        private void NewArgumentCreator(string url)
+        {
+            string[] urlSplitForOutputFile = url.Split(new string[] { "?" }, StringSplitOptions.None);
 
-                foreach (string keypair in keypairs)
-                {
-                    string[] keyvalue = keypair.Split('=');
+            if (urlSplitForOutputFile.Length == 2)
+            {
+                urlSplitForOutputFile[0] = "\"" + CWAFilename + "\"" + urlSplitForOutputFile[0];
+                ParameterString = urlSplitForOutputFile[0];
 
-                    if (keyvalue.Length > 1)
-                    {
-                        SelectedParameters.Add(keyvalue[0], keyvalue[1]);
-
-                        //If there is an output file:
-                        if (Plugin.OutputFile != "")
-                        {
-                            //Then get the extension...
-                            
-                            //If we can have multiple extensions then look for the extension key in the url
-                            if (Plugin.OutputExts.Length > 1)
-                            {
-                                if (keyvalue[0].Equals("\"extension\""))
-                                {
-                                    ChosenExtension = keyvalue[1];
-                                }
-                                else if (keyvalue[0].Equals("\"outFileName\""))
-                                {
-                                    OriginalOutputName = keyvalue[1];
-                                }
-                                else
-                                {
-                                    ParameterString += " " + keyvalue[1];
-                                }
-                            }
-                            else
-                            {
-                                if (keyvalue[0].Equals("\"" + Plugin.OutputExts[0] + "\""))
-                                {
-                                    //Original name
-                                    OriginalOutputName = keyvalue[1];
-
-                                    string ext = keyvalue[1].Split('.')[1];
-
-                                    ParameterString += " " + destFolder + "temp." + ext;
-                                }
-                                else
-                                {
-                                    ParameterString += " " + keyvalue[1];
-                                }
-                            }
-
-                            //For multiple output extension
-                            if (Plugin.OutputExts.Length > 1)
-                            {
-                                if ((ChosenExtension != null || !ChosenExtension.Equals("")))
-                                {
-                                    ParameterString += " " + destFolder + "temp." + ChosenExtension;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                ParameterString = ParameterString;
-                    
-                //Copy input and output file into directory with no spaces because of the Matlab hack.
-                string sourceFile = CWAFilename;
-
-                if (!System.IO.Directory.Exists(destFolder))
-                    System.IO.Directory.CreateDirectory(destFolder);
-
-                //Stick the .CWA in the temp folder
-                System.IO.File.Copy(sourceFile, TempCWAFilePath, true);
+                OriginalOutputName = urlSplitForOutputFile[1];
 
                 //Now we want to save the settings for this plugin
-                saveXmlProfile();
+                //saveXmlProfile();
 
                 DialogResult = System.Windows.Forms.DialogResult.OK;
-                return;
             }
+            else
+            {
+                MessageBox.Show("The plugin has peformed an illegal operation.", "Plugin Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = System.Windows.Forms.DialogResult.Abort;
+            }
+        }
+
+        private void oldArgumentCreator(string[] url)
+        {
+            //oldVersion
+            string[] keypairs = url[1].Split('&');
+
+            SelectedParameters = new Dictionary<string, string>();
+
+            ParameterString = TempCWAFilePath;
+
+            foreach (string keypair in keypairs)
+            {
+                string[] keyvalue = keypair.Split('=');
+
+                if (keyvalue.Length > 1)
+                {
+                    SelectedParameters.Add(keyvalue[0], keyvalue[1]);
+                    if (keyvalue[0].Equals("\"extension\""))
+                    {
+                        ChosenExtension = keyvalue[1];
+                    }
+                    else if (keyvalue[0].Equals("\"outFileName\""))
+                    {
+                        OriginalOutputName = keyvalue[1];
+                    }
+                    else
+                    {
+                        ParameterString += " " + keyvalue[1];
+                    }
+                }
+            }
+
+            ParameterString += " " + destFolder + "temp." + ChosenExtension;
+
+            //Copy input and output file into directory with no spaces because of the Matlab hack.
+            string sourceFile = CWAFilename;
+
+            if (!System.IO.Directory.Exists(destFolder))
+                System.IO.Directory.CreateDirectory(destFolder);
+
+            //Stick the .CWA in the temp folder
+            System.IO.File.Copy(sourceFile, TempCWAFilePath, true);
         }
 
         private void saveXmlProfile()
         {
             XmlDocument xml = new XmlDocument();
-            XmlNode outerNode = xml.CreateElement(Plugin.Name + "Profile");
+            XmlNode outerNode = xml.CreateElement("SavedValues");
             xml.AppendChild(outerNode);
 
+            //Get each key/value pair and create
             foreach (KeyValuePair<string, string> kvp in SelectedParameters)
             {
                 string key = kvp.Key.Substring(1, kvp.Key.Length - 2);
@@ -204,11 +197,11 @@ namespace OmGui
 
             try
             {
-                xml.Save(Properties.Settings.Default.CurrentWorkingFolder + "\\" + Plugin.Name + "_profile.xml");
+                xml.Save(Properties.Settings.Default.CurrentWorkingFolder + "\\" + Plugin.FileName + "_" + Plugin.SavedValuesFilePath);
             }
             catch (XmlException e)
             {
-                Console.WriteLine("Xml Error: Could not save " + Plugin.Name + "_profile.xml - " + e.Message);
+                Console.WriteLine("Xml Error: Could not save " + Plugin.SavedValuesFilePath + " - " + e.Message);
             }
             catch (Exception e)
             {
@@ -225,10 +218,10 @@ namespace OmGui
 
             string parameterString = null;
             
-            if (File.Exists(Properties.Settings.Default.CurrentWorkingFolder + "\\" +  Plugin.Name + "_profile.xml"))
+            if (File.Exists(Properties.Settings.Default.CurrentWorkingFolder + "\\" +  Plugin.FileName + "_" + Plugin.SavedValuesFilePath))
             {
                 StreamReader recordProfile = new StreamReader(Properties.Settings.Default.CurrentWorkingFolder +
-                    "\\" + Plugin.Name + "_profile.xml");
+                    "\\" + Plugin.FileName + "_" + Plugin.SavedValuesFilePath);
                 String profileAsString = recordProfile.ReadToEnd();
 
                 XmlDocument xmlDocument = new XmlDocument();
@@ -240,7 +233,7 @@ namespace OmGui
 
                 foreach (XmlNode node in rootNode.ChildNodes)
                 {
-                    if (!node.Name.Equals(Plugin.Name + "Profile"))
+                    if (!node.Name.Equals("SavedValues"))
                     {
                         if (first)
                             first = false;
@@ -257,7 +250,7 @@ namespace OmGui
             return parameterString;
         }
 
-        private void RunProcess(string parametersAsString)
+        /*private void RunProcess(string parametersAsString)
         {
             //TOM TODO - Add in so we can run PY and JAR files as well as EXE
             //if (Plugin.Ext == Plugin.ExtType.PY)
@@ -319,7 +312,7 @@ namespace OmGui
                 System.IO.File.Delete(destFolder + "temp.csv");
                 System.IO.File.Delete(TempCWAFilePath);
             }
-        }
+        }*/
 
         private void parseMessage(string outputLine)
         {

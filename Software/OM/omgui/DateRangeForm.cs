@@ -44,9 +44,9 @@ namespace OmGui
                 SettingsProfileDictionary = new Dictionary<string, string>();
             }
 
-            //Set the height/weight enabled
-            checkBoxHeight.Checked = true;
-            checkBoxWeight.Checked = true;
+            ////Set the height/weight enabled
+            //checkBoxHeight.Checked = true;
+            //checkBoxWeight.Checked = true;
 
             //Device
             Device = device;
@@ -124,10 +124,10 @@ namespace OmGui
             settingsDictionary.Add("StudyNotes", textBoxStudyNotes.Text);
             settingsDictionary.Add("SubjectCode", textBoxSubjectCode.Text);
             settingsDictionary.Add("SubjectSex", comboBoxSubjectSex.SelectedIndex.ToString());
-            settingsDictionary.Add("SubjectHeight", numericUpDownSubjectHeight.Value.ToString());
-            settingsDictionary.Add("SubjectWidth", numericUpDownSubjectWeight.Value.ToString());
+            settingsDictionary.Add("SubjectHeight", textBoxHeight.Text.ToString());
+            settingsDictionary.Add("SubjectWidth", textBoxWeight.Text.ToString());
             settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex.ToString());
-            settingsDictionary.Add("SubjectTimezone", comboBoxSubjectTimezone.SelectedIndex.ToString());
+            //settingsDictionary.Add("SubjectTimezone", comboBoxSubjectTimezone.SelectedIndex.ToString());
             settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex.ToString());
         }
         
@@ -170,20 +170,20 @@ namespace OmGui
                 }
                 else if (pair.Key.Equals("SubjectHeight"))
                 {
-                    numericUpDownSubjectHeight.Value = Int32.Parse(pair.Value);
+                    textBoxHeight.Text = pair.Value;
                 }
                 else if (pair.Key.Equals("SubjectWeight"))
                 {
-                    numericUpDownSubjectWeight.Value = Int32.Parse(pair.Value);
+                    textBoxWeight.Text = pair.Value;
                 }
                 else if (pair.Key.Equals("SubjectHandedness"))
                 {
                     comboBoxSubjectHandedness.SelectedIndex = Int32.Parse(pair.Value);
                 }
-                else if (pair.Key.Equals("SubjectTimezone"))
-                {
-                    comboBoxSubjectTimezone.SelectedIndex = Int32.Parse(pair.Value);
-                }
+                //else if (pair.Key.Equals("SubjectTimezone"))
+                //{
+                //    comboBoxSubjectTimezone.SelectedIndex = Int32.Parse(pair.Value);
+                //}
                 else if (pair.Key.Equals("SubjectSite"))
                 {
                     comboBoxSite.SelectedIndex = Int32.Parse(pair.Value);
@@ -231,35 +231,31 @@ namespace OmGui
         {
             get
             {
-                if (!datePickerStart.Checked) { return DateTime.MinValue; }
-                return datePickerStart.Value; 
+                return datePickerStart.Value.Date.Add(timePickerStart.Value.TimeOfDay);
             }
             set
             {
-                if (value < datePickerStart.MinDate)
-                {
-                    datePickerStart.Checked = false;
-                    datePickerStart.Value = datePickerStart.MinDate;
-                }
-                else if (value > datePickerStart.MaxDate)
-                {
-                    datePickerStart.Checked = false;
-                    datePickerStart.Value = datePickerStart.MaxDate;
-                }
-                else
-                {
-                    datePickerStart.Value = value;
-                }
-
+                //if (value < datePickerStart.MinDate)
+                //{
+                //    datePickerStart.Checked = false;
+                //    datePickerStart.Value = datePickerStart.MinDate;
+                //}
+                //else if (value > datePickerStart.MaxDate)
+                //{
+                //    datePickerStart.Checked = false;
+                //    datePickerStart.Value = datePickerStart.MaxDate;
+                //}
+                //else
+                //{
+                //    datePickerStart.Value = value;
+                //}
+                //value = datePickerStart.Value;
             }
         }
 
         public DateTime UntilDate
         {
-            get
-            {
-                return DateTime.Now;
-            }
+            get { return datePickerEnd.Value.Date.Add(timePickerEnd.Value.TimeOfDay); }
         }
 
         //public DateTime UntilDate
@@ -289,9 +285,14 @@ namespace OmGui
         //    }
         //}
 
+        Dictionary<string, string> metaDataEntries;
+        List<MetaDataEntry> metaDataList;
+        MetaDataTools mdt = new MetaDataTools();
 
         private void buttonOk_Click(object sender, EventArgs e)
         {
+            metaDataEntries = MetaDataEntry.shorthandMetaData;
+
             setOK = true;
 
             SyncTime = SyncTimeType.PC;
@@ -300,6 +301,30 @@ namespace OmGui
 
             saveDictionaryFromFields(SettingsProfileDictionary);
             saveDictionaryToXML(SettingsProfileDictionary);
+            metaDataList = new List<MetaDataEntry>();
+
+            //fill mde
+            metaDataList.Add(new MetaDataEntry("_c", SettingsProfileDictionary["StudyCentre"]));
+            metaDataList.Add(new MetaDataEntry("_s", SettingsProfileDictionary["StudyCode"]));
+            metaDataList.Add(new MetaDataEntry("_i", SettingsProfileDictionary["StudyInvestigator"]));
+            metaDataList.Add(new MetaDataEntry("_x", SettingsProfileDictionary["StudyExerciseType"]));
+            metaDataList.Add(new MetaDataEntry("_so", SettingsProfileDictionary["StudyOperator"]));
+            metaDataList.Add(new MetaDataEntry("_n", SettingsProfileDictionary["StudyNotes"]));
+
+            metaDataList.Add(new MetaDataEntry("_p", SettingsProfileDictionary["SubjectSite"]));
+            metaDataList.Add(new MetaDataEntry("_sc", SettingsProfileDictionary["SubjectCode"]));
+            metaDataList.Add(new MetaDataEntry("_se", SettingsProfileDictionary["SubjectSex"]));
+            metaDataList.Add(new MetaDataEntry("_h", SettingsProfileDictionary["SubjectHeight"]));
+            metaDataList.Add(new MetaDataEntry("_w", SettingsProfileDictionary["SubjectWidth"]));
+            metaDataList.Add(new MetaDataEntry("_ha", SettingsProfileDictionary["SubjectHandedness"]));
+
+            //Create metadata
+            string md = MetaDataTools.CreateMetaData(metaDataList);
+
+            mdt.SaveMetaData(md);
+
+            DateTime t = datePickerStart.Value.Date.Add(timePickerStart.Value.TimeOfDay);
+            DateTime t2 = datePickerEnd.Value.Date.Add(timePickerEnd.Value.TimeOfDay);
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
 
@@ -335,25 +360,25 @@ namespace OmGui
 
         #region Height/Weight Checkbox Logic
         //checkbox enabling logic for height/weight
-        private void checkBoxHeight_CheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox cbHeight = (CheckBox)sender;
+        //private void checkBoxHeight_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    CheckBox cbHeight = (CheckBox)sender;
 
-            if (cbHeight.Checked)
-                numericUpDownSubjectHeight.Enabled = true;
-            else
-                numericUpDownSubjectHeight.Enabled = false;
-        }
+        //    if (cbHeight.Checked)
+        //        numericUpDownSubjectHeight.Enabled = true;
+        //    else
+        //        numericUpDownSubjectHeight.Enabled = false;
+        //}
 
-        private void checkBoxWeight_CheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox cbWeight = (CheckBox)sender;
+        //private void checkBoxWeight_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    CheckBox cbWeight = (CheckBox)sender;
 
-            if (cbWeight.Checked)
-                numericUpDownSubjectWeight.Enabled = true;
-            else
-                numericUpDownSubjectWeight.Enabled = false;
-        }
+        //    if (cbWeight.Checked)
+        //        numericUpDownSubjectWeight.Enabled = true;
+        //    else
+        //        numericUpDownSubjectWeight.Enabled = false;
+        //}
         #endregion
 
         #region RecordingTime Radio Button Logic
@@ -720,14 +745,15 @@ namespace OmGui
         #endregion
 
         #region Warning Message Logic
-        bool[] warningMessagesFlags = { false, false, false, false, false, false, false };
+        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false };
         string[] warningMessages = {"Device not fully charged",
                                     "Device not fully cleared",
                                     "Duration could be limited by device capacity",
-                                    "Duration could be liited by remaining battery",
+                                    "Duration could be limited by remaining battery",
                                     "Delayed start time is more than 14 days in the future",
                                     "End time is in the past",
-                                    "Start time is in the past"};
+                                    "Start time is in the past",
+                                    "Current Sampling Frequency not guaranteed"};
         private void updateWarningMessages()
         {
             if (Device != null)
@@ -770,6 +796,10 @@ namespace OmGui
                 if (startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0)))
                     warningMessagesFlags[6] = true;
 
+                //Warning for sampling frequency
+                int sampFreq = int.Parse(comboBoxSamplingFreq.Text);
+                if (sampFreq > 200 || sampFreq < 50)
+                    warningMessagesFlags[7] = true;
 
                 //Now that we have the flags, we can build the string.
                 StringBuilder s = new StringBuilder();
@@ -783,13 +813,20 @@ namespace OmGui
                 if (s.ToString().Length == 0)
                 {
                     richTextBoxWarning.Text = "WARNINGS\nNo warnings";
+                    richTextBoxWarning.Visible = false;
                 }
                 else
                 {
                     richTextBoxWarning.Text = "WARNINGS\n" + s.ToString();
+                    richTextBoxWarning.Visible = true;
                 }
             }
         }
         #endregion
+
+        private void comboBoxSamplingFreq_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updateWarningMessages();
+        }
     }
 }
