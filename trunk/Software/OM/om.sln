@@ -24,8 +24,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jomapi", "jomapi\jomapi.vcx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "omapinet-examples", "omapinet-examples\omapinet-examples.csproj", "{B247DF64-B92B-4116-AA01-5AD200851F2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectListView2010", "ObjectListViewFull-2.5.1\ObjectListViewDemo\ObjectListView\ObjectListView2010.csproj", "{18FEDA0C-D147-4286-B39A-01204808106A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,28 +198,6 @@ Global
 		{B247DF64-B92B-4116-AA01-5AD200851F2D}.test|x64.ActiveCfg = test|x86
 		{B247DF64-B92B-4116-AA01-5AD200851F2D}.test|x86.ActiveCfg = test|x86
 		{B247DF64-B92B-4116-AA01-5AD200851F2D}.test|x86.Build.0 = test|x86
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Win32.ActiveCfg = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|x64.ActiveCfg = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|x86.ActiveCfg = Release|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|Any CPU.ActiveCfg = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|Any CPU.Build.0 = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|Mixed Platforms.ActiveCfg = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|Mixed Platforms.Build.0 = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|Win32.ActiveCfg = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|x64.ActiveCfg = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|x86.ActiveCfg = test|Any CPU
-		{18FEDA0C-D147-4286-B39A-01204808106A}.test|x86.Build.0 = test|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

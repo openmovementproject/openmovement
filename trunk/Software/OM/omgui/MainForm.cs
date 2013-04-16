@@ -484,76 +484,118 @@ namespace OmGui
             int numDevicesNotDownloaded = 0;
             List<string> fileNamesDownloaded = new List<string>();
 
+            Dictionary<string, string> devicesAndErrors = new Dictionary<string, string>();
+
             foreach (ListViewItem i in devicesListView.SelectedItems)
             {
                 OmDevice device = (OmDevice)i.Tag;
-                if (device != null && !device.IsDownloading && device.IsRecording == OmDevice.RecordStatus.Stopped && device.HasData)
+                OmSource source = (OmSource)device;
+                string deviceText = string.Format("{0:00000}", source.DeviceId);
+
+                if (device != null)
                 {
-                    bool ok = true;
-                    string folder = GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder);
-                    System.IO.Directory.CreateDirectory(folder);
-                    string prefix = folder + string.Format("{0:00000}_{1:0000000000}", device.DeviceId, device.SessionId);
-                    string finalFilename = prefix + ".cwa";
-                    string downloadFilename = finalFilename;
-
-                    downloadFilename += ".part";
-                    if (System.IO.File.Exists(downloadFilename))
+                    if (!device.IsDownloading)
                     {
-                        DialogResult dr = MessageBox.Show(this, "Download file already exists:\r\n\r\n    " + downloadFilename + "\r\n\r\nOverwrite existing file?", "Overwrite File?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
-                        if (dr != DialogResult.OK)
+                        if (device.IsRecording == OmDevice.RecordStatus.Stopped)
                         {
-                            ok = false;
+                            if (device.HasData)
+                            {
+                                bool ok = true;
+                                string folder = GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder);
+                                System.IO.Directory.CreateDirectory(folder);
+                                string prefix = folder + string.Format("{0:00000}_{1:0000000000}", device.DeviceId, device.SessionId);
+                                string finalFilename = prefix + ".cwa";
+                                string downloadFilename = finalFilename;
 
-                            //TS - Device not downloaded because user clicked cancel on overwrite.
-                            numDevicesNotDownloaded++;
+                                downloadFilename += ".part";
+                                if (System.IO.File.Exists(downloadFilename))
+                                {
+                                    DialogResult dr = MessageBox.Show(this, "Download file already exists:\r\n\r\n    " + downloadFilename + "\r\n\r\nOverwrite existing file?", "Overwrite File?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                    if (dr != DialogResult.OK)
+                                    {
+                                        ok = false;
+
+                                        //TS - Device not downloaded because user clicked cancel on overwrite.
+                                        numDevicesNotDownloaded++;
+                                    }
+                                    else { System.IO.File.Delete(downloadFilename); }
+
+
+                                }
+
+                                if (ok && System.IO.File.Exists(finalFilename))
+                                {
+                                    DialogResult dr = MessageBox.Show(this, "File already exists:\r\n\r\n    " + downloadFilename + "\r\n\r\nOverwrite existing file?", "Overwrite File?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                    if (dr != DialogResult.OK)
+                                    {
+                                        ok = false;
+
+                                        //TS - Device not downloaded because user clicked cancel on overwrite.
+                                        numDevicesNotDownloaded++;
+                                    }
+                                    else { System.IO.File.Delete(finalFilename); }
+                                }
+
+                                //Clicked OK and want to download.
+                                if (ok)
+                                {
+                                    device.BeginDownloading(downloadFilename, finalFilename);
+
+                                    //TS - Device downloaded because user clicked OK.
+                                    numDevicesDownloaded++;
+                                    fileNamesDownloaded.Add(finalFilename);
+
+                                    devicesAndErrors.Add(deviceText, "Device downloaded");
+                                }
+                            }
+                            else
+                            {
+                                //Has no data
+                                devicesAndErrors.Add(deviceText, "device has no data");
+                            }
                         }
-                        else { System.IO.File.Delete(downloadFilename); }
-
-
-                    }
-
-                    if (ok && System.IO.File.Exists(finalFilename))
-                    {
-                        DialogResult dr = MessageBox.Show(this, "File already exists:\r\n\r\n    " + downloadFilename + "\r\n\r\nOverwrite existing file?", "Overwrite File?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
-                        if (dr != DialogResult.OK)
+                        else
                         {
-                            ok = false;
-
-                            //TS - Device not downloaded because user clicked cancel on overwrite.
-                            numDevicesNotDownloaded++;
+                            //is still recording
+                            devicesAndErrors.Add(deviceText, "device is recording");
                         }
-                        else { System.IO.File.Delete(finalFilename); }
                     }
-
-                    //Clicked OK and want to download.
-                    if (ok)
+                    else
                     {
-                        device.BeginDownloading(downloadFilename, finalFilename);
-
-                        //TS - Device downloaded because user clicked OK.
-                        numDevicesDownloaded++;
-                        fileNamesDownloaded.Add(finalFilename);
+                        //is downloading
+                        devicesAndErrors.Add(deviceText, "device is downloading");
                     }
                 }
                 else
                 {
                     //Couldn't download so hasn't downloaded
-                    numDevicesNotDownloaded++;
+                    //Device null.
+                    //numDevicesNotDownloaded++;
+                    devicesAndErrors.Add(deviceText, "Unknown error");
                 }
             }
+
+            string message = numDevicesDownloaded + " devices downloaded:\r\n";
+
+            foreach (KeyValuePair<string, string> kvp in devicesAndErrors)
+            {
+                message += "\r\nDevice name: " + kvp.Key + " - " + kvp.Value;
+            }
+
+            MessageBox.Show(message, "Download Status", MessageBoxButtons.OK);
 
             //TS - If multiple devices selected then show which downloaded and which didnt.
-            if (devicesListView.SelectedItems.Count > 0)
-            {
-                string message = numDevicesDownloaded + " devices downloaded from a selection of " + (int)(numDevicesNotDownloaded + numDevicesDownloaded) + " devices." + "\r\nFiles:";
+            //if (devicesListView.SelectedItems.Count > 0)
+            //{
+            //    string message = numDevicesDownloaded + " devices downloaded from a selection of " + (int)(numDevicesNotDownloaded + numDevicesDownloaded) + " devices." + "\r\nFiles:";
 
-                foreach (string fileName in fileNamesDownloaded)
-                {
-                    message += "\r\n" + fileName;
-                }
+            //    foreach (string fileName in fileNamesDownloaded)
+            //    {
+            //        message += "\r\n" + fileName;
+            //    }
 
-                MessageBox.Show(message, "Download Status", MessageBoxButtons.OK);
-            }
+            //    MessageBox.Show(message, "Download Status", MessageBoxButtons.OK);
+            //}
         }
 
         //TS - [P] - Updates toolstrip buttons based on what has been selected in devicesListView

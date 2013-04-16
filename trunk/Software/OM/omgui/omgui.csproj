@@ -222,6 +222,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceListView.resx">
       <DependentUpon>DeviceListView.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
@@ -275,20 +276,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ObjectListViewFull-2.5.1\ObjectListViewDemo\ObjectListView\ObjectListView2010.csproj">
-      <Project>{18FEDA0C-D147-4286-B39A-01204808106A}</Project>
-      <Name>ObjectListView2010</Name>
-    </ProjectReference>
     <ProjectReference Include="..\omapinet\omapinet.csproj">
       <Project>{292262D5-D4C9-458D-B8F1-1C0F4C19A74C}</Project>
       <Name>omapinet</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\libomapi\libomapi.dll">
-      <Link>libomapi.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="libomapi.dll" />
+    <Content Include="OmApiNet.dll" />
     <Content Include="OmGui.ico" />
     <None Include="Resources\DeleteHS.png" />
     <None Include="Resources\Export.png" />
