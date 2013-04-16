@@ -10,24 +10,19 @@
     <None Include="build.cmd">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="JOM.java">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="JOMAPI.java">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="Makefile">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="src\openmovement\JOM.java" />
+    <None Include="src\openmovement\JOMAPI.java" />
+    <None Include="src\openmovement\JOMAPIListener.java" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="JOMAPI.c">
+    <ClCompile Include="c\JOMAPI.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="JOMAPI.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
+    <ClInclude Include="c\openmovement_JOMAPI.h" />
   </ItemGroup>
 </Project>

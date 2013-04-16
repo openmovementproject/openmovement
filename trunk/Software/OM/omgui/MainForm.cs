@@ -14,6 +14,8 @@ using System.IO;
 using System.Threading;
 using System.Xml;
 
+using AndreasJohansson.Win32.Shell;
+
 namespace OmGui
 {
     public partial class MainForm : Form
@@ -392,9 +394,11 @@ namespace OmGui
             OmSource device = (OmSource)item.Tag;
             DeviceListViewItemUpdate(item);
 
-            //If the list item is for a device
+            //If the device has been removed.
             if (device is OmDevice && !((OmDevice)device).Connected)
             {
+                //TODO - Dataviewer clear.
+
                 listViewDevices.Remove(device.DeviceId);
                 devicesListView.Items.Remove(item);
             }
@@ -405,7 +409,7 @@ namespace OmGui
         //TS - Update file in listView
         private void UpdateFile(ListViewItem item, string path)
         {
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+            string fileName = System.IO.Path.GetFileName(path);
 
             System.IO.FileInfo info = new System.IO.FileInfo(path);
             //MB
@@ -422,9 +426,11 @@ namespace OmGui
         }
 
 
-        private void UpdateOutputFile(ListViewItem item, string path)
+        private ListViewItem UpdateOutputFile(string path)
         {
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+            ListViewItem item = new ListViewItem();
+
+            string fileName = System.IO.Path.GetFileName(path);
             System.IO.FileInfo info = new FileInfo(path);
 
             string fileSize = ((double)((double) info.Length / 1024.0 / 1024.0)).ToString("F");
@@ -439,6 +445,8 @@ namespace OmGui
             item.Text = fileName;
 
             item.Tag = path;
+
+            return item;
         }
 
         int refreshIndex = 0;
@@ -976,11 +984,13 @@ namespace OmGui
 
             DateRangeForm rangeForm = new DateRangeForm("Session Range", "Session Range", device);
             DialogResult dr = rangeForm.ShowDialog();
-            start = rangeForm.FromDate;
-            stop = rangeForm.UntilDate; //TS - TODO - stop needs to be got from dialog.
+            
 
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
+                start = rangeForm.FromDate;
+                stop = rangeForm.UntilDate;
+
                 dataViewer.CancelPreview();
                 Cursor.Current = Cursors.WaitCursor;
 
@@ -1134,7 +1144,7 @@ namespace OmGui
             System.Diagnostics.Process.Start(GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder));
         }
 
-        private void ExportDataConstruct(OmSource.SourceCategory category)
+        private void ExportDataConstruct()
         {
             float blockStart = -1;
             float blockCount = -1;
@@ -1284,11 +1294,6 @@ namespace OmGui
 
             Text = defaultTitleText + " - " + Properties.Settings.Default.CurrentWorkingFolder;
 
-            //Remove files already in list if changed folder
-            filesListView.Items.Clear();
-            listViewFiles.Clear();
-            listViewOutputFiles.Clear();
-
             //Find files
             try
             {
@@ -1299,27 +1304,12 @@ namespace OmGui
                     System.IO.Directory.CreateDirectory(folder);
                 }
 
-                //Output Watcher
-                if (!File.Exists(folder + "\\output"))
-                {
-                    Directory.CreateDirectory(folder + "\\output");
-                }
-
-                fileSystemWatcherOutput.Path = folder + "\\output";
-                string[] filePathsOutput = System.IO.Directory.GetFiles(folder + "\\output", fileSystemWatcherOutput.Filter, System.IO.SearchOption.TopDirectoryOnly);
-                foreach (string f in filePathsOutput)
-                {
-                    outputListAddItem(f);
-                }
+                fileSystemWatcherOutput.Path = folder;
+                fileListViewOutputRefreshList();
 
                 //Files Watcher
                 fileSystemWatcher.Path = folder;
-
-                string[] filePaths = System.IO.Directory.GetFiles(folder, fileSystemWatcher.Filter, System.IO.SearchOption.TopDirectoryOnly);
-                foreach (string f in filePaths)
-                {
-                    FileListViewAdd(f);
-                }
+                fileListViewRefreshList();
             }
             catch (Exception e)
             {
@@ -1339,6 +1329,31 @@ namespace OmGui
             fileSystemWatcher.Path = OmGui.Properties.Settings.Default.CurrentWorkingFolder;
         }
 
+        private void fileListViewRefreshList()
+        {
+            filesListView.Items.Clear();
+            listViewFiles.Clear();
+
+            string[] filePaths = System.IO.Directory.GetFiles(fileSystemWatcher.Path, fileSystemWatcher.Filter, System.IO.SearchOption.TopDirectoryOnly);
+            foreach (string f in filePaths)
+            {
+                FileListViewAdd(f);
+            }
+        }
+
+        private void fileListViewOutputRefreshList()
+        {
+            outputListView.Items.Clear();
+            listViewOutputFiles.Clear();
+
+            string[] filePaths = Directory.GetFiles(fileSystemWatcherOutput.Path, fileSystemWatcherOutput.Filter, System.IO.SearchOption.TopDirectoryOnly);
+            foreach (string f in filePaths)
+            {
+                if(!Path.GetExtension(f).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+                    outputListAddItem(f);
+            }
+        }
+
         private void UnloadWorkingFolder()
         {
             Properties.Settings.Default.Reset();
@@ -1353,6 +1368,8 @@ namespace OmGui
         //TS - TODO - This is hard-coded at the moment for testing purposes.
         private const string PLUGIN_PROFILE_FILE = "profile.xml";
 
+        public PluginManager pluginManager;
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             FilesResetToolStripButtons();
@@ -1365,10 +1382,6 @@ namespace OmGui
             //If there is no default folder then make it My Documents
             if (Properties.Settings.Default.DefaultWorkingFolder == "")
                 Properties.Settings.Default.DefaultWorkingFolder = GetPath("{MyDocuments}");
-
-            Console.WriteLine("Default: " + Properties.Settings.Default.DefaultWorkingFolder);
-            Console.WriteLine("Current: " + Properties.Settings.Default.CurrentWorkingFolder);
-            Console.WriteLine("Current Plugin: " + Properties.Settings.Default.CurrentPluginFolder);
 
             if (Properties.Settings.Default.CurrentWorkingFolder != "" && Properties.Settings.Default.CurrentWorkingFolder != Properties.Settings.Default.DefaultWorkingFolder)
             {
@@ -1388,14 +1401,51 @@ namespace OmGui
                 LoadWorkingFolder(true);
             }
 
+            Console.WriteLine("Default: " + Properties.Settings.Default.DefaultWorkingFolder);
+            Console.WriteLine("Current: " + Properties.Settings.Default.CurrentWorkingFolder);
+            Console.WriteLine("Current Plugin: " + Properties.Settings.Default.CurrentPluginFolder);
+
+            //Create PluginManager
+            pluginManager = new PluginManager();
+
             //Add Profile Plugins
             AddProfilePluginsToToolStrip();
         }
 
         private void AddProfilePluginsToToolStrip()
         {
+            if (pluginManager.LoadProfilePlugins())
+            {
+                bool isFirst = true;
+
+                foreach (Plugin plugin in pluginManager.ProfilePlugins)
+                {
+                    if (plugin != null)
+                    {
+                        ToolStripButton tsb = new ToolStripButton();
+                        tsb.Text = plugin.ReadableName;
+                        tsb.Tag = plugin;
+
+                        if (plugin.Icon != null)
+                            tsb.Image = plugin.Icon;
+
+                        tsb.Click += new EventHandler(tsb_Click);
+
+                        if (isFirst)
+                        {
+                            toolStripFiles.Items.Add(new ToolStripSeparator());
+                            isFirst = false;
+                        }
+
+                        toolStripFiles.Items.Add(tsb);
+                        toolStripFiles.Items[toolStripFiles.Items.Count - 1].Enabled = false;
+                    }
+                }
+            }
+
+            //TODO - Old code, delete after testing code above.
             //TS - Add tool strip buttons for "default" profiles
-            try
+            /*try
             {
                 StreamReader pluginProfile = new StreamReader(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + PLUGIN_PROFILE_FILE);
                 string pluginProfileAsString = pluginProfile.ReadToEnd();
@@ -1460,7 +1510,7 @@ namespace OmGui
             catch (Exception e)
             {
                 Console.WriteLine("Exception: " + e.Message);
-            }
+            }*/
         }
 
         //Click event handler for the tool strip default plugins that comes from the profile file...
@@ -1484,27 +1534,30 @@ namespace OmGui
                     DateTime startDateTime;
                     DateTime endDateTime;
 
-                    blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
-                    blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
-                    blockEnd = blockStart + blockCount;
-
-                    startDateTime = dataViewer.TimeForBlock(blockStart);
-                    endDateTime = dataViewer.TimeForBlock(blockEnd);
-                    string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
-                    string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
-
-                    //See now if we want the dataViewer selection.
-                    if (p.CanSelection && blockCount > -1 && blockStart > -1)
+                    if (dataViewer.HasSelection)
                     {
-                        p.BlockStart = blockStart;
-                        p.BlockCount = blockCount;
+                        blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
+                        blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+                        blockEnd = blockStart + blockCount;
+
+                        startDateTime = dataViewer.TimeForBlock(blockStart);
+                        endDateTime = dataViewer.TimeForBlock(blockEnd);
+                        string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+                        string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+
+                        //See now if we want the dataViewer selection.
+                        if (blockCount > -1 && blockStart > -1)
+                        {
+                            p.SelectionBlockStart = blockStart;
+                            p.SelectionBlockCount = blockCount;
+                        }
+
+                        if (startDateTimeString != null && endDateTimeString != null)
+                        {
+                            p.SelectionDateTimeStart = startDateTimeString;
+                            p.SelectionDateTimeEnd = endDateTimeString;
+                        }
                     }
-
-                    if (startDateTimeString != null && endDateTimeString != null)
-                    {
-                        p.StartTimeString = startDateTimeString;
-                        p.EndTimeString = endDateTimeString;
-                    } 
 
                     RunPluginForm rpf = new RunPluginForm(p, CWAFilename);
                     rpf.ShowDialog();
@@ -1512,7 +1565,7 @@ namespace OmGui
                     if (rpf.DialogResult == System.Windows.Forms.DialogResult.OK)
                     {
                         //if the plugin has an output file    
-                        RunProcess(p, rpf.ParameterString, rpf.OriginalOutputName, reader.Filename);
+                        RunProcess2(rpf.ParameterString, p, rpf.OriginalOutputName, reader.Filename);
 
                         //Change index to the queue
                         tabControlFiles.SelectedIndex = 1;
@@ -1558,7 +1611,7 @@ namespace OmGui
                 devicesListView.SelectedItems.Clear();
 
                 //Enable plugins
-                for (int i = 0; i < toolStripFiles.Items.Count; i++)
+                for (int i = 1; i < toolStripFiles.Items.Count; i++)
                 {
                     toolStripFiles.Items[i].Enabled = true;
                 }
@@ -1579,7 +1632,7 @@ namespace OmGui
         private void FilesResetToolStripButtons()
         {
             //Disable buttons
-            for (int i = 0; i < toolStripFiles.Items.Count; i++)
+            for (int i = 1; i < toolStripFiles.Items.Count; i++)
             {
                 toolStripFiles.Items[i].Enabled = false;
             }
@@ -1705,12 +1758,71 @@ namespace OmGui
 
         private void RunPluginsProcess(ListView.SelectedListViewItemCollection listItems)
         {
+            OmReader reader = (OmReader)listItems[0].Tag;
+
+            float blockStart = -1;
+            float blockCount = -1;
+            float blockEnd = -1;
+
+            DateTime startDateTime;
+            DateTime endDateTime;
+            
+            PluginsForm pluginsForm;
+
+            //Now see if we've got a selection on the dataViewer
+            if (dataViewer.HasSelection)
+            {
+                blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
+                blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+                blockEnd = blockStart + blockCount;
+
+                startDateTime = dataViewer.TimeForBlock(blockStart);
+                endDateTime = dataViewer.TimeForBlock(blockEnd);
+                string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+                string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+
+                pluginsForm = new PluginsForm(pluginManager, reader.Filename, blockStart, blockCount, startDateTimeString, endDateTimeString);
+                pluginsForm.ShowDialog(this);
+
+                //Run the process
+                if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                {
+                    //if the plugin has an output file    
+                    RunProcess(pluginsForm.SelectedPlugin, pluginsForm.rpf.ParameterString, pluginsForm.rpf.OriginalOutputName, reader.Filename);
+                }
+            }
+            else
+            {
+                //Now that we have our plugins, open the plugin form
+                pluginsForm = new PluginsForm(pluginManager, reader.Filename, -1, -1, null, null);
+
+                //If there are any plugins then show otherwise put up messagebox.
+                if (pluginsForm.PluginManager.Plugins.Count > 0)
+                {
+                    pluginsForm.ShowDialog(this);
+
+                    //Run the process
+                    if (pluginsForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+                    {
+                        //if the plugin has an output file    
+                        RunProcess(pluginsForm.SelectedPlugin, pluginsForm.rpf.ParameterString, pluginsForm.rpf.OriginalOutputName, reader.Filename);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("There are no plugins in this folder.\r\nPlease add plugin folders or change your Plugin folder in Options.", "No Plugins Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            //TS -  Old version where plugin finding was done on the fly as it is here. This was a waste and now we use the PluginManager.
             //Find plugins and build form.
-            if (listItems.Count > 0)
+            /*if (listItems.Count > 0)
             {
                 ListViewItem i = listItems[0];
 
                 OmReader reader = (OmReader)i.Tag;
+
+                //TODO - put new plugins code here using PluginManager.
 
                 List<Plugin> plugins = new List<Plugin>();
 
@@ -1827,7 +1939,7 @@ namespace OmGui
                         string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
                         string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
 
-                        pluginsForm = new PluginsForm(plugins, reader.Filename, blockStart, blockCount, startDateTimeString, endDateTimeString);
+                        pluginsForm = new PluginsForm(pluginManager, reader.Filename, blockStart, blockCount, startDateTimeString, endDateTimeString);
                         pluginsForm.ShowDialog(this);
 
                         //Run the process
@@ -1840,7 +1952,7 @@ namespace OmGui
                     else
                     {
                         //Now that we have our plugins, open the plugin form
-                        pluginsForm = new PluginsForm(plugins, reader.Filename, -1, -1, null, null);
+                        pluginsForm = new PluginsForm(pluginManager, reader.Filename, -1, -1, null, null);
                         pluginsForm.ShowDialog(this);
 
                         //Run the process
@@ -1854,15 +1966,54 @@ namespace OmGui
                 //No files so do a dialog.
                 else
                 {
-                    MessageBox.Show("No plugins found, put plugins in the current plugins folder or change your plugin folder in the Options", "No Plugins", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("No plugins found, put plugins in the current plugins folder or change your plugin folder in the Options Menu.", "No Plugins Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
                 MessageBox.Show("Please choose a file to run a plugin on.");
-            }
+            }*/
         }
 
+        private void RunProcess2(string parameterString, Plugin p, string outputName, string inputName)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo();
+
+            psi.FileName = p.FilePath + Path.DirectorySeparatorChar + p.RunFilePath;
+
+            //TODO - Idea to try and do the outfile as a filepath rather than filename but it didn't like it.
+            //Find arguments and replace the output file with the full file path.
+            parameterString = parameterString.Replace(outputName, "\"" + Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + outputName + "\"");
+
+            psi.Arguments = parameterString;
+
+            psi.UseShellExecute = true;
+            psi.RedirectStandardError = false;
+            psi.RedirectStandardOutput = false;
+
+            psi.Verb = "runas";
+            psi.CreateNoWindow = true;
+
+            PluginQueueItem pqi = new PluginQueueItem(p, parameterString, inputName);
+            pqi.StartInfo = psi;
+            pqi.OriginalOutputName = outputName;
+
+            //Add PQI to file queue
+            ListViewItem lvi = new ListViewItem(new string[] { pqi.Name, pqi.File, "0" });
+
+            BackgroundWorker pluginQueueWorker = new BackgroundWorker();
+            pluginQueueWorker.WorkerSupportsCancellation = true;
+
+            pluginQueueWorker.DoWork += new DoWorkEventHandler(pluginQueueWorker_DoWork);
+            pluginQueueWorker.ProgressChanged += new ProgressChangedEventHandler(pluginQueueWorker_ProgressChanged);
+            pluginQueueWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(pluginQueueWorker_RunWorkerCompleted);
+
+            lvi.Tag = pluginQueueWorker;
+
+            queueListViewItems2.Items.Add(lvi);
+
+            pluginQueueWorker.RunWorkerAsync(pqi);
+        }
 
         List<ListViewItem> queueListViewItems = new List<ListViewItem>();
         //PLUGIN PROCESS RUNNING
@@ -1880,24 +2031,26 @@ namespace OmGui
             //psi.FileName = @"H:\OM\Plugins\TestParameterApp.exe";
 
             //TOM TODO - Add in so we can run PY and JAR files as well as EXE
-            if (plugin.Ext == Plugin.ExtType.PY)
-            {
-                psi.FileName = "python";
-                parametersAsString = plugin.RunFile.FullName + parametersAsString;
-            }
-            else if (plugin.Ext == Plugin.ExtType.JAR)
-            {
-                psi.FileName = "java";
-                parametersAsString = "-jar" + plugin.RunFile.FullName + parametersAsString;
-            }
-            else if (plugin.Ext == Plugin.ExtType.EXE)
-            {
-                psi.FileName = plugin.RunFile.FullName;
-            }
-            else
-            {
-                MessageBox.Show("The plugin must be an exe, jar or py.", "Invalid Plugin Type", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //if (plugin.Ext == Plugin.ExtType.PY)
+            //{
+            //    psi.FileName = "python";
+            //    parametersAsString = plugin.RunFile.FullName + parametersAsString;
+            //}
+            //else if (plugin.Ext == Plugin.ExtType.JAR)
+            //{
+            //    psi.FileName = "java";
+            //    parametersAsString = "-jar" + plugin.RunFile.FullName + parametersAsString;
+            //}
+            //else if (plugin.Ext == Plugin.ExtType.EXE)
+            //{
+            //    psi.FileName = plugin.RunFile.FullName;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("The plugin must be an exe, jar or py.", "Invalid Plugin Type", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
+
+            psi.FileName = plugin.FilePath + Path.DirectorySeparatorChar + plugin.RunFilePath;
 
             psi.Arguments = parametersAsString;
 
@@ -1958,7 +2111,10 @@ namespace OmGui
                         {
                             this.Invoke((MethodInvoker)delegate
                             {
-                                lvi.SubItems[1].Text = "Complete";
+                                lvi.SubItems[2].Text = "Complete";
+
+                                //Make clear button completed.
+                                //toolStripQueueButtonClearAll.Enabled = true;
                             });
                         }
                     }
@@ -1988,14 +2144,12 @@ namespace OmGui
             {
                 Process p = Process.Start(pqi.StartInfo);
 
-                p.Start();
-
                 //TS - TODO - This is where we need to get the info and put it into progress bar...
                 //Hack - Sometimes we don't get the last stdout line
                 //string lastLine = p.StandardOutput.ReadLine();
                 //parseMessage(lastLine);
 
-                while (!p.HasExited)
+                /*while (!p.HasExited)
                 {
                     string outputLine = p.StandardOutput.ReadLine();
                     int progress = -1;
@@ -2015,23 +2169,23 @@ namespace OmGui
                                 }
                             }
                         });
-                    }
+                    }*/
 
 
                     //labelStatus.Text = parseMessage(outputLine);
 
                     //runPluginProgressBar.Invalidate(true);
                     //labelStatus.Invalidate(true);
-                }
+                //}
 
                 p.WaitForExit();
 
                 p.Close();
 
+                //HACK - Copy the output file back into the working directory.
                 //If there is an output file:
-                if (pqi.OriginalOutputName != "")
+                /*if (pqi.OriginalOutputName != "")
                 {
-                    //HACK - Copy the output file back into the working directory.
                     string outputFileLocation = System.IO.Path.Combine(Properties.Settings.Default.CurrentWorkingFolder + "\\output", pqi.OriginalOutputName);
                     System.IO.File.Copy(pqi.destFolder + "temp.csv", outputFileLocation);
 
@@ -2040,24 +2194,30 @@ namespace OmGui
 
                     //Set result
                     e.Result = "done";
-                }
+                }*/
+
+
+                File.Move(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName, Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName + "a");
+                File.Move(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName + "a", Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName);
+
+                e.Result = "done";
             }
             catch (InvalidOperationException ioe)
             {
-                foreach (ListViewItem lvi in queueListViewItems2.Items)
+                this.Invoke((MethodInvoker)delegate
                 {
-                    BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
-                    if (worker.Equals(bw))
+                    foreach (ListViewItem lvi in queueListViewItems2.Items)
                     {
-                        this.Invoke((MethodInvoker)delegate
+                        BackgroundWorker bw = (BackgroundWorker)lvi.Tag;
+                        if (worker.Equals(bw))
                         {
                             queueListViewItems2.Items.Remove(lvi);
 
                             Console.WriteLine("ioe: " + ioe.Message);
                             MessageBox.Show("Plugin Error: " + ioe.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        });
+                        }
                     }
-                }
+                });
             }
             catch (System.ComponentModel.Win32Exception w32e)
             {
@@ -2234,18 +2394,23 @@ namespace OmGui
                     bw.CancelAsync();
                 }
             }
+
+            //clear all
+            if (queueListViewItems2.Items.Count == 0)
+            {
+                //toolStripQueueButtonClearAll.Enabled = false;
+            }
         }
 
         private void fileSystemWatcherOutput_Created(object sender, FileSystemEventArgs e)
         {
-            outputListAddItem(e.FullPath);
+            if(!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+                outputListAddItem(e.FullPath);
         }
 
         private void outputListAddItem(string filePath)
         {
-            ListViewItem item = new ListViewItem();
-
-            UpdateOutputFile(item, filePath);
+            ListViewItem item = UpdateOutputFile(filePath);
 
             outputListView.Items.Add(item);
             listViewOutputFiles[filePath] = item;
@@ -2253,7 +2418,8 @@ namespace OmGui
 
         private void fileSystemWatcherOutput_Deleted(object sender, FileSystemEventArgs e)
         {
-            outputListRemoveItem(e.FullPath, false);
+            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+                outputListRemoveItem(e.FullPath, false);
         }
 
         private void outputListRemoveItem(string file, bool delete)
@@ -2279,8 +2445,11 @@ namespace OmGui
 
         private void fileSystemWatcherOutput_Renamed(object sender, RenamedEventArgs e)
         {
-            outputListRemoveItem(e.OldFullPath, false);
-            outputListAddItem(e.FullPath);
+            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+            {
+                outputListRemoveItem(e.OldFullPath, false);
+                outputListAddItem(e.FullPath);
+            }
         }
 
         private void outputListView_DoubleClick(object sender, EventArgs e)
@@ -2291,6 +2460,56 @@ namespace OmGui
             string filePath = item.Tag.ToString();
 
             System.Diagnostics.Process.Start(filePath);
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportDataConstruct();
+        }
+
+        bool showAll = true;
+        private void toolStripButtonShowFiles_Click(object sender, EventArgs e)
+        {
+            if (showAll)
+            {
+                fileSystemWatcher.Filter = "*.*";
+                fileListViewRefreshList();
+                toolStripButtonShowFiles.Text = "Show *.cwa Only";
+                showAll = false;
+            }
+            else
+            {
+                fileSystemWatcher.Filter = "*.cwa";
+                fileListViewRefreshList();
+                toolStripButtonShowFiles.Text = "Show All Files";
+                showAll = true;
+            }
+        }
+
+        ShellContextMenu scm = new ShellContextMenu();
+        private void outputListView_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            {
+                ListView lv = sender as ListView;
+                FileInfo[] fileInfos = new FileInfo[lv.SelectedItems.Count];
+
+                int i = 0;
+                foreach (ListViewItem item in lv.SelectedItems)
+                {
+                    string filePath = item.Tag.ToString();
+
+                    fileInfos[i] = new FileInfo(filePath);
+                    i++;
+                }
+
+                scm.ShowContextMenu(this.Handle, fileInfos, Cursor.Position);
+            }
+        }
+
+        private void toolStripQueueButtonClearAll_Click(object sender, EventArgs e)
+        {
+            queueListViewItems2.Items.Clear();
         }
     }
 }

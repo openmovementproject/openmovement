@@ -70,5 +70,17 @@ namespace OmGui.Properties {
                 this["CurrentProfileDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Operator {
+            get {
+                return ((string)(this["Operator"]));
+            }
+            set {
+                this["Operator"] = value;
+            }
+        }
     }
 }
