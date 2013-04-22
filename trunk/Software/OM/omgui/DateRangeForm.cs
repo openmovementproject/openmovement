@@ -21,7 +21,7 @@ namespace OmGui
         private string settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml";
         private OmDevice Device { get; set; }
 
-        public DateRangeForm(string title, string prompt, OmDevice device)
+        public DateRangeForm(string title, OmDevice device)
         {
             InitializeComponent();
             Text = title;
@@ -212,6 +212,9 @@ namespace OmGui
             {
                 Console.WriteLine("Xml Error: Could not save recordProfile.xml - " + e.Message);
             }
+            catch (Exception e)
+            {
+            }
         }
 
         public bool Always { get; set; }
@@ -289,6 +292,12 @@ namespace OmGui
         List<MetaDataEntry> metaDataList;
         MetaDataTools mdt = new MetaDataTools();
 
+        public int SamplingFrequency { get; set; }
+        private int[] SamplingFrequencies = { 3200, 800, 400, 200, 100, 50, 25, 12, 6 };
+
+        public int Range { get; set; }
+        private int[] SamplingRanges = { 2, 4, 8, 16 };
+
         private void buttonOk_Click(object sender, EventArgs e)
         {
             metaDataEntries = MetaDataEntry.shorthandMetaData;
@@ -325,6 +334,9 @@ namespace OmGui
 
             DateTime t = datePickerStart.Value.Date.Add(timePickerStart.Value.TimeOfDay);
             DateTime t2 = datePickerEnd.Value.Date.Add(timePickerEnd.Value.TimeOfDay);
+
+            SamplingFrequency = SamplingFrequencies[comboBoxSamplingFreq.SelectedIndex];
+            Range = SamplingRanges[comboBoxRange.SelectedIndex];
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
 
@@ -753,7 +765,7 @@ namespace OmGui
                                     "Delayed start time is more than 14 days in the future",
                                     "End time is in the past",
                                     "Start time is in the past",
-                                    "Current Sampling Frequency not guaranteed"};
+                                    "Current Sampling Frequency not guaranteed on this firmware"};
         private void updateWarningMessages()
         {
             if (Device != null)
@@ -772,7 +784,7 @@ namespace OmGui
                     warningMessagesFlags[0] = true;
 
                 //Not fully cleared
-                if (Device.HasNewData)
+                if (Device.HasData)
                     warningMessagesFlags[1] = true;
 
                 //Duration could be limited by device capacity
@@ -789,7 +801,7 @@ namespace OmGui
                     warningMessagesFlags[4] = true;
 
                 //End time is in the past.
-                if (endDate < DateTime.Now)
+                if (endDate < DateTime.Now.Add(new TimeSpan(0, 1, 0)))
                     warningMessagesFlags[5] = true;
 
                 //Start date is more than a day in the past

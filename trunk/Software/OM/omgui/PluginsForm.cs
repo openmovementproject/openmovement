@@ -35,8 +35,14 @@ namespace OmGui
             BlockStart = blockStart;
             BlockCount = blockCount;
 
-            StartTime = startDateTime;
-            EndTime = endDateTime;
+            StartTime = null;
+            EndTime = null;
+
+            if(!startDateTime.Equals(""))
+                StartTime = startDateTime;
+
+            if(!endDateTime.Equals(""))
+                EndTime = endDateTime;
 
             plugins = PluginManager.Plugins;
 
