@@ -9,13 +9,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="CurrentPluginFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="CurrentProfileDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\</Value>
-    </Setting>
-    <Setting Name="Operator" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

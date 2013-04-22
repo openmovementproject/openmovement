@@ -12,7 +12,6 @@ using System.Threading;
 
 namespace OmGui
 {
-
     public partial class DataViewer : UserControl
     {
         public DataViewer()

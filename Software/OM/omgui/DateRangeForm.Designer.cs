@@ -59,6 +59,8 @@
             this.radioButtonImmediately = new System.Windows.Forms.RadioButton();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.textBoxWeight = new System.Windows.Forms.TextBox();
+            this.textBoxHeight = new System.Windows.Forms.TextBox();
             this.comboBoxSite = new System.Windows.Forms.ComboBox();
             this.label26 = new System.Windows.Forms.Label();
             this.comboBoxSubjectHandedness = new System.Windows.Forms.ComboBox();
@@ -84,8 +86,6 @@
             this.textBoxStudyExerciseType = new System.Windows.Forms.TextBox();
             this.textBoxStudyCentre = new System.Windows.Forms.TextBox();
             this.textBoxStudyInvestigator = new System.Windows.Forms.TextBox();
-            this.textBoxHeight = new System.Windows.Forms.TextBox();
-            this.textBoxWeight = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.daysPicker)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.hoursPicker)).BeginInit();
@@ -510,6 +510,20 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Subject";
             // 
+            // textBoxWeight
+            // 
+            this.textBoxWeight.Location = new System.Drawing.Point(99, 92);
+            this.textBoxWeight.Name = "textBoxWeight";
+            this.textBoxWeight.Size = new System.Drawing.Size(100, 20);
+            this.textBoxWeight.TabIndex = 37;
+            // 
+            // textBoxHeight
+            // 
+            this.textBoxHeight.Location = new System.Drawing.Point(99, 69);
+            this.textBoxHeight.Name = "textBoxHeight";
+            this.textBoxHeight.Size = new System.Drawing.Size(100, 20);
+            this.textBoxHeight.TabIndex = 36;
+            // 
             // comboBoxSite
             // 
             this.comboBoxSite.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -819,20 +833,6 @@
             this.textBoxStudyInvestigator.Size = new System.Drawing.Size(180, 20);
             this.textBoxStudyInvestigator.TabIndex = 5;
             // 
-            // textBoxHeight
-            // 
-            this.textBoxHeight.Location = new System.Drawing.Point(99, 69);
-            this.textBoxHeight.Name = "textBoxHeight";
-            this.textBoxHeight.Size = new System.Drawing.Size(100, 20);
-            this.textBoxHeight.TabIndex = 36;
-            // 
-            // textBoxWeight
-            // 
-            this.textBoxWeight.Location = new System.Drawing.Point(99, 92);
-            this.textBoxWeight.Name = "textBoxWeight";
-            this.textBoxWeight.Size = new System.Drawing.Size(100, 20);
-            this.textBoxWeight.TabIndex = 37;
-            // 
             // DateRangeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -845,6 +845,7 @@
             this.Controls.Add(this.numericUpDownSessionID);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.panel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.MinimizeBox = false;

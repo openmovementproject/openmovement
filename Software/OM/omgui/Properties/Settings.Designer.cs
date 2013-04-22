@@ -49,7 +49,7 @@ namespace OmGui.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string CurrentPluginFolder {
             get {
                 return ((string)(this["CurrentPluginFolder"]));
@@ -68,18 +68,6 @@ namespace OmGui.Properties {
             }
             set {
                 this["CurrentProfileDirectory"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Operator {
-            get {
-                return ((string)(this["Operator"]));
-            }
-            set {
-                this["Operator"] = value;
             }
         }
     }

@@ -124,7 +124,30 @@ category = SourceCategory.Other;
         protected string filename;
         public string Filename { get { return filename; } }
 
-        public bool HasData { get { if (Filename == null) { return false; }  return File.Exists(Filename); } }
+        //public bool HasData { get { if (Filename == null) { return false; }  return File.Exists(Filename); } }
+
+        public bool HasData
+        {
+            get
+            {
+                string fName = "";
+                StringBuilder filenamesb = new StringBuilder(256);
+                if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
+                {
+                    fName = filenamesb.ToString();
+                }
+
+                if (!fName.Equals(""))
+                {
+                    FileInfo f = new FileInfo(fName);
+
+                    if (f.Length > 1024)
+                        return true;
+                }
+
+                return false;
+            }
+        }
 
         // TODO: Remember to clear archive on successful download
         public bool HasNewData 
@@ -160,7 +183,7 @@ category = SourceCategory.Other;
         {
             get
             {
-                if (DateTime.Now >= StopTime) { return RecordStatus.Stopped; }
+                if (DateTime.Now >= StopTime || (StopTime == DateTime.MaxValue && StartTime == DateTime.MaxValue)) { return RecordStatus.Stopped; }
                 else if (StartTime == DateTime.MinValue && StopTime == DateTime.MaxValue) { return RecordStatus.Always; }
                 else { return RecordStatus.Interval; }
             }
