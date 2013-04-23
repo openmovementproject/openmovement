@@ -29,5 +29,5 @@ Drivers:
 
 Firmware binaries: (including boot-loader for Windows)
 
-  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-30.zip AX3 r1.7 Firmware 30]
+  * [http://code.google.com/p/openmovement/downloads/detail?name=AX3-1.7-Firmware-36.zip AX3 r1.7 Firmware 36]
   * [http://code.google.com/p/openmovement/downloads/detail?name=WAX3-2.1-Firmware-28.zip WAX3 r2.1 Firmware 28]
