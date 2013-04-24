@@ -1,0 +1,51 @@
+Microchip Technology Inc, vv3_31 (A) `
+
+Tool Name:
+  c:\program files (x86)\microchip\mplab c30\bin\bin\..\bin/pic30-coff-ld.exe
+
+Command:
+  -p24FJ256GB106 \
+  -oBootloader CWA.cof \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/.. \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/PIC24E \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../support/PIC24E/gld \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/PIC24F \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../support/PIC24F/gld \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/PIC24H \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../support/PIC24H/gld \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/dsPIC30F \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../support/dsPIC30F/gld \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/dsPIC33E \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../support/dsPIC33E/gld \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/dsPIC33F \
+  -Lc:/program files (x86)/microchip/mplab c30/bin/bin/../../support/dsPIC33F/gld \
+  Objects\USB Device - C30\main.o \
+  Objects\USB Device - C30\HardwareProfile.o \
+  Objects\USB Device - C30\usb_function_hid.o \
+  Objects\USB Device - C30\usb_descriptors.o \
+  Objects\USB Device - C30\usb_device.o \
+  -LC:\Program Files\Microchip\MPLAB C30\lib \
+  -Tboot_hid_boot_p24FJ256GB106.gld.00 \
+  --defsym=__MPLAB_BUILD=1 \
+  --defsym=__MPLAB_DEBUG=1 \
+  -Map=Bootloader CWA.map \
+  --report-mem \
+  -start-group \
+  --library=pic30-coff \
+  --library=m-coff \
+  --library=c-coff \
+  -end-group \
+
+Archive member included because of file (symbol)
+
+c:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/PIC24F\libpPIC24Fxxx-coff.a(CloseADC10.o)
+                              Objects\USB Device - C30\HardwareProfile.o (CloseADC10)
+c:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/PIC24F\libpPIC24Fxxx-coff.a(OpenADC10_v2.o)
+                              Objects\USB Device - C30\HardwareProfile.o (OpenADC10_v2)
+c:/program files (x86)/microchip/mplab c30/bin/bin/../../lib/PIC24F\libpPIC24Fxxx-coff.a(ReadADC10.o)
+                              Objects\USB Device - C30\HardwareProfile.o (ReadADC10)
+c:/program files (x86)/microchip/mplab c30/bin/bin/../../lib\libpic30-coff.a(crt0_standard.o)
+                              (_resetPRI)
+c:/program files (x86)/microchip/mplab c30/bin/bin/../../lib\libpic30-coff.a(data_init_standard.o)
+                              c:/program files (x86)/microchip/mplab c30/bin/bin/../../lib\libpic30-coff.a(crt0_standard.o) (_data_init_standard)
