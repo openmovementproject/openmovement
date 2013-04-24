@@ -1,4 +1,5 @@
 // Write application code here, call from main.c
+// Diana Nowacka
 #include <Compiler.h>
 #include <TimeDelay.h>
 #include "HardwareProfile.h"
@@ -9,11 +10,6 @@ char ir_mode = 0;
 
 void RunApp(void)   
 {  
-    
-   // MOTOR1_DUTY = 0x4E20;
-    //MOTOR2_DUTY = 0x0;
-    //IR_TX1_DUTY = 0xFF;
-    //IR_TX2_DUTY = 0xFF;
 	while(!USB_BUS_SENSE)
 	{  	
         if (!BUTTON) 
@@ -21,7 +17,7 @@ void RunApp(void)
     	    if (button_clicked == 0)
     	    {
         	    button_clicked = 1;
-        	   // ir_mode = ! ir_mode; // switch the pwm
+        	   // nothing is happening here really
     	    }
         }
         else button_clicked = 0; 

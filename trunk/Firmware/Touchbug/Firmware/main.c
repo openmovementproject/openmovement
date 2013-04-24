@@ -1,4 +1,5 @@
 // CWA3.1 Karim Ladha 08/12/12
+// Diana Nowacka
 // Includes
 #include <Compiler.h>
 #include <TimeDelay.h>
