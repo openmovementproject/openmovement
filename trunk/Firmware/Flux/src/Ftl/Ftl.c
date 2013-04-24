@@ -1326,7 +1326,7 @@ static char FtlMapInitialize(void)
 		else if (type == FTL_PAGE_INFO_BAD)				// Bad
 		{
 #if FTL_PLANES > 1
-        	unsigned char plane = (logicalBlock & (FTL_PLANES - 1));
+        	unsigned char plane = (block & (FTL_PLANES - 1));
 #else
         	unsigned char plane = 0;
 #endif
