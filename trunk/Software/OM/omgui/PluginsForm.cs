@@ -72,6 +72,16 @@ namespace OmGui
 
             descriptionLabel.Text = SelectedPlugin.Description;
 
+            if (!SelectedPlugin.InputFile.Equals("none"))
+                inputFileContentsLabel.Text = SelectedPlugin.InputFile;
+            else
+                inputFileContentsLabel.Text = "not specified";
+
+            if (!SelectedPlugin.OutputFile.Equals("none"))
+                outputFileContentsLabel.Text = SelectedPlugin.OutputFile;
+            else
+                outputFileContentsLabel.Text = "not specified";
+
             //TS - Not worrying about input and output file anymore.
             //if (SelectedPlugin.InputFile != "null")
             //{

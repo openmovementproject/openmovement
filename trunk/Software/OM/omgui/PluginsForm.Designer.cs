@@ -39,6 +39,8 @@
             this.btnRun = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.buttonRefresh = new System.Windows.Forms.Button();
+            this.inputFileContentsLabel = new System.Windows.Forms.Label();
+            this.outputFileContentsLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // pluginsComboBox
@@ -142,11 +144,29 @@
             this.buttonRefresh.UseVisualStyleBackColor = true;
             this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
             // 
+            // inputFileContentsLabel
+            // 
+            this.inputFileContentsLabel.Location = new System.Drawing.Point(68, 73);
+            this.inputFileContentsLabel.Name = "inputFileContentsLabel";
+            this.inputFileContentsLabel.Size = new System.Drawing.Size(296, 24);
+            this.inputFileContentsLabel.TabIndex = 11;
+            this.inputFileContentsLabel.Text = "Description Here...";
+            // 
+            // outputFileContentsLabel
+            // 
+            this.outputFileContentsLabel.Location = new System.Drawing.Point(68, 104);
+            this.outputFileContentsLabel.Name = "outputFileContentsLabel";
+            this.outputFileContentsLabel.Size = new System.Drawing.Size(296, 24);
+            this.outputFileContentsLabel.TabIndex = 12;
+            this.outputFileContentsLabel.Text = "Description Here...";
+            // 
             // PluginsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(373, 306);
+            this.Controls.Add(this.outputFileContentsLabel);
+            this.Controls.Add(this.inputFileContentsLabel);
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnRun);
@@ -158,6 +178,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.pluginsComboBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "PluginsForm";
             this.Text = "PluginsForm";
             this.ResumeLayout(false);
@@ -178,5 +199,7 @@
         private System.Windows.Forms.Button btnRun;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button buttonRefresh;
+        private System.Windows.Forms.Label inputFileContentsLabel;
+        private System.Windows.Forms.Label outputFileContentsLabel;
     }
 }

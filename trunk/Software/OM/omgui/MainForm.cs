@@ -1559,7 +1559,7 @@ namespace OmGui
 
         private void AddProfilePluginsToToolStrip()
         {
-            for(int i = toolStripFiles.Items.Count; i > 3; i--)
+            for(int i = toolStripFiles.Items.Count; i > 4; i--)
             {
                 toolStripFiles.Items.RemoveAt(toolStripFiles.Items.Count-1);
             }
