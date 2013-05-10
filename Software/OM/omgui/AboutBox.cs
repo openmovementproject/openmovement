@@ -17,7 +17,7 @@ namespace OmGui
             this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
-            this.textBoxDescription.Text = AssemblyDescription;
+            this.labelDescription.Text = AssemblyDescription;
         }
 
         #region Assembly Attribute Accessors
@@ -107,6 +107,12 @@ namespace OmGui
 
         private void okButton_Click(object sender, EventArgs e)
         {
+            Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            DialogResult = System.Windows.Forms.DialogResult.OK;
             Close();
         }
     }

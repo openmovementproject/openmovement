@@ -330,15 +330,20 @@ namespace OmGui
             //Create metadata
             string md = MetaDataTools.CreateMetaData(metaDataList);
 
-            mdt.SaveMetaData(md);
+            int i = OmApi.OmSetMetadata(Device.DeviceId, md, md.Length);
+            Console.WriteLine("i: " + i);
 
-            DateTime t = datePickerStart.Value.Date.Add(timePickerStart.Value.TimeOfDay);
-            DateTime t2 = datePickerEnd.Value.Date.Add(timePickerEnd.Value.TimeOfDay);
+            //mdt.SaveMetaData(md);
 
             SamplingFrequency = SamplingFrequencies[comboBoxSamplingFreq.SelectedIndex];
             Range = SamplingRanges[comboBoxRange.SelectedIndex];
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
+
+            StringBuilder sb = new StringBuilder(9600);
+            OmApi.OmGetMetadata(Device.DeviceId, sb);
+
+            Console.WriteLine("sb: " + sb.ToString());
 
             //TS - TODO - Build UntilDate from the data provided.
         }
@@ -801,7 +806,8 @@ namespace OmGui
                     warningMessagesFlags[4] = true;
 
                 //End time is in the past.
-                if (endDate < DateTime.Now.Add(new TimeSpan(0, 1, 0)))
+                DateTime d = DateTime.Now.AddMinutes(1);
+                if (radioButtonDuration.Checked && (endDate < d))
                     warningMessagesFlags[5] = true;
 
                 //Start date is more than a day in the past

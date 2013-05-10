@@ -23,6 +23,8 @@ namespace OmGui
         public string FileName { get; set; }
         public string ReadableName { get; set; }
         public string[] OutputExtensions { get; set; }
+        public string OutputFile { get; set; }
+        public string InputFile { get; set; }
         public Dictionary<string, string> DefaultValues { get; set; }
         public string FilePath { get; set; }
 
@@ -77,7 +79,9 @@ namespace OmGui
                                 XmlNodeList fileNameXML = pluginSettingsXML.GetElementsByTagName("fileName");
                                 XmlNodeList outputExtensionsXML = pluginSettingsXML.GetElementsByTagName("outputExtensions");
                                 XmlNodeList defaultValuesXML = pluginSettingsXML.GetElementsByTagName("defaultValues");
-
+                                XmlNodeList outputFileXML = pluginSettingsXML.GetElementsByTagName("outputFile");
+                                XmlNodeList inputFileXML = pluginSettingsXML.GetElementsByTagName("inputFile");
+                                
                                 int height = 0;
                                 if (heightXML.Count < 1 || !int.TryParse(heightXML[0].InnerText, out height))
                                     plugin.Height = 600;
@@ -141,6 +145,14 @@ namespace OmGui
                                 if (defaultValuesXML.Count > 0)
                                     foreach (XmlNode node in defaultValuesXML[0].ChildNodes)
                                         plugin.DefaultValues.Add(node.Name, node.InnerText);
+
+                                plugin.OutputFile = "none";
+                                if (outputFileXML.Count > 0)
+                                    plugin.OutputFile = outputFileXML[0].InnerText;
+
+                                plugin.InputFile = "none";
+                                if (inputFileXML.Count > 0)
+                                    plugin.InputFile = inputFileXML[0].InnerText;
 
                                 Console.WriteLine("height: " + plugin.Height);
                                 Console.WriteLine("width: " + plugin.Width);
