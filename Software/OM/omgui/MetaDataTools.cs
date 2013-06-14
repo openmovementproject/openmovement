@@ -69,6 +69,24 @@ namespace OmGui
             return (new System.Text.UTF8Encoding()).GetString(bufferArray);
         }
 
+        public static List<string> mdStringList = new List<string>() { "_c", "_s", "_i", "_x", "_so", "_n", "_p", "_sc", "_se", "_h", "_w", "_ha" };
+
+        public static Dictionary<string, string> metaDataMappingDictionary = new Dictionary<string, string>()
+        {
+            { "_c",  "StudyCentre" },
+            { "_s",  "StudyCode" },
+            { "_i",  "StudyInvestigator" }, 
+            { "_x",  "StudyExerciseType" },
+            { "_so",  "StudyOperator" },
+            { "_n",  "StudyNotes" },
+            { "_p",  "SubjectSite" },
+            { "_sc",  "SubjectCode" },
+            { "_se",  "SubjectSex" },
+            { "_h",  "SubjectHeight" },
+            { "_w",  "SubjectWidth" },
+            { "_ha",  "SubjectHandedness" }
+        };
+
         public static IDictionary<string, string> ParseMetaData(string source, ICollection<string> basicSet)
         {
             IDictionary<string, string> metaData = new Dictionary<string, string>();
