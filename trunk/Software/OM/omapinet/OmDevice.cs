@@ -139,10 +139,17 @@ category = SourceCategory.Other;
 
                 if (!fName.Equals(""))
                 {
-                    FileInfo f = new FileInfo(fName);
+                    try
+                    {
+                        FileInfo f = new FileInfo(fName);
 
-                    if (f.Length > 1024)
-                        return true;
+                        if (f.Length > 1024)
+                            return true;
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
+                    }
                 }
 
                 return false;
@@ -183,8 +190,9 @@ category = SourceCategory.Other;
         {
             get
             {
-                if (DateTime.Now >= StopTime || (StopTime == DateTime.MaxValue && StartTime == DateTime.MaxValue)) { return RecordStatus.Stopped; }
-                else if (StartTime == DateTime.MinValue && StopTime == DateTime.MaxValue) { return RecordStatus.Always; }
+                // DateTime.Now >= StopTime
+                if (StopTime <= StartTime) { return RecordStatus.Stopped; }
+                else if (StartTime <= DateTime.MinValue && StopTime >= DateTime.MaxValue) { return RecordStatus.Always; }
                 else { return RecordStatus.Interval; }
             }
         }

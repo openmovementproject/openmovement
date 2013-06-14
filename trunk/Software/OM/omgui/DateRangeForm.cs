@@ -16,13 +16,22 @@ namespace OmGui
     public partial class DateRangeForm : Form
     {
         bool setOK = false;
+        bool warningsOn = true;
 
         private Dictionary<string, string> SettingsProfileDictionary { get; set; }
         private string settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml";
         private OmDevice Device { get; set; }
+        private OmDevice[] Devices { get; set; }
 
-        public DateRangeForm(string title, OmDevice device)
+        public DateRangeForm(string title, OmDevice[] devices)
         {
+            if (devices.Length > 0)
+            {
+                warningsOn = false;
+            }
+
+            Devices = devices;
+
             InitializeComponent();
             Text = title;
             //labelPrompt.Text = prompt;
@@ -47,9 +56,6 @@ namespace OmGui
             ////Set the height/weight enabled
             //checkBoxHeight.Checked = true;
             //checkBoxWeight.Checked = true;
-
-            //Device
-            Device = device;
 
             //Set radio buttons enabled
             radioButtonImmediately.Checked = true;
@@ -312,26 +318,45 @@ namespace OmGui
             saveDictionaryToXML(SettingsProfileDictionary);
             metaDataList = new List<MetaDataEntry>();
 
-            //fill mde
-            metaDataList.Add(new MetaDataEntry("_c", SettingsProfileDictionary["StudyCentre"]));
-            metaDataList.Add(new MetaDataEntry("_s", SettingsProfileDictionary["StudyCode"]));
-            metaDataList.Add(new MetaDataEntry("_i", SettingsProfileDictionary["StudyInvestigator"]));
-            metaDataList.Add(new MetaDataEntry("_x", SettingsProfileDictionary["StudyExerciseType"]));
-            metaDataList.Add(new MetaDataEntry("_so", SettingsProfileDictionary["StudyOperator"]));
-            metaDataList.Add(new MetaDataEntry("_n", SettingsProfileDictionary["StudyNotes"]));
+            List<string> mdStringList = new List<string>();
 
-            metaDataList.Add(new MetaDataEntry("_p", SettingsProfileDictionary["SubjectSite"]));
-            metaDataList.Add(new MetaDataEntry("_sc", SettingsProfileDictionary["SubjectCode"]));
-            metaDataList.Add(new MetaDataEntry("_se", SettingsProfileDictionary["SubjectSex"]));
-            metaDataList.Add(new MetaDataEntry("_h", SettingsProfileDictionary["SubjectHeight"]));
-            metaDataList.Add(new MetaDataEntry("_w", SettingsProfileDictionary["SubjectWidth"]));
-            metaDataList.Add(new MetaDataEntry("_ha", SettingsProfileDictionary["SubjectHandedness"]));
+            //fill mde
+            metaDataList.Add(new MetaDataEntry("_c", SettingsProfileDictionary["StudyCentre"])); mdStringList.Add("_c");
+            metaDataList.Add(new MetaDataEntry("_s", SettingsProfileDictionary["StudyCode"])); mdStringList.Add("_s");
+            metaDataList.Add(new MetaDataEntry("_i", SettingsProfileDictionary["StudyInvestigator"])); mdStringList.Add("_i");
+            metaDataList.Add(new MetaDataEntry("_x", SettingsProfileDictionary["StudyExerciseType"])); mdStringList.Add("_x");
+            metaDataList.Add(new MetaDataEntry("_so", SettingsProfileDictionary["StudyOperator"])); mdStringList.Add("_so");
+            metaDataList.Add(new MetaDataEntry("_n", SettingsProfileDictionary["StudyNotes"])); mdStringList.Add("_n");
+
+            metaDataList.Add(new MetaDataEntry("_p", SettingsProfileDictionary["SubjectSite"])); mdStringList.Add("_p");
+            metaDataList.Add(new MetaDataEntry("_sc", SettingsProfileDictionary["SubjectCode"])); mdStringList.Add("_sc");
+            metaDataList.Add(new MetaDataEntry("_se", SettingsProfileDictionary["SubjectSex"])); mdStringList.Add("_se");
+            metaDataList.Add(new MetaDataEntry("_h", SettingsProfileDictionary["SubjectHeight"])); mdStringList.Add("_h");
+            metaDataList.Add(new MetaDataEntry("_w", SettingsProfileDictionary["SubjectWidth"])); mdStringList.Add("_w");
+            metaDataList.Add(new MetaDataEntry("_ha", SettingsProfileDictionary["SubjectHandedness"])); mdStringList.Add("_ha");
 
             //Create metadata
             string md = MetaDataTools.CreateMetaData(metaDataList);
 
-            int i = OmApi.OmSetMetadata(Device.DeviceId, md, md.Length);
-            Console.WriteLine("i: " + i);
+            foreach (OmDevice device in Devices)
+            {
+                int i = OmApi.OmSetMetadata(device.DeviceId, md, md.Length);
+
+                Console.WriteLine("OmSetMetadata Result: " + i);
+
+                StringBuilder sb = new StringBuilder(9600);
+                OmApi.OmGetMetadata(device.DeviceId, sb);
+
+                Console.WriteLine("sb: " + sb.ToString());
+
+                Dictionary<string, string> test = (Dictionary<string, string>) MetaDataTools.ParseMetaData(sb.ToString(), mdStringList);
+
+                foreach(KeyValuePair<string, string> kvp in test)
+                {
+                    Console.WriteLine(kvp.Key + " - " + kvp.Value);
+                }
+            }
+            
 
             //mdt.SaveMetaData(md);
 
@@ -339,11 +364,6 @@ namespace OmGui
             Range = SamplingRanges[comboBoxRange.SelectedIndex];
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
-
-            StringBuilder sb = new StringBuilder(9600);
-            OmApi.OmGetMetadata(Device.DeviceId, sb);
-
-            Console.WriteLine("sb: " + sb.ToString());
 
             //TS - TODO - Build UntilDate from the data provided.
         }
@@ -430,6 +450,8 @@ namespace OmGui
 
                 Always = false;
             }
+
+            updateWarningMessages();
         }
         #endregion
 
@@ -773,7 +795,7 @@ namespace OmGui
                                     "Current Sampling Frequency not guaranteed on this firmware"};
         private void updateWarningMessages()
         {
-            if (Device != null)
+            if (Device != null && warningsOn)
             {
                 //Make date start and end from dates and times;
                 DateTime startDate = datePickerStart.Value.Date + timePickerStart.Value.TimeOfDay;
@@ -806,12 +828,12 @@ namespace OmGui
                     warningMessagesFlags[4] = true;
 
                 //End time is in the past.
-                DateTime d = DateTime.Now.AddMinutes(1);
+                DateTime d = DateTime.Now;
                 if (radioButtonDuration.Checked && (endDate < d))
                     warningMessagesFlags[5] = true;
 
                 //Start date is more than a day in the past
-                if (startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0)))
+                if ((startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0))) && radioButtonDuration.Checked)
                     warningMessagesFlags[6] = true;
 
                 //Warning for sampling frequency

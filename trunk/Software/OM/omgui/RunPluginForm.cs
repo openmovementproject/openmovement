@@ -57,6 +57,37 @@ namespace OmGui
             //Add block parameters if needed
             url += "?";
 
+            //TODO - get metadata from file into url.
+            if (Plugin.WantMetaData)
+            {
+                OmApiNet.OmReader reader = OmApiNet.OmReader.Open(CWAFilename);
+
+                string md = reader.MetaData;
+                Dictionary<string, string> parsed = (Dictionary<string, string>)MetaDataTools.ParseMetaData(md, MetaDataTools.mdStringList);
+
+                Dictionary<string, string> metadataBuiltReadable = new Dictionary<string, string>();
+
+                foreach (KeyValuePair<string, string> kvp in parsed)
+                {
+                    metadataBuiltReadable.Add(MetaDataTools.metaDataMappingDictionary[kvp.Key], kvp.Value);
+                }
+
+                bool notFirst = false;
+
+                foreach (KeyValuePair<string, string> kvp in metadataBuiltReadable)
+                {
+                    if (!notFirst)
+                        notFirst = true;
+                    else
+                        url += "&";
+
+                    url += kvp.Key + "=" + kvp.Value;
+
+                }
+            }
+
+            Console.WriteLine("URL: " + url);
+
             if (Plugin.SelectionBlockStart > -1 && Plugin.SelectionBlockCount > -1)
             {
                 url += "startBlock=" + Plugin.SelectionBlockStart;
@@ -120,7 +151,7 @@ namespace OmGui
 
             if (urlSplitForOutputFile.Length == 2)
             {
-                urlSplitForOutputFile[0] = "\"" + CWAFilename + "\"" + urlSplitForOutputFile[0];
+                urlSplitForOutputFile[0] = "\"" + CWAFilename + "\" " + urlSplitForOutputFile[0];
                 ParameterString = urlSplitForOutputFile[0];
 
                 OriginalOutputName = urlSplitForOutputFile[1];

@@ -569,6 +569,7 @@ namespace OmGui
                 {
                     if (!device.IsDownloading)
                     {
+                        //Console.WriteLine(device.StartTime.Ticks + " - " + device.StopTime.Ticks + " - " + device.IsRecording);
                         if (device.IsRecording == OmDevice.RecordStatus.Stopped)
                         {
                             if (device.HasData)
@@ -724,7 +725,7 @@ namespace OmGui
             //TS - Multiple rows logic - Only indicates of some or all are doing something so the buttons will actually have to do some logic as it iterates through each selected.
             else if (devicesListView.SelectedItems.Count > 1)
             {
-                bool allDownloading = true, someDownloading = false, allHaveData = true, someHaveData = false, allRecording = true, someRecording = false, allSetupForRecord = true, someSetupForRecord = false;
+                bool allDownloading = true, someDownloading = false, someHaveData = false, allRecording = true, someRecording = false, allSetupForRecord = true, someSetupForRecord = false;
 
                 foreach (ListViewItem item in devicesListView.SelectedItems)
                 {
@@ -747,11 +748,6 @@ namespace OmGui
                     if (device.HasData)
                     {
                         someHaveData = true;
-                    }
-                    //If don't have data then allHaveData set false.
-                    else if (allHaveData)
-                    {
-                        allHaveData = false;
                     }
 
                     //ALL RECORDING
@@ -781,7 +777,7 @@ namespace OmGui
 
                 //Can Download/Clear
                 toolStripButtonDownload.Enabled = someHaveData && !allRecording; //If has data and not downloading
-                toolStripButtonClear.Enabled = someDownloading || allDownloading; //If not downloading but have data then can clear
+                toolStripButtonClear.Enabled = (someDownloading || !allDownloading) && someHaveData && !allRecording; //If not downloading but have data then can clear
 
                 //Can Cancel Download
                 toolStripButtonCancelDownload.Enabled = someDownloading || allDownloading; //If downloading then can cancel download
@@ -1104,6 +1100,77 @@ namespace OmGui
         //    devicesListViewUpdateEnabled();
         //}
 
+        private void toolStripButtonRecord_Click(object sender, EventArgs e)
+        {
+            OmDevice[] devices = new OmDevice[devicesListView.SelectedItems.Count];
+            for (int i = 0; i < devicesListView.SelectedItems.Count; i++)
+            {
+                devices[i] = (OmDevice) devicesListView.SelectedItems[i].Tag;
+            }
+
+            DateRangeForm rangeForm = new DateRangeForm("Recording Settings", devices);
+            DialogResult dr = rangeForm.ShowDialog();
+
+            if (dr == System.Windows.Forms.DialogResult.OK)
+            {
+                DateTime start = DateTime.MaxValue;
+                DateTime stop = DateTime.MaxValue;
+
+                List<string> fails = new List<string>();
+                List<string> fails2 = new List<string>();
+
+                dataViewer.CancelPreview();
+                Cursor.Current = Cursors.WaitCursor;
+
+                foreach (OmDevice device in devices)
+                {
+                    if (device is OmDevice && !((OmDevice)device).IsDownloading)
+                    {
+                        if (rangeForm.Always)
+                        {
+                            //Set Date
+                            if (rangeForm.Always)
+                            {
+                                //TS - Taken from Record button
+                                if (!((OmDevice)device).AlwaysRecord())
+                                    fails.Add(device.DeviceId.ToString());
+                            }
+                            else
+                            {
+                                if (!((OmDevice)device).SetInterval(start, stop))
+                                    fails.Add(device.DeviceId.ToString());
+                            }
+
+                            //Set SessionID
+                            if (!((OmDevice)device).SetSessionId((uint)rangeForm.SessionID))
+                                fails.Add(device.DeviceId.ToString());
+                        }
+                    }
+
+                    //Sampling Freq and Range
+                    OmApi.OmSetAccelConfig(device.DeviceId, (int)rangeForm.SamplingFrequency, rangeForm.Range);
+
+                    //Do Sync Time
+                    if (rangeForm.SyncTime != DateRangeForm.SyncTimeType.None)
+                    {
+                        Cursor.Current = Cursors.WaitCursor;
+                        //foreach (ListViewItem i in devicesListView.SelectedItems)
+                        //{
+                        //    OmSource device = (OmSource)i.Tag;
+                        if (device is OmDevice && ((OmDevice)device).Connected)
+                        {
+                            if (!((OmDevice)device).SyncTime((int)rangeForm.SyncTime))
+                                fails2.Add(device.DeviceId.ToString());
+                        }
+                    }
+                }
+
+                if (fails2.Count > 0) { MessageBox.Show(this, "Failed operation on " + fails2.Count + " device(s):\r\n" + string.Join("; ", fails2.ToArray()), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1); }
+
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
         private void toolStripButtonInterval_Click(object sender, EventArgs e)
         {
             //if (EnsureNoSelectedDownloading())
@@ -1115,7 +1182,7 @@ namespace OmGui
 
             OmDevice device = (OmDevice)devicesListView.SelectedItems[0].Tag;
 
-            DateRangeForm rangeForm = new DateRangeForm("Recording Settings", device);
+            DateRangeForm rangeForm = new DateRangeForm("Recording Settings", new OmDevice[] {device});
             DialogResult dr = rangeForm.ShowDialog();
             
             if (dr == System.Windows.Forms.DialogResult.OK)
@@ -1147,9 +1214,6 @@ namespace OmGui
                     //Set SessionID
                     if (!((OmDevice)device).SetSessionId((uint)rangeForm.SessionID))
                         fails.Add(device.DeviceId.ToString());
-
-                    //TODO - Set Metadata
-                    //DONE - in DateRangeForm.
                 }
 
                 //Sampling Freq and Range
@@ -2202,6 +2266,11 @@ namespace OmGui
             else if (e.Error != null)
             {
                 MessageBox.Show("An error has occured in the plugin:\n" + e.Error.Message, "Error in Plugin", MessageBoxButtons.OK);
+
+            }
+            else
+            {
+                MessageBox.Show("Unknown error - please try again", "Error in Plugin", MessageBoxButtons.OK);
             }
         }
 
@@ -2247,10 +2316,10 @@ namespace OmGui
                     }*/
 
 
-                    //labelStatus.Text = parseMessage(outputLine);
+                //labelStatus.Text = parseMessage(outputLine);
 
-                    //runPluginProgressBar.Invalidate(true);
-                    //labelStatus.Invalidate(true);
+                //runPluginProgressBar.Invalidate(true);
+                //labelStatus.Invalidate(true);
                 //}
 
                 p.WaitForExit();
@@ -2271,9 +2340,15 @@ namespace OmGui
                     e.Result = "done";
                 }*/
 
-
-                File.Move(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName, Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName + "a");
-                File.Move(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName + "a", Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName);
+                try
+                {
+                    File.Move(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName, Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName + "a");
+                    File.Move(Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName + "a", Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + pqi.OriginalOutputName);
+                }
+                catch (Exception ue)
+                {
+                    MessageBox.Show("Plugin Error: Unknown plugin error: " + ue.Message, "Plugin Error", MessageBoxButtons.OK);
+                }
 
                 e.Result = "done";
             }
@@ -2310,6 +2385,10 @@ namespace OmGui
                     Console.WriteLine("w32e: " + w32e.Message);
                     MessageBox.Show("Plugin Error: " + w32e.Message, "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 });
+            }
+            catch (ArgumentNullException ane)
+            {
+                MessageBox.Show("Argument null: " + ane.Message);
             }
             catch (Exception e2)
             {
@@ -2663,6 +2742,6 @@ namespace OmGui
             DataObject data = new DataObject(DataFormats.FileDrop, new string[] { lvi.SubItems[1].Text });
 
             outputListView.DoDragDrop(data, DragDropEffects.Copy);
-        }
+       } 
     }
 }
