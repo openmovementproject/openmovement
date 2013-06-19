@@ -65,7 +65,7 @@ namespace TeddiGui
 			StringBuilder sb = new StringBuilder();
 			sb.Append("TEDDI");
 			sb.Append(",").Append(secs);             // epoch-timestamp, 
-            sb.Append(RawTimestamp.ToString(DATE_TIME_FORMAT)).Append(",");        // timestamp,
+            sb.Append(",").Append(RawTimestamp.ToString(DATE_TIME_FORMAT));        // timestamp,
 			sb.Append(",").Append(DeviceId);         // deviceId, 
 			sb.Append(",").Append(Version);          // version,
 			sb.Append(",").Append(SampleCount);      // sampleCount, 
