@@ -31,6 +31,7 @@ namespace OmApiNet
         public float Light { get; protected set; }
         public float Temp { get; protected set; }
         public float Batt { get; protected set; }
+        public float BattRaw { get; protected set; }
 
         // Base constructor
         protected OmReader(Om om, IntPtr handle)
@@ -120,6 +121,7 @@ namespace OmApiNet
             Light = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_LIGHT);
             Temp = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_TEMPERATURE_MC);
             Batt = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY_PERCENT);
+            BattRaw = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY);
 
             return samples;
         }

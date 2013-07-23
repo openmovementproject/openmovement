@@ -166,7 +166,8 @@ namespace TeddiGui
 							humidity = 0;
 						}
 
-						ushort sampleInterval = 250;
+                        int[] teddiFrequency = new int[] { 4, 8, 16, 32, 64, 128, 256, 512, 1, 1,  1,  1,  1,  1,  1,  2 };
+						ushort sampleInterval = (ushort)(1000 / teddiFrequency[config]);
 
 						try
 						{

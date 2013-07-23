@@ -41,9 +41,10 @@
             this.checkBoxAccel = new System.Windows.Forms.CheckBox();
             this.checkBoxLight = new System.Windows.Forms.CheckBox();
             this.checkBoxTemp = new System.Windows.Forms.CheckBox();
-            this.checkBoxBatt = new System.Windows.Forms.CheckBox();
+            this.checkBoxBattPercent = new System.Windows.Forms.CheckBox();
             this.timerAnimate = new System.Windows.Forms.Timer(this.components);
             this.graphPanel = new OmGui.GraphPanel();
+            this.checkBoxBattRaw = new System.Windows.Forms.CheckBox();
             this.groupBoxOptions.SuspendLayout();
             this.toolStripData.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -54,11 +55,11 @@
             this.groupBoxOptions.Controls.Add(this.toolStripData);
             this.groupBoxOptions.Controls.Add(this.tableLayoutPanel1);
             this.groupBoxOptions.Dock = System.Windows.Forms.DockStyle.Right;
-            this.groupBoxOptions.Location = new System.Drawing.Point(644, 0);
+            this.groupBoxOptions.Location = new System.Drawing.Point(650, 0);
             this.groupBoxOptions.Margin = new System.Windows.Forms.Padding(2);
             this.groupBoxOptions.Name = "groupBoxOptions";
             this.groupBoxOptions.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBoxOptions.Size = new System.Drawing.Size(80, 216);
+            this.groupBoxOptions.Size = new System.Drawing.Size(80, 263);
             this.groupBoxOptions.TabIndex = 0;
             this.groupBoxOptions.TabStop = false;
             this.groupBoxOptions.Text = "Options";
@@ -69,7 +70,7 @@
             this.toolStripData.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonZoom,
             this.toolStripButtonSelection});
-            this.toolStripData.Location = new System.Drawing.Point(2, 15);
+            this.toolStripData.Location = new System.Drawing.Point(2, 17);
             this.toolStripData.Name = "toolStripData";
             this.toolStripData.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStripData.Size = new System.Drawing.Size(76, 25);
@@ -98,9 +99,9 @@
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.checkBoxX, 0, 0);
@@ -109,11 +110,12 @@
             this.tableLayoutPanel1.Controls.Add(this.checkBoxAccel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxLight, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxTemp, 0, 5);
-            this.tableLayoutPanel1.Controls.Add(this.checkBoxBatt, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(this.checkBoxBattPercent, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(this.checkBoxBattRaw, 0, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 41);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 7;
+            this.tableLayoutPanel1.RowCount = 8;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -121,7 +123,8 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(70, 164);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(76, 218);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // checkBoxX
@@ -132,7 +135,7 @@
             this.checkBoxX.Location = new System.Drawing.Point(2, 2);
             this.checkBoxX.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxX.Name = "checkBoxX";
-            this.checkBoxX.Size = new System.Drawing.Size(55, 17);
+            this.checkBoxX.Size = new System.Drawing.Size(69, 21);
             this.checkBoxX.TabIndex = 0;
             this.checkBoxX.Text = "X-Axis";
             this.checkBoxX.UseVisualStyleBackColor = true;
@@ -143,10 +146,10 @@
             this.checkBoxY.AutoSize = true;
             this.checkBoxY.Checked = true;
             this.checkBoxY.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxY.Location = new System.Drawing.Point(2, 23);
+            this.checkBoxY.Location = new System.Drawing.Point(2, 27);
             this.checkBoxY.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxY.Name = "checkBoxY";
-            this.checkBoxY.Size = new System.Drawing.Size(55, 17);
+            this.checkBoxY.Size = new System.Drawing.Size(69, 21);
             this.checkBoxY.TabIndex = 0;
             this.checkBoxY.Text = "Y-Axis";
             this.checkBoxY.UseVisualStyleBackColor = true;
@@ -157,10 +160,10 @@
             this.checkBoxZ.AutoSize = true;
             this.checkBoxZ.Checked = true;
             this.checkBoxZ.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxZ.Location = new System.Drawing.Point(2, 44);
+            this.checkBoxZ.Location = new System.Drawing.Point(2, 52);
             this.checkBoxZ.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxZ.Name = "checkBoxZ";
-            this.checkBoxZ.Size = new System.Drawing.Size(55, 17);
+            this.checkBoxZ.Size = new System.Drawing.Size(69, 21);
             this.checkBoxZ.TabIndex = 0;
             this.checkBoxZ.Text = "Z-Axis";
             this.checkBoxZ.UseVisualStyleBackColor = true;
@@ -170,10 +173,10 @@
             // 
             this.checkBoxAccel.AutoSize = true;
             this.checkBoxAccel.Enabled = false;
-            this.checkBoxAccel.Location = new System.Drawing.Point(2, 65);
+            this.checkBoxAccel.Location = new System.Drawing.Point(2, 77);
             this.checkBoxAccel.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxAccel.Name = "checkBoxAccel";
-            this.checkBoxAccel.Size = new System.Drawing.Size(56, 17);
+            this.checkBoxAccel.Size = new System.Drawing.Size(68, 21);
             this.checkBoxAccel.TabIndex = 0;
             this.checkBoxAccel.Text = "Accel.";
             this.checkBoxAccel.UseVisualStyleBackColor = true;
@@ -182,10 +185,10 @@
             // checkBoxLight
             // 
             this.checkBoxLight.AutoSize = true;
-            this.checkBoxLight.Location = new System.Drawing.Point(2, 86);
+            this.checkBoxLight.Location = new System.Drawing.Point(2, 102);
             this.checkBoxLight.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxLight.Name = "checkBoxLight";
-            this.checkBoxLight.Size = new System.Drawing.Size(49, 17);
+            this.checkBoxLight.Size = new System.Drawing.Size(61, 21);
             this.checkBoxLight.TabIndex = 0;
             this.checkBoxLight.Text = "Light";
             this.checkBoxLight.UseVisualStyleBackColor = true;
@@ -194,26 +197,26 @@
             // checkBoxTemp
             // 
             this.checkBoxTemp.AutoSize = true;
-            this.checkBoxTemp.Location = new System.Drawing.Point(2, 107);
+            this.checkBoxTemp.Location = new System.Drawing.Point(2, 127);
             this.checkBoxTemp.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxTemp.Name = "checkBoxTemp";
-            this.checkBoxTemp.Size = new System.Drawing.Size(56, 17);
+            this.checkBoxTemp.Size = new System.Drawing.Size(70, 21);
             this.checkBoxTemp.TabIndex = 0;
             this.checkBoxTemp.Text = "Temp.";
             this.checkBoxTemp.UseVisualStyleBackColor = true;
             this.checkBoxTemp.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
-            // checkBoxBatt
+            // checkBoxBattPercent
             // 
-            this.checkBoxBatt.AutoSize = true;
-            this.checkBoxBatt.Location = new System.Drawing.Point(2, 128);
-            this.checkBoxBatt.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBoxBatt.Name = "checkBoxBatt";
-            this.checkBoxBatt.Size = new System.Drawing.Size(48, 17);
-            this.checkBoxBatt.TabIndex = 0;
-            this.checkBoxBatt.Text = "Batt.";
-            this.checkBoxBatt.UseVisualStyleBackColor = true;
-            this.checkBoxBatt.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
+            this.checkBoxBattPercent.AutoSize = true;
+            this.checkBoxBattPercent.Location = new System.Drawing.Point(2, 152);
+            this.checkBoxBattPercent.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBoxBattPercent.Name = "checkBoxBattPercent";
+            this.checkBoxBattPercent.Size = new System.Drawing.Size(71, 21);
+            this.checkBoxBattPercent.TabIndex = 0;
+            this.checkBoxBattPercent.Text = "Batt.%";
+            this.checkBoxBattPercent.UseVisualStyleBackColor = true;
+            this.checkBoxBattPercent.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // timerAnimate
             // 
@@ -228,7 +231,7 @@
             this.graphPanel.Location = new System.Drawing.Point(0, 0);
             this.graphPanel.Margin = new System.Windows.Forms.Padding(2);
             this.graphPanel.Name = "graphPanel";
-            this.graphPanel.Size = new System.Drawing.Size(644, 216);
+            this.graphPanel.Size = new System.Drawing.Size(650, 263);
             this.graphPanel.TabIndex = 1;
             this.graphPanel.SizeChanged += new System.EventHandler(this.graphPanel_SizeChanged);
             this.graphPanel.Click += new System.EventHandler(this.graphPanel_Click);
@@ -239,6 +242,18 @@
             this.graphPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseMove);
             this.graphPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseUp);
             // 
+            // checkBoxBattRaw
+            // 
+            this.checkBoxBattRaw.AutoSize = true;
+            this.checkBoxBattRaw.Location = new System.Drawing.Point(2, 177);
+            this.checkBoxBattRaw.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBoxBattRaw.Name = "checkBoxBattRaw";
+            this.checkBoxBattRaw.Size = new System.Drawing.Size(68, 21);
+            this.checkBoxBattRaw.TabIndex = 0;
+            this.checkBoxBattRaw.Text = "Batt.V";
+            this.checkBoxBattRaw.UseVisualStyleBackColor = true;
+            this.checkBoxBattRaw.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
+            // 
             // DataViewer
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -246,7 +261,7 @@
             this.Controls.Add(this.groupBoxOptions);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "DataViewer";
-            this.Size = new System.Drawing.Size(724, 216);
+            this.Size = new System.Drawing.Size(730, 263);
             this.groupBoxOptions.ResumeLayout(false);
             this.groupBoxOptions.PerformLayout();
             this.toolStripData.ResumeLayout(false);
@@ -272,6 +287,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButtonZoom;
         private System.Windows.Forms.ToolStripButton toolStripButtonSelection;
         private System.Windows.Forms.Timer timerAnimate;
-        private System.Windows.Forms.CheckBox checkBoxBatt;
+        private System.Windows.Forms.CheckBox checkBoxBattPercent;
+        private System.Windows.Forms.CheckBox checkBoxBattRaw;
     }
 }

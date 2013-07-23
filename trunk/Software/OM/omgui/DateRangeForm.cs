@@ -218,8 +218,9 @@ namespace OmGui
             {
                 Console.WriteLine("Xml Error: Could not save recordProfile.xml - " + e.Message);
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                // TODO: Never silently eat errors!
             }
         }
 
