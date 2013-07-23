@@ -218,7 +218,7 @@ typedef struct
     unsigned char  data[BITPACK10_SIZEOF(DATA_MAX_INTERVAL * 2)];   // @18 [50] PIR and audio energy (4 Hz, 20x 2x 10-bit samples)
 } TeddiPayload;
 */
-#define TEDDI_MS_PER_SAMPLE 250
+//#define TEDDI_MS_PER_SAMPLE 250
 typedef struct
 {
     unsigned long long timestampReceived;
@@ -237,6 +237,7 @@ typedef struct
     unsigned short parentAddress;       // Parent node address (optional)
     unsigned short parentAltAddress;    // Parent node alt. address (optional)
 } TeddiPacket;
+const unsigned short teddiFrequency[16] = { 4, 8, 16, 32, 64, 128, 256, 512, 1, 1,  1,  1,  1,  1,  1,  2 };
 #define NUM_COORDINATOR 64
 typedef struct
 {
@@ -869,6 +870,7 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
             unsigned short parentAltAddress;	// @ADDITIONAL_OFFSET+2  [2] (optional) Parent alt. address
             */
             unsigned char config = (unsigned char)(buffer[4] >> 4);
+            int msPerSample = 1000 / teddiFrequency[(teddiPacket.version >> 4)];
             teddiPacket.sampleCount = (unsigned char)(buffer[5]);         // Sample count (default config is at 250 msec interval with an equal number of PIR and audio samples; 20 = 5 seconds)
             teddiPacket.sequence = (unsigned short)(buffer[ 6] | (((unsigned short)buffer[ 7]) << 8));
             teddiPacket.unsent =   (unsigned short)(buffer[ 8] | (((unsigned short)buffer[ 9]) << 8));
@@ -920,7 +922,7 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
 // [Overall packet]
 //   time = timestamp - TimeSpan.FromMilliseconds((unsent + sampleCount - 1) * sampleInterval
 teddiPacket.timestampReceived = now;
-teddiPacket.timestampEstimated = teddiPacket.timestampReceived - (teddiPacket.unsent + teddiPacket.sampleCount - 1) * TEDDI_MS_PER_SAMPLE;
+teddiPacket.timestampEstimated = teddiPacket.timestampReceived - (teddiPacket.unsent + teddiPacket.sampleCount - 1) * msPerSample;
 
             return &teddiPacket;
         }
@@ -1908,6 +1910,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 	                        static char msg[2048];
                             char *p = msg;
                             int i;
+                            int msPerSample = 1000 / teddiFrequency[(teddiPacket->version >> 4)];
                             
                             p += sprintf(p, "{");
                             p += sprintf(p, "\"Type\":\"TEDDI\",");
@@ -1926,7 +1929,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                             p += sprintf(p, "\"Samples\":[");
                             for (i = 0; i < teddiPacket->sampleCount; i++)
                             {
-                                p += sprintf(p, "[%llu,%u,%u]%s", teddiPacket->timestampEstimated + i * TEDDI_MS_PER_SAMPLE, teddiPacket->pirData[i], teddiPacket->audioData[i], i + 1 < teddiPacket->sampleCount ? "," : "");
+                                p += sprintf(p, "[%llu,%u,%u]%s", teddiPacket->timestampEstimated + i * msPerSample, teddiPacket->pirData[i], teddiPacket->audioData[i], i + 1 < teddiPacket->sampleCount ? "," : "");
                             }
                             p += sprintf(p, "],");
 
