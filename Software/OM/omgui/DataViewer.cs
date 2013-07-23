@@ -142,7 +142,7 @@ namespace OmGui
                 {
                     bool displayX = checkBoxX.Checked, displayY = checkBoxY.Checked, displayZ = checkBoxZ.Checked;
                     bool displayAccel = checkBoxAccel.Checked;
-                    bool displayLight = checkBoxLight.Checked, displayTemp = checkBoxTemp.Checked, displayBatt = checkBoxBatt.Checked;
+                    bool displayLight = checkBoxLight.Checked, displayTemp = checkBoxTemp.Checked, displayBattPercent = checkBoxBattPercent.Checked, displayBattRaw = checkBoxBattRaw.Checked;
 
                     int width = graphPanel.Width;
                     if (myBitmap == null || myBitmap.Width != width || myBitmap.Height != graphPanel.Height)
@@ -162,7 +162,8 @@ namespace OmGui
                     Pen penDataAccel = new Pen(Color.FromArgb(96, Color.Black));
                     Pen penDataLight = new Pen(Color.FromArgb(96, Color.Brown));
                     Pen penDataTemp = new Pen(Color.FromArgb(96, Color.DarkMagenta));
-                    Pen penDataBatt = new Pen(Color.FromArgb(96, Color.DarkCyan));
+                    Pen penDataBattPercent = new Pen(Color.FromArgb(96, Color.DarkCyan));
+                    Pen penDataBattRaw = new Pen(Color.FromArgb(96, Color.LightCyan));
 
                     // Fade-zoom
                     //int fadedA = (int)(255 * (1.0f - animate));
@@ -222,7 +223,8 @@ namespace OmGui
 
                                 if (displayLight) { float height = ((aggregate.Max.Light - aggregate.Min.Light) / 1024.0f);     g.DrawRectangle(penDataLight, x, (1.0f - (height + aggregate.Min.Light / 1024.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                                 if (displayTemp) { float height = -0.02f * (aggregate.Max.Temp - aggregate.Min.Temp) / 1000.0f; g.DrawRectangle(penDataTemp,  x, (1.0f - (height + 0.02f * aggregate.Min.Temp / 1000.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
-                                if (displayBatt) { float height = (aggregate.Max.Batt - aggregate.Min.Batt + 1) / 102.0f;       g.DrawRectangle(penDataBatt,  x, (1.0f - (height + (aggregate.Min.Batt + 1) / 102.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
+                                if (displayBattPercent) { float height = (aggregate.Max.BattPercent - aggregate.Min.BattPercent + 1) / 102.0f; g.DrawRectangle(penDataBattPercent, x, (1.0f - (height + (aggregate.Min.BattPercent + 1) / 102.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
+                                if (displayBattRaw) { float height = (aggregate.Max.BattRaw - aggregate.Min.BattRaw + 1) / 102.0f; g.DrawRectangle(penDataBattRaw, x, (1.0f - (height + (aggregate.Min.BattRaw + 1) / 1024.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                             }
                             else
                             {
@@ -596,14 +598,15 @@ namespace OmGui
                 }
             }
 
-            if (endBlock == beginBlock)
-            {
-                graphPanel.SetSelection(-1, -1, "");
-            }
-            else
-            {
-                graphPanel.SetSelection(PointForBlock(beginBlock), PointForBlock(endBlock), TimeForBlock(beginBlock) + " - " + TimeForBlock(endBlock));
-            }
+            Refresh();
+            //if (endBlock == beginBlock)
+            //{
+            //    graphPanel.SetSelection(-1, -1, "");
+            //}
+            //else
+            //{
+            //    graphPanel.SetSelection(PointForBlock(beginBlock), PointForBlock(endBlock), TimeForBlock(beginBlock) + " - " + TimeForBlock(endBlock));
+            //}
         }
 
         /*
@@ -796,16 +799,17 @@ namespace OmGui
 
     public struct Sample
     {
-        public Sample(DateTime t, float x, float y, float z, float light, float temp, float batt) : this() { T = t; X = x; Y = y; Z = z; Light = light; Temp = temp; Batt = batt; }
+        public Sample(DateTime t, float x, float y, float z, float light, float temp, float battpercent, float battraw) : this() { T = t; X = x; Y = y; Z = z; Light = light; Temp = temp; BattPercent = battpercent; BattRaw = battraw; }
         public DateTime T { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
         public float Light { get; set; }
         public float Temp { get; set; }
-        public float Batt { get; set; }
+        public float BattPercent { get; set; }
+        public float BattRaw { get; set; }
         public float Amplitude { get { return (float)Math.Sqrt(X * X + Y * Y + Z * Z); } }
-        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         /*
         public static Sample Minimum(Sample a, Sample b)
         {
@@ -828,8 +832,9 @@ namespace OmGui
             float z = (1.0f - p) * a.Z + p * b.Z;
             float light = (1.0f - p) * a.Light + p * b.Light;
             float temp = (1.0f - p) * a.Temp + p * b.Temp;
-            float batt = (1.0f - p) * a.Batt + p * b.Batt;
-            return new Sample(t, x, y, z, light, temp, batt);
+            float battpercent = (1.0f - p) * a.BattPercent + p * b.BattPercent;
+            float battraw = (1.0f - p) * a.BattRaw + p * b.BattRaw;
+            return new Sample(t, x, y, z, light, temp, battpercent, battraw);
         }
     }
 
@@ -856,7 +861,8 @@ namespace OmGui
             if (sample.Z < Min.Z) { Min.Z = sample.Z; } if (sample.Z > Max.Z) { Max.Z = sample.Z; }
             if (sample.Light < Min.Light) { Min.Light = sample.Light; } if (sample.Light > Max.Light) { Max.Light = sample.Light; }
             if (sample.Temp < Min.Temp) { Min.Temp = sample.Temp; } if (sample.Temp > Max.Temp) { Max.Temp = sample.Temp; }
-            if (sample.Batt < Min.Batt) { Min.Batt = sample.Batt; } if (sample.Batt > Max.Batt) { Max.Batt = sample.Batt; }
+            if (sample.BattPercent < Min.BattPercent) { Min.BattPercent = sample.BattPercent; } if (sample.BattPercent > Max.BattPercent) { Max.BattPercent = sample.BattPercent; }
+            if (sample.BattRaw < Min.BattRaw) { Min.BattRaw = sample.BattRaw; } if (sample.BattRaw > Max.BattRaw) { Max.BattRaw = sample.BattRaw; }
             //Min = Sample.Minimum(Min, sample);
             //Max = Sample.Maximum(Max, sample);
         }
@@ -885,7 +891,7 @@ namespace OmGui
         private Aggregate aggregate;
         public Aggregate Aggregate { get { return aggregate; } }
 
-        public DataBlock(DateTime firstTime, DateTime lastTime, float light, float temp, float batt, short[] raw)
+        public DataBlock(DateTime firstTime, DateTime lastTime, float light, float temp, float battpercent, float battraw, short[] raw)
         {
             RawValues = raw;
             Values = new Sample[raw.Length / 3];
@@ -898,7 +904,7 @@ namespace OmGui
                 float x = raw[3 * i + 0] / 256.0f;
                 float y = raw[3 * i + 1] / 256.0f;
                 float z = raw[3 * i + 2] / 256.0f;
-                Values[i] = new Sample(t, x, y, z, light, temp, batt);
+                Values[i] = new Sample(t, x, y, z, light, temp, battpercent, battraw);
             }
             aggregate.Add(Values);
         }
@@ -917,10 +923,11 @@ namespace OmGui
                 DateTime lastTime;
                 float light = reader.Light;
                 float temp = reader.Temp;
-                float batt = reader.Batt;
+                float battpercent = reader.Batt;
+                float battraw = reader.BattRaw;
                 if (values.Length == 0) { lastTime = firstTime; }
                 else { lastTime = reader.TimeForSample(values.Length - 1); }
-                return new DataBlock(firstTime, lastTime, light, temp, batt, values);
+                return new DataBlock(firstTime, lastTime, light, temp, battpercent, battraw, values);
             }
             catch (Exception)
             {

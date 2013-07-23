@@ -146,7 +146,7 @@ category = SourceCategory.Other;
                         if (f.Length > 1024)
                             return true;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         return false;
                     }

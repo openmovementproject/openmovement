@@ -86,7 +86,7 @@ namespace OmGui
 
                         return true;
                     }
-                    catch(XmlException e)
+                    catch(XmlException)
                     {
                         Console.WriteLine("Error: pluginsProfile.profile is not valid. Please fix file.");
 

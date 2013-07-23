@@ -119,7 +119,7 @@ namespace OmGui
                                     {
                                         plugin.loadIcon(plugin.iconFilePath);
                                     }
-                                    catch (Exception e)
+                                    catch (Exception)
                                     {
                                     }
                                 }
@@ -206,7 +206,7 @@ namespace OmGui
                                 plugin.SelectionDateTimeStart = "";
                                 return plugin;
                             }
-                            catch (XmlException e)
+                            catch (XmlException)
                             {
                                 Console.WriteLine("Error: Plugin Settings File is not valid XML.");
                             }
@@ -261,7 +261,7 @@ namespace OmGui
                                 return savedValuesDictionary;
                             }
                         }
-                        catch (XmlException e)
+                        catch (XmlException)
                         {
                             Console.WriteLine("Error: Invalid Saved Values XML File");
                         }
