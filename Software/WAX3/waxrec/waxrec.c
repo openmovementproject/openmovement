@@ -43,8 +43,8 @@
 
 
 //#define POLL_RECV     // STOMP poll receive
-//#define THREAD_RECEIVE_KEYS
-//#define THREAD_RECEIVE_UDP
+//#define THREAD_WRITE_FROM_KEYS
+//#define THREAD_WRITE_FROM_UDP
 
 
 /* Cross-platform alternatives */
@@ -1045,27 +1045,66 @@ void waxDump(WaxPacket *waxPacket, FILE *ofp, char tee, int timeformat)
 
 
 /* Dumps a TEDDI packet */
-void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee)
+void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee, int format)
 {
     static char line[2048];
-    static char number[16];
+    static char number[32];
     int i;
 
-    sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestampReceived, 3), teddiPacket->deviceId, teddiPacket->version, 
-                                        teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent, 
-                                        teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
-    for (i = 0; i < teddiPacket->sampleCount; i++)
+    if (format == 1)
     {
-        sprintf(number, ",%u", teddiPacket->pirData[i]);
-        strcat(line, number);
-    }
-    for (i = 0; i < teddiPacket->sampleCount; i++)
-    {
-        sprintf(number, ",%u", teddiPacket->audioData[i]);
-        strcat(line, number);
-    }
+        unsigned short imin = 0, imax = 0, iav = 0;
+        int itot = 0;
 
-	strcat(line, "\n");
+        sprintf(line, "TEDDI_SHORT,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestampEstimated, 3), teddiPacket->deviceId, teddiPacket->version,
+                                            teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent,
+                                            teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
+
+        for (i = 0; i < teddiPacket->sampleCount; i++)
+        {
+            if (teddiPacket->pirData[i] < imin) { imin = teddiPacket->pirData[i]; }
+            if (teddiPacket->pirData[i] > imax) { imax = teddiPacket->pirData[i]; }
+            itot = itot + teddiPacket->pirData[i];
+        }
+        iav = itot / 24;
+
+        //fprintf(stderr, "PIR   min max avg: %u,%u,%u\n",imin,imax,iav);
+        sprintf(number, ",%u,%u,%d", imin,imax,iav);
+        strcat(line, number);
+
+        imin=0, imax=0, iav=0, itot=0;
+        for (i = 0; i < teddiPacket->sampleCount; i++)
+        {
+            if (teddiPacket->audioData[i] < imin) {imin = teddiPacket->audioData[i]; }
+            if (teddiPacket->audioData[i] > imax) {imax = teddiPacket->audioData[i]; }
+            itot = itot + teddiPacket->audioData[i];
+        }
+        iav = itot / 24;
+
+        //fprintf(stderr, "Audio min max avg: %u,%u,%u\n",imin,imax,iav);
+        sprintf(number, ",%u,%u,%u", imin,imax,iav);
+        strcat(line, number);
+
+        strcat(line, "\n");
+    }
+    else
+    {
+        sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestampReceived, 3), teddiPacket->deviceId, teddiPacket->version, 
+                                            teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent, 
+                                            teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
+        for (i = 0; i < teddiPacket->sampleCount; i++)
+        {
+            sprintf(number, ",%u", teddiPacket->pirData[i]);
+            strcat(line, number);
+        }
+        for (i = 0; i < teddiPacket->sampleCount; i++)
+        {
+            sprintf(number, ",%u", teddiPacket->audioData[i]);
+            strcat(line, number);
+        }
+
+	    strcat(line, "\n");
+    }
 
     fprintf(ofp, "%s", line);
     if (tee) fprintf(stderr, "%s", line);
@@ -1369,7 +1408,7 @@ int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t buffe
 
 
 
-#ifdef THREAD_RECEIVE_KEYS
+#ifdef THREAD_WRITE_FROM_KEYS
 
 static thread_t threadReceiveKeys;
 static char quitReceiveKeys = 0;
@@ -1425,7 +1464,7 @@ void ReceiveKeysStop(void)
 #endif
 
 
-#ifdef THREAD_RECEIVE_UDP
+#ifdef THREAD_WRITE_FROM_UDP
 
 static thread_t threadReceiveUdp;
 static char quitReceiveUdp = 0;
@@ -1667,7 +1706,7 @@ int CreateTestData(char *buffer, const char *fakeType)
 
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
-int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int udpReceivePort, int timeformat, char convertToOsc)
+int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -1676,12 +1715,82 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
     struct sockaddr_in serverAddr;
     SOCKET s = SOCKET_ERROR;
     static char ports[1024];
+    SOCKET receiveUdpSocket = SOCKET_ERROR;
     const char *fakeType = NULL;
+
+#ifdef _WIN32
+    {
+        WSADATA wsaData;
+        WSAStartup(MAKEWORD(1, 1), &wsaData);
+    }
+#endif
 
     /* fake input for testing */
     if (infile[0] == '*')
     {
         fakeType = infile + 1;
+    }
+    else if (infile[0] == 'u' && infile[1] == 'd' && infile[2] == 'p' && infile[3] == ':')
+    {
+        char *name = (char *)infile + 4;
+        int receiveUdpPort = 1234;
+        char serverName[64] = "localhost";
+        struct sockaddr_in serverAddr;
+        //const int recvMaxLength = 65535;
+        //unsigned char *recvBuffer;
+        //int recvLength = 0;
+        struct hostent *hp;
+
+        // Ignore preceding slashes
+        while (*name == '/') { name++; }
+
+        gethostname(serverName, 64);
+
+        // Check if interface name is specified
+        if (*name != '\0' && *name != ':' && !(*name >= '0' && *name <= '9' && strstr(name, ".") == NULL))
+        {
+            strcpy(serverName, name);
+            // Find and remove port separator
+            name = strstr(serverName, ":");
+            if (name != NULL) { *name++ = '\0'; }
+        }
+
+        // Check if port specified
+        if (name != NULL && *name != '\0')
+        {
+            receiveUdpPort = atoi(name);
+        }
+
+        /* Get server host information, name and inet address */
+        hp = gethostbyname(serverName);
+        if (hp == NULL) { fprintf(stderr, "UDPRECV: Can't resolve host: %s\n", serverName); return 8; }
+        memcpy(&(serverAddr.sin_addr), hp->h_addr, hp->h_length);
+        serverAddr.sin_family = AF_INET; 
+        serverAddr.sin_port = htons(receiveUdpPort);
+        fprintf(stderr, "UDPRECV: Address: [%s] = %s : %d\n", hp->h_name, inet_ntoa(serverAddr.sin_addr), receiveUdpPort);
+        serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    
+        /* Create the socket */
+        receiveUdpSocket = socket(AF_INET, SOCK_DGRAM, 0); 
+        if (receiveUdpSocket < 0)
+        {
+            fprintf(stderr, "UDPRECV: ERROR: Socket creation failed (%s)\n", strerrorsocket());
+            return 5;
+        }
+    
+        /* Allow rapid reuse of this socket */
+        {
+            int option = 1;
+            setsockopt(receiveUdpSocket, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option));
+        }
+    
+        /* Bind the socket */
+        if (bind(receiveUdpSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+        {
+            fprintf(stderr, "UDPRECV: ERROR: Socket bind failed (%s)\n", strerrorsocket());
+            return 6;
+        }
+
     }
     else
     {
@@ -1753,12 +1862,6 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 
     if (!sendOnly)
     {
-#ifdef _WIN32
-        {
-            WSADATA wsaData;
-            WSAStartup(MAKEWORD(1, 1), &wsaData);
-        }
-#endif
 
         /* Open the STOMP port */
         if (stompHost[0] != '\0')
@@ -1781,11 +1884,11 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
         receiveKeysFD = fd;
         ReceiveKeysStart();
 #endif
-        if (udpReceivePort != 0)
+        if (writeFromUdp != 0)
         {
-#ifdef THREAD_RECEIVE_UDP
+#ifdef THREAD_WRITE_FROM_UDP
             receiveUdpFD = fd;
-            ReceiveUdpStart(udpReceivePort);
+            ReceiveUdpStart(writeFromUdp);
 #else
             fprintf(stderr, "WARNING: UDP Receive not compiled in.\n");
 #endif
@@ -1803,7 +1906,23 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                 size_t len = 0;
                 unsigned long long now;
                 
-                if (fd == -1)
+                if (receiveUdpSocket != SOCKET_ERROR)
+                {
+                    struct sockaddr_in from;
+                    int fromlen = sizeof(from);
+        
+                    len = recvfrom(receiveUdpSocket, (char *)buffer, BUFFER_SIZE, 0, (struct sockaddr *)&from, &fromlen);
+        
+                    if (len == 0 || len == SOCKET_ERROR) { fprintf(stderr, "UDPRECV: ERROR: Receive failed (%s)\n", strerrorsocket()); break; }
+        
+                    //fprintf(stderr, "UDPRECV: Received from %s:%d\n", inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+
+                    /* Check if it appears to be an OSC bundle or OSC packet... */
+                    if (len >= 1 && buffer[0] == '/') { fprintf(stderr, "WARNING: OSC packet receive not yet implemented.\n"); }
+                    else if (len >= 1 && buffer[0] == '#') { fprintf(stderr, "WARNING: OSC bundle receive not yet implemented.\n"); }
+
+                }
+                else if (fd == -1)
                 {
                     /* Fake input for testing */
                     sleep(1);
@@ -1846,7 +1965,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                     logOpen = now;
                 }
                 
-                if (text)
+                if (receiveUdpSocket == SOCKET_ERROR && fd != -1 && text)
                 {
                     printf("%s\n", buffer);
                     if (tee) { fprintf(stderr, "%s\n", buffer); }
@@ -1902,7 +2021,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                     if (teddiPacket != NULL)
                     {
                         /* Output text version */
-                        if (outfp != NULL) { teddiDump(teddiPacket, outfp, tee); }
+                        if (outfp != NULL) { teddiDump(teddiPacket, outfp, tee, format); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -2018,13 +2137,19 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
         }
 
         /* Stop receiver threads */
-#ifdef THREAD_RECEIVE_KEYS
+#ifdef THREAD_WRITE_FROM_KEYS
         ReceiveKeysStop();
 #endif
-#ifdef THREAD_RECEIVE_UDP
+#ifdef THREAD_WRITE_FROM_UDP
         ReceiveUdpStop();
 #endif
-        
+
+        /* Close incoming UDP */
+        if (receiveUdpSocket != SOCKET_ERROR)
+        {
+            closesocket(receiveUdpSocket);
+        }
+
         /* Close socket */
         if (s != SOCKET_ERROR) { closesocket(s); }
 
@@ -2035,13 +2160,14 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 		    stompTransmitter = NULL;
 	    }
 
-#ifdef _WIN32
-        WSACleanup();
-#endif
     }
 
     /* Close file */
     if (fd != -1 && fd != fileno(stdin)) { close(fd); }
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
 
     return (s != SOCKET_ERROR) ? 0 : 1;
 }
@@ -2061,12 +2187,13 @@ int main(int argc, char *argv[])
     char stompUser[128] = "";
     char stompPassword[128] = "";
     const char *logfile = NULL;
-    int udpReceivePort = 0;
+    int writeFromUdp = 0;
     int timeformat = 2;
     char convertToOsc = 0;
+    int format = 0;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.86     by Daniel Jackson, 2011-2012\n");
+    fprintf(stderr, "V1.90     by Daniel Jackson, 2011-2013\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2107,20 +2234,21 @@ int main(int argc, char *argv[])
         {
             initString = argv[++i];
         }
+        else if (strcasecmp(argv[i], "-udpwritefrom") == 0)
+        {
+            writeFromUdp = atoi(argv[++i]);
+        }
         else if (strcasecmp(argv[i], "-osc") == 0)
         {
             host = argv[++i];
             convertToOsc = 1;
         }
-        else if (strcasecmp(argv[i], "-raw") == 0)
+        else if (strcasecmp(argv[i], "-raw") == 0 || strcasecmp(argv[i], "-udp") == 0)
         {
             host = argv[++i];
             convertToOsc = 0;
         }
-        else if (strcasecmp(argv[i], "-udprecv") == 0)
-        {
-            udpReceivePort = atoi(argv[++i]);
-        }
+        else if (strcasecmp(argv[i], "-format:short") == 0) { format = 1; }
         else if (strcasecmp(argv[i], "-stomphost") == 0)
         {
             strcpy(stompHost, argv[++i]);
@@ -2164,14 +2292,15 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Usage:  waxrec <device>\n");
         fprintf(stderr, "        [-log [-tee]]                          Output log to stdout, optionally tee to stderr.\n");
         fprintf(stderr, "        [-osc <hostname>[:<port>] [-timetag]]  Send OSC to the specified host/port, time-tag.\n");
-        fprintf(stderr, "        [-raw <hostname>[:<port>]]             Send raw packets over UDP to the specified host/port (cannot be used with -osc)\n");
+        fprintf(stderr, "        [-udp <hostname>[:<port>]]             Send raw packets over UDP to the specified host/port (cannot be used with -osc)\n");
         fprintf(stderr, "        [-stomphost <hostname>[:<port>] [-stomptopic /topic/Topic] [-stompuser <username>] [-stomppassword <password>]]  Send STOMP to the specified server.\n");
         fprintf(stderr, "        [-init <string> [-exit]]               Send initialzing string; immediately exit.\n");
-#ifdef THREAD_RECEIVE_UDP
-        fprintf(stderr, "        [-udprecv <port>]                      Receive UDP on the specified port.\n");
+#ifdef THREAD_WRITE_FROM_UDP
+        //fprintf(stderr, "        [-udpwritefrom <port>]               Write data received from the specified UDP port.\n");
 #endif
 		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
 		fprintf(stderr, "        [-out <file.csv>]                      Output to a specific log file\n");
+        fprintf(stderr, "        [-format:short]                        Format as short output (TEDDI packets only)\n");
         fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Log example: waxrec %s -log -tee -init \"MODE=1\\r\\n\" > log.csv\n", EXAMPLE_DEVICE);
@@ -2179,6 +2308,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "STOMP example: waxrec %s -stomphost localhost:61613 -stomptopic /topic/Kitchen.Sensor.Wax -init \"MODE=1\\r\\n\"\n", EXAMPLE_DEVICE);
         fprintf(stderr, "Hourly log example: waxrec %s -out /log/@Y-@M-@D/@Y-@M-@D-@h-00-00.csv\n", EXAMPLE_DEVICE);
         fprintf(stderr, "\n");
+        fprintf(stderr, "NOTE: 'device' can be 'udp://localhost:1234' to receive over UDP\n");
 #ifdef _WIN32
         fprintf(stderr, "NOTE: 'device' can be '!' or '![VID+PID]' to automatically find the first matching serial port (default: !%04X%04X)\n", DEFAULT_VID, DEFAULT_PID);
 #endif
@@ -2186,10 +2316,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    fprintf(stderr, "WAXREC: %s -> %s%s%s%s %s:%s@%s%s <-%d\n", (infile == NULL) ? "<stdin>" : infile, host, (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompUser, strlen(stompPassword) > 0 ? "*" : "", stompHost, stompAddress, udpReceivePort);
+    fprintf(stderr, "WAXREC: %s -> %s%s%s%s %s:%s@%s%s\n", (infile == NULL) ? "<stdin>" : infile, host, (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompUser, strlen(stompPassword) > 0 ? "*" : "", stompHost, stompAddress);
     fprintf(stderr, "INIT: %s\n", initString);
 
-    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, udpReceivePort, timeformat, convertToOsc);
+    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
