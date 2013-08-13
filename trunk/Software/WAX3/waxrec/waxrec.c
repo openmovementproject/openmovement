@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2011-2012, Newcastle University, UK.
+ * Copyright (c) 2011-2013, Newcastle University, UK.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -25,7 +25,7 @@
 
 /*
  * WAX Receiver converter
- * by Daniel Jackson, 2011-2012
+ * by Daniel Jackson, 2011-2013
  */
 
 /*
@@ -96,7 +96,9 @@
 
     /* Device discovery */
     #include <setupapi.h>
-    #include <cfgmgr32.h>
+    #ifdef _MSC_VER
+        #include <cfgmgr32.h>
+    #endif
     #pragma comment(lib, "setupapi.lib")
     #pragma comment(lib, "advapi32.lib")    /* For RegQueryValueEx() */
 
@@ -1321,7 +1323,8 @@ int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t buffe
         buffer[pos + 1] = '\0';
     }
     
-#ifdef _WIN32
+// _MSC_VER instead of _WIN32 as I can't get it to compile under Cygwin (-lcfgmgr32 doesn't seem to help)
+#ifdef _MSC_VER
     {
         GUID *pGuids;
         DWORD dwGuids = 0;
@@ -2193,7 +2196,7 @@ int main(int argc, char *argv[])
     int format = 0;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.90     by Daniel Jackson, 2011-2013\n");
+    fprintf(stderr, "V1.91     by Daniel Jackson, 2011-2013\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2309,7 +2312,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Hourly log example: waxrec %s -out /log/@Y-@M-@D/@Y-@M-@D-@h-00-00.csv\n", EXAMPLE_DEVICE);
         fprintf(stderr, "\n");
         fprintf(stderr, "NOTE: 'device' can be 'udp://localhost:1234' to receive over UDP\n");
-#ifdef _WIN32
+#ifdef _MSC_VER
+        // See 'findPorts()'
         fprintf(stderr, "NOTE: 'device' can be '!' or '![VID+PID]' to automatically find the first matching serial port (default: !%04X%04X)\n", DEFAULT_VID, DEFAULT_PID);
 #endif
         fprintf(stderr, "\n");
