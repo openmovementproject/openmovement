@@ -24,12 +24,13 @@
  */
 
 
+
 /** @file
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.4.0
- *  @date      2011-2012
+ *  @version   1.5.0
+ *  @date      2011-2013
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
     Open Movement API header file.
@@ -46,9 +47,9 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.4.0
- *  @date      2011-2012
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
+ *  @version   1.5.0
+ *  @date      2011-2013
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-2013, Newcastle University, UK. All rights reserved.
  *  @details
         This document describes the Open Movement application programming interface (API).
         The API provides an interface to communicate with AX3 longitudinal movement data loggers and their data files.  
@@ -224,7 +225,7 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 104
+#define OM_VERSION 105
 
 
 /**
@@ -757,6 +758,29 @@ OM_EXPORT int OmGetAccelConfig(int deviceId, int *rate, int *range);
  * @since 1.3
  */
 OM_EXPORT int OmSetAccelConfig(int deviceId, int rate, int range);
+
+
+/**
+ * Queries the specified device's 'maximum sample' value.  This should always be set to 0.
+ * @param deviceId Identifier of the device.
+ * @param[out] value Pointer to a value to receive the max sample value.
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @see OmSetMaxSamples()
+ * @since 1.5
+ */
+OM_EXPORT int OmGetMaxSamples(int deviceId, int *value);
+
+
+/**
+ * Sets the specified device's 'maximum sample' value.  This should always be set to 0.
+ * @note This API call does not alter the existing settings, and only takes full effect when OmEraseDataAndCommit() is called.
+ * @param deviceId Identifier of the device.
+ * @param value Value setting (should be 0)
+ * @return \a OM_OK if successful, an error code otherwise.
+ * @see OmGetMaxSamples()
+ * @since 1.5
+ */
+OM_EXPORT int OmSetMaxSamples(int deviceId, int value);
 
 
 

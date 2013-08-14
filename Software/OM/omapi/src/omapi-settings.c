@@ -321,4 +321,30 @@ int OmSetAccelConfig(int deviceId, int rate, int range)
     return OM_OK;
 }
 
+int OmGetMaxSamples(int deviceId, int *value)
+{
+    int status;
+    char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
+    status = OM_COMMAND(deviceId, "\r\nMAXSAMPLES\r\n", response, "MAXSAMPLES=", OM_DEFAULT_TIMEOUT, parts);
+    if (OM_FAILED(status)) return status;
+    // "MAXSAMPLES=0"
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
+    if (value == NULL) { return OM_E_POINTER; }
+    *value = atoi(parts[1]);
+    return OM_OK;
+}
+
+int OmSetMaxSamples(int deviceId, int value)
+{
+    char command[32];
+    int status;
+    char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
+    sprintf(command, "\r\nMAXSAMPLES %u\r\n", value);
+    status = OM_COMMAND(deviceId, command, response, "MAXSAMPLES=", OM_DEFAULT_TIMEOUT, parts);
+    if (OM_FAILED(status)) return status;
+    // "MAXSAMPLES=0"
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
+    if (atoi(parts[1]) != value) { return OM_E_FAIL; }
+    return OM_OK;
+}
 

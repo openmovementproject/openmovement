@@ -58,6 +58,14 @@
 #include "omapi.h"
 
 
+/* LEDs */
+#define LED_PROCESSING  OM_LED_YELLOW
+#define LED_OK          OM_LED_MAGENTA
+#define LED_WARNING     OM_LED_MAGENTA
+#define LED_FAILED      OM_LED_BLUE
+#define LED_ERROR_COMMS OM_LED_CYAN
+
+
 /* Error measures */
 #define STUCK_COUNT (5 * 120)
 #define AVERAGE_FACTOR 0.00001
@@ -66,6 +74,56 @@
 
 #define IGNORE_RECENT_RESTARTS (6*60*60)        // Enable this if the devices have been connected/disconnected recently (causing a break in the data)
 
+
+#define ID_NAND
+
+typedef struct
+{
+    int memoryHealth;
+#ifdef ID_NAND
+    unsigned char nandId[6];
+    int nandType;
+#endif
+    char *filename;
+    // ???!!!
+} download_t;
+
+#ifdef ID_NAND
+// "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
+static const char NAND_DEVICE_DONT_CARE[6] = 	  {0x00};
+static const char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00};
+static const char NAND_DEVICE_HY27UF084G2B[6] = {0xAD,0xDC,0x10,0x95,0x54,0x00};
+static const char NAND_DEVICE_HY27UF084G2M[6] = {0xAD,0xDC,0x80,0x95,0xAD,0x00};
+
+static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
+{
+    int status;
+    char response[256], *parts[16] = {0};
+    unsigned char localId[6] = {0};
+    int tempId[6] = {0};
+    int i;
+
+    status = OmCommand(deviceId, "\r\nSTATUS 7\r\n", response, 255, "NANDID=", 2000, parts, 15);
+    if (OM_FAILED(status)) return status;
+    // "NANDID=0"
+    if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
+    if (sscanf(parts[1], "%x:%x:%x:%x:%x:%x", &tempId[0], &tempId[1], &tempId[2], &tempId[3], &tempId[4], &tempId[5]) != 6) { return OM_E_UNEXPECTED_RESPONSE; }
+    for (i = 0; i < 6; i++) { localId[i] = (unsigned char)tempId[i]; }
+    if (id != NULL) { memcpy(id, localId, 6); }
+    if (identified != NULL) 
+    {
+        *identified = -2;
+        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0) { *identified = 1; }
+        else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
+    }
+    if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
+    if (present != NULL) 
+    {
+        *present = atoi(parts[2]);
+    }
+    return OM_OK;
+}
+#endif
 
 
 FILE *outfile;
@@ -96,7 +154,7 @@ unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
 
 
 /* Conversion function */
-int verify_process(int id, const char *infile)
+int verify_process(int id, const char *infile, download_t *download)
 {
     char output = 0;
     OmReaderHandle reader;
@@ -481,24 +539,74 @@ int verify_process(int id, const char *infile)
             }
         }
 
+// FILE - Read file issue (sector incorrect or checksum mismatch)
+#define CODE_WARNING_FILE       0x000001
+#define CODE_ERROR_FILE         0x001000
+
+// EVENT - System logged event error (e.g. FIFO overflow)
+#define CODE_WARNING_EVENT      0x000002
+#define CODE_ERROR_EVENT        0x002000
+
+// STUCK - Where the accelerometer appears to be stuck at the same value 
+#define CODE_WARNING_STUCK      0x000004
+#define CODE_ERROR_STUCK        0x004000
+
+// RANGE - Where the accelerometer doesn't seem to average to 1G
+#define CODE_WARNING_RANGE      0x000008
+#define CODE_ERROR_RANGE        0x008000
+
+// RATE - Where the rate is too far off 100Hz
+#define CODE_WARNING_RATE       0x000010
+#define CODE_ERROR_RATE         0x010000
+
+// BREAKS - Where there is a gap in the data
+#define CODE_WARNING_BREAKS     0x000020
+#define CODE_ERROR_BREAKS       0x020000
+
+// RESTARTS - Where the device has restarted
+#define CODE_WARNING_RESTARTS   0x000040
+#define CODE_ERROR_RESTARTS     0x040000
+
+// LIGHT - Where the light level reading is far lower than normal (seems to indicate a failure)
+#define CODE_WARNING_LIGHT      0x000080
+#define CODE_ERROR_LIGHT        0x080000
+
+// BATT - Where the battery discharge is more rapid than usual
+#define CODE_WARNING_BATT       0x000100
+#define CODE_ERROR_BATT         0x100000
+
+// STARTSTOP - Where the configured start/stop times are not met
+#define CODE_WARNING_STARTSTOP  0x000200
+#define CODE_ERROR_STARTSTOP    0x200000
+
+// NANDHEALTH - Where the number of reported spare blocks are low
+#define CODE_WARNING_NANDHEALTH 0x000400
+#define CODE_ERROR_NANDHEALTH   0x400000
+
+// NANDID - Where the NAND id is unexpected
+#define CODE_WARNING_NANDID     0x000800
+#define CODE_ERROR_NANDID       0x800000
+
+
 retval = 0;
-if (errorFile > 1)   { retval |= 0x001000; } else if (errorFile > 0)   { retval |= 0x000001; }
-if (errorEvent > 1)  { retval |= 0x002000; } else if (errorEvent > 0)  { retval |= 0x000002; }
-if (errorStuck > 0)  { retval |= 0x004000; }
-if (errorRange > 1)  { retval |= 0x008000; } else if (errorRange > 0)  { retval |= 0x000008; }
-if (errorRate > 2)   { retval |= 0x010000; } else if (errorRate > 0)   { retval |= 0x000010; }
-if (errorBreaks > 1) { retval |= 0x020000; } else if (errorBreaks > 0) { retval |= 0x000020; }
-if (restarts > 1)    { retval |= 0x040000; } else if (restarts > 0)    { retval |= 0x000040; }
-if (minLight < 50)   { retval |= 0x080000; } else if (minLight < 140)  { retval |= 0x000080; }
+if (errorFile   > 0)  { retval |= CODE_ERROR_FILE; }     else if (errorFile > 0)   { retval |= CODE_WARNING_FILE; }
+if (errorEvent  > 0)  { retval |= CODE_ERROR_EVENT; }    else if (errorEvent > 0)  { retval |= CODE_WARNING_EVENT; }
+if (errorStuck  > 0)  { retval |= CODE_ERROR_STUCK; }    else if (errorStuck > 0)  { retval |= CODE_WARNING_STUCK; }
+if (errorRange  > 0)  { retval |= CODE_ERROR_RANGE; }    else if (errorRange > 0)  { retval |= CODE_WARNING_RANGE; }
+if (errorRate   > 0)  { retval |= CODE_ERROR_RATE; }     else if (errorRate > 0)   { retval |= CODE_WARNING_RATE; }
+if (errorBreaks > 0)  { retval |= CODE_ERROR_BREAKS; }   else if (errorBreaks > 0) { retval |= CODE_WARNING_BREAKS; }
+if (restarts    > 0)  { retval |= CODE_ERROR_RESTARTS; } else if (restarts > 0)    { retval |= CODE_WARNING_RESTARTS; }
+if (minLight    < 90) { retval |= CODE_ERROR_LIGHT; }    else if (minLight < 140)  { retval |= CODE_WARNING_LIGHT; }
 // Discharge
 {
     float hours = ((totalDuration >> 16) / 60.0f / 60.0f);
     float percentLoss = (float)batteryMaxPercent - batteryMinPercent;
     percentPerHour = 0;
     if (hours > 0) { percentPerHour = percentLoss / hours; } else { percentPerHour = 0; }
-    if (percentPerHour >= 0.25f) { retval |= 0x100000; } else if (percentPerHour >= 0.20f)  { retval |= 0x000100; }
+    if (percentPerHour >= 0.25f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.20f)  { retval |= CODE_WARNING_BATT; }
 }
-if (startStopFail) { retval |= 0x200000; } 
+// Start/stop
+if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; } 
 
         fprintf(stderr, "---\n");
         fprintf(stderr, "Input file,%d,\"%s\",%d\n", id, infile, retval);
@@ -506,6 +614,23 @@ if (startStopFail) { retval |= 0x200000; }
         fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
         fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f));
         fprintf(stderr, "Summary info-3: minLight=%d, Bmax=%d%%, Bmin=%d%%, intervalFail=%d\n", minLight, batteryMaxPercent, batteryMinPercent, startStopFail);
+
+if (download != NULL)
+{
+    // Spare blocks
+    if (download->memoryHealth < OM_MEMORY_HEALTH_ERROR)        { retval |= CODE_ERROR_NANDHEALTH; }    // ERROR: No spare blocks
+    else if (download->memoryHealth < OM_MEMORY_HEALTH_WARNING) { retval |= CODE_WARNING_NANDHEALTH; }  // WARNING: Very few spare blocks
+
+#ifdef ID_NAND
+    // NAND ID
+    if (download->nandType == -1) { ; }                                                 // Firmware doesn't support nand Id
+    else if (download->nandType != 1 && download->nandType != 2) { retval |= CODE_ERROR_NANDID; }   // ERROR: Not primary or secondary type
+    //else if (download->nandType != 1) { retval |= CODE_WARNING_NANDID; }                            // WARNING: Not primary type
+
+    fprintf(stderr, "NAND #%d (%d spare)\n", download->nandType, download->memoryHealth);
+#endif
+}
+
         fprintf(stderr, "---\n");
 
 #define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail," "percentLoss\n"
@@ -533,6 +658,8 @@ if (startStopFail) { retval |= 0x200000; }
 /* Download updated */
 static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_STATUS status, int value)
 {
+    download_t *download = (download_t *)reference;
+
     if (status == OM_DOWNLOAD_PROGRESS)
     { 
         //printf("VERIFY #%d: Progress %d%%.\n", deviceId, value);
@@ -540,13 +667,13 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
     }
     else if (status == OM_DOWNLOAD_COMPLETE)
     { 
-        const char *file = (const char *)reference;
+        const char *file = download->filename;
         int verifyResult;
         int result;
 
         printf("VERIFY #%d: Download complete, verify starting...\n", deviceId);
 
-        verifyResult = verify_process(deviceId, file);
+        verifyResult = verify_process(deviceId, file, download);
 
         /* Set the session id (use the deviceId) */
         result = OmSetSessionId(deviceId, 0);
@@ -563,25 +690,25 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
         result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
         if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
 
-        if (verifyResult < 0) { OmSetLed(deviceId, OM_LED_YELLOW); }                    // Error accessing data
-        else if (verifyResult & 0xfffff000) { OmSetLed(deviceId, OM_LED_RED); }         // Looks like a problem
-        else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, OM_LED_MAGENTA); }     // Warning
-        else { OmSetLed(deviceId, OM_LED_CYAN); }                                       // Everything ok
+        if (verifyResult < 0) { OmSetLed(deviceId, LED_ERROR_COMMS); }                      // Error accessing data
+        else if (verifyResult & 0xfffff000) { OmSetLed(deviceId, LED_FAILED); }             // Looks like a problem
+        else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, LED_WARNING); }            // Warning
+        else { OmSetLed(deviceId, LED_OK); }                                           // Everything ok
     }
     else if (status == OM_DOWNLOAD_CANCELLED)
     { 
         printf("VERIFY #%d: Cancelled.\n", deviceId);
-        OmSetLed(deviceId, OM_LED_MAGENTA);
+        OmSetLed(deviceId, LED_ERROR_COMMS);
     }
     else if (status == OM_DOWNLOAD_ERROR) 
     { 
         printf("VERIFY #%d: Error. (Diagnostic 0x%04x)\n", deviceId, value);
-        OmSetLed(deviceId, OM_LED_MAGENTA);
+        OmSetLed(deviceId, LED_ERROR_COMMS);
     }
     else
     {
         printf("VERIFY #%d: Unexpected status %d / 0x%04x\n", deviceId, status, value);
-        OmSetLed(deviceId, OM_LED_MAGENTA);
+        OmSetLed(deviceId, LED_ERROR_COMMS);
     }
     return;
 }
@@ -590,6 +717,8 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
 /* Device updated */
 static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS status)
 {
+    download_t *download = (download_t *)reference;
+
     if (status == OM_DEVICE_CONNECTED)
     {
         int result;
@@ -614,37 +743,49 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
         if (dataNumBlocks - dataOffsetBlocks <= 0)
         {
             printf("VERIFY #%d: Ignoring - no data stored.\n");
-            OmSetLed(deviceId, OM_LED_RED);                   // Error accessing data
+            OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
         }
         else
         {
             const char *downloadPath = ".";
-            char *file;
+            /* Create reference handle */
+            download_t *download = (download_t *)malloc(sizeof(download_t));
+
+            /* Get NAND information */
+            download->memoryHealth = OmGetMemoryHealth(deviceId);
+#ifdef ID_NAND
+            download->nandType = -1;
+            memset(download->nandId, 0, sizeof(download->nandId));
+            result = OmGetNandId(deviceId, download->nandId, NULL, &download->nandType);
+            if (result == OM_E_NOT_IMPLEMENTED) { fprintf(stderr, "NOTE: This firmware doesn't support NANDID command\n"); }
+            else if (result == OM_E_UNEXPECTED_RESPONSE) { fprintf(stderr, "NOTE: Unexpected NANDID response (firmware probably doesn't support NANDID command)\n"); }
+#endif
 
             /* Allocate filename string */
-            file = (char *)malloc(strlen(downloadPath) + 32);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
+            download->filename = (char *)malloc(strlen(downloadPath) + 32);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
 
             /* Copy path, and platform-specific path separator char */
-            strcpy(file, downloadPath);
+            strcpy(download->filename, downloadPath);
             #ifdef _WIN32
-                if (file[strlen(file) - 1] != '\\') strcat(file, "\\");
+                if (download->filename[strlen(download->filename) - 1] != '\\') strcat(download->filename, "\\");
             #else
-                if (file[strlen(file) - 1] != '/') strcat(file, "/");
+                if (download->filename[strlen(download->filename) - 1] != '/') strcat(download->filename, "/");
             #endif
 
             /* Append session-id and device-id as part of the filename */
-            sprintf(file + strlen(file), "CWA-%04u.CWA", deviceId);
+            sprintf(download->filename + strlen(download->filename), "CWA-%04u.CWA", deviceId);
 
             /* Setup */
-            OmSetLed(deviceId, OM_LED_BLUE);
+            OmSetLed(deviceId, LED_PROCESSING);
 
             /* Begin download */
-            printf("VERIFY #%d: Starting download to file: %s\n", deviceId, file);
-            result = OmBeginDownloadingReference(deviceId, 0, -1, file, file);
+            printf("VERIFY #%d: Starting download to file: %s\n", deviceId, download->filename);
+            {
+                result = OmBeginDownloadingReference(deviceId, 0, -1, download->filename, download);
+            }
             if (OM_FAILED(result)) { printf("ERROR: OmBeginDownloading() %s\n", OmErrorString(result)); }
 
             /* Leave filename string for download complete to free... */
-            //free(file);
         }
     }
     else if (status == OM_DEVICE_REMOVED)
@@ -656,7 +797,7 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
     else
     {
         printf("VERIFY #%d: Error, unexpected status %d\n", deviceId, status);
-        OmSetLed(deviceId, OM_LED_MAGENTA);                   // Error accessing data
+        OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
     }
 
     return;
@@ -733,7 +874,7 @@ int verify_main(int argc, char *argv[])
         //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
         if (mode == 0)
         {
-            ret = verify_process(-1, infile);
+            ret = verify_process(-1, infile, NULL);
         }
         else
         {
