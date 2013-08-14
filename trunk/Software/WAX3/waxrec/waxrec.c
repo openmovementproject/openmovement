@@ -1625,15 +1625,19 @@ FILE *openlogfile(const char *logfile, unsigned long long ticks, unsigned long *
             
 fprintf(stderr, "DEBUG: Creating log directory: %s\n", temp);
 
-            if (stat(temp, &st) != 0)
+            if (strlen(temp) != 0 & stat(temp, &st) != 0)
             {
-                if (mkdir(temp, 0777) != 0 && errno != EEXIST)
+                if (mkdir(temp, 0777) != 0)
                 {
-                    fprintf(stderr, "ERROR: Cannot make log directory: %s\n", temp);
-                    return NULL;
+                    fprintf(stderr, "ERROR: mkdir failed");
+                    if (errno != EEXIST)
+                    {
+                        fprintf(stderr, "ERROR: Cannot make log directory: %s\n", temp);
+                        return NULL;
+                    }
                 }
             }
-            else if (!(st.st_mode & S_IFDIR))
+            else if (strlen(temp) != 0 & !(st.st_mode & S_IFDIR))
             {
                 fprintf(stderr, "ERROR: Path not a directory: %s\n", temp);
                 return NULL;
