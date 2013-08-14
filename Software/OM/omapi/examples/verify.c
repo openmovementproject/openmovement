@@ -65,6 +65,9 @@
 #define LED_FAILED      OM_LED_BLUE
 #define LED_ERROR_COMMS OM_LED_CYAN
 
+/* Options */
+#define VERIFY_OPTION_ALL           0x01
+#define VERIFY_OPTION_NO_CHECK_STOP 0x02
 
 /* Error measures */
 #define STUCK_COUNT (5 * 120)
@@ -79,6 +82,7 @@
 
 typedef struct
 {
+    int options;
     int memoryHealth;
 #ifdef ID_NAND
     unsigned char nandId[6];
@@ -87,6 +91,8 @@ typedef struct
     char *filename;
     // ???!!!
 } download_t;
+
+int globalOptions = 0;
 
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
@@ -154,7 +160,7 @@ unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
 
 
 /* Conversion function */
-int verify_process(int id, const char *infile, download_t *download)
+int verify_process(int id, const char *infile, download_t *download, int options)
 {
     char output = 0;
     OmReaderHandle reader;
@@ -494,6 +500,7 @@ int verify_process(int id, const char *infile, download_t *download)
         if (hp == NULL)
         {
             fprintf(stderr, "ERROR: Unable to access file header for start/stop times.\n");
+            startStopFail += 4;
         }
         else
         {
@@ -523,7 +530,11 @@ int verify_process(int id, const char *infile, download_t *download)
                 unsigned long fEnd = (unsigned long)TimeSerial(hp->loggingEndTime);
                 unsigned long aEnd = (unsigned long)(lastTime >> 16);
                 int stopDiff = (int)(aEnd - fEnd);
-                if (abs(stopDiff) < 80)
+                if (options & VERIFY_OPTION_NO_CHECK_STOP)
+                {
+                    fprintf(stderr, "NOTE: Ignoring whether data stopped near recording stop time (difference was %ds).\n", stopDiff);
+                }
+                else if (abs(stopDiff) < 80)
                 { 
                     fprintf(stderr, "NOTE: Data stopped near recording stop time (%ds).\n", stopDiff);
                 }
@@ -633,9 +644,39 @@ if (download != NULL)
 
         fprintf(stderr, "---\n");
 
-#define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail," "percentLoss\n"
-        sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d,"           "%f\n",
-                                label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail, percentPerHour);
+#define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail," "percentLoss," "description\n"
+        {
+            char description[1024] = "";
+
+            if (retval & CODE_WARNING_FILE      ) { strcat(description, "W:File; "); }
+            if (retval & CODE_WARNING_EVENT     ) { strcat(description, "W:Event; "); }
+            if (retval & CODE_WARNING_STUCK     ) { strcat(description, "W:Stuck; "); }
+            if (retval & CODE_WARNING_RANGE     ) { strcat(description, "W:Range; "); }
+            if (retval & CODE_WARNING_RATE      ) { strcat(description, "W:Rate; "); }
+            if (retval & CODE_WARNING_BREAKS    ) { strcat(description, "W:Breaks; "); }
+            if (retval & CODE_WARNING_RESTARTS  ) { strcat(description, "W:Restarts; "); }
+            if (retval & CODE_WARNING_LIGHT     ) { strcat(description, "W:Light; "); }
+            if (retval & CODE_WARNING_BATT      ) { strcat(description, "W:Batt; "); }
+            if (retval & CODE_WARNING_STARTSTOP ) { strcat(description, "W:StartStop; "); }
+            if (retval & CODE_WARNING_NANDHEALTH) { strcat(description, "W:NandHealth; "); }
+            if (retval & CODE_WARNING_NANDID    ) { strcat(description, "W:NandId; "); }
+            if (retval & CODE_ERROR_FILE        ) { strcat(description, "E:File; "); }
+            if (retval & CODE_ERROR_EVENT       ) { strcat(description, "E:Event; "); }
+            if (retval & CODE_ERROR_STUCK       ) { strcat(description, "E:Stuck; "); }
+            if (retval & CODE_ERROR_RANGE       ) { strcat(description, "E:Range; "); }
+            if (retval & CODE_ERROR_RATE        ) { strcat(description, "E:Rate; "); }
+            if (retval & CODE_ERROR_BREAKS      ) { strcat(description, "E:Breaks; "); }
+            if (retval & CODE_ERROR_RESTARTS    ) { strcat(description, "E:Restarts; "); }
+            if (retval & CODE_ERROR_LIGHT       ) { strcat(description, "E:Light; "); }
+            if (retval & CODE_ERROR_BATT        ) { strcat(description, "E:Batt; "); }
+            if (retval & CODE_ERROR_STARTSTOP   ) { strcat(description, "E:StartStop; "); }
+            if (retval & CODE_ERROR_NANDHEALTH  ) { strcat(description, "E:NandHealth; "); }
+            if (retval & CODE_ERROR_NANDID      ) { strcat(description, "E:NandId; "); }
+
+        sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d,"           "%f,"          "%s\n",
+                                label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail, percentPerHour, description);
+
+        }
 
         fprintf(stderr, line);
         if (outfile != NULL)
@@ -671,9 +712,9 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
         int verifyResult;
         int result;
 
-        printf("VERIFY #%d: Download complete, verify starting...\n", deviceId);
+        printf("VERIFY #%d: Download complete, verify starting... (options 0x%04x)\n", deviceId, download->options);
 
-        verifyResult = verify_process(deviceId, file, download);
+        verifyResult = verify_process(deviceId, file, download, download->options);
 
         /* Set the session id (use the deviceId) */
         result = OmSetSessionId(deviceId, 0);
@@ -717,7 +758,7 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
 /* Device updated */
 static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS status)
 {
-    download_t *download = (download_t *)reference;
+    int options = *((int *)reference);
 
     if (status == OM_DEVICE_CONNECTED)
     {
@@ -725,7 +766,7 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
         int dataBlockSize = 0, dataOffsetBlocks = 0, dataNumBlocks = 0;
         OM_DATETIME startTime = 0, endTime = 0;
 
-        printf("VERIFY #%d: Device CONNECTED\n", deviceId);
+        printf("VERIFY #%d: Device CONNECTED (verify options 0x%04x)\n", deviceId, options);
 
         /* Get the data range */
         result = OmGetDataRange(deviceId, &dataBlockSize, &dataOffsetBlocks, &dataNumBlocks, &startTime, &endTime);
@@ -750,6 +791,7 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
             const char *downloadPath = ".";
             /* Create reference handle */
             download_t *download = (download_t *)malloc(sizeof(download_t));
+            download->options = globalOptions;
 
             /* Get NAND information */
             download->memoryHealth = OmGetMemoryHealth(deviceId);
@@ -806,12 +848,12 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
 
 
 /* Record function */
-int verify(void)
+int verify(int options)
 {
     int result;
 
     /* Set device callback before API startup to get initially-connected devices through the callback */
-    OmSetDeviceCallback(verify_DeviceCallback, NULL);
+    OmSetDeviceCallback(verify_DeviceCallback, &options);
 
     /* Set download callback */
     OmSetDownloadCallback(verify_DownloadCallback, NULL);
@@ -841,28 +883,48 @@ int verify_main(int argc, char *argv[])
 {
     const char *outfilename = NULL;
     int ret = -1;
-    int mode = 0;
+    int options = 0;
+    int i;
     fprintf(stderr, "VERIFY: verify a specified binary data file contains sensible data.\n");
     fprintf(stderr, "\n");
     if (argc > 1)
     {
-        const char *infile;
+        const char *infile = NULL;
         //char output = 0;
 
-        if (!strcmp(argv[1], "-headeronly"))
+        for (i = 1; i < argc; i++)
         {
-            fprintf(stdout, HEADER);
-            return -2;
-        }
-
-        if (!strcmp(argv[1], "-stop-clear-all"))
-        {
-            mode = 1;
-            if (argc > 2) { outfilename = argv[2]; }
-        }
-        else
-        {
-            infile = argv[1];
+            if (!strcmp(argv[i], "-headeronly"))
+            {
+                fprintf(stdout, HEADER);
+                return -2;
+            }
+            else if (!strcmp(argv[i], "-stop-clear-all"))
+            {
+                options |= VERIFY_OPTION_ALL;
+            }
+            else if (!strcmp(argv[i], "-no-check-stop"))
+            {
+                options |= VERIFY_OPTION_NO_CHECK_STOP;
+            }
+            else if (argv[i][0] == '-')
+            {
+                fprintf(stdout, "ERROR: Unrecognized option %s\n", argv[i]);
+                return -3;
+            }
+            else if (infile == NULL && !(options & VERIFY_OPTION_ALL))
+            {
+                infile = argv[i];
+            }
+            else if (outfilename == NULL)
+            {
+                outfilename = argv[i];
+            }
+            else
+            {
+                fprintf(stdout, "ERROR: Unexpected parameter %s\n", argv[i]);
+                return -3;
+            }
         }
 
         /* Open the input and output files */
@@ -872,20 +934,20 @@ int verify_main(int argc, char *argv[])
         }
 
         //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
-        if (mode == 0)
+        if ((options & VERIFY_OPTION_ALL) == 0)
         {
-            ret = verify_process(-1, infile, NULL);
+            ret = verify_process(-1, infile, NULL, options);
         }
         else
         {
-            verify();
+            verify(options);
         }
 
         if (outfile != NULL) { fclose(outfile); }
     }
     else
     {
-        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> outfile.csv | <-headeronly>\n");
+        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop]\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
         fprintf(stderr, "\n");
