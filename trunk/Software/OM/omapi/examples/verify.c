@@ -78,11 +78,11 @@
 #define IGNORE_RECENT_RESTARTS (6*60*60)        // Enable this if the devices have been connected/disconnected recently (causing a break in the data)
 
 
+
 #define ID_NAND
 
 typedef struct
 {
-    int options;
     int memoryHealth;
 #ifdef ID_NAND
     unsigned char nandId[6];
@@ -92,7 +92,7 @@ typedef struct
     // ???!!!
 } download_t;
 
-int globalOptions = 0;
+static int globalOptions = 0;
 
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
@@ -160,7 +160,7 @@ unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
 
 
 /* Conversion function */
-int verify_process(int id, const char *infile, download_t *download, int options)
+int verify_process(int id, const char *infile, download_t *download, int globalOptions)
 {
     char output = 0;
     OmReaderHandle reader;
@@ -530,7 +530,7 @@ int verify_process(int id, const char *infile, download_t *download, int options
                 unsigned long fEnd = (unsigned long)TimeSerial(hp->loggingEndTime);
                 unsigned long aEnd = (unsigned long)(lastTime >> 16);
                 int stopDiff = (int)(aEnd - fEnd);
-                if (options & VERIFY_OPTION_NO_CHECK_STOP)
+                if (globalOptions & VERIFY_OPTION_NO_CHECK_STOP)
                 {
                     fprintf(stderr, "NOTE: Ignoring whether data stopped near recording stop time (difference was %ds).\n", stopDiff);
                 }
@@ -712,9 +712,9 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
         int verifyResult;
         int result;
 
-        printf("VERIFY #%d: Download complete, verify starting... (options 0x%04x)\n", deviceId, download->options);
+        printf("VERIFY #%d: Download complete, verify starting... (options 0x%04x)\n", deviceId, globalOptions);
 
-        verifyResult = verify_process(deviceId, file, download, download->options);
+        verifyResult = verify_process(deviceId, file, download, globalOptions);
 
         /* Set the session id (use the deviceId) */
         result = OmSetSessionId(deviceId, 0);
@@ -758,15 +758,13 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
 /* Device updated */
 static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATUS status)
 {
-    int options = *((int *)reference);
-
     if (status == OM_DEVICE_CONNECTED)
     {
         int result;
         int dataBlockSize = 0, dataOffsetBlocks = 0, dataNumBlocks = 0;
         OM_DATETIME startTime = 0, endTime = 0;
 
-        printf("VERIFY #%d: Device CONNECTED (verify options 0x%04x)\n", deviceId, options);
+        printf("VERIFY #%d: Device CONNECTED (verify options 0x%04x)\n", deviceId, globalOptions);
 
         /* Get the data range */
         result = OmGetDataRange(deviceId, &dataBlockSize, &dataOffsetBlocks, &dataNumBlocks, &startTime, &endTime);
@@ -791,7 +789,6 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
             const char *downloadPath = ".";
             /* Create reference handle */
             download_t *download = (download_t *)malloc(sizeof(download_t));
-            download->options = globalOptions;
 
             /* Get NAND information */
             download->memoryHealth = OmGetMemoryHealth(deviceId);
@@ -848,12 +845,12 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
 
 
 /* Record function */
-int verify(int options)
+int verify(void)
 {
     int result;
 
     /* Set device callback before API startup to get initially-connected devices through the callback */
-    OmSetDeviceCallback(verify_DeviceCallback, &options);
+    OmSetDeviceCallback(verify_DeviceCallback, NULL);
 
     /* Set download callback */
     OmSetDownloadCallback(verify_DownloadCallback, NULL);
@@ -883,10 +880,10 @@ int verify_main(int argc, char *argv[])
 {
     const char *outfilename = NULL;
     int ret = -1;
-    int options = 0;
     int i;
     fprintf(stderr, "VERIFY: verify a specified binary data file contains sensible data.\n");
     fprintf(stderr, "\n");
+    globalOptions = 0;
     if (argc > 1)
     {
         const char *infile = NULL;
@@ -901,18 +898,20 @@ int verify_main(int argc, char *argv[])
             }
             else if (!strcmp(argv[i], "-stop-clear-all"))
             {
-                options |= VERIFY_OPTION_ALL;
+                fprintf(stderr, "VERIFY: Option -stop-clear-all\n");
+                globalOptions |= VERIFY_OPTION_ALL;
             }
             else if (!strcmp(argv[i], "-no-check-stop"))
             {
-                options |= VERIFY_OPTION_NO_CHECK_STOP;
+                fprintf(stderr, "VERIFY: Option -no-check-stop\n");
+                globalOptions |= VERIFY_OPTION_NO_CHECK_STOP;
             }
             else if (argv[i][0] == '-')
             {
                 fprintf(stdout, "ERROR: Unrecognized option %s\n", argv[i]);
                 return -3;
             }
-            else if (infile == NULL && !(options & VERIFY_OPTION_ALL))
+            else if (infile == NULL && !(globalOptions & VERIFY_OPTION_ALL))
             {
                 infile = argv[i];
             }
@@ -934,13 +933,13 @@ int verify_main(int argc, char *argv[])
         }
 
         //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
-        if ((options & VERIFY_OPTION_ALL) == 0)
+        if ((globalOptions & VERIFY_OPTION_ALL) == 0)
         {
-            ret = verify_process(-1, infile, NULL, options);
+            ret = verify_process(-1, infile, NULL, globalOptions);
         }
         else
         {
-            verify(options);
+            verify();
         }
 
         if (outfile != NULL) { fclose(outfile); }
