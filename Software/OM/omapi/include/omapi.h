@@ -29,7 +29,7 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.5.0
+ *  @version   1.6.0
  *  @date      2011-2013
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -47,7 +47,7 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.5.0
+ *  @version   1.6.0
  *  @date      2011-2013
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2013, Newcastle University, UK. All rights reserved.
  *  @details
@@ -225,7 +225,7 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 105
+#define OM_VERSION 106
 
 
 /**

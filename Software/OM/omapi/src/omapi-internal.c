@@ -441,10 +441,9 @@ unsigned long OmMilliseconds(void)
 /** Internal method to open a serial port */
 static int OmPortOpen(const char *infile, char writeable)
 {
-    int fd;
-    
-    fd = fileno(stdin);
-    if (infile != NULL && infile[0] != '\0' && !(infile[0] == '-' && infile[1] == '\0'))
+    int fd = -1;        // fd = fileno(stdin);
+
+    if (infile != NULL && infile[0] != '\0')
     {
 #ifdef _WIN32
         int flags = O_BINARY;
@@ -456,7 +455,9 @@ static int OmPortOpen(const char *infile, char writeable)
         fd = open(infile, flags);
         if (fd < 0)
         {
-            OmLog(0, "ERROR: Problem opening input: %s\n", infile);
+            if (errno == ENOENT) { OmLog(0, "ERROR: Problem opening input (ENOENT): %s\n", infile); }
+            else if (errno == EACCES) { OmLog(0, "ERROR: Problem opening input (EACCES): %s\n", infile); }
+            else { OmLog(0, "ERROR: Problem opening input (other): %s\n", infile); }
             return -1;
         }
 
@@ -474,20 +475,66 @@ static int OmPortOpen(const char *infile, char writeable)
             }
             else
             {
+                char dcbOk = 0;
                 dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-                if (!GetCommState(hSerial, &dcbSerialParams))
+
+                if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
+
+                if (!dcbOk)
+                {
+                    // If GetCommState() failed with error 995, call ClearCommError() before retrying
+                    DWORD comErrors = 0;
+                    COMSTAT comStat = {0};
+                    OmLog(0, "WARNING: GetCommState() failed (clearing errors and retrying).\n");
+                    ClearCommError(hSerial, &comErrors, &comStat);
+                    if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
+                }
+
+                if (!dcbOk)
                 {
                     OmLog(0, "ERROR: GetCommState() failed.\n");
                 }
                 else
                 {
                     //dcbSerialParams.BaudRate = CBR_115200;
+                    dcbSerialParams.fBinary = TRUE;
+                    dcbSerialParams.fParity = FALSE;
+                    dcbSerialParams.fOutxCtsFlow = FALSE;
+                    dcbSerialParams.fOutxDsrFlow = FALSE;
+                    dcbSerialParams.fDtrControl = DTR_CONTROL_DISABLE;
+                    dcbSerialParams.fDsrSensitivity = FALSE;
+                    dcbSerialParams.fTXContinueOnXoff = FALSE;
+                    dcbSerialParams.fOutX = FALSE;
+                    dcbSerialParams.fInX = FALSE;
+                    dcbSerialParams.fErrorChar = FALSE;
+                    dcbSerialParams.fNull = FALSE;
+                    dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
+                    dcbSerialParams.fAbortOnError = 0;  // SetDcbFlag bit 14 to zero (clears fAbortOnError).
+                    //dcbSerialParams.fDummy2 = <do-not-use>;
+                    dcbSerialParams.wReserved = 0;
+                    dcbSerialParams.XonLim = 0;
+                    dcbSerialParams.XoffLim = 0;
                     dcbSerialParams.ByteSize = 8;
-                    dcbSerialParams.StopBits = ONESTOPBIT;
                     dcbSerialParams.Parity = NOPARITY;
-//dcbSerialParams.
-                    if (!SetCommState(hSerial, &dcbSerialParams)){
-                        OmLog(0, "ERROR: SetCommState() failed.\n");
+                    dcbSerialParams.StopBits = ONESTOPBIT;
+                    //dcbSerialParams.XonChar;
+                    //dcbSerialParams.XoffChar;
+                    dcbSerialParams.ErrorChar = 0;
+                    //dcbSerialParams.EofChar;
+                    //dcbSerialParams.EvtChar;
+                    //dcbSerialParams.wReserved1;
+
+                    if (!SetCommState(hSerial, &dcbSerialParams))
+                    {
+                        // If SetCommState() failed with error 995, call ClearCommError() before retrying
+                        DWORD comErrors = 0;
+                        COMSTAT comStat = {0};
+                        OmLog(0, "WARNING: SetCommState() failed (clearing errors and retrying).\n");
+                        ClearCommError(hSerial, &comErrors, &comStat);
+                        if (SetCommState(hSerial, &dcbSerialParams))
+                        {
+                            OmLog(0, "ERROR: SetCommState() failed.\n");
+                        }
                     };
                 }
 
@@ -500,6 +547,9 @@ static int OmPortOpen(const char *infile, char writeable)
                 {
                     OmLog(0, "ERROR: SetCommTimeouts() failed.\n");
                 }
+
+//GetCommProperties();
+
             }
         }
 #else
