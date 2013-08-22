@@ -159,14 +159,14 @@ int test(void)
             }
         }
 
-        /* Set the LED to red or green to indicate result */
+        /* Set the LED to WHITE if successful, or RED otherwise */
         if (errors > 0)
         {
             result = OmSetLed(deviceId, OM_LED_RED);
         }
         else
         {
-            result = OmSetLed(deviceId, OM_LED_GREEN);
+            result = OmSetLed(deviceId, OM_LED_WHITE);
         }
         if (OM_FAILED(result)) { printf("WARNING: OmSetLed() %s\n", OmErrorString(result)); }
 

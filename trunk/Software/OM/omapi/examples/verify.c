@@ -66,11 +66,11 @@
 #define LED_ERROR_COMMS OM_LED_CYAN
 
 /* Options */
-#define VERIFY_OPTION_ALL           0x01
-#define VERIFY_OPTION_NO_CHECK_STOP 0x02
+#define VERIFY_OPTION_ALL               0x01
+#define VERIFY_OPTION_NO_CHECK_STOP     0x02
 
 /* Error measures */
-#define STUCK_COUNT (5 * 120)
+#define STUCK_COUNT (10 * 120)
 #define AVERAGE_FACTOR 0.00001
 #define AVERAGE_RANGE_MAX 0.400
 #define AVERAGE_RANGE_OFF 0.300
@@ -93,6 +93,7 @@ typedef struct
 } download_t;
 
 static int globalOptions = 0;
+static int globalAllowedRestarts = 0;
 
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
@@ -198,15 +199,15 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
     double av = 0.0;
     int lastHour = -1;
 
-    fprintf(stderr, "FILE: %s\n", infile);
-    sprintf(label, infile);
-    if (id >= 0) { sprintf(label, "%d", id); }
-
     if (infile == NULL || infile[0] == '\0')
     {
         fprintf(stderr, "ERROR: File not specified\n");
         return -2;
     }
+
+    fprintf(stderr, "FILE: %s\n", infile);
+    sprintf(label, infile);
+    if (id >= 0) { sprintf(label, "%d", id); }
 
     /* Open the binary file reader on the input file */
     reader = OmReaderOpen(infile);
@@ -606,7 +607,7 @@ if (errorStuck  > 0)  { retval |= CODE_ERROR_STUCK; }    else if (errorStuck > 0
 if (errorRange  > 0)  { retval |= CODE_ERROR_RANGE; }    else if (errorRange > 0)  { retval |= CODE_WARNING_RANGE; }
 if (errorRate   > 0)  { retval |= CODE_ERROR_RATE; }     else if (errorRate > 0)   { retval |= CODE_WARNING_RATE; }
 if (errorBreaks > 0)  { retval |= CODE_ERROR_BREAKS; }   else if (errorBreaks > 0) { retval |= CODE_WARNING_BREAKS; }
-if (restarts    > 0)  { retval |= CODE_ERROR_RESTARTS; } else if (restarts > 0)    { retval |= CODE_WARNING_RESTARTS; }
+if (restarts    > globalAllowedRestarts) { retval |= CODE_ERROR_RESTARTS; } else if (restarts > 0) { retval |= CODE_WARNING_RESTARTS; }
 if (minLight    < 90) { retval |= CODE_ERROR_LIGHT; }    else if (minLight < 140)  { retval |= CODE_WARNING_LIGHT; }
 // Discharge
 {
@@ -896,16 +897,9 @@ int verify_main(int argc, char *argv[])
                 fprintf(stdout, HEADER);
                 return -2;
             }
-            else if (!strcmp(argv[i], "-stop-clear-all"))
-            {
-                fprintf(stderr, "VERIFY: Option -stop-clear-all\n");
-                globalOptions |= VERIFY_OPTION_ALL;
-            }
-            else if (!strcmp(argv[i], "-no-check-stop"))
-            {
-                fprintf(stderr, "VERIFY: Option -no-check-stop\n");
-                globalOptions |= VERIFY_OPTION_NO_CHECK_STOP;
-            }
+            else if (!strcmp(argv[i], "-stop-clear-all")) { fprintf(stderr, "VERIFY: Option -stop-clear-all\n");    globalOptions |= VERIFY_OPTION_ALL; }
+            else if (!strcmp(argv[i], "-no-check-stop"))  { fprintf(stderr, "VERIFY: Option -no-check-stop\n");     globalOptions |= VERIFY_OPTION_NO_CHECK_STOP; }
+            else if (!strcmp(argv[i], "-allow-restarts")) { globalAllowedRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-restarts %d\n", globalAllowedRestarts); }
             else if (argv[i][0] == '-')
             {
                 fprintf(stdout, "ERROR: Unrecognized option %s\n", argv[i]);
@@ -946,7 +940,7 @@ int verify_main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop]\n");
+        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop] [-allow-restarts <n>]\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
         fprintf(stderr, "\n");

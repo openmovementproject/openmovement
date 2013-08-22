@@ -361,6 +361,7 @@ OmLog(4, "- Flush done (%d bytes)", num);
         if (OM_FAILED(OmPortWrite(deviceId, command)))
         {
             OmPortRelease(deviceId); 
+// TODO: Return separate error codes for "access denied", "write error".
             return OM_E_ACCESS_DENIED;
         }
     }
@@ -415,6 +416,8 @@ OmLog(2, "- Error found: \"%s\"", p);
         }
     }
     OmPortRelease(deviceId); 
+
+// TODO: When expecting a response, return a different error code for "unexpected response" and "no response".
 
     // Exit now if we weren't storing the response in a buffer
     if (buffer == NULL || bufferSize <= 0) { return offset; }
