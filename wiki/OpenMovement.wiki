@@ -3,6 +3,7 @@ Open Movement devices are miniature, embeddable, open source sensors developed a
 * Devices
   * [AX3 AX3 Movement logging]
   * [WAX3 WAX3 Wireless accelerometers]
+  * [AX9i AX9i '9-Axis' device with display]
 
 * [http://code.google.com/p/openmovement/wiki/Downloads?tm=2 Downloads]
 
