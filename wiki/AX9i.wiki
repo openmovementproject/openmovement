@@ -1,0 +1,12 @@
+#summary Open Movement AX9i '9-Axis' wireless and logging device with display.
+
+= Open Movement - AX9i '9-Axis' wireless and logging device with display. =
+
+The AX9i device allow '9-axis' (triaxial accelerometer, gyroscope and magnetometer) movement data to be recorded onboard or wirlessly streamed and analyzed in real-time.  The devices also feature a monochrome OLED display.
+
+<wiki:comment>
+== Links ==
+  * [Documentation Documentation]
+  * [Source Source]
+  * [Downloads Downloads]
+</wiki:comment>
