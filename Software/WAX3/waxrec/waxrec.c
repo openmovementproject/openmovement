@@ -145,6 +145,7 @@
 /* Includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -174,6 +175,29 @@ typedef struct
     unsigned char sampleCount;
     WaxSample samples[MAX_SAMPLES];
 } WaxPacket;
+
+
+/* WAX9 structures */
+// 9-axis packet type (always little-endian, transmitted SLIP-encoded)
+typedef struct
+{
+    // Standard part (26-bytes)
+    char packetType;                        // @ 0 ASCII '9' for 9-axis
+    char packetVersion;                     // @ 1 Version (0x01 = standard, 0x02 = extended)
+    unsigned short sampleNumber;            // @ 2 Sample number (reset on configuration change, inactivity, or wrap-around)
+    uint32_t timestamp;                     // @ 4 Timestamp (16.16 fixed-point representation, seconds)
+    struct { signed short x, y, z; } accel; // @ 8 Accelerometer
+    struct { signed short x, y, z; } gyro;  // @14 Gyroscope
+    struct { signed short x, y, z; } mag;   // @20 Magnetometer
+
+    // Extended part
+    unsigned short battery;                 // @26 Battery (mV)
+    short temperature;                      // @28 Temperature (0.1 degrees C)
+    uint32_t pressure;                      // @30 Pressure (Pascal)
+    //unsigned short deviceId;                // @34 Device identifier
+    //                                        // @36
+} Wax9Packet;
+
 
 
 /* TEDDI structure */
@@ -223,6 +247,7 @@ typedef struct
 //#define TEDDI_MS_PER_SAMPLE 250
 typedef struct
 {
+    char valid;
     unsigned long long timestampReceived;
     unsigned long long timestampEstimated;
     unsigned short deviceId;            // Device identifier (16-bit)
@@ -836,6 +861,88 @@ WaxPacket *parseWaxPacket(const void *inputBuffer, size_t len, unsigned long lon
 }
 
 
+/* Parse a binary WAX9 packet */
+Wax9Packet *parseWax9Packet(const void *inputBuffer, size_t len, unsigned long long now)
+{
+    const unsigned char *buffer = (const unsigned char *)inputBuffer;
+    static Wax9Packet wax9Packet;
+
+    if (buffer == NULL || len <= 0) { return 0; }
+
+    if (len >= 20 && buffer[0] == '9')
+    {
+        wax9Packet.packetType = buffer[0];
+        wax9Packet.packetVersion = buffer[1];
+        wax9Packet.sampleNumber = buffer[2] | ((unsigned short)buffer[3] << 8);
+        wax9Packet.timestamp = buffer[4] | ((unsigned int)buffer[5] << 8) | ((unsigned int)buffer[6] << 16) | ((unsigned int)buffer[7] << 24);
+
+        wax9Packet.accel.x = (short)((unsigned short)(buffer[ 8] | (((unsigned short)buffer[ 9]) << 8)));
+        wax9Packet.accel.y = (short)((unsigned short)(buffer[10] | (((unsigned short)buffer[11]) << 8)));
+        wax9Packet.accel.z = (short)((unsigned short)(buffer[12] | (((unsigned short)buffer[13]) << 8)));
+
+        if (len >= 20)
+        {
+            wax9Packet.gyro.x  = (short)((unsigned short)(buffer[14] | (((unsigned short)buffer[15]) << 8)));
+            wax9Packet.gyro.y  = (short)((unsigned short)(buffer[16] | (((unsigned short)buffer[17]) << 8)));
+            wax9Packet.gyro.z  = (short)((unsigned short)(buffer[18] | (((unsigned short)buffer[19]) << 8)));
+        }
+        else
+        {
+            wax9Packet.gyro.x   = 0;
+            wax9Packet.gyro.y   = 0;
+            wax9Packet.gyro.z   = 0;
+        }
+
+        if (len >= 26)
+        {
+            wax9Packet.mag.x   = (short)((unsigned short)(buffer[20] | (((unsigned short)buffer[21]) << 8)));
+            wax9Packet.mag.y   = (short)((unsigned short)(buffer[22] | (((unsigned short)buffer[23]) << 8)));
+            wax9Packet.mag.z   = (short)((unsigned short)(buffer[24] | (((unsigned short)buffer[25]) << 8)));
+        }
+        else
+        {
+            wax9Packet.mag.x   = 0;
+            wax9Packet.mag.y   = 0;
+            wax9Packet.mag.z   = 0;
+        }
+
+        if (len >= 28)
+        {
+            wax9Packet.battery = (unsigned short)(buffer[26] | (((unsigned short)buffer[27]) << 8));
+        }
+        else
+        {
+            wax9Packet.battery = 0xffff;
+        }
+
+        if (len >= 30)
+        {
+            wax9Packet.temperature = (short)((unsigned short)(buffer[28] | (((unsigned short)buffer[29]) << 8)));
+        }
+        else
+        {
+            wax9Packet.temperature = 0xffff;
+        }
+
+        if (len >= 34)
+        {
+            wax9Packet.pressure = buffer[30] | ((unsigned int)buffer[31] << 8) | ((unsigned int)buffer[32] << 16) | ((unsigned int)buffer[33] << 24);
+        }
+        else
+        {
+            wax9Packet.pressure = 0xfffffffful;
+        }
+
+        return &wax9Packet;
+    }
+    else
+    {
+        fprintf(stderr, "WARNING: Unrecognized WAX9 packet -- ignoring.\n");
+    }
+    return NULL;
+}
+
+
 /* Parse a binary TEDDI packet */
 TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long long now)
 {
@@ -843,6 +950,7 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
     static TeddiPacket teddiPacket;
     int i;
 
+    teddiPacket.valid = 0;
     if (buffer == NULL || len <= 0) { return 0; }
 
     if (len >= 5 && buffer[0] == 0x12 && buffer[1] == 0x54)
@@ -884,10 +992,18 @@ TeddiPacket *parseTeddiPacket(const void *inputBuffer, size_t len, unsigned long
             teddiPacket.parentAddress = 0;
             teddiPacket.parentAltAddress = 0;
 
+            teddiPacket.valid = 1;
+
             if ((teddiPacket.version & 0x0f) >= 0x04)
             {
                 int additionalOffset = ADDITIONAL_OFFSET(teddiPacket.sampleCount);
                 teddiPacket.humidity = (unsigned short)(buffer[16] | (((unsigned short)buffer[17]) << 8));
+
+                if (additionalOffset != (int)len && additionalOffset + 4 != (int)len)
+                {
+                    fprintf(stderr, "WARNING: TEDDI packet incorrect length (%d, expected %d or 4 less) - probably corrupt?\n", len, additionalOffset + 4);
+                    teddiPacket.valid = 0;
+                }
 
                 if (additionalOffset + 2 <= (int)len) { teddiPacket.parentAddress = (unsigned short)(buffer[additionalOffset + 0] | (((unsigned short)buffer[additionalOffset + 1]) << 8)); }
                 if (additionalOffset + 4 <= (int)len) { teddiPacket.parentAltAddress = (unsigned short)(buffer[additionalOffset + 2] | (((unsigned short)buffer[additionalOffset + 3]) << 8)); }
@@ -1046,19 +1162,43 @@ void waxDump(WaxPacket *waxPacket, FILE *ofp, char tee, int timeformat)
 }
 
 
+/* Dumps a WAX9 packet */
+void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsigned long long receivedTime)
+{
+    int i;
+    const char *timeString = timestamp(receivedTime, timeformat);
+    for (i = 0; i <= tee ? 1 : 0; i++)
+    {
+        fprintf((i == 0) ? ofp : stderr, "$WAX9,%s,%u,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", timeString, wax9Packet->sampleNumber, wax9Packet->timestamp, 
+            wax9Packet->accel.x / 2048.0f, wax9Packet->accel.y / 2048.0f, wax9Packet->accel.z / 2048.0f, 
+            wax9Packet->gyro.x * 0.07f,    wax9Packet->gyro.y * 0.07f,    wax9Packet->gyro.z * 0.07f, 
+            wax9Packet->mag.x, wax9Packet->mag.y, wax9Packet->mag.z
+            );
+    }
+    return;
+}
+
+
 /* Dumps a TEDDI packet */
-void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee, int format)
+void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee, int format, char ignoreInvalid)
 {
     static char line[2048];
     static char number[32];
+    char *labelAppend = "";
     int i;
+
+    if (!teddiPacket->valid)
+    {
+        if (ignoreInvalid == 1) { return; }
+        else if (ignoreInvalid == 2) { labelAppend = "!"; }
+    }
 
     if (format == 1)
     {
         unsigned short imin = 0, imax = 0, iav = 0;
         int itot = 0;
 
-        sprintf(line, "TEDDI_SHORT,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestampEstimated, 3), teddiPacket->deviceId, teddiPacket->version,
+        sprintf(line, "TEDDI_SHORT%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", labelAppend, timestamp(teddiPacket->timestampEstimated, 3), teddiPacket->deviceId, teddiPacket->version,
                                             teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent,
                                             teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
 
@@ -1091,7 +1231,7 @@ void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee, int format)
     }
     else
     {
-        sprintf(line, "TEDDI,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", timestamp(teddiPacket->timestampReceived, 3), teddiPacket->deviceId, teddiPacket->version, 
+        sprintf(line, "TEDDI%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u", labelAppend, timestamp(teddiPacket->timestampReceived, 3), teddiPacket->deviceId, teddiPacket->version, 
                                             teddiPacket->sampleCount, teddiPacket->sequence, teddiPacket->unsent, 
                                             teddiPacket->temp, teddiPacket->light, teddiPacket->battery, teddiPacket->humidity);
         for (i = 0; i < teddiPacket->sampleCount; i++)
@@ -1185,6 +1325,41 @@ size_t waxToOsc(WaxPacket *waxPacket, void *outputBuffer, char timetag)
             o += write_osc_timetag(buffer + o, waxPacket->samples[i].timestamp);    /* [OSC timetag] timestamp <8 bytes> */
         }
     }
+    return o;
+}
+
+
+/* Create an OSC bundle for the WAX9 data */
+size_t wax9ToOsc(Wax9Packet *wax9Packet, void *outputBuffer, char timetag, unsigned long long receivedTime)
+{
+    unsigned char *buffer = (unsigned char *)outputBuffer;
+    size_t o = 0;
+    char address[16];
+
+    sprintf(address, "/wax9");      //sprintf(address, "/wax9/%d", waxPacket->deviceId);
+
+    o += write_osc_string(buffer + o, "#bundle");                            /* [OSC string] bundle identifier: "#bundle" <pads to 8 bytes> */
+    o += write_osc_timetag(buffer + o, receivedTime);                        /* [OSC timetag] timestamp <8 bytes> */
+
+    /* OSC messages */
+    {
+        int msgLen = 76 + ((strlen(address) >= 8) ? 4 : 0);
+        o += write_osc_int(buffer + o, msgLen);                                 /* [OSC int] message length */
+        o += write_osc_string(buffer + o, address);                             /* [OSC string] address: "/wax9/#####" <pads to 12 bytes if ID >= 100, or 8 bytes otherwise> */
+        o += write_osc_string(buffer + o, ",fffffffffii");                      /* [OSC string] type tag: <pads to 16 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.x / 2048.0f);        /* [OSC float] Accel. X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.y / 2048.0f);        /* [OSC float] Accel. Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.z / 2048.0f);        /* [OSC float] Accel. Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.x * 0.07f);           /* [OSC float] Gyro. X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.y * 0.07f);           /* [OSC float] Gyro. Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.z * 0.07f);           /* [OSC float] Gyro. Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.x);                    /* [OSC float] Mag. X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.y);                    /* [OSC float] Mag. Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.z);                    /* [OSC float] Mag. Z-axis <4 bytes> */
+        o += write_osc_int(buffer + o, wax9Packet->sampleNumber);               /* [OSC int] sample index <4 bytes> */
+        o += write_osc_int(buffer + o, wax9Packet->timestamp);                  /* [OSC int] sample time (16.16) <4 bytes> */
+    }
+
     return o;
 }
 
@@ -1625,7 +1800,7 @@ FILE *openlogfile(const char *logfile, unsigned long long ticks, unsigned long *
             
 fprintf(stderr, "DEBUG: Creating log directory: %s\n", temp);
 
-            if (strlen(temp) != 0 & stat(temp, &st) != 0)
+            if (strlen(temp) != 0 && stat(temp, &st) != 0)
             {
                 if (mkdir(temp, 0777) != 0)
                 {
@@ -1637,7 +1812,7 @@ fprintf(stderr, "DEBUG: Creating log directory: %s\n", temp);
                     }
                 }
             }
-            else if (strlen(temp) != 0 & !(st.st_mode & S_IFDIR))
+            else if (strlen(temp) != 0 && !((st.st_mode) & S_IFDIR))
             {
                 fprintf(stderr, "ERROR: Path not a directory: %s\n", temp);
                 return NULL;
@@ -1713,7 +1888,7 @@ int CreateTestData(char *buffer, const char *fakeType)
 
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
-int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format)
+int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format, char ignoreInvalid)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -2019,6 +2194,49 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                     }
                 }
 
+                /* If it appears to be a binary WAX9 packet... */
+                if (len > 1 && buffer[0] == '9')
+                {
+                    unsigned long long now = TicksNow();
+                    Wax9Packet *wax9Packet;
+                    if (dump) { hexdump(buffer, len); }
+                    wax9Packet = parseWax9Packet(buffer, len, now);
+                    if (wax9Packet != NULL)
+                    {
+                        /* Output text version */
+                        if (outfp != NULL) { wax9Dump(wax9Packet, outfp, tee, timeformat, now); }
+
+                        /* Create a STOMP packet */
+	                    if (stompTransmitter != NULL)
+	                    {
+	                        static char msg[2048];
+                            char *p = msg;
+
+                            p += sprintf(p, "{");
+                            p += sprintf(p, "\"Type\":\"WAX9\",");
+                            p += sprintf(p, "\"ReceivedTimestamp\":\"%llu\",", now);
+                            if ((wax9Packet->packetVersion & 1) == 0)
+                            {
+                                p += sprintf(p, "\"Battery\":\"%u\",", wax9Packet->battery);
+                                p += sprintf(p, "\"Temperature\":\"%d\",", wax9Packet->temperature);
+                                p += sprintf(p, "\"Pressure\":\"%u\",", wax9Packet->pressure);
+                            }
+                            p += sprintf(p, "\"Samples\":[");
+                            p += sprintf(p, "[%llu,%u,%d,%d,%d,%d,%d,%d,%d,%d,%d]", wax9Packet->timestamp, wax9Packet->sampleNumber, 
+                                wax9Packet->accel.x, wax9Packet->accel.y, wax9Packet->accel.z, 
+                                wax9Packet->gyro.x,  wax9Packet->gyro.y,  wax9Packet->gyro.z, 
+                                wax9Packet->mag.x,   wax9Packet->mag.y,   wax9Packet->mag.z 
+                                );
+                            p += sprintf(p, "]");
+                            p += sprintf(p, "}");
+	                        TinyStompTransmitter_Transmit(stompTransmitter, stompAddress, msg, stompUser, stompPassword);
+                        }
+
+                        /* Create an OSC bundle from the WAX packet */
+                        if (convertToOsc) { len = wax9ToOsc(wax9Packet, buffer, timetag, now); }
+                    }
+                }
+
                 /* If it appears to be a binary TEDDI packet (USER_REPORT_TYPE, 'T') */
                 if (len > 1 && buffer[0] == 0x12 && buffer[1] == 0x54)
                 {
@@ -2028,7 +2246,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                     if (teddiPacket != NULL)
                     {
                         /* Output text version */
-                        if (outfp != NULL) { teddiDump(teddiPacket, outfp, tee, format); }
+                        if (outfp != NULL) { teddiDump(teddiPacket, outfp, tee, format, ignoreInvalid); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -2198,9 +2416,10 @@ int main(int argc, char *argv[])
     int timeformat = 2;
     char convertToOsc = 0;
     int format = 0;
+    char ignoreInvalid = 0;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.91     by Daniel Jackson, 2011-2013\n");
+    fprintf(stderr, "V1.92     by Daniel Jackson, 2011-2013\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2272,6 +2491,14 @@ int main(int argc, char *argv[])
         {
             strcpy(stompPassword, argv[++i]);
         }
+        else if (strcasecmp(argv[i], "-invalid:ignore") == 0)
+        {
+            ignoreInvalid = 1;
+        }
+        else if (strcasecmp(argv[i], "-invalid:label") == 0)
+        {
+            ignoreInvalid = 2;
+        }
         else if (strcasecmp(argv[i], "-t:none") == 0) { timeformat = 0; }
         else if (strcasecmp(argv[i], "-t:secs") == 0) { timeformat = 1; }
         else if (strcasecmp(argv[i], "-t:full") == 0) { timeformat = 2; }
@@ -2305,6 +2532,7 @@ int main(int argc, char *argv[])
 #ifdef THREAD_WRITE_FROM_UDP
         //fprintf(stderr, "        [-udpwritefrom <port>]               Write data received from the specified UDP port.\n");
 #endif
+		fprintf(stderr, "        [-invalid:ignore|-invalid:label]       Ingore or label invalid packets\n");
 		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
 		fprintf(stderr, "        [-out <file.csv>]                      Output to a specific log file\n");
         fprintf(stderr, "        [-format:short]                        Format as short output (TEDDI packets only)\n");
@@ -2327,7 +2555,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "WAXREC: %s -> %s%s%s%s %s:%s@%s%s\n", (infile == NULL) ? "<stdin>" : infile, host, (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompUser, strlen(stompPassword) > 0 ? "*" : "", stompHost, stompAddress);
     fprintf(stderr, "INIT: %s\n", initString);
 
-    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format);
+    // The function with the most arguments in the world... (I think a configuration structure might help here)
+    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
