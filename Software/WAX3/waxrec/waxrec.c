@@ -50,6 +50,8 @@
 /* Cross-platform alternatives */
 #ifdef _WIN32
 
+#define WIN_HANDLE
+
     /* Defines and headers */
     #define _CRT_SECURE_NO_WARNINGS
     #define _CRT_SECURE_NO_DEPRECATE
@@ -697,7 +699,15 @@ static size_t lineread(int fd, void *inBuffer, size_t len)
     for (;;)
     {
         c = '\0';
+#if defined(_WIN32) && defined(WIN_HANDLE)
+        {
+            int done;
+            ReadFile((HANDLE)fd, &c, 1, (DWORD *)&done, 0);
+            if (done <= 0) { return received; }
+        }
+#else
         if (read(fd, &c, 1) <= 0) { return received; }
+#endif
         if (c == 0xC0) { return (size_t)-1; }    /* A SLIP_END means the reader should switch to slip reading. */
         if (c == '\r' || c == '\n')
         {
@@ -726,7 +736,15 @@ static size_t slipread(int fd, void *inBuffer, size_t len)
     for (;;)
     {
         c = '\0';
+#if defined(_WIN32) && defined(WIN_HANDLE)
+        {
+            int done;
+            ReadFile((HANDLE)fd, &c, 1, (DWORD *)&done, 0);
+            if (done <= 0) { return received; }
+        }
+#else
         if (read(fd, &c, 1) <= 0) { return received; }
+#endif
         switch (c)
         {
             case SLIP_END:
@@ -869,7 +887,11 @@ Wax9Packet *parseWax9Packet(const void *inputBuffer, size_t len, unsigned long l
 
     if (buffer == NULL || len <= 0) { return 0; }
 
-    if (len >= 20 && buffer[0] == '9')
+    if (buffer[0] != '9')
+    {
+        fprintf(stderr, "WARNING: Unrecognized packet -- ignoring.\n");
+    }
+    else if (len >= 20)
     {
         wax9Packet.packetType = buffer[0];
         wax9Packet.packetVersion = buffer[1];
@@ -1421,7 +1443,26 @@ int openport(const char *infile, char writeable)
 #endif
         flags |= (writeable) ? O_RDWR : O_RDONLY;
 
+#ifdef _WIN32
+        {
+            HANDLE hSerial;
+            hSerial = CreateFileA(infile, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+            if (hSerial == INVALID_HANDLE_VALUE) { fd = -1; fprintf(stderr, "ERROR: CreateFile problem '%s'\n", infile); }
+            else
+            { 
+#ifdef WIN_HANDLE
+                fd = (intptr_t)hSerial;
+#else
+                // This fails for Bluetooth serial ports... keep as a handle
+                fd = _open_osfhandle((intptr_t)hSerial, 0); 
+                if (fd == -1) { fprintf(stderr, "ERROR: Problem converting handle %x to fd %d for '%s'\n", hSerial, fd, infile);  } 
+#endif
+            }
+        }
+#else
         fd = open(infile, flags);
+#endif
+
         if (fd < 0)
         {
             fprintf(stderr, "ERROR: Problem opening input: '%s'\n", infile);
@@ -1435,7 +1476,11 @@ int openport(const char *infile, char writeable)
             DCB dcbSerialParams = {0};
             COMMTIMEOUTS timeouts = {0};
 
+#ifdef WIN_HANDLE
+            hSerial = (HANDLE)fd;
+#else
             hSerial = (HANDLE)_get_osfhandle(fd);
+#endif
             if (hSerial == INVALID_HANDLE_VALUE)
             {
                 fprintf(stderr, "ERROR: Failed to get HANDLE from file.\n");
@@ -1486,11 +1531,17 @@ int openport(const char *infile, char writeable)
 }
 
 
-/* Find port names for a given USB VID & PID */
-int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t bufferSize)
+// _MSC_VER instead of _WIN32 as I can't get it to compile under Cygwin (-lcfgmgr32 doesn't seem to help)
+#ifdef _MSC_VER
+/* Find port names for a given set of constraints */
+static int Win32FindPorts(const char *prefix, const char *substring, char *buffer, size_t bufferSize)
 {
     int count = 0;
     int pos = 0;
+    GUID *pGuids;
+    DWORD dwGuids = 0;
+    unsigned int guidIndex;
+    int index;
     
     if (buffer != NULL)
     {
@@ -1498,90 +1549,123 @@ int findPorts(unsigned short vid, unsigned short pid, char *buffer, size_t buffe
         buffer[pos + 1] = '\0';
     }
     
-// _MSC_VER instead of _WIN32 as I can't get it to compile under Cygwin (-lcfgmgr32 doesn't seem to help)
-#ifdef _MSC_VER
+    /* Convert the name "Ports" to a GUID */
+    SetupDiClassGuidsFromNameA("Ports", NULL, 0, &dwGuids) ;
+    if (dwGuids == 0) { fprintf(stderr, "ERROR: SetupDiClassGuidsFromName() failed.\n"); return -1; }
+    pGuids = (GUID *)malloc(dwGuids * sizeof(GUID));
+    if (!SetupDiClassGuidsFromNameA("Ports", pGuids, dwGuids, &dwGuids)) { fprintf(stderr, "ERROR: SetupDiClassGuidsFromName() failed.\n"); free(pGuids); return -1; }
+
+    /* For each GUID returned */
+    for (guidIndex = 0; guidIndex < dwGuids; guidIndex++)
     {
-        GUID *pGuids;
-        DWORD dwGuids = 0;
-        unsigned int guidIndex;
-        char prefix[32];
-        int index;
+        HDEVINFO hDevInfo;
 
-        /* PNPDeviceID to search for */
-        sprintf(prefix, "USB\\VID_%04X&PID_%04X", vid, pid);
+        /* From the root of the device tree, look for all devices that match the interface GUID */
+        hDevInfo = SetupDiGetClassDevs(&pGuids[guidIndex], NULL, NULL, DIGCF_PRESENT);
+        if (hDevInfo == INVALID_HANDLE_VALUE) { free(pGuids); return -1; }
 
-        /* Convert the name "Ports" to a GUID */
-        SetupDiClassGuidsFromNameA("Ports", NULL, 0, &dwGuids) ;
-        if (dwGuids == 0) { fprintf(stderr, "ERROR: SetupDiClassGuidsFromName() failed.\n"); return -1; }
-        pGuids = (GUID *)malloc(dwGuids * sizeof(GUID));
-        if (!SetupDiClassGuidsFromNameA("Ports", pGuids, dwGuids, &dwGuids)) { fprintf(stderr, "ERROR: SetupDiClassGuidsFromName() failed.\n"); free(pGuids); return -1; }
-
-        /* For each GUID returned */
-        for (guidIndex = 0; guidIndex < dwGuids; guidIndex++)
+        for (index = 0; ; index++)
         {
-            HDEVINFO hDevInfo;
+            char usbId[MAX_PATH] = "";
 
-            /* From the root of the device tree, look for all devices that match the interface GUID */
-            hDevInfo = SetupDiGetClassDevs(&pGuids[guidIndex], NULL, NULL, DIGCF_PRESENT);
-            if (hDevInfo == INVALID_HANDLE_VALUE) { free(pGuids); return -1; }
+            /* Enumerate the current device */
+            SP_DEVINFO_DATA devInfo;
+            devInfo.cbSize = sizeof(SP_DEVINFO_DATA);
+            if (!SetupDiEnumDeviceInfo(hDevInfo, index, &devInfo)) { break; }
 
-            for (index = 0; ; index++)
+            /* Get USB id for device */
+            CM_Get_Device_IDA(devInfo.DevInst, usbId, MAX_PATH, 0);
+
+            /* If this is the device we are looking for */
+            if ((prefix == NULL || strncmp(usbId, prefix, strlen(prefix)) == 0) && (substring == NULL || strstr(usbId, substring) != NULL))
             {
-                char usbId[MAX_PATH] = "";
-
-                /* Enumerate the current device */
-                SP_DEVINFO_DATA devInfo;
-                devInfo.cbSize = sizeof(SP_DEVINFO_DATA);
-                if (!SetupDiEnumDeviceInfo(hDevInfo, index, &devInfo)) { break; }
-
-                /* Get USB id for device */
-                CM_Get_Device_IDA(devInfo.DevInst, usbId, MAX_PATH, 0);
-
-                /* If this is the device we are looking for */
-                if (strncmp(usbId, prefix, strlen(prefix)) == 0)
-                {
-                    HKEY hDeviceKey;
+                HKEY hDeviceKey;
 
 #if 1
-                    /* Move up one level to get to the composite device string */
-                    char usbComposite[MAX_PATH] = "";
-                    DWORD parent = 0;
-                    CM_Get_Parent(&parent, devInfo.DevInst, 0);
-                    CM_Get_Device_IDA(parent, usbComposite, MAX_PATH, 0);
-                    if (strncmp(usbComposite, prefix, strlen(prefix)) != 0)
-                    {
-                        usbComposite[0] = '\0';     /* If it doesn't match the vid/pid, this is not a composite device */
-                    }
-#endif
-
-                    /* Registry key for the ports settings */
-                    hDeviceKey = SetupDiOpenDevRegKey(hDevInfo, &devInfo, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
-                    if (hDeviceKey)
-                    {
-                        /* Name of the port */
-                        char portName[MAX_PATH] = "";
-                        DWORD dwSize = sizeof(portName);
-                        DWORD dwType = 0;
-                        if ((RegQueryValueExA(hDeviceKey, "PortName", NULL, &dwType, (LPBYTE)portName, &dwSize) == ERROR_SUCCESS) && (dwType == REG_SZ))
-                        {
-                            /* TODO: snprintf with (bufferSize - pos) */
-                            pos += sprintf(buffer + pos, "\\\\.\\%s", portName);
-                            *(buffer + ++pos) = '\0';
-
-                            count++;
-                        }
-                    }
-
+                /* Move up one level to get to the composite device string */
+                char usbComposite[MAX_PATH] = "";
+                DWORD parent = 0;
+                CM_Get_Parent(&parent, devInfo.DevInst, 0);
+                CM_Get_Device_IDA(parent, usbComposite, MAX_PATH, 0);
+                if (prefix == NULL || strncmp(usbComposite, prefix, strlen(prefix)) != 0)
+                {
+                    usbComposite[0] = '\0';     /* If it doesn't match the vid/pid, this is not a composite device */
                 }
-            }
-            SetupDiDestroyDeviceInfoList(hDevInfo);
-        }
-        free(pGuids); 
-    }
-#else
-    /* Not implemented */
 #endif
+
+                /* Registry key for the ports settings */
+                hDeviceKey = SetupDiOpenDevRegKey(hDevInfo, &devInfo, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
+                if (hDeviceKey)
+                {
+                    /* Name of the port */
+                    char portName[MAX_PATH] = "";
+                    DWORD dwSize = sizeof(portName);
+                    DWORD dwType = 0;
+                    if ((RegQueryValueExA(hDeviceKey, "PortName", NULL, &dwType, (LPBYTE)portName, &dwSize) == ERROR_SUCCESS) && (dwType == REG_SZ))
+                    {
+                        /* TODO: snprintf with (bufferSize - pos) */
+                        pos += sprintf(buffer + pos, "\\\\.\\%s", portName);
+                        *(buffer + ++pos) = '\0';
+
+                        count++;
+                    }
+                }
+
+            }
+        }
+        SetupDiDestroyDeviceInfoList(hDevInfo);
+    }
+    free(pGuids); 
+
     return count;
+}
+#endif
+
+
+/* Find port names for a given USB VID & PID */
+static int FindPorts(unsigned short vid, unsigned short pid, char *buffer, size_t bufferSize)
+{
+// _MSC_VER instead of _WIN32 as I can't get it to compile under Cygwin (-lcfgmgr32 doesn't seem to help)
+#ifdef _MSC_VER
+    /* PNPDeviceID to search for */
+    char prefix[32];
+    sprintf(prefix, "USB\\VID_%04X&PID_%04X", vid, pid);
+    return Win32FindPorts(prefix, NULL, buffer, bufferSize);
+#else
+    // Not implemented
+    if (buffer != NULL) { buffer[0] = '\0'; buffer[1] = '\0'; }
+    return 0;
+#endif
+}
+
+
+static int FindBluetoothPorts(const char *address, char *buffer, size_t bufferSize)
+{
+// _MSC_VER instead of _WIN32 as I can't get it to compile under Cygwin (-lcfgmgr32 doesn't seem to help)
+#ifdef _MSC_VER
+    const char *s = address;
+    char normalizedAddress[128];
+    char *d = normalizedAddress;
+
+    // Copy address, removing non-hex characters, as upper-case.
+    do
+    {
+        char c = *s;
+        if (c >= 'a' && c <= 'f') { c = c + 'A' - 'a'; }
+        if (c == '\0' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'))
+        {
+            *d++ = c;
+        }
+    } while (*s++ != '\0');
+    
+    return Win32FindPorts("BTHENUM\\", normalizedAddress, buffer, bufferSize);
+#else
+
+    // Not implemented
+    if (buffer != NULL) { buffer[0] = '\0'; buffer[1] = '\0'; }
+    return 0;
+
+#endif
 }
 
 
@@ -1983,9 +2067,20 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
             unsigned int vidpid = (DEFAULT_VID << 16) | DEFAULT_PID;
             sscanf(infile + 1, "%08x", &vidpid);
             fprintf(stderr, "Searching for VID=%04X&PID=%04X...\n", (unsigned short)(vidpid >> 16), (unsigned short)vidpid);
-            if (findPorts((unsigned short)(vidpid >> 16), (unsigned short)vidpid, ports, 1024) <= 0)
+            if (FindPorts((unsigned short)(vidpid >> 16), (unsigned short)vidpid, ports, 1024) <= 0)
             {
                 fprintf(stderr, "ERROR: No ports found.\n");
+                return 3;
+            }
+            /* Choose the first port found */
+            infile = ports;
+        }
+        else if (infile[0] == '@')
+        {
+            fprintf(stderr, "Searching for Bluetooth port %s...\n", infile + 1);
+            if (FindBluetoothPorts(infile + 1, ports, 1024) <= 0)
+            {
+                fprintf(stderr, "ERROR: No matching Bluetooth ports found.\n");
                 return 3;
             }
             /* Choose the first port found */
@@ -2032,13 +2127,27 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 						else { c |= *p - '0'; }
 						p++;
 								
+#if defined(_WIN32) && defined(WIN_HANDLE)
+                        {
+                            int written;
+                            WriteFile((HANDLE)fd, &c, 1, &written, 0);
+                        }
+#else
                         write(fd, &c, 1);
+#endif
 						continue;
 					}
 				}
             }
             if (c == '\0') { break; }
+#if defined(_WIN32) && defined(WIN_HANDLE)
+            {
+                int written;
+                WriteFile((HANDLE)fd, &c, 1, &written, 0);
+            }
+#else
             write(fd, &c, 1);
+#endif
         }
     }
 
@@ -2388,7 +2497,11 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
     }
 
     /* Close file */
+#if defined(_WIN32) && defined(WIN_HANDLE)
+    if (fd != -1 && (HANDLE)fd != INVALID_HANDLE_VALUE) { CloseHandle((HANDLE)fd); }
+#else
     if (fd != -1 && fd != fileno(stdin)) { close(fd); }
+#endif
 
 #ifdef _WIN32
     WSACleanup();
@@ -2419,7 +2532,7 @@ int main(int argc, char *argv[])
     char ignoreInvalid = 0;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.92     by Daniel Jackson, 2011-2013\n");
+    fprintf(stderr, "V1.93     by Daniel Jackson, 2011-2013\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2547,6 +2660,7 @@ int main(int argc, char *argv[])
 #ifdef _MSC_VER
         // See 'findPorts()'
         fprintf(stderr, "NOTE: 'device' can be '!' or '![VID+PID]' to automatically find the first matching serial port (default: !%04X%04X)\n", DEFAULT_VID, DEFAULT_PID);
+        fprintf(stderr, "      or '@' or '@[MAC-address]' to automatically find the first matching Bluetooth serial port\n");
 #endif
         fprintf(stderr, "\n");
         return -1;
