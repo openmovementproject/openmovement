@@ -753,8 +753,16 @@ static size_t slipread(int fd, void *inBuffer, size_t len)
 
             case SLIP_ESC:
                 c = '\0';
+ #if defined(_WIN32) && defined(WIN_HANDLE)
+                {
+                    int done;
+                    ReadFile((HANDLE)fd, &c, 1, (DWORD *)&done, 0);
+                    if (done <= 0) { return received; }
+                }
+#else
                 if (read(fd, &c, 1) <= 0) { return received; }
-                switch (c)
+#endif
+               switch (c)
                 {
                     case SLIP_ESC_END:
                         c = SLIP_END;
