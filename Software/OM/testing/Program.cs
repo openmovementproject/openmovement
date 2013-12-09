@@ -17,6 +17,14 @@ namespace OMTesting
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
         static void Main(string[] args)
         {
+            bool mutexCreated = false;
+            System.Threading.Mutex mutex = new System.Threading.Mutex(true, @"Local\OMTesting", out mutexCreated);
+            if (!mutexCreated)
+            {
+                MessageBox.Show("Another instance is already running.\r\nIt is only safe to run one at once.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             try
             {
                 // Default to only logging UI exceptions
@@ -71,6 +79,10 @@ namespace OMTesting
                     "Stack trace: " + ex.StackTrace + "";
                 MessageBox.Show(error, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(-1);
+            }
+            finally
+            {
+                mutex.Close();
             }
         }
 
