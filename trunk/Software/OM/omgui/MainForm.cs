@@ -506,8 +506,14 @@ namespace OmGui
             string fileName = System.IO.Path.GetFileName(path);
             System.IO.FileInfo info = new FileInfo(path);
 
-            string fileSize = ((double)((double) info.Length / 1024.0 / 1024.0)).ToString("F");
-            string dateModified = info.CreationTime.ToString("dd/MM/yy HH:mm:ss");
+            string fileSize = "";
+            string dateModified = "";
+
+            if (info.Exists)
+            {
+                fileSize = ((double)((double)info.Length / 1024.0 / 1024.0)).ToString("F");
+                dateModified = info.CreationTime.ToString("dd/MM/yy HH:mm:ss");
+            }
 
             item.SubItems.Clear();
 

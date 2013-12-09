@@ -42,8 +42,6 @@
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
-#define gmtime_r(timer, result) gmtime_s(result, timer)
-#define timegm _mkgmtime
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -51,6 +49,12 @@
 #include <math.h>
 #include <time.h>
 #include <sys/timeb.h>
+
+#ifdef _WIN32
+#define gmtime_r(timer, result) gmtime_s(result, timer)
+#define timegm _mkgmtime
+#define tzset _tzset
+#endif
 
 
 
@@ -68,9 +72,10 @@
 /* Options */
 #define VERIFY_OPTION_ALL               0x01
 #define VERIFY_OPTION_NO_CHECK_STOP     0x02
+#define VERIFY_OPTION_OUTPUT_NEW        0x04
 
 /* Error measures */
-#define STUCK_COUNT (10 * 120)
+#define STUCK_COUNT (12 * 120)
 #define AVERAGE_FACTOR 0.00001
 #define AVERAGE_RANGE_MAX 0.400
 #define AVERAGE_RANGE_OFF 0.300
@@ -135,7 +140,7 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
 
 FILE *outfile;
 
-// Calculate the time in ticks from a packed time
+// Calculate epoch the time in seconds from a packed time
 time_t TimeSerial(OM_DATETIME timestamp)
 {
     time_t tSec;                            // Seconds since epoch
@@ -151,11 +156,33 @@ time_t TimeSerial(OM_DATETIME timestamp)
 }
 
 
-// Calculate the time in ticks from a packed time
+// Calculate the time in 1/65536th seconds from a packed time
 unsigned long long Ticks(OM_DATETIME timestamp, unsigned short fractional)
 {
     time_t tSec = TimeSerial(timestamp);
     return ((unsigned long long)tSec << 16) + fractional;
+}
+
+// Returns the number of milliseconds since the epoch
+unsigned long long now(void)
+{
+    struct timeb tp;
+    ftime(&tp);
+    return (unsigned long long)tp.time * 1000 + tp.millitm;
+}
+
+// Returns a formatted date/time string for the specific number of milliseconds since the epoch
+const char *formattedtime(unsigned long long milliseconds)
+{
+	static char output[] = "YYYY-MM-DD HH:MM:SS.fff";
+	struct tm *today;
+	struct timeb tp = {0};
+	tp.time = (time_t)(milliseconds / 1000);
+	tp.millitm = (unsigned short)(milliseconds % 1000);
+	tzset();
+	today = localtime(&(tp.time));
+	sprintf(output, "%04d-%02d-%02d %02d:%02d:%02d.%03d", 1900 + today->tm_year, today->tm_mon + 1, today->tm_mday, today->tm_hour, today->tm_min, today->tm_sec, tp.millitm);
+    return output;
 }
 
 
@@ -198,6 +225,7 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
     int seconds, packetCount = 0;
     double av = 0.0;
     int lastHour = -1;
+    char description[1024] = "";
 
     if (infile == NULL || infile[0] == '\0')
     {
@@ -229,9 +257,9 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
         int i;
 
         /* Report progress: minute */
-        if (block != 0 && block %    50 == 0) { fprintf(stderr, "."); }   /* Approx. 1 minute */
-        //if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }               /* Approx. 1 hour */
-        //if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }             /* Approx. 1 day */
+        if (block != 0 && block %    50 == 0) { fprintf(stderr, "."); }						/* Approx. 1 minute */
+        //if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }					/* Approx. 1 hour */
+        //if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }				/* Approx. 1 day */
 
         /* Read the next block */
         numSamples = OmReaderNextBlock(reader);
@@ -551,6 +579,9 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
             }
         }
 
+// Error mask
+#define CODE_ERROR_MASK         0xfff000
+
 // FILE - Read file issue (sector incorrect or checksum mismatch)
 #define CODE_WARNING_FILE       0x000001
 #define CODE_ERROR_FILE         0x001000
@@ -615,7 +646,7 @@ if (minLight    < 90) { retval |= CODE_ERROR_LIGHT; }    else if (minLight < 140
     float percentLoss = (float)batteryMaxPercent - batteryMinPercent;
     percentPerHour = 0;
     if (hours > 0) { percentPerHour = percentLoss / hours; } else { percentPerHour = 0; }
-    if (percentPerHour >= 0.25f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.20f)  { retval |= CODE_WARNING_BATT; }
+    if (percentPerHour >= 0.26f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.25f)  { retval |= CODE_WARNING_BATT; }
 }
 // Start/stop
 if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; } 
@@ -647,41 +678,50 @@ if (download != NULL)
 
 #define HEADER        "VERIFY," "id,"  "summary,"  "file,"    "event,"    "stuck,"    "range,"    "rate,"    "breaks,"    "restarts," "breakTime," "maxAv,"    "minInterval,"          "maxInterval,"           "duration,"                             "minLight," "batteryMaxPercent," "batteryMinPercent," "intervalFail," "percentLoss," "description\n"
         {
-            char description[1024] = "";
+			description[0] = '\0';
 
-            if (retval & CODE_WARNING_FILE      ) { strcat(description, "W:File; "); }
-            if (retval & CODE_WARNING_EVENT     ) { strcat(description, "W:Event; "); }
-            if (retval & CODE_WARNING_STUCK     ) { strcat(description, "W:Stuck; "); }
-            if (retval & CODE_WARNING_RANGE     ) { strcat(description, "W:Range; "); }
-            if (retval & CODE_WARNING_RATE      ) { strcat(description, "W:Rate; "); }
-            if (retval & CODE_WARNING_BREAKS    ) { strcat(description, "W:Breaks; "); }
-            if (retval & CODE_WARNING_RESTARTS  ) { strcat(description, "W:Restarts; "); }
-            if (retval & CODE_WARNING_LIGHT     ) { strcat(description, "W:Light; "); }
-            if (retval & CODE_WARNING_BATT      ) { strcat(description, "W:Batt; "); }
-            if (retval & CODE_WARNING_STARTSTOP ) { strcat(description, "W:StartStop; "); }
-            if (retval & CODE_WARNING_NANDHEALTH) { strcat(description, "W:NandHealth; "); }
-            if (retval & CODE_WARNING_NANDID    ) { strcat(description, "W:NandId; "); }
-            if (retval & CODE_ERROR_FILE        ) { strcat(description, "E:File; "); }
-            if (retval & CODE_ERROR_EVENT       ) { strcat(description, "E:Event; "); }
-            if (retval & CODE_ERROR_STUCK       ) { strcat(description, "E:Stuck; "); }
-            if (retval & CODE_ERROR_RANGE       ) { strcat(description, "E:Range; "); }
-            if (retval & CODE_ERROR_RATE        ) { strcat(description, "E:Rate; "); }
-            if (retval & CODE_ERROR_BREAKS      ) { strcat(description, "E:Breaks; "); }
-            if (retval & CODE_ERROR_RESTARTS    ) { strcat(description, "E:Restarts; "); }
-            if (retval & CODE_ERROR_LIGHT       ) { strcat(description, "E:Light; "); }
-            if (retval & CODE_ERROR_BATT        ) { strcat(description, "E:Batt; "); }
-            if (retval & CODE_ERROR_STARTSTOP   ) { strcat(description, "E:StartStop; "); }
-            if (retval & CODE_ERROR_NANDHEALTH  ) { strcat(description, "E:NandHealth; "); }
-            if (retval & CODE_ERROR_NANDID      ) { strcat(description, "E:NandId; "); }
+            if (retval & CODE_WARNING_FILE      ) { strcat(description, "W:File;"); }
+            if (retval & CODE_WARNING_EVENT     ) { strcat(description, "W:Event;"); }
+            if (retval & CODE_WARNING_STUCK     ) { strcat(description, "W:Stuck;"); }
+            if (retval & CODE_WARNING_RANGE     ) { strcat(description, "W:Range;"); }
+            if (retval & CODE_WARNING_RATE      ) { strcat(description, "W:Rate;"); }
+            if (retval & CODE_WARNING_BREAKS    ) { strcat(description, "W:Breaks;"); }
+            if (retval & CODE_WARNING_RESTARTS  ) { strcat(description, "W:Restarts;"); }
+            if (retval & CODE_WARNING_LIGHT     ) { strcat(description, "W:Light;"); }
+            if (retval & CODE_WARNING_BATT      ) { strcat(description, "W:Batt;"); }
+            if (retval & CODE_WARNING_STARTSTOP ) { strcat(description, "W:StartStop;"); }
+            if (retval & CODE_WARNING_NANDHEALTH) { strcat(description, "W:NandHealth;"); }
+            if (retval & CODE_WARNING_NANDID    ) { strcat(description, "W:NandId;"); }
+            if (retval & CODE_ERROR_FILE        ) { strcat(description, "E:File;"); }
+            if (retval & CODE_ERROR_EVENT       ) { strcat(description, "E:Event;"); }
+            if (retval & CODE_ERROR_STUCK       ) { strcat(description, "E:Stuck;"); }
+            if (retval & CODE_ERROR_RANGE       ) { strcat(description, "E:Range;"); }
+            if (retval & CODE_ERROR_RATE        ) { strcat(description, "E:Rate;"); }
+            if (retval & CODE_ERROR_BREAKS      ) { strcat(description, "E:Breaks;"); }
+            if (retval & CODE_ERROR_RESTARTS    ) { strcat(description, "E:Restarts;"); }
+            if (retval & CODE_ERROR_LIGHT       ) { strcat(description, "E:Light;"); }
+            if (retval & CODE_ERROR_BATT        ) { strcat(description, "E:Batt;"); }
+            if (retval & CODE_ERROR_STARTSTOP   ) { strcat(description, "E:StartStop;"); }
+            if (retval & CODE_ERROR_NANDHEALTH  ) { strcat(description, "E:NandHealth;"); }
+            if (retval & CODE_ERROR_NANDID      ) { strcat(description, "E:NandId;"); }
 
         sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d,"           "%f,"          "%s\n",
                                 label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail, percentPerHour, description);
-
         }
 
         fprintf(stderr, line);
         if (outfile != NULL)
         { 
+			// New output format
+			if (globalOptions & VERIFY_OPTION_OUTPUT_NEW)
+			{
+				int passed = ((retval & CODE_ERROR_MASK) == 0) ? 1 : 0;
+				// "VERIFY,YYYY-MM-DD hh:mm:ss,12345,1,260,W:Batt;W:Stuck;"
+				sprintf(line, "VERIFY,%s,%s,%d,%d,%s\n", formattedtime(now()), label, passed, retval, description);
+
+		        fprintf(stderr, line);
+			}
+
             fprintf(outfile, line); 
             fflush(outfile);
         }
@@ -884,7 +924,7 @@ int verify_main(int argc, char *argv[])
     int i;
     fprintf(stderr, "VERIFY: verify a specified binary data file contains sensible data.\n");
     fprintf(stderr, "\n");
-    globalOptions = 0;
+    globalOptions = VERIFY_OPTION_OUTPUT_NEW;
     if (argc > 1)
     {
         const char *infile = NULL;
@@ -899,6 +939,8 @@ int verify_main(int argc, char *argv[])
             }
             else if (!strcmp(argv[i], "-stop-clear-all")) { fprintf(stderr, "VERIFY: Option -stop-clear-all\n");    globalOptions |= VERIFY_OPTION_ALL; }
             else if (!strcmp(argv[i], "-no-check-stop"))  { fprintf(stderr, "VERIFY: Option -no-check-stop\n");     globalOptions |= VERIFY_OPTION_NO_CHECK_STOP; }
+            else if (!strcmp(argv[i], "-output:new"))     { fprintf(stderr, "VERIFY: Option -output:new\n");        globalOptions |= VERIFY_OPTION_OUTPUT_NEW; }
+            else if (!strcmp(argv[i], "-output:old"))     { fprintf(stderr, "VERIFY: Option -output:old\n");        globalOptions &= ~VERIFY_OPTION_OUTPUT_NEW; }
             else if (!strcmp(argv[i], "-allow-restarts")) { globalAllowedRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-restarts %d\n", globalAllowedRestarts); }
             else if (argv[i][0] == '-')
             {
