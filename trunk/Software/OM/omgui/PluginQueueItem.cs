@@ -9,7 +9,7 @@ namespace OmGui
     class PluginQueueItem
     {
         public string Name { get; set; }
-        public string File { get; set; }
+        public string[] Files { get; set; }
         public string Parameters { get; set; }
         public int Progress { get; set; }
         public Plugin Plugin { get; set; }
@@ -18,12 +18,12 @@ namespace OmGui
 
         public string destFolder = "C:\\OM\\PluginTemp\\";
 
-        public PluginQueueItem(Plugin plugin, string parameters, string file)
+        public PluginQueueItem(Plugin plugin, string parameters, string[] files)
         {
             Plugin = plugin;
             Name = plugin.ReadableName;
             Parameters = parameters;
-            File = file;
+            Files = files;
         }
     }
 }

@@ -6,12 +6,23 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace OmGui
 {
     public partial class ProgressBox : Form
     {
         protected BackgroundWorker backgroundWorker;
+
+
+        protected override void WndProc(ref Message msg)
+        {
+            base.WndProc(ref msg);
+            if (MainForm.queryCancelAutoPlayID != 0 && msg.Msg == MainForm.queryCancelAutoPlayID)
+            {
+                msg.Result = (IntPtr)1;    // Cancel autoplay
+            }
+        }
 
         public ProgressBox(string title, string message, BackgroundWorker backgroundWorker)
         {
@@ -42,7 +53,7 @@ namespace OmGui
 
         void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            Invoke(new Action(() =>
+            BeginInvoke(new Action(() =>
                 {
                     Value = e.ProgressPercentage;
                     if (e.UserState != null)
@@ -53,8 +64,16 @@ namespace OmGui
                             Prompt = s;
                         }
                     }
+Application.DoEvents();
+
+//Invalidate(true);
+//Thread.Sleep(500);
                 }
             ));
+
+Application.DoEvents();
+
+//Thread.Sleep(50);
         }
 
         void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -83,14 +102,15 @@ namespace OmGui
             {
                 if (value < 0)
                 {
-                    progressBar.Style = ProgressBarStyle.Marquee;
+                    if (progressBar.Style != ProgressBarStyle.Marquee) progressBar.Style = ProgressBarStyle.Marquee;
                     progressBar.Value = 0;
                 }
                 else
                 {
-                    progressBar.Style = ProgressBarStyle.Continuous;
+                    if (progressBar.Style != ProgressBarStyle.Continuous) progressBar.Style = ProgressBarStyle.Continuous;
                     progressBar.Value = value;
                 }
+//progressBar.Invalidate();
             }
         }
 

@@ -13,13 +13,14 @@ namespace OmGui
         public List<Plugin> Plugins { get; set; }
         public List<Plugin> ProfilePlugins { get; set; }
 
-        private string profilePath = "";
+        //private string profilePath = "";
 
         public PluginManager()
         {
             //profilePath = Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + "settings";
 
             Plugins = new List<Plugin>();
+
             ProfilePlugins = new List<Plugin>();
         }
 
@@ -29,14 +30,23 @@ namespace OmGui
 
             string pluginsFol = Properties.Settings.Default.CurrentPluginFolder;
 
-            string[] pluginPaths = Directory.GetDirectories(Properties.Settings.Default.CurrentPluginFolder);
+            //MessageBox.Show("Current plugin folder: " + Properties.Settings.Default.CurrentPluginFolder);
 
-            foreach (string pluginPath in pluginPaths)
+            try
             {
-                Plugin p = Plugin.CreatePlugin(pluginPath);
+                string[] pluginPaths = Directory.GetDirectories(Properties.Settings.Default.CurrentPluginFolder);
 
-                if (p != null)
-                    Plugins.Add(p);
+                foreach (string pluginPath in pluginPaths)
+                {
+                    Plugin p = Plugin.CreatePlugin(pluginPath);
+
+                    if (p != null)
+                        Plugins.Add(p);
+                }
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                MessageBox.Show("Could not find plugin directory (" + e.Message + "): " + Properties.Settings.Default.CurrentPluginFolder, "Plugins Error");
             }
         }
 

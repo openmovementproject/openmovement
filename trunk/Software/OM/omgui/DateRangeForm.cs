@@ -15,24 +15,32 @@ namespace OmGui
 {
     public partial class DateRangeForm : Form
     {
-        bool setOK = false;
-        bool warningsOn = true;
+        //bool setOK = false;
+        //bool warningsOn = true;
 
         private Dictionary<string, string> SettingsProfileDictionary { get; set; }
         private string settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml";
-        private OmDevice Device { get; set; }
+        //private OmDevice Device { get; set; }
         private OmDevice[] Devices { get; set; }
 
         public DateRangeForm(string title, OmDevice[] devices)
         {
-            if (devices.Length > 0)
+            //TODO - Warnings currently only work for one device.
+            //if (devices.Length > 1)
             {
-                warningsOn = false;
+            //    warningsOn = false;
             }
 
             Devices = devices;
 
+            //if (devices.Length > 0)
+            //    Device = devices[0];
+
             InitializeComponent();
+
+            comboBoxSamplingFreq.SelectedIndex = 5;
+            comboBoxRange.SelectedIndex = 2;
+
             Text = title;
             //labelPrompt.Text = prompt;
             FromDate = DateTime.MinValue;
@@ -72,7 +80,7 @@ namespace OmGui
             datePickerStart.Value = DateTime.Now;
             timePickerStart.Value = DateTime.Now;
             datePickerEnd.Value = DateTime.Now;//.AddDays(1);
-            timePickerEnd.Value = DateTime.Now;//.AddDays(1);
+            timePickerEnd.Value = new DateTime(2013, 8,3, 10, 10, 10); // DateTime.Now.AddHours(1);
             hoursPicker.Value = 0;
             minutesPicker.Value = 0;
             daysPicker.Value = 0;
@@ -129,12 +137,12 @@ namespace OmGui
             settingsDictionary.Add("StudyOperator", textBoxStudyOperator.Text);
             settingsDictionary.Add("StudyNotes", textBoxStudyNotes.Text);
             settingsDictionary.Add("SubjectCode", textBoxSubjectCode.Text);
-            settingsDictionary.Add("SubjectSex", comboBoxSubjectSex.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectSex", comboBoxSubjectSex.SelectedIndex <= 0 ? "" : comboBoxSubjectSex.SelectedIndex.ToString());
             settingsDictionary.Add("SubjectHeight", textBoxHeight.Text.ToString());
             settingsDictionary.Add("SubjectWidth", textBoxWeight.Text.ToString());
-            settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex <= 0 ? "" : comboBoxSubjectHandedness.SelectedIndex.ToString());
             //settingsDictionary.Add("SubjectTimezone", comboBoxSubjectTimezone.SelectedIndex.ToString());
-            settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex <= 0 ? "" : comboBoxSite.SelectedIndex.ToString());
         }
         
         private void resetFieldsToDictionary(Dictionary<string, string> settingsDictionary)
@@ -166,7 +174,7 @@ namespace OmGui
                 {
                     textBoxStudyNotes.Text = pair.Value;
                 }
-                else if (pair.Key.Equals("SubjectCode"))
+                /*else if (pair.Key.Equals("SubjectCode"))
                 {
                     textBoxSubjectCode.Text = pair.Value;
                 }
@@ -193,7 +201,7 @@ namespace OmGui
                 else if (pair.Key.Equals("SubjectSite"))
                 {
                     comboBoxSite.SelectedIndex = Int32.Parse(pair.Value);
-                }
+                }*/
             }
         }
 
@@ -225,6 +233,10 @@ namespace OmGui
         }
 
         public bool Always { get; set; }
+
+        public DateTime StartDate { get; set; }
+
+        public DateTime EndDate { get; set; }
 
         public int SessionID { get; set; }
 
@@ -300,16 +312,20 @@ namespace OmGui
         MetaDataTools mdt = new MetaDataTools();
 
         public int SamplingFrequency { get; set; }
-        private int[] SamplingFrequencies = { 3200, 800, 400, 200, 100, 50, 25, 12, 6 };
+        private int[] SamplingFrequencies = { 3200, 1600, 800, 400, 200, 100, 50, 25, 12, 6 };
 
         public int Range { get; set; }
         private int[] SamplingRanges = { 2, 4, 8, 16 };
 
+        public string metaData = null;
+
         private void buttonOk_Click(object sender, EventArgs e)
         {
+Cursor.Current = Cursors.WaitCursor;
+
             metaDataEntries = MetaDataEntry.shorthandMetaData;
 
-            setOK = true;
+            //setOK = true;
 
             SyncTime = SyncTimeType.PC;
 
@@ -337,32 +353,36 @@ namespace OmGui
             metaDataList.Add(new MetaDataEntry("_ha", SettingsProfileDictionary["SubjectHandedness"])); mdStringList.Add("_ha");
 
             //Create metadata
-            string md = MetaDataTools.CreateMetaData(metaDataList);
+            metaData =  MetaDataTools.CreateMetaData(metaDataList);
 
+            /*
             foreach (OmDevice device in Devices)
             {
-                int i = OmApi.OmSetMetadata(device.DeviceId, md, md.Length);
+                int i = OmApi.OmSetMetadata(device.DeviceId, metaData, metaData.Length);
 
                 Console.WriteLine("OmSetMetadata Result: " + i);
 
-                StringBuilder sb = new StringBuilder(9600);
-                OmApi.OmGetMetadata(device.DeviceId, sb);
-
-                Console.WriteLine("sb: " + sb.ToString());
-
-                Dictionary<string, string> test = (Dictionary<string, string>) MetaDataTools.ParseMetaData(sb.ToString(), mdStringList);
-
-                foreach(KeyValuePair<string, string> kvp in test)
+                // Debug print the metadata
+                if (false)
                 {
-                    Console.WriteLine(kvp.Key + " - " + kvp.Value);
+                    StringBuilder sb = new StringBuilder(9600);
+                    OmApi.OmGetMetadata(device.DeviceId, sb);
+                    Console.WriteLine("sb: " + sb.ToString());
+
+                    Dictionary<string, string> test = (Dictionary<string, string>)MetaDataTools.ParseMetaData(sb.ToString(), mdStringList);
+
+                    foreach (KeyValuePair<string, string> kvp in test)
+                    {
+                        Console.WriteLine(kvp.Key + " - " + kvp.Value);
+                    }
                 }
             }
-            
+            */
 
-            //mdt.SaveMetaData(md);
+            //mdt.SaveMetaData(metaData);
 
-            SamplingFrequency = SamplingFrequencies[comboBoxSamplingFreq.SelectedIndex];
-            Range = SamplingRanges[comboBoxRange.SelectedIndex];
+            SamplingFrequency = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString());
+            Range = (int)float.Parse(comboBoxRange.SelectedItem.ToString());
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
 
@@ -391,9 +411,8 @@ namespace OmGui
 
         private void DateRangeForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            //TS - TODO - Do warnings
-            DateTime startDate = datePickerStart.Value;
-            DateTime endDate = startDate.Add(new TimeSpan((int)daysPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
+            StartDate = datePickerStart.Value;
+            EndDate = StartDate.Add(new TimeSpan((int)daysPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
         }
 
         #region Height/Weight Checkbox Logic
@@ -467,6 +486,7 @@ namespace OmGui
 
         //Start date
         DateTime previousDateStart = DateTime.Now;
+        bool warningStartDateBeforeEndDate = false;
         private void datePickerStart_ValueChanged(object sender, EventArgs e)
         {
             if (datePickerStartIgnoreEvent)
@@ -479,11 +499,15 @@ namespace OmGui
 
             if (difference.Days < 1000)
             {
-                //TS - If the end date is before the start date, error at them
+                //TS - If the end date is before the start date, put warning in warning box.
                 if (difference.TotalSeconds < 0)
                 {
-                    MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    datePickerStart.Value = previousDateStart;
+                    warningStartDateBeforeEndDate = true;
+                    //Legacy - used to do message box error.
+                    //MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    //datePickerStart.Value = previousDateStart;
+
+
                 }
                 else
                 {
@@ -500,7 +524,11 @@ namespace OmGui
                     minutePickerIgnoreEvent = false;
 
                     previousDateStart = datePickerStart.Value;
+
+                    warningStartDateBeforeEndDate = false;
                 }
+
+                updateWarningMessages();
             }
 
             /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
@@ -785,89 +813,103 @@ namespace OmGui
         #endregion
 
         #region Warning Message Logic
-        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false };
-        string[] warningMessages = {"Device not fully charged",
-                                    "Device not fully cleared",
-                                    "Duration could be limited by device capacity",
-                                    "Duration could be limited by remaining battery",
+        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false, false };
+        string[] warningMessages = {"Selected device(s) not fully charged",
+                                    "Selected device(s) not fully cleared",
+                                    "Selected device(s) capacity could limit duration",
+                                    "Selected device(s) current battery charge could limit duration",
                                     "Delayed start time is more than 14 days in the future",
                                     "End time is in the past",
                                     "Start time is in the past",
-                                    "Current Sampling Frequency not guaranteed on this firmware"};
+                                    "Chosen sampling frequency is not officially supported (use at own risk)",
+                                    "Start time is after end time"};
         private void updateWarningMessages()
         {
-            if (Device != null && warningsOn)
+            //Make date start and end from dates and times;
+            DateTime startDate = datePickerStart.Value.Date + timePickerStart.Value.TimeOfDay;
+            DateTime endDate = datePickerEnd.Value.Date + timePickerEnd.Value.TimeOfDay;
+
+            for (int i = 0; i < warningMessagesFlags.Length; i++)
             {
-                //Make date start and end from dates and times;
-                DateTime startDate = datePickerStart.Value.Date + timePickerStart.Value.TimeOfDay;
-                DateTime endDate = datePickerEnd.Value.Date + timePickerEnd.Value.TimeOfDay;
+                warningMessagesFlags[i] = false;
+            }
 
-                for (int i = 0; i < warningMessagesFlags.Length; i++)
-                {
-                    warningMessagesFlags[i] = false;
-                }
 
+
+            foreach (OmDevice device in Devices)
+            {
                 //Not fully charged.
-                if (Device.BatteryLevel < 95)
+                if (device.BatteryLevel < 90)
                     warningMessagesFlags[0] = true;
 
                 //Not fully cleared
-                if (Device.HasData)
+                if (device.HasData)
                     warningMessagesFlags[1] = true;
 
                 //Duration could be limited by device capacity
                 //TS - TODO
 
                 //Duration could be limited by battery (on rate)
-                double estimateBatteryInSeconds = EstimateBatteryLife(Device.BatteryLevel, Int32.Parse(comboBoxSamplingFreq.Text));
+                double estimateBatteryInSeconds = EstimateBatteryLife(device.BatteryLevel, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString()));
                 TimeSpan ts = endDate - startDate;
                 if (ts.TotalSeconds > estimateBatteryInSeconds)
                     warningMessagesFlags[3] = true;
-
-                //Delayed start time is more than 14 days in the future
-                if (startDate > (DateTime.Now.Add(new TimeSpan(14, 0, 0, 0))))
-                    warningMessagesFlags[4] = true;
-
-                //End time is in the past.
-                DateTime d = DateTime.Now;
-                if (radioButtonDuration.Checked && (endDate < d))
-                    warningMessagesFlags[5] = true;
-
-                //Start date is more than a day in the past
-                if ((startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0))) && radioButtonDuration.Checked)
-                    warningMessagesFlags[6] = true;
-
-                //Warning for sampling frequency
-                int sampFreq = int.Parse(comboBoxSamplingFreq.Text);
-                if (sampFreq > 200 || sampFreq < 50)
-                    warningMessagesFlags[7] = true;
-
-                //Now that we have the flags, we can build the string.
-                StringBuilder s = new StringBuilder();
-                for (int i = 0; i < warningMessagesFlags.Length; i++)
-                {
-                    if (warningMessagesFlags[i])
-                        s.AppendLine("\u2022 " + warningMessages[i]);
-                }
-
-                //If we have no warnings then display message
-                if (s.ToString().Length == 0)
-                {
-                    richTextBoxWarning.Text = "WARNINGS\nNo warnings";
-                    richTextBoxWarning.Visible = false;
-                }
-                else
-                {
-                    richTextBoxWarning.Text = "WARNINGS\n" + s.ToString();
-                    richTextBoxWarning.Visible = true;
-                }
             }
+
+
+            //Delayed start time is more than 14 days in the future
+            if (startDate > (DateTime.Now.Add(new TimeSpan(14, 0, 0, 0))))
+                warningMessagesFlags[4] = true;
+
+            //End time is in the past.
+            DateTime d = DateTime.Now;
+            if (radioButtonDuration.Checked && (endDate < d))
+                warningMessagesFlags[5] = true;
+
+            //Start date is more than a day in the past
+            if ((startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0))) && radioButtonDuration.Checked)
+                warningMessagesFlags[6] = true;
+
+            //Start date is after end date
+            if (warningStartDateBeforeEndDate)
+                warningMessagesFlags[8] = true;
+
+            //Warning for sampling frequency
+            int sampFreq = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString());
+            if (sampFreq > 200 || sampFreq < 50)
+                warningMessagesFlags[7] = true;
+
+            //Now that we have the flags, we can build the string.
+            StringBuilder s = new StringBuilder();
+            for (int i = 0; i < warningMessagesFlags.Length; i++)
+            {
+                if (warningMessagesFlags[i])
+                    s.AppendLine("\u2022 " + warningMessages[i]);
+            }
+
+            //If we have no warnings then display message
+            if (s.ToString().Length == 0)
+            {
+                richTextBoxWarning.Text = "WARNINGS\nNo warnings";
+                richTextBoxWarning.Visible = false;
+            }
+            else
+            {
+                richTextBoxWarning.Text = "WARNINGS\n" + s.ToString();
+                richTextBoxWarning.Visible = true;
+            }
+
         }
         #endregion
 
         private void comboBoxSamplingFreq_SelectedIndexChanged(object sender, EventArgs e)
         {
             updateWarningMessages();
+        }
+
+        private void DateRangeForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

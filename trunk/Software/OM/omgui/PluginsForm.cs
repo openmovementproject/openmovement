@@ -15,7 +15,7 @@ namespace OmGui
         private List<Plugin> plugins = new List<Plugin>();
         public Plugin SelectedPlugin { get; set; }
         public Dictionary<string, string> SelectedParameters { get; set; }
-        public string CWAFilename { get; set; }
+        public string[] CWAFilenames { get; set; }
         public RunPluginForm rpf { get; set; }
 
         public float BlockStart { get; set; }
@@ -25,7 +25,7 @@ namespace OmGui
 
         public PluginManager PluginManager { get; set; }
         
-        public PluginsForm(PluginManager manager, string fileName, float blockStart, float blockCount, string startDateTime, string endDateTime)
+        public PluginsForm(PluginManager manager, string[] fileNames, float blockStart, float blockCount, string startDateTime, string endDateTime)
         {
             InitializeComponent();
 
@@ -61,7 +61,7 @@ namespace OmGui
 
                 pluginsComboBox.SelectedIndex = 0;
 
-                CWAFilename = fileName;
+                CWAFilenames = fileNames;
             }
         }
 
@@ -104,6 +104,13 @@ namespace OmGui
 
         private void btnRun_Click(object sender, EventArgs e)
         {
+            if (CWAFilenames.Length != SelectedPlugin.NumberOfInputFiles)
+            {
+                MessageBox.Show("Incorrect number of CWA files provided to plugin.\nPlugin requires " + SelectedPlugin.NumberOfInputFiles + " files", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = System.Windows.Forms.DialogResult.Abort;
+                return;
+            }
+
             //See now if we want the dataViewer selection.
             if (BlockCount > -1 && BlockStart > -1)
             {
@@ -118,12 +125,18 @@ namespace OmGui
             }  
 
             //Want to pop up Input and Run Window.
-            rpf = new RunPluginForm(SelectedPlugin, CWAFilename);
+            rpf = new RunPluginForm(SelectedPlugin, CWAFilenames);
             rpf.ShowDialog();
 
             if (rpf.DialogResult == System.Windows.Forms.DialogResult.OK)
             {
                 SelectedParameters = rpf.SelectedParameters;
+
+                DialogResult = System.Windows.Forms.DialogResult.OK;
+            }
+            else
+            {
+                DialogResult = System.Windows.Forms.DialogResult.Cancel;
             }
         }
 
@@ -149,6 +162,11 @@ namespace OmGui
             }
 
             pluginsComboBox.SelectedIndex = 0;
+        }
+
+        private void PluginsForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
         }
     }
 }

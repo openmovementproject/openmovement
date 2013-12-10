@@ -284,6 +284,7 @@
     <None Include="Resources\DeleteHS.png" />
     <None Include="Resources\Export.png" />
     <None Include="Resources\Refresh.png" />
+    <None Include="Resources\loading.gif" />
     <Content Include="utils\cwa-convert.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
