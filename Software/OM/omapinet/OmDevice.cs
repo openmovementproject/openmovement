@@ -241,6 +241,9 @@ category = SourceCategory.Other;
                 res = OmApi.OmGetSessionId(deviceId, out sessionId);
                 error |= OmApi.OM_FAILED(res);
 
+error = false;      // Ignore error here as retrying won't help up (log to console)
+Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId);
+
                 changed = true;
                 if (!error) { validData = true; }
             }
@@ -329,11 +332,20 @@ category = SourceCategory.Other;
         public bool SetInterval(DateTime start, DateTime stop)
         {
             bool failed = false;
-            this.startTime = start;
-            this.stopTime = stop;
+
             failed |= OmApi.OM_FAILED(OmApi.OmSetDelays(deviceId, OmApi.OmDateTimePack(start), OmApi.OmDateTimePack(stop)));
-            failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
-validData = false;
+            if (!failed)
+            {
+                failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
+            }
+
+//validData = false;
+            if (!failed)
+            {
+                this.startTime = start;
+                this.stopTime = stop;
+            }
+
             hasChanged = true;
             om.OnChanged(new OmDeviceEventArgs(this));
             return !failed;
@@ -349,19 +361,29 @@ validData = false;
             return SetInterval(DateTime.MinValue, DateTime.MaxValue);
         }
 
-        public bool SetSessionId(uint sessionId)
+        public bool SetSessionId(uint sessionId, bool commit)
         {
             bool failed = false;
+
             failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId(deviceId, sessionId));
-            failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
-            validData = false;
+            if (commit)
+            {
+                failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
+            }
+
+//validData = false;
+            if (!failed)
+            {
+                this.sessionId = sessionId;
+            }
+
             hasChanged = true;
             om.OnChanged(new OmDeviceEventArgs(this));
             return !failed;
         }
 
 
-        public bool Clear()
+        public bool Clear(bool wipe)
         {
             bool failed = false;
 
@@ -372,10 +394,17 @@ validData = false;
             failed |= OmApi.OM_FAILED(OmApi.OmSetMetadata(deviceId, "", 0));                                                   // No metadata
             failed |= OmApi.OM_FAILED(OmApi.OmSetDelays(deviceId, OmApi.OM_DATETIME_INFINITE, OmApi.OM_DATETIME_INFINITE));    // Never log
             failed |= OmApi.OM_FAILED(OmApi.OmSetAccelConfig(deviceId, OmApi.OM_ACCEL_DEFAULT_RATE, OmApi.OM_ACCEL_DEFAULT_RANGE));    // Default configuration
-            failed |= OmApi.OM_FAILED(OmApi.OmEraseDataAndCommit(deviceId, OmApi.OM_ERASE_LEVEL.OM_ERASE_WIPE));                 // Erase data and commit
+            failed |= OmApi.OM_FAILED(OmApi.OmEraseDataAndCommit(deviceId, wipe ? OmApi.OM_ERASE_LEVEL.OM_ERASE_WIPE : OmApi.OM_ERASE_LEVEL.OM_ERASE_QUICKFORMAT)); // Erase data and commit
             //failed |= OmApi.OM_FAILED(OmApi.OmClearDataAndCommit(deviceId));                                                   // Clear data and commit
 
-            validData = false;
+//validData = false;
+            if (!failed)
+            {
+                this.sessionId = 0;
+                this.startTime = OmApi.OmDateTimeUnpack(OmApi.OM_DATETIME_INFINITE);
+                this.stopTime = OmApi.OmDateTimeUnpack(OmApi.OM_DATETIME_INFINITE);
+            }
+
             hasChanged = true;
             om.OnChanged(new OmDeviceEventArgs(this));
             return !failed;

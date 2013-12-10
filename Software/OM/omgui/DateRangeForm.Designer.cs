@@ -272,26 +272,27 @@
             // 
             // comboBoxSamplingFreq
             // 
+            this.comboBoxSamplingFreq.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxSamplingFreq.FormattingEnabled = true;
             this.comboBoxSamplingFreq.Items.AddRange(new object[] {
             "3200",
+            "1600",
             "800",
             "400",
             "200",
             "100",
             "50",
             "25",
-            "12.5",
-            "6.25"});
+            "12.5"});
             this.comboBoxSamplingFreq.Location = new System.Drawing.Point(111, 26);
             this.comboBoxSamplingFreq.Name = "comboBoxSamplingFreq";
             this.comboBoxSamplingFreq.Size = new System.Drawing.Size(82, 21);
             this.comboBoxSamplingFreq.TabIndex = 25;
-            this.comboBoxSamplingFreq.Text = "100";
             this.comboBoxSamplingFreq.SelectedIndexChanged += new System.EventHandler(this.comboBoxSamplingFreq_SelectedIndexChanged);
             // 
             // comboBoxRange
             // 
+            this.comboBoxRange.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxRange.FormattingEnabled = true;
             this.comboBoxRange.Items.AddRange(new object[] {
             "2",
@@ -302,7 +303,6 @@
             this.comboBoxRange.Name = "comboBoxRange";
             this.comboBoxRange.Size = new System.Drawing.Size(55, 21);
             this.comboBoxRange.TabIndex = 27;
-            this.comboBoxRange.Text = "8";
             // 
             // label7
             // 
@@ -325,6 +325,11 @@
             // numericUpDownSessionID
             // 
             this.numericUpDownSessionID.Location = new System.Drawing.Point(124, 20);
+            this.numericUpDownSessionID.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
             this.numericUpDownSessionID.Name = "numericUpDownSessionID";
             this.numericUpDownSessionID.Size = new System.Drawing.Size(120, 20);
             this.numericUpDownSessionID.TabIndex = 31;
@@ -855,6 +860,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Date Range";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DateRangeForm_FormClosing);
+            this.Load += new System.EventHandler(this.DateRangeForm_Load);
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.daysPicker)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.hoursPicker)).EndInit();

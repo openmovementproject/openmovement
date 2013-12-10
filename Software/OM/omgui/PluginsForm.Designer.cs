@@ -181,6 +181,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "PluginsForm";
             this.Text = "PluginsForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PluginsForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 

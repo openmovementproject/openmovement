@@ -28,6 +28,9 @@ namespace OmGui
         public Dictionary<string, string> DefaultValues { get; set; }
         public string FilePath { get; set; }
         public bool WantMetaData { get; set; }
+        public int NumberOfInputFiles { get; set; }
+        public bool RequiresCWANames { get; set; }
+        public bool CreatesOutput { get; set; }
 
         //Properties from Program
         public float SelectionBlockStart { get; set; }
@@ -83,6 +86,9 @@ namespace OmGui
                                 XmlNodeList outputFileXML = pluginSettingsXML.GetElementsByTagName("outputFile");
                                 XmlNodeList inputFileXML = pluginSettingsXML.GetElementsByTagName("inputFile");
                                 XmlNodeList wantMetaDataXML = pluginSettingsXML.GetElementsByTagName("wantMetadata");
+                                XmlNodeList numberOfInputFilesXML = pluginSettingsXML.GetElementsByTagName("numberOfInputFiles");
+                                XmlNodeList requiresCWANames = pluginSettingsXML.GetElementsByTagName("requiresCWANames");
+                                XmlNodeList createsOutput = pluginSettingsXML.GetElementsByTagName("createsOutput");
                                 
                                 int height = 0;
                                 if (heightXML.Count < 1 || !int.TryParse(heightXML[0].InnerText, out height))
@@ -160,6 +166,18 @@ namespace OmGui
                                 if (wantMetaDataXML.Count > 0)
                                     plugin.WantMetaData = wantMetaDataXML[0].InnerText.Equals("true") ? true : false;
 
+                                plugin.NumberOfInputFiles = 1;
+                                if (numberOfInputFilesXML.Count > 0)
+                                    plugin.NumberOfInputFiles = Int32.Parse(numberOfInputFilesXML[0].InnerText);
+
+                                plugin.RequiresCWANames = false;
+                                if (requiresCWANames.Count > 0)
+                                    plugin.RequiresCWANames = requiresCWANames[0].InnerText.Equals("true") ? true : false;
+
+                                plugin.CreatesOutput = false;
+                                if (createsOutput.Count > 0)
+                                    plugin.CreatesOutput = createsOutput[0].InnerText.Equals("true") ? true : false;
+
                                 Console.WriteLine("height: " + plugin.Height);
                                 Console.WriteLine("width: " + plugin.Width);
                                 Console.WriteLine("run file: " + plugin.RunFilePath);
@@ -168,8 +186,8 @@ namespace OmGui
                                 Console.WriteLine("icon file: " + plugin.iconFilePath);
                                 Console.WriteLine("description: " + plugin.Description);
                                 Console.WriteLine("readable name: " + plugin.ReadableName);
-
                                 Console.WriteLine("Want metadata: " + plugin.WantMetaData);
+                                Console.WriteLine("Number of input files: " + plugin.NumberOfInputFiles);
 
                                 Console.WriteLine("Output Extensions: ");
                                 if (plugin.OutputExtensions != null && plugin.OutputExtensions.Length < 1)

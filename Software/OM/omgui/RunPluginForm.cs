@@ -14,11 +14,11 @@ namespace OmGui
 {
     public partial class RunPluginForm : Form
     {
-        bool firstGone = false;
+        //bool firstGone = false;
         
         Plugin Plugin { get; set; }
 
-        private string CWAFilename { get; set; }
+        private string[] CWAFilenames { get; set; }
         public string TempCWAFilePath { get; set; }
 
         private string OutputName { get; set; }
@@ -32,7 +32,7 @@ namespace OmGui
         //Temp folder for Matlab Hack
         public string destFolder = "C:\\OM\\PluginTemp\\";
 
-        public RunPluginForm(Plugin plugin, string filename)
+        public RunPluginForm(Plugin plugin, string[] filenames)
         {
             InitializeComponent();
 
@@ -41,7 +41,7 @@ namespace OmGui
             Height = Plugin.Height;
             Width = Plugin.Width;
 
-            CWAFilename = filename;
+            CWAFilenames = filenames;
 
             TempCWAFilePath = System.IO.Path.Combine(destFolder, "input.cwa");
 
@@ -60,7 +60,7 @@ namespace OmGui
             //TODO - get metadata from file into url.
             if (Plugin.WantMetaData)
             {
-                OmApiNet.OmReader reader = OmApiNet.OmReader.Open(CWAFilename);
+                OmApiNet.OmReader reader = OmApiNet.OmReader.Open(CWAFilenames[0]);
 
                 string md = reader.MetaData;
                 Dictionary<string, string> parsed = (Dictionary<string, string>)MetaDataTools.ParseMetaData(md, MetaDataTools.mdStringList);
@@ -90,6 +90,7 @@ namespace OmGui
 
             if (Plugin.SelectionBlockStart > -1 && Plugin.SelectionBlockCount > -1)
             {
+                if (url.Length > 1) { url += "&"; }
                 url += "startBlock=" + Plugin.SelectionBlockStart;
                 url += "&blockCount=" + Plugin.SelectionBlockCount;
             }
@@ -102,12 +103,24 @@ namespace OmGui
                 url += "&endTime=" + Plugin.SelectionDateTimeEnd;
             }
 
+            if (Plugin.RequiresCWANames)
+            {
+                if (url.Length > 1) { url += "&"; }
+
+                url += "input1=" + CWAFilenames[0];
+
+                for (int i = 1; i < CWAFilenames.Length; i++)
+                    url += "&input" + (i + 1) + "=" + CWAFilenames[i];
+            }
+
             string profileString = loadXmlProfile();
 
             if (profileString != null)
             {
                 url += profileString;
             }
+
+            Console.WriteLine("url:\n" + url);
 
             this.webBrowser1.Url = new System.Uri(url, System.UriKind.RelativeOrAbsolute);
         }
@@ -144,6 +157,7 @@ namespace OmGui
             }
         }
 
+        bool success = false;
         //Because the matlab vs. other stuff etc. is so wildly different, it will all now be done in javascript and just come over as a string.
         private void NewArgumentCreator(string url)
         {
@@ -151,7 +165,11 @@ namespace OmGui
 
             if (urlSplitForOutputFile.Length == 2)
             {
-                urlSplitForOutputFile[0] = "\"" + CWAFilename + "\" " + urlSplitForOutputFile[0];
+                //TODO - only uses first CWA for filename, need to think of a better way to do this for plugins with multiple CWA files.
+                //TODO - HACK - ClimbAx doesn't need this doing 
+                if (!Plugin.ReadableName.Equals("ClimbAx"))
+                    urlSplitForOutputFile[0] = "\"" + CWAFilenames[0] + "\" " + urlSplitForOutputFile[0];
+
                 ParameterString = urlSplitForOutputFile[0];
 
                 OriginalOutputName = urlSplitForOutputFile[1];
@@ -159,7 +177,7 @@ namespace OmGui
                 //Now we want to save the settings for this plugin
                 //saveXmlProfile();
 
-                DialogResult = System.Windows.Forms.DialogResult.OK;
+                success = true;
             }
             else
             {
@@ -201,8 +219,9 @@ namespace OmGui
 
             ParameterString += " " + destFolder + "temp." + ChosenExtension;
 
+            //TODO - Only uses first CWA filename for this, need to think of better way for plugins that require multiple files.
             //Copy input and output file into directory with no spaces because of the Matlab hack.
-            string sourceFile = CWAFilename;
+            string sourceFile = CWAFilenames[0];
 
             if (!System.IO.Directory.Exists(destFolder))
                 System.IO.Directory.CreateDirectory(destFolder);
@@ -373,7 +392,10 @@ namespace OmGui
 
         private void RunPluginForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-        
+            if (success)
+                DialogResult = System.Windows.Forms.DialogResult.OK;
+            else
+                DialogResult = System.Windows.Forms.DialogResult.Cancel;
         }
     }
 }

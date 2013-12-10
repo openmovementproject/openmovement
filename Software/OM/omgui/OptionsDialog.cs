@@ -17,10 +17,6 @@ namespace OmGui
 
             btnOK.DialogResult = DialogResult.OK;
             btnCancel.DialogResult = DialogResult.Cancel;
-
-            textBoxDefaultFolder.Text = Properties.Settings.Default.DefaultWorkingFolder;
-
-            DefaultFolderName = Properties.Settings.Default.DefaultWorkingFolder;
             DefaultPluginName = Properties.Settings.Default.CurrentPluginFolder;
 
             textBoxDefaultPlugin.Text = Properties.Settings.Default.CurrentPluginFolder;
@@ -38,7 +34,6 @@ namespace OmGui
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
                 DefaultFolderName = fbd.SelectedPath;
-                textBoxDefaultFolder.Text = DefaultFolderName;
             }
         }
 
@@ -56,15 +51,8 @@ namespace OmGui
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.DefaultWorkingFolder = DefaultFolderName;
+            DefaultPluginName = textBoxDefaultPlugin.Text;
             Properties.Settings.Default.CurrentPluginFolder = DefaultPluginName;
-        }
-
-        private void buttonSetCurrent_Click(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.DefaultWorkingFolder = Properties.Settings.Default.CurrentWorkingFolder;
-            DefaultFolderName = Properties.Settings.Default.DefaultWorkingFolder;
-            textBoxDefaultFolder.Text = DefaultFolderName;
         }
     }
 }
