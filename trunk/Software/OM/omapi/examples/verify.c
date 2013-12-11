@@ -580,7 +580,8 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
         }
 
 // Error mask
-#define CODE_ERROR_MASK         0xfff000
+#define CODE_ERROR_MASK         0xfffff000
+#define CODE_WARNING_MASK       0x00000fff
 
 // FILE - Read file issue (sector incorrect or checksum mismatch)
 #define CODE_WARNING_FILE       0x000001
@@ -687,8 +688,8 @@ if (download != NULL)
             if (retval & CODE_WARNING_RATE      ) { strcat(description, "W:Rate;"); }
             if (retval & CODE_WARNING_BREAKS    ) { strcat(description, "W:Breaks;"); }
             if (retval & CODE_WARNING_RESTARTS  ) { strcat(description, "W:Restarts;"); }
-            if (retval & CODE_WARNING_LIGHT     ) { strcat(description, "W:Light;"); }
-            if (retval & CODE_WARNING_BATT      ) { strcat(description, "W:Batt;"); }
+            if (retval & CODE_WARNING_LIGHT     ) { char temp[32]; sprintf(temp, "W:Light(%d);", minLight); strcat(description, temp); }
+            if (retval & CODE_WARNING_BATT      ) { char temp[32]; sprintf(temp, "W:Batt(%2.2f);", percentPerHour); strcat(description, temp); }
             if (retval & CODE_WARNING_STARTSTOP ) { strcat(description, "W:StartStop;"); }
             if (retval & CODE_WARNING_NANDHEALTH) { strcat(description, "W:NandHealth;"); }
             if (retval & CODE_WARNING_NANDID    ) { strcat(description, "W:NandId;"); }
@@ -699,16 +700,17 @@ if (download != NULL)
             if (retval & CODE_ERROR_RATE        ) { strcat(description, "E:Rate;"); }
             if (retval & CODE_ERROR_BREAKS      ) { strcat(description, "E:Breaks;"); }
             if (retval & CODE_ERROR_RESTARTS    ) { strcat(description, "E:Restarts;"); }
-            if (retval & CODE_ERROR_LIGHT       ) { strcat(description, "E:Light;"); }
-            if (retval & CODE_ERROR_BATT        ) { strcat(description, "E:Batt;"); }
+            if (retval & CODE_ERROR_LIGHT       ) { char temp[32]; sprintf(temp, "E:Light(%d);", minLight); strcat(description, temp); }
+            if (retval & CODE_ERROR_BATT        ) { char temp[32]; sprintf(temp, "E:Batt(%2.2f);", percentPerHour); strcat(description, temp); }
             if (retval & CODE_ERROR_STARTSTOP   ) { strcat(description, "E:StartStop;"); }
             if (retval & CODE_ERROR_NANDHEALTH  ) { strcat(description, "E:NandHealth;"); }
             if (retval & CODE_ERROR_NANDID      ) { strcat(description, "E:NandId;"); }
 
-        sprintf(line, "VERIFY," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d,"           "%f,"          "%s\n",
-                                label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail, percentPerHour, description);
+        sprintf(line, "VERIFYX," "%s,"  "%d,"       "%d,"      "%d,"       "%d,"       "%d,"       "%d,"      "%d,"        "%d,"       "%.1f,"      "%.4f,"     "%.3f,"                 "%.3f,"                  "%.4f,"                                 "%d,"       "%d,"                "%d,"                "%d,"           "%f,"          "%s\n",
+                                 label, retval,     errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks, restarts,   breakTime,   maxAv,       minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f), minLight,   batteryMaxPercent,   batteryMinPercent,   startStopFail, percentPerHour, description);
         }
 
+        fprintf(stdout, line);
         fprintf(stderr, line);
         if (outfile != NULL)
         { 
@@ -716,11 +718,13 @@ if (download != NULL)
 			if (globalOptions & VERIFY_OPTION_OUTPUT_NEW)
 			{
 				int passed = ((retval & CODE_ERROR_MASK) == 0) ? 1 : 0;
-				// "VERIFY,YYYY-MM-DD hh:mm:ss,12345,1,260,W:Batt;W:Stuck;"
+				// "VERIFY,YYYY-MM-DD hh:mm:ss.000,12345,1,260,W:Batt;W:Stuck;"
 				sprintf(line, "VERIFY,%s,%s,%d,%d,%s\n", formattedtime(now()), label, passed, retval, description);
 
 		        fprintf(stderr, line);
 			}
+
+			fprintf(stdout, line);
 
             fprintf(outfile, line); 
             fflush(outfile);
@@ -757,39 +761,67 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
 
         verifyResult = verify_process(deviceId, file, download, globalOptions);
 
-        /* Set the session id (use the deviceId) */
-        result = OmSetSessionId(deviceId, 0);
-        fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, 0);
-        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); }
+        if (verifyResult < 0)								
+		{ 
+			char line[128];
+			sprintf(line, "#ERROR,%s,%d,Verify failed (%d)\n", formattedtime(now()), deviceId, verifyResult);
+			fprintf(stderr, line);
+			fprintf(stdout, line);
+			if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
+			OmSetLed(deviceId, LED_ERROR_COMMS);
+		}
+        else if (verifyResult & CODE_ERROR_MASK)
+		{ 
+			OmSetLed(deviceId, LED_FAILED);					// Looks like a problem
+		}
+        else 
+		{
+			/* Set the session id (use the deviceId) */
+			result = OmSetSessionId(deviceId, 0);
+			fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, 0);
+			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); }
 
-        /* Set the delayed start/stop times */
-        fprintf(stderr, "VERIFY #%d: Setting start/stop: INFINITY/ZERO\n", deviceId);
-        result = OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_ZERO);
-        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); }
+			/* Set the delayed start/stop times */
+			fprintf(stderr, "VERIFY #%d: Setting start/stop: INFINITY/ZERO\n", deviceId);
+			result = OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_ZERO);
+			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); }
 
-        /* Commit the new settings */
-        fprintf(stderr, "VERIFY #%d: Committing new settings...\n", deviceId);
-        result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
-        if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
+			/* Commit the new settings */
+			fprintf(stderr, "VERIFY #%d: Committing new settings...\n", deviceId);
+			result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
+			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
 
-        if (verifyResult < 0) { OmSetLed(deviceId, LED_ERROR_COMMS); }                      // Error accessing data
-        else if (verifyResult & 0xfffff000) { OmSetLed(deviceId, LED_FAILED); }             // Looks like a problem
-        else if (verifyResult & 0x00000fff) { OmSetLed(deviceId, LED_WARNING); }            // Warning
-        else { OmSetLed(deviceId, LED_OK); }                                           // Everything ok
+			// Set LEDs
+			if (verifyResult & CODE_WARNING_MASK) { OmSetLed(deviceId, LED_WARNING); }            // Warning
+			else { OmSetLed(deviceId, LED_OK); }                                           // Everything ok
+		}
+
     }
     else if (status == OM_DOWNLOAD_CANCELLED)
     { 
-        printf("VERIFY #%d: Cancelled.\n", deviceId);
+		char line[128];
+		sprintf(line, "#ERROR,%s,%d,Download cancelled\n", formattedtime(now()), deviceId);
+		fprintf(stderr, line);
+		fprintf(stdout, line);
+		if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
         OmSetLed(deviceId, LED_ERROR_COMMS);
     }
     else if (status == OM_DOWNLOAD_ERROR) 
     { 
-        printf("VERIFY #%d: Error. (Diagnostic 0x%04x)\n", deviceId, value);
+		char line[128];
+		sprintf(line, "#ERROR,%s,%d,Download error (diagnostic 0x%04x)\n", formattedtime(now()), deviceId, value);
+		fprintf(stderr, line);
+		fprintf(stdout, line);
+		if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
         OmSetLed(deviceId, LED_ERROR_COMMS);
     }
     else
     {
-        printf("VERIFY #%d: Unexpected status %d / 0x%04x\n", deviceId, status, value);
+		char line[128];
+		sprintf(line, "#ERROR,%s,%d,Unexpected status %d / 0x%04x\n", formattedtime(now()), deviceId, status, value);
+		fprintf(stderr, line);
+		fprintf(stdout, line);
+		if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
         OmSetLed(deviceId, LED_ERROR_COMMS);
     }
     return;

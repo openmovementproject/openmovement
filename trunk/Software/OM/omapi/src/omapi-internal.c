@@ -475,9 +475,41 @@ static int OmPortOpen(const char *infile, char writeable)
             }
             else
             {
-                char dcbOk = 0;
-                dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+                char dcbOk;
 
+#if 1
+                // Always call ClearCommError() here
+                {
+                    DWORD comErrors = 0;
+                    COMSTAT comStat = {0};
+                    ClearCommError(hSerial, &comErrors, &comStat);
+                }
+#endif
+
+#if 1
+				if (!PurgeComm(hSerial, PURGE_TXABORT|PURGE_TXCLEAR|PURGE_RXABORT|PURGE_RXCLEAR))
+				{
+                    OmLog(0, "WARNING: PurgeComm() failed.\n");
+				}
+#endif
+
+#if 1
+				if (!SetupComm(hSerial, 4096, 4096))
+				{
+                    OmLog(0, "WARNING: SetupComm() failed.\n");
+				}
+#endif
+
+#if 1
+				if (!ClearCommBreak(hSerial))
+				{
+                    OmLog(0, "WARNING: ClearCommBreak() failed.\n");
+				}
+#endif
+
+
+				dcbOk = 0;
+                dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
                 if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
 
                 if (!dcbOk)
@@ -538,8 +570,19 @@ static int OmPortOpen(const char *infile, char writeable)
                     };
                 }
 
+
+//PurgeComm(PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR);
+//ClearCommBreak(hFile);
+//FlushFileBuffers();
+
+
                 timeouts.ReadIntervalTimeout = 0;
-                timeouts.ReadTotalTimeoutConstant = 20;
+				#define TIMEOUT_CONSTANT 20
+				#ifdef TIMEOUT_CONSTANT
+					timeouts.ReadTotalTimeoutConstant = TIMEOUT_CONSTANT;
+				#else
+					timeouts.ReadTotalTimeoutConstant = 20;
+				#endif
                 timeouts.ReadTotalTimeoutMultiplier = 0;
                 timeouts.WriteTotalTimeoutConstant = 2500;
                 timeouts.WriteTotalTimeoutMultiplier = 0;
@@ -578,6 +621,7 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
     unsigned char cc;
     int c;
     int fd;
+	unsigned long elapsed = 0;
 
     OmLog(3, "OmPortReadLine(%d, _,%d, %d);", deviceId, len, timeout);
 
@@ -587,24 +631,27 @@ int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned lo
     if (inBuffer != NULL) { inBuffer[0] = '\0'; }
     for (;;)
     {
-        unsigned long elapsed;
-
         // Read character
         c = -1; cc = 0;
         if (read(fd, &cc, 1) == 1) { c = cc; }
 
-        elapsed = OmMilliseconds() - start;
-
-        if (timeout > 0 && elapsed > timeout)
-        {
-OmLog(3, "- Overall timeout > %d", timeout);
-            return -1; 
-        }
-
         // If timeout (or NULL)
         if (c <= 0)
         {
+#if defined(_WIN32) && defined(TIMEOUT_CONSTANT)
+			elapsed += TIMEOUT_CONSTANT;
+#else
+			elapsed = OmMilliseconds() - start;
+#endif
+
 OmLog(3, "-T/O(%d/%d)", elapsed, timeout);
+
+			if (timeout > 0 && elapsed > timeout)
+			{
+OmLog(3, "- Overall timeout > %d", timeout);
+				return -1; 
+			}
+
             continue;   // try to read again until timeout
         }
         else if (c == '\r' || c == '\n')
