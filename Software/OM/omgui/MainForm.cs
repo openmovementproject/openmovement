@@ -1485,7 +1485,7 @@ namespace OmGui
             //TS - Record which are cleared and stopped if multiple selected.
             //            int devicesClearing = 0;
 
-            bool wipe = ((Form.ModifierKeys & Keys.Shift) != 0);
+            bool wipe = ((Form.ModifierKeys & Keys.Shift) == 0);
 
             if (EnsureNoSelectedDownloading())
             {
