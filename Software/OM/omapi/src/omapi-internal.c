@@ -487,23 +487,23 @@ static int OmPortOpen(const char *infile, char writeable)
 #endif
 
 #if 1
-				if (!PurgeComm(hSerial, PURGE_TXABORT|PURGE_TXCLEAR|PURGE_RXABORT|PURGE_RXCLEAR))
+				if (PurgeComm(hSerial, PURGE_TXABORT|PURGE_TXCLEAR|PURGE_RXABORT|PURGE_RXCLEAR) == 0)
 				{
-                    OmLog(0, "WARNING: PurgeComm() failed.\n");
+                    OmLog(0, "NOTE: PurgeComm() failed.\n");
 				}
 #endif
 
 #if 1
-				if (!SetupComm(hSerial, 4096, 4096))
+				if (SetupComm(hSerial, 4096, 4096) == 0)
 				{
-                    OmLog(0, "WARNING: SetupComm() failed.\n");
+                    OmLog(0, "NOTE: SetupComm() failed.\n");
 				}
 #endif
 
 #if 1
-				if (!ClearCommBreak(hSerial))
+				if (ClearCommBreak(hSerial) == 0)
 				{
-                    OmLog(0, "WARNING: ClearCommBreak() failed.\n");
+                    OmLog(0, "NOTE: ClearCommBreak() failed.\n");
 				}
 #endif
 
