@@ -29,6 +29,10 @@
  */
 
 /*
+ * This started as a small, self-contained program -- but this massive file has become ridiculous!  It should be split nicely in to *many* smaller files.
+ */
+
+/*
     Usage:   waxrec <device> [-log [-tee]] [-osc <hostname>[:<port>] [-timetag]] [-init <string>] [-dump]
 
     Log example: waxrec <device> -log -tee -init "MODE=1\r\n" > log.csv
@@ -37,9 +41,6 @@
     'device' on Windows "\\.\COM1", Mac "/dev/tty.usbmodem*"
 */
 
-/*
- * TODO: It started as a small, self-contained program, but this massive file has become ridiculous!  It should be split nicely in to many smaller files.
- */
 
 
 //#define POLL_RECV     // STOMP poll receive
@@ -1437,7 +1438,7 @@ size_t teddiToOsc(TeddiPacket *teddiPacket, void *outputBuffer, char timetag)
 
 
 /* Open a serial port */
-int openport(const char *infile, char writeable)
+int openport(const char *infile, char writeable, int timeout)
 {
     int fd;
     
@@ -1512,7 +1513,7 @@ int openport(const char *infile, char writeable)
                 }
 
                 timeouts.ReadIntervalTimeout = 0;
-                timeouts.ReadTotalTimeoutConstant = 0;
+                timeouts.ReadTotalTimeoutConstant = timeout;
                 timeouts.ReadTotalTimeoutMultiplier = 0;
                 timeouts.WriteTotalTimeoutConstant = 0;
                 timeouts.WriteTotalTimeoutMultiplier = 0;
@@ -1980,7 +1981,8 @@ int CreateTestData(char *buffer, const char *fakeType)
 
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
-int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format, char ignoreInvalid)
+// TODO: Turn this silly argument list into an configuration structure
+int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format, char ignoreInvalid, const char *waitPrefix, int waitTimeout)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -1991,6 +1993,8 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
     static char ports[1024];
     SOCKET receiveUdpSocket = SOCKET_ERROR;
     const char *fakeType = NULL;
+	char waiting = 0;
+	char matched = -1;
 
 #ifdef _WIN32
     {
@@ -2096,7 +2100,8 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
         }
     
         /* Open the serial port */
-        fd = openport(infile, 1);   // (initString != NULL)
+        fprintf(stderr, "NOTE: Using port: %s\n", infile);
+        fd = openport(infile, 1, (waitTimeout > 0) ? waitTimeout : 0);   // (initString != NULL)
         if (fd < 0)
         {
             fprintf(stderr, "ERROR: Port not open.\n");
@@ -2104,7 +2109,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
         }
 
     }
-    
+  
     /* Send initialization string */
     if (initString != NULL && fd != -1)
     {
@@ -2137,7 +2142,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 								
 #if defined(_WIN32) && defined(WIN_HANDLE)
                         {
-                            int written;
+                            DWORD written;
                             WriteFile((HANDLE)fd, &c, 1, &written, 0);
                         }
 #else
@@ -2150,7 +2155,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
             if (c == '\0') { break; }
 #if defined(_WIN32) && defined(WIN_HANDLE)
             {
-                int written;
+                DWORD written;
                 WriteFile((HANDLE)fd, &c, 1, &written, 0);
             }
 #else
@@ -2159,7 +2164,18 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
         }
     }
 
-    if (!sendOnly)
+
+  
+    /* Are we waiting for a specified response */
+	if (waitPrefix != NULL || waitTimeout >= 0)
+	{
+		fprintf(stderr, "NOTE: Waiting (timeout %d) for prefix: %s\n", waitTimeout, waitPrefix);
+		waiting = 1; 
+		matched = 0;
+	}
+
+
+    if (!sendOnly || waiting)
     {
 
         /* Open the STOMP port */
@@ -2198,13 +2214,14 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
             FILE *outfp = NULL;
             unsigned long logInterval = 0;
             unsigned long long logOpen = 0;
+            unsigned long long start = TicksNow();
             char text = 1;
 
             for (;;)
             {
                 size_t len = 0;
                 unsigned long long now;
-                
+
                 if (receiveUdpSocket != SOCKET_ERROR)
                 {
                     struct sockaddr_in from;
@@ -2249,7 +2266,52 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 
                 /* Get time now */
                 now = TicksNow();
-                
+
+
+				/* Waiting for a specific prefix */
+				if (waiting)
+				{
+					/* While waiting, always output received packets */
+					if (len >= 0) { buffer[len] = '\0'; } else { buffer[0] = '\0'; }
+					fprintf(stderr, "%s%s", buffer, (text) ? "\n" : "");
+
+					/* Match against the specified prefix */
+					if (waitPrefix != NULL && waitPrefix[0] != '\0')
+					{
+						if (strncmp(buffer, waitPrefix, strlen(waitPrefix)) == 0)
+						{
+							fprintf(stderr, "NOTE: Matched expected prefix: %s\n", waitPrefix);
+
+							matched = 1;
+
+							/* Output match to stdout */
+							fwrite(buffer, 1, (len >= 0) ? len : 0, stdout);
+							if (text) { fprintf(stdout, "\n"); }
+
+							waiting = 0; 
+						}
+					}
+
+					/* Check for timeout */
+					if (waitTimeout >= 0 && (now - start) >= waitTimeout)
+					{ 
+						fprintf(stderr, "NOTE: Time-out (%d) waiting for expected prefix: %s\n", (now - start), waitPrefix);
+						waiting = 0; 
+					}
+
+					/* We're no longer waiting - if we only wanted to send the init string and wait for the response, exit now */
+					if (!waiting && sendOnly)
+					{
+						break;
+					}
+
+					/* Don't do anything else with this packet */
+					continue; 
+				}
+
+				// When allowing receive timeouts...
+				if (len < 0) { continue; }
+
                 /* Close existing log file if interval recording */
                 if (logInterval && outfp != NULL && (now / (unsigned long long)logInterval) != (logOpen / (unsigned long long)logInterval))
                 {
@@ -2515,6 +2577,8 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
     WSACleanup();
 #endif
 
+	if (matched == 0) { return 10; }	// Wanted a match but didn't find one
+	if (matched == 1) { return 0; }		// Wanted a match and found one
     return (s != SOCKET_ERROR) ? 0 : 1;
 }
 
@@ -2538,9 +2602,11 @@ int main(int argc, char *argv[])
     char convertToOsc = 0;
     int format = 0;
     char ignoreInvalid = 0;
+	char *waitPrefix = NULL;
+	int waitTimeout = -1;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.93     by Daniel Jackson, 2011-2013\n");
+    fprintf(stderr, "V1.94     by Daniel Jackson, 2011-2013\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2580,6 +2646,14 @@ int main(int argc, char *argv[])
         else if (strcasecmp(argv[i], "-init") == 0)
         {
             initString = argv[++i];
+        }
+        else if (strcasecmp(argv[i], "-wait") == 0)
+        {
+            waitPrefix = argv[++i];
+        }
+        else if (strcasecmp(argv[i], "-timeout") == 0)
+        {
+            waitTimeout = atoi(argv[++i]);
         }
         else if (strcasecmp(argv[i], "-udpwritefrom") == 0)
         {
@@ -2649,7 +2723,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "        [-osc <hostname>[:<port>] [-timetag]]  Send OSC to the specified host/port, time-tag.\n");
         fprintf(stderr, "        [-udp <hostname>[:<port>]]             Send raw packets over UDP to the specified host/port (cannot be used with -osc)\n");
         fprintf(stderr, "        [-stomphost <hostname>[:<port>] [-stomptopic /topic/Topic] [-stompuser <username>] [-stomppassword <password>]]  Send STOMP to the specified server.\n");
-        fprintf(stderr, "        [-init <string> [-exit]]               Send initialzing string; immediately exit.\n");
+        fprintf(stderr, "        [-init <string> [-exit]]               Send initialzing string; exit (immediately if not waiting for a response).\n");
+        fprintf(stderr, "        [-wait <prefix> [-timeout <msec>]]     Wait for a response line with the specified prefix; timeout waiting.\n");
 #ifdef THREAD_WRITE_FROM_UDP
         //fprintf(stderr, "        [-udpwritefrom <port>]               Write data received from the specified UDP port.\n");
 #endif
@@ -2667,7 +2742,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "NOTE: 'device' can be 'udp://localhost:1234' to receive over UDP\n");
 #ifdef _MSC_VER
         // See 'findPorts()'
-        fprintf(stderr, "NOTE: 'device' can be '!' or '![VID+PID]' to automatically find the first matching serial port (default: !%04X%04X)\n", DEFAULT_VID, DEFAULT_PID);
+        fprintf(stderr, "NOTE: 'device' can be '!' or '![VID+PID]' to automatically find the first matching serial port (default: !%04X%04X, example: !04D80057)\n", DEFAULT_VID, DEFAULT_PID);
         fprintf(stderr, "      or '@' or '@[MAC-address]' to automatically find the first matching Bluetooth serial port\n");
 #endif
         fprintf(stderr, "\n");
@@ -2677,8 +2752,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "WAXREC: %s -> %s%s%s%s %s:%s@%s%s\n", (infile == NULL) ? "<stdin>" : infile, host, (tee ? " [tee]" : ""), (dump ? " [dump]" : ""), (timetag ? " [timetag]" : ""), stompUser, strlen(stompPassword) > 0 ? "*" : "", stompHost, stompAddress);
     fprintf(stderr, "INIT: %s\n", initString);
 
-    // The function with the most arguments in the world... (I think a configuration structure might help here)
-    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid);
+    // The function with the most arguments in the world... (I think a configuration structure might help here!)
+    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid, waitPrefix, waitTimeout);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }

@@ -824,6 +824,41 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
 		if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
         OmSetLed(deviceId, LED_ERROR_COMMS);
     }
+
+
+	// On any download event other than progress, alert the user
+    if (status != OM_DOWNLOAD_PROGRESS)
+	{
+#ifdef _WIN32
+		{
+			char oldTitle[2048];
+			char newTitle[] = "[ALERT]";
+			HWND hWnd = NULL;
+			FLASHWINFO fwi = {0};
+			GetConsoleTitle(oldTitle, sizeof(oldTitle));
+			SetConsoleTitle(newTitle);
+
+			fprintf(stderr, "\a");
+			MessageBeep(0xffffffff);
+			Sleep(40);
+
+			hWnd = FindWindow(NULL, newTitle);
+		    SetConsoleTitle(oldTitle);
+			if (hWnd != NULL)
+			{
+				fwi.cbSize = sizeof(fwi);
+				fwi.hwnd = hWnd;
+				fwi.dwFlags = FLASHW_ALL;
+				fwi.uCount = 3;
+				fwi.dwTimeout = 0;
+				FlashWindowEx(&fwi);
+			}
+		}
+#else
+		fprintf(stderr, "\a");
+#endif
+	}
+
     return;
 }
 

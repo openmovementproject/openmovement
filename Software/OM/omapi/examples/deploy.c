@@ -79,7 +79,7 @@ int deploy(const char *infile, const char *outfile)
 
     /* Loop until we've exhausted the incoming list of session identifiers to issue. */
     /* NOTE: Production code should not loop in this way, but instead respond to the OmDeviceCallback events. */
-    while (!feof(ifp))
+    while (ifp != NULL && !feof(ifp))
     {
         int numDevices;
         int *deviceIds;
