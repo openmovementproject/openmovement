@@ -281,9 +281,6 @@ function positionLogo() {
 		}
 
 		hash = site + " " + side + " " + weightValue + " " + bodyFatValue + " " + epochValue + " " + startTimeValue + " " + endTimeValue + " " + fileJSONValue + " " + fileCSVValue + " " + fileHTMLValue + "?" + outputFileName;
-
-		alert(hash);
-		
 		
 		window.location.hash = hash;
         return 0;
@@ -326,7 +323,7 @@ function positionLogo() {
 		
 	function alertInvalidCharactersWeight()
 	{
-		var numbers = /^$/;  
+		var numbers = /^\d+$/;  
 		if(!document.forms[0].elements['subjectWeight'].value.match(numbers) && document.forms[0].elements['subjectWeight'].value != "")
 		{		
 			document.forms[0].elements['subjectWeight'].value = "";
@@ -337,8 +334,9 @@ function positionLogo() {
 	
 	function alertInvalidCharactersBodyFat()
 	{
-		var numbers = /^$/;  
-		if(!document.forms[0].elements['subjectBodyFat'].value.match(numbers) && document.forms[0].elements['subjectBodyFat'].value != "")
+		var numbers = /^\d+$/;
+		if((!document.forms[0].elements['subjectBodyFat'].value.match(numbers) && document.forms[0].elements['subjectBodyFat'].value != "") ||
+			document.forms[0].elements.value > 100)
 		{		
 			document.forms[0].elements['subjectBodyFat'].value = "";
 			
