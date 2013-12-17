@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<!-- This is a sample XML document -->
+<Plugin>
+	<height>500</height>
+	<width>800</width>
+	<runFilePath>OMPA_win32.exe</runFilePath>
+	<htmlFilePath>OMPA converter.html</htmlFilePath>
+	<savedValuesFilePath>saved.xml</savedValuesFilePath>
+	<iconName>64x64 converter.ico</iconName>
+	<description>Simple physical activity calculator.</description>
+	<fileName>OM PA</fileName>
+	<readableName>OM PA</readableName>
+	<wantMetadata>true</wantMetadata>
+	<outputExtensions>
+		<extension>csv</extension>
+		<extension>js</extension>
+		<extension>html</extension>
+	</outputExtensions>
+	<defaultValues>
+		<bodyMass>80</bodyMass>
+		<percentage>0.22</percentage>
+		<fileStart>fileStart</fileStart>
+		<fileEnd>fileEnd</fileEnd>
+	</defaultValues>
+</Plugin>
