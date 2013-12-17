@@ -2441,7 +2441,7 @@ namespace OmGui
             //Find arguments and replace the output file with the full file path.
             
             
-            parameterString = parameterString.Replace(outputName, Properties.Settings.Default.CurrentWorkingFolder + Path.DirectorySeparatorChar + outputName);
+            parameterString = parameterString.Replace(outputName, "\"" + Properties.Settings.Default.CurrentWorkingFolder + outputName + "\"");
             
             psi.Arguments = parameterString;
 
