@@ -1286,6 +1286,9 @@ namespace OmGui
                                    error = "Metadata set failed";
                            }
 
+                           // Check 'max samples' is always zero
+                           OmApi.OmSetMaxSamples(device.DeviceId, 0);
+
                            recordBackgroundWorker.ReportProgress((100 * (5 * i + 2) / (devices.Length * 5)), message + "(config)");
 
                            //Sampling Freq and Range

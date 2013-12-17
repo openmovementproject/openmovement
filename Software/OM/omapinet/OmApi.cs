@@ -70,6 +70,7 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmSetDelays(int deviceId, uint startTime, uint stopTime);
         [DllImport("libomapi.dll")] public static extern int OmGetSessionId(int deviceId, out uint sessionId);
         [DllImport("libomapi.dll")] public static extern int OmSetSessionId(int deviceId, uint sessionId);
+        [DllImport("libomapi.dll")] public static extern int OmSetMaxSamples(int deviceId, int maxSamples);
         public const int OM_METADATA_SIZE = 448;
         [DllImport("libomapi.dll")] public static extern int OmGetMetadata(int deviceId, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata);
         [DllImport("libomapi.dll")] public static extern int OmSetMetadata(int deviceId, string metadata, int size);
