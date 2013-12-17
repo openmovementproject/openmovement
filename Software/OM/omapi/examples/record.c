@@ -181,6 +181,15 @@ int record_setup(int deviceId)
     fprintf(stderr, "RECORD #%d: Setting session id: %u\n", deviceId, deviceId);
     if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); return 0; }
 
+	/* Clear the max samples setting */
+	OmSetMaxSamples(deviceId, 0);
+	
+	/* Clear the metadata */
+	OmSetMetadata(deviceId, NULL, 0);
+	
+	/* Zero the debug setting*/
+	//OmCommand(deviceId, "\r\nDEBUG 0\r\n", NULL, 0, "DEBUG=", 2000, NULL, 0);
+	
 #if 1
     {
         time_t now;
