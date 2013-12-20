@@ -2431,8 +2431,11 @@ namespace OmGui
                 MessageBox.Show("Please choose a file to run a plugin on.");
             }*/
 
+        string omGUIEXEPath = Directory.GetCurrentDirectory();
+
         private void RunProcess2(string parameterString, Plugin p, string outputName, string[] inputNames)
         {
+
             ProcessStartInfo psi = new ProcessStartInfo();
 
             psi.FileName = p.FilePath + Path.DirectorySeparatorChar + p.RunFilePath;
@@ -2441,7 +2444,7 @@ namespace OmGui
             //Find arguments and replace the output file with the full file path.
             
             
-            parameterString = parameterString.Replace(outputName, "\"" + Properties.Settings.Default.CurrentWorkingFolder + outputName + "\"");
+            parameterString = parameterString.Replace(outputName, Properties.Settings.Default.CurrentWorkingFolder + "\\" + outputName);
             
             psi.Arguments = parameterString;
 
@@ -2476,6 +2479,8 @@ namespace OmGui
 
             queueListViewItems2.Items.Add(lvi);
 
+            Directory.SetCurrentDirectory(p.FilePath);
+
             pluginQueueWorker.RunWorkerAsync(pqi);
         }
 
@@ -2484,6 +2489,8 @@ namespace OmGui
 
         void pluginQueueWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            Directory.SetCurrentDirectory(omGUIEXEPath);
+
             Console.WriteLine("run worker completed");
             BackgroundWorker worker = (BackgroundWorker)sender;
             if (e.Result != null)
