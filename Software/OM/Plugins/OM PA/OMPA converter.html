@@ -280,7 +280,7 @@ function positionLogo() {
 			outputFileName = fileHTMLValue;
 		}
 
-		hash = site + " " + side + " " + weightValue + " " + bodyFatValue + " " + epochValue + " " + startTimeValue + " " + endTimeValue + " " + fileJSONValue + " " + fileCSVValue + " " + fileHTMLValue + "?" + outputFileName;
+		hash = site + " " + side + " " + weightValue + " " + bodyFatValue + " " + epochValue + " " + startTimeValue + " " + endTimeValue + " " + fileJSONValue + " " + fileCSVValue + " " + fileHTMLValue + "?" + "\"" + outputFileName + "\"";
 		
 		window.location.hash = hash;
         return 0;
