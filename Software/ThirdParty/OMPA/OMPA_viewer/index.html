@@ -1,0 +1,294 @@
+<!DOCTYPE html> 
+<html>
+<head>
+	
+<meta charset="utf-8">
+<title>OpenMovement Physical Activity Plotting</title>
+<script src="./js/jquery.min.js"></script>
+
+<!-- D3 shizzle-->
+<script src="./js/d3.v3.js"></script>
+<script src="./js/nv.d3.js"></script>
+<script src="./js/tooltip.js"></script>
+<script src="./js/legend.js"></script>
+<script src="./js/axis.js"></script>
+<script src="./js/scatter.js"></script>
+<script src="./js/pie.js"></script>
+<script src="./js/pieChart.js"></script>
+<script src="./js/line.js"></script>
+<script src="./js/lineWithFocusChart.js"></script>
+<script src="./js/utils.js"></script>
+
+<link rel="stylesheet" href="./css/viewer_style.css">
+<link rel="stylesheet" href="./css/nv.d3.css" type="text/css">
+
+<!-- The Data -->
+<script src="./data/data.js"></script>
+
+<script>
+
+	var d = readData(); // all the data
+	var summarizedHours = new Array(); // used to hold all the summarized hours	
+	var linePlotData=0;
+	var calsTotal = 0;
+	var stepsTotal = 0;
+	var distTotal = 0;
+	var PAintensity = [];
+
+	function summarizeData(){
+		// we need to summarise the min data into hours
+		var startTime = Date.parse(d.PAjson.Data.epoch[0].t);
+		var stopTime = Date.parse(d.PAjson.Data.epoch[d.PAjson.Data.epoch.length - 1].t);
+		var firstHour = Date.parse(d.PAjson.Data.epoch[0].t.substring(0, 10) + " 00:00:00");
+		var lastHour = Date.parse(d.PAjson.Data.epoch[d.PAjson.Data.epoch.length - 1].t.substring(0, 10) + " 23:59:59");
+		var numHours = Math.ceil((lastHour - firstHour)/3600000);
+		var tmpData = new Object();
+		
+		var ee = [];
+		var dist = [];
+		var steps = [];
+
+		var counter;
+		
+		for ( i = 0; i < numHours; i++ ) {
+			tmpData = {};
+			tmpData.t = firstHour + (i*3600000);
+			tmpData.ee = 0;
+			tmpData.steps = 0;
+			tmpData.dist = 0;
+			tmpData.intensity_l = 0;
+			tmpData.intensity_m = 0;
+			tmpData.intensity_v = 0;														
+			counter = 0;
+			for ( j = 0; j <(d.PAjson.Data.epoch.length - 1); j++ ) {
+				if( (Date.parse(d.PAjson.Data.epoch[j].t) >= tmpData.t ) && (Date.parse(d.PAjson.Data.epoch[j].t) <= (tmpData.t+3600000)) ){
+					//TODO - - zero the distance and ee at 12am every day here....
+					tmpData.ee += Math.round(d.PAjson.Data.epoch[j].ee/1000);
+					tmpData.steps += d.PAjson.Data.epoch[j].steps;
+					tmpData.dist += Math.round(d.PAjson.Data.epoch[j].dist);
+					tmpData.intensity_l += Math.round(d.PAjson.Data.epoch[j].intensity_l);
+					tmpData.intensity_m += Math.round(d.PAjson.Data.epoch[j].intensity_m);
+					tmpData.intensity_v += Math.round(d.PAjson.Data.epoch[j].intensity_v);
+					counter++;
+				}
+			}
+			summarizedHours[i] = tmpData;
+			//x and y coord for the graph
+			ee.push({x:new Date(tmpData.t), y:tmpData.ee});
+			steps.push({x:new Date(tmpData.t), y:tmpData.steps});
+			dist.push({x:new Date(tmpData.t), y:tmpData.dist});
+
+			if(summarizedHours[i].ee > 0){summarizedHours[i].ee = summarizedHours[i].ee/counter;} 
+		}
+
+		data = [
+			{
+				values:steps,
+				key:'Steps',
+				color: '#A2AF39'
+			}];
+		// 	,
+		// 	{
+		// 		values:ee,
+		// 		key:'PAEE',
+		// 		color: '#6D742C'
+		// 	},
+		// 	{
+		// 		values:dist,
+		// 		key:'Distance',
+		// 		color: '#424242'
+		// 	}
+		// ];
+
+		return data;
+
+	}
+	
+	function plotGraph(plotChunkSize, plotDataSelection) {
+
+		
+	}
+	//this function controls position of the logo in header
+	function positionLogo() {
+		document.getElementById('logo').style.left = document.getElementById('content').offsetLeft + 'px';
+	}
+
+</script>
+</head> 
+
+<body onresize="positionLogo();" onload="positionLogo();">
+<div id="header" class="foo">
+<img src="./images/logoPA.png" id="logo" alt="Open Movement">
+</div>
+
+<div id="contentHolder">
+	<div id="content">
+		
+		<div id="grid" style="">
+				
+		<svg id="mainChart" style="float:left;height:400px ; width:550px"></svg>
+		<svg id="pieChart" style="float:right;height:400px ; width:400px" class="piechart"></svg>
+						
+		</div>
+	
+	</div>
+	<div id="shadow"></div>	
+
+	<div id="uppergradient"></div>
+	
+	<style>
+#stats { position: relative; padding: 0; margin-top: 3px; }
+.stat { width: 33%; height: 30px; text-align: center; display: inline-block; padding: 0; margin: 0;}
+.stat img { padding-right: 5px; vertical-align: text-bottom; }
+	</style>
+
+	<div id="stats">
+		<div class="stat">
+		  <img src="./images/steps.png" />
+		  <span id="stepsread" style="font-family:Arial, Helvetica, sans-serif; font-size: 20px;color: grey;"></span>	
+		</div>
+	  
+		<div class="stat">
+		  <img src="./images/calories.png" />
+		  <span id="eeread" style="font-family:Arial, Helvetica, sans-serif; font-size: 20px;color: grey;"></span>	
+		</div>
+
+		<div class="stat">
+		  <img src="./images/distance.png" />
+		  <span id="distread" style="font-family:Arial, Helvetica, sans-serif; font-size: 20px;color: grey;"></span>	
+		</div>
+	</div>
+	
+	<div id="lowergradient"></div>
+
+<div id="footer"/>
+
+</body>
+<script>
+function updateTotalText(e){
+  calsTotal = 0;
+  distTotal = 0;
+  stepsTotal = 0;
+  lightTotal = 0;
+  modTotal = 0;
+  vigTotal = 0;
+  startLimit = summarizedHours[0].t;
+  stopLimit = summarizedHours[summarizedHours.length-1].t;
+  if(e != null)
+  {
+	  var navLimits = e.extent;
+	  startLimit = navLimits[0];
+	  stopLimit = navLimits[1];
+  }
+
+  
+
+for(i=0;i<summarizedHours.length;i++){
+	  if(summarizedHours[i].t>startLimit && summarizedHours[i].t<stopLimit){
+		  calsTotal += summarizedHours[i].ee;
+		  stepsTotal += summarizedHours[i].steps;
+		  distTotal += summarizedHours[i].dist;
+		  lightTotal += summarizedHours[i].intensity_l;
+		  modTotal += summarizedHours[i].intensity_m;
+		  vigTotal += summarizedHours[i].intensity_v;
+	}
+  }
+
+	// update the totals		
+	document.getElementById('stepsread').innerHTML = Math.round(stepsTotal) + ' steps';	
+	document.getElementById('eeread').innerHTML = Math.round(calsTotal) + ' kcal';
+	document.getElementById('distread').innerHTML = Math.round(distTotal/1000) + ' km';
+
+	// Now update the variable for the PIE chart
+	PAintensity = [
+			{	key: "Light",
+				y: Math.round(lightTotal/3600),
+				color: '#E1EC8D'
+			},
+			{	key: "Moderate",
+				y: Math.round(modTotal/3600),
+				color: '#CDD871'
+			},
+			{	key: "Vigorous",
+				y: Math.round(vigTotal/3600),
+				color: '#B9C935'
+			}
+		];
+
+return;
+}	  
+
+function drawLineGraph(){
+  nv.addGraph(function() {
+  var chart = nv.models.lineWithFocusChart()
+  .height(400)
+  .width(550);
+  
+  chart.xAxis
+  .tickFormat(function(d) { return d3.time.format('%H:%M:%S')(new Date(d)); });
+  chart.x2Axis
+  .tickFormat(function(d) { return d3.time.format('%d-%m-%y')(new Date(d)); });
+  
+  //chart.yAxis
+  //    .tickFormat(d3.format(',.2f'));
+  //chart.y2Axis
+  //    .tickFormat(d3.format(',.2f'));
+
+  d3.select("#mainChart")
+      .datum(linePlotData)
+      .transition().duration(500)
+      .call(chart);
+  
+
+  drawPie();
+
+  chart.dispatch.on('brush', function(e) { updateTotalText(e); drawPie(); } );    
+  nv.utils.windowResize(chart.update);
+
+
+	return chart;	
+  });
+}
+
+function drawPie()
+{
+	nv.addGraph(function() {
+
+	    var chart = nv.models.pieChart()
+	        .x(function(d) { return d.key })
+	        //.y(function(d) { return d.value })
+	        .values(function(d) { return d })
+	        //.labelThreshold(.08)
+	        //.showLabels(true)
+	        .color(['#E1EC8D','#CDD871','#B9C935'])
+	        .width(400)
+	        .height(400)
+	        .donut(true);
+
+
+	      //chart.pie.donutLabelsOutside(true).donut(true);
+
+	      d3.select("#pieChart")
+	          //.datum(historicalBarChart)
+	          //.datum([testdata])
+	          .datum([PAintensity])
+	        .transition().duration(1200)
+	          .attr('width', 400)
+	          .attr('height', 400)
+	          .call(chart);
+
+	    return chart;
+	});
+}
+
+
+//Do on first pass then later on every brush
+linePlotData = summarizeData();
+updateTotalText(null);
+drawLineGraph();
+
+
+</script>
+</html>
+	
+	
