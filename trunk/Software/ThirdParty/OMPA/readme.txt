@@ -24,8 +24,14 @@ Readme to OMPA
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE. 
 %
-% Cassim Ladha Nov 2012
+% Cassim Ladha JAN 2014
 % cassimladha@gmail.com
+%
+% RELEASE NOTES
+% v0.2  - Fixed compatability issues for OM_GUI beta12
+%	- incread error reporting
+%	- Plugin now assumes current working directory is \plugins\plugin
+%	- Removed compiled in version of the viewer to enable upgrading
 
 Installation Intructions (Assuming Binary Dist Downloaded)
 
@@ -67,5 +73,7 @@ AX3_readfile
 - https://code.google.com/p/openmovement/source/browse/#svn%2Ftrunk%2FSoftware%2FAX3%2Fcwa-convert%2Fmatlab
 
 jsonlab - http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?jsonlab/Download
+OR SVN: svn checkout svn://svn.code.sf.net/p/iso2mesh/code/trunk/jsonlab jsonlab
+
 - savejson.m
 - varargin2struct.m
