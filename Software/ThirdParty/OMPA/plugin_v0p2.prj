@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project plugin="plugin.deploytool" plugin-version="1.0">
-  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="plugin_v0p2" location="C:\Users\Cas\Desktop\OMPA 121213\OMPA" file="C:\Users\Cas\Desktop\OMPA 121213\OMPA\plugin_v0p2.prj" build-checksum="4282598366">
+  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="plugin_v0p2" location="C:\Users\Cas\Desktop\OMPA 121213\OMPA" file="C:\Users\Cas\Desktop\OMPA 121213\OMPA\plugin_v0p2.prj" build-checksum="3036861547">
     <param.project.name>C:\Users\Cas\Desktop\OMPA 121213\OMPA\plugin_v0p2.prj</param.project.name>
     <param.target.type>Windows Standalone Application</param.target.type>
     <param.appname>plugin_v0p2</param.appname>
@@ -97,11 +97,11 @@
     <matlab>
       <root>C:\Program Files\MATLAB\R2012b</root>
       <path>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn\pristine</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn\pristine\14</directory>
+        <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn\pristine\19</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn\pristine\3b</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn\pristine\70</directory>
         <directory>C:\Users\Cas\Desktop\OMPA 121213\cwa-convert\.svn\pristine\b6</directory>
@@ -139,28 +139,87 @@
         <directory>${PROJECT_ROOT}\.svn</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\00</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\01</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\03</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\05</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\06</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\0d</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\0f</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\10</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\14</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\1d</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\1f</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\22</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\24</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\25</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\27</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\28</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\2b</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\2c</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\2d</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\2e</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\32</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\35</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\3a</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\43</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\45</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\46</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\53</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\56</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\5a</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\5c</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\61</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\62</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\64</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\67</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\68</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\6a</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\6f</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\72</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\74</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\79</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\7b</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\7c</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\7f</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\8b</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\90</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\91</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\92</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\93</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\94</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\95</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\97</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\9c</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\a4</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\a6</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\aa</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\b0</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\b4</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\b7</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\bc</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\bf</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\c1</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\c3</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\c4</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\cb</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\cd</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\d3</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\d5</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\dc</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\e0</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\e5</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\e6</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\eb</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\ed</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\f3</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\f7</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\f8</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\f9</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\fa</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\fb</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\fc</directory>
         <directory>${PROJECT_ROOT}\.svn\pristine\fe</directory>
+        <directory>${PROJECT_ROOT}\.svn\pristine\ff</directory>
         <directory>${PROJECT_ROOT}\.svn\tmp</directory>
         <directory>${PROJECT_ROOT}\OMPA_viewer</directory>
         <directory>${PROJECT_ROOT}\OMPA_viewer\css</directory>
@@ -170,25 +229,6 @@
         <directory>${PROJECT_ROOT}\OMPA_viewer\svg</directory>
         <directory>${PROJECT_ROOT}\plugin_v0p2</directory>
         <directory>${PROJECT_ROOT}\plugin_v0p2\distrib</directory>
-        <directory>${PROJECT_ROOT}\plugin_v0p2\src</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\example HTML 5-day report</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\example HTML 5-day report\css</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\example HTML 5-day report\data</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\example HTML 5-day report\images</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\example HTML 5-day report\js</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\example HTML 5-day report\svg</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\css</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\img</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\js</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\OMPA_viewer</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\OMPA_viewer\css</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\OMPA_viewer\data</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\OMPA_viewer\images</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\OMPA_viewer\js</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\OM PA\OMPA_viewer\svg</directory>
-        <directory>C:\Users\Cas\Desktop\OMPA 121213\OMPA_plugin v0.1\settings</directory>
         <directory>C:\Users\Cas\Documents\MATLAB</directory>
         <directory>${MATLAB_ROOT}\toolbox\hdlcoder\matlabhdlcoder\matlabhdlcoder</directory>
         <directory>${MATLAB_ROOT}\toolbox\hdlcoder\matlabhdlcoder</directory>

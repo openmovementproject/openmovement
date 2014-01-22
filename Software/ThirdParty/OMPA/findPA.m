@@ -253,23 +253,42 @@ try
     end
     
     if~(strcmp(strcat(datestr(ts,31),'data.html'),p.Results.html))
-        
+        fprintf('Status: p.results is %s\n', p.Results.html);
         outPath = sprintf('%s', p.Results.html);
-        outPath = outPath(1:end-5);
+        fprintf('Status: outPath is %s\n', outPath);
+        
+        %fprintf('Status: outPath(1,1:end-5) is %s\n', outPath(1,1:end-5));
+        
+        outPath = outPath(1,1:end-5);
+        
+        fprintf('Status: the outPath is is now%s\n', outPath);
+        
         %p.Results.html = p.Results.html(1:end-5);
         
         % step 1 - make the directory structure and copy the static files accross
         if(ispc)
+            fprintf('Status: using a PC\n');
             %             slashes = strfind(p.Results.html,'\');
             %             fPath = p.Results.html(1:slashes(end));
             %             fId = p.Results.html(slashes(end)+1:end);
             %             fprintf('Status: fPath %s\r\n', fPath);
             %             fprintf('Status: fId %s\r\n', fId);
+            if(strcmp(outPath(1,2:3),':\'))
+                %a full path has been given so use it
+                fprintf('Status: a full path was given\n');
+                fPath = outPath;
+            else
+                %only a file name was given so make the full path
+                fprintf('Status: only a file name was given');
+                fPath = [pwd '\' outPath];
+            end
+            fprintf('Status: fPath is %s\n', fPath);
             
-            fPath = [pwd '\' outPath];
+            fprintf('Status: making directory...\n');
             mkdir(fPath);
-            
+            fprintf('Status: copying files...\n');
             copyfile([currentFolder '\OMPA_viewer\*.*'],[fPath '\'],'f')
+            
         else
             %             slashes = strfind(p.Results.html,'/');
             %             fPath = p.Results.html(1:slashes(end));
