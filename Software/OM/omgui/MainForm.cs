@@ -1874,6 +1874,12 @@ namespace OmGui
 
             if (Properties.Settings.Default.CurrentWorkingFolder.Equals(""))
                 Properties.Settings.Default.CurrentWorkingFolder = GetPath("{MyDocuments}");
+            
+            if (!Directory.Exists(Properties.Settings.Default.CurrentWorkingFolder))
+            {
+                MessageBox.Show("Could not find last working folder: " + Properties.Settings.Default.CurrentWorkingFolder + "\r\n\r\nDefaulting to: " + GetPath("{MyDocuments}"), "Error - Missing Working Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Properties.Settings.Default.CurrentWorkingFolder = GetPath("{MyDocuments}");
+            }
 
             LoadWorkingFolder();
 
@@ -2442,9 +2448,14 @@ namespace OmGui
 
             //TODO - Idea to try and do the outfile as a filepath rather than filename.
             //Find arguments and replace the output file with the full file path.
-            
-            
-            parameterString = parameterString.Replace(outputName, Properties.Settings.Default.CurrentWorkingFolder + "\\" + outputName);
+
+
+            Console.WriteLine("current user working folder: " + Properties.Settings.Default.CurrentWorkingFolder);
+
+            if (!Properties.Settings.Default.CurrentWorkingFolder[Properties.Settings.Default.CurrentWorkingFolder.Length - 1].Equals('\\'))
+                parameterString = parameterString.Replace(outputName, "\"" + Properties.Settings.Default.CurrentWorkingFolder + "\\" + outputName + "\"");
+            else
+                parameterString = parameterString.Replace(outputName, "\"" + Properties.Settings.Default.CurrentWorkingFolder + outputName + "\"");
             
             psi.Arguments = parameterString;
 
@@ -2719,8 +2730,8 @@ namespace OmGui
                         }
                     }
 
-                    Console.WriteLine("w32e: " + w32e.Message);
-                    MessageBox.Show("Plugin Error: " + "Plugin EXE not present", "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Console.WriteLine("Plugin Error: " + w32e.Message);
+                    MessageBox.Show("Plugin Error: " + "Plugin EXE not present or not compatible.", "Plugin Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 });
             }
             catch (ArgumentNullException ane)
