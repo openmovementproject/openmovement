@@ -75,7 +75,7 @@ function data = OMX_readFile(filename, varargin)
     %
     %   v0.1
     %       Nils Hammerla, 2012 <nils.hammerla@ncl.ac.uk>
-    %       Dan Jackson, 2014
+    %       Changes for basic, limited use of OMX files - Dan Jackson, 2014
     %
     
     % 
@@ -197,7 +197,7 @@ function data = readFile(filename, options)
     % interpolation of other timestamps
     TIME = [(packetIds*80)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
     % TIME_full just contains integer packet numbers for LIGHT and TEMP.
-    TIME_full = [packetIds data.validPackets(packetIds,2)];
+    %TIME_full = [packetIds data.validPackets(packetIds,2)];
     
     % read data
     validIds = data.validPackets(:,1);
@@ -332,11 +332,10 @@ function validPackets = getValidPackets(fid, options)
 		ts = packetTimestamps(validIds(i));
 		tsf = double(packetTimestampFractional(validIds(i))) * (1 / (65536 * 24 * 60 * 60));
 		
-		dates = 0;
 		if options.useC
             dates = datenum(parseDate(ts));
         else
-            dates = datenum(parseDateML(ts));
+            dates = parseDateML(ts);
         end
         validPackets(i,2) = dates + tsf;
 		
@@ -374,23 +373,32 @@ end
 %% matlab specific parsing functions (c-code much much quicker)
 
 % Matlab version by Dan Jackson, 2012
-function datearr = parseDateML(t)
-    datearr = zeros(1,6);
+function dat = parseDateML(t)
+    persistent lastvalue;
+    persistent lastdatearr;
+    persistent lastreturn;
+    
+    if isempty(lastdatearr) 
+        lastdatearr = zeros(1,6);
+    end
 
-    % Y-M-D h:m:s
-    % #define OM_DATETIME_YEAR(dateTime)    ((unsigned int)((unsigned char)(((dateTime) >> 26) & 0x3f)) + 2000) /**< Extract the year from a packed date/time value. @hideinitializer */
-    % #define OM_DATETIME_MONTH(dateTime)   ((unsigned char)(((dateTime) >> 22) & 0x0f))  /**< Extract the month (1-12) from a packed date/time value. @hideinitializer */
-    % #define OM_DATETIME_DAY(dateTime)     ((unsigned char)(((dateTime) >> 17) & 0x1f))  /**< Extract the day (1-31) from a packed date/time value. @hideinitializer */
-    % #define OM_DATETIME_HOURS(dateTime)   ((unsigned char)(((dateTime) >> 12) & 0x1f))  /**< Extract the hours (0-23) from a packed date/time value. @hideinitializer */
-    % #define OM_DATETIME_MINUTES(dateTime) ((unsigned char)(((dateTime) >>  6) & 0x3f))  /**< Extract the minutes (0-59) from a packed date/time value. @hideinitializer */
-    % #define OM_DATETIME_SECONDS(dateTime) ((unsigned char)(((dateTime)      ) & 0x3f))  /**< Extract the seconds (0-59) from a packed date/time value. @hideinitializer */
-   
-    %%% 'idivide' version -- think this fixes potential problems with initial version
-    datearr(1) = idivide(t, 67108864, 'floor') + 2000;
-    datearr(2) = mod(idivide(t, 4194304, 'floor'), 16);
-    datearr(3) = mod(idivide(t, 131072, 'floor'), 32);
-    datearr(4) = mod(idivide(t, 4096, 'floor'), 32);
-    datearr(5) = mod(idivide(t, 64, 'floor'), 64);
-    datearr(6) = mod(t, 64);
-  
+    if (not(isempty(lastvalue)) && t == lastvalue)
+        % do nothing
+    elseif (not(isempty(lastvalue)) && t == lastvalue + 1)
+        lastdatearr(6) = lastdatearr(6) + 1;
+        lastreturn = datenum(lastdatearr); % lastreturn = lastreturn + (1 / 60 / 60 / 24); % accumulates a small error
+    else
+        %%% 'idivide' version -- think this fixes potential problems with initial version
+        lastdatearr(1) = idivide(t, 67108864, 'floor') + 2000;  % #define OM_DATETIME_YEAR(dateTime)    ((unsigned int)((unsigned char)(((dateTime) >> 26) & 0x3f)) + 2000) /**< Extract the year from a packed date/time value. @hideinitializer */
+        lastdatearr(2) = mod(idivide(t, 4194304, 'floor'), 16); % #define OM_DATETIME_MONTH(dateTime)   ((unsigned char)(((dateTime) >> 22) & 0x0f))  /**< Extract the month (1-12) from a packed date/time value. @hideinitializer */
+        lastdatearr(3) = mod(idivide(t, 131072, 'floor'), 32);  % #define OM_DATETIME_DAY(dateTime)     ((unsigned char)(((dateTime) >> 17) & 0x1f))  /**< Extract the day (1-31) from a packed date/time value. @hideinitializer */
+        lastdatearr(4) = mod(idivide(t, 4096, 'floor'), 32);    % #define OM_DATETIME_HOURS(dateTime)   ((unsigned char)(((dateTime) >> 12) & 0x1f))  /**< Extract the hours (0-23) from a packed date/time value. @hideinitializer */
+        lastdatearr(5) = mod(idivide(t, 64, 'floor'), 64);      % #define OM_DATETIME_MINUTES(dateTime) ((unsigned char)(((dateTime) >>  6) & 0x3f))  /**< Extract the minutes (0-59) from a packed date/time value. @hideinitializer */
+        lastdatearr(6) = mod(t, 64);                            % #define OM_DATETIME_SECONDS(dateTime) ((unsigned char)(((dateTime)      ) & 0x3f))  /**< Extract the seconds (0-59) from a packed date/time value. @hideinitializer */
+        lastreturn = datenum(lastdatearr);
+    end
+
+    lastvalue = t;
+    
+    dat = lastreturn;
 end
