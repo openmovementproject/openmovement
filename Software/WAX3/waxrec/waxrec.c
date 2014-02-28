@@ -1200,10 +1200,10 @@ void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsig
     const char *timeString = timestamp(receivedTime, timeformat);
     for (i = 0; i <= tee ? 1 : 0; i++)
     {
-        fprintf((i == 0) ? ofp : stderr, "$WAX9,%s,%u,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", timeString, wax9Packet->sampleNumber, wax9Packet->timestamp, 
-            wax9Packet->accel.x / 2048.0f, wax9Packet->accel.y / 2048.0f, wax9Packet->accel.z / 2048.0f, 
-            wax9Packet->gyro.x * 0.07f,    wax9Packet->gyro.y * 0.07f,    wax9Packet->gyro.z * 0.07f, 
-            wax9Packet->mag.x, wax9Packet->mag.y, wax9Packet->mag.z
+        fprintf((i == 0) ? ofp : stderr, "$WAX9,%s,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", timeString, wax9Packet->sampleNumber, wax9Packet->timestamp / 65536.0, 
+			wax9Packet->accel.x / 4096.0f, wax9Packet->accel.y / 4096.0f, wax9Packet->accel.z / 4096.0f,	// 'G' (9.81 m/s/s)
+            wax9Packet->gyro.x * 0.07f,    wax9Packet->gyro.y * 0.07f,    wax9Packet->gyro.z * 0.07f,		// degrees/sec
+			wax9Packet->mag.x * 0.10f, wax9Packet->mag.y * 0.10f, wax9Packet->mag.z * 0.10f * -1			// uT (magnetic field ranges between 25-65 uT)
             );
     }
     return;
