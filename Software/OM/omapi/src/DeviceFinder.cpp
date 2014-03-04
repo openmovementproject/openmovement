@@ -124,23 +124,23 @@ bool DeviceFinder::Initialize(void)
     // Initialize COM
     HRESULT hr;
     hr =  CoInitializeEx(0, COINIT_MULTITHREADED); 
-    if (hr != S_OK && hr != S_FALSE && hr != RPC_E_CHANGED_MODE) { cerr << "ERROR: Failed to initialize COM library: " << hr << endl; return false; }
+	if (hr != S_OK && hr != S_FALSE && hr != RPC_E_CHANGED_MODE) { Log(0, "ERROR: Failed to initialize COM library: 0x%08x\n", hr); return false; }
 
     // Set COM security levels
     hr =  CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-    if (FAILED(hr)) { cerr << "WARNING: Failed to initialize security: " << hr << endl; }
+	if (FAILED(hr)) { Log(0, "WARNING: Failed to initialize security: 0x%08x\n", hr); }
 
     // Obtain the WMI initial locator
     hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
-    if (FAILED(hr)) { cerr << "ERROR: Failed to create IWbemLocator object: " << hr << endl; CoUninitialize(); return false; }
+    if (FAILED(hr)) { Log(0, "ERROR: Failed to create IWbemLocator object: 0x%08x\n", hr); CoUninitialize(); return false; }
 
     // Connect to the root\cimv2 WMI namespace through the IWbemLocator::ConnectServer method with the current user and obtain pointer pSvc to make IWbemServices calls.
     hr = ((IWbemLocator *)pLoc)->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, (IWbemServices **)&pSvc);
-    if (FAILED(hr)) { cerr << "ERROR: Could not connect to WMI ROOT\\CIMV2: " << hr << endl; ((IWbemLocator *)pLoc)->Release(); pLoc = NULL; CoUninitialize(); return false; }
+    if (FAILED(hr)) { Log(0, "ERROR: Could not connect to WMI ROOT\\CIMV2: 0x%08x\n", hr); ((IWbemLocator *)pLoc)->Release(); pLoc = NULL; CoUninitialize(); return false; }
 
     // Set security levels on the proxy
     hr = CoSetProxyBlanket((IWbemServices *)pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
-    if (FAILED(hr)) { cerr << "WARNING: Could not set proxy blanket: " << hr << endl; }
+    if (FAILED(hr)) { Log(0, "WARNING: Could not set proxy blanket: 0x%08x\n", hr); }
 
     initialized = true;
     return true;
@@ -167,6 +167,10 @@ DeviceFinder::DeviceFinder(unsigned int vidPid)
 {
     this->initialized = false;
     this->vidPid = vidPid;
+	this->pLoc = NULL;
+	this->pSvc = NULL;
+	this->hWndDeviceFinder = NULL;
+	this->hDeviceNotify = NULL;
     return;
 }
 
@@ -581,14 +585,14 @@ bool DeviceFinder::MappingUsbstorToDeviceNumber(std::map<std::string, int>& usbS
     usbStorToDeviceMap.clear();
 
     // Ensure pSvc is initialized
-    Initialize();
-
-    if (pSvc == NULL) { cerr << "ERROR: Unable to get usbstor-deviceNumber mapping." << endl;  return false; }
+	if (!Initialize()) { Log(0, "ERROR: Unable to initialize for usbstor-deviceNumber mapping.\n");  return false; }
 
     // Use the IWbemServices pointer to make a WMI request for Win32_SerialPort
     IEnumWbemClassObject* pEnumerator = NULL;
-    hr = ((IWbemServices *)pSvc)->ExecQuery(bstr_t("WQL"), bstr_t("SELECT PNPDeviceID, DeviceID FROM Win32_DiskDrive WHERE InterfaceType='USB'"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
-    if (FAILED(hr)) { cerr << "ERROR: Query for Win32_DiskDrive has failed: " << hr << endl; return false; }
+	IWbemServices *pServices = (IWbemServices *)pSvc;	// Cast required as the public API doesn't include the type information
+	if (pServices == NULL) { Log(0, "ERROR: Unable to get usbstor-deviceNumber mapping.\n");  return false; }
+	hr = pServices->ExecQuery(bstr_t("WQL"), bstr_t("SELECT PNPDeviceID, DeviceID FROM Win32_DiskDrive WHERE InterfaceType='USB'"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+    if (FAILED(hr)) { Log(0, "ERROR: Query for Win32_DiskDrive has failed: 0x%08x\n", hr); return false; }
 
     // Get the data from the query
     if (pEnumerator)
