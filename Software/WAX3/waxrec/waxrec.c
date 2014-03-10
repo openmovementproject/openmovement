@@ -2606,7 +2606,7 @@ int main(int argc, char *argv[])
 	int waitTimeout = -1;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.94     by Daniel Jackson, 2011-2013\n");
+    fprintf(stderr, "V1.95     by Daniel Jackson, 2011-2013\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
