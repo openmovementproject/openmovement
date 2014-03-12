@@ -34,9 +34,6 @@ Firmware binaries: (including boot-loader for Windows)
 
 
 
-== Other links ==
+---
 
-Other links:
-
-  * [http://code.google.com/p/openmovement/downloads/list Original downloads page].
-  * [http://code.google.com/p/openmovement/w/edit/Downloads edit]
+([http://code.google.com/p/openmovement/downloads/list deprecated downloads page]; [http://code.google.com/p/openmovement/w/edit/Downloads edit page])
