@@ -6,15 +6,4 @@ To get your hand on the source for the *software*, *firmware*, *hardware*, or *m
   * [http://code.google.com/p/openmovement/source/browse/#svn%2Ftrunk Browse the source code]
   * [http://code.google.com/p/openmovement/source/checkout Checkout the source code]
 
-The source code includes:
-
-  * Software
-    * Open Movement API
-    * AX3 PC Software
-  * Firmware
-    * Flux Library
-    * AX3 Device Firmware
-  * Hardware
-    * AX3 PCB and Schematic
-  * Mechanical
-    * AX3 Mechanical
+The source code includes the source for the embedded firmware, PC software, PCB and schematics for the hardware and mechanical enclosure designs for the Open Movement projects.
