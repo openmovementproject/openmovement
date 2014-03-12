@@ -2,6 +2,8 @@
 
 = [Documentation Documentation Wiki] =
 
+For more detailed documentation, see the [http://code.google.com/p/openmovement/wiki/Source?tm=4 Source].
+
 
 == Open Movement ==
 
@@ -14,16 +16,42 @@
 == AX3 Movement logging sensor ==
 
   * [AX3 AX3 Overview]
+<wiki:comment>
   * [Ax3Software AX3 Software]
   * [Ax3Firmware AX3 Firmware]
   * [Ax3Hardware AX3 Hardware]
   * [Ax3Mechanical AX3 Mechanical]
+</wiki:comment>
 
 
 == WAX3 Wireless accelerometer ==
 
   * [WAX3 WAX3 Overview]
+<wiki:comment>
   * [Wax3Software WAX3 Software]
   * [Wax3Firmware WAX3 Firmware]
   * [Wax3Hardware WAX3 Hardware]
   * [Wax3Mechanical WAX3 Mechanical]
+</wiki:comment>
+
+
+== WAX9 Wireless IMU ==
+
+  * [WAX9 WAX9 Overview]
+<wiki:comment>
+  * [Wax9Software WAX9 Software]
+  * [Wax9Firmware WAX9 Firmware]
+  * [Wax9Hardware WAX9 Hardware]
+  * [Wax9Mechanical WAX9 Mechanical]
+</wiki:comment>
+
+
+== BuildAX Building monitoring ==
+
+  * [BuildAX BuildAX Overview]
+<wiki:comment>
+  * [BuildAXSoftware BuildAX Software]
+  * [BuildAXFirmware BuildAX Firmware]
+  * [BuildAXHardware BuildAX Hardware]
+  * [BuildAXMechanical BuildAX Mechanical]
+</wiki:comment>
