@@ -28,48 +28,76 @@
 
 #ifndef FIFO_H
 #define FIFO_H
+#include "Compiler.h"
+#include "HardwareProfile.h"
 
+#if defined(__PIC24FJ256DA206__) && !defined(USE_EDS)
+#warning "EDS Expected"
+#endif
+
+#ifdef USE_EDS
+#warning "Using extended data space (24bit) pointers"
+#define FIFO_EDS __eds__
+#else
+#define FIFO_EDS 
+#endif
 
 // FIFO
 typedef struct
 {
-    unsigned short head;
-    unsigned short tail;
-    unsigned short elementSize;
-    unsigned short capacity;
-    unsigned short mask;
-    void *buffer;
+    unsigned int head;
+    unsigned int tail;
+    size_t elementSize;
+    unsigned int capacity;
+    unsigned int mask;
+    void FIFO_EDS *buffer;
 } fifo_t;
 
+// Interrupt mask protection functions - used to block fifo interrupts (may result in timestamp jitter)
+#ifdef __C30__
+	typedef unsigned char FIFO_IPL_shadow_t;
+	#define FIFO_INTS_DISABLE()	{IPLshadow = SRbits.IPL; if(SRbits.IPL<FIFO_INTERRUPT_PRIORITY)SRbits.IPL=FIFO_INTERRUPT_PRIORITY;}
+	#define FIFO_INTS_ENABLE()	{SRbits.IPL = IPLshadow;}
+#elif defined (__C32__)
+	typedef unsigned long FIFO_IPL_shadow_t;
+	#define FIFO_INTS_DISABLE()	{IPLshadow = _CP0_BCS_STATUS((_CP0_STATUS_IPL_MASK&((~FIFO_INTERRUPT_PRIORITY)<<_CP0_STATUS_IPL_POSITION)),(_CP0_STATUS_IPL_MASK&(FIFO_INTERRUPT_PRIORITY<<_CP0_STATUS_IPL_POSITION)));} // Assign IPL equal to FIFO_INTERRUPT_PRIORITY
+	#define FIFO_INTS_ENABLE()	{_CP0_BCS_STATUS((_CP0_STATUS_IPL_MASK&(~IPLshadow)),(_CP0_STATUS_IPL_MASK&IPLshadow));}
+#endif
 
 // Initialize FIFO data structure
-void FifoInit(fifo_t *fifo, unsigned short elementSize, unsigned short capacity, void *buffer);
+void FifoInit(fifo_t *fifo, size_t elementSize, unsigned int capacity, void FIFO_EDS *buffer);
 
 // Clear FIFO
 void FifoClear(fifo_t *fifo);
 
-// Add values to the FIFO
-unsigned short FifoPush(fifo_t *fifo, void *values, unsigned short count);
+// Add values to the FIFO - NEVER double push
+unsigned int FifoPush(fifo_t *fifo, void *values, unsigned int count);
 
-// Empty values from the FIFO
-unsigned short FifoPop(fifo_t *fifo, void *values, unsigned short count);
+// Empty values from the FIFO - Will not overwite itself, returns number written successfully
+unsigned int FifoPop(fifo_t *fifo, void *destination, unsigned int count);
+unsigned int FifoPop2(fifo_t *fifo, void *destination, unsigned int count, void** dataSource); // KL, allows streaming of data out of fifos using the vdma
 
 // Returns the current length of the FIFO
-unsigned short FifoLength(fifo_t *fifo);
+unsigned int FifoLength(fifo_t *fifo);
 
 // Returns the free space left in the FIFO
-unsigned short FifoFree(fifo_t *fifo);
+unsigned int FifoFree(fifo_t *fifo);
 
 // See how many contiguous entries there are
-unsigned short FifoContiguousEntries(fifo_t *fifo, void **buffer);
+unsigned int FifoContiguousEntries(fifo_t *fifo,  void **buffer);
+void FIFO_EDS *FifoContiguousEntries2(fifo_t *fifo,  unsigned int *contiguous);
 
 // See how many contiguous free entries there are
-unsigned short FifoContiguousSpaces(fifo_t *fifo, void **buffer);
+unsigned int FifoContiguousSpaces(fifo_t *fifo, void **buffer);
+void FIFO_EDS *FifoContiguousSpaces2(fifo_t *fifo,  unsigned int *contiguous);
 
 // Data has been directly removed from the FIFO
-void FifoExternallyRemoved(fifo_t *fifo, unsigned short count);
+void FifoExternallyRemoved(fifo_t *fifo, unsigned int count);
 
 // Data has been directly added to the FIFO
-void FifoExternallyAdded(fifo_t *fifo, unsigned short count);
+void FifoExternallyAdded(fifo_t *fifo, unsigned int count);
+
+// Directly set tail (specialist use only)
+void FifoSetTail(fifo_t *fifo, unsigned int tail);
 
 #endif

@@ -36,10 +36,32 @@
 // Defines
 #define I2C_READ_MASK		0x1
 
-#if ( defined(USE_HW_I2C1) || defined(USE_HW_I2C2) || defined(USE_HW_I2C3) || defined(USE_HW_I2C))
+// Override to non-default i2c channel or set master switch
+#ifdef MY_I2C_OVERIDE // Define this locally in the .c file
+	#define LOCAL_MASTER_SWITCH MY_I2C_OVERIDE
+#else
+	#if   defined (USE_MY_SW_I2C)	
+		#define LOCAL_MASTER_SWITCH	-1
+	#elif defined (USE_HW_I2C)
+		#define LOCAL_MASTER_SWITCH	1 // Assuming I2C 1 is used, legacy
+	#elif defined (USE_HW_I2C1)
+		#define LOCAL_MASTER_SWITCH	1
+	#elif defined (USE_HW_I2C2)
+		#define LOCAL_MASTER_SWITCH	2
+	#elif defined (USE_HW_I2C3)
+		#define LOCAL_MASTER_SWITCH	3
+	#else
+		#define LOCAL_MASTER_SWITCH 0 // Causes no I2C functions to be gernerated by header
+	#endif
+#endif
+
+// Are we using a hardware module?
+#if (LOCAL_MASTER_SWITCH > 0)
+
 	#ifndef InitI2C		/* Sometimes defined in HardwareProfile.h */
 		#define InitI2C()		{mySCLd=1;mySDAd=1;}
 	#endif
+	
 	#ifdef __C30__
 	/*
 	Notes on baud rate for PIC24:
@@ -49,98 +71,106 @@
 		400kHz	-	9
 		1MHz	-	3
 		2MHz	-	1
-		4MHz	-	0
+		4MHz	-	0 (invalid)
 	@16MIPS
 		100kHz	-	157
 		400kHz	-	37
 		1MHz	-	13
 		2MHz	-	5
-		4MHz	-	1	
+		4MHz	-	1 (invalid)	
 	*/
+	
 	// Use one of these defines in the .c file (HW only)
 	// #define LOCAL_I2C_RATE		XXXXXXXXX
-	#define I2C_RATE_100kHZ 		((OSCCONbits.COSC==1)? 157 : 39)	
-	#define I2C_RATE_200kHZ 		((OSCCONbits.COSC==1)? 72 : 18)
-	#define I2C_RATE_400kHZ 		((OSCCONbits.COSC==1)? 37 : 9)	
-	#define I2C_RATE_1000kHZ 		((OSCCONbits.COSC==1)? 13 : 3)			
-	#define I2C_RATE_2000kHZ		((OSCCONbits.COSC==1)? 7 : 1)		
-	
+	#ifndef __dsPIC33E__	/*PIC24F only HW with no USB xtal*/
+		#define I2C_RATE_100kHZ 		((OSCCONbits.COSC==1)? 157 : 39)	
+		#define I2C_RATE_200kHZ 		((OSCCONbits.COSC==1)? 72 : 18)
+		#define I2C_RATE_400kHZ 		((OSCCONbits.COSC==1)? 37 : 9)	
+		#define I2C_RATE_1000kHZ 		((OSCCONbits.COSC==1)? 13 : 3)			
+		#define I2C_RATE_2000kHZ		((OSCCONbits.COSC==1)? 7 : 1)		
+	#endif
 	
 		// Needed, or else i2c.h fails
 		#define USE_AND_OR
 		#include <i2c.h>
+
+		#ifdef __dsPIC33E__
+			// Need to undo the and/or masking too
+			#define I2C_ON			(~(I2C1_OFF))
+			#define I2C_7BIT_ADD	(~(I2C1_10BIT_ADD))
+			#define I2C_SLW_DIS		(~(I2C1_SLW_EN))
+		#endif
 	
 		#ifndef MY_I2C_TIMEOUT
 		#define MY_I2C_TIMEOUT 	65535
 		#warning "Using default timeout, long!"
 		#endif
-		
-		#ifdef USE_HW_I2C1
+
+		#if defined(__DEBUG) || !defined(IGNORE_I2C_TIMOUTS)			
+			extern void myI2CCheckTimeout(unsigned short timeout); /* My internal prototype*/
+			#ifndef CHECK_TIMEOUT				/* You can add your own handler if you need - this type of exeption indicates some HW failure*/
+				#warning "USING DEFAULT CHECK FOR BUS TIMEOUTS (P24 only). This will slow the i2c functions a bit."
+				#define ENABLE_I2C_TIMOUT_CHECK /* Causes prototyped function to be created in myi2c.c*/
+				#define CHECK_TIMEOUT(_t)	myI2CCheckTimeout(_t) /* Assign internal handler to check timouts*/
+			#endif
+		#elif defined (CHECK_TIMEOUT)
+			/* User handler should be declared in hardware profile.h*/
+		#else
+			/* Ingnore timeouts*/
+			#define CHECK_TIMEOUT(_t)	{;}
+		#endif
+	
+		#if	(LOCAL_MASTER_SWITCH == 1)
 			// Following defines from the peripheral header
-			#define myI2COpen()			{OpenI2C1((I2C1_ON  | I2C1_7BIT_ADD | I2C1_SLW_DIS),(LOCAL_I2C_RATE));}
+			#define myI2COpen()			{OpenI2C1((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
 			#define myI2CIdle	 		IdleI2C1	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.SEN=1;while(I2C1CONbits.SEN && timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.PEN=1;while(I2C1CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.RSEN=1;while(I2C1CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.ACKDT = 0;I2C1CONbits.ACKEN=1;while(I2C1CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.ACKDT = 1;I2C1CONbits.ACKEN=1;while(I2C1CONbits.ACKEN&& timeout--);}
+			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.SEN=1;while(I2C1CONbits.SEN && --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.PEN=1;while(I2C1CONbits.PEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.RSEN=1;while(I2C1CONbits.RSEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.ACKDT = 0;I2C1CONbits.ACKEN=1;while(I2C1CONbits.ACKEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.ACKDT = 1;I2C1CONbits.ACKEN=1;while(I2C1CONbits.ACKEN&& --timeout);CHECK_TIMEOUT(timeout);}
 			#define myI2CClose			CloseI2C1
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1TRN=_x;while(I2C1STATbits.TBF&& timeout--);while(I2C1STATbits.TRSTAT&& timeout--);} 
+			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1TRN=_x;while(I2C1STATbits.TBF&& --timeout);while(I2C1STATbits.TRSTAT&& --timeout);CHECK_TIMEOUT(timeout);} 
 			#define myI2Cgetc()			MasterReadI2C1()
 			#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
 			#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
 			#define myAckStat()			(!I2C1STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-		#elif defined (USE_HW_I2C2)
+		#elif (LOCAL_MASTER_SWITCH == 2)
 			// Following defines from the peripheral header
-			#define myI2COpen()			{OpenI2C2((I2C2_ON  | I2C2_7BIT_ADD | I2C2_SLW_DIS),(LOCAL_I2C_RATE));}
+			#define myI2COpen()			{OpenI2C2((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
 			#define myI2CIdle	 		IdleI2C2	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.SEN=1;while(I2C2CONbits.SEN&& timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.PEN=1;while(I2C2CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.RSEN=1;while(I2C2CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.ACKDT = 0;I2C2CONbits.ACKEN=1;while(I2C2CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.ACKDT = 1;I2C2CONbits.ACKEN=1;while(I2C2CONbits.ACKEN&& timeout--);}
+			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.SEN=1;while(I2C2CONbits.SEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.PEN=1;while(I2C2CONbits.PEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.RSEN=1;while(I2C2CONbits.RSEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.ACKDT = 0;I2C2CONbits.ACKEN=1;while(I2C2CONbits.ACKEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONbits.ACKDT = 1;I2C2CONbits.ACKEN=1;while(I2C2CONbits.ACKEN&& --timeout);CHECK_TIMEOUT(timeout);}
 			#define myI2CClose			CloseI2C2
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2TRN=_x;while(I2C2STATbits.TBF&& timeout--);while(I2C2STATbits.TRSTAT&& timeout--);} 
+			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2TRN=_x;while(I2C2STATbits.TBF&& --timeout);while(I2C2STATbits.TRSTAT&& --timeout);CHECK_TIMEOUT(timeout);} 
 			#define myI2Cgetc()			MasterReadI2C2()
 			#define mygetsI2C(_data,_length) MastergetsI2C2((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
 			#define myI2Cputs(_data,_length) MasterputsI2C2((unsigned char *)(_data),strlen(_data))
 			#define myAckStat()			(!I2C2STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-		#elif defined (USE_HW_I2C3)
+		#elif (LOCAL_MASTER_SWITCH == 3)
 			// Following defines from the peripheral header
-			#define myI2COpen()			{OpenI2C3((I2C3_ON  | I2C3_7BIT_ADD | I2C3_SLW_DIS),(LOCAL_I2C_RATE));}
+			#define myI2COpen()			{OpenI2C3((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
 			#define myI2CIdle	 		IdleI2C3	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.SEN=1;while(I2C3CONbits.SEN&& timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.PEN=1;while(I2C3CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.RSEN=1;while(I2C3CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.ACKDT = 0;I2C3CONbits.ACKEN=1;while(I2C3CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.ACKDT = 1;I2C3CONbits.ACKEN=1;while(I2C3CONbits.ACKEN&& timeout--);}
+			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.SEN=1;while(I2C3CONbits.SEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.PEN=1;while(I2C3CONbits.PEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.RSEN=1;while(I2C3CONbits.RSEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.ACKDT = 0;I2C3CONbits.ACKEN=1;while(I2C3CONbits.ACKEN&& --timeout);CHECK_TIMEOUT(timeout);}
+			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONbits.ACKDT = 1;I2C3CONbits.ACKEN=1;while(I2C3CONbits.ACKEN&& --timeout);CHECK_TIMEOUT(timeout);}
 			#define myI2CClose			CloseI2C3
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3TRN=_x;while(I2C3STATbits.TBF&& timeout--);while(I2C3STATbits.TRSTAT&& timeout--);} 
+			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3TRN=_x;while(I2C3STATbits.TBF&& --timeout);while(I2C3STATbits.TRSTAT&& --timeout);CHECK_TIMEOUT(timeout);} 
 			#define myI2Cgetc()			MasterReadI2C3()
 			#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
 			#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
 			#define myAckStat()			(!I2C3STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-		#else
-			#warning "Assuming I2C 1 is used"
-			// Following defines from the peripheral header
-			#define myI2COpen()			{OpenI2C1((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
-			#define myI2CIdle	 		IdleI2C1	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.SEN=1;while(I2C1CONbits.SEN&& timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.PEN=1;while(I2C1CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.RSEN=1;while(I2C1CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.ACKDT = 0;I2C1CONbits.ACKEN=1;while(I2C1CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONbits.ACKDT = 1;I2C1CONbits.ACKEN=1;while(I2C1CONbits.ACKEN&& timeout--);}
-			#define myI2CClose			CloseI2C1
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1TRN=_x;while(I2C1STATbits.TBF&& timeout--);while(I2C1STATbits.TRSTAT&& timeout--);} 
-			#define myI2Cgetc()			MasterReadI2C1()
-			#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
-			#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
-			#define myAckStat()			(!I2C1STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
 		#endif
 	
 		#define WaitStartmyI2C()	{}
 		#define WaitStopmyI2C() 	{}
 		#define WaitRestartmyI2C()	{}
+
 	#elif defined __C32__
 
 	#define I2C_RATE_100kHZ 		((OSCCONbits.COSC&1)? 398 : 38)	
@@ -158,90 +188,76 @@
 		#warning "Using default timeout, long!"
 		#endif
 		
-		#ifdef USE_HW_I2C1
+		#if (LOCAL_MASTER_SWITCH == 1)
 			// Following defines from the peripheral header
 			#define myI2COpen()			{I2C1CON = 0;I2C1BRG = (LOCAL_I2C_RATE);I2C1CONSET = 0x00008200; myI2CIdle();} /*Standard mode, no slew rate control*/
-			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C1CONbits.SEN || I2C1CONbits.PEN || I2C1CONbits.RSEN || I2C1CONbits.RCEN || I2C1CONbits.ACKEN || I2C1STATbits.TRSTAT)&& timeout--);}	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_SEN_MASK;while(I2C1CONbits.SEN && timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_PEN_MASK;while(I2C1CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_RSEN_MASK;while(I2C1CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONCLR =_I2C1CON_ACKDT_MASK;I2C1CONSET=_I2C1CON_ACKEN_MASK;while(I2C1CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET =_I2C1CON_ACKDT_MASK;I2C1CONSET=_I2C1CON_ACKEN_MASK;while(I2C1CONbits.ACKEN&& timeout--);}
+			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C1CONbits.SEN || I2C1CONbits.PEN || I2C1CONbits.RSEN || I2C1CONbits.RCEN || I2C1CONbits.ACKEN || I2C1STATbits.TRSTAT)&& --timeout);}	
+			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_SEN_MASK;while(I2C1CONbits.SEN && --timeout);}
+			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_PEN_MASK;while(I2C1CONbits.PEN&& --timeout);}
+			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_RSEN_MASK;while(I2C1CONbits.RSEN&& --timeout);}
+			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONCLR =_I2C1CON_ACKDT_MASK;I2C1CONSET=_I2C1CON_ACKEN_MASK;while(I2C1CONbits.ACKEN&& --timeout);}
+			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET =_I2C1CON_ACKDT_MASK;I2C1CONSET=_I2C1CON_ACKEN_MASK;while(I2C1CONbits.ACKEN&& --timeout);}
 			#define myI2CClose()		{I2C1CONCLR = _I2C1CON_ON_MASK;}
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;while(I2C1STATbits.TBF&& timeout--);I2C1TRN=_x;while(I2C1STATbits.TRSTAT&& timeout--);} 
+			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;while(I2C1STATbits.TBF&& --timeout);I2C1TRN=_x;while(I2C1STATbits.TRSTAT&& --timeout);} 
 			#define myI2Cgetc()			MasterGetcI2C1()
 			//#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
 			//#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
 			#define myAckStat()			(!I2C1STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-		#elif defined (USE_HW_I2C2)
+		#elif (LOCAL_MASTER_SWITCH == 2)
 			// Following defines from the peripheral header
 			#define myI2COpen()			{OpenI2C2((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
-			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C2CONbits.SEN || I2C2CONbits.PEN || I2C2CONbits.RSEN || I2C2CONbits.RCEN || I2C2CONbits.ACKEN || I2C2STATbits.TRSTAT)&& timeout--);	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_SEN_MASK;while(I2C2CONbits.SEN && timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_PEN_MASK;while(I2C2CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_RSEN_MASK;while(I2C2CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONCLR =_I2C2CON_ACKDT_MASK;I2C2CONSET=_I2C2CON_ACKEN_MASK;while(I2C2CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET =_I2C2CON_ACKDT_MASK;I2C2CONSET=_I2C2CON_ACKEN_MASK;while(I2C2CONbits.ACKEN&& timeout--);}
+			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C2CONbits.SEN || I2C2CONbits.PEN || I2C2CONbits.RSEN || I2C2CONbits.RCEN || I2C2CONbits.ACKEN || I2C2STATbits.TRSTAT)&& --timeout);	
+			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_SEN_MASK;while(I2C2CONbits.SEN && --timeout);}
+			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_PEN_MASK;while(I2C2CONbits.PEN&& --timeout);}
+			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_RSEN_MASK;while(I2C2CONbits.RSEN&& --timeout);}
+			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONCLR =_I2C2CON_ACKDT_MASK;I2C2CONSET=_I2C2CON_ACKEN_MASK;while(I2C2CONbits.ACKEN&& --timeout);}
+			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET =_I2C2CON_ACKDT_MASK;I2C2CONSET=_I2C2CON_ACKEN_MASK;while(I2C2CONbits.ACKEN&& --timeout);}
 			#define myI2CClose()		{I2C2CONCLR = _I2C2CON_ON_MASK;}
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2TRN=_x;/*while(I2C2STATbits.TBF&& timeout--);*/while(I2C2STATbits.TRSTAT&& timeout--);} 
+			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2TRN=_x;/*while(I2C2STATbits.TBF&& --timeout);*/while(I2C2STATbits.TRSTAT&& --timeout);} 
 			#define myI2Cgetc()			MasterGetcI2C2()
 			#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
 			#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
 			#define myAckStat()			(!I2C2STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-		#elif defined (USE_HW_I2C3)
+		#elif (LOCAL_MASTER_SWITCH == 3)
 			// Following defines from the peripheral header
 			#define myI2COpen()			{OpenI2C3((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
-			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C3CONbits.SEN || I2C3CONbits.PEN || I2C3CONbits.RSEN || I2C3CONbits.RCEN || I2C3CONbits.ACKEN || I2C3STATbits.TRSTAT)&& timeout--);	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_SEN_MASK;while(I2C3CONbits.SEN && timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_PEN_MASK;while(I2C3CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_RSEN_MASK;while(I2C3CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONCLR =_I2C3CON_ACKDT_MASK;I2C3CONSET=_I2C3CON_ACKEN_MASK;while(I2C3CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET =_I2C3CON_ACKDT_MASK;I2C3CONSET=_I2C3CON_ACKEN_MASK;while(I2C3CONbits.ACKEN&& timeout--);}
+			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C3CONbits.SEN || I2C3CONbits.PEN || I2C3CONbits.RSEN || I2C3CONbits.RCEN || I2C3CONbits.ACKEN || I2C3STATbits.TRSTAT)&& --timeout);	
+			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_SEN_MASK;while(I2C3CONbits.SEN && --timeout);}
+			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_PEN_MASK;while(I2C3CONbits.PEN&& --timeout);}
+			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_RSEN_MASK;while(I2C3CONbits.RSEN&& --timeout);}
+			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONCLR =_I2C3CON_ACKDT_MASK;I2C3CONSET=_I2C3CON_ACKEN_MASK;while(I2C3CONbits.ACKEN&& --timeout);}
+			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET =_I2C3CON_ACKDT_MASK;I2C3CONSET=_I2C3CON_ACKEN_MASK;while(I2C3CONbits.ACKEN&& --timeout);}
 			#define myI2CClose()		{I2C3CONCLR = _I2C3CON_ON_MASK;}
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3TRN=_x;/*while(I2C3STATbits.TBF&& timeout--);*/while(I2C3STATbits.TRSTAT&& timeout--);} 
+			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3TRN=_x;/*while(I2C3STATbits.TBF&& --timeout);*/while(I2C3STATbits.TRSTAT&& --timeout);} 
 			#define myI2Cgetc()			MasterGetcI2C3()
 			#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
 			#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
 			#define myAckStat()			(!I2C3STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-		#else
-			#warning "Assuming I2C 1 is used"
-			// Following defines from the peripheral header
-			#define myI2COpen()			{OpenI2C1((I2C_ON  | I2C_7BIT_ADD | I2C_SLW_DIS),(LOCAL_I2C_RATE));}
-			#define myI2CIdle()	 		{unsigned short timeout = MY_I2C_TIMEOUT;while((I2C1CONbits.SEN || I2C1CONbits.PEN || I2C1CONbits.RSEN || I2C1CONbits.RCEN || I2C1CONbits.ACKEN || I2C1STATbits.TRSTAT)&& timeout--);	
-			#define myI2CStart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_SEN_MASK;while(I2C1CONbits.SEN && timeout--);}
-			#define myI2CStop()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_PEN_MASK;while(I2C1CONbits.PEN&& timeout--);}
-			#define myI2CRestart()		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_RSEN_MASK;while(I2C1CONbits.RSEN&& timeout--);}
-			#define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONCLR =_I2C1CON_ACKDT_MASK;I2C1CONSET=_I2C1CON_ACKEN_MASK;while(I2C1CONbits.ACKEN&& timeout--);}
-			#define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET =_I2C1CON_ACKDT_MASK;I2C1CONSET=_I2C1CON_ACKEN_MASK;while(I2C1CONbits.ACKEN&& timeout--);}
-			#define myI2CClose()		{I2C1CONCLR = _I2C1CON_ON_MASK;}
-			#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1TRN=_x;/*while(I2C1STATbits.TBF&& timeout--);*/while(I2C1STATbits.TRSTAT&& timeout--);} 
-			#define myI2Cgetc()			MasterGetcI2C1()
-			#define mygetsI2C(_data,_length) MastergetsI2C((unsigned int) _length,(unsigned char *)_data, (unsigned int)0xffff/*Timeout*/);
-			#define myI2Cputs(_data,_length) MasterputsI2C((unsigned char *)(_data),strlen(_data))
-			#define myAckStat()			(!I2C1STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
 		#endif
 
-// Following are inline macros to enable the above to work - replaces old legacy M'chip ones
-#ifdef _I2C1CON_RCEN_MASK
-extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C1(void)
-{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_RCEN_MASK;while(!I2C1STATbits.RBF&& timeout--);return I2C1RCV;}
-#endif
-#ifdef _I2C2CON_RCEN_MASK
-extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C2(void)
-{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_RCEN_MASK;while(!I2C2STATbits.RBF&& timeout--);return I2C2RCV;}
-#endif
-#ifdef _I2C3CON_RCEN_MASK
-extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C3(void)
-{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_RCEN_MASK;while(!I2C3STATbits.RBF&& timeout--);return I2C3RCV;}
-#endif
+		// PIC32 only, Following are inline macros to enable the above to work - replaces old legacy M'chip ones
+		#ifdef _I2C1CON_RCEN_MASK
+		extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C1(void)
+		{unsigned short timeout = MY_I2C_TIMEOUT;I2C1CONSET = _I2C1CON_RCEN_MASK;while(!I2C1STATbits.RBF&& --timeout);return I2C1RCV;}
+		#endif
+		#ifdef _I2C2CON_RCEN_MASK
+		extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C2(void)
+		{unsigned short timeout = MY_I2C_TIMEOUT;I2C2CONSET = _I2C2CON_RCEN_MASK;while(!I2C2STATbits.RBF&& --timeout);return I2C2RCV;}
+		#endif
+		#ifdef _I2C3CON_RCEN_MASK
+		extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C3(void)
+		{unsigned short timeout = MY_I2C_TIMEOUT;I2C3CONSET = _I2C3CON_RCEN_MASK;while(!I2C3STATbits.RBF&& --timeout);return I2C3RCV;}
+		#endif
 
 		// Unused but may be called in legacy drivers
 		#define WaitStartmyI2C()	{}
 		#define WaitStopmyI2C() 	{}
 		#define WaitRestartmyI2C()	{}
-	#endif
+		
+	#endif // PIC32 part
 
-#elif defined (USE_MY_SW_I2C)
+// Not using hardware (LOCAL_MASTER_SWITCH <= 0) - software then?
+#elif (LOCAL_MASTER_SWITCH == -1)
 	
 	// Control of timing - add delays if your clock is faster than 8Mhz
 	/*The rise time taken for the pull ups to raise the SDA bus capacitance to Vdd*/
@@ -393,9 +409,15 @@ extern __inline__ unsigned char __attribute__((always_inline))	MasterGetcI2C3(vo
 		if (mySDAr)	my_ISR_I2C_working_var|=0x1;\
 		mySCL = 0;WaitFall();\
 	}
-#else
-	#error "HW or SW I2C code?"
+	
+#else // LOCAL_MASTER_SWITCH == 0
+	//  Not an error - some drivers have dual interface modes and include this file despite not using it
 #endif
+
+#undef MY_I2C_OVERIDE 
+#undef LOCAL_MASTER_SWITCH 
+
+#else
 
 #endif
 

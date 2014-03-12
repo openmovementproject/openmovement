@@ -26,6 +26,10 @@
 // Emulated NAND Flash interface
 // Dan Jackson, 2011-2012
 
+#include "HardwareProfile.h"
+
+#ifdef FTL
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -34,7 +38,11 @@
 #include "FtlConfig.h"			// Emulation relies on the FTL configuration
 
 
+//#define DEBUG_BAD 1              // Bad block debugging (first bad block)
+
+#ifndef NO_EMU_VISUALIZER
 #define EMU_VISUALIZER
+#endif
 #ifdef EMU_VISUALIZER
 extern char EmuVisualizerUpdate(char logical, unsigned long sector, unsigned int count, char flags);
 #endif
@@ -88,6 +96,39 @@ char NandInitialize(void)
 		nandStore = (unsigned char *)malloc(len);
 		memset(nandStore, 0xff, len);
 	}
+
+#ifdef DEBUG_BAD
+{
+    int ofs = DEBUG_BAD, fail = 0;      // 0, 10  // 1, 0
+// simulate different manufacturer-marked bad blocks
+NandDebugMarkBadBlock(ofs + 0, 0, 0, 0x00); 
+NandDebugMarkBadBlock(ofs + 1, FTL_PAGES_PER_BLOCK - 1, 0, 0x00); 
+NandDebugMarkBadBlock(ofs + 2, 0, 5, 0x00); 
+NandDebugMarkBadBlock(ofs + 3, FTL_PAGES_PER_BLOCK - 1, 5, 0x00); 
+// simulate corrupted manufacturer-marked bad blocks
+NandDebugMarkBadBlock(ofs + 4, 0, 0, 0x12); 
+NandDebugMarkBadBlock(ofs + 5, FTL_PAGES_PER_BLOCK - 1, 0, 0x12); 
+NandDebugMarkBadBlock(ofs + 6, 0, 5, 0x12); 
+NandDebugMarkBadBlock(ofs + 7, FTL_PAGES_PER_BLOCK - 1, 5, 0x12); 
+// simulate user-marked bad blocks
+NandDebugMarkBadBlock(ofs + 8, 0, 0, 0xa5); NandDebugMarkBadBlock(8, 0, 5, 0xa5);
+NandDebugMarkBadBlock(ofs + 9, FTL_PAGES_PER_BLOCK - 1, 0, 0xa5); NandDebugMarkBadBlock(9, FTL_PAGES_PER_BLOCK - 1, 5, 0xa5);
+// set it up so the BAM write will fail on the last page
+ NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 12);  // This will cause >10 fails for the BAM write
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 11);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 10);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 9);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 8);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 7);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 6);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 5);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 4);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 3);
+NandDebugFail(fail, FTL_PAGES_PER_BLOCK - 2);
+//NandDebugFail(10, FTL_PAGES_PER_BLOCK - 1);
+}
+#endif
+
 	assert(nandBuffer != NULL && nandStore != NULL );
 	return 1;
 }
@@ -110,7 +151,7 @@ char NandShutdown(void)
 	return 1;
 }
 
-char NandReadParameters(NandParameters *nandParameters)
+char NandReadParameters(NandParameters_t *nandParameters)
 {
     nandParameters->revisionNumber = 0;          // ONFI parameter page offset @4-5
     nandParameters->dataBytesPerPage = 0;        // ONFI parameter page offset @80-83
@@ -128,6 +169,14 @@ char NandLoadPageRead(unsigned short block, unsigned char page)
 	nandDestBlock = 0xffff;
 	nandDestPage = 0xff;
 	memcpy(nandBuffer, nandStore + offset, length);
+
+#ifdef DEBUG_BAD
+    if (block < 10 && page != 0 && page != FTL_PAGES_PER_BLOCK - 1)
+    {
+        //printf("WARNING: Unexpected page read of bad-marked blocks during special debugging (%d, %d)\n", block, page);
+    }
+#endif
+
 #ifdef EMU_VISUALIZER
 EmuVisualizerUpdate(0, ((unsigned long)block * FTL_PAGES_PER_BLOCK * FTL_SECTORS_PER_PAGE) + ((unsigned long)page * FTL_SECTORS_PER_PAGE), FTL_SECTORS_PER_PAGE, 2);
 #endif
@@ -139,6 +188,14 @@ char NandLoadPageWrite(unsigned short srcBlock, unsigned char srcPage, unsigned 
 	unsigned long offset = ((unsigned long)srcBlock * FTL_PAGES_PER_BLOCK * (FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + FTL_SPARE_BYTES_PER_PAGE)) + ((unsigned long)srcPage * (FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + FTL_SPARE_BYTES_PER_PAGE));
 	unsigned long length = (unsigned long)FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + FTL_SPARE_BYTES_PER_PAGE;
 	if ((srcBlock & (FTL_PLANES - 1)) != (destBlock & (FTL_PLANES - 1))) { printf("ERROR: NandLoadPageWrite() - cross-plane operation attempted.\n"); return 0; }
+
+#ifdef DEBUG_BAD
+    if (srcBlock >= DEBUG_BAD && srcBlock < DEBUG_BAD + 10 && srcPage != 0 && srcPage != FTL_PAGES_PER_BLOCK - 1)
+    {
+        printf("WARNING: Unexpected page read for write back of bad-marked blocks during special debugging (%d, %d)->(%d, %d)\n", srcBlock, srcPage, destBlock, destPage);
+    }
+#endif
+
 	nandDestBlock = destBlock;
 	nandDestPage = destPage;
 	memcpy(nandBuffer, nandStore + offset, length);
@@ -185,11 +242,20 @@ char NandStorePage(void)
 
 	memcpy(nandStore + offset, nandBuffer, length);
 #ifdef EMU_VISUALIZER
-if (EmuVisualizerUpdate(0, ((unsigned long)nandDestBlock * FTL_PAGES_PER_BLOCK * FTL_SECTORS_PER_PAGE) + ((unsigned long)nandDestPage * FTL_SECTORS_PER_PAGE), FTL_SECTORS_PER_PAGE, 4))
 {
-	nandDestBlock = 0xffff;
-	nandDestPage = 0xff;
-	return 0;
+    int flags = 0;
+    if (nandBuffer[FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + 0] != 0xff || nandBuffer[FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + 5] != 0xff)
+    {
+        // Bad block marker witten - update visualizer
+        flags |= 128;
+    }
+
+    if (EmuVisualizerUpdate(0, ((unsigned long)nandDestBlock * FTL_PAGES_PER_BLOCK * FTL_SECTORS_PER_PAGE) + ((unsigned long)nandDestPage * FTL_SECTORS_PER_PAGE), FTL_SECTORS_PER_PAGE, 4 | flags))
+    {
+	    nandDestBlock = 0xffff;
+	    nandDestPage = 0xff;
+	    return 0;
+    }
 }
 #endif
 	nandDestBlock = 0xffff;
@@ -334,5 +400,32 @@ printf("FAILING-PAGE: (%d,%d)\n", block, page);
     return;
 }
 
+void NandDebugMarkBadBlock(unsigned short block, unsigned char page, int offset, unsigned char value)
+{
+	unsigned long nandOffset;
+
+    /*
+    0	unsigned char badBlock;		
+    1	unsigned char blockType;	
+    2	unsigned short blockNum;	
+    4	unsigned char page;			
+    5	unsigned char badBlock2;	
+    6	unsigned short blockNum1;	
+    8	unsigned char page1;		
+    9	unsigned short blockNum2;	
+    11	unsigned char page2;		
+    */
+    nandOffset = ((unsigned long)block * FTL_PAGES_PER_BLOCK * (FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + FTL_SPARE_BYTES_PER_PAGE)) + ((unsigned long)page * (FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE + FTL_SPARE_BYTES_PER_PAGE));
+printf("BAD-MARKING-BLOCK: (%d,%d+%d=%d)\n", block, page, offset, value);
+    nandStore[nandOffset + (FTL_SECTORS_PER_PAGE * FTL_SECTOR_SIZE) + offset] = value;
+
+#ifdef EMU_VISUALIZER
+EmuVisualizerUpdate(0, (((unsigned long)block * FTL_PAGES_PER_BLOCK + page) * FTL_SECTORS_PER_PAGE), FTL_SECTORS_PER_PAGE, 128);
 #endif
 
+    return;
+}
+
+#endif
+
+#endif

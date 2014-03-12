@@ -29,11 +29,17 @@
 #include "Peripherals\myI2C.h"
 #include "HardwareProfile.h"
 
+#ifdef __DEBUG
+	volatile unsigned short myI2CLastAddress;
+#endif
+
+// Software code
+#ifdef USE_SW_I2C
+
 #if (!defined(mySCL) || !defined(mySDAr) || !defined(mySDAw))
 	#error "definitions needed"
 #endif
 
-#if !( defined(USE_HW_I2C1) || defined(USE_HW_I2C2) || defined(USE_HW_I2C3) || defined(USE_HW_I2C))
 	// I need a very fast variable for my I2C code that does not require banking
 	/* all accesses to these will be unbanked */
 	unsigned char my_I2C_working_var;
@@ -129,11 +135,11 @@
 		#endif
 	}
 
-#else
-
+#elif ( defined(USE_HW_I2C1) || defined(USE_HW_I2C2) || defined(USE_HW_I2C3) || defined(USE_HW_I2C))
+	// Note: Use a low rate for debugging functions
 	#define LOCAL_I2C_RATE I2C_RATE_100kHZ
 
-	extern void I2CBusDebug(char* list)
+	void I2CBusDebug(char* list)
 	{
 		unsigned char add;
 		for (add=0;add<0x7f;add++,list++)
@@ -152,4 +158,53 @@
 		myI2Cputc(0); myI2Cputc(0x06); 
 		myI2CStop(); WaitStopmyI2C();myI2CClose();
 	}
+
+	#ifdef ENABLE_I2C_TIMOUT_CHECK
+	void myI2CCheckTimeout(unsigned short timeout)
+	{
+		#ifdef __DEBUG // Allow debugging of timeouts
+		// Put a breakpoint here to manually check timouts
+		if (timeout == 0)
+		{
+			static volatile unsigned short status = 0, sda, scl;
+			status = I2C1STAT;
+			sda = mySDAr;
+			scl = mySCL;
+
+			Nop();
+			Nop();
+			Nop();
+
+			// Attempt an unlock for common error (sda=low lockup)
+			if(sda==0)
+			{
+				myI2CClose();
+				myI2COpen();myI2CStart(); WaitStartmyI2C();
+				myI2Cputc(0);  
+				myI2Cputc(0);  
+				myI2Cputc(0);  
+				myI2CStop(); WaitStopmyI2C();myI2CClose();
+				myI2COpen();
+				sda = mySDAr;
+			}	
+
+			Nop();
+			Nop();
+			Nop();
+
+		}
+		#else // Just unlock bus
+		if (timeout == 0)
+		{
+			myI2CClose(); 			// Power off module
+			myI2Cclear();
+			myI2COpen();			// Restore module
+		}
+		#endif
+		return;
+	}
+	#endif
+
+#else
+	// No I2C used so no code generated
 #endif

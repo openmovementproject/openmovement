@@ -34,7 +34,11 @@
 void usb_putchar(unsigned char);
 int usb_getchar(void);
 char usb_haschar(void);
-void USBCDCWait(void);
+void usb_write(const void *buffer, unsigned int len);
+
+char USBCDCBusy(void);
+void USBCDCWait(void);  // wait until empty
+//void USBCDCWaitNotFull(void);   // wait until not full
 void USBProcessIO(void);
 void USBSerialIO(void);
 unsigned char GetCDCBytesToCircularBuffer(void);

@@ -1,6 +1,6 @@
 // [dgj] Fixes read problem from last two clusters, and FAT16 FORMAT_SECTORS_PER_CLUSTER
 #define DGJ_FIX
-
+#define KL_FIX
 /******************************************************************************
 *
 *               Microchip Memory Disk Drive File System
@@ -68,12 +68,20 @@
 ********************************************************************/
 
 #include "Compiler.h"
-#include "MDD File System/FSIO.h"
+#ifdef KL_FIX		// This won't be needed if "Flux/include" is in your project include path
+	#include "../Include/MDD File System/FSIO.h"
+#else
+	#include "MDD File System/FSIO.h"
+#endif
 #include "GenericTypeDefs.h"
 #include "string.h"
 #include "stdlib.h"
 #include "ctype.h"
-#include "MDD File System/FSDefs.h"
+#ifdef KL_FIX		// This won't be needed if "Flux/include" is in your project include path
+	#include "../Include/MDD File System/FSDefs.h"
+#else
+	#include "MDD File System/FSDefs.h"
+#endif
 
 #ifdef ALLOW_FSFPRINTF
 #include "stdarg.h"
@@ -6110,9 +6118,10 @@ CETYPE FILECreateHeadCluster( FILEOBJ fo, DWORD *cluster)
         // lets erase this cluster
         if(error == CE_GOOD)
         {
-#ifndef DGJ_FIX		// [dgj] I don't think this is required (at least for writing -- check whether reading copes)
-            error = EraseCluster(disk,*cluster);
+#ifdef DGJ_FIX		// [dgj] I don't think this is required unless it is a directory (at least for writing -- check whether reading copes)
+			if(fo->attributes & ATTR_DIRECTORY)
 #endif
+            error = EraseCluster(disk,*cluster);
         }
     }
 

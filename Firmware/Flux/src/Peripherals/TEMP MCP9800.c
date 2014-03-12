@@ -4,7 +4,7 @@
 // Include
 #define USE_AND_OR
 #include "GenericTypeDefs.h"
-#include "myI2C.h"
+#include "Peripherals/myI2C.h"
 #include "Peripherals/TEMP MCP9800.h"
 // User defines for rate ant address
 #define LOCAL_I2C_RATE		((OSCCONbits.COSC==1)? 72 : 18)		/*200kHz for this device, controls baud*/
@@ -41,9 +41,12 @@ void MCP9800Off(void)
 
 void MCP9800Sample(void)
 {
+	// Shutdown to access one-shot
+	MCP9800Off(); 
+	// Then trigger a one shot conversion
 	SENSOROpen();
 	SENSORAddressWrite(MCP9800_CONFIG_REG);
-	SENSORWrite(saved_MCP9800_setup | MCP9800_ONE_SHOT_ENABLE | MCP9800_SHUTDOWN);
+	SENSORWrite(saved_MCP9800_setup | MCP9800_ONE_SHOT | MCP9800_SHUTDOWN);
 	SENSORClose();	
 }
 
@@ -69,6 +72,12 @@ signed int MCP9800Read(void)
 	result |= SENSORReadLast();
 	SENSORClose();
 	return result;
+}
+
+// Convert the reading into 0.1C steps - bottom 8 bits are fractional part in modulo 2 format
+signed int MCP9800inCelcius(signed int MCP9800conversion)
+{
+	return ((signed int)(((signed long)MCP9800conversion*10)>>8));
 }
 
 //EOF

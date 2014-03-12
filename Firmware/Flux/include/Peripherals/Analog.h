@@ -56,17 +56,30 @@ unsigned short AdcBattToMillivolt(unsigned short value);
 unsigned int AdcLdrToLux(unsigned short value);
 short AdcTempToTenthDegreeC(unsigned short value);
 
+// This relies on the interrupt clearing the ASAMP bit
+void AdcStartConversion(void);
+
+// Useful macro
+#define UpdateAdc()		{AdcInit();\
+						AdcSampleNow();\
+						AdcOff(); }
+#define UpdateAdcWait()	{AdcInit();\
+						AdcSampleWait();\
+						AdcOff(); }
+
 
 // Legacy code compatibility
 #ifndef NO_LEGACY
-
+#ifndef ADC_INDEX_LDR
+	#define ADC_INDEX_LDR	ADC_INDEX_LIGHT
+#endif
     // Global array (new code should use structure)
-    #define ADCresult (adcResult.values)
-
-    // Array indices (new code should use structure elements)
-    #define ADC_BATTERY 0
-    #define ADC_LDR 1
-    #define ADC_TEMP 2
+//    #define ADCresult (adcResult.values)
+//
+//    // Array indices (new code should use structure elements)
+//    #define ADC_BATTERY 0
+//    #define ADC_LDR 1
+//    #define ADC_TEMP 2
 
     // Functions
 //    #define InitADCOn() AdcInit()

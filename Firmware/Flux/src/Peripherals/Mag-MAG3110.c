@@ -34,7 +34,13 @@
 #include <stdio.h>
 #include <TimeDelay.h>
 #include "Peripherals/Mag.h"
-#include "myI2C.h"
+
+// Alternate I2C bus?
+#ifdef MAG_ALTERNATE_I2C
+	#define MY_I2C_OVERIDE MAG_ALTERNATE_I2C
+#endif
+#define USE_AND_OR
+#include "Peripherals/myI2C.h"
 
 #ifndef MAG_I2C_MODE
 	#error "This magnetometer is I2C only."
@@ -61,38 +67,32 @@
 #define	MAG_ADDR_CTRL_REG2		0x11
 
 // I2C routines
-#define USE_AND_OR
-#include "myI2C.h"
-#define LOCAL_I2C_RATE		((OSCCONbits.COSC==1)? 72 : 18)		/*200kHz for this device, controls baud*/
+#define LOCAL_I2C_RATE		I2C_RATE_200kHZ
 #define MAG_ADDRESS			0x1C	/*I2C address*/
 #define MAG_MASK_READ  		0x01 	/*I2C_READ_MASK*/
 #define MAG_DEVICE_ID		0xC4 	/*Staic response*/
 
-// I2C functions for using the Mag.c code
-#define MagIdleI2C        myI2CIdle
-#define MagStartI2C       myI2CStart
-#define MagWriteI2C       myI2Cputc
-#define MagStopI2C        myI2CStop
-#define MagAckI2C         myI2CAck
-#define MagNackI2C 	      myI2CNack
-#define MagReadI2C        myI2Cgetc
-#define MagRestartI2C     myI2CRestart
-#define MagOpenI2C()	  myI2COpen()
-#define MagWaitStartI2C() WaitStartmyI2C()
-#define MagWaitStopI2C()  WaitStopmyI2C()
-#define MagWaitRestartI2C() WaitRestartmyI2C()
-#define MagCloseI2C()	  myI2CClose()
-
-// I2C - (OR register in MagAddressX with Mag_MASK_BURST)
-#define MagOpen()              MagOpenI2C();MagStartI2C(); MagWaitStartI2C();
-#define MagAddressRead(_r)     MagWriteI2C(MAG_ADDRESS); MagWriteI2C((_r)); MagRestartI2C(); MagWaitStartI2C(); MagWriteI2C(MAG_ADDRESS | MAG_MASK_READ);
-#define MagAddressWrite(_r)    MagWriteI2C(MAG_ADDRESS); MagWriteI2C((_r)); 
-#define MagReadContinue()      MagReadI2C(); MagAckI2C()
-#define MagReadLast()          MagReadI2C(); MagNackI2C()
-#define MagWrite(_v)           MagWriteI2C((_v));
-#define MagClose()             MagStopI2C(); MagWaitStopI2C();MagCloseI2C();
-#define MagReopen()            MagRestartI2C(); MagWaitRestartI2C();
-
+// I2C 
+#define CUT_DOWN_I2C_CODE_SIZE
+#ifndef CUT_DOWN_I2C_CODE_SIZE
+#define MagOpen()              myI2COpen();myI2CStart(); WaitStartmyI2C();
+#define MagAddressRead(_r)     myI2Cputc(MAG_ADDRESS); myI2Cputc((_r)); myI2CRestart(); WaitRestartmyI2C(); myI2Cputc(MAG_ADDRESS | I2C_READ_MASK);
+#define MagAddressWrite(_r)    myI2Cputc(MAG_ADDRESS); myI2Cputc((_r)); 
+#define MagReadContinue()      myI2Cgetc(); myI2CAck()
+#define MagReadLast()          myI2Cgetc(); myI2CNack()
+#define MagWrite(_v)           myI2Cputc((_v));
+#define MagClose()             myI2CStop(); WaitStopmyI2C();myI2CClose();
+#define MagReopen()            myI2CRestart(); WaitRestartmyI2C();
+#else
+void MagOpen(void)						{myI2COpen();myI2CStart(); WaitStartmyI2C();}
+void MagAddressRead(unsigned char _r)	{myI2Cputc(MAG_ADDRESS); myI2Cputc((_r)); myI2CRestart(); WaitRestartmyI2C(); myI2Cputc(MAG_ADDRESS | I2C_READ_MASK);}
+void MagAddressWrite(unsigned char _r)	{myI2Cputc(MAG_ADDRESS); myI2Cputc((_r)); }
+unsigned char MagReadContinue(void)   	{unsigned char ret = myI2Cgetc(); myI2CAck();return ret;}
+unsigned char MagReadLast(void)       	{unsigned char ret = myI2Cgetc(); myI2CNack();return ret;}
+void MagWrite(unsigned char _v)       	{myI2Cputc((_v));}
+void MagClose(void )             		{myI2CStop(); WaitStopmyI2C();myI2CClose();}
+void MagReopen(void )            		{myI2CRestart(); WaitRestartmyI2C();}
+#endif
 
 static unsigned char 	magRate = 0;
 				char 	magPresent = 0;
@@ -114,7 +114,13 @@ unsigned char MagVerifyDeviceId(void)
 // MagStartup
 void MagStartup(unsigned char samplingRate)
 {
+	if(!magPresent)return;
+	MAG_DISABLE_INTS();
 	MagOpen();
+	MagReopen();
+	MagAddressWrite(MAG_ADDR_CTRL_REG1);
+	MagWrite(0b00000000);	/*Device is turned off first*/
+	MagReopen();
 	MagAddressWrite(MAG_ADDR_OFF_X_MSB);	/* Offset regs*/
 	MagWrite(0b00000000);	/*	MAG_ADDR_OFF_X_MSB */
 	MagWrite(0b00000000);	/*	MAG_ADDR_OFF_X_LSB */
@@ -122,6 +128,13 @@ void MagStartup(unsigned char samplingRate)
 	MagWrite(0b00000000);	/*	MAG_ADDR_OFF_Y_LSB */
 	MagWrite(0b00000000);	/*	MAG_ADDR_OFF_Z_MSB */
 	MagWrite(0b00000000);	/*	MAG_ADDR_OFF_Z_LSB */
+	MagReopen();
+	/*MAG_ADDR_CTRL_REG2*/
+	MagAddressWrite(MAG_ADDR_CTRL_REG2);
+	MagWrite(0b10000000); /*
+	b7		: 	AUTO_MRST_EN Automatic Magnetic Sensor Reset. 0: Automatic Magnetic sensor resets off. 1: Automatic Magnetic sensor resets on.
+	b5		:	RAW 0: Normal mode -data values are corrected by the user offset register values. 1: Raw mode: data values are not corrected by the user offset register values.
+	b4		:	Mag_RST 0: Reset cycle not active. 1: Reset cycle initiate or Reset cycle busy/active.*/
 	MagReopen();
 	MagAddressWrite(MAG_ADDR_CTRL_REG1);
 	/*MAG_ADDR_CTRL_REG1*/
@@ -137,7 +150,8 @@ void MagStartup(unsigned char samplingRate)
 			case (5)	:	{ctrl_reg1 = 0b10000001;magRate = 5;	break;} /*68uA*/
 			case (2)	:	{ctrl_reg1 = 0b10100001;magRate = 2;	break;} /*34.4uA*/
 			case (1)	:	{ctrl_reg1 = 0b11000001;magRate = 1;	break;} /*17.2uA*/
-			default 	:	{ctrl_reg1 = 0b01100001;magRate = 10;	break;}/* 10Hz OSR 16, 137uA */
+			case (0)	:	{ctrl_reg1 = 0b00000010;magRate = 0;	break;} /*Polled,12.5ms OSR=16 (fastest)*/
+			default 	:	{ctrl_reg1 = 0b01100010;magRate = 0;	break;} /*Polled,100ms  OSR=16*/
 		}
 		MagWrite(ctrl_reg1); /*
 		b7-5	:	DR[2:0]	Data rate selection. Default value: 000.
@@ -146,35 +160,86 @@ void MagStartup(unsigned char samplingRate)
 		b1		:	TM Trigger immediate measurement. 0: Normal operation based on AC condition. 1: Trigger measurement.
 		b0		:	AC	0: STANDBY mode. 1: ACTIVE mode. */
 	}
-	/*MAG_ADDR_CTRL_REG2*/
-	MagWrite(0b00000000); /*
-	b7		: 	AUTO_MRST_EN Automatic Magnetic Sensor Reset. 0: Automatic Magnetic sensor resets off. 1: Automatic Magnetic sensor resets on.
-	b5		:	RAW 0: Normal mode: data values are corrected by the user offset register values. 1: Raw mode: data values are not corrected by the user offset register values.
-	b4		:	Mag_RST 0: Reset cycle not active. 1: Reset cycle initiate or Reset cycle busy/active.*/
 	MagClose(); 
+
+	#ifdef MAG_ZERO_ON_POWER_UP
+		// KL: This applies the first sample as an offset
+		mag_t temp;
+		if(samplingRate<=0) return;
+		MagSingleSample(NULL); 			// Discard initial buffer contents
+		MagSingleSample(NULL); 			// Discard initial buffer contents
+		DelayMs(25);				// Wait sensor startup time (25ms)
+		DelayMs(2000/samplingRate);	// Wait for a sample (2x sample time in ms)
+		MagSingleSample(&temp);		// Discard some samples for settling
+		DelayMs(2000/samplingRate);	// Wait for a sample (2x sample time in ms)		
+		MagSingleSample(&temp);		// Discard some samples for settling
+		DelayMs(2000/samplingRate);	// Wait for a sample (2x sample time in ms)		
+		MagSingleSample(&temp);		// Discard some samples for settling
+		DelayMs(2000/samplingRate);	// Wait for a sample (2x sample time in ms)		
+		MagSingleSample(&temp);		// Get a sample	
+		MagWriteOffsets(&temp); 	// Read sample and apply offset
+	#endif
+
 	return;
 }
 
 // Shutdown the device to standby mode (standby mode, interrupts disabled)
 void MagStandby(void)
 {
+	if(!magPresent)return;
+	MAG_DISABLE_INTS();
 	MagOpen();
 	MagAddressWrite(MAG_ADDR_CTRL_REG1);
-	MagWrite(0b01100000);/* 10Hz OSR 16, 137uA, continuous normal sampling ON
+	MagWrite(0b01100000);/* 10Hz OSR 16, 137uA, continuous normal sampling off - standby
 	b7-5	:	DR[2:0]	Data rate selection. Default value: 000.
 	b4-3	:	OS [1:0] This register configures the over sampling ratio or measurement integration time. Default value: 00.
 	b2		:	FR Fast Read selection. Default value: 0: The full 16-bit values are read. 1: Fast Read, 8-bit values read from the MSB registers.
 	b1		:	TM Trigger immediate measurement. 0: Normal operation based on AC condition. 1: Trigger measurement.
 	b0		:	AC	0: STANDBY mode. 1: ACTIVE mode. */
-	/*MAG_ADDR_CTRL_REG2*/	
 	MagClose();
 }
 
 /*Note: The samples are 2's compliment and 16bit*/
 void MagSingleSample(mag_t *value)
 {
-	MagOpen();	
-	MagAddressRead(MAG_ADDR_OUT_X_MSB);
+	if(!magPresent){value->x = value->y = value->z = 0;return;}
+	unsigned char dataReadyStatus;
+	static mag_t last_read = {{0}};
+	int i;
+
+	for (i=0;i<5;i++) // Retry 5 times
+	{
+		MagOpen();	
+		MagAddressRead(MAG_ADDR_DR_STATUS);
+		dataReadyStatus = MagReadContinue();
+	
+		// Check for read collision 
+		if (dataReadyStatus == 0xC4) 
+		{
+			MagReadLast();	// Dummy
+			MagClose();		// Close bus
+			continue;		// Loop round again	
+		}
+		else
+		{
+			break; 			// Device responded ok, continue reading
+		}
+	}
+	
+	// Check for errors
+	if(i>=5)
+	{
+		// FAILED, device not responding- return last sample
+		value->xh=last_read.xh;
+		value->xl=last_read.xl;
+		value->yh=last_read.yh;
+		value->yl=last_read.yl;
+		value->zh=last_read.zh;
+		value->zl=last_read.zl;
+		return; 
+	}
+
+	// No collision detected
 	if (value == NULL)
 	{
 		MagReadContinue();MagReadContinue();MagReadContinue();
@@ -182,28 +247,47 @@ void MagSingleSample(mag_t *value)
 	}
 	else
 	{
-	value->xh = MagReadContinue();
-	value->xl = MagReadContinue();
-	value->yh = MagReadContinue();
-	value->yl = MagReadContinue();
-	value->zh = MagReadContinue();
-	value->zl = MagReadLast();
+		// Store each value to return if error occurs
+		last_read.xh = value->xh = MagReadContinue();
+		last_read.xl = value->xl = MagReadContinue();
+		last_read.yh = value->yh = MagReadContinue();
+		last_read.yl = value->yl = MagReadContinue();
+		last_read.zh = value->zh = MagReadContinue();
+		last_read.zl = value->zl = 		MagReadLast();
+
 	}
 	MagClose();
+
 	return;
 }
 
 // Enable interrupts
-void MagEnableInterrupts(unsigned char flags, unsigned char pinMask)
+void MagEnableInterrupts(void)
 {
+	if(!magPresent)return;
 	// The Magnetometer is always enabled when continuous sampling
 	// The INT pin is cleared (active high) by reading the data regs
-	MagSingleSample(NULL);
-	MAG_CN_INT = 1;
-	CN_INTS_ON();
+	while(MAG_INT)MagSingleSample(NULL); // Clears pin
+	MAG_ENABLE_INTS();
+	if (MAG_INT)MAG_INT_IF = 1;
 	return;
 }
 
+// Read at most 'maxEntries' 3-axis samples 
+void MagWriteOffsets(mag_t *magBuffer)
+{
+	if(!magPresent)return;
+	MagOpen();
+	MagAddressWrite(MAG_ADDR_OFF_X_MSB);
+	MagWrite(magBuffer->xh);
+	MagWrite(magBuffer->xl);
+	MagWrite(magBuffer->yh);
+	MagWrite(magBuffer->yl);
+	MagWrite(magBuffer->zh);
+	MagWrite(magBuffer->zl);
+	MagClose();
+return;
+}
 
 // Read at most 'maxEntries' 3-axis samples 
 unsigned char MagReadFIFO(mag_t *magBuffer, unsigned char maxEntries)
@@ -220,6 +304,7 @@ return 0;
 }
 
 // Debug dump registers
+#if 0
 void MagDebugDumpRegisters(void)
 {
 	static unsigned char i,regs[10];
@@ -237,9 +322,28 @@ void MagDebugDumpRegisters(void)
 	Nop();
  	return;
 }
-
+#endif
 // 
 void MagPackData(short *input, unsigned char *output)
 {
 
 }
+
+
+// ------ Uniform -ValidSettings() & -StartupSettings() functions ------
+
+// Returns whether given settings are valid
+char MagValidSettings(unsigned short rateHz, unsigned short sensitivity, unsigned long flags)
+{
+    // 80, 40, 20, 10, 5, 2, 1
+    return (rateHz == 80 || rateHz == 40 || rateHz == 20 || rateHz == 10 || rateHz == 5 || rateHz == 2 || rateHz == 1);
+}
+
+// Starts the device with the given settings
+void MagStartupSettings(unsigned short rateHz, unsigned short sensitivity, unsigned long flags)
+{
+    MagStartup(rateHz);
+    if (flags & MAG_FLAG_FIFO_INTERRUPTS) { MagEnableInterrupts(); }
+}
+
+// ------

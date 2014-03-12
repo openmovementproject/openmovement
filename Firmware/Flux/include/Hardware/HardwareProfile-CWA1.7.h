@@ -41,10 +41,12 @@
     #define 	CWA1_7
     #define HARDWARE_VERSION 0x17           // BCD format (for USB response)
 
+#define  ENABLE_printhexdump
+
 //SystemPwrSave arguments OR together
 #define WAKE_ON_USB				0x1
-#define WAKE_ON_ADXL1			0x2	
-#define WAKE_ON_ADXL2			0x4
+#define WAKE_ON_ACCEL1			0x2	
+#define WAKE_ON_ACCEL2			0x4
 #define WAKE_ON_GYRO1			0x8	
 #define WAKE_ON_GYRO2			0x10
 #define WAKE_ON_BUTTON			0x20
@@ -62,6 +64,10 @@
 #define JUST_POWER_DOWN_PERIPHERALS	0x20000
 #define DONT_RESTORE_PERIPHERALS	0x40000
 
+// Now legacy
+#define WAKE_ON_ADXL1			WAKE_ON_ACCEL1
+#define WAKE_ON_ADXL2			WAKE_ON_ACCEL2
+
 // Essential Functions in HardwareProfile.c
 extern void WaitForPrecharge(void);
 extern void SystemPwrSave(unsigned long NapSetting);
@@ -75,10 +81,12 @@ extern void SystemPwrSave(unsigned long NapSetting);
     #define USB_BUS_SENSE       	PORTFbits.RF5
 	#define USB_BUS_SENSE_INIT()	USB_BUS_SENSE_PIN=1
 	// Change notification int,  vectors to button handler
-	#define USB_BUS_SENSE_INTS()	{/*New USB int is remappable -> INT3*/\
+	#define USB_INIT_BUS_SENSE_INTS(){/*New USB int is remappable -> INT3*/\
 									IFS3bits.INT3IF = 0;/*Flag*/\
 									IEC3bits.INT3IE = 1;/*Unmask*/\
 									}
+	#define USB_BUS_SENSE_INTS()	USB_INIT_BUS_SENSE_INTS() /*This define is now legacy, it doen't make gramatical sense*/
+
     // MCHPFSUSB frameworkc self-power flag
     #define self_power          0   // 0 = bus-powered, 1 = self-powered
 
@@ -217,8 +225,8 @@ extern void SystemPwrSave(unsigned long NapSetting);
     #define BATT_CHARGE_ZERO		614
 	#define BATT_CHARGE_MIN_LOG		517		// minimum level to update log
 	#define BATT_CHARGE_MIN_SAFE	520		// minimum safe running voltage (5%), avoids unwanted RTC resets and file corruptions etc.
-    #define BATT_CHARGE_MID_USB		688     // (was 650) 80% - level to count towards recharge cycle counter
-    #define BATT_CHARGE_FULL_USB	708     // was 670 ?!
+    #define BATT_CHARGE_MID_USB		650     // level to count towards recharge cycle counter
+    #define BATT_CHARGE_FULL_USB	670
     #define BATT_CHARGE_FULL		708
 
 
@@ -252,6 +260,7 @@ extern void SystemPwrSave(unsigned long NapSetting);
 	// All the pins need re-mapping. See RemapPins() in this file.
 
     // Accelerometer 
+    #define ACCEL_ADXL345
     #define ACCEL_CS_PIN		TRISCbits.TRISC15         
     #define ACCEL_CS            LATCbits.LATC15
     #define	ACCEL_SCK           needs remapping   	
@@ -279,13 +288,9 @@ extern void SystemPwrSave(unsigned long NapSetting);
 								ACCEL_INT2_PIN	= 1;\
 								}
 								
+									
     // Flash Memory - Hynix/Micron
     #define NAND_DEVICE     NAND_DEVICE_HY27UF084G2B
-    #define NAND_DEVICE_ALT NAND_DEVICE_HY27UF084G2x
-
-	// Switches on no-RCB for alternative NAND. Eliminating the read copy back code widens the compatibility of this driver at the expense of slower writes and 1 page of RAM usage on the MCU
-	#define NAND_NO_RCB
-	#define NAND_BYTES_PER_PAGE 2112		// Page size (when no-RCB used)
 
 	#define FLASH_DATA_WR	LATE
 	#define FLASH_DATA_RD	PORTE

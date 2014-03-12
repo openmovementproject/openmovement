@@ -291,6 +291,8 @@
 	The only difference is the SPI_CS line and interrupts.
 	*/
     #define USE_GYRO
+	#define GYRO_IS_L3G4200D
+	#define GYRO_FIFO_WATERMARK 25
 #ifdef USE_GYRO
 	#define GYRO_INT_PRIORITY	4
     #define GYRO_CS_PIN 		TRISBbits.TRISB3

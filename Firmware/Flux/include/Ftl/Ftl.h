@@ -110,7 +110,10 @@ char FtlFlush(char finalize);														// Flushes all FTL buffers
 char FtlReadSector(unsigned long sector, unsigned char *buffer);					// Reads the specified sector through the FTL (verifying ECC data if present)
 char FtlWriteSector(unsigned long sector, const unsigned char *buffer, char ecc);	// Writes the specified sector through the FTL (optionally writing ECC data)
 
-char FtlReadRawSector(unsigned long sector, unsigned char *buffer);                 // Directly read a raw NAND sector (FTL-aware) - for recovery
+// Specialist utility functions
+char FtlReadRawSector(unsigned long physicalSector, unsigned char *buffer);         // Directly read a raw NAND sector (FTL-aware) - for recovery
+char FtlTranslateLogicalSectorToPhysical(unsigned long logicalSector, unsigned short *physicalBlock, unsigned char *page, unsigned char *sectorInPage);	// Translate a logical sector address to a physical block address (and, optionally, the physical page address and sector-in-page offset)
+char FtlRelocatePhysicalBlockAndMarkBad(unsigned short physicalBlock);				// Relocate the block contents and mark the specified physical block as bad
 
 unsigned short FtlIncrementInactivity(void);										// Increment inactivity counter and return current value
 

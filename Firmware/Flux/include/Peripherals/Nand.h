@@ -72,20 +72,26 @@ char NandStorePage(void);
 char NandStorePageRepeat(unsigned short block, unsigned char page);
 
 // Read device parameters
-typedef struct
-{
-    unsigned short revisionNumber;          // ONFI parameter page offset @4-5
-    unsigned long  dataBytesPerPage;        // ONFI parameter page offset @80-83
-    unsigned short spareBytesPerPage;       // ONFI parameter page offset @84-85
-    unsigned long  pagesPerBlock;           // ONFI parameter page offset @92-94
-    unsigned long  blocksPerLogicalUnit;    // ONFI parameter page offset @96-99
-    unsigned char  logicalUnits;            // ONFI parameter page offset @100
-} NandParameters;
-char NandReadParameters(NandParameters *nandParameters);
+#ifndef NANDPARAMETERS_T_DEFINED // KL, to fix nand multi bug, we want one definition but two instances
+#define NANDPARAMETERS_T_DEFINED
+	typedef struct
+	{
+	    unsigned short revisionNumber;          // ONFI parameter page offset @4-5
+	    unsigned long  dataBytesPerPage;        // ONFI parameter page offset @80-83
+	    unsigned short spareBytesPerPage;       // ONFI parameter page offset @84-85
+	    unsigned long  pagesPerBlock;           // ONFI parameter page offset @92-94
+	    unsigned long  blocksPerLogicalUnit;    // ONFI parameter page offset @96-99
+	    unsigned char  logicalUnits;            // ONFI parameter page offset @100
+	} NandParameters_t;
+#endif
+char NandReadParameters(NandParameters_t *nandParameters);
 
 // Debug functions for emulated NAND
 #ifdef _WIN32
 void NandDebugRead(unsigned short block, unsigned char page, unsigned short offset, unsigned char *buffer, unsigned short length);
 void NandDebugCorrupt(unsigned short block, unsigned char page);
 void NandDebugFail(unsigned short block, unsigned char page);
+void NandDebugMarkBadBlock(unsigned short block, unsigned char page, int offset, unsigned char value);
 #endif
+
+//EOF
