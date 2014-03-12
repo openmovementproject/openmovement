@@ -1,0 +1,18 @@
+#summary Open Movement BuildAX Building Monitoring
+
+= Open Movement - BuildAX Building Monitoring =
+
+The BuildAX wireless sensors measure building environment/occupancy and include temperature, humidity, light and movement.  (V1 sensors include acoustic noise, V2 sensors include a door opening sensor).
+
+<wiki:comment>
+== Documentation ==
+  * [BuildAXSoftware BuildAX Software]
+  * [BuildAXFirmware BuildAX Firmware]
+  * [BuildAXHardware BuildAX Hardware]
+  * [BuildAXMechanical BuildAX Mechanical]
+</wiki:comment>
+
+== Links ==
+  * [Documentation Documentation]
+  * [Source Source]
+  * [Downloads Downloads]
