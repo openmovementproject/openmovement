@@ -45,7 +45,7 @@ unsigned char 	MagRate(void);
 // Read device ID
 unsigned char MagVerifyDeviceId(void);
 
-// MagStartup
+// MagStartup - startup with 0 == polled
 void MagStartup(unsigned char samplingRate);
 
 // Shutdown the Magnetometer
@@ -55,7 +55,10 @@ void MagStandby(void);
 void MagSingleSample(mag_t *MagBuffer);
 
 // Enable interrupts
-void MagEnableInterrupt(void);
+void MagEnableInterrupts(void);
+
+// Write offsets, these correct the mag o/p
+void MagWriteOffsets(mag_t *magBuffer);
 
 // Read at most 'maxEntries' 3-axis samples - Note: device may have no fifo
 unsigned char MagReadFIFO(mag_t *MagBuffer, unsigned char maxEntries);
@@ -68,6 +71,20 @@ void MagDebugDumpRegisters(void);
 
 // 16 bit data will not be packed and this function will not be implemented
 void MagPackData(short *input, unsigned char *output);
+
+
+// ------ Uniform -ValidSettings() & -StartupSettings() functions ------
+
+// Flags for settings
+#define MAG_FLAG_FIFO_INTERRUPTS 0x0001			// Has an interrupt (but not a FIFO)
+
+// Returns whether given settings are valid
+char MagValidSettings(unsigned short rateHz, unsigned short sensitivity, unsigned long flags);
+
+// Starts the device with the given settings
+void MagStartupSettings(unsigned short rateHz, unsigned short sensitivity, unsigned long flags);
+
+// ------
 
 #endif
 

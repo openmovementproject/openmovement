@@ -35,9 +35,13 @@
 #include "Peripherals/Gyro.h"
 #endif
 #include "Peripherals/Rtc.h"
+#ifndef IGNORE_FTL
 #include "Peripherals/Nand.h"
+#endif
 #include "Peripherals/Analog.h"
+#ifndef IGNORE_FTL
 #include "Ftl/Ftl.h"
+#endif
 
 
 // Configuration word
@@ -401,8 +405,10 @@ unsigned short SelfTest(void)
     // Read ADXL device ID (should be ACCEL_DEVICE_ID = 0xE5)
     if (!AccelVerifyDeviceId()) { result |= 0x0001; }
 
+#ifndef IGNORE_FTL
     // Read NAND parameters and compare with compiled-in constants
     if (FtlVerifyNandParameters()) { result |= 0x0002; }
+#endif
 
     // FTL
 

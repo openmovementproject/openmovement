@@ -66,13 +66,13 @@ char radioPresent = 0;	// [dgj] Global status flag
     #include "WirelessProtocols/Console.h"
     #include "WirelessProtocols/SymbolTime.h"
     #include "WirelessProtocols/NVM.h"
-  
+
     /************************ VARIABLES ********************************/
     MACINIT_PARAM   MACInitParams;
     
     #if defined(__18CXX)
         #define MIPS    (CLOCK_FREQ/4000000)
-    #elif defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__) || defined(__dsPIC33F__)
+    #elif defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__) || defined(__dsPIC33F__)|| defined(__dsPIC33E__)
         #define MIPS    (CLOCK_FREQ/2000000)
     #elif defined(__PIC32MX__)
         #define MIPS    (CLOCK_FREQ/1000000)   // PIC32 has various execution timing. Here assumes the best situation
@@ -128,9 +128,14 @@ char radioPresent = 0;	// [dgj] Global status flag
     WORD_VAL myNetworkAddress;
 
     volatile MRF24J40_STATUS MRF24J40Status;
-    
+
+#ifndef MRF_SPI_OPEN
     void SPIPut(BYTE v);
     BYTE SPIGet(void);
+#else
+	#define SPIPut(_c) MRF_SPI_PUTC(_c)
+	inline unsigned char SPIGet(){MRF_SPI_PUTC(0xff);return MRF_SPI_GETC();}
+#endif
     
     /*********************************************************************
      * void PHYSetLongRAMAddr(INPUT WORD address, INPUT BYTE value)
@@ -154,7 +159,6 @@ char radioPresent = 0;	// [dgj] Global status flag
     void PHYSetLongRAMAddr(INPUT WORD address, INPUT BYTE value)
     {
         volatile BYTE tmpRFIE = RFIE;
-        
         RFIE = 0;
         PHY_CS = 0;
         SPIPut((((BYTE)(address>>3))&0x7F)|0x80);
@@ -187,8 +191,7 @@ char radioPresent = 0;	// [dgj] Global status flag
      ********************************************************************/
     void PHYSetShortRAMAddr(INPUT BYTE address, INPUT BYTE value)
     {
-        volatile BYTE tmpRFIE = RFIE;
-        
+        volatile BYTE tmpRFIE = RFIE;   
         RFIE = 0;
         PHY_CS = 0;     
         SPIPut(address);
@@ -219,14 +222,12 @@ char radioPresent = 0;	// [dgj] Global status flag
     {
         BYTE toReturn;
         volatile BYTE tmpRFIE = RFIE;
-        
         RFIE = 0;
         PHY_CS = 0;
         SPIPut(address);
         toReturn = SPIGet();
         PHY_CS = 1;
         RFIE = tmpRFIE;
-        
         return toReturn;
     }
     
@@ -250,7 +251,6 @@ char radioPresent = 0;	// [dgj] Global status flag
     {
         BYTE toReturn;
         volatile BYTE tmpRFIE = RFIE;
-        
         RFIE = 0;
         PHY_CS = 0;
         SPIPut(((address>>3)&0x7F)|0x80);
@@ -258,7 +258,6 @@ char radioPresent = 0;	// [dgj] Global status flag
         toReturn = SPIGet();
         PHY_CS = 1;
         RFIE = tmpRFIE;
-        
         return toReturn;
     }
 
@@ -266,7 +265,9 @@ char radioPresent = 0;	// [dgj] Global status flag
     {
         BYTE i;
         WORD j;
-        
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif
         // first perform a hardware reset
         PHY_RESETn = 0;
         for(j=0;j<(WORD)300;j++){}
@@ -392,7 +393,10 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
             PHYSetShortRAMAddr(WRITE_RFCTL,0x00);
     
         #endif          
-        
+ #ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
+       
     }
         
     
@@ -787,8 +791,9 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
             BOOL IntraPAN;
         #endif
         MIWI_TICK t1, t2;
-
-    
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif
         if( transParam.flags.bits.broadcast )
         {
             transParam.altDestAddr = TRUE;
@@ -1067,6 +1072,9 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
                     if( MRF24J40Status.bits.TX_FAIL )
                     {
                         MRF24J40Status.bits.TX_FAIL = 0;
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
                         return FALSE;
                     }
                     break;   
@@ -1077,11 +1085,16 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
                     InitMRF24J40();
                     MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
                     MRF24J40Status.bits.TX_BUSY = 0;
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
                     return FALSE;
                 }
             }
         #endif
-        
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif        
         return TRUE;    
         
     }
@@ -1124,7 +1137,9 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
         BYTE MiMAC_ChannelAssessment(INPUT BYTE AssessmentMode)
         {
             BYTE RSSIcheck;
-            
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif            
             #if defined(ENABLE_PA_LNA)
                 PHYSetLongRAMAddr(TESTMODE, 0x08);              // Disable automatic switch on PA/LNA
                 #if defined(MRF24J40MC)
@@ -1163,7 +1178,9 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
                 #endif
                 PHYSetLongRAMAddr(TESTMODE, 0x0F);
             #endif
-            
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif            
             return RSSIcheck;
         }
     #endif
@@ -1213,6 +1230,9 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
          *****************************************************************************************/    
         BOOL MiMAC_PowerState(INPUT BYTE PowerState)
         {
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif
             switch(PowerState)
             {
                 case POWER_STATE_DEEP_SLEEP:
@@ -1319,8 +1339,14 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
                     break;
                     
                 default:
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
                     return FALSE;
             }
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
             return TRUE;
         }
     #endif
@@ -1367,6 +1393,7 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
      *****************************************************************************************/      
     BOOL MiMAC_SetChannel(INPUT BYTE channel, INPUT BYTE offsetFreq)
     {
+
         if( channel < 11 || channel > 26)
         {
             return FALSE;
@@ -1378,11 +1405,16 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
                 return FALSE;
             }
         #endif
-        
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif        
         MACCurrentChannel = channel;
         PHYSetLongRAMAddr(RFCTRL0,((channel-11)<<4)|0x03);
         PHYSetShortRAMAddr(WRITE_RFCTL,0x04);
-        PHYSetShortRAMAddr(WRITE_RFCTL,0x00);   
+        PHYSetShortRAMAddr(WRITE_RFCTL,0x00); 
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif  
         return TRUE;  
     }
     
@@ -1449,8 +1481,13 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
         {
             reg += 0x10;
         }
-    
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif    
         PHYSetLongRAMAddr(RFCTRL3,reg);
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
         return TRUE;
     }
     
@@ -1497,11 +1534,16 @@ if (!j--) { radioPresent = 0; break; }	// [dgj]
         myNetworkAddress.v[1] = Address[1];
         MAC_PANID.v[0] = PANID[0];
         MAC_PANID.v[1] = PANID[1];
-        
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif
         PHYSetShortRAMAddr(WRITE_SADRL,myNetworkAddress.v[0]);
         PHYSetShortRAMAddr(WRITE_SADRH,myNetworkAddress.v[1]);
         PHYSetShortRAMAddr(WRITE_PANIDL,MAC_PANID.v[0]);
         PHYSetShortRAMAddr(WRITE_PANIDH,MAC_PANID.v[1]);
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif
         return TRUE;    
     }
     
@@ -1593,25 +1635,35 @@ if (!radioPresent) { return FALSE; }	// [dgj] Return false if InitMRF24J40() app
      * Side Effects:    Various flags and registers set.
      *
      ********************************************************************/
-    #if defined(__18CXX)
-        #pragma interruptlow HighISR
-        void HighISR(void)
-    #elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__)
-        void _ISRFAST __attribute__((interrupt, auto_psv)) _INT1Interrupt(void)
-    #elif defined(__PIC32MX__)
-        void __ISR(_EXTERNAL_1_VECTOR, ipl4) _INT1Interrupt(void)
-    #else
-        void _ISRFAST _INT1Interrupt(void)
-    #endif
+	#ifndef MRFIsr
+	    #if defined(__18CXX)
+	        #pragma interruptlow HighISR
+	        void HighISR(void)
+	    #elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__)
+	        void _ISRFAST __attribute__((interrupt, auto_psv)) _INT1Interrupt(void)
+	    #elif defined(__PIC32MX__)
+	        void __ISR(_EXTERNAL_1_VECTOR, ipl4) _INT1Interrupt(void)
+	    #else
+	        void _ISRFAST _INT1Interrupt(void)
+	    #endif
+	#else
+		void MRFIsr(void)
+	#endif
     {
         if(RFIE && RFIF)
         {  
             BYTE i;
+			#ifdef ENABLE_SECURITY
             BYTE j;
+			#endif
               
             //clear the interrupt flag as soon as possible such that another interrupt can
             //occur quickly.
             RFIF = 0;
+
+#ifdef MRF_REMAP	
+MRF_REMAP();
+#endif
 
             //create a new scope for the MRF24J40 interrupts so that we can clear the interrupt
             //flag quickly and then handle the interrupt that we have already received
@@ -1797,8 +1849,9 @@ if (!radioPresent) { return FALSE; }	// [dgj] Return false if InitMRF24J40() app
                     }//end of RX_BUFFERED check
                         
                 } //end of RXIF check
-                
-START_OF_SEC_INT:                
+#ifdef ENABLE_SECURITY                
+START_OF_SEC_INT:     
+#endif           
                 if( flags.bits.SECIF )
                 {
                     #ifdef ENABLE_SECURITY
@@ -1868,8 +1921,9 @@ START_OF_SEC_INT:
                 }                
             } //end of scope of RF interrupt handler
         } //end of if(RFIE && RFIF)
-
+#ifdef ENABLE_SECURITY
 END_OF_RF_INT:        
+#endif
         #if defined(__18CXX)
             //check to see if the symbol timer overflowed
             if(TMR_IF)
@@ -1889,7 +1943,9 @@ END_OF_RF_INT:
             UserInterruptHandler(); 
         #endif
 
-        
+#ifdef MRF_UNREMAP	
+MRF_UNREMAP();
+#endif        
         return;
         
     } //end of interrupt handler

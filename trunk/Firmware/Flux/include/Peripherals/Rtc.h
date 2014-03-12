@@ -30,12 +30,50 @@
 #define _RTC_H
 
 
+// Microchip RTCC support
+#if defined(__18CXX) || defined(__C30__) || defined( __C32__ ) || defined(__PIC32MX__)
+
 // Implementation-specific
-#if 1
-#include <Rtcc.h>
-typedef rtccTimeDate rtcInternalTime;
+#include "Compiler.h"
+
+
+// HACK: Fixes the fact that Rtcc.h on dsPIC includes Generic.h with redefinitions of some generic types
+#ifdef __dsPIC33E__
+#include "GenericTypeDefs.h"
+#define _GENERIC_H_
 #endif
 
+
+#include "HardwareProfile.h"
+#include <Rtcc.h>
+
+#ifdef __C30__
+	typedef rtccTimeDate rtcInternalTime;
+
+#elif defined( __C32__ )
+	typedef union {
+		struct {rtccTime time;rtccDate date;
+		};
+		unsigned long l[2];
+    }rtcInternalTime;
+	
+#else 
+	#warning "Define date time structure used"
+#endif
+
+#else
+    // Other platform (e.g. PC), dummy elements to compile
+    #define RTC_NO_INTERNAL_FORMAT
+	typedef union {
+		unsigned long l[2];
+    } rtcInternalTime;
+    #define RTC_IPL_shadow_t extern char
+    #define RTC_INTS_DISABLE()	{;}
+    #define RTC_INTS_ENABLE()	{;}
+    #ifdef _WIN32
+        #define inline _inline
+    #endif
+#endif
 
 
 // DateTime - a single long integer date/time value
@@ -54,6 +92,22 @@ typedef rtccTimeDate rtcInternalTime;
         };
     } DateTime;
 */
+
+// Interrupt mask protection functions - used to block data stream interrupts
+#ifdef __C30__
+	typedef unsigned char RTC_IPL_shadow_t;
+	#define RTC_INTS_DISABLE()	{IPLshadow = SRbits.IPL; if(SRbits.IPL<RTC_INT_PRIORITY)SRbits.IPL=RTC_INT_PRIORITY;}
+	#define RTC_INTS_ENABLE()	{SRbits.IPL = IPLshadow;}
+#elif defined(__C32__)
+	typedef unsigned long RTC_IPL_shadow_t;
+	#define RTC_INTS_DISABLE()	{IPLshadow = _CP0_BCS_STATUS((_CP0_STATUS_IPL_MASK&((~RTC_INT_PRIORITY)<<_CP0_STATUS_IPL_POSITION)),(_CP0_STATUS_IPL_MASK&(RTC_INT_PRIORITY<<_CP0_STATUS_IPL_POSITION)));} // Assign IPL equal to RTC_INT_PRIORITY
+	#define RTC_INTS_ENABLE()	{_CP0_BCS_STATUS((_CP0_STATUS_IPL_MASK&(~IPLshadow)),(_CP0_STATUS_IPL_MASK&IPLshadow));}
+#endif
+//#define RTC_INTS_DISABLE()	{IEC3bits.RTCIE = 0;IEC0bits.T1IE = 0;}
+//#define RTC_INTS_ENABLE()	{IEC3bits.RTCIE = 1;IEC0bits.T1IE = 1;}
+
+
+
 // 'DateTime' bit pattern:  YYYYYYMM MMDDDDDh hhhhmmmm mmssssss
 typedef unsigned long DateTime;
 #define DATETIME_FROM_YMDHMS(_year, _month, _day, _hours, _minutes, _seconds) ( (((unsigned long)(_year % 100) & 0x3f) << 26) | (((unsigned long)(_month) & 0x0f) << 22) | (((unsigned long)(_day) & 0x1f) << 17) | (((unsigned long)(_hours) & 0x1f) << 12) | (((unsigned long)(_minutes) & 0x3f) <<  6) | ((unsigned long)(_seconds) & 0x3f) )
@@ -67,10 +121,16 @@ typedef unsigned long DateTime;
 // Valid range
 #define DATETIME_MIN DATETIME_FROM_YMDHMS(2000,1,1,0,0,0)
 #define DATETIME_MAX DATETIME_FROM_YMDHMS(2063,12,31,23,59,59)
+#define DATETIME_INVALID 0xffffffff
 
 // Fractional seconds to milliseconds
 #define RTC_FRACTIONAL_TO_MS(_t) ((unsigned short)((1000UL * (_t)) >> 16))
 
+// Directly reads the RTC (WARNING: RTC interrupts must not be on)
+#ifdef __C30__
+	#define RtcRead(_ptr) RtccReadTimeDate(_ptr)
+#endif
+#define RtcClear() RtcWrite(DATETIME_MIN)
 
 // Initialize the RTC
 void RtcStartup(void);
@@ -109,8 +169,11 @@ DateTime RtcFromInternal(rtcInternalTime *value);
 // Convert a date/time to the implementation-specific representation
 rtcInternalTime *RtcToInternal(DateTime value);
 
+// Add/subtract a second offset from a DateTime ~1000 opperations
+DateTime RtcCalcOffset(DateTime start, signed long seconds);
+
 // Initialize RTC
-void RtcClear(void);
+//void RtcClear(void);
 
 // Increment time by 1 second
 //DateTime RtcIncrement(DateTime value);
@@ -149,19 +212,18 @@ inline void RtcTasks(void);
 
 //extern void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void)
 // (internal update function)
-inline char RtcTimerTasks(void);
+inline void RtcTimerTasks(void);
 
-#ifdef RTC_SWWDT
-volatile unsigned int rtcSwwdtValue = 0;
-#endif
 
-#define RTC_SWWDT
-#ifdef RTC_SWWDT
-#define RTC_SWWDT_TIMEOUT 55
-extern volatile unsigned int rtcSwwdtValue;
-// These functions are actually defines to ensure they're actually inline
-#define RtcSwwdtReset() { rtcSwwdtValue = 0; }
-#define RtcSwwdtIncrement() { if (++rtcSwwdtValue >= RTC_SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); Reset(); } }
+#if (defined(RTC_SWWDT) || defined(RTC_SWWDT_TIMEOUT))
+	extern volatile unsigned int rtcSwwdtValue;
+	// These functions are actually defines to ensure they're actually inline
+	//#warning "SW WDT ENABLED"
+	#define RtcSwwdtReset() { rtcSwwdtValue = 0; }
+	#define RtcSwwdtIncrement() { if (++rtcSwwdtValue >= RTC_SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); DelayMs(1000); Reset(); } }
+#else
+	#define RtcSwwdtReset() 	{}
+	#define RtcSwwdtIncrement() {}
 #endif
 
 

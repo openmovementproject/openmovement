@@ -25,7 +25,7 @@
 #define MCP9800_INTERRUPT_MODE			0x02
 
 /*Default setting, note - 12bit mode uses alot of power at 1Hz, suggest 0.1Hz max for 12bit setting!*/
-#define MCP9800_DEFAULT	(MCP9800_ONE_SHOT_ENABLE|MCP9800_RESOLUTION_10BIT_60MS) //12uA at 1Hz
+#define MCP9800_DEFAULT	(MCP9800_ONE_SHOT_ENABLE|MCP9800_RESOLUTION_12BIT_240MS) //12uA at 1Hz
 
 // Prototypes
 
@@ -39,4 +39,6 @@ void MCP9800Sample(void);
 unsigned char MCP9800CheckComplete(void);
 // Read the latest conversion - assumes the current conversion is over
 signed int MCP9800Read(void);
+// Convert the reading into 0.1C steps
+signed int MCP9800inCelcius(signed int MCP9800conversion);
 //EOF

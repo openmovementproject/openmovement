@@ -35,9 +35,15 @@
 
 /*Default settings - legacy*/
 // Default settings
-#define ACCEL_DEFAULT_RATE      (ACCEL_RATE_100 | ACCEL_RANGE_8G)   // ACCEL_RATE_LOW_POWER
-#define ACCEL_DEFAULT_WATERMARK 25          // Define default watermark (up to 31)
-#define ACCEL_HIGH_SPEED_WATERMARK 10		// Define high speed watermark (up to 31)
+#ifndef ACCEL_DEFAULT_RATE 
+	#define ACCEL_DEFAULT_RATE      (ACCEL_RATE_100 | ACCEL_RANGE_8G)   // ACCEL_RATE_LOW_POWER
+#endif
+#ifndef ACCEL_DEFAULT_WATERMARK
+	#define ACCEL_DEFAULT_WATERMARK 25          // Define default watermark (up to 31)
+#endif
+#ifndef ACCEL_HIGH_SPEED_WATERMARK
+	#define ACCEL_HIGH_SPEED_WATERMARK 10		// Define high speed watermark (up to 31)
+#endif
 
 /*For all accelerometers*/
 // Accelerometer sampling rate codes (current shown as normal / low-power mode)
@@ -64,6 +70,7 @@
 
 // Rate calculations
 #define ACCEL_FREQUENCY_FOR_RATE(_f)   (3200 / (1 << (15-((_f) & 0x0f))))
+#define ACCEL_RANGE_FOR_RATE(_f)       (16 >> ((_f) >> 6))
 #define ACCEL_IS_VALID_RATE(_v)        (((_v & 0x3f) >= 0x6 && (_v & 0x3f) <= 0xf) || ((_v & 0x3f) >= 0x17 && (_v & 0x3f) <= 0x1c))
 #define ACCEL_IS_LOW_POWER_RATE(_v)    ((_v & 0x3f) & 0x10)
 
@@ -74,19 +81,21 @@
 	#define ACCEL_BYTES_PER_SAMPLE 6
 	#define ACCEL_MAX_FIFO_SAMPLES  (32)
 	// Interrupt source masks
-	#define ACCEL_INT_SOURCE_INACTIVITY   0x80
+	#define ACCEL_INT_SOURCE_ASLEEP   	  0x80
 	#define ACCEL_INT_SOURCE_WATERMARK    0x40
-	#define ACCEL_INT_SOURCE_ORIENTATION  0x20
-	#define ACCEL_INT_SOURCE_ACTIVITY     0x10
+	#define ACCEL_INT_SOURCE_TRANSIENT    0x20
+	#define ACCEL_INT_SOURCE_ORIENTATION  0x10
 	#define ACCEL_INT_SOURCE_TAP   		  0x08
-	#define ACCEL_INT_SOURCE_SINGLE_TAP   0x08
-	#define ACCEL_INT_SOURCE_DOUBLE_TAP   0x08
 	#define ACCEL_INT_SOURCE_FREE_FALL    0x04
 	#define ACCEL_INT_SOURCE_DATA_READY   0x01 // per sample!
 
+
 	#define ACCEL_INT_SOURCE_OVERRUN	0x00 //Not used
 
-#else //defined(ACCEL_ADXL345)
+	unsigned char AccelReadSysmod(void); // needed to determine whether waking / sleeping
+	unsigned char AccelReadTransientSource(void);
+
+#elif defined(ACCEL_ADXL345)
 	/*For the ADXL345*/
 	// Defines
 	#define ACCEL_BYTES_PER_SAMPLE 6
@@ -106,22 +115,45 @@
 	#define ACCEL_INT_SOURCE_WATERMARK    0x02
 	#define ACCEL_INT_SOURCE_OVERRUN      0x01
 
+#elif defined(ACCEL_LIS3DH)
+	/*For the LIS3DH*/
+	// Defines
+	// Interrupt source masks
+	#define ACCEL_INT_SOURCE_ORIENTATION  0x01
+	#define ACCEL_INT_SOURCE_DATA_READY   0x02
+	#define ACCEL_INT_SOURCE_ACTIVITY	  0x04
+	#define ACCEL_INT_SOURCE_SINGLE_TAP   0x08
+	#define ACCEL_INT_SOURCE_DOUBLE_TAP   0x20
+	#define ACCEL_INT_SOURCE_WATERMARK    0x40
+
+	#define ACCEL_MAX_FIFO_SAMPLES 32
+
 #endif
 
 // Globals..
-extern char accelPresent;       // Accelerometer present (call AccelVerifyDeviceId() once to set this)
+extern char 			accelPresent;       // Accelerometer present (call AccelVerifyDeviceId() once to set this)
+extern unsigned char 	accelOrientation;
+extern unsigned char 	accelTapStaus;
+extern unsigned char 	accelTransSource;
 
 // Data types
+#ifdef ACCEL_8BIT_MODE
+typedef union
+{
+    struct { signed char x, y, z; };
+} accel_t;
+#else
 typedef union
 {
     struct { short x, y, z; };
     struct { unsigned char xl, xh, yl, yh,  zl, zh; };
     short values[3];
 } accel_t;
+#endif
 
 // Prototypes..
 
-// Read device ID (should be ACCEL_DEVICE_ID = 0xE5)
+// Read device ID
 unsigned char AccelVerifyDeviceId(void);
 
 // Initialize the accelerometer
@@ -148,6 +180,9 @@ extern unsigned char AccelReadTapStatus(void);
 // Read the orientation of the device - on supported hardware
 unsigned char AccelReadOrientaion(void);
 
+// Read the source of the transient - on supported hardware
+unsigned char AccelReadTransientSource(void);
+
 // Read interrupt source - b1 = watermark, b5=double-tap, b6=single-tap
 extern unsigned char AccelReadIntSource(void);
 
@@ -162,6 +197,27 @@ unsigned short AccelFrequency(void);
 
 // Packs a buffer of 16-bit (x,y,z) values into an output buffer (4 bytes per entry)
 extern void AccelPackData(short *input, unsigned char *output);
+
+// (Mostly private) returns the setting code for the given values
+unsigned short AccelSetting(int rate, int range);
+
+
+// ------ Uniform -ValidSettings() & -StartupSettings() functions ------
+
+// Flags for settings
+#define ACCEL_FLAG_FIFO_INTERRUPTS        0x0001     // Default configuration with watermark interrupt
+#define ACCEL_FLAG_ORIENTATION_INTERRUPTS 0x0002     // Orientation interrupts on second interrupt
+#define ACCEL_FLAG_TRANSIENT_INTERRUPTS   0x0004     // Transient (activity) interrupts on second interrupt
+#define ACCEL_FLAG_TAP_INTERRUPTS         0x0008     // Tap interrupts on second interrupt
+
+// Returns whether given settings are valid
+char AccelValidSettings(unsigned short rateHz, unsigned short sensitivityG, unsigned long flags);
+
+// Starts the device with the given settings
+void AccelStartupSettings(unsigned short rateHz, unsigned short sensitivityG, unsigned long flags);
+
+// ------
+
 
 // Unpack DWORD - Sign-extend 10-bit value, adjust for exponent
 #define ACCEL_UNPACK_XVALUE(_a) ( (signed short)((unsigned short)0xffc0 & (unsigned short)((_a) <<  6)) >> (6 - ((unsigned char)((_a) >> 30))) )

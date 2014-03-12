@@ -40,6 +40,10 @@
 adc_results_t adcResult;
 
 
+#ifndef ADC_INDEX_LIGHT
+#define ADC_INDEX_LIGHT ADC_INDEX_LDR		// Compatibility with older projects
+#endif
+
 // Should probably move these to HardwareProfile?
 #define AdcSettleLdr() DelayMs(1)
 #define AdcSettleTemp() DelayMs(1)
@@ -145,23 +149,43 @@ unsigned short *AdcSampleWait(void)
 unsigned short *AdcSampleNow(void)
 {
 
-// KL - Fixed ADC read bug
-//	ConvertADC10(); // starts conversion
-//  while(!AD1CON1bits.DONE); // wait until conversion complete
-
 	if (AD1CON1bits.ADON == 0) return (unsigned short*)&adcResult; // Otherwise this code will hang forever
 	IFS0bits.AD1IF = 0;		// Clear interrupt flag
 	AD1CON1bits.ASAM = 1;	// Begin auto sampling
 	while (!IFS0bits.AD1IF);// Wait for the allotted number of conversions set by ADC_INTR_?_CONV in config2
 	AD1CON1bits.ASAM = 0;	// Stop auto sampling
 	while(!AD1CON1bits.DONE);// Wait for partially complete samples
-	
+		
     adcResult.batt = ReadADC10(ADC_INDEX_BATT); // Battery
-    adcResult.ldr  = ReadADC10(ADC_INDEX_LDR);  // LDR
+    adcResult.ldr  = ReadADC10(ADC_INDEX_LIGHT);// LDR
     adcResult.temp = ReadADC10(ADC_INDEX_TEMP); // Temp
 
     return adcResult.values;
 }
+
+void AdcStartConversion(void)
+{
+	if (AD1CON1bits.ADON == 0) return; // Otherwise this code will hang forever
+	IPC3bits.AD1IP = ADC_INT_PRIORITY;
+	IFS0bits.AD1IF = 0;		// Clear interrupt flag
+	IEC0bits.AD1IE = 1;		// Enable interrupts
+	AD1CON1bits.ASAM = 1;	// Begin auto sampling
+}
+
+// ADC interrupt will clear the ASAMP bit after sample completes
+void __attribute__((interrupt, shadow, auto_psv)) _ADC1Interrupt(void)
+{
+	IEC0bits.AD1IE = 0;
+	IFS0bits.AD1IF = 0;			// Clear flag
+	AD1CON1bits.ASAM = 0;		// Stop auto sampling
+	while(!AD1CON1bits.DONE);	// Wait for partially complete samples
+	LDR_DISABLE();
+    TEMP_DISABLE();
+    adcResult.batt = ReadADC10(ADC_INDEX_BATT); // Battery
+    adcResult.ldr  = ReadADC10(ADC_INDEX_LIGHT);// LDR
+    adcResult.temp = ReadADC10(ADC_INDEX_TEMP); // Temp
+}
+
 
 
 unsigned int AdcBattToPercent(unsigned int Vbat)
@@ -191,9 +215,16 @@ unsigned int AdcBattToPercent(unsigned int Vbat)
 
 	unsigned long temp; 
 	
-	// Compensate for charging current
-	if (USB_BUS_SENSE && (Vbat>12)) Vbat -= 12; 
- 
+	// Compensate for charging current and internal resistance
+	if (USB_BUS_SENSE)
+	{
+		if (Vbat>BATT_FIT_CONST_1) 		// Const voltage charging, variable current
+		{
+			Vbat -= (((BATT_CHARGE_FULL-BATT_FIT_CONST_1)-(Vbat-BATT_FIT_CONST_1))>>2);
+		}
+	 	else if (Vbat>12) Vbat -= 12; 	// Const current charging 200mA 
+	}
+	
 	// Early out functions for full and zero charge
 	if (Vbat > BATT_CHARGE_FULL) return 100;
     if (Vbat < BATT_CHARGE_ZERO) return 0;
@@ -228,18 +259,25 @@ unsigned short AdcBattToMillivolt(unsigned short value)
 }
 
 
-// LDRConvert - Convert LDR reading to units of Lux
+// AdcLdrToLux - convert ADC reading to log10(lux) * 10^3  -->  lux = pow(10.0, log10LuxTimes10Power3 / 1000.0);
 unsigned int AdcLdrToLux(unsigned short value)
 {
-	return value;
-	// example of how to convert the numbers
-    //#include "math.h"
-	// N*(3/1024) = Log10(Lux)
-//	unsigned long temp = value;
-//	temp *= 3000;
-//	temp >>= 10;
-//	temp = (unsigned long)pow(10,3+((float)temp/1000)); 
-//   return temp; // Temp is in milli-Lux
+    // 'APDS-9007' Ambient Light Photo Sensor with Logarithmic Current Output 
+    //  Summary: The measured ADC voltage is log10(lux) --> lux = 10 ^ V
+    //
+    // adc = (V / Vref) * (2^10)  -->  V = (adc * Vref) / (2^10)
+	//unsigned short voltageMV = (unsigned short)((((unsigned long)value * VREF_USED_MV) + 512) >> 10);
+    //
+    // I = V / R  -->  I = <voltage-mV> / 1000 / <loadResistance> * 1000000000; where loadResistance = 100kOhm = 100000 Ohm
+    //unsigned short currentNA = voltageMV * 10;
+    //
+    // 10uA per log10(lux)  -->  10000 nA per log10(lux)  -->  log10(lux) * 10^3 = <current-nA> / 10
+    //unsigned short log10LuxTimes10Power3 = currentNA / 10;
+    //
+    // Calculate lux value (1 to 986279)
+    //double lux = pow(10.0, log10LuxTimes10Power3 / 1000.0);
+    
+    return AdcBattToMillivolt(value);
 }
 
 

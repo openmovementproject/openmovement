@@ -264,7 +264,7 @@ WriteSPIx(10);	// Inactivity Time: 1 sec/LSB [0x0a = 10s]
     //                                                                          Enables FIFO in 'stream' mode interrupting on ADXL-INT1 
     if ((samplingRate & 0x1f) == ACCEL_RATE_800 || (samplingRate & 0x1f) == ACCEL_RATE_1600 || (samplingRate & 0x1f) == ACCEL_RATE_3200)
     {
-		WriteSPIx(0x80 + ACCEL_HIGH_SPEED_WATERMARK);                               // ... sets water mark to 10 (of 32)
+		WriteSPIx(0x80 + ACCEL_HIGH_SPEED_WATERMARK);                               // ... sets water mark to 4 (of 32)
     }
     else
     {

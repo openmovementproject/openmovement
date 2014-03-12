@@ -29,6 +29,19 @@
 #ifndef HARDWAREPROFILE_CWA_H
 #define HARDWAREPROFILE_CWA_H
 
+// These should be chacked properly for this application
+//#warning "Assumptions made about interrupt priority levels here."
+	// SW WDT
+	// #define RTC_SWWDT_TIMEOUT 60
+	// Interrupt priority levels - needed for newer device drivers
+	#define RTC_INT_PRIORITY				6 
+	#define T1_INT_PRIORITY					RTC_INT_PRIORITY 	/*Prevents ms rollover during reads*/
+	#define ADC_INT_PRIORITY				5 /*This is very fast*/
+	#define FIFO_INTERRUPT_PRIORITY 		5
+	#define GLOBAL_I2C_PROCESSOR_PRIORITY	4
+	#define DATA_STREAM_INTERRUPT_PRIORITY 	4
+	#define ACCEL_INT_PRIORITY				4
+
 // These are now defined in the local HardwareProfile.h
 	// Switch between hardware versions (0x16 = 1.6, 0x17 = 1.7)
 	//#define HARDWARE_SELECT 0x16
@@ -55,6 +68,12 @@
 	#if HARDWARE_VERSION != HARDWARE_SELECT
         #error "Hardware does not match included."
 	#endif
+
+
+	// Misc software settings
+	#define OWN_CDC_BUFFER_SIZES
+	#define IN_BUFFER_CAPACITY 128		// Must be 128 for legacy projects
+	#define OUT_BUFFER_CAPACITY 256		// Must be 256 for legacy projects
 
 
     // --- Required functions for all hardware ---

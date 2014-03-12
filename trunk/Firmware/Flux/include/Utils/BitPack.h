@@ -38,6 +38,7 @@
 // Number of bytes required to pack 'n' 10-bit values:  size = ((n / 4) * 5); if ((n % 4) != 0) size += (n % 4) + 1;
 #define BITPACK10_SIZEOF(_n) ((((_n) / 4) * 5) + ((((_n) & 0x03) == 0) ? 0 : (((_n) & 0x03) + 1)))
 
+#ifndef BITPACK_H_NO_FUNCTIONS
 
 // Pack 4x 10-bit samples into 5-byte groups (stored little-endian).
 // IMPORTANT: Samples must be written sequentially (otherwise destination values will be overwritten or combined incorrectly).
@@ -87,5 +88,5 @@ static void BitPack_uint12(void *buffer, unsigned short index, unsigned short va
 }
 */
 
-
+#endif
 #endif

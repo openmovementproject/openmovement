@@ -29,15 +29,12 @@
 #ifndef FSFTL_H
 #define FSFTL_H
 
-
-#define FSFTL_SECTOR_FLUSH 8		// (8 = 512kB)  Flush every N * 64kB written with FSfwriteSector
-//#define FSFTL_READ_PREFETCH     	// [never tested] Support next-sector pre-fetching
-//#define FSFTL_OWN_FORMAT			// [don't use] Support own format command
-//#define FSFTL_WRITE_VOLUME_LABEL    // [experimental - may cause file system problems] Write volume label after formatting
-
 #include "Compiler.h" 
 #ifndef FSFTL_IN_FSCONFIG
 #include "FSconfig.h"
+#ifndef FS_CONFIG_FTL_AWARE
+#warning "Local FSconfig.h does not seem to be aware of the new FSutils.c/FsFtl.c split, see #defines from CWA/FSconfig.h for example."
+#endif
 #endif
 #include "MDD File System/FSDefs.h" 
 #include "MDD File System/FSIO.h"
@@ -68,56 +65,24 @@ BYTE MDD_FTL_WriteProtectState(void);
 BYTE MDD_FTL_InitIO(void);
 
 
+/*
+// Define one or more of these in the local FSconfig.h
+//#define FSFTL_READ_PREFETCH     	// [not tested] Support next-sector pre-fetching
+//#define FSFTL_OWN_FORMAT			// [don't use] Support own format command
+//#define FSFTL_WRITE_VOLUME_LABEL    // [experimental - may cause file system problems] Write volume label after formatting
+*/
+
+// Prefetch (experimental)
 #ifdef FSFTL_READ_PREFETCH
 void FsFtlPrefetch(void);
 #endif
-
-// FSIO.c doesn't allocate buffers on non-embedded compiles
-#if !defined(__18CXX) && !defined (__C30__) && !defined (__PIC32MX__)
-    extern BYTE gDataBuffer[MEDIA_SECTOR_SIZE];    // The global data sector buffer
-    extern BYTE gFATBuffer[MEDIA_SECTOR_SIZE];     // The global FAT sector buffer
-
-	// ...and it fails to prototype these functions...
-    BYTE ReadByte( BYTE* pBuffer, WORD index );
-    WORD ReadWord( BYTE* pBuffer, WORD index );
-    DWORD ReadDWord( BYTE* pBuffer, WORD index );
-#endif
-
 
 // Drive reported as mounted when connected to USB
 extern char fsftlUsbDiskMounted;
 
 
-// Don't define functions that require FSFILE
-#ifndef FSFTL_IN_FSCONFIG
+// Formats the media, optionally initializes the NAND memory
+char FsFtlFormat(char wipe, long serial, const char *volumeLabel);
 
-    // Get a character
-    int FSfgetc(FSFILE *fp);
-
-    // Put a character
-    int FSfputc(int character, FSFILE *fp);
-
-    // Get/put word/dword
-    void FSfputshort(short v, FSFILE *fp);
-    void FSfputlong(long v, FSFILE *fp);
-    short FSfgetshort(FSFILE *fp);
-    long FSfgetlong(FSFILE *fp);
-    
-    // Flushes the file system stream and FTL buffers
-    int FSfflush(FSFILE *stream);
-
-    // Retrieve a line from a file
-    extern char *FSfgets(char *str, int num, FSFILE *stream);
-
-	// Formats the media, optionally initializes the NAND memory
-	char FsFtlFormat(char wipe, long serial, const char *volumeLabel);
-
-    // Writes an aligned sector with optional ECC
-    BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc);
-
-#endif
-
-// Calculates the free space remaining on the drive
-unsigned long FSDiskFree(void);
 
 #endif

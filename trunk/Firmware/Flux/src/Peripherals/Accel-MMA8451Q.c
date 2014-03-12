@@ -28,10 +28,17 @@
 
 // Includes
 #include "HardwareProfile.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <TimeDelay.h>
 #include "Peripherals/Accel.h"
-#include "myI2C.h"
+
+// Alternate I2C bus?
+#ifdef ACCEL_ALTERNATE_I2C
+	#define MY_I2C_OVERIDE	ACCEL_ALTERNATE_I2C
+#endif
+#include "Peripherals/myI2C.h"
+
+
 
 #ifndef ACCEL_I2C_MODE
 	#error "This accelerometer is I2C only."
@@ -104,38 +111,36 @@
 #define		RATE_6HZ	6
 #define		RATE_1HZ	7
 
-// I2C routines
-#define USE_AND_OR
-#include "myI2C.h"
-#define LOCAL_I2C_RATE		((OSCCONbits.COSC==1)? 7 : 1)		/*2MHz for this device, controls baud*/
+#ifndef ACCEL_I2C_RATE
+	#define LOCAL_I2C_RATE		I2C_RATE_1000kHZ
+#else
+	#define LOCAL_I2C_RATE		ACCEL_I2C_RATE
+#endif
+
 #define ACCEL_ADDRESS		0x38 	/*I2C address*/
 #define ACCEL_MASK_READ  	0x01 	/*I2C_READ_MASK*/
 
-// I2C functions for using the ACCEL.c code
-#define ACCELIdleI2C        myI2CIdle
-#define ACCELStartI2C       myI2CStart
-#define ACCELWriteI2C       myI2Cputc
-#define ACCELStopI2C        myI2CStop
-#define ACCELAckI2C         myI2CAck
-#define ACCELNackI2C 	    myI2CNack
-#define ACCELReadI2C        myI2Cgetc
-#define ACCELRestartI2C     myI2CRestart
-#define ACCELOpenI2C()	    myI2COpen()
-#define ACCELWaitStartI2C() WaitStartmyI2C()
-#define ACCELWaitStopI2C()  WaitStopmyI2C()
-#define ACCELWaitRestartI2C() WaitRestartmyI2C()
-#define ACCELCloseI2C()		myI2CClose()
-
-
-// I2C - (OR register in ACCELAddressX with ACCEL_MASK_BURST)
-#define ACCELOpen()              ACCELOpenI2C();ACCELStartI2C(); ACCELWaitStartI2C();
-#define ACCELAddressRead(_r)     ACCELWriteI2C(ACCEL_ADDRESS); ACCELWriteI2C((_r)); ACCELRestartI2C(); ACCELWaitStartI2C(); ACCELWriteI2C(ACCEL_ADDRESS | ACCEL_MASK_READ);
-#define ACCELAddressWrite(_r)    ACCELWriteI2C(ACCEL_ADDRESS); ACCELWriteI2C((_r)); 
-#define ACCELReadContinue()      ACCELReadI2C(); ACCELAckI2C()
-#define ACCELReadLast()          ACCELReadI2C(); ACCELNackI2C()
-#define ACCELWrite(_v)           ACCELWriteI2C((_v));
-#define ACCELClose()             ACCELStopI2C(); ACCELWaitStopI2C();ACCELCloseI2C();
-#define ACCELReopen()            ACCELRestartI2C(); ACCELWaitRestartI2C();
+// I2C 
+#define CUT_DOWN_I2C_CODE_SIZE
+#ifndef CUT_DOWN_I2C_CODE_SIZE
+#define ACCELOpen()              myI2COpen();myI2CStart(); WaitStartmyI2C();
+#define ACCELAddressRead(_r)     myI2Cputc(ACCEL_ADDRESS); myI2Cputc((_r)); myI2CRestart(); WaitRestartmyI2C(); myI2Cputc(ACCEL_ADDRESS | I2C_READ_MASK);
+#define ACCELAddressWrite(_r)    myI2Cputc(ACCEL_ADDRESS); myI2Cputc((_r)); 
+#define ACCELReadContinue()      myI2Cgetc(); myI2CAck()
+#define ACCELReadLast()          myI2Cgetc(); myI2CNack()
+#define ACCELWrite(_v)           myI2Cputc((_v));
+#define ACCELClose()             myI2CStop(); WaitStopmyI2C();myI2CClose();
+#define ACCELReopen()            myI2CRestart(); WaitRestartmyI2C();
+#else
+void ACCELOpen(void)					{myI2COpen();myI2CStart(); WaitStartmyI2C();}
+void ACCELAddressRead(unsigned char _r)	{myI2Cputc(ACCEL_ADDRESS); myI2Cputc((_r)); myI2CRestart(); WaitRestartmyI2C(); myI2Cputc(ACCEL_ADDRESS | I2C_READ_MASK);}
+void ACCELAddressWrite(unsigned char _r){myI2Cputc(ACCEL_ADDRESS); myI2Cputc((_r)); }
+unsigned char ACCELReadContinue(void)   {unsigned char ret = myI2Cgetc(); myI2CAck();return ret;}
+unsigned char ACCELReadLast(void)       {unsigned char ret = myI2Cgetc(); myI2CNack();return ret;}
+void ACCELWrite(unsigned char _v)       {myI2Cputc((_v));}
+void ACCELClose(void )             		{myI2CStop(); WaitStopmyI2C();myI2CClose();}
+void ACCELReopen(void )            		{myI2CRestart(); WaitRestartmyI2C();}
+#endif
 
 
 static unsigned char 	accelRate = 0;
@@ -144,6 +149,7 @@ static unsigned short 	accelFrequency = 0;
 				char 	accelPresent = 0;
 	   unsigned char 	accelOrientation = 0;
 	   unsigned char 	accelTapStaus = 0;
+	   unsigned char 	accelTransSource = 0;
 
 unsigned char AccelRate(void) 		{ return accelRate; }
 unsigned short AccelFrequency(void) { return accelFrequency; }
@@ -156,7 +162,7 @@ unsigned char AccelVerifyDeviceId(void)
 	ACCELAddressRead(ACCEL_ADDR_WHO_AM_I);
 	id = ACCELReadLast();
 	ACCELClose();
-    accelPresent = (id == ACCEL_DEVICE_ID) ? 1 : 0;
+    accelPresent = (id == ACCEL_DEVICE_ID)? 1 : 0;
 	return accelPresent;
 }
 
@@ -164,12 +170,24 @@ unsigned char AccelVerifyDeviceId(void)
 void AccelStartup(unsigned char setting)
 {
 	unsigned int ctrlreg1;
+	// Blocks access if not detected
+	if (!accelPresent) return;
+
+	// DISABLE INTERRUPTS
+	ACCEL_INT1_IE = 0;
+	ACCEL_INT2_IE = 0;
+
 	ACCELOpen();	
 	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1); 
-	ACCELWrite(0); // power off device so you can access the other ctrl regs	
+	ACCELWrite(0); // power off device so you can access the other ctrl regs
+	
+	ACCELReopen();
+	ACCELAddressWrite(ACCEL_ADDR_F_SETUP); 
+	ACCELWrite(0);	/*F_SETUP zeroed to access f_read bits*/
+
 	ACCELReopen();
 	ACCELAddressWrite(ACCEL_ADDR_XYZ_DATA_CFG);
-	accelRange = setting>>4;
+	accelRange = setting&0xf0;
 	switch (accelRange){
 		case (ACCEL_RANGE_8G) : {ACCELWrite(0b00000010);break;}
 		case (ACCEL_RANGE_4G) : {ACCELWrite(0b00000001);break;}
@@ -177,11 +195,12 @@ void AccelStartup(unsigned char setting)
 		default : 				{ACCELWrite(0b00000001);break;}
 	}/*	XYZ_DATA_CFG
 			b4		: 	HPF on/off 	- 0: High pass filter on data out off
-			b1-0	:	Data res	- 10: +/- 4g range*/
-	ACCELWrite(0b00110000);	/*	HP_FILTER_CUTOFF
+			b1-0	:	Data res	- 10: +/- 8g range*/
+	ACCELWrite(0b00100011);	/*	HP_FILTER_CUTOFF
 			b5		: 	Pulse_HPF_BYP 	- 0: HPF enabled for Pulse Processing
 			b4		:	Pulse_LPF_EN	- 0: LPF disabled for Pulse Processing
 			b1-0	:	SEL[1:0]		- 00:See data sheet HPF Cut-off frequency selection*/
+
 	ACCELReopen();
 	ACCELAddressWrite(ACCEL_ADDR_PL_CFG);	
 	ACCELWrite(0b11000000);	/*	PL_CFG
@@ -195,25 +214,30 @@ void AccelStartup(unsigned char setting)
 	ACCELWrite(0b10000100);	/*	P_L_THS_REG
 			b7-3	:	P_L_THS[7:3] Portrait/Landscape Fixed Threshold angle = 1_0000 (45°).
 			b2-0	:	HYS[2:0] This is a fixed angle added to the threshold angle fixed at ±14°, which is 100.*/
-	ACCELWrite(0b00000000);	/*	FF_MT_CFG
+	ACCELWrite(0b01111000);	/*	FF_MT_CFG
 			b7		:	ELE		0: Event flag latch disabled; 1: event flag latch enabled
 			b6		:	OAE		0: Freefall Flag  1: Motion Flag 
 			b5		:	ZEFE	Event flag enable on Z Default value: 0.
 			b4		:	YEFE	Event flag enable on Y event. Default value: 0.
 			b3		:	XEFE	Event flag enable on X event. Default value: 0.*/
+
 	ACCELReopen();
 	ACCELAddressWrite(ACCEL_ADDR_FF_MT_THS);
-	ACCELWrite(0b00000000);	/*	FF_MT_THS
+	ACCELWrite(0b00000011);	/*	FF_MT_THS
 			b7		:	DBCNTM	0: increments or decrements debounce, 1: increments or clears counter.
 			b6-0	:	THS[6:0] Freefall /Motion Threshold: Default value: 000_0000.*/
-	ACCELWrite(0b00000000);	/*	FF_MT_COUNT
+	ACCELWrite(0b00000011);	/*	FF_MT_COUNT
 			b7-0	:	D[7:0] Count value. Default value: 0000_0000*/
+
+	ACCELReopen();
+	ACCELAddressWrite(ACCEL_ADDR_TRANSIENT_CFG);
 	ACCELWrite(0b00010000);	/*	TRANSIENT_CFG
 			b4		:	ELE		0: Event flag latch disabled; 1: Event flag latch enabled
 			b3		:	ZTEFE	0: Event detection disabled; 1: Raise event flag on measured acceleration delta value greater than transient threshold.
 			b2		:	YTEFE	0: Event detection disabled; 1: Raise event flag on measured acceleration delta value greater than transient threshold.
 			b1		:	XTEFE	0: Event detection disabled; 1: Raise event flag on measured acceleration delta value greater than transient threshold.
 			b0		:	HPF_BYP 0: Data to transient acceleration detection block is through HPF 1: Data to transient acceleration detection block is NOT through*/
+
 	ACCELReopen();
 	ACCELAddressWrite(ACCEL_ADDR_TRANSIENT_THS);
 	ACCELWrite(0b00000000);	/*	TRANSIENT_THS
@@ -232,6 +256,7 @@ void AccelStartup(unsigned char setting)
 			b2		:	YSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse
 			b1		:	XDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
 			b0		:	XSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse*/
+
 	ACCELReopen();
 	ACCELAddressWrite(ACCEL_ADDR_PULSE_THSX);
 	ACCELWrite(0b00000000);	/*	PULSE_THSX Pulse threshold x*/
@@ -244,6 +269,9 @@ void AccelStartup(unsigned char setting)
 
 	accelRate = setting&0xf;
 	ctrlreg1 = 0; // Standby mode
+	#ifdef ACCEL_8BIT_MODE
+		 ctrlreg1|=0x2; // 8 Bit mode
+	#endif
 	switch (accelRate) {
 	case (ACCEL_RATE_800) :	{ctrlreg1|=0b00000000;break;}
 	case (ACCEL_RATE_400) :	{ctrlreg1|=0b00001000;break;}
@@ -255,9 +283,11 @@ void AccelStartup(unsigned char setting)
 	case (ACCEL_RATE_1_56) :{ctrlreg1|=0b00111000;break;}
 	default	:	{accelRate=ACCEL_RATE_100;ctrlreg1|=0b00011000;break;}}/*100Hz default*/
 	accelFrequency = ACCEL_FREQUENCY_FOR_RATE(setting);
+
+	// Address has auto incremented to ctrlreg1 by this point so no need to reopen bus
 	ACCELWrite(ctrlreg1);
 	/*ACCELWrite(0b00011001);*/	/*	CTRL_REG1
-			b7-6	:	ASLP_RATE[1:0] Configures the Auto-WAKE sample frequency when the device is in SLEEP Mode. Default value: 00.
+			b7-6	:	ASLP_RATE[1:0] Configures the Auto-WAKE sample frequency when the device is in SLEEP Mode. Default value: 00 (50Hz).
 			b5-3	:	DR[2:0] Data rate selection. 011 -> 100Hz
 			b2		:	LNOISE (0: Normal mode; 1: Reduced Noise mode)
 			b1		:	F_READ (0: Normal mode 1: Fast Read Mode)
@@ -295,30 +325,267 @@ void AccelStartup(unsigned char setting)
 	ACCELWrite(0b00000000);	/*	OFF_X Offset Correction X Register */
 	ACCELWrite(0b00000000);	/*	OFF_Y Offset Correction Y Register */
 	ACCELWrite(0b00000000);	/*	OFF_Z Offset Correction Z Register */
+
 	ACCELReopen();
 	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1);
 	ACCELWrite(ctrlreg1|1); // Turn on device
 	ACCELClose();
+
 	return;
 }
 
 // Shutdown the accelerometer to standby mode (standby mode, interrupts disabled)
 void AccelStandby(void)
 {
+	// Blocks access if not detected
+	if (!accelPresent)  return;
 	ACCELOpen();
 	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1);
-	ACCELWrite(0b00011000);	/*	CTRL_REG1
+	ACCELWrite(0b00000000);	/*	CTRL_REG1
 			b7-6	:	ASLP_RATE[1:0] Configures the Auto-WAKE sample frequency when the device is in SLEEP Mode. Default value: 00.
 			b5-3	:	DR[2:0] Data rate selection. 011 -> 100Hz
 			b2		:	LNOISE (0: Normal mode; 1: Reduced Noise mode)
 			b1		:	F_READ (0: Normal mode 1: Fast Read Mode)
-			b0		:	ACTIVE (0: STANDBY mode; 1: ACTIVE mode)*/	
+			b0		:	ACTIVE (0: STANDBY mode; 1: ACTIVE mode)*/
 	ACCELClose();
 }
 
+
+// Enable interrupts - FIFO enabled and interrupting
+void AccelEnableInterrupts(unsigned char flags, unsigned char pinMask)
+{
+	unsigned char ctrl_reg1;
+	// Blocks access if not detected
+	if (!accelPresent) return;
+
+	// DISABLE INTERRUPTS
+	ACCEL_INT1_IE = 0;
+	ACCEL_INT2_IE = 0;
+
+	/*POWER OFF DEVICE*/
+	ACCELOpen();	
+	ACCELAddressRead(ACCEL_ADDR_CTRL_REG1);
+	ctrl_reg1 = ACCELReadLast();
+	#ifdef ACCEL_8BIT_MODE
+		ctrl_reg1 |= 0x2;
+	#endif
+	ACCELReopen();	
+	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1); 
+	ACCELWrite(0); // power off device so you can access the other ctrl regs	
+	
+	/*SETUP FIFO*/
+	ACCELReopen();
+	ACCELAddressWrite(ACCEL_ADDR_F_SETUP); 
+	// NEW: Only enable the FIFO if the watermark interrupt is enabled
+	if (flags & ACCEL_INT_SOURCE_WATERMARK) { ACCELWrite(0x80|ACCEL_FIFO_WATERMARK); }
+	else 									{ ACCELWrite(0x00|ACCEL_FIFO_WATERMARK); }
+	/*F_SETUP	
+		b7-6	00: FIFO is disabled.
+				01: FIFO contains the most recent samples when overflowed (circular buffer). Oldest sample is discarded to be replaced by new sample.
+				->10: FIFO stops accepting new samples when overflowed.
+				11: Trigger mode. The FIFO will be in a circular mode up to the number of samples in the watermark.
+		b5-0	Watermark: 25 = 0b011001 */
+	ACCELWrite(0);	/*TRIG_CFG - enables trigger sources used to start the FIFO capture
+	b5		Trig_TRANS 
+	b4		Trig_LNDPRT 
+	b3		Trig_PULSE 
+	b2		Trig_FF_MT */
+
+	/* TRANSIENT CONFIGURATION*/
+	ACCELReopen();
+	ACCELAddressWrite(ACCEL_ADDR_TRANSIENT_CFG);
+	ACCELWrite(0b00001110);	/*	TRANSIENT_CFG
+			b4		:	ELE		0: Event flag latch disabled; 1: Event flag latch enabled
+			b3		:	ZTEFE	0: Event detection disabled; 1: Raise event flag on measured acceleration delta value greater than transient threshold.
+			b2		:	YTEFE	0: Event detection disabled; 1: Raise event flag on measured acceleration delta value greater than transient threshold.
+			b1		:	XTEFE	0: Event detection disabled; 1: Raise event flag on measured acceleration delta value greater than transient threshold.
+			b0		:	HPF_BYP 0: Data to transient acceleration detection block is through HPF 1: Data to transient acceleration detection block is NOT through*/
+
+	ACCELReopen();
+	ACCELAddressWrite(ACCEL_ADDR_TRANSIENT_THS);
+	ACCELWrite(0b10000010);	/*	TRANSIENT_THS
+			b7		:	0: increments or decrements debounce; 1: increments or clears counter.
+			b6-0	:	THS[6:0] Transient Threshold: Default value: 000_0000.*/
+	ACCELWrite(0b00000010);	/*	TRANSIENT_COUNT (x sample time)
+			b7-0	:	D[7:0] Count value. Default value: 0000_0000.*/
+	/*SETUP PULSE/TAP DETECTION*/
+	ACCELWrite(0b01111111); /*PULSE_CFG
+			b7		:	DPA	0: 	Double Pulse detection is not aborted if the start of a pulse is detected during the time period specified by the PULSE_LTCY register.
+							1: 	Setting the DPA bit momentarily suspends the double tap detection if the start of a pulse is detected during the time period specified
+								by the PULSE_LTCY register and the pulse ends before the end of the time period specified by the PULSE_LTCY register.
+			b6		:	ELE		0: Event flag latch disabled; 1: Event flag latch enabled
+			b5		:	ZDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
+			b4		:	ZSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse
+			b3		:	YDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
+			b2		:	YSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse
+			b1		:	XDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
+			b0		:	XSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse*/
+
+	ACCELReopen();	
+	ACCELAddressWrite(ACCEL_ADDR_PULSE_THSX); /*7 bit values, 0.063g/LSB fixed, 32 = 2g*/ 
+	ACCELWrite(32); /*X pulse threshold*/
+	ACCELWrite(32); /*Y pulse threshold*/
+	ACCELWrite(32); /*Z pulse threshold*/
+	/*Note: The startup code turns on LPF and HPF for pulse detection.*/
+	ACCELWrite(2);	/*<20ms> PULSE_TMLT - multiple of sample timestep/4 (x by 4 if LPF is on), defines pulse width limit*/
+	ACCELWrite(2); 	/*<40ms> PULSE_LTCY - time after pulse detection that device ignores other pulses in Tsamp/2 (x4 for LPF)*/
+	ACCELWrite(25); /*<250ms>PULSE_WIND - window in which second pulse can arrive to create double tap, same step as PULSE_TMLT*/
+
+	// ENABLE SELECTED INTERRUPTS
+	ACCELReopen();
+	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG2); 
+	ACCELWrite(0b00000000);	/*	CTRL_REG2
+			b7		:	ST 0: Self-Test disabled; 1: Self-Test enabled
+			b6		:	RST 0: Device reset disabled; 1: Device reset enabled.
+			b4-3	:	SMODS[1:0] SLEEP mode power scheme selection. Default value: 00.
+			b2		:	SLPE Auto-SLEEP enable. Default value: 0, activity/inactivity fires interrupt
+			b1-0	:	MODS[1:0] ACTIVE mode power scheme selection. Default value: 00.*/
+	ACCELWrite(0b00000010);	/*	CTRL_REG3 -- All wake sources on
+			b7		:	FIFO_GATE	0: FIFO gate is bypassed. FIFO is flushed upon sleep 1: FIFO preserved on sleep
+			b6		:	WAKE_TRANS 	0: Transient function is bypassed in SLEEP mode. Default value: 0.
+			b5		:	WAKE_LNDPRT 0: Orientation function is bypassed in SLEEP mode. Default value: 0.
+			b4		:	WAKE_PULSE 	0: Pulse function is bypassed in SLEEP mode. Default value: 0.
+			b3		:	WAKE_FF_MT 	0: Freefall/Motion function is bypassed in SLEEP mode. Default value: 0.
+			b1		:	IPOL 		1: ACTIVE high Interrupt polarity ACTIVE high 1, or ACTIVE low 0. Default value: 0.
+			b0		:	PP_OD		0:Push-Pull/1:Open Drain selection on interrupt pad. Default value: 0.*/
+	ACCELWrite(flags);		/*	CTRL_REG4
+			b7		:	INT_EN_ASLP		0: Auto-SLEEP/WAKE interrupt disabled; 1: Auto-SLEEP/WAKE interrupt enabled.
+			B6		: 	INT_EN_FIFO		0: FIFO interrupt off
+			b5		:	INT_EN_TRANS	0: Transient interrupt disabled; 1: Transient interrupt enabled.
+			b4		:	INT_EN_LNDPRT	0: Orientation (Landscape/Portrait) interrupt disabled.
+			b3		:	INT_EN_PULSE	0: Pulse Detection interrupt disabled; 1: Pulse Detection interrupt enabled
+			b2		:	INT_EN_FF_MT	0: Freefall/Motion interrupt disabled; 1: Freefall/Motion interrupt enabled
+			b0		:	INT_EN_DRDY		0: Data Ready interrupt disabled; 1: Data Ready interrupt enabled*/
+	ACCELWrite(pinMask);	/*	CTRL_REG5 - which ints are mapped to int1 pin */
+
+	// TURN ON DEVICE
+	ACCELReopen();	
+	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1); 
+	ACCELWrite(ctrl_reg1); /*Re-enable device*/
+	ACCELClose();
+
+	// KL: Fixed bus lockup caused by reading the device while it is booting up with new settings
+	DelayMs(100);
+
+	// Empty the fifo, read tap, transient and orientation regs to clear pin levels
+	AccelReadTapStatus();
+	AccelReadOrientaion();
+	AccelReadTransientSource();
+	AccelReadFIFO(NULL,32);
+
+	ACCEL_INT1_IP = ACCEL_INT_PRIORITY;
+	ACCEL_INT2_IP = ACCEL_INT_PRIORITY;
+
+	// Now enable the interrupts
+	if(pinMask&flags) // If any ints mapped to int1
+	{
+		ACCEL_INT1_IF = 0;
+		ACCEL_INT1_IE = 1;
+	}
+	if(flags && (pinMask&flags)!=flags) //I any ints enabled on int2 
+	{
+		ACCEL_INT2_IF = ACCEL_INT2; // May have already fired
+		ACCEL_INT2_IE = 1;
+	}
+
+	/*	To clear the interrupts you need to read specific registers:
+		FIFO cleared on reading F_STATUS
+		LNDPRT cleared on reading PL_STATUS
+		PULSE cleared on reading PULSE_SRC */
+}
+
+
+
+// Read number of bytes in fifo - if the fifo has not been initialised this will return unknown
+unsigned char AccelReadFifoLength(void)
+{
+	unsigned char number_in_fifo;
+	// Blocks access if not detected
+	if (!accelPresent)  return 0;
+	ACCELOpen();	
+	ACCELAddressRead(ACCEL_ADDR_F_STATUS); // Bottom 6 bits are number of samples
+	number_in_fifo = ACCELReadLast();
+	number_in_fifo &= 0x3f;
+	ACCELClose();
+	return number_in_fifo;
+}
+
+#ifdef ACCEL_8BIT_MODE
 /*Note: The samples are Left justified signed and 12bit*/
 void AccelSingleSample(accel_t *value)
 {
+	// Blocks access if not detected
+	if (!accelPresent)  
+	{
+		value->x = 0;
+		value->y = 0;
+		value->z = 0;	
+		return;
+	}
+	ACCELOpen();	
+	ACCELAddressRead(ACCEL_ADDR_OUT_X_MSB);
+	value->x = ACCELReadContinue();
+	value->y = ACCELReadContinue();
+	value->z = ACCELReadLast();
+	ACCELClose();
+	return;
+}
+
+
+// Read at most 'maxEntries' 3-axis samples (3 words = 6 bytes) from the accelerometer FIFO into the specified RAM buffer
+unsigned char AccelReadFIFO(accel_t *accelBuffer, unsigned char maxEntries)
+{
+	unsigned char number_in_fifo, number_read=0;
+	unsigned char * ptr = (unsigned char*)accelBuffer; // Pointer cast to bytes
+	// Blocks access if not detected
+	if (!accelPresent) return 0;
+	if (maxEntries == 0) return 0;
+
+	ACCELOpen();	
+	ACCELWrite(ACCEL_ADDRESS | ACCEL_MASK_READ); // The first reg to read will be F_STATUS
+	number_in_fifo = ACCELReadContinue();
+	number_in_fifo &= 0x3f;
+
+	while ((number_in_fifo>1)&&(maxEntries>1))
+	{
+		if (accelBuffer == NULL)
+			{ACCELReadContinue();ACCELReadContinue();ACCELReadContinue();}
+		else
+		{
+			*(ptr+0) = ACCELReadContinue(); // X
+			*(ptr+1) = ACCELReadContinue(); // Y
+			*(ptr+2) = ACCELReadContinue(); // Z
+			ptr+=3;
+		}
+		number_in_fifo--;
+		maxEntries--;
+		number_read++;		
+	}
+	if (accelBuffer == NULL)
+		{ACCELReadContinue();ACCELReadContinue();ACCELReadLast();}
+	else
+	{
+		*(ptr+0) = ACCELReadContinue(); // X
+		*(ptr+1) = ACCELReadContinue(); // Y
+		*(ptr+2) = ACCELReadLast(); 	// Z
+	}
+	ACCELClose();
+	number_read++;
+
+	return number_read;
+}
+#else
+/*Note: The samples are Left justified signed and 12bit*/
+void AccelSingleSample(accel_t *value)
+{
+	// Blocks access if not detected
+	if (accelPresent==0)  
+	{
+		value->x = 0;
+		value->y = 0;
+		value->z = 0;	
+		return;
+	}
 	ACCELOpen();	
 	ACCELAddressRead(ACCEL_ADDR_OUT_X_MSB);
 	value->xh = ACCELReadContinue();
@@ -331,114 +598,21 @@ void AccelSingleSample(accel_t *value)
 	return;
 }
 
-// Enable interrupts - FIFO enabled and interrupting
-void AccelEnableInterrupts(unsigned char flags, unsigned char pinMask)
-{
-	unsigned char ctrl_reg1;
-	/*POWER OFF DEVICE*/
-	ACCELOpen();	
-	ACCELAddressRead(ACCEL_ADDR_CTRL_REG1);
-	ctrl_reg1 = ACCELReadLast();
-	ACCELReopen();	
-	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1); 
-	ACCELWrite(0); // power off device so you can access the other ctrl regs	
-	ACCELReopen();	
-	/*SETUP FIFO*/
-	ACCELAddressWrite(ACCEL_ADDR_F_SETUP); 
-	ACCELWrite(0b10011001);	/*F_SETUP
-	b7-6	00: FIFO is disabled.
-			01: FIFO contains the most recent samples when overflowed (circular buffer). Oldest sample is discarded to be replaced by new sample.
-			->10: FIFO stops accepting new samples when overflowed.
-			11: Trigger mode. The FIFO will be in a circular mode up to the number of samples in the watermark.
-	b5-0	Watermark: 25 = 0b011001 */
-	ACCELWrite(0);	/*TRIG_CFG - enables trigger sources used to start the FIFO capture
-	b5		Trig_TRANS 
-	b4		Trig_LNDPRT 
-	b3		Trig_PULSE 
-	b2		Trig_FF_MT */
-	/*SETUP PULSE DETECTION*/
-	ACCELReopen();	
-	ACCELAddressWrite(ACCEL_ADDR_PULSE_CFG); 
-	ACCELWrite(0b01111111); /*PULSE_CFG
-			b7		:	DPA	0: 	Double Pulse detection is not aborted if the start of a pulse is detected during the time period specified by the PULSE_LTCY register.
-							1: 	Setting the DPA bit momentarily suspends the double tap detection if the start of a pulse is detected during the time period specified
-								by the PULSE_LTCY register and the pulse ends before the end of the time period specified by the PULSE_LTCY register.
-			b6		:	ELE		0: Event flag latch disabled; 1: Event flag latch enabled
-			b5		:	ZDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
-			b4		:	ZSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse
-			b3		:	YDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
-			b2		:	YSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse
-			b1		:	XDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
-			b0		:	XSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse*/
-	ACCELReopen();	
-	ACCELAddressWrite(ACCEL_ADDR_PULSE_THSX); /*7 bit values, 0.063g/LSB fixed, 32 = 2g*/ 
-	ACCELWrite(32); /*X pulse threshold*/
-	ACCELWrite(32); /*Y pulse threshold*/
-	ACCELWrite(32); /*Z pulse threshold*/
-	/*Note: The startup code turns on LPF and HPF for pulse detection.*/
-	ACCELWrite(2);	/*<20ms> PULSE_TMLT - multiple of sample timestep/4 (x by 4 if LPF is on), defines pulse width limit*/
-	ACCELWrite(2); 	/*<40ms> PULSE_LTCY - time after pulse detection that device ignores other pulses in Tsamp/2 (x4 for LPF)*/
-	ACCELWrite(25); /*<250ms>PULSE_WIND - window in which second pulse can arrive to create double tap, same step as PULSE_TMLT*/
-	ACCELReopen();	
-	// ENABLE SELECTED INTERRUPTS
-	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG4); 
-	ACCELWrite(flags);		/*	CTRL_REG4
-			b7		:	INT_EN_ASLP		0: Auto-SLEEP/WAKE interrupt disabled; 1: Auto-SLEEP/WAKE interrupt enabled.
-			B6		: 	INT_EN_FIFO		0: FIFO interrupt off
-			b5		:	INT_EN_TRANS	0: Transient interrupt disabled; 1: Transient interrupt enabled.
-			b4		:	INT_EN_LNDPRT	0: Orientation (Landscape/Portrait) interrupt disabled.
-			b3		:	INT_EN_PULSE	0: Pulse Detection interrupt disabled; 1: Pulse Detection interrupt enabled
-			b2		:	INT_EN_FF_MT	0: Freefall/Motion interrupt disabled; 1: Freefall/Motion interrupt enabled
-			b0		:	INT_EN_DRDY		0: Data Ready interrupt disabled; 1: Data Ready interrupt enabled*/
-	ACCELWrite(pinMask);	/*	CTRL_REG5 - which ints are mapped to int1 pin */
-	// TURN ON DEVICE
-	ACCELReopen();	
-	ACCELAddressWrite(ACCEL_ADDR_CTRL_REG1); 
-	ACCELWrite(ctrl_reg1); /*Re-enable device*/
-	ACCELClose();
-
-	// Empty the fifo, read tap and orientation regs to clear flags
-	AccelReadFIFO(NULL,32);
-	AccelReadTapStatus();
-	AccelReadOrientaion();
-
-	// Now enable the interrupts
-	ACCEL_INT1_IP = ACCEL_INT_PRIORITY;
-	ACCEL_INT1_IF = 0;
-	ACCEL_INT1_IE = 1;
-	ACCEL_INT2_IP = ACCEL_INT_PRIORITY;
-	ACCEL_INT2_IF = 0;
-	ACCEL_INT2_IE = 1;
-
-	/*	To clear the interrupts you need to read specific registers:
-		FIFO cleared on reading F_STATUS
-		LNDPRT cleared on reading PL_STATUS
-		PULSE cleared on reading PULSE_SRC */
-}
-
-// Read number of bytes in fifo - if the fifo has not been initialised this will return unknown
-unsigned char AccelReadFifoLength(void)
-{
-	unsigned char number_in_fifo;
-	ACCELOpen();	
-	ACCELAddressRead(ACCEL_ADDR_F_STATUS); // Bottom 6 bits are number of samples
-	number_in_fifo = ACCELReadLast();
-	number_in_fifo &= 0x3f;
-	ACCELClose();
-	return number_in_fifo;
-}
 
 // Read at most 'maxEntries' 3-axis samples (3 words = 6 bytes) from the accelerometer FIFO into the specified RAM buffer
 unsigned char AccelReadFIFO(accel_t *accelBuffer, unsigned char maxEntries)
 {
 	unsigned char number_in_fifo, number_read=0;
 	unsigned char * ptr = (unsigned char*)accelBuffer; // Pointer cast to bytes
+	// Blocks access if not detected
+	if (!accelPresent) return 0;
 	if (maxEntries == 0) return 0;
 
 	ACCELOpen();	
-	ACCELWriteI2C(ACCEL_ADDRESS | ACCEL_MASK_READ); // The first reg to read will be F_STATUS
+	ACCELWrite(ACCEL_ADDRESS | ACCEL_MASK_READ); // The first reg to read will be F_STATUS
 	number_in_fifo = ACCELReadContinue();
 	number_in_fifo &= 0x3f;
+    if (number_in_fifo == 0) { return 0; }
 
 	while ((number_in_fifo>1)&&(maxEntries>1))
 	{
@@ -476,12 +650,13 @@ unsigned char AccelReadFIFO(accel_t *accelBuffer, unsigned char maxEntries)
 
 	return number_read;
 }
-
-
+#endif
 // Read tap status
 unsigned char AccelReadTapStatus(void)
 {
 	unsigned char tap_status_reg;
+	// Blocks access if not detected
+	if (!accelPresent) return 0;
 	ACCELOpen();	
 	ACCELAddressRead(ACCEL_ADDR_PULSE_SRC);
 	tap_status_reg = ACCELReadLast();
@@ -503,6 +678,8 @@ unsigned char AccelReadTapStatus(void)
 unsigned char AccelReadOrientaion(void)
 {
 	unsigned char pl_status_reg;
+	// Blocks access if not detected
+	if (!accelPresent) return 0;
 	ACCELOpen();	
 	ACCELAddressRead(ACCEL_ADDR_PL_STATUS);
 	pl_status_reg = ACCELReadLast();
@@ -519,7 +696,9 @@ unsigned char AccelReadOrientaion(void)
 // Read interrupt source
 unsigned char AccelReadIntSource(void)
 {
-	unsigned char reason;	
+	unsigned char reason;
+	// Blocks access if not detected
+	if (!accelPresent) return 0;	
 	ACCELOpen();	
 	ACCELAddressRead(ACCEL_ADDR_INT_SOURCE);
 	reason = ACCELReadLast();
@@ -527,16 +706,42 @@ unsigned char AccelReadIntSource(void)
 	return reason;
 }
 
+unsigned char AccelReadSysmod(void)
+{
+	unsigned char reason;
+	// Blocks access if not detected
+	if (!accelPresent) return 0;	
+	ACCELOpen();	
+	ACCELAddressRead(ACCEL_ADDR_SYSMOD);
+	reason = ACCELReadLast();
+	ACCELClose();
+	return reason;
+}
+
+unsigned char AccelReadTransientSource(void)
+{
+	unsigned char reason;	
+	// Blocks access if not detected
+	if (!accelPresent) return 0;
+	ACCELOpen();	
+	ACCELAddressRead(ACCEL_ADDR_TRANSIENT_SRC);
+	reason = ACCELReadLast();
+	ACCELClose();
+	return reason;
+}
+
 
 // Debug dump registers
+#if 0
 void AccelDebugDumpRegisters(void)
 {
-	static unsigned char i,regs[100];
+	static unsigned char accelRegs[32];
+	unsigned char i;
 	ACCELOpen();	
-	ACCELAddressRead(ACCEL_ADDR_CTRL_REG1); 
-	for (i=0;i<100;i++)
+	ACCELAddressRead(0x07); // First non data memory location
+	for (i=0;i<23;i++) 		// Reads 0x07 to 0x1E
 	{
-		regs[i] = ACCELReadContinue();	
+		accelRegs[i] = ACCELReadContinue();	
 	}
 	ACCELReadLast();
 	ACCELClose();
@@ -546,10 +751,82 @@ void AccelDebugDumpRegisters(void)
 	Nop();
  	return;
 }
+#endif
 
 // 
 void AccelPackData(short *input, unsigned char *output)
 {
 	// This function could be implemented if <14 bits were needed
-	// For 14 bits, the best packing is 42 bits from 48 bits  - a small saving of only 6 bits 
+	// For 14 bits, the best byte-aligned packing is: 4x 3-axis samples packed into 21 bytes instead of 24 bytes,
+    // or word-aligned packing: 8x 3-axis samples packed into 42 bytes, instead of 48 bytes.
 }
+
+
+
+// Returns the setting code for the given values
+unsigned short AccelSetting(int rate, int range)
+{
+    unsigned short value = 0x0000;
+    switch (rate)
+    {
+        case 3200: value |= 0x8000 | ACCEL_RATE_800;  break;        // Mark as invalid, closest to 3200 is 800
+        case 1600: value |= 0x8000 | ACCEL_RATE_800;  break;        // Mark as invalid, closest to 1600 is 800
+        case  800: value |= ACCEL_RATE_800;   break;
+        case  400: value |= ACCEL_RATE_400;   break;
+        case  200: value |= ACCEL_RATE_200;   break;
+        case  100: value |= ACCEL_RATE_100;   break;
+        case   50: value |= ACCEL_RATE_50;    break;
+        case   25: value |= 0x8000 | ACCEL_RATE_50;   break;        // Mark as invalid, closest to 25 is 50
+        case   12: value |= ACCEL_RATE_12_5;  break;
+        case    6: value |= ACCEL_RATE_6_25;  break;
+        case    3: value |= 0x8000 | ACCEL_RATE_6_25;  break;       // Mark as invalid, closest to 3.125 is 6.25
+        case    1: value |= ACCEL_RATE_1_56;  break;
+        default:   value |= ACCEL_RATE; value |= 0x8000; break;     // Mark as invalid
+    }
+
+    switch (range)
+    {
+        case 16:   value |= 0x8000 | ACCEL_RANGE_8G; break;         // Mark as invalid, closest to 16 is 8
+        case  8:   value |= ACCEL_RANGE_8G;  break;
+        case  4:   value |= ACCEL_RANGE_4G;  break;
+        case  2:   value |= ACCEL_RANGE_2G;  break;
+        default: value |= ACCEL_RANGE; value |= 0x8000; break;      // Mark as invalid
+    }
+
+    return value;
+}
+
+
+// ------ Uniform -ValidSettings() & -StartupSettings() functions ------
+
+// Returns whether given settings are valid
+char AccelValidSettings(unsigned short rateHz, unsigned short sensitivityG, unsigned long flags)
+{
+    unsigned short rateCode = AccelSetting(rateHz, sensitivityG);
+    //flags;                                      // Unused
+    if (rateCode & 0x8000) { return 0; }        // Invalid value
+    return 1;
+}
+
+// Starts the device with the given settings
+void AccelStartupSettings(unsigned short rateHz, unsigned short sensitivityG, unsigned long flags)
+{
+    unsigned char accelFlags = 0;
+    unsigned char accelFlagsInt1 = 0;
+	    
+    unsigned short rateCode = AccelSetting(rateHz, sensitivityG);
+    AccelStartup(rateCode);                     // Start accelerometer, interrupts off
+    
+    if (flags & ACCEL_FLAG_FIFO_INTERRUPTS) 		{ accelFlags |= ACCEL_INT_SOURCE_WATERMARK; accelFlagsInt1 |= ACCEL_INT_SOURCE_WATERMARK; }    
+    if (flags & ACCEL_FLAG_ORIENTATION_INTERRUPTS) 	{ accelFlags |= ACCEL_INT_SOURCE_ORIENTATION; }    
+    if (flags & ACCEL_FLAG_TRANSIENT_INTERRUPTS) 	{ accelFlags |= ACCEL_INT_SOURCE_TRANSIENT; }    
+    if (flags & ACCEL_FLAG_TAP_INTERRUPTS) 			{ accelFlags |= ACCEL_INT_SOURCE_TAP; }    
+	
+	if (accelFlags != 0)
+	{
+		// Default interrupts enabled and pin mapping
+        AccelEnableInterrupts(accelFlags, accelFlagsInt1); // Last field diverts source to int1
+    }
+}
+
+// ------
