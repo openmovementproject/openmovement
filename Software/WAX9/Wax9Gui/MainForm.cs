@@ -224,30 +224,37 @@ namespace Wax9Gui
             Console.WriteLine("Updating devices...");
 
             IDictionary <string, string> results = new Dictionary<string, string>();
+
             // Add Reference: System.Management
-            System.Management.ManagementObjectSearcher Searcher = new System.Management.ManagementObjectSearcher("Select * from WIN32_SerialPort");
-            foreach (System.Management.ManagementObject Port in Searcher.Get())
+            System.Management.ManagementObjectCollection instances;
+
+            instances = new System.Management.ManagementClass("Win32_SerialPort").GetInstances();
+
+            //System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher("Select * from WIN32_SerialPort");   // DeviceID, PNPDeviceID, Name
+            //instances = searcher.Get();
+
+            foreach (System.Management.ManagementObject port in instances)
             {
 
                 try
                 {
                     //foreach (System.Management.PropertyData Property in Port.Properties) { Console.WriteLine(Property.Name + " " + (Property.Value == null ? null : Property.Value.ToString())); }
 
-                    System.Management.PropertyData portProperty = Port.Properties["DeviceID"];
-                    string port = portProperty.Value.ToString();
+                    System.Management.PropertyData portProperty = port.Properties["DeviceID"];
+                    string portName = portProperty.Value.ToString();
 
                     string label = null;
 
                     string pnpDeviceId = null;
-                    if (Port.Properties["PNPDeviceID"] != null)
+                    if (port.Properties["PNPDeviceID"] != null)
                     {
-                        System.Management.PropertyData pnpDeviceIdProperty = Port.Properties["PNPDeviceID"];
+                        System.Management.PropertyData pnpDeviceIdProperty = port.Properties["PNPDeviceID"];
                         pnpDeviceId = pnpDeviceIdProperty.Value.ToString();
                     }
 
-                    if (Port.Properties["Name"] != null)
+                    if (port.Properties["Name"] != null)
                     {
-                        System.Management.PropertyData nameProperty = Port.Properties["Name"];
+                        System.Management.PropertyData nameProperty = port.Properties["Name"];
                         label = "\"" + nameProperty.Value.ToString() + "\"";
                     }
 
@@ -278,8 +285,8 @@ namespace Wax9Gui
                         }
                     }
 
-Console.WriteLine("Port: " + port + " - " + label);
-                    results.Add(port, label);
+Console.WriteLine("Port: " + portName + " - " + label);
+                    results.Add(portName, label);
                 }
                 catch (Exception ex)
                 {
