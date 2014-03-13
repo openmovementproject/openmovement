@@ -1,4 +1,26 @@
-﻿using System;
+﻿/*
+
+Map:
+* change the application title to BuildAX Monitor
+* in the 'Save' icon the dialog pops up with a blank name - better if it was populated with the name (and location) of the currenly loaded csv file.
+* a legend with clues about the circular report/icons e.g. what each of the rings represents
+* Not sure what the 'connect' icon at the top does. 
+* Indicator of time would be useful - sometimes if the system has faulted there is no indication that no new data has been received.
+
+Graph:
+* PIR value is not human readable - not sure what units would make sense.  
+* light should be in Lux.  The vertical axis never seems to be indicative - if it goes from bright light to inside a box the line in the graph hardly moves.
+* sound should be in db
+* battery - how about just the % and do not show voltage (how would person viewing it know what voltage is good/bad?). If letters became red if less than 25% then that would be good.
+* indicator of time scale on the bottom (horizontal axis) of the application.
+* indicator of NOW as a vertical line
+* there is no indicator of the value of the vertical axis - actually there are multiple vertical axis in each graph. Surely there must be a way but this is a lower priority that other items.
+* legend reminding folk what each line colour represents.
+* only the sensor id is shown - would be more consistent to use the name of the sensor as seen in the map view.
+
+*/
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -72,6 +94,8 @@ namespace TeddiGui
 
         public bool LoadFromFile(string filename)
         {
+            saveFileDialog.FileName = filename;
+
             // Load map
             if (mapPanel.LoadFromFile(filename))
             {

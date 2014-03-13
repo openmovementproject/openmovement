@@ -156,7 +156,7 @@
             // 
             this.splitContainerLog.Panel2.Controls.Add(this.textBoxLog);
             this.splitContainerLog.Size = new System.Drawing.Size(1024, 798);
-            this.splitContainerLog.SplitterDistance = 763;
+            this.splitContainerLog.SplitterDistance = 762;
             this.splitContainerLog.SplitterWidth = 5;
             this.splitContainerLog.TabIndex = 1;
             // 
@@ -171,7 +171,7 @@
             this.textBoxLog.Name = "textBoxLog";
             this.textBoxLog.ReadOnly = true;
             this.textBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLog.Size = new System.Drawing.Size(1024, 30);
+            this.textBoxLog.Size = new System.Drawing.Size(1024, 31);
             this.textBoxLog.TabIndex = 0;
             // 
             // saveFileDialog
@@ -191,7 +191,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
-            this.Text = "TEDDI GUI";
+            this.Text = "BuildAX";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.toolStripMain.ResumeLayout(false);
