@@ -193,7 +193,7 @@ namespace TeddiGui
                 if (device.Samples.Count > 0)
                 {
                     Sample lastSample = device.Samples[device.Samples.Count - 1];
-                    string t = "pir=" + lastSample.X.ToString() + ", temp=" + lastSample.Temperature().ToString("F2") + ", light=" + lastSample.Z.ToString() + ", hum=" + lastSample.Humidity().ToString("F2") + ", sound=" + lastSample.V.ToString() + ", batt=" + lastSample.BattVolts() + " (" + lastSample.BattPercent() + "%)";
+                    string t = "pir=" + lastSample.X.ToString() + ", temp=" + lastSample.Temperature().ToString("F2") + ", light=" + lastSample.Z.ToString() + ", hum=" + lastSample.Humidity().ToString("F2") + ", sound=" + lastSample.V.ToString() + ", batt=" + lastSample.BattVolts() + "";  //  "(" + lastSample.BattPercent() + "%)"
                     g.DrawString(t, font, fontBrush, (float)rect.X + 50, (float)rect.Y + 5 + 0 * font.Height);
                     /*
                     g.DrawString("motion = " + lastSample.X.ToString(), font, fontBrush, (float)rect.X + 5, (float)rect.Y + 5 + 1 * font.Height);
@@ -201,6 +201,10 @@ namespace TeddiGui
                     g.DrawString("light  = " + lastSample.Z.ToString(), font, fontBrush, (float)rect.X + 5, (float)rect.Y + 5 + 3 * font.Height);
                     g.DrawString("sound  = " + lastSample.V.ToString(), font, fontBrush, (float)rect.X + 5, (float)rect.Y + 5 + 4 * font.Height);
                     */
+
+                    // [dgj] Draw last received timestamp
+                    t = lastSample.Timestamp.ToString("dd MMM HH:mm:ss");
+                    g.DrawString(t, font, fontBrush, (float)rect.X + rect.Width - 50 - g.MeasureString(t, font).Width, (float)rect.Y + 5 + 0 * font.Height);
                 }
             }
         }
