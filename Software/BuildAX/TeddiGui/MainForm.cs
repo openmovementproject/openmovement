@@ -128,6 +128,29 @@ namespace TeddiGui
             // Sort ports by numerical component
             string[] ports = SerialPort.GetPortNames();
             int[] portValues = new int[ports.Length];
+
+            // Fix any stray characters on some machines
+            for (int i = 0; i < ports.Length; i++)
+            {
+                string port = ports[i];
+                if (port.StartsWith("COM", StringComparison.InvariantCultureIgnoreCase) && port.Length > 4) // "COM1#"
+                {
+                    for (int j = 3; j < port.Length; j++)
+                    {
+                        // If not a numeric character
+                        if (!char.IsDigit(port[j]))
+                        {
+                            // If it's not the last character, leave it as it is
+                            if (j < port.Length - 1) { break; }
+                            // If it is the last character, trim it off
+                            //Console.Out.WriteLine("NOTICE: Trimming invalid port name: " + port);
+                            ports[i] = port.Substring(0, port.Length - 1);
+                            break;
+                        }
+                    }
+                }
+            }
+
             for (int i = 0; i < portValues.Length; i++)
             {
                 string p = ports[i];
