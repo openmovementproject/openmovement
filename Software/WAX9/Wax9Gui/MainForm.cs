@@ -23,10 +23,34 @@ namespace Wax9Gui
             timerUpdate.Enabled = true;
         }
 
-        private void UpdatePorts(string existingPort = null)
+        private void UpdatePorts()
         {
+            string existingPort = null;
+
             // Sort ports by numerical component
             String[] ports = GetPortList();  // System.IO.Ports.SerialPort.GetPortNames();
+
+            // Fix any stray characters on some machines returned by System.IO.Ports.SerialPort.GetPortNames()
+            for (int i = 0; i < ports.Length; i++)
+            {
+                string port = ports[i];
+                if (port.StartsWith("COM", StringComparison.InvariantCultureIgnoreCase) && port.Length > 4) // "COM1#"
+                {
+                    for (int j = 3; j < port.Length; j++)
+                    {
+                        // If not a numeric character
+                        if (!char.IsDigit(port[j]))
+                        {
+                            // If it's not the last character, leave it as it is
+                            if (j < port.Length - 1) { break; }
+                            // If it is the last character, trim it off
+                            //Console.Out.WriteLine("NOTICE: Trimming invalid port name: " + port);
+                            ports[i] = port.Substring(0, port.Length - 1);
+                            break;
+                        }
+                    }
+                }
+            }
 
             int[] portValues = new int[ports.Length];
             for (int i = 0; i < portValues.Length; i++)
@@ -79,7 +103,10 @@ namespace Wax9Gui
             comboBoxTemplate.Items.AddRange(commands.ToArray());
 
             comboBoxTemplate.SelectedIndex = 0;
+
         }
+
+        private bool devicesChanged = false;
 
         protected override void WndProc(ref Message m)
         {
@@ -91,7 +118,12 @@ namespace Wax9Gui
             {
                 //int devType = Marshal.ReadInt32(m.LParam, 4);
                 //if (devType == DBT_DEVTYP_...
-                UpdatePorts();
+
+                // Without the invoke it would call the DisconnectedContext MDA / RPC_E_WRONG_THREAD
+                //UpdatePorts();
+                //MethodInvoker updatePorts = new MethodInvoker(UpdatePorts);
+                //this.BeginInvoke(updatePorts); //IAsyncResult result = updatePorts.BeginInvoke(null, ""); updatePorts.EndInvoke(result);
+                devicesChanged = true;
             }
             base.WndProc(ref m);
         }
@@ -228,10 +260,10 @@ namespace Wax9Gui
             // Add Reference: System.Management
             System.Management.ManagementObjectCollection instances;
 
-            instances = new System.Management.ManagementClass("Win32_SerialPort").GetInstances();
+            //instances = new System.Management.ManagementClass("Win32_SerialPort").GetInstances();
 
-            //System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher("Select * from WIN32_SerialPort");   // DeviceID, PNPDeviceID, Name
-            //instances = searcher.Get();
+            System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher("Select * from WIN32_SerialPort");   // DeviceID, PNPDeviceID, Name
+            instances = searcher.Get();
 
             foreach (System.Management.ManagementObject port in instances)
             {
@@ -310,13 +342,10 @@ Console.WriteLine("Port: " + portName + " - " + label);
             return ports;
         }
 
-
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
             // Update serial ports
-            Application.UseWaitCursor = true;
             UpdatePorts();
-            Application.UseWaitCursor = false;
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -328,6 +357,17 @@ Console.WriteLine("Port: " + portName + " - " + label);
         {
             // Update the command every second (it may include the current seconds as a value)
             Update(null, null);
+            if (devicesChanged)
+            {
+                Application.UseWaitCursor = true;
+                Application.DoEvents();
+
+                devicesChanged = false;
+                UpdatePorts();
+
+                Application.UseWaitCursor = false;
+                Application.DoEvents();
+            }
         }
 
     }
