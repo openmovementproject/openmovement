@@ -27,6 +27,13 @@ namespace Wax9Gui
         {
             string existingPort = null;
 
+            Application.UseWaitCursor = true;
+            this.UseWaitCursor = true;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            devicesChanged = false;
+            for (int i = 0; i < 50; i++) { Application.DoEvents(); }
+
             // Sort ports by numerical component
             String[] ports = GetPortList();  // System.IO.Ports.SerialPort.GetPortNames();
 
@@ -104,6 +111,11 @@ namespace Wax9Gui
 
             comboBoxTemplate.SelectedIndex = 0;
 
+            this.Enabled = true;
+            this.UseWaitCursor = false;
+            Application.UseWaitCursor = false;
+            this.Cursor = Cursors.Default;
+            //Application.DoEvents();
         }
 
         private bool devicesChanged = false;
@@ -290,6 +302,8 @@ namespace Wax9Gui
                         label = "\"" + nameProperty.Value.ToString() + "\"";
                     }
 
+//Console.WriteLine(pnpDeviceId);
+
                     if (pnpDeviceId != null && pnpDeviceId.StartsWith(@"BTHENUM\"))
                     {
                         string mac = null;
@@ -345,7 +359,16 @@ Console.WriteLine("Port: " + portName + " - " + label);
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
             // Update serial ports
+            buttonRefresh.Font = new Font(buttonRefresh.Font, FontStyle.Regular);
+            buttonRefresh.ForeColor = SystemColors.ControlText;
+            buttonRefresh.BackColor = SystemColors.Control;
+
+            string restore = buttonRefresh.Text;
+            buttonRefresh.Text = "...";
+            buttonRefresh.Cursor = Cursors.WaitCursor;
             UpdatePorts();
+            buttonRefresh.Cursor = Cursors.Default;
+            buttonRefresh.Text = restore;
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -359,14 +382,12 @@ Console.WriteLine("Port: " + portName + " - " + label);
             Update(null, null);
             if (devicesChanged)
             {
-                Application.UseWaitCursor = true;
-                Application.DoEvents();
+                //buttonRefresh.Font = new Font(buttonRefresh.Font, FontStyle.Italic);
+                //buttonRefresh.ForeColor = Color.White;
+                buttonRefresh.BackColor = Color.Pink;
 
-                devicesChanged = false;
-                UpdatePorts();
+                //UpdatePorts();
 
-                Application.UseWaitCursor = false;
-                Application.DoEvents();
             }
         }
 
