@@ -886,6 +886,88 @@ char SettingsCommand(const char *line, SettingsMode mode)
             printf("READRAW: Specify raw sector\r\n");
         }
     }
+#ifdef NAND_BLOCK_MARK
+    else if (strnicmp(line, "FILEBLOCK", 9) == 0)
+    {
+        unsigned long offset = 0xffffffff;
+        if (line[9] != '\0')
+        {
+            offset = my_atoi(line + 10);
+        }
+
+        if (locked) { printf("ERROR: Locked.\r\n"); }
+        else if (offset != 0xffffffff)
+        {
+			unsigned long logicalSector;			
+			unsigned short physicalBlock = 0xFFFF;
+			unsigned char page;	
+			unsigned char sectorInPage;
+			
+			// Calculate block, page, and sector in page from the file offset
+			logicalSector = FSFileOffsetToLogicalSector(DEFAULT_FILE, offset)
+
+			// If the block was found... 
+			if (logicalSector > 0 && logicalSector < 0xFFFFFFFFul)
+			{
+				// Translate a logical sector address to a physical block address (and, the physical page address and sector-in-page offset)
+				if (FtlTranslateLogicalSectorToPhysical(logicalSector, &physicalBlock, &page, &sectorInPage))
+				{
+					printf("FILEBLOCK=%u\r\n", physicalBlock);
+				}
+				else
+				{
+					printf("ERROR: Problem finding the physical block for the logical sector.\r\n");
+				}
+			}
+			else
+			{
+				printf("ERROR: Problem finding the logical sector for the file offset.\r\n");
+			}
+			
+        }
+        else
+        {
+            printf("FILEBLOCK: Data file offset not specified.\r\n");
+        }
+    }
+    else if (strnicmp(line, "BADBLOCK", 8) == 0)
+    {
+        unsigned short physicalBlock = 0xffffffff;
+        if (line[8] != '\0')
+        {
+            physicalBlock = (unsigned short)my_atoi(line + 9);
+        }
+
+        if (locked) { printf("ERROR: Locked.\r\n"); }
+        else if (physicalBlock != 0xffff)
+        {
+			// Relocate the block contents and mark the specified physical block as bad
+			char ret = FtlRelocatePhysicalBlockAndMarkBad(physicalBlock);
+			if (ret)
+			{
+				if (ret == -1)
+				{
+					// Already marked as bad
+					printf("BADBLOCK=%u,1\r\n", physicalBlock);
+				}
+				else
+				{
+					// Successfully marked as bad
+					printf("BADBLOCK=%u\r\n", physicalBlock);
+				}
+			}
+			else
+			{
+				printf("ERROR: Problem marking block as bad.\r\n");
+			}
+			
+        }
+        else
+        {
+            printf("BADBLOCK: Physical block not specified.\r\n");
+        }
+    }
+#endif
 #ifdef RAW_NAND_DEBUG
     else if (strnicmp(line, "writeraw", 8) == 0)
     {
@@ -1017,8 +1099,8 @@ char SettingsCommand(const char *line, SettingsMode mode)
             if (line[7] == 'd' || line[7] == 'D')
             {
                 if (line[8] == '\0') { printf("FORMAT: Destroy.\r\n"); FtlDestroy(0); }
-                else if (line[8] == 'B') { printf("FORMAT: Destroy user-marked bad blocks.\r\n"); FtlDestroy(1); }
-                //else if (line[8] == '!') { printf("FORMAT: Destroy manufacturer-marked bad blocks.\r\n"); FtlDestroy(42); }   // this is a bad idea
+                else if (line[8] == 'B') { printf("FORMAT: Destroy user bad blocks.\r\n"); FtlDestroy(1); }
+                else if (line[8] == '!') { printf("FORMAT: Destroy all bad blocks.\r\n"); FtlDestroy(42); }
             }
             else
             {

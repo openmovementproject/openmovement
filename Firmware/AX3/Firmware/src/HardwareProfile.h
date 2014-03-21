@@ -33,7 +33,7 @@
 	#define HARDWARE_SELECT 0x17
     
     // Define firmware version
-    #define SOFTWARE_VERSION 36
+    #define SOFTWARE_VERSION 37
 
 	// No legacy defines for this code
 	#define NO_LEGACY
@@ -43,6 +43,9 @@
     #ifdef IGNORE_UNRECOGNIZED_PERIPHERALS
     	#warning "IGNORE_UNRECOGNIZED_PERIPHERALS could be dangerous."
     #endif
+
+	// User-management of bad blocks
+//	#define NAND_BLOCK_MARK
     
     // Include CWA hardware profile
     #include "Hardware/HardwareProfile-CWA.h"
