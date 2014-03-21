@@ -1266,79 +1266,86 @@ namespace OmGui
                     {
                        string error = null;
 
-                       if (device is OmDevice && !((OmDevice)device).IsDownloading)
+                       try
                        {
-                           // Nothing wrong so far...
-                           string message = "Configuring device " + (i + 1) + " of " + devices.Length + ".... ";
-
-                           recordBackgroundWorker.ReportProgress((100 * (5 * i + 0) / (devices.Length * 5)), message + "(session)");
-
-                           //Set SessionID
-                           if (error == null && !((OmDevice)device).SetSessionId((uint)rangeForm.SessionID, false))
-                               error = "Failed to set session ID";
-
-                           recordBackgroundWorker.ReportProgress((100 * (5 * i + 1) / (devices.Length * 5)), message + "(metadata)");
-
-                           // Safe to do this as metadata cleared when device cleared
-                           if (error == null && rangeForm.metaData.Length > 0)
+                           if (device is OmDevice && !((OmDevice)device).IsDownloading)
                            {
-                               if (OmApi.OM_FAILED(OmApi.OmSetMetadata(device.DeviceId, rangeForm.metaData, rangeForm.metaData.Length)))
-                                   error = "Metadata set failed";
+                               // Nothing wrong so far...
+                               string message = "Configuring device " + (i + 1) + " of " + devices.Length + ".... ";
+
+                               recordBackgroundWorker.ReportProgress((100 * (5 * i + 0) / (devices.Length * 5)), message + "(session)");
+
+                               //Set SessionID
+                               if (error == null && !((OmDevice)device).SetSessionId((uint)rangeForm.SessionID, false))
+                                   error = "Failed to set session ID";
+
+                               recordBackgroundWorker.ReportProgress((100 * (5 * i + 1) / (devices.Length * 5)), message + "(metadata)");
+
+                               // Safe to do this as metadata cleared when device cleared
+                               if (error == null && rangeForm.metaData.Length > 0)
+                               {
+                                   if (OmApi.OM_FAILED(OmApi.OmSetMetadata(device.DeviceId, rangeForm.metaData, rangeForm.metaData.Length)))
+                                       error = "Metadata set failed";
+                               }
+
+                               // Check 'max samples' is always zero
+                               OmApi.OmSetMaxSamples(device.DeviceId, 0);
+
+                               recordBackgroundWorker.ReportProgress((100 * (5 * i + 2) / (devices.Length * 5)), message + "(config)");
+
+                               //Sampling Freq and Range
+                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, (int)rangeForm.SamplingFrequency, rangeForm.Range)))
+                                   error = "Accel. config failed";
+
+                               recordBackgroundWorker.ReportProgress((100 * (5 * i + 3) / (devices.Length * 5)), message + "(time sync)");
+
+                               //Do Sync Time
+                               if (error == null)
+                               {
+                                   //Cursor.Current = Cursors.WaitCursor;
+                                   //foreach (ListViewItem i in devicesListView.SelectedItems)
+                                   //{
+                                   //    OmSource device = (OmSource)i.Tag;
+                                   if (device is OmDevice && ((OmDevice)device).Connected)
+                                   {
+                                       if (!((OmDevice)device).SyncTime())
+                                           error = "Time sync. failed";
+                                   }
+                               }
+
+                               recordBackgroundWorker.ReportProgress((100 * (5 * i + 4) / (devices.Length * 5)), message + "(interval)");
+
+                               // Set the devices to record -- IMPORTANT: This also 'commits' the settings to the device
+                               if (error == null)
+                               {
+                                   if (rangeForm.Always)
+                                   {
+                                       //TS - Taken from Record button
+                                       if (!((OmDevice)device).AlwaysRecord())
+                                           error = "Set interval (always) failed";
+                                   }
+                                   else
+                                   {
+                                       //Do datetime intervals
+                                       start = rangeForm.StartDate;
+                                       stop = rangeForm.EndDate;
+
+                                       if (!((OmDevice)device).SetInterval(start, stop))
+                                           error = "Set interval failed";
+                                   }
+                               }
+
+
                            }
-
-                           // Check 'max samples' is always zero
-                           OmApi.OmSetMaxSamples(device.DeviceId, 0);
-
-                           recordBackgroundWorker.ReportProgress((100 * (5 * i + 2) / (devices.Length * 5)), message + "(config)");
-
-                           //Sampling Freq and Range
-                           if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, (int)rangeForm.SamplingFrequency, rangeForm.Range)))
-                               error = "Accel. config failed";
-
-                           recordBackgroundWorker.ReportProgress((100 * (5 * i + 3) / (devices.Length * 5)), message + "(time sync)");
-
-                           //Do Sync Time
-                           if (error == null && rangeForm.SyncTime != DateRangeForm.SyncTimeType.None)
+                           else
                            {
-                               //Cursor.Current = Cursors.WaitCursor;
-                               //foreach (ListViewItem i in devicesListView.SelectedItems)
-                               //{
-                               //    OmSource device = (OmSource)i.Tag;
-                               if (device is OmDevice && ((OmDevice)device).Connected)
-                               {
-                                   if (!((OmDevice)device).SyncTime((int)rangeForm.SyncTime))
-                                       error = "Time sync. failed";
-                               }
+                               error = "Device is downloading";
                            }
-
-                           recordBackgroundWorker.ReportProgress((100 * (5 * i + 4) / (devices.Length * 5)), message + "(interval)");
-
-                           // Set the devices to record -- IMPORTANT: This also 'commits' the settings to the device
-                           if (error == null)
-                           {
-                               if (rangeForm.Always)
-                               {
-                                   //TS - Taken from Record button
-                                   if (!((OmDevice)device).AlwaysRecord())
-                                       error = "Set interval (always) failed";
-                               }
-                               else
-                               {
-                                   //Do datetime intervals
-                                   start = rangeForm.StartDate;
-                                   stop = rangeForm.EndDate;
-
-                                   if (!((OmDevice)device).SetInterval(start, stop))
-                                       error = "Set interval failed";
-                               }
-                           }
-
-
-                       }
-                       else
-                       {
-                           error = "Device is downloading";
-                       }
+                        }
+                        catch (Exception ex)
+                        {
+                            error = "Exception: " + ex.Message;
+                        }
                         
                         if (error != null) { 
                             fails.Add(device.DeviceId.ToString(), error); 

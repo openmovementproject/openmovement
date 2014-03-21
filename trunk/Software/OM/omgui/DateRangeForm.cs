@@ -240,15 +240,6 @@ namespace OmGui
 
         public int SessionID { get; set; }
 
-        public enum SyncTimeType
-        {
-            None,
-            PC = 1,
-            Zero = 2
-        }
-
-        public SyncTimeType SyncTime { get; set; }
-
         public DateTime FromDate
         {
             get
@@ -326,8 +317,6 @@ Cursor.Current = Cursors.WaitCursor;
             metaDataEntries = MetaDataEntry.shorthandMetaData;
 
             //setOK = true;
-
-            SyncTime = SyncTimeType.PC;
 
             SessionID = (int) numericUpDownSessionID.Value;
 
