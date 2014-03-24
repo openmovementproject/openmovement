@@ -95,7 +95,14 @@ namespace OmGui
 
         public void Open(ushort deviceId)
         {
-            Reader = OmReader.Open(deviceId);
+            try
+            {
+                Reader = OmReader.Open(deviceId);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("ERROR: " + ex.Message);
+            }
         }
 
         public void Open(string filename)
