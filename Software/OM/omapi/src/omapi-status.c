@@ -377,7 +377,7 @@ OmLog(4, "- Flush done (%d bytes)", num);
         if (buffer != NULL) { *p = '\0'; }
         //if (offset >= bufferSize - 1) break;                                // Ignore filled output buffer, wait for timeout or expected response
         elapsed = OmMilliseconds() - start;
-        if (elapsed > timeoutMs)
+        if (elapsed >= timeoutMs)
         {
             // Overall timeout supplied by caller
 OmLog(2, "- Overall command timeout (%d)", timeoutMs);
