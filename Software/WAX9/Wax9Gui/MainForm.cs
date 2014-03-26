@@ -20,6 +20,14 @@ namespace Wax9Gui
             //Trace.Listeners.Add(new ConsoleTraceListener());
             Console.WriteLine("Started.");
 
+            // Command templates
+            List<string> commands = new List<string>();
+            commands.Add(@"waxrec.exe %PORT% -log -tee -out log_%LABEL%-%YEAR%-%MONTH%-%DAY%-%HOUR%-%MIN%-%SEC%.csv -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
+            commands.Add(@"IMU-demo\demo.exe -in %PORT% -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
+            comboBoxTemplate.Items.AddRange(commands.ToArray());
+
+            comboBoxTemplate.SelectedIndex = 0;
+
             timerUpdate.Enabled = true;
         }
 
@@ -102,14 +110,6 @@ namespace Wax9Gui
                     comboBoxPorts.SelectedIndex = i;
                 }
             }
-
-            // Command templates
-            List<string> commands = new List<string>();
-            commands.Add(@"waxrec.exe %PORT% -log -tee -out log_%LABEL%-%YEAR%-%MONTH%-%DAY%-%HOUR%-%MIN%-%SEC%.csv -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
-            commands.Add(@"IMU-demo\demo.exe -in %PORT% -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
-            comboBoxTemplate.Items.AddRange(commands.ToArray());
-
-            comboBoxTemplate.SelectedIndex = 0;
 
             this.Enabled = true;
             this.UseWaitCursor = false;

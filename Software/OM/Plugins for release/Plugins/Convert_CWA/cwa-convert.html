@@ -1,0 +1,400 @@
+<!DOCTYPE html> 
+<html>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="utf-8">
+	<title>OpenMovement Converter</title>
+	<link href="./css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="./css/bootstrap.css" rel="stylesheet">
+	<link href="./css/page.css" rel="stylesheet">
+	<script type="text/javascript" src="./js/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/bootstrap.js"></script> 
+	<script type="text/javascript" src="./js/bootstrap.min.js"></script>
+	
+<script language="javascript">
+function positionLogo() {
+	document.getElementById('logo').style.left = document.getElementById('content').offsetLeft + 'px';
+}
+
+</script>
+
+<!-- Leave this script as it is otherwise the program won't pick it up and it won't run. -->
+<script language="javascript" type="text/javascript">
+    //var $ = function (e) { return document.getElementById(e); }
+	
+	var blockStart = -1;
+	var blockCount = -1;
+	
+	function fillValues()
+	{
+		var url = document.URL;
+		
+		var folderURL = "";
+		
+		var urlSplit = unescape(url).split('?');
+		
+		if(urlSplit.length > 1)
+		{
+			var pairsString = unescape(url).split('?')[1];
+			
+			if(pairsString != "")
+			{
+				var pairs = pairsString.split('&');
+				
+				for (var i = 0; i < pairs.length; i++)
+				{			
+					var keyValuePair = pairs[i].split('=');
+					
+					if(keyValuePair[0] == "startBlock")
+					{
+						blockStart = keyValuePair[1];
+						
+						//document.forms[0].elements["startBlock"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "blockCount")
+					{
+						blockCount = keyValuePair[1];
+						
+						//document.forms[0].elements["blockCount"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "startTime")
+					{
+						document.forms[0].elements["startTime"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "endTime")
+					{
+						document.forms[0].elements["stopTime"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "folderURL")
+					{
+						folderURL = keyValuePair[1];
+					}
+				}
+			}
+			//Change URL
+			/*if(folderURL != "")
+			{
+				document.getElementById("folderURL").href = folderURL;
+			}*/
+		}
+	}
+	
+	//Onload to get start block and block count...may want to get rid of the text fields...
+	window.onload = function() {
+		positionLogo();
+		
+		fillValues();
+	};
+	
+	//Return Function
+    function func()
+    {
+		var hash = "";
+		
+		var name = document.forms[0].elements["outputfile"].value;
+		
+		/*if(name == "" || ".csv")
+		{
+				t("Please enter an output filename.");			
+		}*/
+		//hash = "\"outFileName\"=" + name;
+		
+		//Output file type.
+		if(document.getElementById('output_option1').checked)
+		{
+			//hash = hash + "&\"extension\"=CSV";
+			var i = -1;
+			if((i = name.search(".csv")) > 0)
+			{
+				if(i != name.length - 4)
+				{
+					name += ".csv";
+				}
+			}
+			else
+			{
+				name += ".csv";
+			}
+			
+			hash = hash + " -f:csv";
+		}
+		//else if(document.getElementById('output_option2').checked)
+		//{
+			//hash = hash + "&\"extension\"=SQlite";
+			//hash = hash + " -f:csv";
+			//name = name + ".csv";
+		//}
+		else if(document.getElementById('output_option3').checked)
+		{
+			//hash = hash + "&\"extension\"=WAV";
+			hash = hash + " -f:wav";
+			
+			var i = -1;
+			if((i = name.search(".wav")) > 0)
+			{
+				if(i != name.length - 4)
+				{
+					name += ".wav";
+				}
+			}
+			else
+			{
+				name += ".wav";
+			}
+		}
+		else if(document.getElementById('output_option4').checked)
+		{
+			//hash = hash + "&\"extension\"=RAW";
+			
+			var i = -1;
+			if((i = name.search(".raw")) > 0)
+			{
+				if(i != name.length - 4)
+				{
+					name += ".raw";
+				}
+			}
+			else
+			{
+				name += ".raw";
+			}
+			
+			hash = hash + " -f:raw";
+		}
+		
+		//start and stop times
+		var startTime = document.forms[0].elements["startTime"].value;
+		var stopTime = document.forms[0].elements["stopTime"].value;
+		//hash = hash + "&\"startTime\"" + startTime;
+		//hash = hash + "&\"stopTime\"" + stopTime;
+		
+		if(blockStart > -1 && blockCount > -1)
+		{
+			hash = hash + " -blockstart " + blockStart;
+			hash = hash + " -blockCount " + blockCount;
+		}
+		hash = hash + " -out " + name;
+		
+		//streams
+		if(document.getElementById('streams_optionAcc').checked)
+		{
+			//hash = hash + "&\"streams_option1\"=true";
+			hash = hash + " -s:accel";
+		}
+		
+		if(document.getElementById('streams_optionLight').checked)
+		{
+			//hash = hash + "&\"streams_option2\"=true";
+			hash = hash + " -light";
+		}
+
+		if(document.getElementById('streams_optionTemp').checked)
+		{
+			//hash = hash + "&\"streams_option3\"=true";
+			hash = hash + " -temp";
+		}
+		if(document.getElementById('streams_optionBattery').checked)
+		{
+			//hash = hash + "&\"streams_option4\"=true";
+			hash = hash + " -batt";
+		}
+		
+		//timeFormat
+		if(document.getElementById('timeFormat_optionNone').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option1";
+			hash = hash + " -t:none";
+		}
+		else if(document.getElementById('timeFormat_optionSampleNumber').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option2";
+			hash = hash + " -t:sequence";
+		}
+		else if(document.getElementById('timeFormat_optionString').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option3";
+			hash = hash + " -t:timestamp";
+		}
+		else if(document.getElementById('timeFormat_optionSecsRel').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option4";
+			hash = hash + " -t:secs";
+		}
+		else if(document.getElementById('timeFormat_optionDaysRel').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option5";
+			hash = hash + " -t:days";
+		}
+		else if(document.getElementById('timeFormat_optionUnix').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option6";
+			hash = hash + " -t:serial";
+		}
+		else if(document.getElementById('timeFormat_optionExcel').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option7";
+			hash = hash + " -t:excel";
+		}
+		else if(document.getElementById('timeFormat_optionMatlab').checked)
+		{
+			//hash = hash + "&\"timeFormat\"=option8";
+			hash = hash + " -t:matlab";
+		}
+		
+        /*for (var i = 0; i < document.forms[0].elements.length; i++)
+        {
+			var id = document.forms[0].elements[i].id;
+			var name = document.forms[0].elements[i].name;
+			var value = document.forms[0].elements[i].value;
+			
+			if (i != 0) { hash = hash + "&"; }
+			
+			hash = hash + "\"" + name + "\"" + "=" + value;
+        }*/
+		
+		hash = hash + "?" + name;
+		
+		window.location.hash = hash;
+        return 0;
+    }
+</script>
+</head> 
+
+<body onresize="positionLogo();">
+
+<div id="header" class="foo">
+<img src="./img/logo.png" id="logo" alt="Open Movement">
+
+</div>
+
+<div id="contentHolder">
+	<div id="content">
+		<div class="container">
+		
+		<!--<form name="subjectinfo" style="font-family:Arial, Helvetica, sans-serif";>
+						 <fieldset>
+						  <legend><b>Subject info</b></legend>
+						  Source File:<input type="text"  id="participant" value=""><br>
+						  <br>
+						  Output File:<input type="text"  id="participant" value=""><br>
+						</fieldset>
+								
+
+		</div>
+		<div class="container" style="font-family:Arial, Helvetica, sans-serif";>
+			<fieldset>
+			<legend><b>Stream</b></legend>
+			Accelerometer<input type="radio" class="stream" name="sex" value="Accel"><br>Gyro     <input type="radio"  class="stream" name="sex" value="Gyroscope"><br>Light Sensor<input type="radio"  class="stream" name="sex" value="Light"><br>Temperature<input type="radio"  class="stream" name="sex" value="temp"><br>Battery<input type="radio"  class="stream" name="sex" value="batt"><br>
+		</div>
+		-->
+		
+		<form name="Form1" onsubmit="return func()">
+			<h2 class='muted'>Output file name and format</h2>
+			<input class="input-medium search-query" id="outputfile" name="outputfile" type="text">
+			<br>
+			<label class=" radio inline">
+				<input class="radio" type="radio" name="outputFormat" id="output_option1" checked>CSV</input>
+			</label>
+			<!--<label class=" radio inline">
+				<input class="radio" type="radio" name="outputFormat" id="output_option2">SQlite</input>
+			</label>-->
+			<label class=" radio inline">
+				<input class="radio" type="radio" name="outputFormat" id="output_option3">WAV</input>
+			</label>
+			<label class=" radio inline">
+				<input class="radio" type="radio" name="outputFormat" id="output_option4">RAW</input>
+			</label>
+			<br>
+			<br>
+			<p>This is the name of the file being saved. It will be saved in <em id="folderURL" style="color:blue;">./your working directory</em> </p>
+
+			<hr>
+			<h2 class='muted'>Time slice to convert</h2>
+			<div class="container-fluid">
+				<div class="row-fluid">
+				<input class="input-medium search-query pull-left" disabled id="startTime" name="startTime" type="text"></input>
+				<input class="input-medium search-query pull-right" disabled id="stopTime" name="stopTime" type="text"></input>
+				</div>
+				<div class="row-fluid">
+				<div class='span6 text-left'><strong>Start Time</strong> dd-mm-yyyy hh:mm:ss</div>
+				<div class='span6 text-right'><strong>Stop Time</strong> dd-mm-yyyy hh:mm:ss</div>
+				</div>
+			</div>	
+
+			<br>
+			<p>This is the start and end times of the slice to be converted. Specify <emstyle="color:blue;">fileStart</em> and <emstyle="color:blue;">fileEnd</em> to convert the whole file.</p>
+
+			<hr>
+			<h2 class='muted'> Streams to convert</h2>
+			<label class="checkbox inline">
+				<input class="checkbox" type="checkbox" name="streams" id="streams_optionAcc" checked>Accelerometer</input>
+			</label>
+			<label class="checkbox inline">
+				<input class="checkbox" type="checkbox" name="streams" id="streams_optionLight" >Light</input>
+			</label>
+			<label class="checkbox inline">
+				<input class="checkbox" type="checkbox" name="streams" id="streams_optionTemp" >Temperature</input>
+			</label>
+			<label class="checkbox inline">
+				<input class="checkbox" type="checkbox" name="streams" id="streams_optionBattery" >Battery</input>
+			</label>
+			<br>
+			<br>
+			<p>These are the streams that will be converted to the output file.</p>
+			
+			<hr>
+
+			<h2 class='muted'>Time Format</h2>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionNone" checked>None</input>
+			</label>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionSampleNumber" >Sample Number</input>
+			</label>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionString" >String yyyy-mm-dd hh:mm:ss.f</input>
+			</label>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionSecsRel" >Seconds relative to start</input>
+			</label>
+			<br>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionDaysRel" >Days relative to start</input>
+			</label>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionUnix" >Unix (ms since 1/1/1970)</input>
+			</label>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionExcel" >Excel (fraction days 1/1/2000)</input>
+			</label>
+			<label class="radio inline">
+				<input class="radio" type="radio" name="timeFormat" id="timeFormat_optionMatlab" >Matlab (fraction days 1/1/1970)</input>
+			</label>
+			
+			<br>
+			<br>
+			<p>This is the format each time stamp will take</p>
+			<hr>
+			<button type="submit" class="btn">Convert Now</button>
+
+		</form>
+		
+	</div>
+<!--<div id="shadow">
+	<img src="images/contentshadow.png">
+</div>-->
+	
+	
+
+
+
+<div id="footer">
+</div>
+
+
+</body>
+</html>
+	
