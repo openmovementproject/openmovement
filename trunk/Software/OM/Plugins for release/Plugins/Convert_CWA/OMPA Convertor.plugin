@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+<!-- This is a sample XML document -->
+<Plugin>
+	<height>500</height>
+	<width>700</width>
+	<runFilePath>OMPA Convertor.exe</runFilePath>
+	<htmlFilePath>OMPA convertor.html</htmlFilePath>
+	<savedValuesFilePath>saved.xml</savedValuesFilePath>
+	<iconName>64x64 converter.ico</iconName>
+	<description>Converts binary .cwa files to application-friendly formats. Current version supports specifying a time-slice via the data preview pane. Optional output streams (battery, light, temperature). Multiple timestamp formats available.</description>
+	<fileName>Convert_CWA</fileName>
+	<readableName>Convert CWA</readableName>
+	<outputFile>.csv .wav .raw</outputFile>
+	<inputFile>.cwa</inputFile>
+	<wantMetadata>true</wantMetadata>
+	<outputExtensions>
+		<extension>csv</extension>
+	</outputExtensions>
+	<defaultValues>
+		<bodyMass>80</bodyMass>
+		<percentage>0.22</percentage>
+		<fileStart>fileStart</fileStart>
+		<fileEnd>fileEnd</fileEnd>
+	</defaultValues>
+	<createsOutput>true</createsOutput>
+</Plugin>

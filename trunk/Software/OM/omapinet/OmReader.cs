@@ -13,7 +13,7 @@ namespace OmApiNet
         public override SourceCategory Category { get { return SourceCategory.File; } }
 
         private ushort deviceId;
-        public override ushort DeviceId { get { return deviceId; } }
+        public override ushort DeviceId { get { EnsureMetadataRead(); return deviceId; } }
 
         private uint sessionId;
         public override uint SessionId { get { return sessionId; } }
@@ -26,7 +26,21 @@ namespace OmApiNet
         public int DataBlockSize { get; protected set; }
         public int DataOffsetBlocks { get; protected set; }
         public int DataNumBlocks { get; protected set; }
-        public string MetaData { get; protected set; }
+
+        private string metadata = null;
+        private void EnsureMetadataRead()
+        {
+            // Check if already read
+            if (metadata != null) { return; }
+
+            // Get metadata
+            int deviceIdInt = 0;
+            metadata = OmApi.OmReaderMetadata(Handle, out deviceIdInt, out sessionId);
+            deviceId = (ushort)deviceIdInt;
+        }
+
+
+        public string MetaData { get { EnsureMetadataRead(); return metadata; } protected set { metadata = value; } }
 
         public float Light { get; protected set; }
         public float Temp { get; protected set; }
@@ -49,12 +63,8 @@ namespace OmApiNet
             StartTime = OmApi.OmDateTimeUnpack(startTime);
             EndTime = OmApi.OmDateTimeUnpack(endTime);
 
-            // Get metadata
-            string metadata;
-            int deviceIdInt;
-            metadata = OmApi.OmReaderMetadata(handle, out deviceIdInt, out sessionId);
-            MetaData = metadata;
-            deviceId = (ushort)deviceIdInt;
+            // Defer this
+            //EnsureMetadataRead();
 
             // Seek
             Seek(0);

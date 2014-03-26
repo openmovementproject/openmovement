@@ -139,6 +139,8 @@ category = SourceCategory.Other;
 
                 if (!fName.Equals(""))
                 {
+                    if (!File.Exists(fName)) { return false; }
+
                     try
                     {
                         FileInfo f = new FileInfo(fName);
@@ -278,13 +280,14 @@ Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId);
             return true;
         }
 
-        public bool SyncTime(int now)
+        public volatile int volatileTemp;
+
+        public bool SyncTime()
         {
             DateTime time;
-            if(now == 1)
-                time = DateTime.Now;
-            else
-                time = new DateTime(0);
+            DateTime previous = DateTime.Now;
+            while ((time = DateTime.Now) == previous) { volatileTemp = 0; }  // Spin until the second rollover (up to 1 second)
+            // ...now set the time.
 
             if (OmApi.OM_FAILED(OmApi.OmSetTime(deviceId, OmApi.OmDateTimePack(time))))
             {
