@@ -1243,8 +1243,8 @@ namespace OmGui
             {
                 Cursor.Current = Cursors.WaitCursor;
 
-                DateTime start = DateTime.MinValue;
-                DateTime stop = DateTime.MaxValue;
+                //DateTime start = DateTime.MinValue;
+                //DateTime stop = DateTime.MaxValue;
 
                 //List<string> fails = new List<string>();
                 //List<string> fails2 = new List<string>();
@@ -1327,8 +1327,8 @@ namespace OmGui
                                    else
                                    {
                                        //Do datetime intervals
-                                       start = rangeForm.StartDate;
-                                       stop = rangeForm.EndDate;
+                                       DateTime start = rangeForm.StartDate;
+                                       DateTime stop = rangeForm.EndDate;
 
                                        if (!((OmDevice)device).SetInterval(start, stop))
                                            error = "Set interval failed";
