@@ -43,7 +43,7 @@ namespace OmGui
 
             Text = title;
             //labelPrompt.Text = prompt;
-            FromDate = DateTime.MinValue;
+            //FromDate = DateTime.MinValue;
             //UntilDate = DateTime.MaxValue;
 
             timePickerStart.ShowUpDown = true;
@@ -69,29 +69,9 @@ namespace OmGui
             radioButtonImmediately.Checked = true;
 
             //Set default recording times
-            datePickerEndIgnoreEvent = true;
-            datePickerStartIgnoreEvent = true;
-            timePickerEndIgnoreEvent = true;
-            timePickerStartIgnoreEvent = true;
-            dayPickerIgnoreEvent = true;
-            minutePickerIgnoreEvent = true;
-            hourPickerIgnoreEvent = true;
-
-            datePickerStart.Value = DateTime.Now;
-            timePickerStart.Value = DateTime.Now;
-            datePickerEnd.Value = DateTime.Now;//.AddDays(1);
-            timePickerEnd.Value = new DateTime(2013, 8,3, 10, 10, 10); // DateTime.Now.AddHours(1);
-            hoursPicker.Value = 0;
-            minutesPicker.Value = 0;
-            daysPicker.Value = 0;
-
-            datePickerEndIgnoreEvent = false;
-            datePickerStartIgnoreEvent = false;
-            timePickerEndIgnoreEvent = false;
-            timePickerStartIgnoreEvent = false;
-            dayPickerIgnoreEvent = false;
-            minutePickerIgnoreEvent = false;
-            hourPickerIgnoreEvent = false;
+            StartDate = DateTime.Now;
+            Duration = new TimeSpan(0, 0, 0, 0);
+            EndDate = StartDate + Duration;
 
             updateWarningMessages();
         }
@@ -234,69 +214,58 @@ namespace OmGui
 
         public bool Always { get; set; }
 
-        public DateTime StartDate { get; set; }
-
-        public DateTime EndDate { get; set; }
-
-        public int SessionID { get; set; }
-
-        public DateTime FromDate
+        // Save values
+        public DateTime StartDate
         {
-            get
+            get 
             {
-                return datePickerStart.Value.Date.Add(timePickerStart.Value.TimeOfDay);
+                return datePickerStart.Value.Date + timePickerStart.Value.TimeOfDay; 
             }
             set
             {
-                //if (value < datePickerStart.MinDate)
-                //{
-                //    datePickerStart.Checked = false;
-                //    datePickerStart.Value = datePickerStart.MinDate;
-                //}
-                //else if (value > datePickerStart.MaxDate)
-                //{
-                //    datePickerStart.Checked = false;
-                //    datePickerStart.Value = datePickerStart.MaxDate;
-                //}
-                //else
-                //{
-                //    datePickerStart.Value = value;
-                //}
-                //value = datePickerStart.Value;
+                datePickerStart.Value = value.Date;
+                timePickerStart.Value = value.Date + value.TimeOfDay;
+                updateWarningMessages();
             }
         }
 
-        public DateTime UntilDate
+        public TimeSpan Duration
         {
-            get { return datePickerEnd.Value.Date.Add(timePickerEnd.Value.TimeOfDay); }
+            get
+            {
+                return new TimeSpan((int)daysPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0);
+            }
+            set
+            {
+                daysPicker.Value = (int)value.TotalDays > 0 ? (int)value.TotalDays : 0;
+                hoursPicker.Value = value.Hours > 0 ? value.Hours : 0;
+                minutesPicker.Value = value.Minutes > 0 ? value.Minutes : 0;
+                updateWarningMessages();
+            }
         }
 
-        //public DateTime UntilDate
-        //{
-        //    get 
-        //    {
-        //        if (!dateTimePickerUntil.Checked) { return DateTime.MaxValue; }
-        //        return dateTimePickerUntil.Value; 
-        //    }
-        //    set
-        //    {
-        //        if (value < dateTimePickerUntil.MinDate)
-        //        {
-        //            dateTimePickerUntil.Checked = false;
-        //            dateTimePickerUntil.Value = dateTimePickerUntil.MinDate;
-        //        }
-        //        else if (value > dateTimePickerUntil.MaxDate)
-        //        {
-        //            dateTimePickerUntil.Checked = false;
-        //            dateTimePickerUntil.Value = dateTimePickerUntil.MaxDate;
-        //        }
-        //        else
-        //        {
-        //            dateTimePickerUntil.Value = value;
-        //        }
+        public DateTime EndDate 
+        {
+            get 
+            { 
+                return datePickerEnd.Value.Date + timePickerEnd.Value.TimeOfDay; 
+            }
+            set
+            {
+                datePickerEnd.Value = value.Date;
+                timePickerEnd.Value = value.Date + value.TimeOfDay;
 
-        //    }
-        //}
+//Console.WriteLine("SET: " + value.Date + " " + value.TimeOfDay);
+//Console.WriteLine("-->: " + datePickerEnd.Value.Date + " " + timePickerEnd.Value.TimeOfDay);
+//datePickerEnd.Invalidate();
+
+                updateWarningMessages();
+            }
+        }
+
+        public int SessionID { get; set; }
+
+
 
         Dictionary<string, string> metaDataEntries;
         List<MetaDataEntry> metaDataList;
@@ -375,7 +344,6 @@ Cursor.Current = Cursors.WaitCursor;
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
 
-            //TS - TODO - Build UntilDate from the data provided.
         }
 
         // Roughly estimate battery life (in seconds) based on percentage remaining and sampling frequency
@@ -400,8 +368,6 @@ Cursor.Current = Cursors.WaitCursor;
 
         private void DateRangeForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            StartDate = datePickerStart.Value;
-            EndDate = StartDate.Add(new TimeSpan((int)daysPicker.Value, (int)hoursPicker.Value, (int)minutesPicker.Value, 0));
         }
 
         #region Height/Weight Checkbox Logic
@@ -464,341 +430,37 @@ Cursor.Current = Cursors.WaitCursor;
         }
         #endregion
 
+
         #region UpdateWarningMessage Events & Change Duration/End Date Events
-        bool datePickerEndIgnoreEvent = false;
-        bool timePickerEndIgnoreEvent = false;
-        bool datePickerStartIgnoreEvent = false;
-        bool timePickerStartIgnoreEvent = false;
-        bool dayPickerIgnoreEvent = false;
-        bool hourPickerIgnoreEvent = false;
-        bool minutePickerIgnoreEvent = false;
 
-        //Start date
-        DateTime previousDateStart = DateTime.Now;
-        bool warningStartDateBeforeEndDate = false;
-        private void datePickerStart_ValueChanged(object sender, EventArgs e)
+
+        private bool timeChanging = false;
+
+        // Changing the start or duration sets the end based on the start and duration
+        private void startDuration_ValueChanged(object sender, EventArgs e)
         {
-            if (datePickerStartIgnoreEvent)
-                return;
+            // Ignore if this change was expected
+            if (timeChanging) { return; }
 
-            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
-            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
-
-            TimeSpan difference = t.Subtract(t2);
-
-            if (difference.Days < 1000)
-            {
-                //TS - If the end date is before the start date, put warning in warning box.
-                if (difference.TotalSeconds < 0)
-                {
-                    warningStartDateBeforeEndDate = true;
-                    //Legacy - used to do message box error.
-                    //MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    //datePickerStart.Value = previousDateStart;
-
-
-                }
-                else
-                {
-                    dayPickerIgnoreEvent = true;
-                    daysPicker.Value = difference.Days;
-                    dayPickerIgnoreEvent = false;
-
-                    hourPickerIgnoreEvent = true;
-                    hoursPicker.Value = difference.Hours;
-                    hourPickerIgnoreEvent = false;
-
-                    minutePickerIgnoreEvent = true;
-                    minutesPicker.Value = difference.Minutes;
-                    minutePickerIgnoreEvent = false;
-
-                    previousDateStart = datePickerStart.Value;
-
-                    warningStartDateBeforeEndDate = false;
-                }
-
-                updateWarningMessages();
-            }
-
-            /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
-
-            if (ts.Days < 0)
-            {
-                MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                datePickerEnd.Value = datePickerStart.Value;
-            }
-            else
-            {
-                if(ts.Days > (int) dayPicker.Maximum)
-                {
-                    dayPickerIgnoreEvent = true;
-                    dayPicker.Value = dayPicker.Maximum;
-                    dayPickerIgnoreEvent = false;
-                }
-                else
-                {
-                    dayPickerIgnoreEvent = true;
-                    dayPicker.Value = ts.Days;
-                    dayPickerIgnoreEvent = false;
-                }
-            }*/
-
-            updateWarningMessages();
+            // Calculate the new end date/time
+            timeChanging = true;
+            EndDate = StartDate + Duration;
+            timeChanging = false;
         }
 
-        DateTime previousTimeStart = DateTime.Now;
-        private void timePickerStart_ValueChanged(object sender, EventArgs e)
+        // Changing the end sets the duration based on the end and start
+        private void end_ValueChanged(object sender, EventArgs e)
         {
-            if (timePickerStartIgnoreEvent)
-                return;
+            // Ignore if this change was expected
+            if (timeChanging) { return; }
 
-            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
-            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
-
-            TimeSpan difference = t.Subtract(t2);
-
-            //TS - If the end date is before the start date, error at them
-            if (difference.TotalSeconds < 0)
-            {
-                MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                timePickerStart.Value = previousTimeStart;
-            }
-            else
-            {
-                dayPickerIgnoreEvent = true;
-                daysPicker.Value = difference.Days;
-                dayPickerIgnoreEvent = false;
-
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = difference.Hours;
-                hourPickerIgnoreEvent = false;
-
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = difference.Minutes;
-                minutePickerIgnoreEvent = false;
-
-                previousTimeStart = timePickerStart.Value;
-            }
-
-            /*
-            //TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
-
-            //If dates same then can still be in past...
-            if (datePickerEnd.Value.Equals(datePickerStart.Value))
-            {
-                //Dates same, see if hours are less.
-                if (ts.Hours < 0)
-                {
-                    MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    timePickerEnd.Value = timePickerStart.Value;
-                }
-                else if (ts.Hours == 0)
-                {
-                    //If hours are equal then see if minutes are less
-                    if (ts.Minutes < 0)
-                    {
-                        MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        timePickerEnd.Value = timePickerStart.Value;
-                    }
-                }
-
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = ts.Hours;
-                hourPickerIgnoreEvent = false;
-
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = ts.Minutes;
-                minutePickerIgnoreEvent = false;
-            }
-            //Everything is okay so update hours and minutes...
-            else
-            {
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = ts.Hours;
-                hourPickerIgnoreEvent = false;
-
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = ts.Minutes;
-                minutePickerIgnoreEvent = false;
-            }*/
-
-            updateWarningMessages();
+            // Calculate the duration
+            timeChanging = true;
+            Duration = EndDate - StartDate;
+            timeChanging = false;
         }
 
-        //End Date
-        DateTime previousDateEnd = DateTime.Now;
-        private void datePickerEnd_ValueChanged(object sender, EventArgs e)
-        {
-            if (datePickerEndIgnoreEvent)
-                return;
 
-            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
-            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
-
-            TimeSpan difference = t.Subtract(t2);
-
-            //TS - If the end date is before the start date, error at them
-            if (difference.TotalSeconds < 0)
-            {
-                MessageBox.Show("End date/time cannot be before start date/time.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                datePickerEnd.Value = previousDateEnd;
-            }
-            else
-            {
-                dayPickerIgnoreEvent = true;
-                daysPicker.Value = difference.Days;
-                dayPickerIgnoreEvent = false;
-
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = difference.Hours;
-                hourPickerIgnoreEvent = false;
-
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = difference.Minutes;
-                minutePickerIgnoreEvent = false;
-
-                previousDateEnd = datePickerEnd.Value;
-            }
-
-            /*TimeSpan ts = datePickerEnd.Value.Subtract(datePickerStart.Value);
-
-            if (ts.Days < 0)
-            {
-                MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                datePickerEnd.Value = datePickerStart.Value;
-            }
-            else
-            {
-                dayPickerIgnoreEvent = true;
-                dayPicker.Value = ts.Days;
-                dayPickerIgnoreEvent = false;
-            }*/
-
-            updateWarningMessages();
-        }
-
-        DateTime previousTimeEnd = DateTime.Now;
-        private void timePickerEnd_ValueChanged(object sender, EventArgs e)
-        {
-            if (timePickerEndIgnoreEvent)
-                return;
-
-            DateTime t = datePickerEnd.Value.Add(timePickerEnd.Value.TimeOfDay);
-            DateTime t2 = datePickerStart.Value.Add(timePickerStart.Value.TimeOfDay);
-
-            TimeSpan difference = t.Subtract(t2);
-
-            //TS - If the end date is before the start date, error at them
-            if (difference.TotalSeconds < 0)
-            {
-                MessageBox.Show("End date cannot be before start date.", "Date Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                timePickerEnd.Value = previousTimeEnd;
-            }
-            else
-            {
-                dayPickerIgnoreEvent = true;
-                daysPicker.Value = difference.Days;
-                dayPickerIgnoreEvent = false;
-
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = difference.Hours;
-                hourPickerIgnoreEvent = false;
-
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = difference.Minutes;
-                minutePickerIgnoreEvent = false;
-
-                previousTimeEnd = timePickerEnd.Value;
-            }
-            /*TimeSpan ts = timePickerEnd.Value.TimeOfDay.Subtract(timePickerStart.Value.TimeOfDay);
-
-            //If dates same then can still be in past...
-            if (datePickerEnd.Value.Equals(datePickerStart.Value))
-            {
-                //Dates same, see if hours are less.
-                if (ts.Hours < 0)
-                {
-                    MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    timePickerEnd.Value = timePickerStart.Value;
-                }
-                else if (ts.Hours == 0)
-                {
-                    //If hours are equal then see if minutes are less
-                    if (ts.Minutes < 0)
-                    {
-                        MessageBox.Show("The End Date cannot be older than the Start Date", "Invalid End Date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        timePickerEnd.Value = timePickerStart.Value;
-                    }
-                }
-            }
-            //Everything is okay so update hours and minutes...
-            else
-            {
-                hourPickerIgnoreEvent = true;
-                hoursPicker.Value = ts.Hours;
-                hourPickerIgnoreEvent = false;
-
-                minutePickerIgnoreEvent = true;
-                minutesPicker.Value = ts.Minutes;
-                minutePickerIgnoreEvent = false;
-            }*/
-
-            updateWarningMessages();
-        }
-
-        int hoursPickerLastValue = 0;
-        private void hoursPicker_ValueChanged(object sender, EventArgs e)
-        {
-            if (hourPickerIgnoreEvent)
-                return;
-
-            int change = (int)hoursPicker.Value - hoursPickerLastValue;
-            hoursPickerLastValue = (int)hoursPicker.Value;
-
-            DateTime d = timePickerEnd.Value.Add(new TimeSpan(change, 0, 0));
-
-            timePickerEndIgnoreEvent = true;
-            timePickerEnd.Value = d;
-            timePickerEndIgnoreEvent = false;
-
-            updateWarningMessages();
-        }
-
-        int minutesPickerLastValue = 0;
-        private void minutesPicker_ValueChanged(object sender, EventArgs e)
-        {
-            if (minutePickerIgnoreEvent)
-                return;
-
-            int change = (int)minutesPicker.Value - minutesPickerLastValue;
-            minutesPickerLastValue = (int)minutesPicker.Value;
-
-            DateTime d = timePickerEnd.Value.Add(new TimeSpan(0, change, 0));
-
-            timePickerEndIgnoreEvent = true;
-            timePickerEnd.Value = d;
-            timePickerEndIgnoreEvent = false;
-
-            updateWarningMessages();
-        }
-
-        int dayPickerLastValue = 0;
-        private void dayPicker_ValueChanged(object sender, EventArgs e)
-        {
-            if (dayPickerIgnoreEvent)
-                return;
-
-            int change = (int) daysPicker.Value - dayPickerLastValue;
-            dayPickerLastValue = (int)daysPicker.Value;
-
-            DateTime d = datePickerEnd.Value.Add(new TimeSpan(change, 0, 0, 0));
-
-            datePickerEndIgnoreEvent = true;
-            datePickerEnd.Value = d;
-            datePickerEndIgnoreEvent = false;
-
-            updateWarningMessages();
-        }
         #endregion
 
         #region Warning Message Logic
@@ -811,12 +473,12 @@ Cursor.Current = Cursors.WaitCursor;
                                     "End time is in the past",
                                     "Start time is in the past",
                                     "Chosen sampling frequency is not officially supported (use at own risk)",
-                                    "Start time is after end time"};
+                                    "Chosen start and end times do not make an interval (end <= start)"};
         private void updateWarningMessages()
         {
             //Make date start and end from dates and times;
-            DateTime startDate = datePickerStart.Value.Date + timePickerStart.Value.TimeOfDay;
-            DateTime endDate = datePickerEnd.Value.Date + timePickerEnd.Value.TimeOfDay;
+            DateTime startDate = StartDate;
+            DateTime endDate = EndDate;
 
             for (int i = 0; i < warningMessagesFlags.Length; i++)
             {
@@ -847,12 +509,12 @@ Cursor.Current = Cursors.WaitCursor;
 
 
             //Delayed start time is more than 14 days in the future
-            if (startDate > (DateTime.Now.Add(new TimeSpan(14, 0, 0, 0))))
+            if (radioButtonDuration.Checked && startDate > (DateTime.Now.Add(new TimeSpan(14, 0, 0, 0))))
                 warningMessagesFlags[4] = true;
 
             //End time is in the past.
             DateTime d = DateTime.Now;
-            if (radioButtonDuration.Checked && (endDate < d))
+            if (radioButtonDuration.Checked && (endDate < d) && endDate != startDate)
                 warningMessagesFlags[5] = true;
 
             //Start date is more than a day in the past
@@ -860,7 +522,7 @@ Cursor.Current = Cursors.WaitCursor;
                 warningMessagesFlags[6] = true;
 
             //Start date is after end date
-            if (warningStartDateBeforeEndDate)
+            if (radioButtonDuration.Checked && StartDate >= EndDate)
                 warningMessagesFlags[8] = true;
 
             //Warning for sampling frequency
