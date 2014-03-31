@@ -74,8 +74,8 @@ function data = OMX_readFile(filename, varargin)
     %
     %
     %   v0.1
-    %       Nils Hammerla, 2012 <nils.hammerla@ncl.ac.uk>
-    %       Changes for basic, limited use of OMX files - Dan Jackson, 2014
+    %       Dan Jackson, 2014
+    %       derived from CWA importer by Nils Hammerla, 2012 <nils.hammerla@ncl.ac.uk>
     %
     
     % 
@@ -164,8 +164,7 @@ function data = readFile(filename, options)
             fprintf('Finding relevant packets from %s to %s.\n',datestr(options.startTime),datestr(options.stopTime));
         end
 
-        % find relevant parts of valid packets (second column =
-        % matlab-timestamp)
+        % find relevant parts of valid packets (second column = matlab-timestamp)
         tmplist = find(data.validPackets(:,2) >= options.startTime & data.validPackets(:,2) <= options.stopTime);
 
         if isempty(tmplist),
@@ -188,13 +187,13 @@ function data = readFile(filename, options)
     end
     
     % get the timestamps for each sample for interpolation later
-    % First: get packets with positive timestamp offset (packet where
-    % clocked flicked over to current time)
-    packetIds = find(data.validPackets(:,3) > 0);
+    % First: get packet ids
+    packetIds = (1:length(data.validPackets))';
+    % ... with positive timestamp offset (packet where clock flicked over to current time)
+    %packetIds = find(data.validPackets(:,3) > 0);
     
-    % now, use timestamp offset to get (sample) position on which timestamp
-    % occurred (80 samples per packet). TIME will be used for
-    % interpolation of other timestamps
+    % now, use timestamp offset to get (sample) position on which timestamp occurred (80 samples per packet). 
+    % TIME will be used for interpolation of other timestamps (offset, timestamp)
     TIME = [(packetIds*80)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
     % TIME_full just contains integer packet numbers for LIGHT and TEMP.
     %TIME_full = [packetIds data.validPackets(packetIds,2)];
@@ -205,7 +204,7 @@ function data = readFile(filename, options)
     % see what modalities to extract...
     if options.modality(1),
         % initialize variables
-        data.ACC     = zeros(size(validIds,1)*80,4);
+        data.ACC = zeros(size(validIds,1)*80,4);
         ACC_tmp = zeros(size(validIds,1)*80,3,'int16');
     end
     
@@ -223,7 +222,7 @@ function data = readFile(filename, options)
         fprintf('reading data samples\n');
     end
 
-    cnt = 1;
+    %cnt = 1;
     
     % for each packet in valid packets, read samples
     for i=1:length(validIds),
@@ -233,10 +232,13 @@ function data = readFile(filename, options)
                 % read accelerometer values
                 fseek(fid,(validIds(i)-1)*512+24,-1);
                 % reads 80*3 signed shorts (16 bit). 
-                ACC_tmp((i-1)*80+1:i*80,1:3) = fread(fid, [3,80], '3*int16=>int16',0,'ieee-le')';
+                ACC_tmp((i-1)*80+1:i*80,1:3) = fread(fid, [3,80], 'int16=>int16',0,'ieee-le')';
             end
             
-            cnt = cnt + 1;
+            %cnt = cnt + 1;
+        catch %err
+            disp 'Warning: problem during data read ';
+            %rethrow err;
         end
     end
 
@@ -258,17 +260,17 @@ function data = readFile(filename, options)
     
     if options.modality(1),
         % Interpolate the timestamps
-        data.ACC = data.ACC(1:(cnt-2)*80,:); % drop last two packets
-        % interpolate using TIME, linearly between known sample-based
-        % timestamp locations.
+        %data.ACC = data.ACC(1:length(validIds)*80,:);
+        
+        % interpolate using TIME, linearly between known sample-based timestamp locations.
         
         % clean TIME so that they are in strict monotonic order
         TIME = TIME([diff(TIME(:,1))~=0 ; true],:);
 		
-        data.ACC(:,1) = interp1(TIME(:,1),TIME(:,2),1:length(data.ACC),'linear',0);
+        data.ACC(:,1) = interp1(TIME(:,1),TIME(:,2),1:length(data.ACC),'linear','extrap');
 
         % clean up cases outside of known timestamps
-        data.ACC = data.ACC(data.ACC(:,1)>0,:);
+        %data.ACC = data.ACC(data.ACC(:,1)>0,:);
     end
 	
     %if options.modality(2) == 1,
@@ -288,8 +290,7 @@ function data = readFile(filename, options)
 end
 
 function validPackets = getValidPackets(fid, options)
-    % read all the valid ids (accelerometer packets in file with correct
-    % session id)
+    % read all the valid ids (accelerometer packets in file)
     
     % get length of file in bytes
     fseek(fid,0,1);                         % goto eof
@@ -304,8 +305,7 @@ function validPackets = getValidPackets(fid, options)
     if options.verbose
         fprintf('reading headers\n');
     end
-    packetHeaders = zeros(2,numPackets);
-    packetHeaders(:) = fread(fid, numPackets*2, '2*uint8=>uint8',510,'ieee-le');
+    packetHeaders = fread(fid, numPackets, 'uint16=>uint16',510,'ieee-le');
     
     % get timestamps
     if options.verbose
@@ -319,7 +319,8 @@ function validPackets = getValidPackets(fid, options)
     packetOffsets = fread(fid,numPackets,'int16=>int16',510,'ieee-le');
 	
     % find valid packets
-    validIds = find(sum(packetHeaders,1)==197);     % corresponds to specific string
+    seekType = hex2dec('6164'); % little endian: 0x64 'd', 0x61 = 'a'.
+    validIds = find(packetHeaders==seekType);
 	
     % return ids and timestamps
     if options.verbose
@@ -332,12 +333,12 @@ function validPackets = getValidPackets(fid, options)
 		ts = packetTimestamps(validIds(i));
 		tsf = double(packetTimestampFractional(validIds(i))) * (1 / (65536 * 24 * 60 * 60));
 		
-		if options.useC
-            dates = datenum(parseDate(ts));
+        if options.useC
+            date = datenum(parseDate(ts));
         else
-            dates = parseDateML(ts);
+            date = parseDateML(ts);
         end
-        validPackets(i,2) = dates + tsf;
+        validPackets(i,2) = date + tsf;
 		
         validPackets(i,3) = packetOffsets(validIds(i));
     end
@@ -370,9 +371,6 @@ function data = readFileInfo(filename, options)
 end
 
 
-%% matlab specific parsing functions (c-code much much quicker)
-
-% Matlab version by Dan Jackson, 2012
 function dat = parseDateML(t)
     persistent lastvalue;
     persistent lastdatearr;
