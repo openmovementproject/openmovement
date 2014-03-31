@@ -223,9 +223,10 @@ namespace OmGui
             }
             set
             {
-                datePickerStart.Value = value.Date;
-                timePickerStart.Value = value.Date + value.TimeOfDay;
+                datePickerStart.Value = value.Date; // remove time
+                timePickerStart.Value = value.Date + new TimeSpan(value.TimeOfDay.Hours, value.TimeOfDay.Minutes, 0); // remove seconds
                 updateWarningMessages();
+//Console.WriteLine("START ==> " + StartDate);
             }
         }
 
@@ -237,10 +238,13 @@ namespace OmGui
             }
             set
             {
-                daysPicker.Value = (int)value.TotalDays > 0 ? (int)value.TotalDays : 0;
-                hoursPicker.Value = value.Hours > 0 ? value.Hours : 0;
-                minutesPicker.Value = value.Minutes > 0 ? value.Minutes : 0;
+//Console.WriteLine("START=" + StartDate + ", END=" + EndDate + ", DURATION=" + value.ToString() + "");
+                TimeSpan v = value + new TimeSpan(0, 0, 30);
+                daysPicker.Value = (int)v.TotalDays > 0 ? (int)v.TotalDays : 0;
+                hoursPicker.Value = v.Hours > 0 ? v.Hours : 0;
+                minutesPicker.Value = v.Minutes > 0 ? v.Minutes : 0;
                 updateWarningMessages();
+//Console.WriteLine("DURATION ==> " + Duration);
             }
         }
 
@@ -252,14 +256,17 @@ namespace OmGui
             }
             set
             {
-                datePickerEnd.Value = value.Date;
-                timePickerEnd.Value = value.Date + value.TimeOfDay;
+                datePickerEnd.Value = value.Date;   // remove time
+                timePickerEnd.Value = value.Date + new TimeSpan(value.TimeOfDay.Hours, value.TimeOfDay.Minutes, 0); // remove seconds
 
 //Console.WriteLine("SET: " + value.Date + " " + value.TimeOfDay);
 //Console.WriteLine("-->: " + datePickerEnd.Value.Date + " " + timePickerEnd.Value.TimeOfDay);
 //datePickerEnd.Invalidate();
 
                 updateWarningMessages();
+
+//Console.WriteLine("END ==> " + EndDate);
+
             }
         }
 
@@ -441,6 +448,56 @@ Cursor.Current = Cursors.WaitCursor;
         {
             // Ignore if this change was expected
             if (timeChanging) { return; }
+
+            timeChanging = true;
+
+            // Minutes < 0
+            if (minutesPicker.Value < 0)
+            {
+                if (hoursPicker.Value == 0 && daysPicker.Value == 0)
+                {
+                    minutesPicker.Value = 0;
+                }
+                else
+                {
+                    hoursPicker.Value = hoursPicker.Value - 1;
+                    minutesPicker.Value = 59;
+                }
+            }
+
+            // Minutes >= 60
+            if (minutesPicker.Value >= 60)
+            {
+                minutesPicker.Value = 0;
+                hoursPicker.Value = hoursPicker.Value + 1;
+            }
+
+            // Hours < 0
+            if (hoursPicker.Value < 0)
+            {
+                if (daysPicker.Value == 0)
+                {
+                    hoursPicker.Value = 0;
+                }
+                else
+                {
+                    daysPicker.Value = daysPicker.Value - 1;
+                    hoursPicker.Value = 23;
+                }
+            }
+
+            // Hours >= 24
+            if (hoursPicker.Value >= 24)
+            {
+                hoursPicker.Value = 0;
+                daysPicker.Value = daysPicker.Value + 1;
+            }
+
+            // Clamp start seconds to zero (seems to change otherwise?)
+            StartDate = StartDate;
+
+            timeChanging = false;
+
 
             // Calculate the new end date/time
             timeChanging = true;

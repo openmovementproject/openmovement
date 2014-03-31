@@ -234,10 +234,15 @@
             this.hoursPicker.Location = new System.Drawing.Point(255, 133);
             this.hoursPicker.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.hoursPicker.Maximum = new decimal(new int[] {
-            23,
+            24,
             0,
             0,
             0});
+            this.hoursPicker.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
             this.hoursPicker.Name = "hoursPicker";
             this.hoursPicker.Size = new System.Drawing.Size(63, 22);
             this.hoursPicker.TabIndex = 9;
@@ -249,10 +254,15 @@
             this.minutesPicker.Location = new System.Drawing.Point(399, 133);
             this.minutesPicker.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.minutesPicker.Maximum = new decimal(new int[] {
-            59,
+            60,
             0,
             0,
             0});
+            this.minutesPicker.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
             this.minutesPicker.Name = "minutesPicker";
             this.minutesPicker.Size = new System.Drawing.Size(63, 22);
             this.minutesPicker.TabIndex = 11;
