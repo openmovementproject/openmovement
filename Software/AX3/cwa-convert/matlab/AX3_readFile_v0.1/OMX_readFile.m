@@ -201,11 +201,14 @@ function data = readFile(filename, options)
     % read data
     validIds = data.validPackets(:,1);
     
+%    numSamples = size(validIds,1)*80;
+    numSamples = data.validPackets(end,5) + data.validPackets(end,4);
+    
     % see what modalities to extract...
     if options.modality(1),
         % initialize variables
-        data.ACC = zeros(size(validIds,1)*80,4);
-        ACC_tmp = zeros(size(validIds,1)*80,3,'int16');
+        data.ACC = zeros(numSamples,4);
+        ACC_tmp = zeros(numSamples,3,'int16');
     end
     
     if options.modality(2),
@@ -231,8 +234,13 @@ function data = readFile(filename, options)
             if options.modality(1) == 1,
                 % read accelerometer values
                 fseek(fid,(validIds(i)-1)*512+24,-1);
+                
+                dataOffset = data.validPackets(i,5) + 1;  % dataOffset = (i-1)*80+1;
+                dataCount = data.validPackets(i,4);       % dataCount = 80;
+                
                 % reads 80*3 signed shorts (16 bit). 
-                ACC_tmp((i-1)*80+1:i*80,1:3) = fread(fid, [3,80], 'int16=>int16',0,'ieee-le')';
+                ACC_tmp(dataOffset:(dataOffset+dataCount-1),1:3) = fread(fid, [3,dataCount], 'int16=>int16',0,'ieee-le')';
+                
             end
             
             %cnt = cnt + 1;
@@ -317,7 +325,26 @@ function validPackets = getValidPackets(fid, options)
 	packetTimestampFractional = fread(fid, numPackets, 'uint16=>uint16',510,'ieee-le');	
     fseek(fid,14,-1);
     packetOffsets = fread(fid,numPackets,'int16=>int16',510,'ieee-le');
+    fseek(fid,22,-1);
+    packetSampleCount = fread(fid,numPackets,'int16=>int16',510,'ieee-le');
 	
+    %uint8_t  packetType;            // @0  [1] Packet type (ASCII 'd' = single-timestamped data stream, 's' = string, others = reserved)
+    %uint8_t  streamId;              // @1  [1] Stream identifier (by convention: a-ccel, g-yro, m-agnetometer, p-ressure, other-ASCII, non-alphanumeric=reserved, *=all streams)
+    %uint16_t payloadLength;         // @2  [2] <0x01FC> Payload length (payload is 508 bytes long, + 4 header/length = 512 bytes total)
+    %uint32_t sequenceId;            // @4  [4] (32-bit sequence counter, each packet in a stream has a sequential number, reset when a stream is restarted)
+    %uint32_t timestamp;             // @8  [4] Timestamp stored little-endian (top-bit 0 = packed as 0YYYYYMM MMDDDDDh hhhhmmmm mmssssss with year-offset, default 2000; top-bit 1 = 31-bit serial time value of seconds since epoch, default 1/1/2000)
+    %uint16_t fractionalTime;        // @12 [2] Fractional part of the time (1/65536 second)
+    %int16_t  timestampOffset;       // @14 [2] The sample index, relative to the start of the buffer, when the timestamp is valid (0 if at the start of the packet, can be negative or positive)
+    %uint16_t sampleRate;            // @16 [2] Sample rate (Hz)
+    %int8_t   sampleRateModifier;    // @18 [1] Sample rate modifier (1 = none; >1 = divisor: sample rate / value; <-1 = multiplier: -value * sample rate; 0 = period in seconds; -1 = period in minutes)
+    %uint8_t  dataType;              // @19 [1] Data type [NOT FINALIZED!] (top-bit set indicates "non-standard" conversion; bottom 7-bits: 0x00 = reserved,  0x10-0x13 = accelerometer (g, at +-2,4,8,16g sensitivity), 0x20 = gyroscope (dps), 0x30 = magnetometer (uT/raw?), 0x40 = light (CWA-raw), 0x50 = temperature (CWA-raw), 0x60 = battery (CWA-raw), 0x70 = pressure (raw?))
+    %int8_t   dataConversion;        // @20 [1] Conversion of raw values to units (-24 to 24 = * 2^n; < -24 divide -(n+24); > 24 multiply (n-24))
+    %uint8_t  channelPacking;        // @21 [1] Packing type (0x32 = 3-channel 2-bytes-per-sample (16-bit); 0x12 = single-channel 16-bit; 0x30 = DWORD packing of 3-axis 10-bit 0-3 binary shifted)
+    %uint16_t sampleCount;           // @22 [2] Number samples in the packet (any remaining space is unused, or used for type-specific auxilliary values)
+    %uint8_t  data[480];             // @24 [480] = e.g. 240 1-channel 16-bit samples, 80 3-channel 16-bit samples, 120 DWORD-packed 3-channel 10-bit samples
+    %uint16_t aux[3];                // @504 [6] (Optional) auxiliary data specific to the data-type (e.g. for device configuration; or for battery/events/light/temperature in a CWA stream)
+    %uint16_t checksum;              // @510 [2] 16-bit word-wise checksum of packet
+    
     % find valid packets
     seekType = hex2dec('6164'); % little endian: 0x64 'd', 0x61 = 'a'.
     validIds = find(packetHeaders==seekType);
@@ -326,22 +353,26 @@ function validPackets = getValidPackets(fid, options)
     if options.verbose
         fprintf('parsing timestamps\n');
     end
- 	validPackets = zeros(length(validIds),3);
+ 	validPackets = zeros(length(validIds),5);
 	validPackets(:,1) = validIds;
     
+    tsf = double(packetTimestampFractional(validIds)) * (1 / (65536 * 24 * 60 * 60));
+        
     for i=1:length(validIds),
 		ts = packetTimestamps(validIds(i));
-		tsf = double(packetTimestampFractional(validIds(i))) * (1 / (65536 * 24 * 60 * 60));
-		
         if options.useC
             date = datenum(parseDate(ts));
         else
             date = parseDateML(ts);
         end
-        validPackets(i,2) = date + tsf;
-		
-        validPackets(i,3) = packetOffsets(validIds(i));
+        validPackets(i,2) = date + tsf(i);
     end
+    
+    validPackets(:,3) = packetOffsets(validIds);
+    validPackets(:,4) = packetSampleCount(validIds);
+    
+    packetSampleOffset = [0; cumsum(packetSampleCount(validIds))];
+    validPackets(:,5) = packetSampleOffset(1:end-1);
     
 end
 
