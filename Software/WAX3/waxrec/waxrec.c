@@ -1378,15 +1378,15 @@ size_t wax9ToOsc(Wax9Packet *wax9Packet, void *outputBuffer, char timetag, unsig
         o += write_osc_int(buffer + o, msgLen);                                 /* [OSC int] message length */
         o += write_osc_string(buffer + o, address);                             /* [OSC string] address: "/wax9/#####" <pads to 12 bytes if ID >= 100, or 8 bytes otherwise> */
         o += write_osc_string(buffer + o, ",fffffffffii");                      /* [OSC string] type tag: <pads to 16 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->accel.x / 2048.0f);        /* [OSC float] Accel. X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->accel.y / 2048.0f);        /* [OSC float] Accel. Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->accel.z / 2048.0f);        /* [OSC float] Accel. Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.x / 4096.0f);        /* [OSC float] Accel. X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.y / 4096.0f);        /* [OSC float] Accel. Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.z / 4096.0f);        /* [OSC float] Accel. Z-axis <4 bytes> */
         o += write_osc_float(buffer + o, wax9Packet->gyro.x * 0.07f);           /* [OSC float] Gyro. X-axis <4 bytes> */
         o += write_osc_float(buffer + o, wax9Packet->gyro.y * 0.07f);           /* [OSC float] Gyro. Y-axis <4 bytes> */
         o += write_osc_float(buffer + o, wax9Packet->gyro.z * 0.07f);           /* [OSC float] Gyro. Z-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.x);                    /* [OSC float] Mag. X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.y);                    /* [OSC float] Mag. Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.z);                    /* [OSC float] Mag. Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.x * 0.10f);            /* [OSC float] Mag. X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.y * 0.10f);            /* [OSC float] Mag. Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.z * 0.10f);            /* [OSC float] Mag. Z-axis <4 bytes> */
         o += write_osc_int(buffer + o, wax9Packet->sampleNumber);               /* [OSC int] sample index <4 bytes> */
         o += write_osc_int(buffer + o, wax9Packet->timestamp);                  /* [OSC int] sample time (16.16) <4 bytes> */
     }
