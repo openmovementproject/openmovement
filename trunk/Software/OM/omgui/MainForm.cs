@@ -836,9 +836,11 @@ namespace OmGui
             {
                 int numTotal = 0;           // Total number of selected devices
                 int numData = 0;            // Devices with some data
-                int numRecording = 0;       // Devices not stopped
+                int numRecording = 0;       // Devices not stopped/after-interval
                 int numDownloading = 0;     // Devices background downloading
                 int numDataAndStoppedOrNoDataAndConfigured = 0;  // Devices with some and stopped, or no data but set to record
+
+                DateTime now = DateTime.Now;
 
                 foreach (ListViewItem item in devicesListView.SelectedItems)
                 {
@@ -861,7 +863,7 @@ namespace OmGui
                     }
 
                     //ALL RECORDING
-                    if (device.StartTime < device.StopTime)
+                    if (device.StartTime < device.StopTime && device.StopTime >= now)
                     {
                         numRecording++;
                     }
@@ -872,7 +874,7 @@ namespace OmGui
                     //    numFutureRecording++;
                     //}
 
-                    if ((device.HasData && device.StartTime >= device.StopTime) || (!device.HasData && device.StartTime < device.StopTime))
+                    if ((device.HasData && (device.StartTime >= device.StopTime || device.StopTime < now)) || (!device.HasData && device.StartTime < device.StopTime))
                     {
                         numDataAndStoppedOrNoDataAndConfigured++;
                     }
@@ -1196,6 +1198,17 @@ namespace OmGui
                 }
 
             };
+            stopBackgroundWorker.RunWorkerCompleted += (s, ea) =>
+            {
+                int[] selected = new int[devicesListView.SelectedIndices.Count];
+                devicesListView.SelectedIndices.CopyTo(selected, 0);
+                devicesListView.SelectedIndices.Clear();
+                devicesListViewUpdateEnabled();
+                foreach (int i in selected)
+                {
+                    devicesListView.SelectedIndices.Add(i);
+                }
+            };
 
             ShowProgressWithBackground("Stopping", "Stopping devices...", stopBackgroundWorker);
             
@@ -1370,6 +1383,10 @@ namespace OmGui
                     }
 
                 };
+                recordBackgroundWorker.RunWorkerCompleted += (s, ea) =>
+                {
+                    devicesListViewUpdateEnabled();
+                };
 
                 ShowProgressWithBackground("Configuring", "Configuring devices...", recordBackgroundWorker);
 
@@ -1539,6 +1556,10 @@ namespace OmGui
                                 MessageBox.Show(this, "Failed operation on " + fails.Count + " device(s):\r\n" + string.Join("; ", fails.ToArray()) + ADVICE, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
                             ));
                         }
+                    };
+                    clearBackgroundWorker.RunWorkerCompleted += (s, ea) =>
+                    {
+                        devicesListViewUpdateEnabled();
                     };
 
                     ShowProgressWithBackground((wipe ? "Wiping" : "Clearing"), (wipe ? "Wiping" : "Clearing") + " devices...", clearBackgroundWorker);
