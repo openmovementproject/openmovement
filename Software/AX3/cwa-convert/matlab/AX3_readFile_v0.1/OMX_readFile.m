@@ -183,18 +183,19 @@ function data = readFile(filename, options)
     % check if any packets are left...
     if isempty(data.validPackets),
         fprintf('no data after filtering for start and stop dates given.\n');
+        fclose(fid);
         return
     end
     
     % get the timestamps for each sample for interpolation later
-    % First: get packet ids
+    % Get all packet ids
     packetIds = (1:length(data.validPackets))';
     % ... with positive timestamp offset (packet where clock flicked over to current time)
     %packetIds = find(data.validPackets(:,3) > 0);
     
     % now, use timestamp offset to get (sample) position on which timestamp occurred (80 samples per packet). 
     % TIME will be used for interpolation of other timestamps (offset, timestamp)
-    TIME = [(packetIds*80)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
+    TIME = [data.validPackets(packetIds,5)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
     % TIME_full just contains integer packet numbers for LIGHT and TEMP.
     %TIME_full = [packetIds data.validPackets(packetIds,2)];
     
@@ -209,16 +210,6 @@ function data = readFile(filename, options)
         % initialize variables
         data.ACC = zeros(numSamples,4);
         ACC_tmp = zeros(numSamples,3,'int16');
-    end
-    
-    if options.modality(2),
-        % initialize variables
-        %data.LIGHT   = zeros(size(validIds,1),2);
-    end
-    
-    if options.modality(3),
-        % initialize variables
-        %data.TEMP    = zeros(size(validIds,1),2);
     end
     
     if options.verbose,
