@@ -1,6 +1,12 @@
 function data = OMX_readFile(filename, varargin)
     %
-    %   IMPORTANT:  This version only reads accelerometer data and makes assumptions about the format and range, and doesn't check the sector checksum.
+    %   IMPORTANT:  Please note the current limitations:
+    %   * This version defaults to reading the accelerometer values
+    %   * The gyroscope/magnetometer data can be read when given the options: 'modality', [1, 1, 1]
+    %   * Metadata, light, pressure, temperature and battery levels are not yet supported
+    %   * The accelerometer values are scaled 1/4096 (the default range)
+    %   * The gyroscope/magnetometer values are not scaled at all
+    %   * For speed, the Matlab importer doesn't check the sector checksum.
     %
 	%
     %   DATA = OMX_readFile(FILENAME, [OPTIONS])
@@ -18,7 +24,7 @@ function data = OMX_readFile(filename, varargin)
     %                               logging, sensor id, etc. (see example
     %                               below)
     %
-    %           'validPackets'      A Nx3 matrix containing pre-read valid
+    %           'packetInfo'        A Nx3 matrix containing pre-read 
     %                               packet locations, timestamps and
     %                               timestamp offsets (produced by
     %                               info-mode). 
@@ -33,7 +39,7 @@ function data = OMX_readFile(filename, varargin)
     %
     %           'modality'          A three element vector [1, 1, 1] that
     %                               indicates which sensor modalities to
-    %                               extract. Order is ACC, (reserved), (reserved). 
+    %                               extract. Order is ACC, GYR, MAG.
     %                               e.g. [1, 0, 0]
     %
     %           'verbose'           Print out debug messages about
@@ -50,7 +56,7 @@ function data = OMX_readFile(filename, varargin)
     %       Reading file information:
     %           >> fileinfo = OMX_readFile('foobar.omx', 'info', 1, 'useC', 1)
     %               fileinfo = 
-    %                 validPackets: [991997x3 double]
+    %                   packetInfo: [991997x3 double]
     %                        start: [1x1 struct]
     %                         stop: [1x1 struct]
     %                     deviceId: 33
@@ -62,15 +68,15 @@ function data = OMX_readFile(filename, varargin)
     %
     %       subsequent read of slice using pre-read packet info:
     %           >> data = OMX_readFile('foobar.omx', ... 
-    %               'validPackets', fileinfo.validPackets, ...
+    %               'packetInfo', fileinfo.packetInfo, ...
     %               'startTime', datenum('19-Feb-2012 00:00:00'), ... 
     %               'stopTime', datenum('20-Feb-2012 00:00:00'));
     %
     %           >> data = 
-    %               validPackets: [73059x3 double]
+    %                 packetInfo: [73059x5 double]
     %                        ACC: [8766736x4 double]
-    %                  reserved1: ...
-    %                  reserved2: ...       
+    %                        GYR: [8766736x4 double]
+    %                        MAG: [8766736x4 double]
     %
     %
     %   v0.1
@@ -108,7 +114,7 @@ function data = OMX_readFile(filename, varargin)
     
     % define optional arguments with default values
     addOptional(p,'info',0,@isnumeric);             % just get file-info?
-    addOptional(p,'validPackets',0,@isnumeric);     % pre-read packet info
+    addOptional(p,'packetInfo',0,@isnumeric);       % pre-read packet info
     addOptional(p,'startTime',-1,@isnumeric);       % start time (matlab)
     addOptional(p,'stopTime',-1,@isnumeric);        % stop time  (matlab)
     addOptional(p,'verbose',0,@isnumeric);          % print out progress
@@ -130,6 +136,97 @@ function data = OMX_readFile(filename, varargin)
     
 end
 
+
+function data = readTriaxial(fid, packetInfo, seekType, scale)
+
+    packetHeaders = packetInfo(:,5);
+    
+    % get the timestamps for each sample for interpolation later
+    % Get all packet ids
+    %packetIds = (1:length(packetInfo))';
+    % Get requested packet ids
+    packetIds = find(packetHeaders==seekType);
+    packetInfo = packetInfo(packetIds,:);
+    
+    % ... with positive timestamp offset (packet where clock flicked over to current time)
+    %packetIds = find(packetInfo(:,3) > 0);
+    
+    packetSampleCount = packetInfo(:,4);
+    packetSampleOffset = [0; cumsum(packetSampleCount)];
+    packetSampleOffset = packetSampleOffset(1:end-1);
+    
+    % now, use timestamp offset to get (sample) position on which timestamp occurred (80 samples per packet). 
+    % TIME will be used for interpolation of other timestamps (offset, timestamp)
+    TIME = [packetSampleOffset+double(packetInfo(:,3)) packetInfo(:,2)];
+    % TIME_full just contains integer packet numbers for LIGHT and TEMP.
+    %TIME_full = [packetIds packetInfo(packetIds,2)];
+    
+    % read data
+    validIds = packetInfo(:,1);
+    
+%    numSamples = size(validIds,1)*80;
+    numSamples = packetSampleOffset(end) + packetSampleCount(end);
+    
+    % see what modalities to extract...
+    data = zeros(numSamples,4);
+    tmp = zeros(numSamples,3,'int16');
+    
+    %if options.verbose,
+    %    fprintf('reading data samples\n');
+    %end
+
+    %cnt = 1;
+    
+    % for each packet in valid packets, read samples
+    for i=1:length(validIds),
+        try % just to make sure
+            
+            % read values
+            fseek(fid,(validIds(i)-1)*512+24,-1);
+
+            dataOffset = packetSampleOffset(i) + 1;  % dataOffset = (i-1)*80+1;
+            dataCount = packetSampleCount(i);       % dataCount = 80;
+
+            % reads 80*3 signed shorts (16 bit). 
+            tmp(dataOffset:(dataOffset+dataCount-1),1:3) = fread(fid, [3,dataCount], 'int16=>int16',0,'ieee-le')';
+            
+            %cnt = cnt + 1;
+        catch %err
+            disp 'Warning: problem during data read ';
+            %rethrow err;
+        end
+    end
+
+    % decode values for accelerometer
+
+    %if options.verbose > 0,
+    %    fprintf('parsing samples\n');
+    %end
+
+    data(:,2:4) = double(tmp) * scale;
+
+    clear tmp; % clear some memory
+    
+    %if options.verbose,
+    %    fprintf('Calculating timestamps.\n');
+    %end
+    
+    % Interpolate the timestamps
+    %data = data(1:length(validIds)*80,:);
+
+    % interpolate using TIME, linearly between known sample-based timestamp locations.
+
+    % clean TIME so that they are in strict monotonic order
+    TIME = TIME([diff(TIME(:,1))~=0 ; true],:);
+
+    data(:,1) = interp1(TIME(:,1),TIME(:,2),1:size(data,1),'linear','extrap');
+
+    % clean up cases outside of known timestamps
+    %data = data(data(:,1)>0,:);
+    
+end
+
+
 function data = readFile(filename, options)
     % read data from file according to specified options
     
@@ -141,13 +238,13 @@ function data = readFile(filename, options)
     end
 
 
-    % check if we have pre-read timestamps...
-    if length(options.validPackets) == 1,
+    % check if we have pre-read packet information...
+    if length(options.packetInfo) == 1,
         % we don't, so read information
-        data.validPackets = getValidPackets(fid, options);
+        data.packetInfo = getPacketInfo(fid, options);
     else
         % get the valid packet position from the given matrix
-        data.validPackets = options.validPackets;
+        data.packetInfo = options.packetInfo;
     end
     
     
@@ -156,7 +253,7 @@ function data = readFile(filename, options)
     
     % pre-set boundaries
     first = 1;
-    last  = size(data.validPackets,1);
+    last  = size(data.packetInfo,1);
     
     % if startTime & stopTime given, get slice of data
     if options.startTime > 0 && options.stopTime > 0,
@@ -165,7 +262,7 @@ function data = readFile(filename, options)
         end
 
         % find relevant parts of valid packets (second column = matlab-timestamp)
-        tmplist = find(data.validPackets(:,2) >= options.startTime & data.validPackets(:,2) <= options.stopTime);
+        tmplist = find(data.packetInfo(:,2) >= options.startTime & data.packetInfo(:,2) <= options.stopTime);
 
         if isempty(tmplist),
             fprintf('No packets found in desired time-range! Aborting.\n');
@@ -178,100 +275,29 @@ function data = readFile(filename, options)
     end
     
     % filter positions for period of interest
-    data.validPackets = data.validPackets(first:last,:);
+    data.packetInfo = data.packetInfo(first:last,:);
     
     % check if any packets are left...
-    if isempty(data.validPackets),
+    if isempty(data.packetInfo),
         fprintf('no data after filtering for start and stop dates given.\n');
         fclose(fid);
         return
     end
     
-    % get the timestamps for each sample for interpolation later
-    % Get all packet ids
-    packetIds = (1:length(data.validPackets))';
-    % ... with positive timestamp offset (packet where clock flicked over to current time)
-    %packetIds = find(data.validPackets(:,3) > 0);
-    
-    % now, use timestamp offset to get (sample) position on which timestamp occurred (80 samples per packet). 
-    % TIME will be used for interpolation of other timestamps (offset, timestamp)
-    TIME = [data.validPackets(packetIds,5)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
-    % TIME_full just contains integer packet numbers for LIGHT and TEMP.
-    %TIME_full = [packetIds data.validPackets(packetIds,2)];
-    
-    % read data
-    validIds = data.validPackets(:,1);
-    
-%    numSamples = size(validIds,1)*80;
-    numSamples = data.validPackets(end,5) + data.validPackets(end,4);
-    
     % see what modalities to extract...
     if options.modality(1),
-        % initialize variables
-        data.ACC = zeros(numSamples,4);
-        ACC_tmp = zeros(numSamples,3,'int16');
+        % little endian: 0x64 'd', 0x61 = 'a'.
+        data.ACC = readTriaxial(fid, data.packetInfo, hex2dec('6164'), 1/4096);
     end
-    
-    if options.verbose,
-        fprintf('reading data samples\n');
+    if options.modality(2),
+        % little endian: 0x64 'd', 0x67 = 'g'.
+        data.GYR = readTriaxial(fid, data.packetInfo, hex2dec('6764'), 1.0);   % 0.07
     end
-
-    %cnt = 1;
-    
-    % for each packet in valid packets, read samples
-    for i=1:length(validIds),
-        try % just to make sure
-            
-            if options.modality(1) == 1,
-                % read accelerometer values
-                fseek(fid,(validIds(i)-1)*512+24,-1);
-                
-                dataOffset = data.validPackets(i,5) + 1;  % dataOffset = (i-1)*80+1;
-                dataCount = data.validPackets(i,4);       % dataCount = 80;
-                
-                % reads 80*3 signed shorts (16 bit). 
-                ACC_tmp(dataOffset:(dataOffset+dataCount-1),1:3) = fread(fid, [3,dataCount], 'int16=>int16',0,'ieee-le')';
-                
-            end
-            
-            %cnt = cnt + 1;
-        catch %err
-            disp 'Warning: problem during data read ';
-            %rethrow err;
-        end
+    if options.modality(3),
+        % little endian: 0x64 'd', 0x6d = 'm'.
+        data.MAG = readTriaxial(fid, data.packetInfo, hex2dec('6D64'), 1.0);   % 0.1
     end
-
-    if options.modality(1),
-        % decode values for accelerometer
-
-        if options.verbose > 0,
-            fprintf('parsing samples\n');
-        end
-        
-        data.ACC(:,2:4) = double(ACC_tmp) / 4096;
-		
-        clear ACC_tmp; % clear some memory
-    end
-    
-    if options.verbose,
-        fprintf('Calculating timestamps.\n');
-    end
-    
-    if options.modality(1),
-        % Interpolate the timestamps
-        %data.ACC = data.ACC(1:length(validIds)*80,:);
-        
-        % interpolate using TIME, linearly between known sample-based timestamp locations.
-        
-        % clean TIME so that they are in strict monotonic order
-        TIME = TIME([diff(TIME(:,1))~=0 ; true],:);
-		
-        data.ACC(:,1) = interp1(TIME(:,1),TIME(:,2),1:length(data.ACC),'linear','extrap');
-
-        % clean up cases outside of known timestamps
-        %data.ACC = data.ACC(data.ACC(:,1)>0,:);
-    end
-	
+   
     %if options.modality(2) == 1,
     %    % interpolate time for light
     %    data.LIGHT(:,1) = interp1(TIME_full(:,1),TIME_full(:,2),1:length(data.LIGHT),'linear',0);
@@ -288,7 +314,7 @@ function data = readFile(filename, options)
     fclose(fid);
 end
 
-function validPackets = getValidPackets(fid, options)
+function packetInfo = getPacketInfo(fid, options)
     % read all the valid ids (accelerometer packets in file)
     
     % get length of file in bytes
@@ -337,15 +363,18 @@ function validPackets = getValidPackets(fid, options)
     %uint16_t checksum;              // @510 [2] 16-bit word-wise checksum of packet
     
     % find valid packets
-    seekType = hex2dec('6164'); % little endian: 0x64 'd', 0x61 = 'a'.
-    validIds = find(packetHeaders==seekType);
+    %seekType = hex2dec('6164'); % little endian: 0x64 'd', 0x61 = 'a'.
+    %validIds = find(packetHeaders==seekType);
+    validIds = 1:size(packetHeaders,1);
 	
     % return ids and timestamps
     if options.verbose
         fprintf('parsing timestamps\n');
     end
- 	validPackets = zeros(length(validIds),5);
-	validPackets(:,1) = validIds;
+ 	packetInfo = zeros(length(validIds),5);
+	packetInfo(:,1) = validIds;
+    
+    packetInfo(:,5) = packetHeaders;
     
     tsf = double(packetTimestampFractional(validIds)) * (1 / (65536 * 24 * 60 * 60));
         
@@ -356,14 +385,11 @@ function validPackets = getValidPackets(fid, options)
         else
             date = parseDateML(ts);
         end
-        validPackets(i,2) = date + tsf(i);
+        packetInfo(i,2) = date + tsf(i);
     end
     
-    validPackets(:,3) = packetOffsets(validIds);
-    validPackets(:,4) = packetSampleCount(validIds);
-    
-    packetSampleOffset = [0; cumsum(packetSampleCount(validIds))];
-    validPackets(:,5) = packetSampleOffset(1:end-1);
+    packetInfo(:,3) = packetOffsets(validIds);
+    packetInfo(:,4) = packetSampleCount(validIds);
     
 end
 
@@ -374,13 +400,13 @@ function data = readFileInfo(filename, options)
     fid = fopen(filename);
     
     % read valid packet positions 
-    data.validPackets = getValidPackets(fid, options);
+    data.packetInfo = getPacketInfo(fid, options);
     
     % get time (first and last valid packets)
-    data.start.mtime = data.validPackets(1,2);
-    data.start.str   = datestr(data.validPackets(1,2));
-    data.stop.mtime  = data.validPackets(end,2);
-    data.stop.str    = datestr(data.validPackets(end,2));
+    data.start.mtime = data.packetInfo(1,2);
+    data.start.str   = datestr(data.packetInfo(1,2));
+    data.stop.mtime  = data.packetInfo(end,2);
+    data.stop.str    = datestr(data.packetInfo(end,2));
     
     % dummy deviceId
     data.deviceId = 0;
