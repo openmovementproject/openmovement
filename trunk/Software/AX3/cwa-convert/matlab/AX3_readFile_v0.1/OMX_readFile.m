@@ -1,11 +1,12 @@
 function data = OMX_readFile(filename, varargin)
     %
-    %   IMPORTANT:  Please note the current limitations:
-    %   * This version defaults to reading the accelerometer values
-    %   * The gyroscope/magnetometer data can be read when given the options: 'modality', [1, 1, 1]
+    %   NOTES:
+    %   * This version defaults to reading just the accelerometer values.
+    %   * The gyroscope/magnetometer data can be read when given the options:  'modality', [1, 1, 1]
+    %   * Stepped data can be read given the options:  'step', 100
+    %   * The accelerometer values are currently always scaled 1/4096 (the default range conversion to 'g')
+    %   * The gyroscope/magnetometer values are currently not scaled at all
     %   * Metadata, light, pressure, temperature and battery levels are not yet supported
-    %   * The accelerometer values are scaled 1/4096 (the default range)
-    %   * The gyroscope/magnetometer values are not scaled at all
     %   * For speed, the Matlab importer doesn't check the sector checksum.
     %
 	%
@@ -45,11 +46,15 @@ function data = OMX_readFile(filename, varargin)
     %           'verbose'           Print out debug messages about
     %                               progress.
     %
-    %           'useC'              Heavily speed up parsing of samples and
+    %           'useC'              Attempt to speed up parsing of samples and
     %                               timestamps by relying on external
     %                               c-code (parseDate.c). Requires compilation
     %                               using mex-interface or pre-compiled
     %                               binaries (.mexXXX files).
+    %
+    %           'step'              Skip samples (1 = no skipping),
+    %                               inefficient for small numbers that are not 1.
+    %
     %
     %       EXAMPLES:
     %           
@@ -118,10 +123,9 @@ function data = OMX_readFile(filename, varargin)
     addOptional(p,'startTime',-1,@isnumeric);       % start time (matlab)
     addOptional(p,'stopTime',-1,@isnumeric);        % stop time  (matlab)
     addOptional(p,'verbose',0,@isnumeric);          % print out progress
-    addOptional(p,'useC',0,@isnumeric);             % use external c-code 
-                                                    % for speed.
-    addOptional(p,'modality',[1 0 0], @isnumeric);  % specify modality
-                                                    % [ACC reserved1 reserved2]
+    addOptional(p,'useC',0,@isnumeric);             % use external c-code for date conversion
+    addOptional(p,'modality',[1 0 0], @isnumeric);  % specify modality [ACC GYR MAG]
+    addOptional(p,'step',1, @isnumeric);            % specify step size (default 1), this is inefficient for small numbers other than 1
     
     % parse varargin
     parse(p,varargin{:});
@@ -137,7 +141,7 @@ function data = OMX_readFile(filename, varargin)
 end
 
 
-function data = readTriaxial(fid, packetInfo, seekType, scale)
+function data = readTriaxial(fid, packetInfo, seekType, step, scale)
 
     packetHeaders = packetInfo(:,5);
     
@@ -164,8 +168,11 @@ function data = readTriaxial(fid, packetInfo, seekType, scale)
     % read data
     validIds = packetInfo(:,1);
     
-%    numSamples = size(validIds,1)*80;
-    numSamples = packetSampleOffset(end) + packetSampleCount(end);
+%    numActualSamples = size(validIds,1)*80;
+    numActualSamples = packetSampleOffset(end) + packetSampleCount(end);
+    
+    % Skip by 'step'
+    numSamples = floor(numActualSamples / step);
     
     % see what modalities to extract...
     data = zeros(numSamples,4);
@@ -177,24 +184,67 @@ function data = readTriaxial(fid, packetInfo, seekType, scale)
 
     %cnt = 1;
     
-    % for each packet in valid packets, read samples
-    for i=1:length(validIds),
-        try % just to make sure
-            
-            % read values
-            fseek(fid,(validIds(i)-1)*512+24,-1);
+    if step == 1,
+    
+        % for each packet in valid packets, read samples
+        for i=1:length(validIds),
+            try % just to make sure
 
-            dataOffset = packetSampleOffset(i) + 1;  % dataOffset = (i-1)*80+1;
-            dataCount = packetSampleCount(i);       % dataCount = 80;
+                % read values
+                fseek(fid,(validIds(i)-1)*512+24,-1);
 
-            % reads 80*3 signed shorts (16 bit). 
-            tmp(dataOffset:(dataOffset+dataCount-1),1:3) = fread(fid, [3,dataCount], 'int16=>int16',0,'ieee-le')';
-            
-            %cnt = cnt + 1;
-        catch %err
-            disp 'Warning: problem during data read ';
-            %rethrow err;
+                dataOffset = packetSampleOffset(i) + 1;  % dataOffset = (i-1)*80+1;
+                dataCount = packetSampleCount(i);       % dataCount = 80;
+
+                % reads 80*3 signed shorts (16 bit). 
+                tmp(dataOffset:(dataOffset+dataCount-1),1:3) = fread(fid, [3,dataCount], 'int16=>int16',0,'ieee-le')';
+
+                %cnt = cnt + 1;
+            catch %err
+                disp 'Warning: problem during data read ';
+                %rethrow err;
+            end
         end
+        
+    else
+        
+        % Sub-sampled indexes
+        sampleIndexes = 1:numSamples;
+        
+        % Calculate physical sample number
+        physicalSampleIndex = floor((sampleIndexes - 1) * numActualSamples / numSamples) + 1;
+        
+        % Calculate the offset within the file of the sample
+        offsets = zeros(numSamples,1);
+        % Enumerate over the packets
+        sample = 1;
+        for packet=1:size(packetInfo,1),
+            
+            % Calculate base & limit sample number for this packet
+            packetSampleBase = packetSampleOffset(packet) + 1;
+            packetSampleLimit = packetSampleBase - 1 + packetSampleCount(packet);
+            
+            % For the samples within this packet...
+            while sample <= numSamples && physicalSampleIndex(sample) <= packetSampleLimit
+
+                offsets(sample) = ((validIds(packet) - 1) * 512) + 24 + ((physicalSampleIndex(sample) - packetSampleBase) * 6);
+                sample = sample + 1;
+                
+            end            
+        end
+        
+        % for each sample
+        for i=1:numSamples,
+            try % just to make sure
+                % read axes
+                fseek(fid,offsets(i),-1);
+                tmp(i,1:3) = fread(fid, [3,1], 'int16=>int16',0,'ieee-le')';
+            catch %err
+                disp 'Warning: problem during data read ';
+                %rethrow err;
+            end
+        end
+        
     end
 
     % decode values for accelerometer
@@ -287,15 +337,15 @@ function data = readFile(filename, options)
     % see what modalities to extract...
     if options.modality(1),
         % little endian: 0x64 'd', 0x61 = 'a'.
-        data.ACC = readTriaxial(fid, data.packetInfo, hex2dec('6164'), 1/4096);
+        data.ACC = readTriaxial(fid, data.packetInfo, hex2dec('6164'), options.step, 1/4096);
     end
     if options.modality(2),
         % little endian: 0x64 'd', 0x67 = 'g'.
-        data.GYR = readTriaxial(fid, data.packetInfo, hex2dec('6764'), 1.0);   % 0.07
+        data.GYR = readTriaxial(fid, data.packetInfo, hex2dec('6764'), options.step, 1.0);   % 0.07
     end
     if options.modality(3),
         % little endian: 0x64 'd', 0x6d = 'm'.
-        data.MAG = readTriaxial(fid, data.packetInfo, hex2dec('6D64'), 1.0);   % 0.1
+        data.MAG = readTriaxial(fid, data.packetInfo, hex2dec('6D64'), options.step, 1.0);   % 0.1
     end
    
     %if options.modality(2) == 1,
