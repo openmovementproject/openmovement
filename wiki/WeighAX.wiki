@@ -12,6 +12,7 @@ The WeighAX wireless scales measure weight and transmit this via the mobile GSM 
   * [WeighAXMechanical WeighAX Mechanical]
 </wiki:comment>
 
+
 == Links ==
   * [Documentation Documentation]
   * [Source Source]
