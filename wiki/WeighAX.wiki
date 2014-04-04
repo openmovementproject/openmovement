@@ -1,0 +1,18 @@
+#summary Open Movement WeighAX Weight Monitoring
+
+= Open Movement - WeighAX Weight Monitoring =
+
+The WeighAX wireless scales measure weight and transmit this via the mobile GSM network to a server.
+
+<wiki:comment>
+== Documentation ==
+  * [WeighAXSoftware WeighAX Software]
+  * [WeighAXFirmware WeighAX Firmware]
+  * [WeighAXHardware WeighAX Hardware]
+  * [WeighAXMechanical WeighAX Mechanical]
+</wiki:comment>
+
+== Links ==
+  * [Documentation Documentation]
+  * [Source Source]
+  * [Downloads Downloads]
