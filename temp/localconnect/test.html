@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<title>Test</title>
+<!-- <script src="promise.js"></script> -->
+<script src="omm-loader.js"></script>
+<script>
+var gConnections = null;	// All connection objects
+var gConnection = null;		// The currently opened connection
+
+function refreshConnections()
+{
+	document.getElementById("addressPort").innerHTML = "";
+	
+	OmmManager.getConnections(function(connections) {
+	
+		gConnections = connections;
+		
+		//window.alert('Got connections: ' + JSON.stringify(connections));
+		
+		for (var i = 0; i < connections.length; i++)
+		{
+			var port = connections[i];
+			
+			var option = document.createElement("option");
+			option.value = i;
+			var label = port.port + "<em> - " + port.type;
+			if (port.mac) { label = label + " &lt;" + port.mac + "&gt;"; }
+			if (port.serial) { label = label + " &lt;" + port.serial + "&gt;"; }
+			label = label + "</em>";
+			option.innerHTML = label;
+			document.getElementById("addressPort").appendChild(option);
+			
+		}
+		
+	}, function() {
+		window.alert('Failed to get connections.');
+	});
+	
+}
+
+function disableActions(disabled)
+{
+    var form = document.getElementById('actionForm');
+    for (i = 0; i < form.elements.length; i++) {
+		form.elements[i].disabled = (form.elements[i].className == "nodisable") ? false : disabled;
+    }
+ }
+
+function print(message)
+{
+    var output = document.getElementById("output");
+	var pre = document.createElement("p");
+	pre.style.wordWrap = "break-word";
+	pre.innerHTML = message;
+	output.appendChild(pre);
+    output.scrollTop = output.scrollHeight;	
+}
+
+function connect()
+{
+	disconnect();
+	document.getElementById("connectButton").disabled = true;
+	
+	var index = parseInt(document.getElementById("addressPort").value);
+	gConnection = gConnections[index];
+	gConnection.open(function() {
+		print("CONNECTED");
+		document.getElementById("disconnectButton").disabled = false;
+		disableActions(false);
+		
+	}, function() {
+	
+		print("FAILED TO CONNECT");
+		document.getElementById("connectButton").disabled = false;
+	});
+    
+	return false;
+}
+
+function disconnect()
+{
+    if (gConnection != null)
+	{
+		print("DISCONNECTING...");	
+		gConnection.close();
+		gConnection = null;
+	}
+	document.getElementById("disconnectButton").disabled = true;
+	document.getElementById("connectButton").disabled = false;
+	disableActions(true);
+	return false;
+}
+
+function windowLoad()
+{
+//window.alert("getManager...");
+
+	window.onbeforeunload = function()
+	{
+		//if (websocket != null)
+		//{
+		//	websocket.onclose = function () {}; // disable onclose handler
+		//	websocket.close()
+		//	websocket = null;
+		//}
+	};
+
+	document.getElementById("connectButton").disabled = false;
+	document.getElementById("disconnectButton").disabled = true;
+	disableActions(true);
+	
+	var manager = OmmLoader.getManager(null, function() {
+		//window.alert('Manager loaded!');
+		
+		refreshConnections();
+		
+	}, function () {
+		window.alert('Failed to load manager');
+	});
+	
+}
+
+
+window.addEventListener("load", windowLoad, false);
+
+function printResponse(msg) {
+	print('<span style="color: blue;">RESPONSE: ' + msg + '</span>');
+}
+
+function printError(error) {
+	print('<span style="color: red;">ERROR: ' + ((typeof msg === 'undefined') ? "" : msg) + '</span>');
+}
+
+function doGetIdentity()
+{
+	print("getIdentity()...");
+	gConnection.getIdentity(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+function doGetTime()
+{
+	print("getTime()...");
+	gConnection.getTime(function(ret) {
+		printResponse(ret);
+	}, function() { printError(); });
+}
+
+function doGetBattery()
+{
+	print("getBattery()...");
+	gConnection.getBattery(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+function doSetLed(led)
+{
+	print("setLed()...");
+	gConnection.setLed(led, function() {
+		printResponse("SET");
+	}, function() { printError(); });
+}
+
+function doSetTime(newTime)
+{
+	print("setTime()...");
+	newTime = ((typeof newTime === 'undefined') ? null : newTime);	
+	gConnection.setTime(newTime, function(ret) {
+		printResponse("OK");
+	}, function() { printError(); });
+}
+
+/*
+function doGetSettingsRecording()
+{
+	print("getSettingsRecording()...");
+	gConnection.getSettingsRecording(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+function doGetSettingsSensors()
+{
+	print("getSettingsSensors()...");
+	gConnection.getSettingsSensors(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+function doGetSettingsMetadata()
+{
+	print("getSettingsMetadata()...");
+	gConnection.getSettingsMetadata(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+*/
+
+function doGetSettings()
+{
+	print("getSettings()...");
+	gConnection.getSettings(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+
+function doGetMemory()
+{
+	var index = parseInt(document.getElementById("addressPort").value);
+	connection = gConnections[index];
+	
+	print("getMemory()...");
+	connection.getMemory(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+function doGetFiles()
+{
+	var index = parseInt(document.getElementById("addressPort").value);
+	connection = gConnections[index];
+
+	print("getFiles()...");
+	connection.getFiles(function(ret) {
+		printResponse(JSON.stringify(ret));
+	}, function() { printError(); });
+}
+
+function doFormat()
+{
+	var answer = window.confirm("Really format " + gConnection.path + "?")
+	if (answer) {
+		print("doFormat()...");
+		gConnection.format(function(ret) {
+			printResponse("OK");
+		}, function() { printError(); });
+	}
+}
+
+var defaultSetup = {
+	//metadata: "The quick brown fox jumps over the lazy dog."
+};
+
+/*
+function doSetSettingsRecording()
+{
+	print("setSettingsRecording()...");
+	gConnection.setSettingsRecording(defaultSetup, function() {
+		printResponse("OK");
+	}, function() { printError(); });
+}
+
+function doSetSettingsSensors()
+{
+	print("setSettingsSensors()...");
+	gConnection.setSettingsSensors(defaultSetup, function() {
+		printResponse("OK");
+	}, function() { printError(); });
+}
+
+function doSetSettingsMetadata()
+{
+	print("setSettingsMetadata()...");
+	gConnection.setSettingsMetadata(defaultSetup, function() {
+		printResponse("OK");
+	}, function() { printError(); });
+}
+
+function doSetSettingsCommit()
+{
+	print("setSettingsCommit()...");
+	gConnection.setSettingsCommit(defaultSetup, function() {
+		printResponse("OK");
+	}, function() { printError(); });
+}
+*/
+
+function doSetSettings()
+{
+	print("setSettings()...");
+	gConnection.setSettings(defaultSetup, function() {
+		printResponse("OK");
+	}, function() { printError(); });
+}
+
+
+function doStoreGetFiles()
+{
+	print("OmmStore.getFiles()...");
+	OmmManager.getStore().getFiles(function(files) {
+		printResponse(JSON.stringify(files));
+	}, function() { printError(); });
+}
+
+function doStoreRemove()
+{
+	var filename = document.getElementById("filename").value;	
+	var answer = window.confirm("Really delete " + filename + "?")
+	if (answer) {
+		print("OmmStore.remove()...");
+		OmmManager.getStore().remove(filename, function() {
+			printResponse("OK");
+		}, function() { printError(); });
+	}
+}
+
+function doStoreGetMetadata()
+{
+	print("OmmStore.getMetadata()...");
+	var filename = document.getElementById("filename").value;	
+	OmmManager.getStore().getMetadata(filename, function(metadata) {
+		printResponse(JSON.stringify(metadata));
+	}, function() { printError(); });
+}
+
+</script>
+
+
+<h2>Test</h2>
+
+<form id="connectionForm">
+	<select id="addressPort">
+        <option></option>
+    </select>
+	<input id="refreshButton" type="button" value="Refresh" onclick="return refreshConnections();" />
+	<input id="connectButton" type="button" value="Connect" onclick="return connect();" />
+	<input id="disconnectButton" type="button" value="Disconnect" onclick="return disconnect();" />
+	<input id="getMemory"            type="button" value="getMemory()"            onclick="doGetMemory();            return false;" />
+	<input id="getFiles"             type="button" value="getFiles()"             onclick="doGetFiles();             return false;" />
+</form>
+
+<form id="actionForm">
+	<input id="getIdentity"          type="button" value="getIdentity()"          onclick="doGetIdentity();          return false;" />
+	<input id="getTime"              type="button" value="getTime()"              onclick="doGetTime();              return false;" />
+	<input id="getBattery"           type="button" value="getBattery()"           onclick="doGetBattery();           return false;" />
+	<br />
+	<input id="getSettings"          type="button" value="getSettings()"          onclick="doGetSettings();          return false;" />
+	<!--
+	(
+	<input id="getSettingsRecording" type="button" value="getSettingsRecording()" onclick="doGetSettingsRecording(); return false;" />
+	<input id="getSettingsSensors"   type="button" value="getSettingsSensors()"   onclick="doGetSettingsSensors();   return false;" />
+	<input id="getSettingsMetadata"  type="button" value="getSettingsMetadata()"  onclick="doGetSettingsMetadata();  return false;" />
+	)
+	-->
+	<br />
+	<input id="setSettings"          type="button" value="setSettings()"          onclick="doSetSettings();          return false;" />
+	<!--
+	(
+	<input id="setSettingsRecording" type="button" value="setSettingsRecording()" onclick="doSetSettingsRecording(); return false;" />
+	<input id="setSettingsSensors"   type="button" value="setSettingsSensors()"   onclick="doSetSettingsSensors();   return false;" />
+	<input id="setSettingsMetadata"  type="button" value="setSettingsMetadata()"  onclick="doSetSettingsMetadata();  return false;" />
+	<input id="setSettingsCommit"    type="button" value="setSettingsCommit()"    onclick="doSetSettingsCommit();    return false;" />
+	)
+	-->
+	<input id="format"               type="button" value="format()"               onclick="doFormat();               return false;" />
+	<br />
+	<input id="setLed-1"             type="button" value="setLed(-1)"             onclick="doSetLed(-1);             return false;" />
+	<input id="setTime"              type="button" value="setTime()"              onclick="doSetTime();              return false;" />
+</form>
+
+<form id="storeForm">
+	<input id="storeGetFiles"        type="button" value="storeGetFiles()"        onclick="doStoreGetFiles();        return false;" />
+	<label>Filename: <input id="filename" type="text" value="" /></label>
+	<input id="storeRemove"          type="button" value="storeRemove()"          onclick="doStoreRemove();          return false;" />
+	<input id="storeGetMetadata"     type="button" value="storeGetMetadata()"     onclick="doStoreGetMetadata();     return false;" />
+</form>
+
+<div id="output" width="640" height="480" style="width: 640px; height: 320px; overflow-x: hidden; overflow-y: auto;"></div>
+
+
+</html>
