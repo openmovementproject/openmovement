@@ -1,0 +1,75 @@
+// CWA File format
+//
+// A file consists of a single OM_READER_HEADER_PACKET (1024 bytes) followed by multiple OM_READER_DATA_PACKET (512 byte).
+
+// Binary file header block (NOTE: tightly packed with no padding, all little-endian)
+// Always at offset 0 in the file.
+struct OM_READER_HEADER_PACKET
+{
+    uint16_t packetHeader;      // @ 0 +2 ASCII "MD", little-endian (0x444D)
+    uint16_t packetLength;      // @ 2 +2 Packet length (1020 bytes, with header (4) = 1024 bytes total)
+    uint8_t  reserved1;         // @ 4 +1 (1 byte reserved)
+    uint16_t deviceId;          // @ 5 +2 Device identifier
+    uint32_t sessionId;         // @ 7 +4 Unique session identifier
+    uint16_t reserved2;         // @11 +2 (2 bytes reserved)
+    uint32_t loggingStartTime;  // @13 +4 Start time for delayed logging
+    uint32_t loggingEndTime;    // @17 +4 Stop time for delayed logging
+    uint32_t loggingCapacity;   // @21 +4 Preset maximum number of samples to collect, 0 = unlimited
+    uint8_t  reserved3[11];     // @25 +11 (11 bytes reserved)
+    uint8_t  samplingRate;      // @36 +1 Sampling rate
+    uint32_t lastChangeTime;    // @37 +4 Last change metadata time
+    uint8_t  firmwareRevision;  // @41 +1 Firmware revision number
+    int16_t  timeZone;          // @42 +2 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown
+    uint8_t  reserved4[20];     // @44 +20 (20 bytes reserved)
+    uint8_t  annotation[448];   // @64 +448 Scratch buffer / meta-data (448 characters, space padded, generally URL-encoded key/value pairs)
+    uint8_t  reserved[512];     // @512 +512 Reserved for post-collection scratch buffer / meta-data (512 characters)
+};
+
+// Binary file data block (NOTE: tightly packed with no padding, all little-endian)
+// Every data packet starts on a sector (512 byte) boundary.
+struct OM_READER_DATA_PACKET
+{
+    uint16_t packetHeader;      // @ 0 +2  ASCII "AX", little-endian (0x5841)
+    uint16_t packetLength;      // @ 2 +2  Packet length (508 bytes, with header (4) = 512 bytes total)
+    uint16_t deviceFractional;  // @ 4 +2  Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
+    uint32_t sessionId;         // @ 6 +4  Unique session identifier, 0 = unknown
+    uint32_t sequenceId;        // @10 +4  Sequence counter, each packet has a new number (reset if restarted)
+    uint32_t timestamp;         // @14 +4  Last reported RTC value, 0 = unknown
+    uint16_t light;             // @18 +2  Last recorded light sensor value in raw units, 0 = none
+    uint16_t temperature;       // @20 +2  Last recorded temperature sensor value in raw units, 0 = none
+    uint8_t  events;            // @22 +1  Event flags since last packet, b0 = resume logging, b1 = single-tap event, b2 = double-tap event, b3-b7 = reserved for diagnostic use)
+    uint8_t  battery;           // @23 +1  Last recorded battery level in raw units, 0 = unknown
+    uint8_t  sampleRate;        // @24 +1  Sample rate code, (3200/(1<<(15-(rate & 0x0f)))) Hz
+    uint8_t  numAxesBPS;        // @25 +1  0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
+    int16_t  timestampOffset;   // @26 +2  Relative sample index from the start of the buffer where the whole-second timestamp is valid
+    uint16_t sampleCount;       // @28 +2  Number of accelerometer samples (80 or 120)
+    uint8_t  rawSampleData[480];// @30 +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
+    uint16_t checksum;          // @510 +2 Checksum of packet (16-bit word-wise sum of the whole packet, should be zero)
+};
+
+// There are two possible packing formats for the triaxial accelerometer data:
+// * Packing format 2 (3-axis, 80 samples/packet): 
+//      48-bits comprising 3x 16-bit signed integers (x, y, z) stored little endian.
+// * Packing format 0 (3-axis, 120 samples/packet): One 32-bit little-endian packed value, where the bits in the bytes ordered [3][2][1][0] are:
+//      eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
+//    x/y/z represents the three 10-bit axis values.
+//    The left-most bit of each value is the sign bit, and must be sign-extended to fill the word to produce a signed value (-512 to 511).
+//    The 'e' represents the binary exponent value (0-3) -- the number of bits to left-shift all the axis values.
+//
+// Accelerometer sample values are in units of 1/256 g (where g = 9.81 m/s/s).
+// So, to scale a raw axis value to 'g':
+//    accel = value / 256.0;
+// Or to scale a raw axis value to m/s/s:
+//    accel = value * 9.81 / 256;
+//
+// The light sensor is only suitable for a general, relative, indicator of light (the sensor is not placed with a light pipe, the case absorbs a lot of light, etc.)
+// That said, you can use the following formula:
+//   log10LuxTimes10Power3 = ((light + 512.0) * 6000 / 1024);
+//   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0);
+//
+// The temperature conversion is:
+//   centigrade = (temperature * 150.0 - 20500) / 1000;
+//
+// The battery conversion is:
+//   volts = (battery + 512.0) * 6000 / 1024 / 1000.0;
+// 
