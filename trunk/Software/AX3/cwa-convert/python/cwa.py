@@ -68,7 +68,7 @@ class CWA:
             raise IOError
     
     def __init__(self, filename):
-        self.fh = open(filename, 'r')
+        self.fh = open(filename, 'rb')
         
         dbcon = sqlite3.connect(sys.argv[1] + '.sqlite')
         dbcurs = dbcon.cursor()
