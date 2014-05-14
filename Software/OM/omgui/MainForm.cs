@@ -90,8 +90,11 @@ namespace OmGui
             return false;
         }
 
-        public MainForm(int uac)
+        private string configDumpFile = null;
+        public MainForm(int uac, string myConfigDumpFile)
         {
+            this.configDumpFile = myConfigDumpFile;
+
             if (uac == 1)
             {
                 QueryAdminElevate(false);
@@ -1360,8 +1363,47 @@ namespace OmGui
                             error = "Exception: " + ex.Message;
                         }
                         
-                        if (error != null) { 
+                        if (error != null) 
+                        { 
                             fails.Add(device.DeviceId.ToString(), error); 
+                        }
+
+                        if (configDumpFile != null)
+                        {
+                            try
+                            {
+                                StreamWriter sw = File.AppendText(configDumpFile);
+                                string timeNow, type, start, stop;
+
+                                timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                                if (error == null)
+                                {
+                                    type = "AX3-CONFIG-OK";
+                                }
+                                else
+                                {
+                                    type = "AX3-CONFIG-ERROR";
+                                }
+
+                                if (rangeForm.Always)
+                                {
+                                    start = "0";
+                                    stop = "-1";
+                                }
+                                else
+                                {
+                                    start = rangeForm.StartDate.ToString("yyyy-MM-dd HH:mm:ss");
+                                    stop = rangeForm.EndDate.ToString("yyyy-MM-dd HH:mm:ss");
+                                }
+
+                                sw.WriteLine("" + timeNow + "," + type + "," + device.DeviceId + "," + rangeForm.SessionID + "," + start + "," + stop + "," + (int)rangeForm.SamplingFrequency + "," + rangeForm.Range + "," + ((rangeForm.metaData != null && rangeForm.metaData.Length > 0) ? ("\"" + rangeForm.metaData.Replace("\"", "\"\"") + "\"") : ""));
+                                sw.Close();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("Warning: Problem while appending to dump file: " + ex.Message);
+                            }
                         }
 
                         i++;

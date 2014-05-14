@@ -285,9 +285,6 @@
     <None Include="Resources\Export.png" />
     <None Include="Resources\Refresh.png" />
     <None Include="Resources\loading.gif" />
-    <Content Include="utils\cwa-convert.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\1381_cog.ico" />
     <None Include="Resources\zoom-out.cur" />
     <None Include="Resources\zoom-in.cur" />
