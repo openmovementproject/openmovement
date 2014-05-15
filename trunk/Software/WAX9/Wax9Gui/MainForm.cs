@@ -282,7 +282,7 @@ namespace Wax9Gui
 
                 try
                 {
-                    //foreach (System.Management.PropertyData Property in Port.Properties) { Console.WriteLine(Property.Name + " " + (Property.Value == null ? null : Property.Value.ToString())); }
+//foreach (System.Management.PropertyData Property in port.Properties) { Console.WriteLine(Property.Name + " " + (Property.Value == null ? null : Property.Value.ToString())); }
 
                     System.Management.PropertyData portProperty = port.Properties["DeviceID"];
                     string portName = portProperty.Value.ToString();
