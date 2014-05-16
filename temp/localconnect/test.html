@@ -15,7 +15,9 @@ function refreshConnections()
 		gConnections = connections;
 		
 		//window.alert('Got connections: ' + JSON.stringify(connections));
-		
+
+// Math.floor(Math.random()*11)		
+	
 		for (var i = 0; i < connections.length; i++)
 		{
 			var port = connections[i];
@@ -31,8 +33,8 @@ function refreshConnections()
 			
 		}
 		
-	}, function() {
-		window.alert('Failed to get connections.');
+	}, function(reason) {
+		window.alert('Failed to get connections (' + reason + ').');
 	});
 	
 }
@@ -239,8 +241,24 @@ function doFormat()
 	}
 }
 
-var defaultSetup = {
-	//metadata: "The quick brown fox jumps over the lazy dog."
+// "sessionId":0,
+// "startTime":-1,
+// "endTime":-1,
+// "configAccel":{"enabled":1,"frequency":100,"sensitivity":8},
+// "configGyro":{"enabled":1,"frequency":100,"sensitivity":2000},
+// "configMag":{"enabled":1,"frequency":10,"sensitivity":0},
+// "configAlt":{"enabled":1,"frequency":1,"sensitivity":0},
+// "configAdc":{"enabled":1,"frequency":1,"sensitivity":0},
+// "metadata":"The quick brown fox jumps over the lazy dog."
+
+var setupOff = {
+	"startTime": -1,
+	"endTime": 0
+};
+
+var setupOn = {
+	"startTime": 0,
+	"endTime": -1
 };
 
 /*
@@ -277,12 +295,21 @@ function doSetSettingsCommit()
 }
 */
 
-function doSetSettings()
+function doSetSettings(settings)
 {
-	print("setSettings()...");
-	gConnection.setSettings(defaultSetup, function() {
+	print("setSettings(" + JSON.stringify(settings) + ")...");
+	gConnection.setSettings(settings, function() {
 		printResponse("OK");
 	}, function() { printError(); });
+}
+
+function doSetSettingsCustom()
+{
+    var setupCustom = {};
+	setupCustom.sessionId = +(document.getElementById("sessionId").value);	// cast to a number value
+	setupCustom.startTime = new Date(document.getElementById("rangeStart").value);
+	setupCustom.endTime = new Date(document.getElementById("rangeEnd").value);
+	doSetSettings(setupCustom);
 }
 
 
@@ -345,7 +372,8 @@ function doStoreGetMetadata()
 	)
 	-->
 	<br />
-	<input id="setSettings"          type="button" value="setSettings()"          onclick="doSetSettings();          return false;" />
+	<input id="setSettingsOff"       type="button" value="setSettingsOff(setupOff)" onclick="doSetSettings(setupOff); return false;" />
+	<input id="setSettingsOn"        type="button" value="setSettingsOn(setupOn)"   onclick="doSetSettings(setupOn);  return false;" />
 	<!--
 	(
 	<input id="setSettingsRecording" type="button" value="setSettingsRecording()" onclick="doSetSettingsRecording(); return false;" />
@@ -354,6 +382,11 @@ function doStoreGetMetadata()
 	<input id="setSettingsCommit"    type="button" value="setSettingsCommit()"    onclick="doSetSettingsCommit();    return false;" />
 	)
 	-->
+	<input id="setSettingsCustom"    type="button" value="setSettingsCustom()"    onclick="doSetSettingsCustom();    return false;" />
+	<label>Session ID: <input id="sessionId"  type="number" value="0" min="0" max="2147483647" /></label>
+	<label>Start:      <input id="rangeStart" type="datetime-local" value="2000-01-01T00:00:00" /></label>
+	<label>End:        <input id="rangeEnd"   type="datetime-local" value="2063-12-31T23:59:59" /></label>
+	<br />
 	<input id="format"               type="button" value="format()"               onclick="doFormat();               return false;" />
 	<br />
 	<input id="setLed-1"             type="button" value="setLed(-1)"             onclick="doSetLed(-1);             return false;" />
