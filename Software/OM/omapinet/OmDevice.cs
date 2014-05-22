@@ -192,8 +192,7 @@ category = SourceCategory.Other;
         {
             get
             {
-                // DateTime.Now >= StopTime
-                if (StopTime <= StartTime) { return RecordStatus.Stopped; }
+                if (StopTime <= StartTime || StopTime <= DateTime.Now) { return RecordStatus.Stopped; }
                 else if (StartTime <= DateTime.MinValue && StopTime >= DateTime.MaxValue) { return RecordStatus.Always; }
                 else { return RecordStatus.Interval; }
             }
