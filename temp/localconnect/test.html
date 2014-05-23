@@ -6,46 +6,45 @@
 var gConnections = null;	// All connection objects
 var gConnection = null;		// The currently opened connection
 
-function refreshConnections()
+function setSelectConnections(connections)
 {
 	document.getElementById("addressPort").innerHTML = "";
-	
-	OmmManager.getConnections(function(connections) {
-	
-		gConnections = connections;
-		
-		//window.alert('Got connections: ' + JSON.stringify(connections));
-
-// Math.floor(Math.random()*11)		
-	
-		for (var i = 0; i < connections.length; i++)
-		{
-			var port = connections[i];
-			
-			var option = document.createElement("option");
-			option.value = i;
-			var label = port.port + "<em> - " + port.type;
-			if (port.mac) { label = label + " &lt;" + port.mac + "&gt;"; }
-			if (port.serial) { label = label + " &lt;" + port.serial + "&gt;"; }
-			label = label + "</em>";
-			option.innerHTML = label;
-			document.getElementById("addressPort").appendChild(option);
-			
-		}
-		
-	}, function(reason) {
-		window.alert('Failed to get connections (' + reason + ').');
-	});
-	
+	for (var i = 0; i < connections.length; i++)
+	{
+		var port = connections[i];
+		var option = document.createElement("option");
+		option.value = i;
+		var label = port.port + "<em> - " + port.type;
+		if (port.mac) { label = label + " &lt;" + port.mac + "&gt;"; }
+		if (port.serial) { label = label + " &lt;" + port.serial + "&gt;"; }
+		label = label + "</em>";
+		option.innerHTML = label;
+		document.getElementById("addressPort").appendChild(option);
+	}
 }
 
-function disableActions(disabled)
+function setFilenames(controlName, fileDetails)
 {
-    var form = document.getElementById('actionForm');
+	document.getElementById(controlName).innerHTML = "";
+	for (var i = 0; i < fileDetails.length; i++)
+	{
+		var fd = fileDetails[i];
+		var option = document.createElement("option");
+		option.value = fd.name;
+		var label = fd.filename + " (" + fd.size + " bytes)";
+		option.innerHTML = label;
+		document.getElementById(controlName).appendChild(option);
+	}
+}
+
+function setFormEnabled(formName, enabled)
+{
+    var form = document.getElementById(formName);
     for (i = 0; i < form.elements.length; i++) {
-		form.elements[i].disabled = (form.elements[i].className == "nodisable") ? false : disabled;
+		form.elements[i].disabled = (form.elements[i].className == "nodisable") ? false : !enabled;
     }
  }
+
 
 function print(message)
 {
@@ -64,10 +63,11 @@ function connect()
 	
 	var index = parseInt(document.getElementById("addressPort").value);
 	gConnection = gConnections[index];
+	
 	gConnection.open(function() {
 		print("CONNECTED");
 		document.getElementById("disconnectButton").disabled = false;
-		disableActions(false);
+		setFormEnabled('actionForm', true);
 		
 	}, function() {
 	
@@ -88,7 +88,7 @@ function disconnect()
 	}
 	document.getElementById("disconnectButton").disabled = true;
 	document.getElementById("connectButton").disabled = false;
-	disableActions(true);
+	setFormEnabled('actionForm', false);
 	return false;
 }
 
@@ -106,14 +106,29 @@ function windowLoad()
 		//}
 	};
 
-	document.getElementById("connectButton").disabled = false;
-	document.getElementById("disconnectButton").disabled = true;
-	disableActions(true);
+	setFormEnabled('connectionForm', false);
+	setFormEnabled('actionForm', false);
+	setFormEnabled('storeForm', false);
 	
-	var manager = OmmLoader.getManager(null, function() {
+	var manager = OmmLoader.getManager(null, function(theManager) {
 		//window.alert('Manager loaded!');
 		
+		document.getElementById("connectButton").disabled = false;
+		document.getElementById("disconnectButton").disabled = true;
+		
+		setFormEnabled('connectionForm', true);
+		setFormEnabled('storeForm', true);
+		
 		refreshConnections();
+		
+		theManager.onDevicesChanged(function () { 
+			print("UPDATE: Devices changed...");	
+			refreshConnections(); 
+		});
+		
+		theManager.onTransferUpdate(function (details) { 
+			print("UPDATE: Updates: " + JSON.stringify(details));	
+		});
 		
 	}, function () {
 		window.alert('Failed to load manager');
@@ -130,6 +145,18 @@ function printResponse(msg) {
 
 function printError(error) {
 	print('<span style="color: red;">ERROR: ' + ((typeof msg === 'undefined') ? "" : msg) + '</span>');
+}
+
+function refreshConnections()
+{
+	OmmManager.getConnections(function(connections) {
+		gConnections = connections;
+		setSelectConnections(connections);
+		//window.alert('Got connections: ' + JSON.stringify(connections));
+// Math.floor(Math.random()*11)		
+	}, function(reason) {
+		window.alert('Failed to get connections (' + reason + ').');
+	});
 }
 
 function doGetIdentity()
@@ -222,12 +249,40 @@ function doGetMemory()
 function doGetFiles()
 {
 	var index = parseInt(document.getElementById("addressPort").value);
-	connection = gConnections[index];
+	var connection = gConnections[index];
 
 	print("getFiles()...");
 	connection.getFiles(function(ret) {
 		printResponse(JSON.stringify(ret));
+		setFilenames("deviceFilename", ret);
 	}, function() { printError(); });
+}
+
+function doDeviceFileGetMetadata()
+{
+	var index = parseInt(document.getElementById("addressPort").value);
+	var connection = gConnections[index];
+	
+	print("OmmConnection.getMetadata()...");
+	var filename = document.getElementById("deviceFilename").value;	
+	connection.getMetadata(filename, function(metadata) {
+		printResponse(JSON.stringify(metadata));
+	}, function() { printError(); });
+}
+
+function doDeviceFileRemove()
+{
+	var index = parseInt(document.getElementById("addressPort").value);
+	var connection = gConnections[index];
+	
+	var filename = document.getElementById("deviceFilename").value;	
+	var answer = window.confirm("Really delete " + filename + "?")
+	if (answer) {
+		print("OmmConnection.remove()...");
+		connection.remove(filename, function() {
+			printResponse("OK");
+		}, function() { printError(); });
+	}
 }
 
 function doFormat()
@@ -318,12 +373,30 @@ function doStoreGetFiles()
 	print("OmmStore.getFiles()...");
 	OmmManager.getStore().getFiles(function(files) {
 		printResponse(JSON.stringify(files));
+		setFilenames("storeFilename", files);
+	}, function() { printError(); });
+}
+
+function doStoreGetTransfers()
+{
+	print("OmmStore.getTransfers()...");
+	OmmManager.getStore().getTransfers(function(transfers) {
+		printResponse(JSON.stringify(transfers));
+	}, function() { printError(); });
+}
+
+function doStoreGetMetadata()
+{
+	print("OmmStore.getMetadata()...");
+	var filename = document.getElementById("storeFilename").value;	
+	OmmManager.getStore().getMetadata(filename, function(metadata) {
+		printResponse(JSON.stringify(metadata));
 	}, function() { printError(); });
 }
 
 function doStoreRemove()
 {
-	var filename = document.getElementById("filename").value;	
+	var filename = document.getElementById("storeFilename").value;	
 	var answer = window.confirm("Really delete " + filename + "?")
 	if (answer) {
 		print("OmmStore.remove()...");
@@ -333,12 +406,29 @@ function doStoreRemove()
 	}
 }
 
-function doStoreGetMetadata()
+function doStoreDownload()
 {
-	print("OmmStore.getMetadata()...");
-	var filename = document.getElementById("filename").value;	
-	OmmManager.getStore().getMetadata(filename, function(metadata) {
-		printResponse(JSON.stringify(metadata));
+	var index = parseInt(document.getElementById("addressPort").value);
+	connection = gConnections[index];
+	
+	print("OmmStore.download()...");
+	var filename = document.getElementById("destination").value;	
+	var downloadParameters = {};
+	downloadParameters.connection = connection;	
+	downloadParameters.sourceFilename = document.getElementById("deviceFilename").value;	
+	OmmManager.getStore().download(filename, downloadParameters, function(result) {
+		printResponse(JSON.stringify(result));
+	}, function() { printError(); });
+}
+
+function doStoreUpload()
+{
+	print("OmmStore.upload()...");
+	var filename = document.getElementById("storeFilename").value;	
+	var uploadParameters = {};
+	uploadParameters.url = document.getElementById("destination").value;	
+	OmmManager.getStore().upload(filename, uploadParameters, function(result) {
+		printResponse(JSON.stringify(result));
 	}, function() { printError(); });
 }
 
@@ -348,14 +438,25 @@ function doStoreGetMetadata()
 <h2>Test</h2>
 
 <form id="connectionForm">
-	<select id="addressPort">
-        <option></option>
-    </select>
+	<label>Device: 
+		<select id="addressPort">
+			<option></option>
+		</select>
+	</label>
 	<input id="refreshButton" type="button" value="Refresh" onclick="return refreshConnections();" />
 	<input id="connectButton" type="button" value="Connect" onclick="return connect();" />
 	<input id="disconnectButton" type="button" value="Disconnect" onclick="return disconnect();" />
 	<input id="getMemory"            type="button" value="getMemory()"            onclick="doGetMemory();            return false;" />
+	<br />
 	<input id="getFiles"             type="button" value="getFiles()"             onclick="doGetFiles();             return false;" />
+	<label>
+		Device filename:
+		<select id="deviceFilename">
+			<option></option>
+		</select>
+	</label>
+	<input id="deviceFileGetMetadata" type="button" value="deviceFileGetMetadata()" onclick="doDeviceFileGetMetadata(); return false;" />
+	<input id="deviceFileRemove"      type="button" value="deviceFileRemove()"      onclick="doDeviceFileRemove();      return false;" />
 </form>
 
 <form id="actionForm">
@@ -394,11 +495,22 @@ function doStoreGetMetadata()
 </form>
 
 <form id="storeForm">
+	<input id="storeGetTransfers"    type="button" value="storeGetTransfers()"    onclick="doStoreGetTransfers();    return false;" />
 	<input id="storeGetFiles"        type="button" value="storeGetFiles()"        onclick="doStoreGetFiles();        return false;" />
-	<label>Filename: <input id="filename" type="text" value="" /></label>
-	<input id="storeRemove"          type="button" value="storeRemove()"          onclick="doStoreRemove();          return false;" />
+	<label>
+		Store filename:
+		<select id="storeFilename">
+			<option></option>
+		</select>
+	</label>
 	<input id="storeGetMetadata"     type="button" value="storeGetMetadata()"     onclick="doStoreGetMetadata();     return false;" />
+	<input id="storeRemove"          type="button" value="storeRemove()"          onclick="doStoreRemove();          return false;" />
+	<br />
+	<label>Destination (downloaded filename/upload URL): <input id="destination" type="text" value="" /></label>
+	<input id="storeDownload"        type="button" value="storeDownload()"        onclick="doStoreDownload();        return false;" />
+	<input id="storeUpload"          type="button" value="storeUpload()"          onclick="doStoreUpload();          return false;" />
 </form>
+
 
 <div id="output" width="640" height="480" style="width: 640px; height: 320px; overflow-x: hidden; overflow-y: auto;"></div>
 
