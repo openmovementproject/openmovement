@@ -68,10 +68,11 @@ devicestatus_t deviceStatus[65536] = {DEVICE_DISCONNECTED};
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
 static const char NAND_DEVICE_DONT_CARE[6] = 	 {0x00};
-static const char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00};
-static const char NAND_DEVICE_HY27UF084G2B[6] = {0xAD,0xDC,0x10,0x95,0x54,0x00};
-static const char NAND_DEVICE_HY27UF084G2M[6] = {0xAD,0xDC,0x80,0x95,0xAD,0x00};
 //??                                             0xad,0xdc,0x84,0x25,0xad,0x00,
+static const char NAND_DEVICE_HY27UF084G2M[6] = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };
+static const char NAND_DEVICE_HY27UF084G2B[6] = { 0xAD, 0xDC, 0x10, 0x95, 0x54, 0x00 };
+static const char NAND_DEVICE_HY27UF084G2x[6] = { 0xAD, 0xDC, 0x00 };
+static const char NAND_DEVICE_MT29F8G08AAA[6] = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };
 
 static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
 {
@@ -92,7 +93,8 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
     {
         *identified = -1;
         if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0) { *identified = 1; }
-        else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
+		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
+		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0) { *identified = 3; }
     }
     if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (present != NULL) 
@@ -144,7 +146,7 @@ int record_setup(int deviceId)
         else 
         {
             fprintf(stderr, "RECORD #%d: NAND type =%d %s\n", deviceId, nandType, (nandType == 1) ? "" : ((nandType == 2) ? "ALTERNATIVE" : "UNKNOWN!"));
-            if (nandType != 1 && nandType != 2) { printf("ERROR: OmGetNandId() not primary or secondary type.\n"); return 0; }     // ERROR: Not primary or secondary type
+            if (nandType <= 0) { printf("ERROR: OmGetNandId() not known type (try again to be sure).\n"); return 0; }     // ERROR: Not known type
         }
     }
 #endif
@@ -188,7 +190,7 @@ int record_setup(int deviceId)
 	OmSetMetadata(deviceId, NULL, 0);
 	
 	/* Zero the debug setting*/
-	//OmCommand(deviceId, "\r\nDEBUG 0\r\n", NULL, 0, "DEBUG=", 2000, NULL, 0);
+	OmCommand(deviceId, "\r\nDEBUG 0\r\n", NULL, 0, "DEBUG=", 2000, NULL, 0);
 	
 #if 1
     {
