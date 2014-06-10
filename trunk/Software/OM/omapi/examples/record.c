@@ -68,11 +68,13 @@ devicestatus_t deviceStatus[65536] = {DEVICE_DISCONNECTED};
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
 static const char NAND_DEVICE_DONT_CARE[6] = 	 {0x00};
-//??                                             0xad,0xdc,0x84,0x25,0xad,0x00,
-static const char NAND_DEVICE_HY27UF084G2M[6] = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };
-static const char NAND_DEVICE_HY27UF084G2B[6] = { 0xAD, 0xDC, 0x10, 0x95, 0x54, 0x00 };
 static const char NAND_DEVICE_HY27UF084G2x[6] = { 0xAD, 0xDC, 0x00 };
-static const char NAND_DEVICE_MT29F8G08AAA[6] = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };
+//??                                             0xad,0xdc,0x84,0x25,0xad,0x00,
+static const char NAND_DEVICE_HY27UF084G2B[6] = { 0xAD, 0xDC, 0x10, 0x95, 0x54, 0x00 };		// 1
+static const char NAND_DEVICE_HY27UF084G2M[6] = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };		// 2
+static const char NAND_DEVICE_MT29F8G08AAA[6] = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };     // 3
+static const char NAND_DEVICE_S34ML04G1[6]    = { 0x01, 0xDC, 0x90, 0x95, 0x54, 0x00 };     // 4
+
 
 static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
 {
@@ -92,9 +94,10 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
     if (identified != NULL) 
     {
         *identified = -1;
-        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0) { *identified = 1; }
+        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0)      { *identified = 1; }
 		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
 		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0) { *identified = 3; }
+		else if (strcmp(NAND_DEVICE_S34ML04G1, (char *)localId) == 0)    { *identified = 4; }
     }
     if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (present != NULL) 
@@ -145,7 +148,17 @@ int record_setup(int deviceId)
         else if (OM_FAILED(result)) { fprintf(stderr, "ERROR: Problem running OmGetNandId() %s\n", OmErrorString(result)); return 0; }
         else 
         {
-            fprintf(stderr, "RECORD #%d: NAND type =%d %s\n", deviceId, nandType, (nandType == 1) ? "" : ((nandType == 2) ? "ALTERNATIVE" : "UNKNOWN!"));
+			const char *nandDescription;
+			switch (nandType)
+			{
+				case 1: nandDescription = "STANDARD (HY27UF084G2B)"; break;    // NAND_DEVICE_HY27UF084G2B
+				case 2: nandDescription = "ALTERNATE (HY27UF084G2M)"; break;   // NAND_DEVICE_HY27UF084G2M
+				case 3: nandDescription = "MICRON (MT29F8G08AAA)"; break;      // NAND_DEVICE_MT29F8G08AAA
+				case 4: nandDescription = "SPANSION (S34ML04G1)"; break;       // NAND_DEVICE_S34ML04G1
+				default: nandDescription = "UNKNOWN!"; break;
+			}
+
+            fprintf(stderr, "RECORD #%d: NAND type =%d %s\n", deviceId, nandType, nandDescription);
             if (nandType <= 0) { printf("ERROR: OmGetNandId() not known type (try again to be sure).\n"); return 0; }     // ERROR: Not known type
         }
     }
