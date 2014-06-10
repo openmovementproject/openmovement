@@ -392,6 +392,10 @@ OmLog(2, "- Read line: \"%s\"", p);
         printf("<<< '%s'\n", p);
 #endif
             offset += len;
+
+// HACK: Temporary fix for Kim's problem (only until all FW 40 devices are updated)
+if (strcmp(expected, "COMMIT") == 0 && strncmp("no file, creatingCOMMIT", p, 23) == 0) { expectedPosition = p; break; }
+
             if (expected != NULL && strncmp(expected, p, strlen(expected)) == 0)
             {
                 // Expected prefix found
