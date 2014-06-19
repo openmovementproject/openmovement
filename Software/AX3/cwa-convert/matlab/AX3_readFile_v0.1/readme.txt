@@ -3,10 +3,10 @@
 %
 % You will need the following four files:
 %
-%   - AX3_readFile.m
-%   - resampleCWA.m
-%   - SVM.m
-%   - epochs.m
+%   - http://openmovement.googlecode.com/svn/trunk/Software/AX3/cwa-convert/matlab/AX3_readFile_v0.1/AX3_readFile.m
+%   - http://openmovement.googlecode.com/svn/trunk/Software/AX3/cwa-convert/matlab/AX3_readFile_v0.1/resampleCWA.m
+%   - http://openmovement.googlecode.com/svn/trunk/Software/AX3/cwa-convert/matlab/AX3_readFile_v0.1/SVM.m
+%   - http://openmovement.googlecode.com/svn/trunk/Software/AX3/cwa-convert/matlab/AX3_readFile_v0.1/epochs.m
 %
 
 % Load CWA file re-sampled at 100Hz
