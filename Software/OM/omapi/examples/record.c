@@ -93,7 +93,7 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
     if (id != NULL) { memcpy(id, localId, 6); }
     if (identified != NULL) 
     {
-        *identified = -1;
+        *identified = -2;
         if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0)      { *identified = 1; }
 		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
 		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0) { *identified = 3; }

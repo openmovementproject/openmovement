@@ -1329,6 +1329,12 @@ namespace OmGui
                                    }
                                }
 
+                               if (device is OmDevice && ((OmDevice)device).Connected)
+                               {
+                                   ((OmDevice)device).SetDebug(rangeForm.Flash ? 3 : 0);
+                               }
+
+
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 4) / (devices.Length * 5)), message + "(interval)");
 
                                // Set the devices to record -- IMPORTANT: This also 'commits' the settings to the device
