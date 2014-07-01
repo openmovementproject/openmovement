@@ -1,4 +1,7 @@
-﻿using System;
+﻿// TODO: Save delayDays and timeOfDay (if delayDays > 0), rate and range.
+// TODO: Delay before refreshing preview (and fix problem of preview staying after erase).
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -38,16 +41,19 @@ namespace OmGui
 
             InitializeComponent();
 
-            comboBoxSamplingFreq.SelectedIndex = 5;
-            comboBoxRange.SelectedIndex = 2;
-
             Text = title;
             //labelPrompt.Text = prompt;
             //FromDate = DateTime.MinValue;
             //UntilDate = DateTime.MaxValue;
 
+            DateTime now = DateTime.Now;
+            StartDate = now.Date;
             timePickerStart.ShowUpDown = true;
             timePickerEnd.ShowUpDown = true;
+            Duration = new TimeSpan(0, 0, 0, 0);
+
+            //Set radio buttons enabled
+            radioButtonImmediately.Checked = true;
 
             //Try and load in record dialog settings.
             XmlDocument doc;
@@ -65,15 +71,24 @@ namespace OmGui
             //checkBoxHeight.Checked = true;
             //checkBoxWeight.Checked = true;
 
-            //Set radio buttons enabled
-            radioButtonImmediately.Checked = true;
-
             //Set default recording times
-            StartDate = DateTime.Now;
-            Duration = new TimeSpan(0, 0, 0, 0);
+            if (delayDaysPicker.Value == 0)
+            {
+                // If no day delay specified, reset the time-of-day to now
+                StartDate = StartDate.Date + now.TimeOfDay;
+            }
             EndDate = StartDate + Duration;
 
+            // Hack?
+            datePickerStart.Visible = false;
+            datePickerEnd.Visible = false;
+            datePickerStart.Visible = true;
+            datePickerEnd.Visible = true;
+
+            buttonDefault_Click(null, null);
+
             updateWarningMessages();
+
         }
 
         private Dictionary<string, string> loadSettingsProfile(out XmlDocument xmlDocument)
@@ -123,6 +138,15 @@ namespace OmGui
             settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex <= 0 ? "" : comboBoxSubjectHandedness.SelectedIndex.ToString());
             //settingsDictionary.Add("SubjectTimezone", comboBoxSubjectTimezone.SelectedIndex.ToString());
             settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex <= 0 ? "" : comboBoxSite.SelectedIndex.ToString());
+
+            // New settings
+            settingsDictionary.Add("Frequency", comboBoxSamplingFreq.SelectedItem.ToString());
+            settingsDictionary.Add("Range", comboBoxRange.SelectedItem.ToString());
+            settingsDictionary.Add("DelayDays", DayDelay.ToString());
+            settingsDictionary.Add("TimeOfDay", StartDate.TimeOfDay.TotalSeconds.ToString());
+            settingsDictionary.Add("Duration", Duration.TotalSeconds.ToString());
+            settingsDictionary.Add("RecordingTime", radioButtonImmediately.Checked ? "Immediately" : (radioButtonDuration.Checked ? "Duration" : ""));
+            settingsDictionary.Add("Flash", checkBoxFlash.Checked ? "True" : "False");
         }
         
         private void resetFieldsToDictionary(Dictionary<string, string> settingsDictionary)
@@ -182,6 +206,45 @@ namespace OmGui
                 {
                     comboBoxSite.SelectedIndex = Int32.Parse(pair.Value);
                 }*/
+                else if (pair.Key.Equals("Frequency"))
+                {
+                    comboBoxSamplingFreq.SelectedValue = pair.Value;
+                    foreach (object o in comboBoxSamplingFreq.Items)
+                    {
+                        if (o.ToString().Equals(pair.Value)) { comboBoxSamplingFreq.SelectedItem = o; break; }
+                    }
+                }
+                else if (pair.Key.Equals("Range"))
+                {
+                    comboBoxRange.SelectedValue = pair.Value;
+                    foreach (object o in comboBoxRange.Items)
+                    {
+                        if (o.ToString().Equals(pair.Value)) { comboBoxRange.SelectedItem = o; break; }
+                    }
+                }
+                else if (pair.Key.Equals("DelayDays"))
+                {
+                    DayDelay = Convert.ToInt32(pair.Value);
+                }
+                else if (pair.Key.Equals("TimeOfDay"))
+                {
+                    TimeSpan time = TimeSpan.FromSeconds(Convert.ToDouble(pair.Value));
+                    StartDate = StartDate.Date.Add(time);
+                }
+                else if (pair.Key.Equals("Duration"))
+                {
+                    Duration = TimeSpan.FromSeconds(Convert.ToDouble(pair.Value));
+                }
+                else if (pair.Key.Equals("RecordingTime"))
+                {
+                    if (pair.Value.Equals("Immediately")) { radioButtonImmediately.Checked = true; }
+                    else if (pair.Value.Equals("Duration")) { radioButtonDuration.Checked = true; }
+                }
+                else if (pair.Key.Equals("Flash"))
+                {
+                    if (pair.Value.Equals("True")) { checkBoxFlash.Checked = true; }
+                    else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = true; }
+                }
             }
         }
 
@@ -214,6 +277,40 @@ namespace OmGui
 
         public bool Always { get; set; }
 
+
+        private bool settingDelay = false;
+        private bool settingDelayFromStartDate = false;
+        public int DayDelay
+        {
+            get
+            {
+                return (int)delayDaysPicker.Value;
+            }
+            set
+            {
+                int delay = value;
+                if (delay < delayDaysPicker.Minimum) { delay = (int)delayDaysPicker.Minimum; }
+                if (delay > delayDaysPicker.Maximum) { delay = (int)delayDaysPicker.Maximum; }
+                delayDaysPicker.Value = delay;
+                DateTime now = DateTime.Now;
+                if (!settingDelayFromStartDate)
+                {
+                    StartDate = now.Date + TimeSpan.FromDays(DayDelay) + StartDate.TimeOfDay;
+                }
+                updateWarningMessages();
+            }
+        }
+
+        private void delayDaysPicker_ValueChanged(object sender, EventArgs e)
+        {
+            if (!settingDelay)
+            {
+                settingDelay = true;
+                DayDelay = (int)delayDaysPicker.Value;
+                settingDelay = false;
+            }
+        }
+
         // Save values
         public DateTime StartDate
         {
@@ -225,6 +322,12 @@ namespace OmGui
             {
                 datePickerStart.Value = value.Date; // remove time
                 timePickerStart.Value = value.Date + new TimeSpan(value.TimeOfDay.Hours, value.TimeOfDay.Minutes, 0); // remove seconds
+
+                // Delay
+                settingDelayFromStartDate = true;
+                DayDelay = (datePickerStart.Value.Date - DateTime.Now.Date).Days;
+                settingDelayFromStartDate = false;
+
                 updateWarningMessages();
 //Console.WriteLine("START ==> " + StartDate);
             }
@@ -353,6 +456,14 @@ Cursor.Current = Cursors.WaitCursor;
 
         }
 
+        public bool Flash
+        {
+            get
+            {
+                return checkBoxFlash.Checked;
+            }
+        }
+
         // Roughly estimate battery life (in seconds) based on percentage remaining and sampling frequency
         static double EstimateBatteryLife(int percent, int rate)
         {
@@ -412,6 +523,7 @@ Cursor.Current = Cursors.WaitCursor;
                 datePickerEnd.Enabled = false;
                 timePickerEnd.Enabled = false;
 
+                delayDaysPicker.Enabled = false;
                 daysPicker.Enabled = false;
                 hoursPicker.Enabled = false;
                 minutesPicker.Enabled = false;
@@ -426,6 +538,7 @@ Cursor.Current = Cursors.WaitCursor;
                 datePickerEnd.Enabled = true;
                 timePickerEnd.Enabled = true;
 
+                delayDaysPicker.Enabled = true;
                 daysPicker.Enabled = true;
                 hoursPicker.Enabled = true;
                 minutesPicker.Enabled = true;
@@ -441,15 +554,14 @@ Cursor.Current = Cursors.WaitCursor;
         #region UpdateWarningMessage Events & Change Duration/End Date Events
 
 
-        private bool timeChanging = false;
-
+        bool startDurationChanging;
         // Changing the start or duration sets the end based on the start and duration
         private void startDuration_ValueChanged(object sender, EventArgs e)
         {
             // Ignore if this change was expected
-            if (timeChanging) { return; }
+            if (startDurationChanging) { return; }
 
-            timeChanging = true;
+            startDurationChanging = true;
 
             // Minutes < 0
             if (minutesPicker.Value < 0)
@@ -496,25 +608,25 @@ Cursor.Current = Cursors.WaitCursor;
             // Clamp start seconds to zero (seems to change otherwise?)
             StartDate = StartDate;
 
-            timeChanging = false;
+            startDurationChanging = false;
 
 
             // Calculate the new end date/time
-            timeChanging = true;
             EndDate = StartDate + Duration;
-            timeChanging = false;
         }
 
+
+        bool endChanging;
         // Changing the end sets the duration based on the end and start
         private void end_ValueChanged(object sender, EventArgs e)
         {
             // Ignore if this change was expected
-            if (timeChanging) { return; }
+            if (endChanging) { return; }
 
             // Calculate the duration
-            timeChanging = true;
+            endChanging = true;
             Duration = EndDate - StartDate;
-            timeChanging = false;
+            endChanging = false;
         }
 
 
@@ -558,7 +670,7 @@ Cursor.Current = Cursors.WaitCursor;
                 //TS - TODO
 
                 //Duration could be limited by battery (on rate)
-                double estimateBatteryInSeconds = EstimateBatteryLife(device.BatteryLevel, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString()));
+                double estimateBatteryInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateBatteryLife(device.BatteryLevel, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString()));
                 TimeSpan ts = endDate - startDate;
                 if (ts.TotalSeconds > estimateBatteryInSeconds)
                     warningMessagesFlags[3] = true;
@@ -578,14 +690,29 @@ Cursor.Current = Cursors.WaitCursor;
             if ((startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0))) && radioButtonDuration.Checked)
                 warningMessagesFlags[6] = true;
 
+            //Warning for sampling frequency
+            int sampFreq = comboBoxSamplingFreq.SelectedItem != null ? (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString()) : 0;
+            if (sampFreq > 200 || sampFreq < 50)
+                warningMessagesFlags[7] = true;
+
             //Start date is after end date
             if (radioButtonDuration.Checked && StartDate >= EndDate)
                 warningMessagesFlags[8] = true;
 
-            //Warning for sampling frequency
-            int sampFreq = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString());
-            if (sampFreq > 200 || sampFreq < 50)
-                warningMessagesFlags[7] = true;
+            //Warning for non-standard rate/range
+            int sampRange = comboBoxRange.SelectedItem != null ? int.Parse(comboBoxRange.SelectedItem.ToString()) : 0;
+            if (sampFreq == 100 && sampRange == 8)
+            {
+                labelRateRangeSetting.Text = "";
+            }
+            else if (sampFreq > 200 || sampFreq < 50)
+            {
+                labelRateRangeSetting.Text = "not guaranteed";
+            }
+            else
+            {
+                labelRateRangeSetting.Text = "non-standard";
+            }
 
             //Now that we have the flags, we can build the string.
             StringBuilder s = new StringBuilder();
@@ -615,9 +742,43 @@ Cursor.Current = Cursors.WaitCursor;
             updateWarningMessages();
         }
 
+        private void comboBoxRange_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updateWarningMessages();
+        }
+
         private void DateRangeForm_Load(object sender, EventArgs e)
         {
 
         }
+
+        private void radioButtonDuration_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonDefault_Click(object sender, EventArgs e)
+        {
+            comboBoxSamplingFreq.SelectedIndex = 5;
+            comboBoxRange.SelectedIndex = 2;
+            updateWarningMessages();
+        }
+
+
+        bool firstShown = true;
+        private void DateRangeForm_Shown(object sender, EventArgs e)
+        {
+            if (firstShown)
+            {
+                firstShown = false;
+
+                // HACK: Horrible hack to make the date picker respond properly
+                int delay = (int)delayDaysPicker.Value;
+                int alt = (delay + 1 < delayDaysPicker.Maximum) ? delay + 1 : delay - 1;
+                delayDaysPicker.Value = alt;
+                delayDaysPicker.Value = delay;
+            }
+        }
+
     }
 }

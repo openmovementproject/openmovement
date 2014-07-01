@@ -65,7 +65,7 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern int OmUnlock(int deviceId, ushort code);
         [DllImport("libomapi.dll")] public static extern int OmSetEcc(int deviceId, int state);
         [DllImport("libomapi.dll")] public static extern int OmGetEcc(int deviceId);
-        //[DllImport("libomapi.dll")] public static extern int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize, const char *expected, unsigned int timeoutMs, char **parseParts, int parseMax);
+        [DllImport("libomapi.dll")] public static extern int OmCommand(int deviceId, string command, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata, int bufferSize, string expected, uint timeoutMs, IntPtr parseParts, int parseMax); // char **parseParts
         [DllImport("libomapi.dll")] public static extern int OmGetDelays(int deviceId, out uint startTime, out uint stopTime);
         [DllImport("libomapi.dll")] public static extern int OmSetDelays(int deviceId, uint startTime, uint stopTime);
         [DllImport("libomapi.dll")] public static extern int OmGetSessionId(int deviceId, out uint sessionId);
@@ -149,16 +149,24 @@ namespace OmApiNet
         [DllImport("libomapi.dll")] public static extern IntPtr OmReaderOpen(string binaryFilename);
         public static IntPtr OmReaderOpenDeviceData(int deviceId)
         {
-            StringBuilder filename = new StringBuilder(256);
-            if (OmGetDataFilename(deviceId, filename) != OM_OK)
+            StringBuilder sb = new StringBuilder(256);
+            if (OmGetDataFilename(deviceId, sb) != OM_OK)
             {
-                filename = null;
+                sb = null;
             }
-            if (filename == null)
+            if (sb == null)
             {
                 return IntPtr.Zero;
             }
-            return OmReaderOpen(filename.ToString());
+            string filename = sb.ToString();
+Console.Error.WriteLine("NOTE: Using filename: " + filename);
+            if (!System.IO.File.Exists(filename))
+            {
+                Console.Error.WriteLine("WARNING: File does not exist: " + filename);
+                return IntPtr.Zero;
+            }
+            IntPtr ret = OmReaderOpen(filename.ToString());
+            return ret;
         }
         [DllImport("libomapi.dll")] public static extern int OmReaderDataRange(IntPtr reader, out int dataBlockSize, out int dataOffsetBlocks, out int dataNumBlocks, out uint startTime, out uint endTime);
         [DllImport("libomapi.dll")] public static extern string OmReaderMetadata(IntPtr reader, out int deviceId, out uint sessionId);

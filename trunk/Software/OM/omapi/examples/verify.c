@@ -102,10 +102,15 @@ static int globalAllowedRestarts = 0;
 
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
-static const char NAND_DEVICE_DONT_CARE[6] = 	  {0x00};
-static const char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00};
-static const char NAND_DEVICE_HY27UF084G2B[6] = {0xAD,0xDC,0x10,0x95,0x54,0x00};
-static const char NAND_DEVICE_HY27UF084G2M[6] = {0xAD,0xDC,0x80,0x95,0xAD,0x00};
+static const char NAND_DEVICE_DONT_CARE[6] = { 0x00 };
+static const char NAND_DEVICE_HY27UF084G2x[6] = { 0xAD, 0xDC, 0x00 };
+//??                                             0xad,0xdc,0x84,0x25,0xad,0x00,
+static const char NAND_DEVICE_HY27UF084G2B[6] = { 0xAD, 0xDC, 0x10, 0x95, 0x54, 0x00 };		// 1
+static const char NAND_DEVICE_HY27UF084G2M[6] = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };		// 2
+static const char NAND_DEVICE_MT29F8G08AAA[6] = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };     // 3
+static const char NAND_DEVICE_S34ML04G1[6] = { 0x01, 0xDC, 0x90, 0x95, 0x54, 0x00 };     // 4
+
+
 
 static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
 {
@@ -124,9 +129,11 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
     if (id != NULL) { memcpy(id, localId, 6); }
     if (identified != NULL) 
     {
-        *identified = -2;
-        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0) { *identified = 1; }
-        else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
+		*identified = -2;
+		if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0)      { *identified = 1; }
+		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
+		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0) { *identified = 3; }
+		else if (strcmp(NAND_DEVICE_S34ML04G1, (char *)localId) == 0)    { *identified = 4; }
     }
     if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (present != NULL) 
@@ -375,7 +382,7 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
             interval = blockStart - lastBlockStart;
 
             // If the previous block's "blockEnd" is not close (+- 5%) to this block's "blockStart", we have a time discontinuity
-            if (previousBlockEnd != 0 && blockStart != 0 && abs((int)(previousBlockEnd - blockStart)) >= 5000)
+            if (previousBlockEnd != 0 && blockStart != 0 && abs((int)(previousBlockEnd - blockStart)) >= 8000)
             {
                 long long diff = (long long)(blockStart - previousBlockEnd);
                 fprintf(stderr, "WARNING: Time break in sequence by %+.2f seconds (last: %f, curr: %f)\n", (float)diff / 65536.0f, lastBlockStart / 65536.0f, blockStart / 65536.0f);
@@ -647,7 +654,7 @@ if (minLight    < 90) { retval |= CODE_ERROR_LIGHT; }    else if (minLight < 140
     float percentLoss = (float)batteryMaxPercent - batteryMinPercent;
     percentPerHour = 0;
     if (hours > 0) { percentPerHour = percentLoss / hours; } else { percentPerHour = 0; }
-    if (percentPerHour >= 0.26f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.25f)  { retval |= CODE_WARNING_BATT; }
+    if (percentPerHour >= 0.29f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.25f)  { retval |= CODE_WARNING_BATT; }
 }
 // Start/stop
 if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; } 
@@ -668,7 +675,7 @@ if (download != NULL)
 #ifdef ID_NAND
     // NAND ID
     if (download->nandType == -1) { ; }                                                 // Firmware doesn't support nand Id
-    else if (download->nandType != 1 && download->nandType != 2) { retval |= CODE_ERROR_NANDID; }   // ERROR: Not primary or secondary type
+    else if (download->nandType < 1) { retval |= CODE_ERROR_NANDID; }   // ERROR: Not primary or secondary type
     //else if (download->nandType != 1) { retval |= CODE_WARNING_NANDID; }                            // WARNING: Not primary type
 
     fprintf(stderr, "NAND #%d (%d spare)\n", download->nandType, download->memoryHealth);

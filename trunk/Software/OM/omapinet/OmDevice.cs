@@ -384,6 +384,11 @@ Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId);
             return !failed;
         }
 
+        public bool SetDebug(int debugCode)
+        {
+            int status = OmApi.OmCommand(deviceId, "\r\nDEBUG " + debugCode + "\r\n", null, 0, "DEBUG=", 2000, IntPtr.Zero, 0);
+            return (status >= 0);
+        }
 
         public bool Clear(bool wipe)
         {
