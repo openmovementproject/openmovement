@@ -780,5 +780,15 @@ Cursor.Current = Cursors.WaitCursor;
             }
         }
 
+        private void numericUpDown_Enter(object sender, EventArgs e)
+        {
+            ((NumericUpDown)sender).Select(0, ((NumericUpDown)sender).Value.ToString().Length);
+        }
+
+        private void textBox_Enter(object sender, EventArgs e)
+        {
+            ((TextBox)sender).SelectAll();
+        }
+
     }
 }
