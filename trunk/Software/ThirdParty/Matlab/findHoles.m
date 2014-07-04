@@ -20,8 +20,8 @@
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE. 
 %
-% Function to find hols in the timestamps. Time stamps should be continuous
-% in chunks of 1/sampleFreq. The smalles hole detactable is on sample.
+% Function to find holes in the timestamps. Time stamps should be continuous
+% in chunks of 1/sampleFreq. The smallest hole detectable is one sample.
 % Input - data = accelerometer data. assumes time,x,y,z formatted
 %                 timestamps must be in second format (export -t:secs)
 %         sampleFreq = Hz
