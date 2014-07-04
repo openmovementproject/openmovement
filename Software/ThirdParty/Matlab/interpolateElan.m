@@ -33,7 +33,7 @@
 %   Example use: interpolate('inputFileName.csv','outputFileName.csv',0,100);
 %%
 
-function interpolate(fin,fout,samplesToTrim,sampleFreq)
+function interpolateElan(fin,fout,samplesToTrim,sampleFreq)
 % Load in CSV File
 data = load(fin);
 
