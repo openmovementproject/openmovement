@@ -81,12 +81,11 @@ tBounds = p.tBounds/86400;
 progress = p.progress;     
 
 % initialise return variable
-S = [];
+S = zeros(1000,5);
 
 % display progress bar
 if progress,
     h = waitbar(0,'Estimating stationary periods');
-    cnt = 1;
 end
 
 % go through data and get periods of stationarity
@@ -100,34 +99,60 @@ if p.stopTime >0 && p.stopTime > st,
     en = p.stopTime;
 end
     
-for t=st:wstep:en,
+sCnt = 1;
+cnt=1;
+
+% interpolating
+T = st:0.2/86400:en;
+
+D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
+D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
+
+R = zeros(length(T),4); R(:,1) = T;
+for j=2:4,
+    R(:,j) = interp1(D.ACC(:,1),D.ACC(:,j),T,'pchip',0);
+end
+
+wlen = wlen * 86400 * 50;
+wstep = wstep * 86400 * 50;
+
+for t=1:wstep:length(T)-wlen,
     
     % samples in epoch
-    ind = D.ACC(:,1)>= t & D.ACC(:,1) <= t+wlen;
+    %ind = find(D.ACC(:,1)>= t & D.ACC(:,1) <= t+wlen);
+    
+    %a = D.ACC(ind,1); 
+    %datestr(a(end))
+    d = R(t:t+wlen-1,:);
     
     % if there are samples in the epoch
-    if sum(ind)>10,
+    %if length(ind)>10,
         % get standard deviation per axis
-        sd = std(D.ACC(ind,2:4),0,1);
+        sd = std(d(:,2:4),0,1);
         
         % check if std is below threshold for each axis
-        if sum(sd <= actThresh)>=3,
+        if sum(sd <= actThresh) >= 3,
             % stationary!
             % get temperate (use wider bounds as lower sampling frequency)
-            indT = D.TEMP(:,1)>= t-tBounds & D.TEMP(:,1) <= t+wlen+tBounds;
+            indT = D.TEMP(:,1)>= T(t)-tBounds & D.TEMP(:,1) <= T(t)+wlen+tBounds;
             % save mean of epoch measurements and mean temperature
-            S = [S ; t+wlen/2 mean(D.ACC(ind,2:4)) mean(D.TEMP(indT,2))];
+            S(sCnt,:) = [t+wlen/2 mean(d(:,2:4)) mean(D.TEMP(indT,2))];
+            sCnt = sCnt + 1;
         end
-    end
+    %end
     
     % update progress bar if necessary
     if progress
         if mod(cnt,100) == 0,
-            waitbar((t-st) / (en-st),h)
+            %waitbar((t-st) / (en-st),h)
+            waitbar(t/length(T));
         end
         cnt = cnt + 1;
+        
     end
 end
+
+S = S(1:sCnt-1,:);
 
 % close progress bar
 close(h);

@@ -50,11 +50,13 @@ function D = rescaleData(D, e)
 % POSSIBILITY OF SUCH DAMAGE. 
 % 
 
-% apply calibration estimates to rescale data
+% apply calibration estimates from GGIR to rescale data
 N = size(D.ACC(:,1));
 
 % get rid of bad readings
 D.TEMP = D.TEMP(D.TEMP(:,2)>0,:);
+
+D.TEMP = D.TEMP(find(diff(D.TEMP(:,1))>0),:);
 
 % interpolate temperature
 T = interp1(D.TEMP(:,1),D.TEMP(:,2),D.ACC(:,1),'pchip',0);
