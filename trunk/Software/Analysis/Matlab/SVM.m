@@ -13,35 +13,35 @@
 % % Convert to 60 second epochs (sum of absolute SVM-1 values)
 % epochSVM = epochs(abs(svm), 60 * Fs);
 %
-function ret = SVM(data, Fs, filterFreq)
+function ret = SVM(data, Fs, Fc1, Fc2, FN)
+
+    if nargin < 3
+        Fc1 = 0.5;  % First Cutoff Frequency (0.2 Hz or 0.5 Hz)
+    end
+    if nargin < 4
+        Fc2 = 15;   % Second Cutoff Frequency (15 Hz)
+    end
+    if nargin < 5
+        FN  = 4;    % Order (4)
+    end
 
     % Calculate SVM-1
     svm = sqrt(data(:,2) .^ 2 + data(:,3) .^ 2 + data(:,4) .^ 2) - 1;
 
     % No filtering...
-    if filterFreq == 0
+    if Fc1 <= 0 | Fc2 <= 0 | Fc2 <= Fc1 | FN <= 0
         filteredSVM = svm;
         
-    elseif filterFreq > 0
+    else
         
-        % Filter parameters
-        [B,A] = butter(9, filterFreq/(Fs/2), 'high'); 
+        % Create Butterworth filter parameters
+        %[B,A] = butter(FN, [Fc1, Fc2] ./ (Fs / 2)); 
+        [B,A] = filterCoefficients(FN, Fc1, Fc2, Fs); 
 
         % Calculate filtered SVM
-        filteredSVM = filter(B, A, svm);
+        %filteredSVM = filter(B, A, svm);
+        filteredSVM = manualFilter(B, A, svm);
         
-    elseif filterFreq < 0
-
-        % Discrete-time filter object.
-        Fpass = -filterFreq;    % Passband Frequency
-        Fstop = 0.5 * Fpass;    % Stopband Frequency
-        Astop = 60;   % Stopband Attenuation (dB)
-        Apass = 1;    % Passband Ripple (dB)
-
-        h = fdesign.highpass('fst,fp,ast,ap', Fstop, Fpass, Astop, Apass, Fs);
-        Hd = design(h, 'equiripple', 'MinOrder', 'any', 'StopbandShape', 'flat');
-        filteredSVM = filter(Hd, svm);
-
     end
 	
     % Return filteredSVM
