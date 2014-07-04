@@ -50,7 +50,7 @@ function D = rescaleData(D, e)
 % POSSIBILITY OF SUCH DAMAGE. 
 % 
 
-% apply calibration estimates from GGIR to rescale data
+% apply calibration estimates to rescale data
 N = size(D.ACC(:,1));
 
 % get rid of bad readings
