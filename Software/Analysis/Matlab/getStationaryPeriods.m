@@ -102,44 +102,39 @@ end
 sCnt = 1;
 cnt=1;
 
-% interpolating
+% interpolate for speed later on at 50Hz
 T = st:0.2/86400:en;
 
+% get rid of bad timestamps
 D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
 D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
 
+% interpolate each axis
 R = zeros(length(T),4); R(:,1) = T;
 for j=2:4,
     R(:,j) = interp1(D.ACC(:,1),D.ACC(:,j),T,'pchip',0);
 end
 
+% turn from fraction of days to sample numbers
 wlen = wlen * 86400 * 50;
 wstep = wstep * 86400 * 50;
 
 for t=1:wstep:length(T)-wlen,
     
-    % samples in epoch
-    %ind = find(D.ACC(:,1)>= t & D.ACC(:,1) <= t+wlen);
-    
-    %a = D.ACC(ind,1); 
-    %datestr(a(end))
     d = R(t:t+wlen-1,:);
     
-    % if there are samples in the epoch
-    %if length(ind)>10,
-        % get standard deviation per axis
-        sd = std(d(:,2:4),0,1);
-        
-        % check if std is below threshold for each axis
-        if sum(sd <= actThresh) >= 3,
-            % stationary!
-            % get temperate (use wider bounds as lower sampling frequency)
-            indT = D.TEMP(:,1)>= T(t)-tBounds & D.TEMP(:,1) <= T(t)+wlen+tBounds;
-            % save mean of epoch measurements and mean temperature
-            S(sCnt,:) = [t+wlen/2 mean(d(:,2:4)) mean(D.TEMP(indT,2))];
-            sCnt = sCnt + 1;
-        end
-    %end
+    % get standard deviation per axis
+    sd = std(d(:,2:4),0,1);
+
+    % check if std is below threshold for each axis
+    if sum(sd <= actThresh) >= 3,
+        % stationary!
+        % get temperate (use wider bounds as lower sampling frequency)
+        indT = D.TEMP(:,1)>= T(t)-tBounds & D.TEMP(:,1) <= T(t)+wlen+tBounds;
+        % save mean of epoch measurements and mean temperature
+        S(sCnt,:) = [t+wlen/2 mean(d(:,2:4)) mean(D.TEMP(indT,2))];
+        sCnt = sCnt + 1;
+    end
     
     % update progress bar if necessary
     if progress
@@ -147,11 +142,11 @@ for t=1:wstep:length(T)-wlen,
             %waitbar((t-st) / (en-st),h)
             waitbar(t/length(T));
         end
-        cnt = cnt + 1;
-        
+        cnt = cnt + 1;        
     end
 end
 
+% don't give back zeros
 S = S(1:sCnt-1,:);
 
 % close progress bar
