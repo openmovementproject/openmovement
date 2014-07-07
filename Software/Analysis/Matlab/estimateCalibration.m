@@ -26,10 +26,12 @@ function estimate = estimateCalibration(data, varargin)
 %       estimate.offset
 %       estimate.tempOffset
 %       estimate.error
-%       estimate.meanTemperature
+%       estimate.referenceTemperature
+%       estimate.referenceTemperatureQuantiles
 %
 %   Use rescaleData.m to apply these estimates to your data!
 %
+%   v0.2
 %   Nils Hammerla '14
 %   <nils.hammerla@ncl.ac.uk>
 %
@@ -98,10 +100,16 @@ if p.useTemp
     meanTemp = mean(temp);
 else
     % no temperature used, just use "dummy" parameters (zero temp)
-    D = data;
+    if size(data,2)==3,
+        D = data;
+    else
+        D = data(:,1:3);
+    end
     temp = zeros(N,1);
     meanTemp = 0;
 end
+
+%temp = temp - meanTemp;
 
 % initialise variables
 scale = ones(1,size(D,2));
@@ -110,7 +118,7 @@ tempOffset = offset;
 weights = ones(size(D,1),1);
 
 % zero mean temperature
-% temp = temp - meanTemp;
+temp = temp - meanTemp;
 
 % save input data
 D_in = D;
@@ -133,17 +141,9 @@ end
 
 % main loop to estimate unit sphere
 for i=1:p.maxIter,
-    if p.verbose == 1,
-        fprintf('iteration %d\n',i);
-    end
-    
     % scale input data with current parameters
-    % model: (data+offset)*scalePerAxis + temperature*tempOffsetPerAxis
-    D = (D_in + repmat(offset, N, 1)) .* repmat(scale,N,1);
-    
-    if p.useTemp
-        D = D + repmat(temp,1,size(D,2)).*repmat(tempOffset,N,1);
-    end
+    % model: (offset + D_in) * scale + D_in * T * tempOffset)
+    D  = (repmat(offset,N,1) + D_in) .* repmat(scale,N,1) + D_in .* repmat(temp,1,3) .* repmat(tempOffset,N,1);
     
     % targets: points on unit sphere
     target = D ./ repmat(sqrt(sum(D.^2,2)),1,size(D,2));
@@ -157,7 +157,7 @@ for i=1:p.maxIter,
     % (and tempOffset)
     for j=1:size(D,2),
         if p.useTemp,
-            mdl = LinearModel.fit([D(:,j) temp], target(:,j), 'linear', 'Weights', weights);
+            mdl = LinearModel.fit([D(:,j) D(:,j).*temp], target(:,j), 'linear', 'Weights', weights);
         else
             mdl = LinearModel.fit([D(:,j)], target(:,j), 'linear', 'Weights', weights);
         end
@@ -173,11 +173,11 @@ for i=1:p.maxIter,
     % change current parameters
     sc = scale; % save this for convergence comparison
     scale = scale .* gradient;  % adapt scaling
-    offset = offset + off ./ scale; % adapt offset
+    offset = offset + off;% ./ scale; % adapt offset
     
     if p.useTemp
         % apply temperature offset 
-        tempOffset = tempOffset .* gradient + tOff;
+        tempOffset = tempOffset + tOff; 
     end
     
     % weightings for linear regression
@@ -186,16 +186,23 @@ for i=1:p.maxIter,
     weights = min([1 ./ sqrt(sum((D-target).^2,2)), repmat(10,N,1)],[],2);
    
     % no more scaling change -> assume it has converged
-    converged = sum(abs(scale-sc)) < p.convCrit;
+    cE = sum(abs(scale-sc));
+    converged = cE < p.convCrit;
     
+    % L2 error to unit sphere
     E = sqrt(mean(sum((D-target).^2),2));
+    
     if converged,
         break % get out of this loop
     end
     
-    if i==p.maxIter & p.verbose == 1,
+    if i==p.maxIter && p.verbose == 1,
         % no convergence but assume that we are done anyway
         fprintf('Maximum number of iterations reached without convergence.\n');
+    end
+    
+    if p.verbose == 1,
+        fprintf('iteration %d\terror: %.4f\tconvergence: %.6f\n',i,E,cE);
     end
 end
 
@@ -214,6 +221,11 @@ estimate.scale = scale;
 estimate.offset = offset;
 estimate.tempOffset = tempOffset;
 estimate.error = E;
-estimate.meanTemperature = meanTemp;
-
+if p.useTemp == 1,
+    estimate.referenceTemperature = meanTemp;
+    estimate.referenceTemperatureQuantiles = quantile(temp,[0.05 0.95]);
+else
+    estimate.referenceTemperature = 0;
+    estimate.referenceTemperatureQuantiles = quantile(temp,[0 0]);
+end
 end
