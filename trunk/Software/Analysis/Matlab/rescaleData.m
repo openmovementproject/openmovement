@@ -1,6 +1,6 @@
 function D = rescaleData(D, e)
 %
-%   D = rescaleData(D, calibrationEstimates)
+%   D = rescaleData(D, calibrationEstimate)
 %
 %   Rescale the accelerometer data in D (struct returned from
 %   AX3_readFile.m) using the calibration estimates, calculated using
@@ -15,14 +15,18 @@ function D = rescaleData(D, e)
 %                                       .scale      [1x3] double scale-factor
 %                                       .offset     [1x3] double offset
 %                                       .tempOffset [1x3] double temp. offset
+%                                       .referenceTemperature [1x1] double reference temperature
+%                                       .referenceTemperatureQuantiles [1x2] 10th / 90th percentile (temp-meanTemp)
 %
 %   The acceleromter data is rescaled as follows:
 %
-%   sig = (sig + offset) * scale + (temp-mean(temp))*tempOffset
+%   sig = (sig + offset) * scale + sig * (temp-refTemp) *tempOffset
 %
 %
 %   Nils Hammerla '14
 %   <nils.hammerla@ncl.ac.uk>
+%
+% v0.2 
 %
 
 % 
@@ -50,19 +54,37 @@ function D = rescaleData(D, e)
 % POSSIBILITY OF SUCH DAMAGE. 
 % 
 
-% apply calibration estimates from GGIR to rescale data
 N = size(D.ACC(:,1));
 
-% get rid of bad readings
-D.TEMP = D.TEMP(D.TEMP(:,2)>0,:);
+if isfield(D,'TEMP'), % are there temperature readings?
+    % get rid of bad readings and timestamps
+    D.TEMP = D.TEMP(D.TEMP(:,2)>0,:);
+    D.TEMP = D.TEMP(find(diff(D.TEMP(:,1))>0),:);
+    
+    % interpolate temperature
+    T = interp1(D.TEMP(:,1),D.TEMP(:,2),D.ACC(:,1),'pchip',e.referenceTemperature);
+else
+    % no temperature!
+    if e.referenceTemperature > 0,
+        warning('No temperature given. Assuming reference temperature. Results may be inaccurate.');
+    end
+    % add pseudo-time
+    T = repmat(e.referenceTemperature,[N,1]);
+end
 
-D.TEMP = D.TEMP(find(diff(D.TEMP(:,1))>0),:);
+% sanity check: mean temperature within calibrated range?
+if sum(e.referenceTemperatureQuantiles ~= 0) > 0,
+    if mean(T) < e.referenceTemperature + e.referenceTemperatureQuantiles(1) | ...
+       mean(T) > e.referenceTemperature + e.referenceTemperatureQuantiles(2),
+        warning('Mean temperature outside of calibrated temperature range (10th and 90th percentiles). Results may be inaccurate.');
+    end
+end
 
-% interpolate temperature
-T = interp1(D.TEMP(:,1),D.TEMP(:,2),D.ACC(:,1),'pchip',0);
+% substract reference time
+T = T - e.referenceTemperature; % latter may be zero, but then e.tempOffset is zero as well
 
 % apply estimates
-D.ACC(:,2:4) = (D.ACC(:,2:4) + repmat(e.offset,[N,1])) .* repmat(e.scale,[N,1]) ... 
-                + repmat(T,1,3).*repmat(e.tempOffset,[N,1]);
+D.ACC(:,2:4) = (repmat(e.offset,[N,1]) + D.ACC(:,2:4)) .* repmat(e.scale,[N,1]) ...
+                 + D.ACC(:,2:4) .* repmat(T,[1,3]) .* repmat(e.tempOffset,[N,1]);
 
 end
