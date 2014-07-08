@@ -139,8 +139,7 @@ for t=1:wstep:length(T)-wlen,
     % update progress bar if necessary
     if progress
         if mod(cnt,100) == 0,
-            %waitbar((t-st) / (en-st),h)
-            waitbar(t/length(T));
+            waitbar(t/length(T),h);
         end
         cnt = cnt + 1;        
     end
