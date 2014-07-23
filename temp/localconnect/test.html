@@ -110,7 +110,15 @@ function windowLoad()
 	setFormEnabled('actionForm', false);
 	setFormEnabled('storeForm', false);
 	
-	var manager = OmmLoader.getManager(null, function(theManager) {
+	var managerParameters = {};	
+
+    // When running over SSL, connect through a local SSL proxy to the Middleware
+	if (location.protocol == "https:")
+	{
+		managerParameters.domain = "https://127.0.0.1";	// Default: "http://localhost:1234"
+	}
+
+	var manager = OmmLoader.getManager(managerParameters, function(theManager) {
 		//window.alert('Manager loaded!');
 		
 		document.getElementById("connectButton").disabled = false;
@@ -126,18 +134,25 @@ function windowLoad()
 			refreshConnections(); 
 		});
 		
+		theManager.onReceived(function (connection, message) { 
+			print("RECV: " + message);	
+		});
+		
 		theManager.onTransferUpdate(function (details) { 
 			print("UPDATE: Updates: " + JSON.stringify(details));	
 		});
 		
-	}, function () {
-		window.alert('Failed to load manager');
+	}, function (reason) {
+		window.alert('Failed to load manager (' + reason + ')');
 	});
 	
 }
 
 
-window.addEventListener("load", windowLoad, false);
+// On load
+if (window.addEventListener) { window.addEventListener("load", windowLoad, false); }
+else { window.attachEvent('onload', windowLoad); }
+
 
 function printResponse(msg) {
 	print('<span style="color: blue;">RESPONSE: ' + msg + '</span>');
@@ -426,10 +441,31 @@ function doStoreUpload()
 	print("OmmStore.upload()...");
 	var filename = document.getElementById("storeFilename").value;	
 	var uploadParameters = {};
+	var method = document.getElementById("uploadMethod").value;
+	
 	uploadParameters.url = document.getElementById("destination").value;	
+	uploadParameters.method = method;
+
 	OmmManager.getStore().upload(filename, uploadParameters, function(result) {
 		printResponse(JSON.stringify(result));
 	}, function() { printError(); });
+}
+
+function doSendCommand()
+{
+	var command = document.getElementById("command").value;
+    if (gConnection != null && gConnection.websocket != null && gConnection.websocket.readyState == 1)
+	{
+		print("SEND: " + command);	
+		gConnection.websocket.send(command + "\r\n");
+	}
+	else
+	{
+		print("Port not open.");	
+	}
+	document.getElementById('send').focus(); 
+	document.getElementById('send').select(); 
+	return;
 }
 
 </script>
@@ -437,7 +473,7 @@ function doStoreUpload()
 
 <h2>Test</h2>
 
-<form id="connectionForm">
+<form id="connectionForm" onsubmit="return false;">
 	<label>Device: 
 		<select id="addressPort">
 			<option></option>
@@ -459,7 +495,7 @@ function doStoreUpload()
 	<input id="deviceFileRemove"      type="button" value="deviceFileRemove()"      onclick="doDeviceFileRemove();      return false;" />
 </form>
 
-<form id="actionForm">
+<form id="actionForm" onsubmit="return false;">
 	<input id="getIdentity"          type="button" value="getIdentity()"          onclick="doGetIdentity();          return false;" />
 	<input id="getTime"              type="button" value="getTime()"              onclick="doGetTime();              return false;" />
 	<input id="getBattery"           type="button" value="getBattery()"           onclick="doGetBattery();           return false;" />
@@ -494,7 +530,7 @@ function doStoreUpload()
 	<input id="setTime"              type="button" value="setTime()"              onclick="doSetTime();              return false;" />
 </form>
 
-<form id="storeForm">
+<form id="storeForm" onsubmit="return false;">
 	<input id="storeGetTransfers"    type="button" value="storeGetTransfers()"    onclick="doStoreGetTransfers();    return false;" />
 	<input id="storeGetFiles"        type="button" value="storeGetFiles()"        onclick="doStoreGetFiles();        return false;" />
 	<label>
@@ -506,11 +542,28 @@ function doStoreUpload()
 	<input id="storeGetMetadata"     type="button" value="storeGetMetadata()"     onclick="doStoreGetMetadata();     return false;" />
 	<input id="storeRemove"          type="button" value="storeRemove()"          onclick="doStoreRemove();          return false;" />
 	<br />
-	<label>Destination (downloaded filename/upload URL): <input id="destination" type="text" value="" /></label>
+	<label>Destination (downloaded filename/upload URL): <input id="destination" type="text" value="http://localhost/upload/" /></label>
+	<label>
+		Upload method:
+		<select id="uploadMethod">
+			<option value="0">POST file upload form</option>
+			<option value="1">PUT body</option>
+			<option value="2">PUT body chunked-transfer</option>
+			<option value="3">PUT body chunked-transfer deflate-encoding</option>
+			<option value="4">PUT body chunked-transfer gzip-encoding</option>
+		</select>
+	</label>	
 	<input id="storeDownload"        type="button" value="storeDownload()"        onclick="doStoreDownload();        return false;" />
 	<input id="storeUpload"          type="button" value="storeUpload()"          onclick="doStoreUpload();          return false;" />
 </form>
 
+<form id="testForm" onsubmit="return false;">
+	<label>
+		Manual command (testing only):
+		<input id="command" type="text" value="" />
+	</label>
+	<input id="send" type="submit" value="Send" onclick="return doSendCommand();" />
+</form>
 
 <div id="output" width="640" height="480" style="width: 640px; height: 320px; overflow-x: hidden; overflow-y: auto;"></div>
 

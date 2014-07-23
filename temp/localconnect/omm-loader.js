@@ -20,8 +20,6 @@ var OmmLoader = (function () {
 		
 		// Create a new script element
 		var script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.src = url;
 
 		function localSuccess() {
 			if (resolved) { return; }
@@ -30,9 +28,16 @@ var OmmLoader = (function () {
 		}
 		
 		// Bind the callback event
-		script.onreadystatechange = localSuccess;
+		script.onreadystatechange = function() {
+			if (script.readyState == 'complete') {
+				localSuccess();
+			}
+		};		
 		script.onload = localSuccess;
 
+		script.type = 'text/javascript';
+		script.src = url;
+		
 		// Create timeouts
 		setTimeout(function() {
 			if (resolved) { return; }
@@ -49,11 +54,11 @@ var OmmLoader = (function () {
 	
 		// Check for required features
 		if (typeof WebSocket == 'undefined') { 
-			if (callbackFail) { callbackFail("Unsupported browser"); }
+			if (callbackFail) { callbackFail("Unsupported browser - no WebSockets"); }
 			return;
 		}
 		
-		var domain = "http://localhost:1234";
+		var domain = "http://127.0.0.1:1234";  // "http://localhost:1234";
 		
 		if (managerParameters && managerParameters.domain) { domain = managerParameters.domain; }
 		
@@ -64,11 +69,14 @@ var OmmLoader = (function () {
 				return;
 			}
 			var manager = OmmManager;
-			manager.start(function () {
-				if (callbackSuccess) { callbackSuccess(manager); }
-			}, function () {
-				if (callbackFail) { callbackFail('Problem running manager.'); }
-			});
+			manager.start(
+				function () {
+					if (callbackSuccess) { callbackSuccess(manager); }
+				}, function () {
+					if (callbackFail) { callbackFail('Problem running manager.'); }
+				},
+				managerParameters
+			);
 			
 		}, function() {
 			if (callbackFail) { callbackFail('Could not load manager, check middleware is running.'); }
