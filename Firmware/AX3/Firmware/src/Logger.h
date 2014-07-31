@@ -30,10 +30,13 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-
+// Includes
+#include "Utils/Fifo.h"
 
 // Data type
 typedef struct { unsigned short x, y, z; } DataType;        // Data type
+
+// TODO: Make a larger buffer (something breaks at the moment if it is larger)
 #define DATA_BUFFER_CAPACITY 256   // Buffer size -- must be a power of 2. Memory requirement is * sizeof(DataType) -- e.g. 256 entries takes 1.5 kB
 
 // Data buffer
@@ -88,7 +91,7 @@ void LoggerClear(void);
 char LoggerReadMetadata(const char *filename);
 
 // Write metadata settings to a binary file
-char LoggerWriteMetadata(const char *filename);
+char LoggerWriteMetadata(const char *filename, char debug);
 
 
 // Start logging

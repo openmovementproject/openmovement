@@ -27,6 +27,7 @@
 // Karim Ladha, Dan Jackson, 2011-2012
 
 #include "HardwareProfile.h"
+//#include "Delays.h"
 #include "USB/USB.h"
 #include "Usb/USB_CDC_MSD.h"
 #include "usb_config.h"
@@ -35,6 +36,9 @@
 	#include "./USB/usb_function_msd.h"
 	#ifdef USE_INTERNAL_FLASH
 		#include "MDD File System/internal flash.h"
+	#endif
+	#ifdef USE_SD_INTERFACE_WITH_SPI
+		#include "MDD File System/SD-SPI.h"
 	#endif
 #endif
 #ifdef USB_USE_CDC
@@ -45,16 +49,25 @@
 // Globals
 #ifdef USB_USE_CDC
 	// USB circular buffer head/tail pointers
-	unsigned char inHead = 0, inTail = 0;
-	unsigned char outHead = 0, outTail = 0;
+	volatile unsigned short inHead = 0, inTail = 0;
+	volatile unsigned short outHead = 0, outTail = 0;
 	
 #ifndef OWN_CDC_BUFFER_SIZES
-	//#warning "Using default buffer sizes"
-	#define IN_BUFFER_CAPACITY 128
-	#define OUT_BUFFER_CAPACITY 256
+#if !defined(IN_BUFFER_CAPACITY) || !defined(OUT_BUFFER_CAPACITY)
+	#warning "Using default buffer sizes"
+	#define IN_BUFFER_CAPACITY 128		// Must be 128 for legacy projects
+	#define OUT_BUFFER_CAPACITY 256		// Must be 256 for legacy projects
 #endif
-	static unsigned char inBuffer[IN_BUFFER_CAPACITY];
-	static unsigned char outBuffer[OUT_BUFFER_CAPACITY];
+#endif
+
+	#if __DEBUG
+	// These could be static - in debug it helps to see them (retrieve things not sent out on cdc)
+	volatile unsigned char inBuffer[IN_BUFFER_CAPACITY];
+	volatile unsigned char outBuffer[OUT_BUFFER_CAPACITY];
+	#else
+	static volatile unsigned char inBuffer[IN_BUFFER_CAPACITY];
+	static volatile unsigned char outBuffer[OUT_BUFFER_CAPACITY];
+	#endif
 	
 	// Allows manipulation of endpoint and buffer
 	extern USB_HANDLE CDCDataOutHandle;
@@ -155,42 +168,125 @@ void USBInitializeSystem(void)
 	    }
 	    return v;
 	}
+
+	// USB-specific char ready
+	char usb_haschar(void)
+	{
+	    return (inHead != inTail);
+	}
+	
+	// write() redirect for USB
+	void usb_write(const void *buffer, unsigned int len)
+	{
+
+		// LATER: Make this perform a faster than one byte at at time
+		unsigned int i;
+        const char *p = (const char *)buffer;
+	    for (i = len; i; --i)
+	    {
+//KL: To prevent failures when printing from interrupts use this define
+#ifdef LOCK_PRINTF_USBCALLS_IN_INTERRUPTS_ON_WRITE
+if(SRbits.IPL ==0){
+#endif
+            // If full
+            int deadlock = 0;
+            while (((outTail + 1) % OUT_BUFFER_CAPACITY) == outHead)
+            {
+                // While configured and not suspended and buffer not empty, spin calling process I/O
+                if (!USB_BUS_SENSE || (USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) break;
+                #ifndef USB_INTERRUPT
+                USBDeviceTasks(); 	// Interrupt or polling method.  If using polling, must call
+                #endif
+                USBProcessIO();
+
+                // Is it potentially dead-locked?
+                if (USBHandleBusy(CDCDataOutHandle) && cdc_trf_state != CDC_TX_READY)
+                {
+                    if (deadlock++ > 10) { break; }
+                    if (deadlock > 1) Delay10us(50);
+                }
+            }
+#ifdef LOCK_PRINTF_USBCALLS_IN_INTERRUPTS_ON_WRITE
+}
+#endif
+            // Write a byte
+	        outBuffer[outTail] = *p++;
+	        outTail = ((outTail + 1) % OUT_BUFFER_CAPACITY);
+
+	    }
+	}
+	
+	// Identifies if output buffer has data
+	char USBCDCBusy(void)
+	{
+	    return (USB_BUS_SENSE && (USBDeviceState >= CONFIGURED_STATE) && (USBSuspendControl != 1) && outHead != outTail);
+    }
+
+    /*
+	// Waits processing IO until buffer is not-full
+	void USBCDCWaitNotFull(void)
+	{
+//int timeout = 1000;
+		// While configured and not suspended and buffer not empty, spin calling process I/O
+        while (USB_BUS_SENSE && (USBDeviceState >= CONFIGURED_STATE) && (USBSuspendControl != 1) && (((outTail + 1) % OUT_BUFFER_CAPACITY) == outHead))	//     // Prevent lockup?  && inHead == inTail
+        {
+            #ifndef USB_INTERRUPT
+            USBDeviceTasks(); 	// Interrupt or polling method.  If using polling, must call
+            #endif
+            USBProcessIO();
+//if (!timeout--) { break; }
+//DelayMs(1);
+        }
+	}
+    */
 	
 	// Waits processing IO until buffer is empty
 	void USBCDCWait(void)
 	{
+        int deadlock = 0;
 		// While configured and not suspended and buffer not empty, spin calling process I/O
-	    while (USB_BUS_SENSE && (USBDeviceState >= CONFIGURED_STATE) && (USBSuspendControl != 1) && outHead != outTail)
-	    {
-			#ifndef USB_INTERRUPT
-	        USBDeviceTasks(); 	// Interrupt or polling method.  If using polling, must call
-			#endif
-			USBProcessIO();
-	    }
+        while (USB_BUS_SENSE && (USBDeviceState >= CONFIGURED_STATE) && (USBSuspendControl != 1) && outHead != outTail)	//     /* Prevent lockup? */ && inHead == inTail
+        {
+            // Is it potentially dead-locked?
+            if (USBHandleBusy(CDCDataOutHandle) && cdc_trf_state != CDC_TX_READY)
+            {
+                if (deadlock++ > 10) 
+				{ 
+					Nop();
+					break; 
+				}
+                if (deadlock > 1) Delay10us(50);
+            }
+
+            #ifndef USB_INTERRUPT
+            USBDeviceTasks(); 	// Interrupt or polling method.  If using polling, must call
+            #endif
+            USBProcessIO();
+        }
 	}
-	
 	
 	
 	// Perform USB Serial I/O tasks -- must be called periodically from ProcessIO() to empty the out-buffer and fill the in- buffers
 	void USBSerialIO(void)
 	{
 		unsigned char *buffer;
-	    unsigned char maxLength;
-		unsigned char numBytes;
+	    unsigned short maxOutLength;
+		unsigned short numBytes;
 	
 		// Copy recieved bytes to inBuffer
 		GetCDCBytesToCircularBuffer();
 	    
 	    // Transmit USB CDC data
-	    buffer = outBuffer + outHead;
-	    maxLength = (outTail >= outHead) ? (outTail - outHead) : (OUT_BUFFER_CAPACITY - outHead);
+	    buffer = (unsigned char *)outBuffer + outHead;
+	    maxOutLength = (outTail >= outHead) ? (outTail - outHead) : (OUT_BUFFER_CAPACITY - outHead);
 	    
-	    if (maxLength > 0)
+	    if (maxOutLength > 0)
 	    {
 	        if (USBUSARTIsTxTrfReady())
 	        {
-	            putUSBUSART((char *)buffer, maxLength);
-	            numBytes = maxLength;   // We have to assume that they were all written
+if (maxOutLength > 64) { maxOutLength = 64; }       // needed to fix data loss
+	            putUSBUSART((char *)buffer, maxOutLength);
+	            numBytes = maxOutLength;   // We have to assume that they were all written
 	            if (numBytes > 0)
 	            {
 	                outHead = (outHead + numBytes) % OUT_BUFFER_CAPACITY;
@@ -204,20 +300,35 @@ void USBInitializeSystem(void)
 	// GetCDCBytesToCircularBuffer() replaces getsUSBUSART()
 	unsigned char GetCDCBytesToCircularBuffer(void)
 	{
-	    unsigned char maxLength;
-	    unsigned char cdc_rx_len = 0;
+	    unsigned short maxInLength;
+	    unsigned short cdc_rx_len = 0;
 	
 		/* Find space in buffer */
-	    //maxLength = (inTail >= inHead) ? (IN_BUFFER_CAPACITY - inTail - (inHead == 0 ? 1 : 0)) : (inHead - 1 - inTail);
+	    //maxInLength = (inTail >= inHead) ? (IN_BUFFER_CAPACITY - inTail - (inHead == 0 ? 1 : 0)) : (inHead - 1 - inTail);
 		if (inTail >= inHead)
-			{maxLength = IN_BUFFER_CAPACITY + inHead - inTail - 1;}   
+			{maxInLength = IN_BUFFER_CAPACITY + inHead - inTail - 1;}   
 		else
-			{maxLength = inHead - inTail - 1;}
+			{maxInLength = inHead - inTail - 1;}
 	
-		if ((maxLength > 0)&&(!USBHandleBusy(CDCDataOutHandle))) 	// Is there any room in the buffer and is there any in-data
+//if (maxInLength > 0)	// Allow overflow of incoming buffer if not processed in time	
+		if ((!USBHandleBusy(CDCDataOutHandle))) 	// Is there any room in the buffer and is there any in-data
 	    {
-			unsigned char len = USBHandleGetLength(CDCDataOutHandle);
-			if (maxLength>len)	// Is there sufficient room for the new data
+			unsigned short len = USBHandleGetLength(CDCDataOutHandle);
+			
+			// Truncate at the maximum buffer capacity (circular buffer implementation has a capacity one less than the buffer size)
+			if (len >= IN_BUFFER_CAPACITY - 1)
+			{
+				len = IN_BUFFER_CAPACITY - 1;
+			}
+
+// Truncate
+if (len > maxInLength)
+{
+	len = maxInLength;
+}
+			
+			// If there is sufficient room for the new data
+			if (len <= maxInLength)	
 			{
 				// Copy data from dual-ram buffer to user's circular buffer
 	        	for(cdc_rx_len = 0; cdc_rx_len < len; cdc_rx_len++)
@@ -244,6 +355,7 @@ void USBProcessIO(void)
 	    USBSerialIO();
 	    CDCTxService();
 	#endif
+
 	#ifdef USB_USE_MSD
     	MSDTasks();  
 	#endif 
@@ -362,3 +474,4 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
     return TRUE; 
 }
 
+//EOF

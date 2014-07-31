@@ -185,7 +185,7 @@ int strnicmp(const char *a, const char *b, int max)
 
 //unsigned char outputbuffer[128];
 //volatile unsigned char *writereg = &outputbuffer[0];
-
+write_handler_t writeHandler = NULL;
 __attribute__ ( (section(".libc"))) 
 int write(int handle, void *buffer, unsigned int len)
 {
@@ -196,11 +196,19 @@ int write(int handle, void *buffer, unsigned int len)
 		case 1: // handle 1 = stdin
 		case 2: // handle 2 = stderr
 		default:
+		// KL: Added write handler
+		if(writeHandler)
+		{
+			writeHandler(buffer, len);
+		}
+		else
+		{
             for (i = len; i; --i)
             {
                 // Write to peripheral
                 usb_putchar(*(char*)buffer++);
             }
+		}
 	}
 	return len;
 }

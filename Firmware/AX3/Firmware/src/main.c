@@ -42,6 +42,7 @@
 #include "MDD File System/FSIO.h"
 #include "Usb/USB_CDC_MSD.h"
 #include "Ftl/FsFtl.h"
+#include "Utils/FsUtils.h"
 #include "Utils/Fifo.h"
 #include "Utils/Util.h"
 #include "Peripherals/Analog.h"
@@ -49,6 +50,8 @@
 #include "Logger.h"
 //#include <string.h>
 
+// KL: 17-04-2014 Self test sequence
+#include "AX3 SelfTest.h"
 
 
 // Declarations
@@ -56,7 +59,7 @@ void RunAttached(void);
 void RunLogging(void);
 void TimedTasks(void);
 void LedTasks(void);
-
+void RunTestSequence(void);
 
 // Interrupts
 void __attribute__((interrupt,auto_psv)) _DefaultInterrupt(void)
@@ -163,6 +166,9 @@ int main(void)
     GyroVerifyDeviceId();
 #endif
 
+	// Self test check - only actually executes on first run
+	RunTestSequence();
+
     // If we haven't detected the NAND or accelerometer this could be the wrong firmware for this device (reset to bootloader)
     if (!nandPresent)
     {
@@ -190,7 +196,11 @@ int main(void)
 
 LED_SET(LED_WHITE);         // White LED during later startup
     FtlStartup();                       // FTL & NAND startup
-    FSInit();                           // Initialize the filesystem for reading
+if(FSInit()!=TRUE)                          // Initialize the filesystem for reading
+{
+int i;
+for (i = 0; i < 5 * 3; i++) { LED_SET(LED_RED); DelayMs(111); LED_SET(LED_GREEN); DelayMs(111); }
+}
     SettingsReadFile(SETTINGS_FILE);    // Read settings from script
     // TODO: Make this "single binary file" mode optional on the settings just read
     LoggerReadMetadata(DEFAULT_FILE);   // Read settings from the logging binary file
@@ -546,6 +556,14 @@ void RunLogging(void)
                 {
                     int failCounter = 0;
 
+#ifdef HIGH_SPEED_USES_PLL
+#warning "HIGH_SPEED_USES_PLL not fully tested."
+					// [High-speed] If sampling at high rate, switch to PLL
+					char isHighSpeed = 0;
+					if (ACCEL_FREQUENCY_FOR_RATE(settings.sampleRate) >= 1600) { isHighSpeed = 1; }
+					if (isHighSpeed) { CLOCK_PLL();	}
+#endif
+
 	                // Clear the data capture buffer
 	                LoggerClear();
 	
@@ -636,6 +654,12 @@ void RunLogging(void)
                         }
                         else { failCounter = 0; }
 	
+#ifdef HIGH_SPEED_USES_PLL
+// [High-speed] No sleep if sampling at high rate
+if (!isHighSpeed)
+{
+#endif
+
 	                    // Sleep until ADXL INT1, RTC, USB or WDT
 #ifdef USE_GYRO
 	                    SystemPwrSave(WAKE_ON_RTC|WAKE_ON_WDT|WAKE_ON_USB|WAKE_ON_ADXL1|WAKE_ON_GYRO2|WAKE_ON_TIMER1|ADC_POWER_DOWN|LOWER_PWR_SLOWER_WAKE|SAVE_INT_STATUS|ALLOW_VECTOR_ON_WAKE);
@@ -644,7 +668,17 @@ void RunLogging(void)
 #endif
 	                    //Sleep();
 	                    //__builtin_nop();
+#ifdef HIGH_SPEED_USES_PLL
+}
+#endif
+	                    
+	                    
 	                }
+
+#ifdef HIGH_SPEED_USES_PLL
+					// [High-speed] Lower clock rate
+					if (isHighSpeed) { CLOCK_INTOSC();}
+#endif
 
 				}
 	
@@ -712,4 +746,5 @@ void RunLogging(void)
 
     return;
 }
+
 

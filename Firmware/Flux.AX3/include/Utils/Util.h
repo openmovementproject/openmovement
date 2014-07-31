@@ -32,6 +32,7 @@
 extern char commEcho;
 
 #ifdef PIC24
+typedef void (*write_handler_t)(const void *buffer, unsigned int len);
 int write(int handle, void *buffer, unsigned int len);
 #endif
 

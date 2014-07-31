@@ -29,11 +29,19 @@
 #ifndef HARDWAREPROFILE_H
 #define HARDWAREPROFILE_H
 
+// Added self test result page
+#define SELF_TEST_ADDRESS 0x0002A400
+
 	// Switch between hardware versions (0x16 = 1.6, 0x17 = 1.7)
 	#define HARDWARE_SELECT 0x17
     
     // Define firmware version
-    #define SOFTWARE_VERSION 37
+    #define SOFTWARE_VERSION 42
+
+// High-speed capable
+//#define HIGH_SPEED_USES_PLL	// Not fully tested (doesn't appear to be required anyway)
+
+	#define ACCEL_HIGH_SPEED_WATERMARK 8	// Appears to work for short samples at 3200Hz (not tested enough to see if it always works)
 
 	// No legacy defines for this code
 	#define NO_LEGACY
@@ -43,10 +51,10 @@
     #ifdef IGNORE_UNRECOGNIZED_PERIPHERALS
     	#warning "IGNORE_UNRECOGNIZED_PERIPHERALS could be dangerous."
     #endif
-
-	// User-management of bad blocks
-//	#define NAND_BLOCK_MARK
     
+	// User-management of bad blocks
+	#define NAND_BLOCK_MARK
+
     // Include CWA hardware profile
     #include "Hardware/HardwareProfile-CWA.h"
     
@@ -57,10 +65,20 @@
     #define DEFAULT_DEBUGGING 0     // 1=delayed activation, 2=on-tap, 3=always
 #endif
     
+    // USB CDC Buffer
+	#define OWN_CDC_BUFFER_SIZES
+	#define IN_BUFFER_CAPACITY 128
+	#define OUT_BUFFER_CAPACITY 256
+    
     #if 0
     	#warning "This is a no-battery build"
     	#undef USB_BUS_SENSE
     	#define USB_BUS_SENSE 0
     #endif
+
+    // Project properties
+    #define ENABLE_printhexdump     // Enable hex dump function
+    #define RTC_SWWDT               // Enable software WDT
+	#define RTC_SWWDT_TIMEOUT 60
 
 #endif
