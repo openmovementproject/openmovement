@@ -427,7 +427,7 @@ function doStoreDownload()
 	connection = gConnections[index];
 	
 	print("OmmStore.download()...");
-	var filename = document.getElementById("destination").value;	
+	var filename = document.getElementById("destinationFilename").value;	
 	var downloadParameters = {};
 	downloadParameters.connection = connection;	
 	downloadParameters.sourceFilename = document.getElementById("deviceFilename").value;	
@@ -443,12 +443,60 @@ function doStoreUpload()
 	var uploadParameters = {};
 	var method = document.getElementById("uploadMethod").value;
 	
-	uploadParameters.url = document.getElementById("destination").value;	
+	uploadParameters.url = document.getElementById("destinationUrl").value;	
 	uploadParameters.method = method;
 
 	OmmManager.getStore().upload(filename, uploadParameters, function(result) {
 		printResponse(JSON.stringify(result));
 	}, function() { printError(); });
+}
+
+function doStoreDownloadAndUpload()
+{
+	var index = parseInt(document.getElementById("addressPort").value);
+	var connection = gConnections[index];
+	
+	var deviceFilename = document.getElementById("deviceFilename").value;	
+	var downloadFilename = document.getElementById("destinationFilename").value;	
+	var method = document.getElementById("uploadMethod").value;
+	var deviceFilesize = 0;
+	var uploadUrl = document.getElementById("destinationUrl").value;
+	
+	print("Download and upload:");
+	
+	// Get download file metadata
+	print("OmmConnection.getMetadata() " + deviceFilename);
+	connection.getMetadata(deviceFilename, function(metadata) {
+		printResponse(JSON.stringify(metadata));
+		deviceFilesize = metadata["file"]["size"];
+		
+		// Start download
+		print("OmmStore.download(): " + deviceFilename + " (" + deviceFilesize + ") " + downloadFilename);
+		var downloadParameters = {};
+		//downloadParameters.resume = true;	
+		downloadParameters.connection = connection;	
+		downloadParameters.sourceFilename = deviceFilename;	
+		
+		OmmManager.getStore().download(downloadFilename, downloadParameters, function(result) {
+			printResponse(JSON.stringify(result));
+			
+			print("OmmStore.upload(): " + downloadFilename + " (" + deviceFilesize + ") " + uploadUrl);
+			var uploadParameters = {};			
+			uploadParameters.url = uploadUrl;	
+			uploadParameters.method = method;
+			uploadParameters.uploadLimit = deviceFilesize;
+
+			OmmManager.getStore().upload(downloadFilename, uploadParameters, function(result) {
+				printResponse(JSON.stringify(result));
+				
+			}, function() { printError(); });
+			
+			
+		}, function() { printError(); });
+	
+	}, function() { printError(); });
+	
+	
 }
 
 function doSendCommand()
@@ -542,10 +590,11 @@ function doSendCommand()
 	<input id="storeGetMetadata"     type="button" value="storeGetMetadata()"     onclick="doStoreGetMetadata();     return false;" />
 	<input id="storeRemove"          type="button" value="storeRemove()"          onclick="doStoreRemove();          return false;" />
 	<br />
-	<label>Destination (downloaded filename/upload URL): <input id="destination" type="text" value="http://localhost/upload/" /></label>
+	<label>Download destination filename: <input id="destinationFilename" type="text" value="download.omx" /></label>
+	<label>Upload URL: <input id="destinationUrl" type="text" value="http://localhost/upload/" /></label>
 	<label>
 		Upload method:
-		<select id="uploadMethod">
+		<select id="uploadMethod" value="2">
 			<option value="0">POST file upload form</option>
 			<option value="1">PUT body</option>
 			<option value="2">PUT body chunked-transfer</option>
@@ -553,8 +602,9 @@ function doSendCommand()
 			<option value="4">PUT body chunked-transfer gzip-encoding</option>
 		</select>
 	</label>	
-	<input id="storeDownload"        type="button" value="storeDownload()"        onclick="doStoreDownload();        return false;" />
-	<input id="storeUpload"          type="button" value="storeUpload()"          onclick="doStoreUpload();          return false;" />
+	<input id="storeDownload"          type="button" value="storeDownload()"          onclick="doStoreDownload();        return false;" />
+	<input id="storeUpload"            type="button" value="storeUpload()"            onclick="doStoreUpload();          return false;" />
+	<input id="storeDownloadAndUpload" type="button" value="storeDownloadAndUpload()" onclick="doStoreDownloadAndUpload();        return false;" />
 </form>
 
 <form id="testForm" onsubmit="return false;">
