@@ -36,6 +36,7 @@
 //#include "USB/usb_function_msd.h"
 //#include "USB/usb_function_cdc.h"
 #include "Ftl/FsFtl.h"
+#include "Utils/FsUtils.h"
 #include "Peripherals/Accel.h"
 #ifdef USE_GYRO
 #include "Peripherals/Gyro.h"
@@ -386,7 +387,7 @@ char SettingsAction(char flags)
     if (flags & ACTION_CREATE)
     {
         // Write settings to the logging binary file
-        if (LoggerWriteMetadata(DEFAULT_FILE))
+        if (LoggerWriteMetadata(DEFAULT_FILE, 0))
         {
 	        printf("COMMIT\r\n");
 		} 
@@ -394,6 +395,12 @@ char SettingsAction(char flags)
 		{
         	printf("ERROR: Problem during commit\n");
 		}
+
+/*
+extern unsigned char FSerrno;
+int i;
+for (i = FSerrno; i > 0; i--) { LED_SET(LED_MAGENTA); DelayMs(1000); LED_SET(LED_GREEN); DelayMs(1000); }
+*/
 
     }
 
@@ -573,6 +580,43 @@ char SettingsCommand(const char *line, SettingsMode mode)
         }
 
     }
+// KL 2014: Selftest results
+else if (strnicmp(line, "test_results", 12) == 0)
+{
+	unsigned short offset = 0, length, size;
+	ReadProgram(SELF_TEST_ADDRESS, scratchBuffer, 512);
+	length = strlen((char*)scratchBuffer);
+	if(scratchBuffer[0] == '\f')
+	{
+		for(;;)
+		{
+			size = 64; // Printf limititations....
+			if(size > (length - offset))size = length - offset;
+			if(offset >= length)break;
+			write(0,scratchBuffer+offset,size);
+			USBCDCWait();
+			offset += size;
+		}
+	}
+	else
+	{
+		printf("Results not found\r\n");	
+	}
+	// Full re-test and wipe
+	if(line[12] == '+' && line[13] == 'W')
+	{
+		// Schedule factory reset (re-test+format+log)
+		WriteProgramPage(SELF_TEST_ADDRESS, "W", 1);
+		printf("Wipe scheduled\r\n");
+	}
+	// Re-test periferals only
+	if(line[12] == '+' && line[13] == 'R')
+	{
+		// Schedule factory reset (re-test+format+log)
+		WriteProgramPage(SELF_TEST_ADDRESS, "R", 1);
+		printf("Re-test scheduled\r\n");
+	}
+}
     else if (strnicmp(line, "time", 4) == 0)
     {
         unsigned long time;
@@ -904,7 +948,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
 			unsigned char sectorInPage;
 			
 			// Calculate block, page, and sector in page from the file offset
-			logicalSector = FSFileOffsetToLogicalSector(DEFAULT_FILE, offset)
+			logicalSector = FSFileOffsetToLogicalSector(DEFAULT_FILE, offset);
 
 			// If the block was found... 
 			if (logicalSector > 0 && logicalSector < 0xFFFFFFFFul)
@@ -932,7 +976,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
     }
     else if (strnicmp(line, "BADBLOCK", 8) == 0)
     {
-        unsigned short physicalBlock = 0xffffffff;
+        unsigned short physicalBlock = 0xffff;
         if (line[8] != '\0')
         {
             physicalBlock = (unsigned short)my_atoi(line + 9);
@@ -1099,8 +1143,10 @@ char SettingsCommand(const char *line, SettingsMode mode)
             if (line[7] == 'd' || line[7] == 'D')
             {
                 if (line[8] == '\0') { printf("FORMAT: Destroy.\r\n"); FtlDestroy(0); }
-                else if (line[8] == 'B') { printf("FORMAT: Destroy user bad blocks.\r\n"); FtlDestroy(1); }
-                else if (line[8] == '!') { printf("FORMAT: Destroy all bad blocks.\r\n"); FtlDestroy(42); }
+                else if (line[8] == 'B') { printf("FORMAT: Destroy, including user-marked bad blocks.\r\n"); FtlDestroy(1); }
+#ifdef NAND_BLOCK_MARK
+                //else if (line[8] == '!') { printf("FORMAT: Destroy, including all bad blocks (do not do this).\r\n"); FtlDestroy(42); }   // this is a bad idea
+#endif
             }
             else
             {

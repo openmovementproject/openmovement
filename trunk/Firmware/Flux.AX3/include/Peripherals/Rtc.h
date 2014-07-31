@@ -151,17 +151,16 @@ inline void RtcTasks(void);
 // (internal update function)
 inline char RtcTimerTasks(void);
 
-#ifdef RTC_SWWDT
-volatile unsigned int rtcSwwdtValue = 0;
-#endif
 
-#define RTC_SWWDT
-#ifdef RTC_SWWDT
-#define RTC_SWWDT_TIMEOUT 55
-extern volatile unsigned int rtcSwwdtValue;
-// These functions are actually defines to ensure they're actually inline
-#define RtcSwwdtReset() { rtcSwwdtValue = 0; }
-#define RtcSwwdtIncrement() { if (++rtcSwwdtValue >= RTC_SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); Reset(); } }
+#if (defined(RTC_SWWDT) || defined(RTC_SWWDT_TIMEOUT))
+	extern volatile unsigned int rtcSwwdtValue;
+	// These functions are actually defines to ensure they're actually inline
+	//#warning "SW WDT ENABLED"
+	#define RtcSwwdtReset() { rtcSwwdtValue = 0; }
+	#define RtcSwwdtIncrement() { if (++rtcSwwdtValue >= RTC_SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); DelayMs(1000); Reset(); } }
+#else
+	#define RtcSwwdtReset() 	{}
+	#define RtcSwwdtIncrement() {}
 #endif
 
 

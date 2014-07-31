@@ -37,6 +37,7 @@
 #include "Ftl/FsFtl.h"
 #include "Utils/Util.h"
 #include "Utils/Fifo.h"
+#include "Utils/FSutils.h"
 #include "Logger.h"
 #include "Settings.h"
 #include "Peripherals/Analog.h"
@@ -390,18 +391,45 @@ char LoggerReadMetadata(const char *filename)
 
 
 // Write metadata settings to a binary file
-char LoggerWriteMetadata(const char *filename)
+// 1 = ok, 0 = not all written, 
+char LoggerWriteMetadata(const char *filename, char debug)
 {
     FSFILE *fp;
     unsigned int total = 0;
 
     // Can't just use "a+" as (for portability) not allowed to write anywhere except end of stream,
     fp = FSfopen(filename, "r+");
+	if (debug) { printf("\r\nno file, creating"); }
     if (fp == NULL)
     {
         // "r+" won't create a new file, make sure it exists here
         fp = FSfopen(filename, "w+");
-        if (fp == NULL) { return 0; }
+        if (fp == NULL) 
+		{
+			int error = FSerror();
+			int i;
+			
+			if (debug) { printf("\r\nopen fail %d",error); }
+			
+			if (FSInit())
+			{
+				if (debug) { printf("\r\nfsinit ok"); }
+			}	
+			
+			for (i=0;i<3;i++)
+			{
+				fp = FSfopen(filename, "w");
+				error = FSerror();
+				if (fp == NULL)
+				{
+					if (debug) 
+					{
+						printf("\r\nfail %d",error);
+					}	
+				}	
+			}
+		 	return 0; 
+		}
     }
 
     // Ensure archive attribute set to indicate file updated
@@ -439,7 +467,7 @@ char LoggerWriteMetadata(const char *filename)
 
     FSfclose(fp);
 
-    return (total == 1024);
+    return (total == 1024) ? 1 : 0;
 }
 
 
@@ -476,7 +504,7 @@ char LoggerStart(const char *filename)
         // Start a new file if it doesn't exist
         if (!exists)
         {
-            LoggerWriteMetadata(filename);
+            LoggerWriteMetadata(filename, 0);
         }
 
         // Open the log file for append

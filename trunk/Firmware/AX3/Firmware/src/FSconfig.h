@@ -103,5 +103,16 @@
 #include "Ftl/FsFtl.h"
 #undef FSFTL_IN_FSCONFIG
 
+// Change the behaviour of FSutils.h when included from this file
+#define FSUTILS_IN_FSCONFIG
+#include "Utils/FSutils.h"
+#undef FSUTILS_IN_FSCONFIG
+
+
+// Underlying device flush, ECC-aware sector writes and file auto-flushing
+#define FS_CONFIG_FTL_AWARE
+#define FS_FLUSH() FtlFlush(0)
+#define FS_WRITE_SECTOR_ECC(sector, buffer, ecc) FtlWriteSector(sector, buffer, ecc);
+#define FS_SECTOR_FLUSH 8		// (8 = 512kB)  Flush every N * 64kB written with FSfwriteSector
 
 #endif

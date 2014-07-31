@@ -33,6 +33,12 @@
 #include <string.h>
 
 #include "Compiler.h"
+#include "HardwareProfile.h"
+
+#if defined(_WIN32) && !defined(FTL)
+    // Ignore source file
+#else
+
 #include "Ftl/Ftl.h"
 #include "Ftl/Ecc.h"
 #include "Peripherals/Nand.h"
@@ -59,7 +65,9 @@
 
 // Debugging visualizer
 #ifdef _WIN32
+#ifndef NO_EMU_VISUALIZER
 #define EMU_VISUALIZER
+#endif
 #endif
 #ifdef EMU_VISUALIZER
 extern void EmuVisualizerUpdate(char logical, unsigned long sector, unsigned int count, char flags);
@@ -90,7 +98,6 @@ typedef struct {
 	unsigned short blockNum2;	// 12-bit block number repetition 2
 	unsigned char page1;		// 6-bit page number repetition
 	unsigned char page2;		// 6-bit page number repetition 2	// [dgj] Moved here to improve alignment on 16-bit compilers
-	// 13-bytes per 4 sectors = 52 bytes
 } FtlPageInfo;
 
 #define FTL_PAGEINFO_SIZE 12    // == sizeof(FtlPageInfo)
@@ -791,7 +798,7 @@ static char FtlCommitPage(void)
 
 						FtlWarning("Log store unsuccessful in last block -- having to store temporarily and finalize the existing log block.");
 
-						ftlContext.tempBlock = FtlMapGetNextFree(logEntry->logicalBlock);
+						ftlContext.tempBlock = FtlGetSpareBlock(logEntry->logicalBlock);	// Check NAND buffer persists after NandEraseBlock.  (Just FtlMapGetNextFree() might be ok as all old blocks wiped after use?)
 						if (ftlContext.tempBlock >= FTL_PHYSICAL_BLOCKS)
 						{
 							FtlError("Couldn't allocate/use temporary block, the best we can do is use the last-written (failed) entry.");
@@ -808,14 +815,18 @@ static char FtlCommitPage(void)
 						physicalPage = 0;
 						do
 						{
-							if (NandStorePageRepeat(ftlContext.tempBlock, physicalPage)) { break; }
+							if (NandStorePageRepeat(ftlContext.tempBlock, physicalPage)) 
+							{
+								// Temporary store successful
+								break; 
+							}
 						} while (physicalPage++ < FTL_PAGES_PER_BLOCK);
 
 						// If we couldn't write to any of the temporary pages
 						if (physicalPage >= FTL_PAGES_PER_BLOCK)
 						{
 							FtlError("Couldn't write new page in to temporary block, the best we can do is use the last-written (failed) entry.");
-							logEntry->pageMap[(unsigned char)ftlContext.currentPage] = logEntry->pageIndex - 1;
+							logEntry->pageMap[(unsigned char)logicalPage] = logEntry->pageIndex - 1;
 							// No longer using the temp. block
 							FtlMarkBadBlock(ftlContext.tempBlock);
 							ftlContext.tempBlock = FTL_MAP_UNUSED_BLOCK;
@@ -827,6 +838,7 @@ static char FtlCommitPage(void)
 						ftlContext.pageOwner = -1;
 						ftlContext.currentPage = -1;
 						ftlContext.currentBlock = FTL_MAP_UNUSED_BLOCK;
+//logEntry->pageMap[logicalPage] = logEntry->pageIndex - 1;
 						FtlFinalizeLogBlock(logId); // Potentially recursive, should only nest at most once as we've just cleared the current owner/block/page
 
 						// Re-create the log structure around the temporary block
@@ -846,12 +858,12 @@ static char FtlCommitPage(void)
 						logEntry->pageMap[logicalPage] = physicalPage;
 						logEntry->pageIndex = physicalPage + 1;
 
-						// No longer using the temp. block
-						NandEraseBlock(ftlContext.tempBlock);
-						ftlContext.tempBlock = FTL_MAP_UNUSED_BLOCK;
-
 						// We have to finalize again -- we can't keep the page as it is as it may have misleading metadata (we couldn't change the buffer after the first write failed)
 						FtlFinalizeLogBlock(logId); // Potentially recursive, should only nest at most once as we've just cleared the current owner/block/page
+
+						// After finalizing, we're no longer using the temp. block
+						NandEraseBlock(ftlContext.tempBlock);
+						ftlContext.tempBlock = FTL_MAP_UNUSED_BLOCK;
 
 						// We're done with the retries
 						break;
@@ -1087,7 +1099,7 @@ static unsigned short FtlGetSpareBlock(unsigned short logicalBlock)
 		// Check for failure to find any free blocks (this should only happen if there are too many bad blocks)
 		if (block >= FTL_PHYSICAL_BLOCKS) { continue; }
 
-		// If it is free, then return this as our new log block (after erasing it)
+		// If it is free, then return this as our block (after erasing it)
 		if (!NandEraseBlock(block))
 		{
 			// Mark block as bad (and not-free)
@@ -1098,7 +1110,7 @@ static unsigned short FtlGetSpareBlock(unsigned short logicalBlock)
 		return block;
 	}
 
-	// Otherwise, can't find any free log blocks (this should only happen if there are too many bad blocks), return
+	// Otherwise, can't find any free blocks (this should only happen if there are too many bad blocks), return
 	return FTL_MAP_UNUSED_BLOCK;
 }
 
@@ -2121,3 +2133,175 @@ const char *FtlHealth(void)
     *p++ = '\0';
     return health;
 }
+
+
+// Translate a logical sector address to a physical block address (and, optionally, the physical page address and sector-in-page offset)
+char FtlTranslateLogicalSectorToPhysical(unsigned long logicalSector, unsigned short *physicalBlock, unsigned char *page, unsigned char *sectorInPage)
+{
+	unsigned short logicalBlock;
+	
+	// Find logical block
+	logicalBlock = (unsigned short)(logicalSector >> FTL_SECTOR_TO_BLOCK_SHIFT);
+
+	// Treat out-of-range requests as asking for range information
+	if (logicalBlock >= FTL_LOGICAL_BLOCKS)
+	{ 
+		if (physicalBlock != NULL) { *physicalBlock = FTL_PHYSICAL_BLOCKS; }
+		if (page != NULL) { *page = FTL_PAGES_PER_BLOCK; }
+		if (sectorInPage != NULL) { *sectorInPage = FTL_SECTORS_PER_PAGE; }
+		return 0; 
+	}
+
+	// If page required, determine from logical sector
+	if (page != NULL)
+	{
+		*page = (unsigned char)(logicalSector >> FTL_SECTOR_TO_PAGE_SHIFT) & (unsigned char)((1 << (FTL_SECTOR_TO_BLOCK_SHIFT - FTL_SECTOR_TO_PAGE_SHIFT)) - 1);
+	}
+
+	// If sector-in-page required, determine from logical sector
+	if (sectorInPage != NULL)
+	{
+		*sectorInPage = (unsigned char)logicalSector & ((1 << FTL_SECTOR_TO_PAGE_SHIFT) - 1);
+	}
+
+	// If physical block required, look up
+	if (physicalBlock != NULL)
+	{
+		// Check we're initialized
+		if (!ftlContext.initialized)
+		{
+			FtlWarning("Attempt to find a physical block address while not initialized."); 
+			*physicalBlock = 0xffff;
+			return 0; 
+		}
+
+		// Look in the map to locate the physical block for the specified logical block
+		*physicalBlock = FtlMapGetEntry(logicalBlock);
+		if (*physicalBlock >= FTL_PHYSICAL_BLOCKS)
+		{ 
+			FtlWarning("Attempt to find an unmapped physical block address."); 
+			*physicalBlock = 0xffff;
+			return 0; 
+		}
+	}
+
+	return 1;
+}
+
+
+// Relocate the block contents and mark the specified physical block as bad
+char FtlRelocatePhysicalBlockAndMarkBad(unsigned short physicalBlock)
+{
+	unsigned short logicalBlock;
+	unsigned short newBlock;
+	unsigned int retry;
+
+	// Check we're initialized
+	if (!ftlContext.initialized) { FtlWarning("Attempted to relocate/mark-bad a block while not initialized."); return 0; }
+
+	// Check we know the logical block address
+	if (physicalBlock >= FTL_PHYSICAL_BLOCKS) { FtlWarning("Attempted to relocate/mark-bad an invalid physical block."); return 0; }
+
+	// Protect state by finalizing the FTL
+	FtlFlush(1);
+
+	// Find the logical block address
+	{
+		unsigned char type;
+
+		// Check the block is not marked free
+		if ((ftlContext.blockUsageMap[physicalBlock >> 3] & (unsigned char)((unsigned char)1 << (physicalBlock & 0x07))) == 0)
+		{
+			FtlWarning("Relocate/mark-bad called for a block marked free, directly checking block type anyway...");
+		}
+
+		// Directly read the block markers to check the block type
+		type = FtlBlockInfoDecode(physicalBlock, &logicalBlock);
+
+		// Check if this is not a complete block
+		if (type == FTL_PAGE_INFO_BAD) { FtlWarning("Attempted to relocate/mark-bad an already bad-marked block."); return -1; }
+
+		// Check we found the logical block address, and it was within range
+		if (type != FTL_PAGE_INFO_BLOCK) { logicalBlock = FTL_LOGICAL_BLOCKS; FtlWarning("The relocate/mark-bad block is a non-completed block."); }
+		else if (logicalBlock >= FTL_LOGICAL_BLOCKS) { FtlWarning("The relocate/mark-bad block has an invalid logical address."); }
+
+		// Check for the expected plane affinity that physical blocks have with logical blocks (for even allocation)
+#if FTL_PLANES > 1
+		if ((physicalBlock & (FTL_PLANES - 1)) != (logicalBlock & (FTL_PLANES - 1))) { logicalBlock = FTL_LOGICAL_BLOCKS; FtlWarning("The relocate/mark-bad physical block had an invalid plane affinity with its logical block."); }
+#endif
+
+		// If we have a valid logical block, double-check the index is what we expect
+		if (logicalBlock < FTL_LOGICAL_BLOCKS && FtlMapGetEntry(logicalBlock) != physicalBlock) { FtlWarning("The relocate/mark-bad block has a logical entry whose reverse index doesn't match."); }
+	}
+
+	// Copy contents of old physical block to the new block
+	for (retry = 0; ; retry++)
+	{
+		char page;
+		unsigned char copyError;
+
+		// Allocate a new block in the same plane as the physical block (which also happens to be the same 'plane' as the logical block)
+		newBlock = FtlGetSpareBlock(physicalBlock);		// This also erases the new block
+		if (newBlock >= FTL_PHYSICAL_BLOCKS) { FtlWarning("Failed to allocate a new block during relocate/mark-bad."); return 0; }
+
+		// Copy the pages from the original physical block into the new block (rewrite the page info at both ends of the block)
+		copyError = 0;
+		for (page = 0; page < FTL_PAGES_PER_BLOCK; page++)
+		{
+			// If we have a valid logical address, we're going to rewrite the page info (to remove any partial corruption)
+			if (logicalBlock < FTL_LOGICAL_BLOCKS && (page == 0 || page >= FTL_PAGES_PER_BLOCK - 1))
+			{
+				NandLoadPageWrite(physicalBlock, page, newBlock, page);
+				FtlWritePageInfo(0xff, FTL_PAGE_INFO_BLOCK, logicalBlock, page);	// complete block
+				if (!NandStorePage())
+				{
+					copyError++;
+					break;
+				}
+			}
+			else
+			{
+				// Directly copy the page
+				if (!NandCopyPage(physicalBlock, page, newBlock, page))
+				{
+					copyError++;
+					break;
+				}
+			}
+		}
+
+		// If successful, stop
+		if (copyError == 0)
+		{
+			break;
+		}
+
+		// Otherwise, copy failed - mark as bad and retry
+		FtlMarkBadBlock(newBlock);
+		FtlWarning("Failed copy, marking as bad");
+		if (retry >= 2)
+		{
+			FtlWarning("Failed to copy after multiple retries.");
+			return 0;
+		}
+	}
+
+	// Mark the old physical block as bad
+	FtlMarkBadBlock(physicalBlock);
+
+	// Update the new block as in-use
+	FtlMapSetPhysicalBlockUsed(newBlock, 1);						// Mark new block as used
+
+	// If we were moving a valid, logical block, update the block address map to point to new block (instead of the old physical block)
+	if (logicalBlock < FTL_LOGICAL_BLOCKS)
+	{
+		FtlMapSetEntry(logicalBlock, newBlock);							// logicalBlock => newBlock
+	}
+
+	// TODO: Consider re-initializing here if we were told to relocate a non-standard block (e.g. a log or BAM block) -- (the caller shouldn't've done this though)
+
+	// Successfully completed
+	return 1;
+}
+
+#endif

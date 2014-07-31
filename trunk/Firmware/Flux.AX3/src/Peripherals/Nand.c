@@ -295,10 +295,11 @@ typedef union
 }nand_flash_parameters_t;
 
 const unsigned char NAND_DEVICE_DONT_CARE[6] = 	  {0x00}; 							// KL - ADDED
-//const unsigned char NAND_DEVICE_HY27UF084G2M[6] = {0xAD,0xDC,0x80,0x95,0xAD,0x00}; 	// KL - ADDED
+//const unsigned char NAND_DEVICE_HY27UF084G2M[6] = {0xAD,0xDC,0x80,0x95,0xAD,0x00};// KL - ADDED
 const unsigned char NAND_DEVICE_HY27UF084G2B[6] = {0xAD,0xDC,0x10,0x95,0x54,0x00};
-const unsigned char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00}; 		// KL - ADDED
+const unsigned char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00}; 				// KL - ADDED
 const unsigned char NAND_DEVICE_MT29F8G08AAA[6] = {0x2C,0xD3,0x90,0x2E,0x64,0x00};
+const unsigned char NAND_DEVICE_S34ML04G1[6] 	= {0x01,0xDC,0x90,0x95,0x54,0x00}; // KL - ADDED
 
 // Read chip parameters
 char NandReadDeviceId(unsigned char *destination)
@@ -357,7 +358,21 @@ unsigned char NandVerifyDeviceId(void)
 #ifdef NAND_NO_RCB
 			if (nandPresent) { nandNoRCB = 1; }
 #endif
-			
+		}
+#endif
+
+#ifdef NAND_DEVICE_ALT2
+		// KL - Added support for new nand chip
+		if (!nandPresent)
+		{
+			for(i=0;i<6;i++)
+			{
+				if (NAND_DEVICE_ALT2[i] == '\0') 	{nandPresent = 3; break;}	// Successful end of id string
+				if (id[i] != NAND_DEVICE_ALT2[i]) 	{ break; } 					// Character mismatch
+			}
+#ifdef NAND_NO_RCB
+			if (nandPresent) { nandNoRCB = 1; }
+#endif
 		}
 #endif
 
@@ -466,6 +481,7 @@ char NandWritePage(unsigned short srcBlock, unsigned char srcPage, unsigned char
     FLASH_WAIT_RB();                                    // Wait for previous operations
 	NandWriteCommand(FLASH_PAGE_PROGRAM_1);				// Write page
 	NandWriteAddress5B();                               // Specify source address
+
 #ifdef NAND_OPTIMIZE
 	for (;length >= 32; length-=32)
 	{
