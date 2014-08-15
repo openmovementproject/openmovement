@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<html>
+<head>
+
+<!-- The two lines below allow the page to work via file: protocol in IE.  For Internet zone, x-ua-compatible won't be needed and use MOTW:  (0014)about:internet -->
+<!-- saved from url=(0016)http://localhost -->
+<meta http-equiv="x-ua-compatible" content="IE=edge" >
+
+<style>
+body { font-family: sans-serif; }
+</style>
 <title>Test</title>
 <!-- <script src="promise.js"></script> -->
 <script src="omm-loader.js"></script>
@@ -111,12 +121,12 @@ function windowLoad()
 	setFormEnabled('storeForm', false);
 	
 	var managerParameters = {};	
-
-    // When running over SSL, connect through a local SSL proxy to the Middleware
-	if (location.protocol == "https:")
-	{
-		managerParameters.domain = "https://127.0.0.1";	// Default: "http://localhost:1234"
-	}
+	
+	// Manually choose the domain (otherwise the loader will automatically choose)
+	// var protocol = (location.protocol == "https:") ? "https:" : "http:";
+	// var host = "127.0.0.1"; // "localhost";
+	// var port = (protocol == "https:") ? 1235 : 1234;
+	//managerParameters.domain = protocol + "//" + host + ":" + port; }
 
 	var manager = OmmLoader.getManager(managerParameters, function(theManager) {
 		//window.alert('Manager loaded!');
@@ -517,8 +527,8 @@ function doSendCommand()
 }
 
 </script>
-
-
+</head>
+<body>
 <h2>Test</h2>
 
 <form id="connectionForm" onsubmit="return false;">
@@ -617,5 +627,5 @@ function doSendCommand()
 
 <div id="output" width="640" height="480" style="width: 640px; height: 320px; overflow-x: hidden; overflow-y: auto;"></div>
 
-
+</body>
 </html>

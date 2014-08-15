@@ -58,11 +58,23 @@ var OmmLoader = (function () {
 			return;
 		}
 		
-		var domain = "http://127.0.0.1:1234";  // "http://localhost:1234";
+		// Create empty managerParameters if none specified
+		if (typeof managerParameters == "undefined") 
+		{ 
+			managerParameters = {}; 
+		}
 		
-		if (managerParameters && managerParameters.domain) { domain = managerParameters.domain; }
+		// Automatically choose the address if not specified
+		if (typeof managerParameters.domain == "undefined")
+		{ 
+			// Determine the default address
+			var protocol = (location.protocol == "https:") ? "https:" : "http:";
+			var host = "localhost"; //"127.0.0.1"; // "localhost";
+			var port = (protocol == "https:") ? 1235 : 1234;
+			managerParameters.domain = protocol + "//" + host + ":" + port;
+		}
 		
-		var scriptUrl = domain + "/omm-manager.js";
+		var scriptUrl = managerParameters.domain + "/omm-manager.js";
 		loadScript(scriptUrl, function() {
 			if (typeof OmmManager == 'undefined') {
 				if (callbackFail) { callbackFail('Problem loading script.'); }
