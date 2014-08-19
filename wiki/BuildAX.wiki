@@ -13,6 +13,7 @@ The BuildAX wireless sensors measure building environment/occupancy and include 
 </wiki:comment>
 
 == Links ==
-  * [Documentation Documentation]
+  * 
+  * [http://openmovement.googlecode.com/svn/docs/buildax/site/index.html Documentation] (web-based)
   * [Source Source]
   * [Downloads Downloads]
