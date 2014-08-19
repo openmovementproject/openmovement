@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Interface User Guide - BuildAX v2 Documentation</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="../js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> BuildAX v2 Documentation</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="..">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="../connecting/">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Web Interface User Guide</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#bax-router-admin-panel">BAX Router Admin Panel</a></li>
+                
+                    <li><a class="toctree-l3" href="#login">Login</a></li>
+                
+                    <li><a class="toctree-l3" href="#status">Status</a></li>
+                
+                    <li><a class="toctree-l3" href="#sensors">Sensors</a></li>
+                
+                    <li><a class="toctree-l3" href="#settings">Settings</a></li>
+                
+                    <li><a class="toctree-l3" href="#fetch">Fetch</a></li>
+                
+                    <li><a class="toctree-l3" href="#admin">Admin</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="../commands/">Router Commands</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="../developer-api/">Developer Guide</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href=".."></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    <li>Web Interface User Guide</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="bax-router-admin-panel">BAX Router Admin Panel</h1>
+<p>A web configuration interface is provided to make setting up a BuildAX 
+installation easier. This document gives an overview of the admin panel 
+functionality.</p>
+<p>All modern, standards-compliant web browsers are supported. Older browsers may
+experience reduced functionality, for example Microsoft Internet Explorer
+version 8 or lower. A warning message will be displayed in this case.</p>
+<h2 id="login">Login</h2>
+<p>The router configuration interface is protected with a username and password. 
+These should be updated from the Admin panel when you first log into the site.</p>
+<p><img alt="Login" src="/img/login.png" /></p>
+<p>The default login credentials for the BAX Router are:</p>
+<ul>
+<li>Username: admin</li>
+<li>Password: password</li>
+</ul>
+<p>For information on how to change these credentials, see <a href="#Admin">here</a>.</p>
+<h2 id="status">Status</h2>
+<p>The Status tab is the landing page for the system, and allows users to verify
+the running state of the device, including the log file (binary or plaintext)
+and the status of router peripherals.</p>
+<p><img alt="Status" src="/img/status.png" /></p>
+<h2 id="sensors">Sensors</h2>
+<p>The Sensor display page shows the sensors connected to the System, along with
+their details and the last values received.</p>
+<p><img alt="Sensor List" src="/img/sensors.png" /></p>
+<h3 id="name">Name</h3>
+<p>The name of the BAX sensor device can be set when it is programmed, and will be
+sent as part of the encryption key transmission at pairing time. This is stored
+along with the key on the root of the SD card (external storage), and as such
+can be subsequently modified. The maximum length of a sensor node name is 32
+characters.</p>
+<h3 id="last-seen">Last Seen</h3>
+<p>The last time a packet was received from a sensor, as defined by the internal
+RTC on the BAX router.</p>
+<h3 id="address">Address</h3>
+<p>The unique hardware identifier of the BAX sensor. This is generated at random 
+by the sensor, but the pool of values (48-bit3) is large enough to make 
+collisions very unlikely.</p>
+<h3 id="last-packet">Last Packet</h3>
+<p>The last packet field is broken down into the individual values broadcast by 
+the sensor:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>Packet identifier (sensors send packets incrementally).</td>
+</tr>
+<tr>
+<td>RSSI</td>
+<td>Received Signal Strength Indication. Can be used when troubleshooting sensor drop-outs.</td>
+</tr>
+<tr>
+<td>Battery mV</td>
+<td>Battery level, in millivolts, of the BAX sensor. Also useful for troubleshooting connection issues.</td>
+</tr>
+<tr>
+<td>Humidity %</td>
+<td>Relative Humidity (a percentage of the saturation vapor pressure)</td>
+</tr>
+<tr>
+<td>Temp °C</td>
+<td>Temperature in degrees Celsius</td>
+</tr>
+<tr>
+<td>Light Lux</td>
+<td>Luminous flux measurement</td>
+</tr>
+<tr>
+<td>PIR/Switch</td>
+<td>Activation counts of the Passive Infrared sensor and magnetic switch on the device.</td>
+</tr>
+</tbody>
+</table>
+<p>Different versions of BAX nodes may be produced without certain sensors—for
+example, without the light or PIR sensors—to function as lightweight
+environmental monitoring nodes. In this instance, a value of zero will be
+displayed where data is missing.</p>
+<h3 id="limitations">Limitations</h3>
+<p>Sensors appear in this table while their encryption keys are loaded into RAM on
+the Router. As the amount of RAM on the device is limited, only the most recent
+20 sensors will be displayed in this table. This may become possible with future
+hardware revisions.</p>
+<h2 id="settings">Settings</h2>
+<p>The BAX router has the ability to route streams of data to various different
+data sources. The Settings page is used to turn on/off different streams, and
+switch between streaming formats (binary or plaintext). The form is arranged by
+stream type.</p>
+<p><img alt="Settings" src="/img/settings.png" /></p>
+<p>When a setting has been changed, it needs to be applied before it becomes
+active. The Update button will appear when a setting needs to be applied.</p>
+<p><img alt="Change dialog" src="/img/setchange.png" /></p>
+<p>If successfully applied, you will see the confirmation dialog appear below the
+settings form:</p>
+<p><img alt="Update OK" src="/img/setok.png" /></p>
+<h2 id="fetch">Fetch</h2>
+<p>Data can be retrieved from the router remotely via the fetch interface. The form
+on the Data tab is used to format requests to the router.</p>
+<p><img alt="Fetch" src="/img/fetch.png" /></p>
+<p>Fetch types relate directly to the logging types- if your router is logging in
+plaintext mode you should use the plaintext fetch- the same goes for if the
+router is logging in binary.</p>
+<p>The Fetch form exposes four different ways to request data:</p>
+<ul>
+<li>Date/Time</li>
+<li>File</li>
+<li>Sample Number (as a range)</li>
+<li>Last N Samples (from most recent backwards)</li>
+</ul>
+<p>In addition, if the router determines that the parameters entered do not
+translate to an acceptable range, an error 400 (Bad Request) will be returned.</p>
+<h2 id="admin">Admin</h2>
+<p>To update the login credentials for the router, simply fill in the form on the
+Admin tab. There are no hard-coded complexity requirements for the password, but
+normal convention should be followed. The maximum password length is 32
+characters.</p>
+<p><img alt="Admin" src="/img/admin.png" /></p>
+<p>Note that if this password is forgotten, it must be reset by physically
+accessing the router and loading the default settings. This reset procedure can
+be performed by holding down the button on the rear of the router for 12
+seconds.</p>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../commands/" class="btn btn-neutral float-right" title="Router Commands"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../connecting/" class="btn btn-neutral" title="Connection Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

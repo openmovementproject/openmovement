@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Guide - BuildAX v2 Documentation</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="../js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> BuildAX v2 Documentation</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="..">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="../connecting/">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="../user-guide/">Web Interface User Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="../commands/">Router Commands</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Developer Guide</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#bax-router-developer-api">BAX Router Developer API</a></li>
+                
+                    <li><a class="toctree-l3" href="#logging-in">Logging In</a></li>
+                
+                    <li><a class="toctree-l3" href="#changing-settings">Changing Settings</a></li>
+                
+                    <li><a class="toctree-l3" href="#fetching-data">Fetching Data</a></li>
+                
+                    <li><a class="toctree-l3" href="#time-format">Time Format</a></li>
+                
+                    <li><a class="toctree-l3" href="#example-wget-commands">Example wget commands</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href=".."></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    <li>Developer Guide</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="bax-router-developer-api">BAX Router Developer API</h1>
+<p>API calls to the BAX Router are made as RESTful HTTP requests. For you, 
+this means that setting state on the router is performed via <code>POST</code> requests, 
+and <code>GET</code> requests are used to retrieve data.</p>
+<p>The examples in this document use the <code>wget</code> command to communicate with the 
+web server on the BAX router. On unix-like OSes (i.e. Mac OSX or Linux) <code>wget</code> is 
+usually installed by default, but can be downloaded for other OSes (including 
+Windows) from the <a href="https://www.gnu.org/software/wget/">GNU website</a>.</p>
+<h2 id="logging-in">Logging In</h2>
+<p>The Web API uses a unique session key (a <em>cookie</em>) to authenticate users. All 
+API sessions start when this session key is requested by making a POST request
+to the BAX router.</p>
+<p>The user agent must first authenticate with the router and obtain a session
+cookie before further REST API requests can be made:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Resource</th>
+<th>Parameters</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td>/WWW/login.htm</td>
+<td>user, pass</td>
+<td>303 redirect with SID= session cookie.</td>
+</tr>
+</tbody>
+</table>
+<p>Example <code>wget</code> command (a backslash is used to separate the command onto multiple lines):</p>
+<pre class="prettyprint well"><code>wget --save-cookies cookies.txt \
+    --post-data 'user=admin&amp;pass=password' \
+    --keep-session-cookies \
+    http://your-bax-router/WWW/login.htm
+</code></pre>
+<h2 id="changing-settings">Changing Settings</h2>
+<p>Settings are passed to the server in the same format as the text command mode.
+Please refer to <a href="../commands/#settings">Router Commands</a> for a full description
+of the settings commands which may be sent to the router.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Resource</th>
+<th>Parameters</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td>/WWW/a_settng.htm</td>
+<td>Setting arguments in the format specified above</td>
+<td><code>200 OK</code> Set-Cookie: update=ok</td>
+</tr>
+</tbody>
+</table>
+<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+    --post-data 'setting.usb.stream=0' \
+    http://your-bax-router/WWW/a\_settng.htm
+</code></pre>
+<p>Valid settings types are: <code>file</code>, <code>usb</code>, <code>telnet</code>, and <code>udp</code>.</p>
+<h2 id="fetching-data">Fetching Data</h2>
+<p>Data fetching is performed via GET request, so parameters are passed in the
+URL.</p>
+<pre class="prettyprint well"><code>http://your-bax-router/fetch?type=BT&amp;start=449622000&amp;end=485434800
+</code></pre>
+<p>There are three parameters in a fetch request: a type, and the start/end range
+specifiers.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Resource</th>
+<th>Valid Parameters</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/fetch</code></td>
+<td>type, start, end</td>
+<td><code>200 OK</code> (and download)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fetch-types">Fetch Types</h3>
+<p>The <strong>type</strong> parameter may be specified as one of the following:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Fetch mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BT</td>
+<td>Binary / Time range fetch</td>
+</tr>
+<tr>
+<td>TT</td>
+<td>Text / Time</td>
+</tr>
+<tr>
+<td>BF</td>
+<td>Binary / File</td>
+</tr>
+<tr>
+<td>TF</td>
+<td>Text / File</td>
+</tr>
+<tr>
+<td>BS</td>
+<td>Binary / Sample range <em>(note: text/sample range is not implemented)</em></td>
+</tr>
+<tr>
+<td>LS</td>
+<td>Last N Samples <em>(note: specify an empty 'end' parameter with this request)</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="fetch-parameters">Fetch Parameters</h3>
+<p>The parameters <strong>start</strong> and <strong>end</strong> are always present, but their value
+changes based on the type of request.</p>
+<table>
+<thead>
+<tr>
+<th>Fetch Type</th>
+<th>Range specifiers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Time Range</strong></td>
+<td>Start and end are specified in <em>seconds after the epoch 2000-01-01</em> matching the RTC timestamp</td>
+</tr>
+<tr>
+<td><strong>File Range</strong></td>
+<td>Start and end are data file numbers as stored on the external flash card storage</td>
+</tr>
+<tr>
+<td><strong>Sample Range</strong></td>
+<td>Start and end are a range of packets numbers received from the sensors</td>
+</tr>
+<tr>
+<td><strong>Last N Samples</strong></td>
+<td>Start is the number of most recent samples. Specify end as an empty string.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="time-format">Time Format</h2>
+<p>To calculate the time range, take the Unix timestamp for the time required (a
+standard time representation) and subtract the Unix timestamp for the date
+<code>2000-01-01</code>. Eg:</p>
+<pre class="prettyprint well"><code>    Current Unix Time – (2000-01-01 00:00) = BAX RTC Timestamp
+           1407940334 –      946684800     = 461255534
+</code></pre>
+
+<p>The reason for this difference is that the hardware real-time-clock (RTC) on
+the BAX router works with an epoch of the year 2000 and a 32-bit timestamp,
+meaning dates up to 2068 can be represented internally.</p>
+<h2 id="example-wget-commands">Example <code>wget</code> commands</h2>
+<p>Get last 500 samples:</p>
+<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+    --content-disposition \
+    http://your-bax-router/fetch?type=LS&amp;start=500&amp;end=
+</code></pre>
+<p>Get data within a time range:</p>
+<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+    --content-disposition \
+    http://your-bax-router/fetch?type=BT&amp;start=449622000&amp;end=485434800
+</code></pre>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../commands/" class="btn btn-neutral" title="Router Commands"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>
