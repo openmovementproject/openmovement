@@ -17,7 +17,7 @@ version 8 or lower. A warning message will be displayed in this case.
 The router configuration interface is protected with a username and password. 
 These should be updated from the Admin panel when you first log into the site.
 
- ![Login](/img/login.png)
+ ![Login](img/login.png)
 
 The default login credentials for the BAX Router are:
 
@@ -33,7 +33,7 @@ The Status tab is the landing page for the system, and allows users to verify
 the running state of the device, including the log file (binary or plaintext)
 and the status of router peripherals.
 
- ![Status](/img/status.png)
+ ![Status](img/status.png)
 
 
 ## Sensors
@@ -41,7 +41,7 @@ and the status of router peripherals.
 The Sensor display page shows the sensors connected to the System, along with
 their details and the last values received.
 
- ![Sensor List](/img/sensors.png)
+ ![Sensor List](img/sensors.png)
 
 ### Name
 
@@ -97,17 +97,17 @@ data sources. The Settings page is used to turn on/off different streams, and
 switch between streaming formats (binary or plaintext). The form is arranged by
 stream type.
 
- ![Settings](/img/settings.png)
+ ![Settings](img/settings.png)
 
 When a setting has been changed, it needs to be applied before it becomes
 active. The Update button will appear when a setting needs to be applied.
 
- ![Change dialog](/img/setchange.png)
+ ![Change dialog](img/setchange.png)
 
 If successfully applied, you will see the confirmation dialog appear below the
 settings form:
 
- ![Update OK](/img/setok.png)
+ ![Update OK](img/setok.png)
 
 
 ## Fetch
@@ -115,7 +115,7 @@ settings form:
 Data can be retrieved from the router remotely via the fetch interface. The form
 on the Data tab is used to format requests to the router.
 
- ![Fetch](/img/fetch.png)
+ ![Fetch](img/fetch.png)
 
 Fetch types relate directly to the logging types- if your router is logging in
 plaintext mode you should use the plaintext fetch- the same goes for if the
@@ -139,7 +139,7 @@ Admin tab. There are no hard-coded complexity requirements for the password, but
 normal convention should be followed. The maximum password length is 32
 characters.
 
- ![Admin](/img/admin.png)
+ ![Admin](img/admin.png)
 
 Note that if this password is forgotten, it must be reset by physically
 accessing the router and loading the default settings. This reset procedure can
