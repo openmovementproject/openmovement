@@ -24,7 +24,7 @@ The default login credentials for the BAX Router are:
 *   Username: admin
 *   Password: password
 
-For information on how to change these credentials, see [here](#Admin).
+For information on how to change these credentials, see [here](#admin).
 
 
 ## Status 
@@ -59,7 +59,7 @@ RTC on the BAX router.
 ### Address
 
 The unique hardware identifier of the BAX sensor. This is generated at random 
-by the sensor, but the pool of values (48-bit3) is large enough to make 
+by the sensor, but the pool of values (48-bit) is large enough to make 
 collisions very unlikely.
 
 ### Last Packet

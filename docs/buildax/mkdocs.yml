@@ -1,10 +1,16 @@
 # MkDocs configuration file
-site_name: BuildAX v2 Documentation
+site_name: BuildAX v2
+site_description: BuildAX v2 project documentation  
+
 repo_url: https://code.google.com/p/openmovement/
-site_author: Sam Mitchell Finnigan
+repo_name: Google Code
+
+site_author: Sam Mitchell Finnigan, Newcastle University
+copyright: Creative Commons 3.0 BY Atribution licence
 
 #theme: readthedocs
-theme_dir: custom
+#extra_css: extra.css
+theme_dir: theme
 
 pages:
 - [index.md, Home]
@@ -13,4 +19,6 @@ pages:
 - [commands.md, Router Commands]
 - [developer-api.md, Developer Guide]
 
-#use_directory_urls: true
+#use_directory_urls: False
+url_format: file
+
