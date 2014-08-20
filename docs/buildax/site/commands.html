@@ -54,11 +54,6 @@
         
     </li>
 
-    <li class="toctree-l1 ">
-        <a class="" href="user-guide.html">Web Interface User Guide</a>
-        
-    </li>
-
     <li class="toctree-l1 current">
         <a class="current" href="commands.html">Router Commands</a>
         
@@ -70,6 +65,11 @@
                 
             
             </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface User Guide</a>
         
     </li>
 
@@ -171,21 +171,78 @@ command with an equals ('=') sign and the new value. For example:</p>
 <p>... will stop logging data to file, and mount the <a href="connecting.html#usb-mass-storage">USB Mass Storage</a>
 device so the SD card can be accessed by a PC over the USB connection.</p>
 <h2 id="settings">Settings</h2>
-<p>Settings are expressed in the format <code>setting.[type].[mode|stream]=[0|1]</code> and
-can be concatenated with an ampersand (&amp;) in the POST body to change multiple
-settings simultaneously. Where mode=0, a stream will output in plaintext (else
-1 for binary). Where stream=0, logging to this stream will be disabled (enabled
-when 1).</p>
+<p>Settings are expressed in the form <code>setting.type.x=y</code> and are used by the
+router to determine where to route messages. "Messages" in this context are 
+data packets (sent by the environment sensors) received by the device, which 
+must be routed to various outputs.</p>
+<p>Each <code>setting.type</code> describes a data output, or "stream":</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>usb</td>
+<td>USB CDC (Communications Device Class) Serial connection</td>
+</tr>
+<tr>
+<td>file</td>
+<td>Logging of data packets to a file on the SD card</td>
+</tr>
+<tr>
+<td>udp</td>
+<td>Network packet-forwarding over UDP (User Datagram Protocol)</td>
+</tr>
+<tr>
+<td>telnet</td>
+<td>Telnet protocol (virtual terminal connection) provided as a networked alternative to the serial interface</td>
+</tr>
+<tr>
+<td>websocket</td>
+<td>Websocket packet-forwarding (used in the <a href="user-guide.html#sensors">Web Interface</a> to provide real-time data)</td>
+</tr>
+</tbody>
+</table>
+<p>Each stream has two configurable options: <code>stream</code> and <code>mode</code>.</p>
+<ul>
+<li><strong>Stream</strong>: Enable/disable the data output. Off: <code>stream=0</code>, On: <code>stream=1</code></li>
+<li><strong>Mode</strong>: Output as plaintext (<code>mode=0</code>) or slip-encoded binary (<code>mode=1</code>)</li>
+</ul>
+<p>The router will print a summary to confirm the command after you type it.</p>
+<p>Here is an example with commands used to determine the state of the UDP stream,
+enable it, and set it to binary mode:</p>
+<pre class="prettyprint well"><code>&gt;   setting.udp.stream
+    Udp:
+    Mode: 0
+    Setting: Turned off
+
+&gt;   setting.udp.stream=1
+    Udp:
+    Mode: 0
+    Setting: Turned on
+
+&gt;   setting.udp.mode=1
+    Udp:
+    Mode: 1
+    Setting: Turned on
+</code></pre>
+
+<p>It is possible to configure the router with options which are 
+potentially useless- streaming data over Telnet in binary, for instance, 
+would be undesirable in most situations. </p>
 
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="developer-api.html" class="btn btn-neutral float-right" title="Developer Guide"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="user-guide.html" class="btn btn-neutral float-right" title="Web Interface User Guide"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="user-guide.html" class="btn btn-neutral" title="Web Interface User Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="connecting.html" class="btn btn-neutral" title="Connection Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   

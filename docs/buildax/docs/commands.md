@@ -36,10 +36,50 @@ device so the SD card can be accessed by a PC over the USB connection.
 
 ## Settings
 
-Settings are expressed in the format `setting.[type].[mode|stream]=[0|1]` and
-can be concatenated with an ampersand (&) in the POST body to change multiple
-settings simultaneously. Where mode=0, a stream will output in plaintext (else
-1 for binary). Where stream=0, logging to this stream will be disabled (enabled
-when 1).
+Settings are expressed in the form `setting.type.x=y` and are used by the
+router to determine where to route messages. "Messages" in this context are 
+data packets (sent by the environment sensors) received by the device, which 
+must be routed to various outputs.
 
+Each `setting.type` describes a data output, or "stream":
+
+ Type      | Description
+ --------- | -------------
+ usb       | USB CDC (Communications Device Class) Serial connection 
+ file      | Logging of data packets to a file on the SD card
+ udp       | Network packet-forwarding over UDP (User Datagram Protocol)
+ telnet    | Telnet protocol (virtual terminal connection) provided as a networked alternative to the serial interface
+ websocket | Websocket packet-forwarding (used in the [Web Interface](user-guide.md#sensors) to provide real-time data)
+
+
+Each stream has two configurable options: `stream` and `mode`.
+
++ **Stream**: Enable/disable the data output. Off: `stream=0`, On: `stream=1`
++ **Mode**: Output as plaintext (`mode=0`) or slip-encoded binary (`mode=1`)
+
+The router will print a summary to confirm the command after you type it.
+
+Here is an example with commands used to determine the state of the UDP stream,
+enable it, and set it to binary mode:
+
+````
+>	setting.udp.stream
+	Udp:
+	Mode: 0
+	Setting: Turned off
+
+>	setting.udp.stream=1
+	Udp:
+	Mode: 0
+	Setting: Turned on
+
+>	setting.udp.mode=1
+	Udp:
+	Mode: 1
+	Setting: Turned on
+````
+
+It is possible to configure the router with options which are 
+potentially useless- streaming data over Telnet in binary, for instance, 
+would be undesirable in most situations. 
 

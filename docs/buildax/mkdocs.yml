@@ -15,8 +15,8 @@ theme_dir: theme
 pages:
 - [index.md, Home]
 - [connecting.md, Connection Guide]
-- [user-guide.md, Web Interface User Guide]
 - [commands.md, Router Commands]
+- [user-guide.md, Web Interface User Guide]
 - [developer-api.md, Developer Guide]
 
 #use_directory_urls: False

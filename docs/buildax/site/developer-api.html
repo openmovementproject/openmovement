@@ -55,12 +55,12 @@
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="user-guide.html">Web Interface User Guide</a>
+        <a class="" href="commands.html">Router Commands</a>
         
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="commands.html">Router Commands</a>
+        <a class="" href="user-guide.html">Web Interface User Guide</a>
         
     </li>
 
@@ -124,9 +124,11 @@
 this means that setting state on the router is performed via <code>POST</code> requests, 
 and <code>GET</code> requests are used to retrieve data.</p>
 <p>The examples in this document use the <code>wget</code> command to communicate with the 
-web server on the BAX router. On unix-like OSes (i.e. Mac OSX or Linux) <code>wget</code> is 
-usually installed by default, but can be downloaded for other OSes (including 
-Windows) from the <a href="https://www.gnu.org/software/wget/">GNU website</a>.</p>
+web server on the BAX router. On Linux <code>wget</code> is usually installed by default,
+but can be downloaded for other OSes (including MacOSX and Windows) from the 
+<a href="https://www.gnu.org/software/wget/">GNU website</a>.</p>
+<p>An equivalent software with much the same functionality as wget is <code>curl</code>, 
+which may be used in preference to <code>wget</code>.</p>
 <h2 id="logging-in">Logging In</h2>
 <p>The Web API uses a unique session key (a <em>cookie</em>) to authenticate users. All 
 API sessions start when this session key is requested by making a POST request
@@ -151,16 +153,27 @@ cookie before further REST API requests can be made:</p>
 </tr>
 </tbody>
 </table>
-<p>Example <code>wget</code> command (a backslash is used to separate the command onto multiple lines):</p>
-<pre class="prettyprint well"><code>wget --save-cookies cookies.txt \
-    --post-data 'user=admin&amp;pass=password' \
-    --keep-session-cookies \
-    http://your-bax-router/WWW/login.htm
+<p>Example <code>wget</code> command (a backslash is used to separate the command onto 
+multiple lines):</p>
+<pre class="prettyprint well"><code>    wget --save-cookies cookies.txt \
+        --post-data 'user=admin&amp;pass=password' \
+        --keep-session-cookies \
+        http://your-bax-router/WWW/login.htm
 </code></pre>
+
+<p>Equivalent <code>curl</code> command:</p>
+<pre class="prettyprint well"><code>    curl --silent --output /dev/null \
+        -c cookies.txt \
+        --data 'user=admin&amp;pass=password' \
+        http://${ROUTER}/WWW/login.htm
+</code></pre>
+
 <h2 id="changing-settings">Changing Settings</h2>
 <p>Settings are passed to the server in the same format as the text command mode.
 Please refer to <a href="commands.html#settings">Router Commands</a> for a full description
-of the settings commands which may be sent to the router.</p>
+of the settings commands which may be sent to the router. </p>
+<p>Settings can be concatenated with an ampersand (&amp;) in the POST body to change 
+multiple settings simultaneously. </p>
 <table>
 <thead>
 <tr>
@@ -303,7 +316,7 @@ meaning dates up to 2068 can be represented internally.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="commands.html" class="btn btn-neutral" title="Router Commands"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="user-guide.html" class="btn btn-neutral" title="Web Interface User Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   

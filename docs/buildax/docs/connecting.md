@@ -19,6 +19,7 @@ platforms:
  * __Linux__ / __Mac OSX__: [GNU screen](http://www.gnu.org/software/screen/), [CoolTerm](http://freeware.the-meiers.org/)
 
 
+
 ### Microsoft Windows
 
 The device will appear as a COM port on Windows (can be found in the Device 
@@ -29,6 +30,7 @@ Windows).
 ### Linux, OSX (*nix platforms)
 
 Devices on *nix platforms are listed under the `/dev/` directory. 
+
 
 
 # Network Access

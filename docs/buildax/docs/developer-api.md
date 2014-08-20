@@ -8,9 +8,12 @@ this means that setting state on the router is performed via `POST` requests,
 and `GET` requests are used to retrieve data.
 
 The examples in this document use the `wget` command to communicate with the 
-web server on the BAX router. On unix-like OSes (i.e. Mac OSX or Linux) `wget` is 
-usually installed by default, but can be downloaded for other OSes (including 
-Windows) from the [GNU website](https://www.gnu.org/software/wget/).
+web server on the BAX router. On Linux `wget` is usually installed by default,
+but can be downloaded for other OSes (including MacOSX and Windows) from the 
+[GNU website](https://www.gnu.org/software/wget/).
+
+An equivalent software with much the same functionality as wget is `curl`, 
+which may be used in preference to `wget`.
 
 
 ## Logging In
@@ -26,19 +29,34 @@ Method | Resource       | Parameters | Response
 ------ | -------------- | ---------- | ----------
 `POST` | /WWW/login.htm | user, pass | 303 redirect with SID= session cookie.
 
-Example `wget` command (a backslash is used to separate the command onto multiple lines):
 
+Example `wget` command (a backslash is used to separate the command onto 
+multiple lines):
+
+````
 	wget --save-cookies cookies.txt \
 		--post-data 'user=admin&pass=password' \
 		--keep-session-cookies \
 		http://your-bax-router/WWW/login.htm
+````
 
+Equivalent `curl` command:
+
+````
+	curl --silent --output /dev/null \
+        -c cookies.txt \
+        --data 'user=admin&pass=password' \
+        http://${ROUTER}/WWW/login.htm
+````
 
 ## Changing Settings
 
 Settings are passed to the server in the same format as the text command mode.
 Please refer to [Router Commands](commands.md#settings) for a full description
-of the settings commands which may be sent to the router.
+of the settings commands which may be sent to the router. 
+
+Settings can be concatenated with an ampersand (&) in the POST body to change 
+multiple settings simultaneously. 
 
 
 Method | Resource           | Parameters                                      | Response 
