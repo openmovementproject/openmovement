@@ -50,6 +50,16 @@
     </li>
 
     <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
         <a class="" href="connecting.html">Connection Guide</a>
         
     </li>
@@ -156,6 +166,8 @@ cookie before further REST API requests can be made:</p>
 <p>Example <code>wget</code> command (a backslash is used to separate the command onto 
 multiple lines):</p>
 <pre class="prettyprint well"><code>    wget --save-cookies cookies.txt \
+        --delete-after \
+        --no-http-keep-alive \
         --post-data 'user=admin&amp;pass=password' \
         --keep-session-cookies \
         http://your-bax-router/WWW/login.htm
@@ -299,13 +311,23 @@ standard time representation) and subtract the Unix timestamp for the date
 the BAX router works with an epoch of the year 2000 and a 32-bit timestamp,
 meaning dates up to 2068 can be represented internally.</p>
 <h2 id="example-wget-commands">Example <code>wget</code> commands</h2>
+<p><em>Remember that you must first run the <a href="#logging-in">Login</a> command to get a
+session cookie!</em></p>
+<p>Get data file 0 from the SD card. No more than 5 files (10MB) may be requested in one download:</p>
+<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+    --no-http-keep-alive \
+    --content-disposition \
+    http://your-bax-router/fetch?type=BF\&amp;start=0\&amp;end=0
+</code></pre>
 <p>Get last 500 samples:</p>
 <pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+    --no-http-keep-alive \
     --content-disposition \
     http://your-bax-router/fetch?type=LS&amp;start=500&amp;end=
 </code></pre>
 <p>Get data within a time range:</p>
 <pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+    --no-http-keep-alive \
     --content-disposition \
     http://your-bax-router/fetch?type=BT&amp;start=449622000&amp;end=485434800
 </code></pre>

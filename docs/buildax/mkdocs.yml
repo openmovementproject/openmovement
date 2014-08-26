@@ -14,6 +14,8 @@ theme_dir: theme
 
 pages:
 - [index.md, Home]
+- [hardware.md, Hardware]
+- [deployment.md, Deployment]
 - [connecting.md, Connection Guide]
 - [commands.md, Router Commands]
 - [user-guide.md, Web Interface User Guide]

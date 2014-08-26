@@ -49,6 +49,16 @@
         
     </li>
 
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
     <li class="toctree-l1 current">
         <a class="current" href="connecting.html">Connection Guide</a>
         
@@ -148,10 +158,19 @@ will request an IP address using DHCP.</p>
 192.168.x.x. On corporate or academic networks you may need to request an
 address from your network administrator, quoting the device's MAC address. 
 They may also be able to assign a DNS address for convenient access.</p>
+<p>The IP address assigned to the router may be discovered by connecting to the 
+serial connection and typing <code>status</code>. You may also find it useful to assign
+a static IP address to the device for the purposes of port forwarding.</p>
 <h2 id="telnet">Telnet</h2>
 <p>Telnet can be used to access the router command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
 <a href="commands.html">Router Commands</a> are supported.</p>
+<p>The <code>telnet</code> command is used to connect to this console:</p>
+<pre class="prettyprint well"><code>    telnet 192.168.0.15
+</code></pre>
+
+<p>... or use PuTTy on Windows. The router's telnet service runs on the default 
+TCP port 23.</p>
 <h2 id="web-interface-http">Web Interface (HTTP)</h2>
 <p>The BuildAX Router configuration interface is accessed using a web browser, 
 providing a convenient way to change settings and view router status without
@@ -177,7 +196,7 @@ data fetch service to become unstable.</p>
         <a href="commands.html" class="btn btn-neutral float-right" title="Router Commands"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="deployment.html" class="btn btn-neutral" title="Deployment"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   

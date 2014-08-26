@@ -35,6 +35,8 @@ multiple lines):
 
 ````
 	wget --save-cookies cookies.txt \
+		--delete-after \
+		--no-http-keep-alive \
 		--post-data 'user=admin&pass=password' \
 		--keep-session-cookies \
 		http://your-bax-router/WWW/login.htm
@@ -129,15 +131,28 @@ meaning dates up to 2068 can be represented internally.
 
 ## Example `wget` commands
 
+_Remember that you must first run the [Login](#logging-in) command to get a
+session cookie!_
+
+
+Get data file 0 from the SD card. No more than 5 files (10MB) may be requested in one download:
+
+	wget --load-cookies cookies.txt \
+		--no-http-keep-alive \
+		--content-disposition \
+		http://your-bax-router/fetch?type=BF\&start=0\&end=0
+
 Get last 500 samples:
 
 	wget --load-cookies cookies.txt \
+		--no-http-keep-alive \
 		--content-disposition \
 		http://your-bax-router/fetch?type=LS&start=500&end=
 
 Get data within a time range:
 
 	wget --load-cookies cookies.txt \
+		--no-http-keep-alive \
 		--content-disposition \
 		http://your-bax-router/fetch?type=BT&start=449622000&end=485434800
 

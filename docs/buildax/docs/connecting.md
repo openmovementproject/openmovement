@@ -43,12 +43,27 @@ On home networks, the IP address assigned will normally be of the form
 address from your network administrator, quoting the device's MAC address. 
 They may also be able to assign a DNS address for convenient access.
 
+The IP address assigned to the router may be discovered by connecting to the 
+serial connection and typing `status`. You may also find it useful to assign
+a static IP address to the device for the purposes of port forwarding.
+
+
 
 ## Telnet
 
 Telnet can be used to access the router command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
 [Router Commands](commands.md) are supported.
+
+The `telnet` command is used to connect to this console:
+
+
+````
+	telnet 192.168.0.15
+````
+
+... or use PuTTy on Windows. The router's telnet service runs on the default 
+TCP port 23.
 
 
 ## Web Interface (HTTP)

@@ -37,8 +37,8 @@ device so the SD card can be accessed by a PC over the USB connection.
 ## Settings
 
 Settings are expressed in the form `setting.type.x=y` and are used by the
-router to determine where to route messages. "Messages" in this context are 
-data packets (sent by the environment sensors) received by the device, which 
+router to determine where to route messages. A 'messages' in this context is a 
+data packet (sent by the environment sensors) received by the device, which 
 must be routed to various outputs.
 
 Each `setting.type` describes a data output, or "stream":
