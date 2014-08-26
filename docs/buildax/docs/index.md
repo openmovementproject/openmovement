@@ -5,13 +5,9 @@ designed at Culture Lab, Newcastle University.
 
 ## TODO Documentation
 
- * Hardware
  * Quick Start Guide
- * Connecting to your Router
- * Serial (USB)
- * Telnet
- * Web interface 
  * FAQs
+ * Videos
 
 This documentation is currently being written and will be incrementally updated.  
 

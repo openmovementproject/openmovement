@@ -38,18 +38,29 @@ and the status of router peripherals.
 
 ## Sensors
 
-The Sensor display page shows the sensors connected to the System, along with
-their details and the last values received.
+The sensor display page shows a live data stream from the sensors. This can be
+useful while paring sensors, as they will appear immediately on the graph when
+connected to the router.
+
+ ![Live Data](img/live.png)
+
+The duration of the graph can be adjusted at the bottom of the page, showing a
+range of data up to 60 minutes. The number of sensors displayed is not limited,
+and a sensors can be excluded from the graph individually using the checkboxes.
+
+Sensor data can also be viewed as a table. The static page shows the sensors
+currently loaded into memory on the Router, along with their details and the 
+last values received. Only the last 20 sensors seen will be displayed.
 
  ![Sensor List](img/sensors.png)
 
 ### Name
 
-The name of the BAX sensor device can be set when it is programmed, and will be
-sent as part of the encryption key transmission at pairing time. This is stored
-along with the key on the root of the SD card (external storage), and as such
-can be subsequently modified. The maximum length of a sensor node name is 32
-characters.
+The name of the BAX sensor device can be set when it is programmed using an 
+FTDI cable, and will be sent as part of the encryption key transmission at 
+pairing time. This is stored along with the key on the root of the SD card 
+(external storage), and as such can be subsequently modified. The maximum 
+length of a sensor node name is 32 characters.
 
 ### Last Seen
 

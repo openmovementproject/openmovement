@@ -27,7 +27,7 @@ div[role=search] {
 	display:none;
 }
 
-/* Disabled until search works */
+/* Disabled until search works in mkdocs */
 /* 
 #rtd-search-form > input {
 	border-color: #30424A;
@@ -44,11 +44,16 @@ footer p {
 /* List types */
 
 #main > ul > li {
-	list-style: square inside;
-	margin-left: 0.2em;
+	margin-left: 20px;
+	list-style: square outside;
 }
 
-ul {
+#main > ol > li {
+	margin-left: 20px;
+	list-style: decimal outside;
+}
+
+ul, ol {
 	margin-bottom: 24px; /* match paragraphs */
 }
 

@@ -54,11 +54,16 @@
         
             <ul>
             
-                <li class="toctree-l2"><a href="#buildax-v2-hardware">BuildAX v2 Hardware</a></li>
+                <li class="toctree-l2"><a href="#router">Router</a></li>
                 
-                    <li><a class="toctree-l3" href="#router">Router</a></li>
+                    <li><a class="toctree-l3" href="#led-codes">LED codes</a></li>
                 
-                    <li><a class="toctree-l3" href="#sensors">Sensors</a></li>
+                    <li><a class="toctree-l3" href="#connections">Connections</a></li>
+                
+            
+                <li class="toctree-l2"><a href="#sensors">Sensors</a></li>
+                
+                    <li><a class="toctree-l3" href="#buildax-2-sensor-node">BuildAX 2 Sensor Node</a></li>
                 
             
             </ul>
@@ -87,6 +92,16 @@
 
     <li class="toctree-l1 ">
         <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
         
     </li>
 
@@ -123,8 +138,7 @@
   <hr/>
 </div>
           <div role="main" id="main">
-            <h1 id="buildax-v2-hardware">BuildAX v2 Hardware</h1>
-<h2 id="router">Router</h2>
+            <h1 id="router">Router</h1>
 <p>The BuildAX router is primarily a data-logger for the BAX sensors, but has 
 a lot of extra functionality which you may find useful in a wide range of
 deployment scenarios.</p>
@@ -166,7 +180,7 @@ deployment scenarios.</p>
 </tr>
 <tr>
 <td>7</td>
-<td>Remote connection</td>
+<td>Remote connection (telnet) active</td>
 </tr>
 </tbody>
 </table>
@@ -185,12 +199,17 @@ the router LEDs:</p>
 <tr>
 <td>Odd/even LEDs flash alternately</td>
 <td>Pairing Mode</td>
-<td>The router has entered <a href="#pairing-mode">pairing mode</a> (you have held the button on the rear for one second). Proceed to pair up BAX sensors.</td>
+<td>Hold the button on the rear of the router for <strong>1 second</strong>. The router will enter <a href="#pairing-mode">pairing mode</a>. Proceed to pair up BAX sensors.</td>
 </tr>
 <tr>
 <td>2 groups of 3 LEDs flash alternately</td>
-<td></td>
-<td></td>
+<td>Mount USB device</td>
+<td>Hold the button on the rear of the device for <strong>5 seconds</strong>. This will mount (or unmount) the USB disk, and re-initialise the filesystem. The Si44 Radio will also be re-initialised.</td>
+</tr>
+<tr>
+<td>All LEDs flash quickly, twice</td>
+<td>Load Factory Defaults</td>
+<td>Hold the button on the rear of the router for <strong>10 seconds</strong>. This will reset the device to factory defaults but will not wipe files from the SD card (sensors will remain paired).</td>
 </tr>
 <tr>
 <td>All LEDs flash slowly, continuously</td>
@@ -213,7 +232,7 @@ the router LEDs:</p>
 <tr>
 <td>1</td>
 <td>Pairing Button</td>
-<td>Used to make the router enter <a href="#pairing-mode">Pairing Mode</a>, in which BAX sensors may be paired to the device.</td>
+<td>Used to make the router enter <a href="deployment.html#pairing-sensors">pairing mode</a>, in which BAX sensors may be paired to the device.</td>
 </tr>
 <tr>
 <td>2</td>
@@ -242,9 +261,11 @@ the router LEDs:</p>
 </tr>
 </tbody>
 </table>
-<h2 id="sensors">Sensors</h2>
-<p>The BAX System is designed to receive data from a variety of sensor nodes. The
-only type currently available is the BAX2 Environmental Sensor Node:</p>
+<hr />
+<h1 id="sensors">Sensors</h1>
+<h2 id="buildax-2-sensor-node">BuildAX 2 Sensor Node</h2>
+<p>The BuildAX Router is designed to receive data from a variety of sensor nodes. 
+The currently available device is the BuildAX 2 Environmental Sensor Node.</p>
 <p><img alt="BAX Sensor" src="img/baxsensor2.png" /></p>
 <p>This is a small, indoor environment sensor which transmits the following 
 values:</p>
@@ -252,13 +273,19 @@ values:</p>
 <li>Temperature</li>
 <li>Humidity</li>
 <li>Light</li>
-<li>PIR</li>
+<li>PIR (Passive Infrared movement sensor)</li>
 <li>Switch</li>
 </ul>
-<p>The inclusion of a magnetic switch allows the sensor to be mounted on a door
-or window frame, and transmit data on whether the aperture is open or closed.</p>
+<h4 id="front">Front</h4>
 <p><img alt="Image with coin for scale" src="img/baxsensor.png" /></p>
-<h3 id="inside-the-bax-sensor">Inside the BAX Sensor</h3>
+<p>The PIR sensor by default shows a red LED when triggered, similar to those 
+found in security/alarm systems. This indicates that the sensor node is 
+working correctly. </p>
+<p>A green LED is displayed when the magnetic switch is triggered, or when the
+button inside the device is pressed to send and encryption packet.</p>
+<h4 id="rear">Rear</h4>
+<p>The back panel of the device is removed to reveal the battery compartment and
+other components.</p>
 <p><img alt="BAX Sensor" src="img/baxsensor_rear.png" /></p>
 <table>
 <thead>
@@ -301,6 +328,10 @@ or window frame, and transmit data on whether the aperture is open or closed.</p
 </tr>
 </tbody>
 </table>
+<p>The inclusion of a magnetic switch allows the sensor to be mounted on a door
+or window frame, and transmit data on whether the aperture is open or closed.</p>
+<p>A magnet similar to those used on cupboard doors should trigger the switch,
+and should be aligned on the opposite side of the device to the antenna.</p>
 
           </div>
           <footer>

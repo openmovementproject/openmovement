@@ -20,6 +20,8 @@ pages:
 - [commands.md, Router Commands]
 - [user-guide.md, Web Interface User Guide]
 - [developer-api.md, Developer Guide]
+- [firmware.md, Firmware]
+- [faq.md, FAQs]
 
 #use_directory_urls: False
 url_format: file

@@ -98,6 +98,16 @@
         
     </li>
 
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
 </ul>
 
 
@@ -154,15 +164,23 @@ the running state of the device, including the log file (binary or plaintext)
 and the status of router peripherals.</p>
 <p><img alt="Status" src="img/status.png" /></p>
 <h2 id="sensors">Sensors</h2>
-<p>The Sensor display page shows the sensors connected to the System, along with
-their details and the last values received.</p>
+<p>The sensor display page shows a live data stream from the sensors. This can be
+useful while paring sensors, as they will appear immediately on the graph when
+connected to the router.</p>
+<p><img alt="Live Data" src="img/live.png" /></p>
+<p>The duration of the graph can be adjusted at the bottom of the page, showing a
+range of data up to 60 minutes. The number of sensors displayed is not limited,
+and a sensors can be excluded from the graph individually using the checkboxes.</p>
+<p>Sensor data can also be viewed as a table. The static page shows the sensors
+currently loaded into memory on the Router, along with their details and the 
+last values received. Only the last 20 sensors seen will be displayed.</p>
 <p><img alt="Sensor List" src="img/sensors.png" /></p>
 <h3 id="name">Name</h3>
-<p>The name of the BAX sensor device can be set when it is programmed, and will be
-sent as part of the encryption key transmission at pairing time. This is stored
-along with the key on the root of the SD card (external storage), and as such
-can be subsequently modified. The maximum length of a sensor node name is 32
-characters.</p>
+<p>The name of the BAX sensor device can be set when it is programmed using an 
+FTDI cable, and will be sent as part of the encryption key transmission at 
+pairing time. This is stored along with the key on the root of the SD card 
+(external storage), and as such can be subsequently modified. The maximum 
+length of a sensor node name is 32 characters.</p>
 <h3 id="last-seen">Last Seen</h3>
 <p>The last time a packet was received from a sensor, as defined by the internal
 RTC on the BAX router.</p>
