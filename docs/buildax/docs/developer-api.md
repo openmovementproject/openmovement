@@ -114,7 +114,7 @@ changes based on the type of request.
 **Sample Range**   | Start and end are a range of packets numbers received from the sensors
 **Last N Samples** | Start is the number of most recent samples. Specify end as an empty string.
 
-## Time Format
+### Time Format
 
 To calculate the time range, take the Unix timestamp for the time required (a
 standard time representation) and subtract the Unix timestamp for the date
@@ -134,8 +134,7 @@ meaning dates up to 2068 can be represented internally.
 _Remember that you must first run the [Login](#logging-in) command to get a
 session cookie!_
 
-
-Get data file 0 from the SD card. No more than 5 files (10MB) may be requested in one download:
+Get data file 0 from the SD card (no more than 5 files (10MB) may be requested in one download):
 
 	wget --load-cookies cookies.txt \
 		--no-http-keep-alive \
@@ -154,5 +153,9 @@ Get data within a time range:
 	wget --load-cookies cookies.txt \
 		--no-http-keep-alive \
 		--content-disposition \
-		http://your-bax-router/fetch?type=BT&start=449622000&end=485434800
+		http://your-bax-router/fetch?type=BT\&start=449622000\&end=485434800
 
+
+One possible 'gotcha' is that the ampersand (&) symbol has a special meaning
+in most command terminals, and must be escaped with a backslash (as in the 
+above examples) so that the command is not forked.

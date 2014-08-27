@@ -43,9 +43,9 @@ On home networks, the IP address assigned will normally be of the form
 address from your network administrator, quoting the device's MAC address. 
 They may also be able to assign a DNS address for convenient access.
 
-The IP address assigned to the router may be discovered by connecting to the 
-serial connection and typing `status`. You may also find it useful to assign
-a static IP address to the device for the purposes of port forwarding.
+The MAC and IP address assigned to the router may be discovered by connecting 
+via serial and typing `status`. You may also find it useful to assign a static 
+IP address to the device for the purposes of port forwarding.
 
 
 

@@ -35,6 +35,7 @@ the router LEDs:
  Odd/even LEDs flash alternately      | Pairing Mode          | Hold the button on the rear of the router for __1 second__. The router will enter [pairing mode](#pairing-mode). Proceed to pair up BAX sensors.
  2 groups of 3 LEDs flash alternately | Mount USB device      | Hold the button on the rear of the device for __5 seconds__. This will mount (or unmount) the USB disk, and re-initialise the filesystem. The Si44 Radio will also be re-initialised.
  All LEDs flash quickly, twice        | Load Factory Defaults | Hold the button on the rear of the router for __10 seconds__. This will reset the device to factory defaults but will not wipe files from the SD card (sensors will remain paired).
+ LEDs flash counting up from 1-7 continually |  Bootloader Mode | The device is in bootloader mode. This is triggered by holding the button on the rear of the device while the power is being connected. See the [Firmware](firmware.md) page for more info.
  All LEDs flash slowly, continuously  | General Exception     | A fatal router firmware error occurred. This usually signifies that there is a bug which will need to be fixed. Please send us your `ERRORS.TXT` from the SD card to help diagnose the problem.
 
 
