@@ -87,8 +87,6 @@
                 
                     <li><a class="toctree-l3" href="#fetching-data">Fetching Data</a></li>
                 
-                    <li><a class="toctree-l3" href="#time-format">Time Format</a></li>
-                
                     <li><a class="toctree-l3" href="#example-wget-commands">Example wget commands</a></li>
                 
             
@@ -309,7 +307,7 @@ changes based on the type of request.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="time-format">Time Format</h2>
+<h3 id="time-format">Time Format</h3>
 <p>To calculate the time range, take the Unix timestamp for the time required (a
 standard time representation) and subtract the Unix timestamp for the date
 <code>2000-01-01</code>. Eg:</p>
@@ -323,7 +321,7 @@ meaning dates up to 2068 can be represented internally.</p>
 <h2 id="example-wget-commands">Example <code>wget</code> commands</h2>
 <p><em>Remember that you must first run the <a href="#logging-in">Login</a> command to get a
 session cookie!</em></p>
-<p>Get data file 0 from the SD card. No more than 5 files (10MB) may be requested in one download:</p>
+<p>Get data file 0 from the SD card (no more than 5 files (10MB) may be requested in one download):</p>
 <pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
     --no-http-keep-alive \
     --content-disposition \
@@ -339,8 +337,11 @@ session cookie!</em></p>
 <pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
     --no-http-keep-alive \
     --content-disposition \
-    http://your-bax-router/fetch?type=BT&amp;start=449622000&amp;end=485434800
+    http://your-bax-router/fetch?type=BT\&amp;start=449622000\&amp;end=485434800
 </code></pre>
+<p>One possible 'gotcha' is that the ampersand (&amp;) symbol has a special meaning
+in most command terminals, and must be escaped with a backslash (as in the 
+above examples) so that the command is not forked.</p>
 
           </div>
           <footer>

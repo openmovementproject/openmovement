@@ -93,7 +93,7 @@
                 
                     <li><a class="toctree-l3" href="#my-sensor-wont-pair-up">My sensor won't pair up!</a></li>
                 
-                    <li><a class="toctree-l3" href="#network-connection-issues">Network connection issues</a></li>
+                    <li><a class="toctree-l3" href="#networking-issues">Networking issues</a></li>
                 
                     <li><a class="toctree-l3" href="#how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</a></li>
                 
@@ -142,13 +142,38 @@
             <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
 <h3 id="my-sensor-wont-pair-up">My sensor won't pair up!</h3>
 <ol>
-<li>Ensure the batteries are inserted correctly.</li>
 <li>Is the router in <a href="deployment.html#pairing-sensors">Pairing Mode</a>?</li>
+<li>Ensure the batteries are inserted correctly.</li>
+<li>Press the button next to the battery compartment. The green LED should light on the front to indicate a pairing packet has been sent.</li>
+<li>Do other sensors pair correctly? Use the live data web interface to check.</li>
 </ol>
-<h3 id="network-connection-issues">Network connection issues</h3>
+<h3 id="networking-issues">Networking issues</h3>
+<p>Please read the <a href="connecting.html#network-access">Network Access</a> section. Still
+can't connect to the router over your network? Try these troubleshooting steps:</p>
+<ol>
+<li>Is the networking LED (LED 3) on the router lit? If it is not, the device has not been assigned an address by the network and is not connectable.</li>
+<li>Try re-inserting/re-seating the ethernet connector.</li>
+<li>Are you on a corporate/academic network? Your network administrator may require that the device MAC address is registered before it can be assigned an address. </li>
+</ol>
+<p>It is possible that your network configuration does not support loading MS 
+NETBIOS addresses (you are connecting to the device from Mac OSX, for instance). 
+The IP address of the device can be used as a fallback in this case, and can
+always be obtained using the serial <code>status</code> command. </p>
 <h3 id="how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</h3>
+<p>Please see <a href="developer-api.html#fetching-data">Fetching Data</a> in the developer
+guide for more information on how to fetch data over the network.</p>
 <h3 id="how-do-i-read-the-binary-data-format">How do I read the binary data format?</h3>
+<p>The <code>bax2csv</code> utility can be used to convert the binary data format into a
+usable plaintext csv format. </p>
 <h3 id="400-bad-request">400 Bad Request?</h3>
+<p>This is an error code indicating that the router was unable to process a data
+fetch request. Possible reasons for this include:</p>
+<ol>
+<li>The parameters provided in the URL were not correctly formatted and cannot be recognised</li>
+<li>Have you escaped the ampersands (&amp;) in the URL?</li>
+<li>A request has been made which is impossible for the router to fulfill (missing data file?)</li>
+<li>Is the SD card properly inserted?</li>
+</ol>
 
           </div>
           <footer>
