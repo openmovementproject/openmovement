@@ -1,30 +1,5 @@
 # Deployment
 
-Depending on the number of sensors needing to be paired, and the size of the
-building a full BuildAX deployment may be done from scratch in as little as 
-20 minutes. There are three main parts in this guide:
-
- 1. Set up the BuildAX Router
- 2. Pair sensors to Router
- 3. Deploy sensors in building 
-
-## Set up Router
-
-For first-time setup, you may prefer to connect the router to a laptop (rather
-than the USB mains power adapter) in order to troubleshoot network connectivity
-using the serial interface.
-
- 1. Connect router to power
- 2. Copy WWW files onto SD card (to use the web interface)
- 3. Change default credentials
- 4. Set logging options
-
-### Video
-
-**TODO**
-[//]: # (E.G. YouTube embed- uncomment this: <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc?list=PLC1bL6IftT9kwxpbkzuopRKJINkxbGQ46" frameborder="0" allowfullscreen></iframe>)
-
-
 ## Pairing Sensors
 
 To pair sensors to the BuildAX Router, the router must first be put into 
@@ -55,9 +30,6 @@ __Note__: The router will log packets from BuildAX v2 sensors regardless of
 whether it has received an encryption packet, as these may be decrypted at a 
 later date and would otherwise be lost. 
 
-### Video
-
-**TODO**
 
 ## Sensor Deployment
 
@@ -78,4 +50,28 @@ Tips on deploying sensors in a building:
  * The PIR lens is directional. Mount sensors on the wall **vertically** if this is important.
  * If a sensor at the limit of its range, try upping the transmission interval.
  * Walls appear "thicker" when the radio signal has to travel through them diagonally.
+ * Try to avoid direct sunlight when attaching sensors to surfaces. This will skew the data they generate.
+ * Also remember the position of the Sun will change throughout the day!
+
+#### RSSI
+
+A sensor's signal strength is indicated by its RSSI value (Received Signal
+Strength Indication). This can be thought of as the "quietness" of the radio
+signal. In BuildAX 2, the RSSI value is in dBm.
+
+RSSI values can be found in the web interface (see the [Live Data](user-guide.md#sensors)
+page), or in the 4th column of the CSV-format data available as a file, or
+over the various streaming interfaces (telnet, serial, websocket).
+
+Signal strength will be affected by the battery level of the sensor, the 
+distance from the router, and any obstacles which the signal has to travel
+through in-between.
+
+#### Noise floor
+
+All deployment locations have a certain amount of radio noise present in the
+spectrum used by the BAX sensors. This level of noise is referred to as the
+noise "floor", and sensors transmitting must be "louder" than this background
+noise level in order to be heard.
+
 

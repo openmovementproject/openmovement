@@ -7,7 +7,11 @@ All of the configuration actions which are available through the web interface
 may also be used as text-interface commands. For information on how to access 
 the text-mode command terminal, please see [Connecting to the Router](connecting.md).
 
-Command summary for the router:
+## Command Summary
+
+Commands can be provided as a single word (e.g. `status`) or with a key/value
+assignment (e.g. `time=2014-01-01,16:46`). Valid console commands for the 
+router are as follows:
 
  Command | Action
  ------- | --------

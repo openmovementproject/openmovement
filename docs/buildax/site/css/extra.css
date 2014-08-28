@@ -43,14 +43,12 @@ footer p {
 
 /* List types */
 
-#main > ul > li {
-	margin-left: 20px;
-	list-style: square outside;
-}
+#main > ul > li { list-style: square outside }
+#main > ol > li { list-style: decimal outside}
 
-#main > ol > li {
+#main > ol > li, #main > ul > li {
 	margin-left: 20px;
-	list-style: decimal outside;
+	font-size: 16px;
 }
 
 ul, ol {

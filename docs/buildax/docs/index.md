@@ -1,3 +1,4 @@
+
 # BuildAX v2 Documentation
 
 BuildAX (or BAX for short) is a second-generation, open source environmental monitoring system
@@ -5,9 +6,12 @@ designed at Culture Lab, Newcastle University.
 
 ## TODO Documentation
 
- * Quick Start Guide
- * FAQs
+ * Data file format documentation
  * Videos
+
+For the BAX2 Sensor Node:
+ * Firmware programming
+ * Console commands & configuration
 
 This documentation is currently being written and will be incrementally updated.  
 

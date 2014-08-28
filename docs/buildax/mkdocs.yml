@@ -15,9 +15,11 @@ theme_dir: theme
 pages:
 - [index.md, Home]
 - [hardware.md, Hardware]
+- [quickstart.md, Quick Start]
 - [deployment.md, Deployment]
 - [connecting.md, Connection Guide]
 - [commands.md, Router Commands]
+- [datafiles.md, BAX Data Files]
 - [user-guide.md, Web Interface User Guide]
 - [developer-api.md, Developer Guide]
 - [firmware.md, Firmware]

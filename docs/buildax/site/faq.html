@@ -55,6 +55,11 @@
     </li>
 
     <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
         <a class="" href="deployment.html">Deployment</a>
         
     </li>
@@ -66,6 +71,11 @@
 
     <li class="toctree-l1 ">
         <a class="" href="commands.html">Router Commands</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">BAX Data Files</a>
         
     </li>
 
@@ -100,6 +110,8 @@
                     <li><a class="toctree-l3" href="#how-do-i-read-the-binary-data-format">How do I read the binary data format?</a></li>
                 
                     <li><a class="toctree-l3" href="#400-bad-request">400 Bad Request?</a></li>
+                
+                    <li><a class="toctree-l3" href="#i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</a></li>
                 
             
             </ul>
@@ -140,32 +152,48 @@
 </div>
           <div role="main" id="main">
             <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
-<h3 id="my-sensor-wont-pair-up">My sensor won't pair up!</h3>
+<h2 id="my-sensor-wont-pair-up">My sensor won't pair up!</h2>
+<p>On the sensor, press the button next to the battery compartment. The green LED
+should light on the front to indicate a pairing packet has been sent. Things 
+to check:</p>
 <ol>
 <li>Is the router in <a href="deployment.html#pairing-sensors">Pairing Mode</a>?</li>
 <li>Ensure the batteries are inserted correctly.</li>
-<li>Press the button next to the battery compartment. The green LED should light on the front to indicate a pairing packet has been sent.</li>
-<li>Do other sensors pair correctly? Use the live data web interface to check.</li>
+<li>Do other sensors pair correctly? Use the <a href="user-guide.html#sensors">live data web interface</a> to check.</li>
 </ol>
-<h3 id="networking-issues">Networking issues</h3>
+<h2 id="networking-issues">Networking issues</h2>
 <p>Please read the <a href="connecting.html#network-access">Network Access</a> section. Still
 can't connect to the router over your network? Try these troubleshooting steps:</p>
-<ol>
-<li>Is the networking LED (LED 3) on the router lit? If it is not, the device has not been assigned an address by the network and is not connectable.</li>
-<li>Try re-inserting/re-seating the ethernet connector.</li>
-<li>Are you on a corporate/academic network? Your network administrator may require that the device MAC address is registered before it can be assigned an address. </li>
-</ol>
+<h4 id="using-the-netbios-address">Using the NETBIOS Address?</h4>
 <p>It is possible that your network configuration does not support loading MS 
 NETBIOS addresses (you are connecting to the device from Mac OSX, for instance). 
 The IP address of the device can be used as a fallback in this case, and can
 always be obtained using the serial <code>status</code> command. </p>
-<h3 id="how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</h3>
+<h4 id="networking-led">Networking LED</h4>
+<p>Is the networking LED (LED 3) on the router lit? If it is not, this indicates 
+that the networking stack is initialised. Try re-inserting/re-seating the
+ethernet connector to see if the router connects. Possible reasons for this 
+LED not being lit:</p>
+<ul>
+<li>Network not assigning IP address</li>
+<li>Bad Ethernet cable</li>
+</ul>
+<h4 id="corporateacademic-networks">Corporate/Academic Networks</h4>
+<p>Are you on a corporate/academic network? Your network administrator may 
+require that the device MAC address is registered before it can be assigned an 
+address. When programming firmware it is possible to reset the MAC address by
+holding down the button and clicking "Run Program" in the bootloader tool. If
+this is the case you will have to obtain the new MAC via the serial connection
+and re-register the device.</p>
+<h2 id="how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</h2>
 <p>Please see <a href="developer-api.html#fetching-data">Fetching Data</a> in the developer
-guide for more information on how to fetch data over the network.</p>
-<h3 id="how-do-i-read-the-binary-data-format">How do I read the binary data format?</h3>
+guide for more information on how to fetch data over the network. To directly
+connect to the router as a Mass Storage device, see <a href="connecting.html#usb-mass-storage">USB Mass Storage</a>.</p>
+<h2 id="how-do-i-read-the-binary-data-format">How do I read the binary data format?</h2>
 <p>The <code>bax2csv</code> utility can be used to convert the binary data format into a
-usable plaintext csv format. </p>
-<h3 id="400-bad-request">400 Bad Request?</h3>
+usable plaintext csv format. Please read the <a href="datafiles.html">Data Files</a>
+documentation for more info.</p>
+<h2 id="400-bad-request">400 Bad Request?</h2>
 <p>This is an error code indicating that the router was unable to process a data
 fetch request. Possible reasons for this include:</p>
 <ol>
@@ -174,6 +202,14 @@ fetch request. Possible reasons for this include:</p>
 <li>A request has been made which is impossible for the router to fulfill (missing data file?)</li>
 <li>Is the SD card properly inserted?</li>
 </ol>
+<h2 id="i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</h2>
+<p>Another thing to check is if there are any assertions in the ERRORS.txt
+file on the SD card with timestamps around the time you saw this problem.
+"Reset"s in this file (with 0040 or 0083) are usually fine (they are added
+when the router starts up to indicate the reset type).</p>
+<p>If you see a line reading "ASSERT" and a file/line number, this might 
+indicate a firmware issue. Please send us this file and a description of what 
+you were trying to do, and steps to reproduce your problem (if possible).</p>
 
           </div>
           <footer>

@@ -55,6 +55,11 @@
     </li>
 
     <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
         <a class="" href="deployment.html">Deployment</a>
         
     </li>
@@ -66,6 +71,11 @@
 
     <li class="toctree-l1 ">
         <a class="" href="commands.html">Router Commands</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">BAX Data Files</a>
         
     </li>
 
@@ -145,13 +155,11 @@ from 1-7 continuously. </p>
 <h3 id="connecting-to-the-pc">Connecting to the PC</h3>
 <p>Open the firmware flashing tool provided in the OpenMovement repository. 
 (This is unfortunately currently Windows-only).</p>
-<p>Enable the USB checkbox. Ensure that the Vendor and product IDs are:</p>
-<p><code>VID:   0x4D8</code>
-<code>PID:   0x03C</code></p>
-<p>... and hit the "Connect" button. The tool should show that it has connected 
-to the device.</p>
-<p>Next, click "Load Hex File" and select the new firmware. Then,
-"Erase-Program-Verify" should write the new firmware to the device. </p>
+<p>Enable the USB checkbox. The Vendor ID should be <code>0x4D8</code>, and the Product ID<br />
+<code>0x03C</code>. Now hit the "Connect" button. The tool should show that it has 
+connected to the device.</p>
+<p>Next, click "Load Hex File" and select the new firmware. Then, click
+"Erase-Program-Verify", and the new firmware will be written to the device. </p>
 <p>When this is completed, "Run Application" will cause the router to exit
 bootloader mode. If using a USB wall power adaptor, it is now safe to remove 
 the device from the PC and re-connect it to its own adapter.</p>

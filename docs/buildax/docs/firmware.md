@@ -18,16 +18,12 @@ from 1-7 continuously.
 Open the firmware flashing tool provided in the OpenMovement repository. 
 (This is unfortunately currently Windows-only).
 
-Enable the USB checkbox. Ensure that the Vendor and product IDs are:
+Enable the USB checkbox. The Vendor ID should be `0x4D8`, and the Product ID  
+`0x03C`. Now hit the "Connect" button. The tool should show that it has 
+connected to the device.
 
-`VID:   0x4D8`
-`PID:   0x03C`
-
-... and hit the "Connect" button. The tool should show that it has connected 
-to the device.
-
-Next, click "Load Hex File" and select the new firmware. Then,
-"Erase-Program-Verify" should write the new firmware to the device. 
+Next, click "Load Hex File" and select the new firmware. Then, click
+"Erase-Program-Verify", and the new firmware will be written to the device. 
 
 When this is completed, "Run Application" will cause the router to exit
 bootloader mode. If using a USB wall power adaptor, it is now safe to remove 

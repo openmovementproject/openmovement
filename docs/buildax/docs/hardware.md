@@ -18,7 +18,7 @@ The BAX Router includes 7 LEDs which indicate the status of the device:
  --- | ----------
   1  | Power
   2  | USB CDC (Serial connection available)
-  3  | Network Connected
+  3  | Network Connectivity
   4  | SD Card Mounted
   5  | Log File Activity
   6  | 434MHz Radio Activity

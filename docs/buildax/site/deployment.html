@@ -54,14 +54,17 @@
         
     </li>
 
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
     <li class="toctree-l1 current">
         <a class="current" href="deployment.html">Deployment</a>
         
             <ul>
             
                 <li class="toctree-l2"><a href="#deployment">Deployment</a></li>
-                
-                    <li><a class="toctree-l3" href="#set-up-router">Set up Router</a></li>
                 
                     <li><a class="toctree-l3" href="#pairing-sensors">Pairing Sensors</a></li>
                 
@@ -79,6 +82,11 @@
 
     <li class="toctree-l1 ">
         <a class="" href="commands.html">Router Commands</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">BAX Data Files</a>
         
     </li>
 
@@ -136,26 +144,6 @@
 </div>
           <div role="main" id="main">
             <h1 id="deployment">Deployment</h1>
-<p>Depending on the number of sensors needing to be paired, and the size of the
-building a full BuildAX deployment may be done from scratch in as little as 
-20 minutes. There are three main parts in this guide:</p>
-<ol>
-<li>Set up the BuildAX Router</li>
-<li>Pair sensors to Router</li>
-<li>Deploy sensors in building </li>
-</ol>
-<h2 id="set-up-router">Set up Router</h2>
-<p>For first-time setup, you may prefer to connect the router to a laptop (rather
-than the USB mains power adapter) in order to troubleshoot network connectivity
-using the serial interface.</p>
-<ol>
-<li>Connect router to power</li>
-<li>Copy WWW files onto SD card (to use the web interface)</li>
-<li>Change default credentials</li>
-<li>Set logging options</li>
-</ol>
-<h3 id="video">Video</h3>
-<p><strong>TODO</strong></p>
 <h2 id="pairing-sensors">Pairing Sensors</h2>
 <p>To pair sensors to the BuildAX Router, the router must first be put into 
 Pairing Mode. To do this, hold the button on the rear of the device until the 
@@ -179,8 +167,6 @@ into "Pairing Mode", by pressing the button on the rear of the device.</p>
 <p><strong>Note</strong>: The router will log packets from BuildAX v2 sensors regardless of 
 whether it has received an encryption packet, as these may be decrypted at a 
 later date and would otherwise be lost. </p>
-<h3 id="video_1">Video</h3>
-<p><strong>TODO</strong></p>
 <h2 id="sensor-deployment">Sensor Deployment</h2>
 <h3 id="sensor-range">Sensor Range</h3>
 <p>The achievable range of the sensors will depend on a number of factors,
@@ -196,7 +182,24 @@ noisier and the sensors will not be "heard" by the router at further distances.<
 <li>The PIR lens is directional. Mount sensors on the wall <strong>vertically</strong> if this is important.</li>
 <li>If a sensor at the limit of its range, try upping the transmission interval.</li>
 <li>Walls appear "thicker" when the radio signal has to travel through them diagonally.</li>
+<li>Try to avoid direct sunlight when attaching sensors to surfaces. This will skew the data they generate.</li>
+<li>Also remember the position of the Sun will change throughout the day!</li>
 </ul>
+<h4 id="rssi">RSSI</h4>
+<p>A sensor's signal strength is indicated by its RSSI value (Received Signal
+Strength Indication). This can be thought of as the "quietness" of the radio
+signal. In BuildAX 2, the RSSI value is in dBm.</p>
+<p>RSSI values can be found in the web interface (see the <a href="user-guide.html#sensors">Live Data</a>
+page), or in the 4th column of the CSV-format data available as a file, or
+over the various streaming interfaces (telnet, serial, websocket).</p>
+<p>Signal strength will be affected by the battery level of the sensor, the 
+distance from the router, and any obstacles which the signal has to travel
+through in-between.</p>
+<h4 id="noise-floor">Noise floor</h4>
+<p>All deployment locations have a certain amount of radio noise present in the
+spectrum used by the BAX sensors. This level of noise is referred to as the
+noise "floor", and sensors transmitting must be "louder" than this background
+noise level in order to be heard.</p>
 
           </div>
           <footer>
@@ -206,7 +209,7 @@ noisier and the sensors will not be "heard" by the router at further distances.<
         <a href="connecting.html" class="btn btn-neutral float-right" title="Connection Guide"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="hardware.html" class="btn btn-neutral" title="Hardware"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="quickstart.html" class="btn btn-neutral" title="Quick Start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
