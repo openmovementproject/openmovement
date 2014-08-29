@@ -33,7 +33,21 @@ Devices on *nix platforms are listed under the `/dev/` directory.
 
 
 
-# Network Access
+## USB Mass Storage
+
+Finally, data files logged by the router can be retrieved directly by using 
+the router as a USB Mass Storage device. For this option to be available, data 
+logging on the router must be disabled. This is because it would be 
+unsafe to continue writing data to files which could be read at any time.
+
+To override this, use the `mount` command.
+
+**Warning**: removing data files from the mass storage device may cause the 
+data fetch service to become unstable.
+
+
+
+## Network Access
 
 When the BAX Router is connected to your network using an Ethernet cable, it 
 will request an IP address using DHCP.
@@ -50,7 +64,7 @@ IP address to the device for the purposes of port forwarding.
 
 
 
-## Telnet
+### Telnet
 
 Telnet can be used to access the router command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
@@ -67,7 +81,7 @@ The `telnet` command is used to connect to this console:
 TCP port 23.
 
 
-## Web Interface (HTTP)
+### Web Interface (HTTP)
 
 The BuildAX Router configuration interface is accessed using a web browser, 
 providing a convenient way to change settings and view router status without
@@ -81,14 +95,10 @@ For information on using the web interface, please see the [Web Interface User G
 
 
 
-# USB Mass Storage
 
-Finally, data files logged by the router can be retrieved directly by using 
-the router as a USB Mass Storage device. For this option to be available, data 
-logging on the router must be disabled. This is because it would be 
-unsafe to continue writing data to files which could be read at any time.
+# Connecting to the a BAX Environment Sensor
 
-To override this, use the `mount` command.
+**TODO**
 
-**Warning**: removing data files from the mass storage device may cause the 
-data fetch service to become unstable.
+Connecting to a BAX Sensor requires an FTDI cable.
+

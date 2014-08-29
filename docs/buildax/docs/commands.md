@@ -10,7 +10,7 @@ the text-mode command terminal, please see [Connecting to the Router](connecting
 ## Command Summary
 
 Commands can be provided as a single word (e.g. `status`) or with a key/value
-assignment (e.g. `time=2014-01-01,16:46`). Valid console commands for the 
+assignment (e.g. `time=2014/08/01,16:46`). Valid console commands for the 
 router are as follows:
 
  Command | Action
@@ -87,3 +87,6 @@ It is possible to configure the router with options which are
 potentially useless- streaming data over Telnet in binary, for instance, 
 would be undesirable in most situations. 
 
+
+# Sensor commands
+**TODO**

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Interface User Guide - BuildAX v2</title>
+  <title>Web Interface - BuildAX v2</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -70,17 +70,17 @@
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="commands.html">Router Commands</a>
+        <a class="" href="commands.html">Commands</a>
         
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="datafiles.html">BAX Data Files</a>
+        <a class="" href="datafiles.html">Data Files</a>
         
     </li>
 
     <li class="toctree-l1 current">
-        <a class="current" href="user-guide.html">Web Interface User Guide</a>
+        <a class="current" href="user-guide.html">Web Interface</a>
         
             <ul>
             
@@ -141,7 +141,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Web Interface User Guide</li>
+    <li>Web Interface</li>
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -200,49 +200,8 @@ by the sensor, but the pool of values (48-bit) is large enough to make
 collisions very unlikely.</p>
 <h3 id="last-packet">Last Packet</h3>
 <p>The last packet field is broken down into the individual values broadcast by 
-the sensor:</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ID</td>
-<td>Packet identifier (sensors send packets incrementally).</td>
-</tr>
-<tr>
-<td>RSSI</td>
-<td>Received Signal Strength Indication. Can be used when troubleshooting sensor drop-outs.</td>
-</tr>
-<tr>
-<td>Battery mV</td>
-<td>Battery level, in millivolts, of the BAX sensor. Also useful for troubleshooting connection issues.</td>
-</tr>
-<tr>
-<td>Humidity %</td>
-<td>Relative Humidity (a percentage of the saturation vapor pressure)</td>
-</tr>
-<tr>
-<td>Temp °C</td>
-<td>Temperature in degrees Celsius</td>
-</tr>
-<tr>
-<td>Light Lux</td>
-<td>Luminous flux measurement</td>
-</tr>
-<tr>
-<td>PIR/Switch</td>
-<td>Activation counts of the Passive Infrared sensor and magnetic switch on the device.</td>
-</tr>
-</tbody>
-</table>
-<p>Different versions of BAX nodes may be produced without certain sensors—for
-example, without the light or PIR sensors—to function as lightweight
-environmental monitoring nodes. In this instance, a value of zero will be
-displayed where data is missing.</p>
+the sensor. For a breakdown of the sensor values, see the <a href="datafiles.html#field-list">Field List</a>
+section.</p>
 <h3 id="limitations">Limitations</h3>
 <p>Sensors appear in this table while their encryption keys are loaded into RAM on
 the Router. As the amount of RAM on the device is limited, only the most recent
@@ -295,7 +254,7 @@ seconds.</p>
         <a href="developer-api.html" class="btn btn-neutral float-right" title="Developer Guide"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="datafiles.html" class="btn btn-neutral" title="BAX Data Files"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="datafiles.html" class="btn btn-neutral" title="Data Files"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   

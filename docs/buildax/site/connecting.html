@@ -73,17 +73,14 @@
                 
                     <li><a class="toctree-l3" href="#serial-usb">Serial (USB)</a></li>
                 
-            
-                <li class="toctree-l2"><a href="#network-access">Network Access</a></li>
+                    <li><a class="toctree-l3" href="#usb-mass-storage">USB Mass Storage</a></li>
+                
+                    <li><a class="toctree-l3" href="#network-access">Network Access</a></li>
                 
                     <li><a class="toctree-l3" href="#finding-the-ip-address">Finding the IP address</a></li>
                 
-                    <li><a class="toctree-l3" href="#telnet">Telnet</a></li>
-                
-                    <li><a class="toctree-l3" href="#web-interface-http">Web Interface (HTTP)</a></li>
-                
             
-                <li class="toctree-l2"><a href="#usb-mass-storage">USB Mass Storage</a></li>
+                <li class="toctree-l2"><a href="#connecting-to-the-a-bax-environment-sensor">Connecting to the a BAX Environment Sensor</a></li>
                 
             
             </ul>
@@ -91,17 +88,17 @@
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="commands.html">Router Commands</a>
+        <a class="" href="commands.html">Commands</a>
         
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="datafiles.html">BAX Data Files</a>
+        <a class="" href="datafiles.html">Data Files</a>
         
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="user-guide.html">Web Interface User Guide</a>
+        <a class="" href="user-guide.html">Web Interface</a>
         
     </li>
 
@@ -173,7 +170,15 @@ will usually be COM2 or above (COM1 is now a virtual interface on modern
 Windows).</p>
 <h3 id="linux-osx-nix-platforms">Linux, OSX (*nix platforms)</h3>
 <p>Devices on *nix platforms are listed under the <code>/dev/</code> directory. </p>
-<h1 id="network-access">Network Access</h1>
+<h2 id="usb-mass-storage">USB Mass Storage</h2>
+<p>Finally, data files logged by the router can be retrieved directly by using 
+the router as a USB Mass Storage device. For this option to be available, data 
+logging on the router must be disabled. This is because it would be 
+unsafe to continue writing data to files which could be read at any time.</p>
+<p>To override this, use the <code>mount</code> command.</p>
+<p><strong>Warning</strong>: removing data files from the mass storage device may cause the 
+data fetch service to become unstable.</p>
+<h2 id="network-access">Network Access</h2>
 <p>When the BAX Router is connected to your network using an Ethernet cable, it 
 will request an IP address using DHCP.</p>
 <p>On home networks, the IP address assigned will normally be of the form
@@ -184,7 +189,7 @@ They may also be able to assign a DNS address for convenient access.</p>
 <p>The MAC and IP address assigned to the router may be discovered by connecting 
 via serial and typing <code>status</code>. You may also find it useful to assign a static 
 IP address to the device for the purposes of port forwarding.</p>
-<h2 id="telnet">Telnet</h2>
+<h3 id="telnet">Telnet</h3>
 <p>Telnet can be used to access the router command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
 <a href="commands.html">Router Commands</a> are supported.</p>
@@ -194,7 +199,7 @@ without needing to plug the USB cable into a PC. All of the commands listed in
 
 <p>... or use PuTTy on Windows. The router's telnet service runs on the default 
 TCP port 23.</p>
-<h2 id="web-interface-http">Web Interface (HTTP)</h2>
+<h3 id="web-interface-http">Web Interface (HTTP)</h3>
 <p>The BuildAX Router configuration interface is accessed using a web browser, 
 providing a convenient way to change settings and view router status without
 needing to use the text-mode terminal. </p>
@@ -202,21 +207,16 @@ needing to use the text-mode terminal. </p>
 address bar. This will be in the form BAX-xxxxxx (e.g. <code>bax-434c32</code>), and can 
 be found on the sticker on the rear of the device.</p>
 <p>For information on using the web interface, please see the <a href="user-guide.html">Web Interface User Guide</a>.</p>
-<h1 id="usb-mass-storage">USB Mass Storage</h1>
-<p>Finally, data files logged by the router can be retrieved directly by using 
-the router as a USB Mass Storage device. For this option to be available, data 
-logging on the router must be disabled. This is because it would be 
-unsafe to continue writing data to files which could be read at any time.</p>
-<p>To override this, use the <code>mount</code> command.</p>
-<p><strong>Warning</strong>: removing data files from the mass storage device may cause the 
-data fetch service to become unstable.</p>
+<h1 id="connecting-to-the-a-bax-environment-sensor">Connecting to the a BAX Environment Sensor</h1>
+<p><strong>TODO</strong></p>
+<p>Connecting to a BAX Sensor requires an FTDI cable.</p>
 
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="commands.html" class="btn btn-neutral float-right" title="Router Commands"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="commands.html" class="btn btn-neutral float-right" title="Commands"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
         <a href="deployment.html" class="btn btn-neutral" title="Deployment"><span class="icon icon-circle-arrow-left"></span> Previous</a>

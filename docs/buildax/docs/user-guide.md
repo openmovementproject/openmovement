@@ -76,22 +76,8 @@ collisions very unlikely.
 ### Last Packet
 
 The last packet field is broken down into the individual values broadcast by 
-the sensor:
-
-Field      | Description 
----------- | --------------------
-ID         | Packet identifier (sensors send packets incrementally).
-RSSI       | Received Signal Strength Indication. Can be used when troubleshooting sensor drop-outs.
-Battery mV | Battery level, in millivolts, of the BAX sensor. Also useful for troubleshooting connection issues.
-Humidity % | Relative Humidity (a percentage of the saturation vapor pressure)
-Temp °C    | Temperature in degrees Celsius
-Light Lux  | Luminous flux measurement
-PIR/Switch | Activation counts of the Passive Infrared sensor and magnetic switch on the device.
-
-Different versions of BAX nodes may be produced without certain sensors—for
-example, without the light or PIR sensors—to function as lightweight
-environmental monitoring nodes. In this instance, a value of zero will be
-displayed where data is missing.
+the sensor. For a breakdown of the sensor values, see the [Field List](datafiles.md#field-list)
+section.
 
 ### Limitations
 
