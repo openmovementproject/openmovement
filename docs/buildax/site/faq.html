@@ -109,7 +109,7 @@
                 
                     <li><a class="toctree-l3" href="#how-do-i-read-the-binary-data-format">How do I read the binary data format?</a></li>
                 
-                    <li><a class="toctree-l3" href="#400-bad-request">400 Bad Request?</a></li>
+                    <li><a class="toctree-l3" href="#web-interface-issues">Web interface issues</a></li>
                 
                     <li><a class="toctree-l3" href="#i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</a></li>
                 
@@ -193,21 +193,36 @@ connect to the router as a Mass Storage device, see <a href="connecting.html#usb
 <p>The <code>bax2csv</code> utility can be used to convert the binary data format into a
 usable plaintext csv format. Please read the <a href="datafiles.html">Data Files</a>
 documentation for more info.</p>
-<h2 id="400-bad-request">400 Bad Request?</h2>
+<h2 id="web-interface-issues">Web interface issues</h2>
+<p>A number of HTTP error codes may be encountered with the web interface. The 
+following is not an exhaustive list, but these errors are the most common.</p>
+<h3 id="404-file-not-found">404 File Not Found</h3>
+<p><img alt="404" src="img/bax404.png" /></p>
+<p>This error indicates that the files for the web interface on the SD card are 
+missing or in the wrong place. These should be copied to the SD card manually 
+before running, and should be under the directory "WWW". </p>
+<h3 id="400-bad-request">400 Bad Request</h3>
 <p>This is an error code indicating that the router was unable to process a data
-fetch request. Possible reasons for this include:</p>
+fetch request. This will occur when a request is made for data which does not 
+exist on the router, for example:</p>
+<ul>
+<li>Data files are missing due to manual deletion</li>
+<li>Data has been requested from a time range when no data was logged</li>
+<li>The fetch has been specified for the wrong logging mode (e.g. requesting text when the router is logging in binary mode) </li>
+</ul>
+<p>This error may also be seen when automating fetch requests with <code>wget</code> or 
+<code>curl</code>, possible reasons include:</p>
 <ol>
 <li>The parameters provided in the URL were not correctly formatted and cannot be recognised</li>
-<li>Have you escaped the ampersands (&amp;) in the URL?</li>
+<li>The ampersands (&amp;) in the URL are not correctly escaped (<code>\&amp;</code>) and the command has forked</li>
 <li>A request has been made which is impossible for the router to fulfill (missing data file?)</li>
-<li>Is the SD card properly inserted?</li>
 </ol>
 <h2 id="i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</h2>
 <p>Another thing to check is if there are any assertions in the ERRORS.txt
 file on the SD card with timestamps around the time you saw this problem.
-"Reset"s in this file (with 0040 or 0083) are usually fine (they are added
-when the router starts up to indicate the reset type).</p>
-<p>If you see a line reading "ASSERT" and a file/line number, this might 
+"Reset"s in this file are usually fine (they are added when the router starts 
+up to indicate the reset type), unless you have encountered a <a href="hardware.html#led-flash-codes">General Exception</a>.</p>
+<p>If you encounter a line reading "ASSERT" and a file/line number, this might 
 indicate a firmware issue. Please send us this file and a description of what 
 you were trying to do, and steps to reproduce your problem (if possible).</p>
 

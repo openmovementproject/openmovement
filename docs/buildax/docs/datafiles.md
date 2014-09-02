@@ -60,3 +60,7 @@ Binary BAX packets are 32 bytes long. The layout of the binary packet is
 similar to how it is rendered in CSV. The data type widths are described below:
 
 ![Data Width Description Image](img/datawidth.png)
+
+The data portion of the packet (darkest part in the diagram) is the part which
+will vary depending on the packet type. This diagram shows a packet from a BAX 
+environment sensor (types 1,2,3), which would vary with (for example) a CO2 sensor.

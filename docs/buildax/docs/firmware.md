@@ -22,8 +22,10 @@ Enable the USB checkbox. The Vendor ID should be `0x4D8`, and the Product ID
 `0x03C`. Now hit the "Connect" button. The tool should show that it has 
 connected to the device.
 
+ ![BAX Bootloader](img/baxbootloader.png)
+
 Next, click "Load Hex File" and select the new firmware. Then, click
-"Erase-Program-Verify", and the new firmware will be written to the device. 
+"Erase-Program-Verify", and the new firmware will be written to the device.
 
 When this is completed, "Run Application" will cause the router to exit
 bootloader mode. If using a USB wall power adaptor, it is now safe to remove 

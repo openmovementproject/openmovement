@@ -60,16 +60,35 @@ usable plaintext csv format. Please read the [Data Files](datafiles.md)
 documentation for more info.
 
 
+## Web interface issues
 
-## 400 Bad Request?
+A number of HTTP error codes may be encountered with the web interface. The 
+following is not an exhaustive list, but these errors are the most common.
+
+### 404 File Not Found
+
+ ![404](img/bax404.png)
+
+This error indicates that the files for the web interface on the SD card are 
+missing or in the wrong place. These should be copied to the SD card manually 
+before running, and should be under the directory "WWW". 
+
+### 400 Bad Request
 
 This is an error code indicating that the router was unable to process a data
-fetch request. Possible reasons for this include:
+fetch request. This will occur when a request is made for data which does not 
+exist on the router, for example:
+
+ - Data files are missing due to manual deletion
+ - Data has been requested from a time range when no data was logged
+ - The fetch has been specified for the wrong logging mode (e.g. requesting text when the router is logging in binary mode) 
+
+This error may also be seen when automating fetch requests with `wget` or 
+`curl`, possible reasons include:
 
  1. The parameters provided in the URL were not correctly formatted and cannot be recognised
- 2. Have you escaped the ampersands (&) in the URL?
+ 2. The ampersands (&) in the URL are not correctly escaped (`\&`) and the command has forked
  3. A request has been made which is impossible for the router to fulfill (missing data file?)
- 4. Is the SD card properly inserted?
 
 
 
@@ -77,9 +96,9 @@ fetch request. Possible reasons for this include:
 
 Another thing to check is if there are any assertions in the ERRORS.txt
 file on the SD card with timestamps around the time you saw this problem.
-"Reset"s in this file (with 0040 or 0083) are usually fine (they are added
-when the router starts up to indicate the reset type).
+"Reset"s in this file are usually fine (they are added when the router starts 
+up to indicate the reset type), unless you have encountered a [General Exception](hardware.md#led-flash-codes).
 
-If you see a line reading "ASSERT" and a file/line number, this might 
+If you encounter a line reading "ASSERT" and a file/line number, this might 
 indicate a firmware issue. Please send us this file and a description of what 
 you were trying to do, and steps to reproduce your problem (if possible).

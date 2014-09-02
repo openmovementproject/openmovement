@@ -1,7 +1,6 @@
 /* CSS overrides for ReadTheDocs customization */
 
 /* Colour Scheme for sidebar */
-
 .wy-side-nav-search {
     z-index: 200;
     background-color: #354B5E;
@@ -23,15 +22,10 @@
     color: #3091D1;
 }
 
-div[role=search] {
-	display:none;
-}
 
-/* Disabled until search works in mkdocs */
-/* 
-#rtd-search-form > input {
-	border-color: #30424A;
-}*/
+/* Search disabled until search works in mkdocs */
+div[role=search] { display:none }
+/* #rtd-search-form input { border-color: #30424A; }*/
 
 /* Footer */
 footer p {
@@ -42,42 +36,35 @@ footer p {
 
 
 /* List types */
+#main ul li       { list-style: square  outside }
+#main ul ul li    { list-style: disc    outside }
+#main ul ul ul li { list-style: circle  outside }
+#main ol li       { list-style: decimal outside }
+#main ul,#main ol { margin-bottom: 24px }    	/* match paragraphs... */
+#main ul ul,#main ol ol { margin-bottom: 0 } 	/* except nested paragraphs */
 
-#main > ul > li { list-style: square outside }
-#main > ol > li { list-style: decimal outside}
-
-#main > ol > li, #main > ul > li {
+#main li {
 	margin-left: 20px;
 	font-size: 16px;
 }
 
-ul, ol {
-	margin-bottom: 24px; /* match paragraphs */
-}
-
 
 /* Table styles */
-
-#main > table  {
+#main table  {
 	border: none;
 	width: 100%;
 	margin-bottom: 24px
 }
 
-#main > table tr:nth-child(even){ background-color: #E3E3E3; }
-#main > table tr:last-child  td{ border-bottom: 1px solid #ccc; }
-#main > table td, #main > table th {
-	padding: 7px;
-	text-align: left;
-}
-
-#main > table th {
+#main table th {
 	background-color: #E3E3E3;
 	border-bottom: 1px solid #E1E4E5;
 	border-top: 1px solid #ccc;
 }
 
-@media all and (max-width: 767px) {
-	#main > table .lowwidth { display:none; }
+#main table tr:nth-child(even){ background-color: #E3E3E3 }
+#main table tr:last-child td{ border-bottom: 1px solid #ccc }
+#main table td, #main table th {
+	padding: 7px;
+	text-align: left;
 }
-

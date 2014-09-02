@@ -8,8 +8,14 @@ designed at Culture Lab, Newcastle University.
 
 General:
 
- * Data file format documentation
- * Videos
+ * Videos:
+    - Bootloading 
+        + Router
+        + Sensor
+    - Quickstart
+        + Router Setup
+        + Pairing
+        + Deploying
 
 For the BAX2 Sensor Node:
 
@@ -20,5 +26,3 @@ For the BAX2 Sensor Node:
 This documentation is currently being written and will be incrementally updated.  
 
 For our other other projects, please visit the [Open Movement](https://code.google.com/p/openmovement/) repository.
-
-

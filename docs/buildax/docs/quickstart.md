@@ -53,7 +53,7 @@ or via the console (see [here](commands.md#settings)).
 ### Video
 
 **TODO**
-[//]: # (E.G. YouTube embed- uncomment this: <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc?list=PLC1bL6IftT9kwxpbkzuopRKJINkxbGQ46" frameborder="0" allowfullscreen></iframe>)
+[//]: # (E.G. YouTube embed- uncomment this: <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe>)
 
 ## Pair
 
