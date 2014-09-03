@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Interface - BuildAX v2</title>
+  <title>Web Interface - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -84,7 +84,7 @@
         
             <ul>
             
-                <li class="toctree-l2"><a href="#bax-router-admin-panel">BAX Router Admin Panel</a></li>
+                <li class="toctree-l2"><a href="#buildax-lrs-admin-panel">BuildAX LRS Admin Panel</a></li>
                 
                     <li><a class="toctree-l3" href="#login">Login</a></li>
                 
@@ -151,7 +151,7 @@
   <hr/>
 </div>
           <div role="main" id="main">
-            <h1 id="bax-router-admin-panel">BAX Router Admin Panel</h1>
+            <h1 id="buildax-lrs-admin-panel">BuildAX LRS Admin Panel</h1>
 <p>A web configuration interface is provided to make setting up a BuildAX 
 installation easier. This document gives an overview of the admin panel 
 functionality.</p>
@@ -159,10 +159,10 @@ functionality.</p>
 experience reduced functionality, for example Microsoft Internet Explorer
 version 8 or lower. A warning message will be displayed in this case.</p>
 <h2 id="login">Login</h2>
-<p>The router configuration interface is protected with a username and password. 
+<p>The LRS configuration interface is protected with a username and password. 
 These should be updated from the Admin panel when you first log into the site.</p>
 <p><img alt="Login" src="img/login.png" /></p>
-<p>The default login credentials for the BAX Router are:</p>
+<p>The default login credentials for the BuildAX LRS are:</p>
 <ul>
 <li>Username: admin</li>
 <li>Password: password</li>
@@ -171,31 +171,31 @@ These should be updated from the Admin panel when you first log into the site.</
 <h2 id="status">Status</h2>
 <p>The Status tab is the landing page for the system, and allows users to verify
 the running state of the device, including the log file (binary or plaintext)
-and the status of router peripherals.</p>
+and the status of LRS peripherals.</p>
 <p><img alt="Status" src="img/status.png" /></p>
 <h2 id="sensors">Sensors</h2>
 <p>The sensor display page shows a live data stream from the sensors. This can be
 useful while paring sensors, as they will appear immediately on the graph when
-connected to the router.</p>
+connected to the LRS.</p>
 <p><img alt="Live Data" src="img/live.png" /></p>
 <p>The duration of the graph can be adjusted at the bottom of the page, showing a
 range of data up to 60 minutes. The number of sensors displayed is not limited,
 and a sensors can be excluded from the graph individually using the checkboxes.</p>
 <p>Sensor data can also be viewed as a table. The static page shows the sensors
-currently loaded into memory on the Router, along with their details and the 
+currently loaded into memory on the LRS, along with their details and the 
 last values received. Only the last 20 sensors seen will be displayed.</p>
 <p><img alt="Sensor List" src="img/sensors.png" /></p>
 <h3 id="name">Name</h3>
-<p>The name of the BAX sensor device can be set when it is programmed using an 
+<p>The name of the BuildAX sensor device can be set when it is programmed using an 
 FTDI cable, and will be sent as part of the encryption key transmission at 
 pairing time. This is stored along with the key on the root of the SD card 
 (external storage), and as such can be subsequently modified. The maximum 
 length of a sensor node name is 32 characters.</p>
 <h3 id="last-seen">Last Seen</h3>
 <p>The last time a packet was received from a sensor, as defined by the internal
-RTC on the BAX router.</p>
+RTC on the BuildAX LRS.</p>
 <h3 id="address">Address</h3>
-<p>The unique hardware identifier of the BAX sensor. This is generated at random 
+<p>The unique hardware identifier of the BuildAX sensor. This is generated at random 
 by the sensor, but the pool of values (48-bit) is large enough to make 
 collisions very unlikely.</p>
 <h3 id="last-packet">Last Packet</h3>
@@ -204,11 +204,11 @@ the sensor. For a breakdown of the sensor values, see the <a href="datafiles.htm
 section.</p>
 <h3 id="limitations">Limitations</h3>
 <p>Sensors appear in this table while their encryption keys are loaded into RAM on
-the Router. As the amount of RAM on the device is limited, only the most recent
+the LRS. As the amount of RAM on the device is limited, only the most recent
 20 sensors will be displayed in this table. This may become possible with future
 hardware revisions.</p>
 <h2 id="settings">Settings</h2>
-<p>The BAX router has the ability to route streams of data to various different
+<p>The BuildAX LRS has the ability to route streams of data to various different
 data sources. The Settings page is used to turn on/off different streams, and
 switch between streaming formats (binary or plaintext). The form is arranged by
 stream type.</p>
@@ -220,12 +220,12 @@ active. The Update button will appear when a setting needs to be applied.</p>
 settings form:</p>
 <p><img alt="Update OK" src="img/setok.png" /></p>
 <h2 id="fetch">Fetch</h2>
-<p>Data can be retrieved from the router remotely via the fetch interface. The form
-on the Data tab is used to format requests to the router.</p>
+<p>Data can be retrieved from the LRS remotely via the fetch interface. The form
+on the Data tab is used to format requests to the LRS.</p>
 <p><img alt="Fetch" src="img/fetch.png" /></p>
-<p>Fetch types relate directly to the logging types- if your router is logging in
+<p>Fetch types relate directly to the logging types- if your LRS is logging in
 plaintext mode you should use the plaintext fetch- the same goes for if the
-router is logging in binary.</p>
+LRS is logging in binary.</p>
 <p>The Fetch form exposes four different ways to request data:</p>
 <ul>
 <li>Date/Time</li>
@@ -233,17 +233,17 @@ router is logging in binary.</p>
 <li>Sample Number (as a range)</li>
 <li>Last N Samples (from most recent backwards)</li>
 </ul>
-<p>In addition, if the router determines that the parameters entered do not
+<p>In addition, if the LRS determines that the parameters entered do not
 translate to an acceptable range, an error 400 (Bad Request) will be returned.</p>
 <h2 id="admin">Admin</h2>
-<p>To update the login credentials for the router, simply fill in the form on the
+<p>To update the login credentials for the LRS, simply fill in the form on the
 Admin tab. There are no hard-coded complexity requirements for the password, but
 normal convention should be followed. The maximum password length is 32
 characters.</p>
 <p><img alt="Admin" src="img/admin.png" /></p>
 <p>Note that if this password is forgotten, it must be reset by physically
-accessing the router and loading the default settings. This reset procedure can
-be performed by holding down the button on the rear of the router for 12
+accessing the LRS and loading the default settings. This reset procedure can
+be performed by holding down the button on the rear of the LRS for 12
 seconds.</p>
 
           </div>

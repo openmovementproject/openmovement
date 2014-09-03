@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quick Start - BuildAX v2</title>
+  <title>Quick Start - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -63,11 +63,9 @@
                 
                     <li><a class="toctree-l3" href="#part-list">Part List</a></li>
                 
-                    <li><a class="toctree-l3" href="#router-setup">Router Setup</a></li>
+                    <li><a class="toctree-l3" href="#lrs-setup">LRS Setup</a></li>
                 
-                    <li><a class="toctree-l3" href="#pair">Pair</a></li>
-                
-                    <li><a class="toctree-l3" href="#deploy">Deploy</a></li>
+                    <li><a class="toctree-l3" href="#pairdeploy-env-sensors">Pair/Deploy ENV Sensors</a></li>
                 
             
             </ul>
@@ -152,14 +150,14 @@
 building a full BuildAX deployment may be done from scratch in as little as 
 20 minutes. There are three main parts in this guide:</p>
 <ol>
-<li>Set up the BuildAX Router</li>
-<li>Pair sensors to Router</li>
+<li>Set up the BuildAX LRS</li>
+<li>Pair sensors to LRS</li>
 <li>Deploy sensors in building </li>
 </ol>
 <h2 id="part-list">Part List</h2>
 <p>The following components are required for a basic deployment:</p>
 <ul>
-<li>BAX Router</li>
+<li>BuildAX LRS</li>
 <li>SD Card (1GB+ recommended)</li>
 <li>USB A-B cable</li>
 <li>USB Mains power adapter</li>
@@ -167,25 +165,27 @@ building a full BuildAX deployment may be done from scratch in as little as
 </ul>
 <p>If you do not require network connectivity for your deployment, feel free to 
 disregard steps related to this and use the alternate <a href="commands.html">serial commands</a>.</p>
-<h2 id="router-setup">Router Setup</h2>
-<p>For first-time setup, you may prefer to connect the router to a laptop (rather
+<h2 id="lrs-setup">LRS Setup</h2>
+<p>For first-time setup, you may prefer to connect the LRS to a laptop (rather
 than the USB mains power adapter) in order to troubleshoot network connectivity
 using the serial interface.</p>
-<p>Pre-deployment steps:</p>
+<h3 id="pre-deployment-steps">Pre-deployment steps:</h3>
 <ul>
-<li>Copy WWW files onto your SD card (to enable the web interface)</li>
+<li>Download the WWW files to your computer</li>
+<li>Extract the files </li>
+<li>Drag &amp; Drop “WWW" directory to the main (root) level of your SD card</li>
 </ul>
-<p>Setting up:</p>
+<h3 id="setting-up">Setting up:</h3>
 <ol>
-<li>Insert SD card into the BAX router</li>
-<li>Connect the ethernet cable between the BuildAX Router and a network access 
+<li>With the LRS powered OFF, eject card from computer &amp; insert into LRS</li>
+<li>Connect the ethernet cable between the BuildAX LRS and a network access 
  point (or home Broadband router)</li>
-<li>Connect USB power cable to the BAX router and wall adapter</li>
-<li>Connect to the router by typing its address into your browser.
+<li>Connect USB power cable to the BuildAX LRS and wall adapter</li>
+<li>Connect to the LRS by typing its address into your browser (click [here] for tips on finding address).
  (<a href="connecting.html#finding-the-ip-address">Additional steps</a> are required if your 
- network doesn't support NETBIOS or your router is missing the sticker with 
+ network doesn't support NETBIOS or your LRS is missing the sticker with 
  this information)</li>
-<li>Log into the router with the default credentials (<code>admin</code>/<code>password</code>)</li>
+<li>Log into the LRS with the default credentials (<code>admin</code>/<code>password</code>)</li>
 <li>Click "Settings" and turn on logging (and set other options if required)</li>
 <li>Change default credentials</li>
 </ol>
@@ -193,22 +193,16 @@ using the serial interface.</p>
 or via the console (see <a href="commands.html#settings">here</a>).</p>
 <h3 id="video">Video</h3>
 <p><strong>TODO</strong></p>
-<h2 id="pair">Pair</h2>
-<p>For a more in-depth walk through pairing, please see the <a href="deployment.html#pairing-sensors">deployment</a>
-section.</p>
+<p><iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe></p>
+<h2 id="pairdeploy-env-sensors">Pair/Deploy ENV Sensors</h2>
+<p>For a more in-depth walk through pairing, please see the the <a href="deployment.html#sensor-deployment">deployment</a> section.</p>
 <p>Quick pairing steps:</p>
 <ol>
-<li>Press the button on the back of the router until the lights flash. You have 5 minutes to pair your sensors</li>
-<li>Holding the sensor close to the router. Encryption packets are sent at low radio power</li>
-<li>Open each BuildAX sensor and press the button next to the battery compartment</li>
-<li>The LED on the front of the sensor should light to indicate that a pairing packet has been sent.</li>
+<li>Press the button on the back of the LRS until the LEDs flash. You have 5 minutes to pair your sensors</li>
+<li>Open the BuildAX sensor. Press the button next to the battery compartment, holding the sensor close to the LRS.</li>
+<li>The LED on the front of the sensor should illuminate green to indicate that a pairing packet has been sent.</li>
 <li>Determine if the sensor is paired using the <a href="user-guide.html#sensors">live data</a> interface or <a href="connecting.html#serial-usb">console</a></li>
 </ol>
-<h3 id="video_1">Video</h3>
-<p><strong>TODO</strong></p>
-<h2 id="deploy">Deploy</h2>
-<p>This is covered in more depth in the <a href="deployment.html#sensor-deployment">deployment</a> 
-section.</p>
 <p>Quick deployment steps:</p>
 <ol>
 <li>Choose a location out of direct sunlight, with good airflow.</li>
@@ -216,8 +210,9 @@ section.</p>
 <li>Clip the sensor into the backplate</li>
 <li>Verify that packets are still being received from the device</li>
 </ol>
-<h3 id="video_2">Video</h3>
+<h3 id="video_1">Video</h3>
 <p><strong>TODO</strong></p>
+<p><iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe></p>
 <p>You're done!</p>
 
           </div>

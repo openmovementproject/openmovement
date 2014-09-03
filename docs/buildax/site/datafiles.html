@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Files - BuildAX v2</title>
+  <title>Data Files - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -79,7 +79,7 @@
         
             <ul>
             
-                <li class="toctree-l2"><a href="#bax-data-file-format">BAX Data File Format</a></li>
+                <li class="toctree-l2"><a href="#buildax-data-file-format">BuildAX Data File Format</a></li>
                 
                     <li><a class="toctree-l3" href="#csv">CSV</a></li>
                 
@@ -143,7 +143,7 @@
   <hr/>
 </div>
           <div role="main" id="main">
-            <h1 id="bax-data-file-format">BAX Data File Format</h1>
+            <h1 id="buildax-data-file-format">BuildAX Data File Format</h1>
 <h2 id="csv">CSV</h2>
 <p>CSV Format data is logged to files named <code>LOGxxxxx.TXT</code> on the SD card when
 the logging format is set to plaintext mode. It can also be streamed over the 
@@ -191,7 +191,7 @@ serial console and telnet.</p>
 </tr>
 <tr>
 <td>Battery</td>
-<td>Battery level, in millivolts, of the BAX sensor</td>
+<td>Battery level, in millivolts, of the BuildAX sensor</td>
 </tr>
 <tr>
 <td>Humidity</td>
@@ -220,7 +220,7 @@ serial console and telnet.</p>
 </tbody>
 </table>
 <h3 id="packet-types">Packet Types</h3>
-<p>The type of a BAX packet indicates its transmission source. Listed here are
+<p>The type of a BuildAX packet indicates its transmission source. Listed here are
 the currently defined packet types:</p>
 <table>
 <thead>
@@ -248,17 +248,17 @@ the currently defined packet types:</p>
 </tr>
 </tbody>
 </table>
-<p>Further packet types will be defined as more types of BAX sensor are 
+<p>Further packet types will be defined as more types of BuildAX sensor are 
 developed. </p>
 <h2 id="binary">Binary</h2>
 <p>The binary format can be converted into CSV using the <code>bax2csv</code> utility found
 in the OpenMovement repository. The utility is designed to compile on most
 machines with a Make and GCC environment.</p>
-<p>Binary BAX packets are 32 bytes long. The layout of the binary packet is 
-similar to how it is rendered in CSV. The data type widths are described below:</p>
+<p>Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
+similar to how it is rendered in CSV. The data type widths for a ENV sensor are described below:</p>
 <p><img alt="Data Width Description Image" src="img/datawidth.png" /></p>
 <p>The data portion of the packet (darkest part in the diagram) is the part which
-will vary depending on the packet type. This diagram shows a packet from a BAX 
+will vary depending on the packet type. This diagram shows a packet from a BuildAX 
 environment sensor (types 1,2,3), which would vary with (for example) a CO2 sensor.</p>
 
           </div>

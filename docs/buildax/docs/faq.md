@@ -3,10 +3,10 @@
 ## My sensor won't pair up!
 
 On the sensor, press the button next to the battery compartment. The green LED
-should light on the front to indicate a pairing packet has been sent. Things 
+on the sensor should light on the front to indicate a pairing packet has been sent. Things 
 to check:
 
- 1. Is the router in [Pairing Mode](deployment.md#pairing-sensors)?
+ 1. Is the LRS in [Pairing Mode](deployment.md#pairing-sensors)?
  2. Ensure the batteries are inserted correctly.
  3. Do other sensors pair correctly? Use the [live data web interface](user-guide.md#sensors) to check.
 
@@ -14,7 +14,7 @@ to check:
 ## Networking issues
 
 Please read the [Network Access](connecting.md#network-access) section. Still
-can't connect to the router over your network? Try these troubleshooting steps:
+can't connect to the LRS over your network? Try these troubleshooting steps:
 
 #### Using the NETBIOS Address?
 
@@ -26,9 +26,9 @@ always be obtained using the serial `status` command.
 
 #### Networking LED
 
-Is the networking LED (LED 3) on the router lit? If it is not, this indicates 
-that the networking stack is initialised. Try re-inserting/re-seating the
-ethernet connector to see if the router connects. Possible reasons for this 
+Is the networking LED (LED 3) on the LRS lit? If it is not, this indicates 
+that the networking stack is un-initialised. Try re-inserting/re-seating the
+ethernet connector to see if the LRS connects. Possible reasons for this 
 LED not being lit:
 
  * Network not assigning IP address
@@ -49,7 +49,7 @@ and re-register the device.
 
 Please see [Fetching Data](developer-api.md#fetching-data) in the developer
 guide for more information on how to fetch data over the network. To directly
-connect to the router as a Mass Storage device, see [USB Mass Storage](connecting.md#usb-mass-storage).
+connect to the LRS as a Mass Storage device, see [USB Mass Storage](connecting.md#usb-mass-storage).
 
 
 
@@ -71,24 +71,24 @@ following is not an exhaustive list, but these errors are the most common.
 
 This error indicates that the files for the web interface on the SD card are 
 missing or in the wrong place. These should be copied to the SD card manually 
-before running, and should be under the directory "WWW". 
+before running, and should be placed under the directory "WWW". 
 
 ### 400 Bad Request
 
-This is an error code indicating that the router was unable to process a data
+This is an error code indicating that the LRS was unable to process a data
 fetch request. This will occur when a request is made for data which does not 
-exist on the router, for example:
+exist on the LRS, for example:
 
  - Data files are missing due to manual deletion
  - Data has been requested from a time range when no data was logged
- - The fetch has been specified for the wrong logging mode (e.g. requesting text when the router is logging in binary mode) 
+ - The fetch has been specified for the wrong logging mode (e.g. requesting text when the LRS is logging in binary mode) 
 
 This error may also be seen when automating fetch requests with `wget` or 
 `curl`, possible reasons include:
 
  1. The parameters provided in the URL were not correctly formatted and cannot be recognised
  2. The ampersands (&) in the URL are not correctly escaped (`\&`) and the command has forked
- 3. A request has been made which is impossible for the router to fulfill (missing data file?)
+ 3. A request has been made which is impossible for the LRS to fulfill (missing data file?)
 
 
 
@@ -96,9 +96,13 @@ This error may also be seen when automating fetch requests with `wget` or
 
 Another thing to check is if there are any assertions in the ERRORS.txt
 file on the SD card with timestamps around the time you saw this problem.
-"Reset"s in this file are usually fine (they are added when the router starts 
-up to indicate the reset type), unless you have encountered a [General Exception](hardware.md#led-flash-codes).
+"Reset" lines in this file are usually fine (they are added when the LRS 
+starts up to indicate the reset type), unless you have encountered a 
+[General Exception](hardware.md#led-flash-codes). The 4-digit number indicates
+the type of reset and is taken from the value of the reset register.
 
 If you encounter a line reading "ASSERT" and a file/line number, this might 
 indicate a firmware issue. Please send us this file and a description of what 
 you were trying to do, and steps to reproduce your problem (if possible).
+
+Still having problems - try turning it off and on!

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deployment - BuildAX v2</title>
+  <title>Deployment - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -68,7 +68,7 @@
                 
                     <li><a class="toctree-l3" href="#pairing-sensors">Pairing Sensors</a></li>
                 
-                    <li><a class="toctree-l3" href="#sensor-deployment">Sensor Deployment</a></li>
+                    <li><a class="toctree-l3" href="#env-sensor-deployment">ENV Sensor Deployment</a></li>
                 
             
             </ul>
@@ -144,40 +144,41 @@
 </div>
           <div role="main" id="main">
             <h1 id="deployment">Deployment</h1>
+<p>This section covers topics that might affect your sensor deployment as well as some basic best practices.</p>
 <h2 id="pairing-sensors">Pairing Sensors</h2>
-<p>To pair sensors to the BuildAX Router, the router must first be put into 
+<p>To pair sensors to the BuildAX LRS it must first be put into 
 Pairing Mode. To do this, hold the button on the rear of the device until the 
-lights flash alternately. The Router will stay in pairing mode for a period of
+lights flash alternately. The LRS will stay in pairing mode for a period of
 5 minutes.</p>
 <h3 id="what-is-pairing">What is "Pairing"?</h3>
-<p>The BuildAX v2 sensors broadcast data packets containing information about 
+<p>The BuildAX sensors broadcast data packets containing information about 
 their environment over the air. This data could potentially be used by
 eavesdroppers to infer whether a building is occupied, something existing 
-systems have typically not addressed. As a security measure, all BuildAX v2 
+systems have typically not addressed. As a security measure, all BuildAX 
 sensors use 128-bit AES encryption to prevent packets being read while in 
 transmission.</p>
-<p>To decrypt data from the sensors, the router must know the key which was used
-to encrypt it. An encryption key is transmitted from the sensor to the router 
+<p>To decrypt data from the sensors, the LRS must know the key which was used
+to encrypt it. An encryption key is transmitted from the sensor to the LRS 
 when the button on the rear of the sensor (see <a href="hardware.html#rear">#2 on the hardware diagram</a>) 
 is pressed. The radio broadcast power is set to the minimum on the sensor, to
 limit the range at which the packet can be received. </p>
-<p>The router then stores the unique key for the sensor in the <code>BAX_INFO.BIN</code> 
-file on the SD card. To instruct the router to listen for keys, it must be put
+<p>The LRS then stores the unique key for the sensor in the <code>BAX_INFO.BIN</code> 
+file on the SD card. To instruct the LRS to listen for keys, it must be put
 into "Pairing Mode", by pressing the button on the rear of the device.</p>
-<p><strong>Note</strong>: The router will log packets from BuildAX v2 sensors regardless of 
+<p><strong>Note</strong>: The LRS will log packets from BuildAX sensors regardless of 
 whether it has received an encryption packet, as these may be decrypted at a 
 later date and would otherwise be lost. </p>
-<h2 id="sensor-deployment">Sensor Deployment</h2>
-<h3 id="sensor-range">Sensor Range</h3>
+<h2 id="env-sensor-deployment">ENV Sensor Deployment</h2>
+<h3 id="env-sensor-range">ENV Sensor Range</h3>
 <p>The achievable range of the sensors will depend on a number of factors,
 including the materials used in the construction of the building, the thickness
 of the walls, and the "noise-floor" of your deployment environment. </p>
-<p>If there are a lot of devices transmitting on the same 434MHz band as the 
+<p>If there are a lot of devices transmitting on the same 433MHz band as the 
 sensors (for example, in a city environment) the radio frequency will be 
-noisier and the sensors will not be "heard" by the router at further distances.</p>
+noisier and the sensors will not be "heard" by the LRS at further distances.</p>
 <p>Tips on deploying sensors in a building:</p>
 <ul>
-<li>Position the router at a central location, so as to be in range of all sensors.</li>
+<li>Position the LRS at a central location, so as to be in range of all sensors.</li>
 <li>Air temperature and humidity in a room are stratified (change based on height). </li>
 <li>The PIR lens is directional. Mount sensors on the wall <strong>vertically</strong> if this is important.</li>
 <li>If a sensor at the limit of its range, try upping the transmission interval.</li>
@@ -187,17 +188,17 @@ noisier and the sensors will not be "heard" by the router at further distances.<
 </ul>
 <h4 id="rssi">RSSI</h4>
 <p>A sensor's signal strength is indicated by its RSSI value (Received Signal
-Strength Indication). This can be thought of as the "quietness" of the radio
-signal. In BuildAX 2, the RSSI value is in dBm.</p>
+Strength Indication). This can be thought of as the "loudness" of the radio
+signal and is measured in dBm.</p>
 <p>RSSI values can be found in the web interface (see the <a href="user-guide.html#sensors">Live Data</a>
 page), or in the 4th column of the CSV-format data available as a file, or
 over the various streaming interfaces (telnet, serial, websocket).</p>
 <p>Signal strength will be affected by the battery level of the sensor, the 
-distance from the router, and any obstacles which the signal has to travel
+distance from the LRS, and any obstacles which the signal has to travel
 through in-between.</p>
 <h4 id="noise-floor">Noise floor</h4>
-<p>All deployment locations have a certain amount of radio noise present in the
-spectrum used by the BAX sensors. This level of noise is referred to as the
+<p>All environments will have a certain amount of potential noise present in the radio 
+spectrum used by the BuildAX sensors. This level of noise is referred to as the
 noise "floor", and sensors transmitting must be "louder" than this background
 noise level in order to be heard.</p>
 

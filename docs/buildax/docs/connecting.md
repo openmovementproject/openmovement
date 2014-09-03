@@ -1,21 +1,21 @@
 
-[//]: # (Router Connection Guide)
+[//]: # (LRS Connection Guide)
 
-# Connecting to the BAX Router
+# Connecting to the BuildAX LRS
 
-Multiple methods of connecting to the router are supported- these fall into 
+Multiple methods of connecting to the LRS are supported- these fall into 
 two categories: a text-mode command interface, and a web configuration 
 interface.
 
 
 ## Serial (USB)
 
-The serial connection is available when the router is directly connected to a 
+The serial connection is available when the LRS is directly connected to a 
 PC via the USB cable. To access a serial connection, some additional (free)
 software is required. We have tested using the following apps on these 
 platforms:
 
- * __Windows__: [PuTTy](http://www.chiark.greenend.org.uk/~sgtatham/putty/), Hyperterminal (no longer available in Windows 7)
+ * __Windows__: [Hyperterminal](#),[PuTTy](http://www.chiark.greenend.org.uk/~sgtatham/putty/)
  * __Linux__ / __Mac OSX__: [GNU screen](http://www.gnu.org/software/screen/), [CoolTerm](http://freeware.the-meiers.org/)
 
 
@@ -35,10 +35,10 @@ Devices on *nix platforms are listed under the `/dev/` directory.
 
 ## USB Mass Storage
 
-Finally, data files logged by the router can be retrieved directly by using 
-the router as a USB Mass Storage device. For this option to be available, data 
-logging on the router must be disabled. This is because it would be 
-unsafe to continue writing data to files which could be read at any time.
+Finally, data files logged by the LRS can be retrieved directly by using 
+it as a USB Mass Storage device. For this option to be available, data 
+logging on the LRS must be disabled (this is because it would be 
+unsafe to continue writing data to files which could be read at any time).
 
 To override this, use the `mount` command.
 
@@ -49,7 +49,7 @@ data fetch service to become unstable.
 
 ## Network Access
 
-When the BAX Router is connected to your network using an Ethernet cable, it 
+When the BuildAX LRS is connected to your network using an Ethernet cable, it 
 will request an IP address using DHCP.
 
 On home networks, the IP address assigned will normally be of the form
@@ -58,7 +58,7 @@ address from your network administrator, quoting the device's MAC address.
 They may also be able to assign a DNS address for convenient access.
 
 ## Finding the IP address
-The MAC and IP address assigned to the router may be discovered by connecting 
+The MAC and IP address assigned to the LRS may be discovered by connecting 
 via serial and typing `status`. You may also find it useful to assign a static 
 IP address to the device for the purposes of port forwarding.
 
@@ -66,9 +66,9 @@ IP address to the device for the purposes of port forwarding.
 
 ### Telnet
 
-Telnet can be used to access the router command terminal over the network 
+Telnet can be used to access the LRS command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
-[Router Commands](commands.md) are supported.
+[Commands](commands.md) are supported.
 
 The `telnet` command is used to connect to this console:
 
@@ -77,14 +77,14 @@ The `telnet` command is used to connect to this console:
 	telnet 192.168.0.15
 ````
 
-... or use PuTTy on Windows. The router's telnet service runs on the default 
+... or use PuTTy on Windows. The LRS's telnet service runs on the default 
 TCP port 23.
 
 
 ### Web Interface (HTTP)
 
-The BuildAX Router configuration interface is accessed using a web browser, 
-providing a convenient way to change settings and view router status without
+The BuildAX LRS configuration interface is accessed using a web browser, 
+providing a convenient way to change settings and view LRS status without
 needing to use the text-mode terminal. 
 
 On Windows, type the NETBIOS name of the device may be typed directly into the
@@ -96,9 +96,9 @@ For information on using the web interface, please see the [Web Interface User G
 
 
 
-# Connecting to the a BAX Environment Sensor
+# Connecting to the a BuildAX ENV Sensor
 
 **TODO**
 
-Connecting to a BAX Sensor requires an FTDI cable.
+Connecting to a BuildAX Sensor requires an FTDI cable.
 

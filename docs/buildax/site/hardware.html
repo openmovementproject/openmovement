@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hardware - BuildAX v2</title>
+  <title>Hardware - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -54,7 +54,7 @@
         
             <ul>
             
-                <li class="toctree-l2"><a href="#router">Router</a></li>
+                <li class="toctree-l2"><a href="#lrs">LRS</a></li>
                 
                     <li><a class="toctree-l3" href="#led-codes">LED codes</a></li>
                 
@@ -63,7 +63,7 @@
             
                 <li class="toctree-l2"><a href="#sensors">Sensors</a></li>
                 
-                    <li><a class="toctree-l3" href="#buildax-2-sensor-node">BuildAX 2 Sensor Node</a></li>
+                    <li><a class="toctree-l3" href="#buildax-env">BuildAX ENV</a></li>
                 
             
             </ul>
@@ -148,14 +148,14 @@
   <hr/>
 </div>
           <div role="main" id="main">
-            <h1 id="router">Router</h1>
-<p>The BuildAX router is primarily a data-logger for the BAX sensors, but has 
+            <h1 id="lrs">LRS</h1>
+<p>The BuildAX LRS (Logger Router Server) is primarily a data-logger , but has 
 a lot of extra functionality which you may find useful in a wide range of
 deployment scenarios.</p>
-<p><img alt="Router" src="img/router.png" /></p>
+<p><img alt="LRS" src="img/router.png" /></p>
 <h3 id="led-codes">LED codes</h3>
 <p><img alt="LEDs" src="img/leds.png" /></p>
-<p>The BAX Router includes 7 LEDs which indicate the status of the device:</p>
+<p>The BuildAX LRS includes 7 LEDs which indicate the status of the device:</p>
 <table>
 <thead>
 <tr>
@@ -186,7 +186,7 @@ deployment scenarios.</p>
 </tr>
 <tr>
 <td>6</td>
-<td>434MHz Radio Activity</td>
+<td>433MHz Radio Activity</td>
 </tr>
 <tr>
 <td>7</td>
@@ -196,7 +196,7 @@ deployment scenarios.</p>
 </table>
 <h4 id="led-flash-codes">LED Flash Codes</h4>
 <p>There are a number of situations where a flashing pattern will be displayed on
-the router LEDs:</p>
+the LRS LEDs:</p>
 <table>
 <thead>
 <tr>
@@ -207,9 +207,9 @@ the router LEDs:</p>
 </thead>
 <tbody>
 <tr>
-<td>Odd/even LEDs flash alternately</td>
+<td>Odd/Even LEDs flash alternately</td>
 <td>Pairing Mode</td>
-<td>Hold the button on the rear of the router for <strong>1 second</strong>. The router will enter <a href="#pairing-mode">pairing mode</a>. Proceed to pair up BAX sensors.</td>
+<td>Hold the button on the rear of the LRS for <strong>1 second</strong>. The LRS will enter <a href="#pairing-mode">pairing mode</a>. Proceed to pair up BuildAX sensors.</td>
 </tr>
 <tr>
 <td>2 groups of 3 LEDs flash alternately</td>
@@ -219,7 +219,7 @@ the router LEDs:</p>
 <tr>
 <td>All LEDs flash quickly, twice</td>
 <td>Load Factory Defaults</td>
-<td>Hold the button on the rear of the router for <strong>10 seconds</strong>. This will reset the device to factory defaults but will not wipe files from the SD card (sensors will remain paired).</td>
+<td>Hold the button on the rear of the LRS for <strong>10 seconds</strong>. This will reset the device to factory defaults but will not wipe files from the SD card (sensors will remain paired).</td>
 </tr>
 <tr>
 <td>LEDs flash counting up from 1-7 continually</td>
@@ -229,7 +229,7 @@ the router LEDs:</p>
 <tr>
 <td>All LEDs flash slowly, continuously</td>
 <td>General Exception</td>
-<td>A fatal router firmware error occurred. This usually signifies that there is a bug which will need to be fixed. Please send us your <code>ERRORS.TXT</code> from the SD card to help diagnose the problem.</td>
+<td>A fatal LRS firmware error occurred. This usually signifies that there is a bug which will need to be fixed. Please send us your <code>ERRORS.TXT</code> from the SD card to help diagnose the problem.</td>
 </tr>
 </tbody>
 </table>
@@ -247,7 +247,7 @@ the router LEDs:</p>
 <tr>
 <td>1</td>
 <td>Pairing Button</td>
-<td>Used to make the router enter <a href="deployment.html#pairing-sensors">pairing mode</a>, in which BAX sensors may be paired to the device.</td>
+<td>Used to make the LRS enter <a href="deployment.html#pairing-sensors">pairing mode</a>, in which BuildAX sensors may be paired to the device.</td>
 </tr>
 <tr>
 <td>2</td>
@@ -257,7 +257,7 @@ the router LEDs:</p>
 <tr>
 <td>3</td>
 <td>Ethernet Jack</td>
-<td>Used for connecting the BAX Router to a TCP/IP network</td>
+<td>Used for connecting the BuildAX LRS to a TCP/IP network</td>
 </tr>
 <tr>
 <td>4</td>
@@ -267,21 +267,21 @@ the router LEDs:</p>
 <tr>
 <td>5</td>
 <td>USB B Jack</td>
-<td>Provides power to the router. Also exposes a USB CDC Serial connection and Mass Storage Device to access the SD card</td>
+<td>Provides power to the LRS. Also exposes a USB CDC Serial connection and Mass Storage Device to access the SD card</td>
 </tr>
 <tr>
 <td>6</td>
-<td>434MHz Antenna</td>
-<td>434MHz Radio receives data packets from BAXv2 sensors</td>
+<td>433MHz Antenna</td>
+<td>433MHz Radio receives data packets from BuildAX sensors</td>
 </tr>
 </tbody>
 </table>
 <hr />
 <h1 id="sensors">Sensors</h1>
-<h2 id="buildax-2-sensor-node">BuildAX 2 Sensor Node</h2>
-<p>The BuildAX Router is designed to receive data from a variety of sensor nodes. 
-The currently available device is the BuildAX 2 Environmental Sensor Node.</p>
-<p><img alt="BAX Sensor" src="img/baxsensor2.png" /></p>
+<h2 id="buildax-env">BuildAX ENV</h2>
+<p>The BuildAX LRS is designed to receive data from a variety of sensor nodes. 
+The currently available device is the BuildAX ENV (environmental sensor node).</p>
+<p><img alt="BuildAX Sensor" src="img/baxsensor2.png" /></p>
 <p>This is a small, indoor environment sensor which transmits the following 
 values:</p>
 <ul>
@@ -289,7 +289,7 @@ values:</p>
 <li>Humidity</li>
 <li>Light</li>
 <li>PIR (Passive Infrared movement sensor)</li>
-<li>Switch</li>
+<li>Magnetic Reed Switch</li>
 </ul>
 <h4 id="front">Front</h4>
 <p><img alt="Image with coin for scale" src="img/baxsensor.png" /></p>
@@ -297,11 +297,11 @@ values:</p>
 found in security/alarm systems. This indicates that the sensor node is 
 working correctly. </p>
 <p>A green LED is displayed when the magnetic switch is triggered, or when the
-button inside the device is pressed to send and encryption packet.</p>
+button inside the device is pressed to send an encryption packet.</p>
 <h4 id="rear">Rear</h4>
 <p>The back panel of the device is removed to reveal the battery compartment and
 other components.</p>
-<p><img alt="BAX Sensor" src="img/baxsensor_rear.png" /></p>
+<p><img alt="BuildAX Sensor" src="img/baxsensor_rear.png" /></p>
 <table>
 <thead>
 <tr>
@@ -314,22 +314,22 @@ other components.</p>
 <tr>
 <td>1</td>
 <td>FTDI Header</td>
-<td>A connector used to configure the device, and program the BAX Sensor firmware</td>
+<td>A connector used to configure the device, and program the BuildAX Sensor firmware</td>
 </tr>
 <tr>
 <td>2</td>
 <td>Pairing Button</td>
-<td>Press this to send the sensor's encryption packet. See <a href="deployment.html#pairing-sensors">Pairing Sensors</a> for full instructions on pairing sensors to the router.</td>
+<td>Press this to send the sensor's encryption packet. See <a href="deployment.html#pairing-sensors">Pairing Sensors</a> for full instructions on pairing sensors to the LRS.</td>
 </tr>
 <tr>
 <td>3</td>
 <td>Antenna</td>
-<td>433MHz Radio antenna for sending BAX sensor data to the router wirelessly.</td>
+<td>433MHz Radio antenna for sending BuildAX sensor data to the LRS wirelessly.</td>
 </tr>
 <tr>
 <td>4</td>
 <td>Battery Holder</td>
-<td>Two AAA (triple A) batteries power the BAX sensor, expected battery life is over a year with the default configuration</td>
+<td>Two AAA (triple A) batteries power the BuildAX sensor, expected battery life is over a year with the default configuration</td>
 </tr>
 <tr>
 <td>5</td>

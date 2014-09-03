@@ -1,14 +1,14 @@
 
 [//]: # (Developer API)
 
-# BAX Router Developer API
+# BuildAX LRS Developer API
 
-API calls to the BAX Router are made as RESTful HTTP requests. For you, 
-this means that setting state on the router is performed via `POST` requests, 
+The BuildAX LRS can be programatically configured via a remote connection. API calls to the BuildAX LRS are made as RESTful HTTP requests. For you, 
+this means that setting state on the LRS is performed via `POST` requests, 
 and `GET` requests are used to retrieve data.
 
 The examples in this document use the `wget` command to communicate with the 
-web server on the BAX router. On Linux `wget` is usually installed by default,
+web server on the BuildAX LRS. On Linux `wget` is usually installed by default,
 but can be downloaded for other OSes (including MacOSX and Windows) from the 
 [GNU website](https://www.gnu.org/software/wget/).
 
@@ -20,9 +20,9 @@ which may be used in preference to `wget`.
 
 The Web API uses a unique session key (a _cookie_) to authenticate users. All 
 API sessions start when this session key is requested by making a POST request
-to the BAX router.
+to the BuildAX LRS.
 
-The user agent must first authenticate with the router and obtain a session
+The user agent must first authenticate with the LRS and obtain a session
 cookie before further REST API requests can be made:
 
 Method | Resource       | Parameters | Response
@@ -39,7 +39,7 @@ multiple lines):
 		--no-http-keep-alive \
 		--post-data 'user=admin&pass=password' \
 		--keep-session-cookies \
-		http://your-bax-router/WWW/login.htm
+		http://your-bax/WWW/login.htm
 ````
 
 Equivalent `curl` command:
@@ -48,14 +48,14 @@ Equivalent `curl` command:
 	curl --silent --output /dev/null \
         -c cookies.txt \
         --data 'user=admin&pass=password' \
-        http://${ROUTER}/WWW/login.htm
+        http://your-bax/WWW/login.htm
 ````
 
 ## Changing Settings
 
 Settings are passed to the server in the same format as the text command mode.
-Please refer to [Router Commands](commands.md#settings) for a full description
-of the settings commands which may be sent to the router. 
+Please refer to [commands](commands.md#settings) for a full description
+of the settings commands which may be sent to the LRS. 
 
 Settings can be concatenated with an ampersand (&) in the POST body to change 
 multiple settings simultaneously. 
@@ -68,7 +68,7 @@ Method | Resource           | Parameters                                      | 
 
 	wget --load-cookies cookies.txt \
 		--post-data 'setting.usb.stream=0' \
-		http://your-bax-router/WWW/a\_settng.htm
+		http://your-bax/WWW/a\_settng.htm
 
 Valid settings types are: `file`, `usb`, `telnet`, and `udp`.
 
@@ -78,7 +78,7 @@ Valid settings types are: `file`, `usb`, `telnet`, and `udp`.
 Data fetching is performed via GET request, so parameters are passed in the
 URL.
 
-	http://your-bax-router/fetch?type=BT&start=449622000&end=485434800
+	http://your-bax/fetch?type=BT&start=449622000&end=485434800
 
 There are three parameters in a fetch request: a type, and the start/end range
 specifiers.
@@ -121,12 +121,12 @@ standard time representation) and subtract the Unix timestamp for the date
 `2000-01-01`. Eg:
 
 ````
-	Current Unix Time – (2000-01-01 00:00) = BAX RTC Timestamp
+	Current Unix Time – (2000-01-01 00:00) = BuildAX RTC Timestamp
 	       1407940334 –      946684800     = 461255534
 ````
 
 The reason for this difference is that the hardware real-time-clock (RTC) on
-the BAX router works with an epoch of the year 2000 and a 32-bit timestamp,
+the BuildAX LRS works with an epoch of the year 2000 and a 32-bit timestamp,
 meaning dates up to 2068 can be represented internally.
 
 ## Example `wget` commands
@@ -139,21 +139,21 @@ Get data file 0 from the SD card (no more than 5 files (10MB) may be requested i
 	wget --load-cookies cookies.txt \
 		--no-http-keep-alive \
 		--content-disposition \
-		http://your-bax-router/fetch?type=BF\&start=0\&end=0
+		http://your-bax/fetch?type=BF\&start=0\&end=0
 
 Get last 500 samples:
 
 	wget --load-cookies cookies.txt \
 		--no-http-keep-alive \
 		--content-disposition \
-		http://your-bax-router/fetch?type=LS&start=500&end=
+		http://your-bax/fetch?type=LS&start=500&end=
 
 Get data within a time range:
 
 	wget --load-cookies cookies.txt \
 		--no-http-keep-alive \
 		--content-disposition \
-		http://your-bax-router/fetch?type=BT\&start=449622000\&end=485434800
+		http://your-bax/fetch?type=BT\&start=449622000\&end=485434800
 
 
 One possible 'gotcha' is that the ampersand (&) symbol has a special meaning

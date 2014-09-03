@@ -1,5 +1,5 @@
 
-# BAX Data File Format
+# BuildAX Data File Format
 
 ## CSV 
 
@@ -25,7 +25,7 @@ A CSV formatted packet from a BuildAX Environment Sensor looks like this:
  Type           | Received packet type. See [Packet Types](#packet-types) for full definition
  Sequence No.   | Packet identifier (sensors send packets incrementally)
  Transmit Power | Sensor-configured transmission power in dBm 
- Battery        | Battery level, in millivolts, of the BAX sensor
+ Battery        | Battery level, in millivolts, of the BuildAX sensor
  Humidity       | Relative Humidity (percentage of the saturation vapour pressure)
  Temp           | Temperature in degrees Celsius (°C), multiplied by 10.
  Light          | Luminous flux measurement in Lux
@@ -36,7 +36,7 @@ A CSV formatted packet from a BuildAX Environment Sensor looks like this:
 
 ### Packet Types
 
-The type of a BAX packet indicates its transmission source. Listed here are
+The type of a BuildAX packet indicates its transmission source. Listed here are
 the currently defined packet types:
 
  ID    | Type
@@ -46,7 +46,7 @@ the currently defined packet types:
  2     | Packet sent when PIR sensor triggered
  3     | Packet sent when Magnetic Switch triggered 
 
-Further packet types will be defined as more types of BAX sensor are 
+Further packet types will be defined as more types of BuildAX sensor are 
 developed. 
 
 
@@ -56,11 +56,11 @@ The binary format can be converted into CSV using the `bax2csv` utility found
 in the OpenMovement repository. The utility is designed to compile on most
 machines with a Make and GCC environment.
 
-Binary BAX packets are 32 bytes long. The layout of the binary packet is 
-similar to how it is rendered in CSV. The data type widths are described below:
+Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
+similar to how it is rendered in CSV. The data type widths for a ENV sensor are described below:
 
 ![Data Width Description Image](img/datawidth.png)
 
 The data portion of the packet (darkest part in the diagram) is the part which
-will vary depending on the packet type. This diagram shows a packet from a BAX 
+will vary depending on the packet type. This diagram shows a packet from a BuildAX 
 environment sensor (types 1,2,3), which would vary with (for example) a CO2 sensor.

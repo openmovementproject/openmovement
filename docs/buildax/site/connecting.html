@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connection Guide - BuildAX v2</title>
+  <title>Connection Guide - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -69,7 +69,7 @@
         
             <ul>
             
-                <li class="toctree-l2"><a href="#connecting-to-the-bax-router">Connecting to the BAX Router</a></li>
+                <li class="toctree-l2"><a href="#connecting-to-the-buildax-lrs">Connecting to the BuildAX LRS</a></li>
                 
                     <li><a class="toctree-l3" href="#serial-usb">Serial (USB)</a></li>
                 
@@ -80,7 +80,7 @@
                     <li><a class="toctree-l3" href="#finding-the-ip-address">Finding the IP address</a></li>
                 
             
-                <li class="toctree-l2"><a href="#connecting-to-the-a-bax-environment-sensor">Connecting to the a BAX Environment Sensor</a></li>
+                <li class="toctree-l2"><a href="#connecting-to-the-a-buildax-env-sensor">Connecting to the a BuildAX ENV Sensor</a></li>
                 
             
             </ul>
@@ -150,17 +150,17 @@
   <hr/>
 </div>
           <div role="main" id="main">
-            <h1 id="connecting-to-the-bax-router">Connecting to the BAX Router</h1>
-<p>Multiple methods of connecting to the router are supported- these fall into 
+            <h1 id="connecting-to-the-buildax-lrs">Connecting to the BuildAX LRS</h1>
+<p>Multiple methods of connecting to the LRS are supported- these fall into 
 two categories: a text-mode command interface, and a web configuration 
 interface.</p>
 <h2 id="serial-usb">Serial (USB)</h2>
-<p>The serial connection is available when the router is directly connected to a 
+<p>The serial connection is available when the LRS is directly connected to a 
 PC via the USB cable. To access a serial connection, some additional (free)
 software is required. We have tested using the following apps on these 
 platforms:</p>
 <ul>
-<li><strong>Windows</strong>: <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTy</a>, Hyperterminal (no longer available in Windows 7)</li>
+<li><strong>Windows</strong>: <a href="#">Hyperterminal</a>,<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTy</a></li>
 <li><strong>Linux</strong> / <strong>Mac OSX</strong>: <a href="http://www.gnu.org/software/screen/">GNU screen</a>, <a href="http://freeware.the-meiers.org/">CoolTerm</a></li>
 </ul>
 <h3 id="microsoft-windows">Microsoft Windows</h3>
@@ -171,45 +171,45 @@ Windows).</p>
 <h3 id="linux-osx-nix-platforms">Linux, OSX (*nix platforms)</h3>
 <p>Devices on *nix platforms are listed under the <code>/dev/</code> directory. </p>
 <h2 id="usb-mass-storage">USB Mass Storage</h2>
-<p>Finally, data files logged by the router can be retrieved directly by using 
-the router as a USB Mass Storage device. For this option to be available, data 
-logging on the router must be disabled. This is because it would be 
-unsafe to continue writing data to files which could be read at any time.</p>
+<p>Finally, data files logged by the LRS can be retrieved directly by using 
+it as a USB Mass Storage device. For this option to be available, data 
+logging on the LRS must be disabled (this is because it would be 
+unsafe to continue writing data to files which could be read at any time).</p>
 <p>To override this, use the <code>mount</code> command.</p>
 <p><strong>Warning</strong>: removing data files from the mass storage device may cause the 
 data fetch service to become unstable.</p>
 <h2 id="network-access">Network Access</h2>
-<p>When the BAX Router is connected to your network using an Ethernet cable, it 
+<p>When the BuildAX LRS is connected to your network using an Ethernet cable, it 
 will request an IP address using DHCP.</p>
 <p>On home networks, the IP address assigned will normally be of the form
 192.168.x.x. On corporate or academic networks you may need to request an
 address from your network administrator, quoting the device's MAC address. 
 They may also be able to assign a DNS address for convenient access.</p>
 <h2 id="finding-the-ip-address">Finding the IP address</h2>
-<p>The MAC and IP address assigned to the router may be discovered by connecting 
+<p>The MAC and IP address assigned to the LRS may be discovered by connecting 
 via serial and typing <code>status</code>. You may also find it useful to assign a static 
 IP address to the device for the purposes of port forwarding.</p>
 <h3 id="telnet">Telnet</h3>
-<p>Telnet can be used to access the router command terminal over the network 
+<p>Telnet can be used to access the LRS command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
-<a href="commands.html">Router Commands</a> are supported.</p>
+<a href="commands.html">Commands</a> are supported.</p>
 <p>The <code>telnet</code> command is used to connect to this console:</p>
 <pre class="prettyprint well"><code>    telnet 192.168.0.15
 </code></pre>
 
-<p>... or use PuTTy on Windows. The router's telnet service runs on the default 
+<p>... or use PuTTy on Windows. The LRS's telnet service runs on the default 
 TCP port 23.</p>
 <h3 id="web-interface-http">Web Interface (HTTP)</h3>
-<p>The BuildAX Router configuration interface is accessed using a web browser, 
-providing a convenient way to change settings and view router status without
+<p>The BuildAX LRS configuration interface is accessed using a web browser, 
+providing a convenient way to change settings and view LRS status without
 needing to use the text-mode terminal. </p>
 <p>On Windows, type the NETBIOS name of the device may be typed directly into the
 address bar. This will be in the form BAX-xxxxxx (e.g. <code>bax-434c32</code>), and can 
 be found on the sticker on the rear of the device.</p>
 <p>For information on using the web interface, please see the <a href="user-guide.html">Web Interface User Guide</a>.</p>
-<h1 id="connecting-to-the-a-bax-environment-sensor">Connecting to the a BAX Environment Sensor</h1>
+<h1 id="connecting-to-the-a-buildax-env-sensor">Connecting to the a BuildAX ENV Sensor</h1>
 <p><strong>TODO</strong></p>
-<p>Connecting to a BAX Sensor requires an FTDI cable.</p>
+<p>Connecting to a BuildAX Sensor requires an FTDI cable.</p>
 
           </div>
           <footer>

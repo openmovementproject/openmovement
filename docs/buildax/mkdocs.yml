@@ -1,6 +1,6 @@
 # MkDocs configuration file
-site_name: BuildAX v2
-site_description: BuildAX v2 project documentation  
+site_name: BuildAX
+site_description: BuildAX project documentation  
 
 repo_url: https://code.google.com/p/openmovement/
 repo_name: Google Code

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FAQs - BuildAX v2</title>
+  <title>FAQs - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -154,25 +154,25 @@
             <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
 <h2 id="my-sensor-wont-pair-up">My sensor won't pair up!</h2>
 <p>On the sensor, press the button next to the battery compartment. The green LED
-should light on the front to indicate a pairing packet has been sent. Things 
+on the sensor should light on the front to indicate a pairing packet has been sent. Things 
 to check:</p>
 <ol>
-<li>Is the router in <a href="deployment.html#pairing-sensors">Pairing Mode</a>?</li>
+<li>Is the LRS in <a href="deployment.html#pairing-sensors">Pairing Mode</a>?</li>
 <li>Ensure the batteries are inserted correctly.</li>
 <li>Do other sensors pair correctly? Use the <a href="user-guide.html#sensors">live data web interface</a> to check.</li>
 </ol>
 <h2 id="networking-issues">Networking issues</h2>
 <p>Please read the <a href="connecting.html#network-access">Network Access</a> section. Still
-can't connect to the router over your network? Try these troubleshooting steps:</p>
+can't connect to the LRS over your network? Try these troubleshooting steps:</p>
 <h4 id="using-the-netbios-address">Using the NETBIOS Address?</h4>
 <p>It is possible that your network configuration does not support loading MS 
 NETBIOS addresses (you are connecting to the device from Mac OSX, for instance). 
 The IP address of the device can be used as a fallback in this case, and can
 always be obtained using the serial <code>status</code> command. </p>
 <h4 id="networking-led">Networking LED</h4>
-<p>Is the networking LED (LED 3) on the router lit? If it is not, this indicates 
-that the networking stack is initialised. Try re-inserting/re-seating the
-ethernet connector to see if the router connects. Possible reasons for this 
+<p>Is the networking LED (LED 3) on the LRS lit? If it is not, this indicates 
+that the networking stack is un-initialised. Try re-inserting/re-seating the
+ethernet connector to see if the LRS connects. Possible reasons for this 
 LED not being lit:</p>
 <ul>
 <li>Network not assigning IP address</li>
@@ -188,7 +188,7 @@ and re-register the device.</p>
 <h2 id="how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</h2>
 <p>Please see <a href="developer-api.html#fetching-data">Fetching Data</a> in the developer
 guide for more information on how to fetch data over the network. To directly
-connect to the router as a Mass Storage device, see <a href="connecting.html#usb-mass-storage">USB Mass Storage</a>.</p>
+connect to the LRS as a Mass Storage device, see <a href="connecting.html#usb-mass-storage">USB Mass Storage</a>.</p>
 <h2 id="how-do-i-read-the-binary-data-format">How do I read the binary data format?</h2>
 <p>The <code>bax2csv</code> utility can be used to convert the binary data format into a
 usable plaintext csv format. Please read the <a href="datafiles.html">Data Files</a>
@@ -200,31 +200,34 @@ following is not an exhaustive list, but these errors are the most common.</p>
 <p><img alt="404" src="img/bax404.png" /></p>
 <p>This error indicates that the files for the web interface on the SD card are 
 missing or in the wrong place. These should be copied to the SD card manually 
-before running, and should be under the directory "WWW". </p>
+before running, and should be placed under the directory "WWW". </p>
 <h3 id="400-bad-request">400 Bad Request</h3>
-<p>This is an error code indicating that the router was unable to process a data
+<p>This is an error code indicating that the LRS was unable to process a data
 fetch request. This will occur when a request is made for data which does not 
-exist on the router, for example:</p>
+exist on the LRS, for example:</p>
 <ul>
 <li>Data files are missing due to manual deletion</li>
 <li>Data has been requested from a time range when no data was logged</li>
-<li>The fetch has been specified for the wrong logging mode (e.g. requesting text when the router is logging in binary mode) </li>
+<li>The fetch has been specified for the wrong logging mode (e.g. requesting text when the LRS is logging in binary mode) </li>
 </ul>
 <p>This error may also be seen when automating fetch requests with <code>wget</code> or 
 <code>curl</code>, possible reasons include:</p>
 <ol>
 <li>The parameters provided in the URL were not correctly formatted and cannot be recognised</li>
 <li>The ampersands (&amp;) in the URL are not correctly escaped (<code>\&amp;</code>) and the command has forked</li>
-<li>A request has been made which is impossible for the router to fulfill (missing data file?)</li>
+<li>A request has been made which is impossible for the LRS to fulfill (missing data file?)</li>
 </ol>
 <h2 id="i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</h2>
 <p>Another thing to check is if there are any assertions in the ERRORS.txt
 file on the SD card with timestamps around the time you saw this problem.
-"Reset"s in this file are usually fine (they are added when the router starts 
-up to indicate the reset type), unless you have encountered a <a href="hardware.html#led-flash-codes">General Exception</a>.</p>
+"Reset" lines in this file are usually fine (they are added when the LRS 
+starts up to indicate the reset type), unless you have encountered a 
+<a href="hardware.html#led-flash-codes">General Exception</a>. The 4-digit number indicates
+the type of reset and is taken from the value of the reset register.</p>
 <p>If you encounter a line reading "ASSERT" and a file/line number, this might 
 indicate a firmware issue. Please send us this file and a description of what 
 you were trying to do, and steps to reproduce your problem (if possible).</p>
+<p>Still having problems - try turning it off and on!</p>
 
           </div>
           <footer>

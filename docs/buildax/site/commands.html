@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commands - BuildAX v2</title>
+  <title>Commands - BuildAX</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -31,7 +31,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="icon icon-home"> BuildAX v2</a>
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -74,14 +74,16 @@
         
             <ul>
             
-                <li class="toctree-l2"><a href="#router-commands">Router Commands</a></li>
-                
-                    <li><a class="toctree-l3" href="#command-summary">Command Summary</a></li>
+                <li class="toctree-l2"><a href="#commands">Commands</a></li>
                 
                     <li><a class="toctree-l3" href="#settings">Settings</a></li>
                 
             
-                <li class="toctree-l2"><a href="#sensor-commands">Sensor commands</a></li>
+                <li class="toctree-l2"><a href="#buildax-lrs-command-list">BuildAX LRS Command List</a></li>
+                
+                    <li><a class="toctree-l3" href="#basic-commands">Basic commands</a></li>
+                
+                    <li><a class="toctree-l3" href="#complex-commands">Complex commands</a></li>
                 
             
             </ul>
@@ -146,72 +148,17 @@
   <hr/>
 </div>
           <div role="main" id="main">
-            <h1 id="router-commands">Router Commands</h1>
-<p>All of the configuration actions which are available through the web interface
-may also be used as text-interface commands. For information on how to access 
-the text-mode command terminal, please see <a href="connecting.html">Connecting to the Router</a>.</p>
-<h2 id="command-summary">Command Summary</h2>
-<p>Commands can be provided as a single word (e.g. <code>status</code>) or with a key/value
-assignment (e.g. <code>time=2014/08/01,16:46</code>). Valid console commands for the 
-router are as follows:</p>
-<table>
-<thead>
-<tr>
-<th>Command</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>help</td>
-<td>Display this command list</td>
-</tr>
-<tr>
-<td>status</td>
-<td>Show current router configuration, including streaming settings and connectivity (IP address)</td>
-</tr>
-<tr>
-<td>time</td>
-<td>Display and set the RTC (Real Time Clock) on the router, used for time-stamping incoming data</td>
-</tr>
-<tr>
-<td>reset</td>
-<td>Reset the router (reload all settings from the SD card)</td>
-</tr>
-<tr>
-<td>mount</td>
-<td>Show SD card mount status (mounted/unmounted)</td>
-</tr>
-<tr>
-<td>format</td>
-<td>Format the SD card. <strong>All data on the SD card will be permanently erased</strong></td>
-</tr>
-<tr>
-<td>save</td>
-<td>Write settings file out to disk</td>
-</tr>
-<tr>
-<td>setting</td>
-<td>Change a setting. See <a href="#settings">Settings</a> for more information</td>
-</tr>
-<tr>
-<td>exit</td>
-<td>Disconnect from Telnet (will not disconnect a serial connection)</td>
-</tr>
-</tbody>
-</table>
-<p>Each command must be provided on a new line. To modify a value, provide the
-command with an equals ('=') sign and the new value. For example:</p>
-<pre class="prettyprint well"><code>    setting.file.stream=0
-    mount=1
-</code></pre>
-
-<p>... will stop logging data to file, and mount the <a href="connecting.html#usb-mass-storage">USB Mass Storage</a>
-device so the SD card can be accessed by a PC over the USB connection.</p>
+            <h1 id="commands">Commands</h1>
+<p>This document summarizes the serial command set of the BuildAX-LRS. The serial command set is available through the remote <code>telnet</code> interface and through the USB CDC (Communication Device Class) serial port. The command set and responses are subject to change as the open source BuildAX project expands. </p>
+<p>The commands strings are followed by <code>[CR][LF]</code> (carriage return, line feed) in all cases; 
+meaning that you should press the <code>Enter</code> key to send a command after typing it. </p>
+<p><em>(On Unix platforms, only an <code>[LF]</code> is sent- this is detected and handled accordingly.)</em></p>
+<p>For information on how to access the text-mode command terminal, please see the
+<a href="connecting.html">Connection Guide</a>.</p>
 <h2 id="settings">Settings</h2>
-<p>Settings are expressed in the form <code>setting.type.x=y</code> and are used by the
-router to determine where to route messages. A 'messages' in this context is a 
-data packet (sent by the environment sensors) received by the device, which 
+<p>Settings commands are expressed in the form <code>setting.type.x=y</code> and are used by the
+LRS to determine where to route messages. A 'message' in this context is a 
+data packet sent by the environment sensors and received by the device, which 
 must be routed to various outputs.</p>
 <p>Each <code>setting.type</code> describes a data output, or "stream":</p>
 <table>
@@ -249,30 +196,309 @@ must be routed to various outputs.</p>
 <li><strong>Stream</strong>: Enable/disable the data output. Off: <code>stream=0</code>, On: <code>stream=1</code></li>
 <li><strong>Mode</strong>: Output as plaintext (<code>mode=0</code>) or slip-encoded binary (<code>mode=1</code>)</li>
 </ul>
-<p>The router will print a summary to confirm the command after you type it.</p>
-<p>Here is an example with commands used to determine the state of the UDP stream,
-enable it, and set it to binary mode:</p>
-<pre class="prettyprint well"><code>&gt;   setting.udp.stream
-    Udp:
-    Mode: 0
-    Setting: Turned off
-
-&gt;   setting.udp.stream=1
-    Udp:
-    Mode: 0
-    Setting: Turned on
-
-&gt;   setting.udp.mode=1
-    Udp:
-    Mode: 1
-    Setting: Turned on
-</code></pre>
-
-<p>It is possible to configure the router with options which are 
+<p>The LRS will print a summary to confirm the command after it is typed.</p>
+<p>It is possible to configure the LRS with options which are 
 potentially useless- streaming data over Telnet in binary, for instance, 
 would be undesirable in most situations. </p>
-<h1 id="sensor-commands">Sensor commands</h1>
-<p><strong>TODO</strong></p>
+<hr />
+<h1 id="buildax-lrs-command-list">BuildAX LRS Command List</h1>
+<h2 id="basic-commands">Basic commands</h2>
+<p>These commands are for the normal user and provide access to the devices usual functions.</p>
+<p>Commands below are shown in the form: <em>command</em>, <strong>summary</strong>, <code>example</code> (and response).</p>
+<hr />
+<h3 id="help"><code>help</code></h3>
+<p><strong>Summary:</strong> Requests LRS to print a summary of common commands</p>
+<p><strong>Example:</strong> <code>help</code></p>
+<pre class="prettyprint well"><code>    HELP: help|status|time|reset|mount|exit|save|setting.\r\n
+</code></pre>
+
+<hr />
+<h3 id="status"><code>status</code></h3>
+<p><strong>Summary:</strong> Request a printout of current status and settings</p>
+<p><strong>Example:</strong> <code>status</code></p>
+<pre class="prettyprint well"><code>    BAX, HW:1.1, FW:1.1
+    NAME: BAX-434C32
+    Start time: 2014/09/03,14:57:01
+    Time:       2014/09/03,15:26:43
+    SysVolts: 4850mV
+    VddVolts: 3321mV
+    SysTemp: 39.5?C
+    Settings: From eeprom
+
+    Username:admin
+    Password:password
+    Si44 Radio:  On
+    Subnet:4200
+    Mask:FF00
+
+    ETHERNET: Connected
+    MAC:02:04:A3:43:4C:32
+    IP: 10.67.34.50
+    MSK:255:255:240:0
+
+    USB:
+    Mode: 0
+    Setting: Turned on
+    Status:  Streaming
+
+    File: 
+    Mode: 1
+    Setting: Turned off
+    Status:  Card present
+
+    Telnet:
+    Mode:0
+    Setting: Turned on
+    Status:  Streaming
+
+    Udp:
+    Mode: 0
+    Setting: Turned on
+    Status:  Enabled
+
+    Websocket:
+    Mode: 0
+    Setting: Turned on
+    Status:  Enabled
+
+</code></pre>
+
+<hr />
+<h3 id="time"><code>time</code></h3>
+<p><strong>Summary:</strong> Request a printout of or set the time</p>
+<p><strong>Example:</strong> <code>time</code> or <code>time=2014/08/14,10:48:54</code></p>
+<pre class="prettyprint well"><code>    Time: 2014/08/14,10:48:54
+</code></pre>
+
+<hr />
+<h3 id="save"><code>save</code></h3>
+<p><strong>Summary:</strong> Request all open filed to be saved. This ensures all the cluster chains are written to disk. Files in use will be re-opened.</p>
+<p><strong>Example:</strong> <code>save</code></p>
+<pre class="prettyprint well"><code>    Saved files
+</code></pre>
+
+<hr />
+<h3 id="reset"><code>reset</code></h3>
+<p><strong>Summary:</strong> Request a reset. Unsaved settings are lost. Open files are closed in orderly fashion</p>
+<p><strong>Example:</strong> <code>reset</code></p>
+<pre class="prettyprint well"><code>    Resetting
+</code></pre>
+
+<hr />
+<h3 id="exit"><code>exit</code></h3>
+<p><strong>Summary:</strong> Request to close the terminal. Not possible for USB connections</p>
+<p><strong>Example:</strong> <code>exit</code></p>
+<pre class="prettyprint well"><code>    Telnet session closed 
+</code></pre>
+
+<p>or </p>
+<pre class="prettyprint well"><code>    Cannot exit this Terminal
+</code></pre>
+
+<hr />
+<h3 id="settingsave"><code>setting.save</code></h3>
+<p><strong>Summary:</strong> Saves the current settings to non-volatile memory. Without this command, the settings are lost on reset or power loss.</p>
+<p><strong>Example:</strong> <code>setting.save</code></p>
+<pre class="prettyprint well"><code>    Saved settings
+</code></pre>
+
+<hr />
+<h3 id="settingusername"><code>setting.username</code></h3>
+<p><strong>Summary:</strong> Change the device username</p>
+<p><strong>Example:</strong> <code>setting.username=newuser</code></p>
+<pre class="prettyprint well"><code>    Username:newuser
+    Password:password
+</code></pre>
+
+<hr />
+<h3 id="settingpassword"><code>setting.password</code></h3>
+<p><strong>Summary:</strong> Change the device password</p>
+<p><strong>Example:</strong> <code>setting.username=newpassword</code></p>
+<pre class="prettyprint well"><code>    Username:admin
+    Password:newpassword
+</code></pre>
+
+<hr />
+<h3 id="settingname"><code>setting.name</code></h3>
+<p><strong>Summary:</strong> Change the device name. This is also the NETBIOS name. NETBIOS names must be 15 or fewer characters.</p>
+<p><strong>Example:</strong> <code>setting.name=BAX_ROUTER6</code></p>
+<pre class="prettyprint well"><code>    Name: BAX_ROUTER6
+</code></pre>
+
+<hr />
+<h3 id="settingsession"><code>setting.session</code></h3>
+<p><strong>Summary:</strong> Changes the text session number. The current file will be used until a save command is issued or the device autosaves. Permitted range is 0 to 65535.</p>
+<p><strong>Example:</strong> <code>setting.session=12345</code></p>
+<pre class="prettyprint well"><code>    Text session: 12345
+</code></pre>
+
+<hr />
+<h3 id="settingusbstream"><code>setting.usb.stream</code></h3>
+<p><strong>Summary:</strong> Enable of disable the stream of the USB serial port. If turned off, ALL COMMUNICATIONS ARE SUSPENDED including the response to this setting</p>
+<p><strong>Example:</strong> <code>setting.usb.stream=1</code></p>
+<pre class="prettyprint well"><code>    USB:
+    Mode: 0
+    Setting: Turned on
+    Status: Streaming
+</code></pre>
+
+<hr />
+<h3 id="settingusbmode"><code>setting.usb.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream output mode to text (0) or binary slip encoded (1)</p>
+<p><strong>Example:</strong> <code>setting.usb.mode=0</code></p>
+<pre class="prettyprint well"><code>    USB:
+    Mode: 0
+    Setting: Turned on
+    Status: Streaming
+</code></pre>
+
+<hr />
+<h3 id="settingtelnetstream"><code>setting.telnet.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable the stream of the telnet server (0 is off)</p>
+<p><strong>Example:</strong> <code>setting.telnet.stream=0</code></p>
+<pre class="prettyprint well"><code>    Telnet
+    Mode:0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingtelnetmode"><code>setting.telnet.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream mode of the telnet connection to text (0) or binary slip (1)</p>
+<p><strong>Example:</strong> <code>setting.telnet.mode=0</code></p>
+<pre class="prettyprint well"><code>    Telnet
+    Mode:0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingfilestream"><code>setting.file.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable logging to file</p>
+<p><strong>Example:</strong> <code>setting.file.stream=0</code></p>
+<pre class="prettyprint well"><code>    File:
+    Mode: 0
+    Setting: Turned off
+    Status: Card present
+</code></pre>
+
+<hr />
+<h3 id="settingfilemode"><code>setting.file.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream mode of the log file to text (0) or binary raw (1)</p>
+<p><strong>Example:</strong> <code>setting.file.mode=1</code></p>
+<pre class="prettyprint well"><code>    File:
+    Mode: 1
+    Setting: Turned off
+    Status: Card present
+</code></pre>
+
+<hr />
+<h3 id="settingudpstream"><code>setting.udp.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable the udp output (0=off)</p>
+<p><strong>Example:</strong> <code>setting.udp.stream=0</code></p>
+<pre class="prettyprint well"><code>    Udp:
+    Mode: 0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingudpmode"><code>setting.udp.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream mode of the telnet connection to text (0) or binary slip (1)</p>
+<p><strong>Example:</strong> <code>setting.udp.mode=0</code></p>
+<pre class="prettyprint well"><code>    Udp:
+    Mode: 0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingwebsocketstream"><code>setting.websocket.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable the websocket output (0=off)</p>
+<p><strong>Example:</strong> <code>setting.websocket.stream=0</code></p>
+<pre class="prettyprint well"><code>    Websocket:
+    Mode: 0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h2 id="complex-commands">Complex commands</h2>
+<p>These commands are complex in nature and should be used only by users who fully understand the devices functionality and those who are familiar with the source code.</p>
+<hr />
+<h3 id="mount"><code>mount</code></h3>
+<p><strong>Summary:</strong> Request to mount the memory card so it is available to the PC connection. If data logging is running, this is not safe. When logging the disk will appear write protected to the operating system.</p>
+<p><strong>Example:</strong> <code>mount=1</code> or <code>mount=0</code></p>
+<p>The first number represents the mount state, the second number is the write protect state.</p>
+<pre class="prettyprint well"><code>    Mounted: 1, 0
+</code></pre>
+
+<p>or </p>
+<pre class="prettyprint well"><code>    Mounted: 0, 0
+</code></pre>
+
+<hr />
+<h3 id="format"><code>format</code></h3>
+<p><strong>Summary:</strong> Request an SD card format. ALL DATA WILL BE LOST.
+The number on failure is the internal error code.</p>
+<p><strong>Example:</strong> <code>format</code></p>
+<pre class="prettyprint well"><code>    Formatted
+</code></pre>
+
+<p>or </p>
+<pre class="prettyprint well"><code>    Format failed: 00
+</code></pre>
+
+<hr />
+<h3 id="hash"><code>hash</code></h3>
+<p><strong>Summary:</strong> Request the binary hash for opening a UDP session. Debug purposes only</p>
+<p><strong>Example:</strong> <code>hash</code></p>
+<pre class="prettyprint well"><code>    3C24B1A1C87BAA6290049ACCB387A556AA58C1299B38C099E57F5C68ECECC0EB6207B8A6309D99272E565BDFE80842B302E1936D4031ADFB26C3A77DAAA5395EA8AF66348949F2A4CB6CB15F31F97A5C0C3E
+</code></pre>
+
+<hr />
+<h3 id="rpc"><code>rpc</code></h3>
+<p><strong>Summary:</strong> Sends the remote plug socket packet using the argument sent.
+The hexidecimal format of the packet is shown after the response.</p>
+<p><strong>Example:</strong> <code>rpc6</code></p>
+<pre class="prettyprint well"><code>    Rpc-&gt;C93B06
+</code></pre>
+
+<hr />
+<h3 id="settingbaxsubnet"><code>setting.bax.subnet</code></h3>
+<p><strong>Summary:</strong> Change the subnet of the radio, accepts hex input.</p>
+<p><strong>Example:</strong> <code>setting.bax.subnet=4201</code></p>
+<pre class="prettyprint well"><code>    Si44 Radio: On
+    Subnet:4201
+    Mask:FF00
+</code></pre>
+
+<hr />
+<h3 id="settingbaxmask"><code>setting.bax.mask</code></h3>
+<p><strong>Summary:</strong> Change the OR mask of the radio subnet, accepts hex input. The mask is used in the same way as an ethernet subnet mask upon the subnet value.</p>
+<p><strong>Example:</strong> <code>setting.bax.mask=FF01</code></p>
+<pre class="prettyprint well"><code>    Si44 Radio: On
+    Subnet:4201
+    Mask:FF01
+</code></pre>
+
+<hr />
+<h3 id="mac"><code>mac!</code></h3>
+<p><strong>Summary:</strong> This is used to change the device mac address. Value is not latched unless saved and device is reset. IEEE format used.</p>
+<p><strong>Example:</strong> <code>mac!=12:34:56:78:90:ab</code></p>
+<pre class="prettyprint well"><code>    ETHERNET: Disconnected
+    MAC:12:34:56:78:90:AB
+    IP: 169.254.1.1
+    MSK:255:255:0:0
+</code></pre>
+
+<hr />
+<h3 id="bax_test"><code>bax_test</code></h3>
+<p><strong>Summary:</strong> Sets the bax radio to go into a pre-defined test mode. Reception is halted (0=test off, 1=CW carrier, 2=PN9 modulation pattern).</p>
+<p><strong>Example:</strong> <code>bax_test=1</code></p>
+<pre class="prettyprint well"><code>    Bax-&gt;cw
+</code></pre>
+
 
           </div>
           <footer>
