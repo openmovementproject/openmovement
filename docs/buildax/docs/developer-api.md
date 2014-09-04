@@ -131,8 +131,11 @@ meaning dates up to 2068 can be represented internally.
 
 ## Example `wget` commands
 
-_Remember that you must first run the [Login](#logging-in) command to get a
-session cookie!_
+<span class="alert alert-info"> 
+**Login:**
+Remember that you must first run the [Login](#logging-in) command to get a
+session cookie!
+</span>
 
 Get data file 0 from the SD card (no more than 5 files (10MB) may be requested in one download):
 

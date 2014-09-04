@@ -28,10 +28,11 @@ The LRS then stores the unique key for the sensor in the `BAX_INFO.BIN`
 file on the SD card. To instruct the LRS to listen for keys, it must be put
 into "Pairing Mode", by pressing the button on the rear of the device.
 
-__Note__: The LRS will log packets from BuildAX sensors regardless of 
+<span class="alert alert-info">
+**Note:** The LRS will log packets from BuildAX sensors regardless of 
 whether it has received an encryption packet, as these may be decrypted at a 
 later date and would otherwise be lost. 
-
+</span>
 
 ## ENV Sensor Deployment
 

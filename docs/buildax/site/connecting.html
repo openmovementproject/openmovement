@@ -176,8 +176,10 @@ it as a USB Mass Storage device. For this option to be available, data
 logging on the LRS must be disabled (this is because it would be 
 unsafe to continue writing data to files which could be read at any time).</p>
 <p>To override this, use the <code>mount</code> command.</p>
-<p><strong>Warning</strong>: removing data files from the mass storage device may cause the 
-data fetch service to become unstable.</p>
+<p><span class="alert alert-warn"> 
+<strong>Warning:</strong> Manually deleting (or otherwise removing) data files from the mass storage device may cause the 
+data fetch service to become unstable.
+</span></p>
 <h2 id="network-access">Network Access</h2>
 <p>When the BuildAX LRS is connected to your network using an Ethernet cable, it 
 will request an IP address using DHCP.</p>

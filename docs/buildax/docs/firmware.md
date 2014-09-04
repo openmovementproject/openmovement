@@ -4,6 +4,11 @@
 Firmware updates for BuildAX devices will be provided as a .hex file. This 
 document describes the process of flashing the devices with updated firmware.
 
+<span class="alert alert-error"> 
+**Warning:** Updating the firmware is a potentially risky process. If you 
+flash a device with an incorrect firmware file you could render it permanently unusable.
+</span>
+
 ## BuildAX LRS
 
 ### Putting the LRS into bootloader mode

@@ -94,15 +94,19 @@ This error may also be seen when automating fetch requests with `wget` or
 
 ## I have tried the above and still cannot solve my problem
 
-Another thing to check is if there are any assertions in the ERRORS.txt
-file on the SD card with timestamps around the time you saw this problem.
-"Reset" lines in this file are usually fine (they are added when the LRS 
-starts up to indicate the reset type), unless you have encountered a 
-[General Exception](hardware.md#led-flash-codes). The 4-digit number indicates
-the type of reset and is taken from the value of the reset register.
+The first thing you should do is reset the router, and check if this solves
+the problem. Locally, simply unplug the device and plug it in again. 
+This can also be done remotely by [issuing the `reset` command](commands.md#reset)
+over telnet or serial.
+
+If this does not solve your problem, you should check if there are any 
+assertions in the ERRORS.txt file on the SD card with timestamps around the 
+time you saw this problem. "Reset" lines in this file are usually fine (they 
+are added when the LRS starts up to indicate the reset type), unless you have 
+encountered a [General Exception](hardware.md#led-flash-codes). The 4-digit 
+number indicates the type of reset and is taken from the value of the reset 
+register.
 
 If you encounter a line reading "ASSERT" and a file/line number, this might 
 indicate a firmware issue. Please send us this file and a description of what 
 you were trying to do, and steps to reproduce your problem (if possible).
-
-Still having problems - try turning it off and on!

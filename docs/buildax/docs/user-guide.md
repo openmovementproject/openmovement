@@ -7,10 +7,12 @@ A web configuration interface is provided to make setting up a BuildAX
 installation easier. This document gives an overview of the admin panel 
 functionality.
 
+<span class="alert alert-warn">
+**Browser Support:**
 All modern, standards-compliant web browsers are supported. Older browsers may
 experience reduced functionality, for example Microsoft Internet Explorer
 version 8 or lower. A warning message will be displayed in this case.
-
+</span>
 
 ## Login
 
@@ -138,7 +140,11 @@ characters.
 
  ![Admin](img/admin.png)
 
-Note that if this password is forgotten, it must be reset by physically
+
+<span class="alert alert-info">
+**Reset Password:**
+If the password is forgotten, it must be reset by physically
 accessing the LRS and loading the default settings. This reset procedure can
 be performed by holding down the button on the rear of the LRS for 12
 seconds.
+</span>

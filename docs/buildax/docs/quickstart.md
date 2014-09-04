@@ -25,9 +25,12 @@ disregard steps related to this and use the alternate [serial commands](commands
 
 ## LRS Setup
 
+<span class="alert alert-info"> 
+**First-time Setup**
 For first-time setup, you may prefer to connect the LRS to a laptop (rather
 than the USB mains power adapter) in order to troubleshoot network connectivity
 using the serial interface.
+</span>
 
 ### Pre-deployment steps:
 

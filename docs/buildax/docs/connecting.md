@@ -42,9 +42,11 @@ unsafe to continue writing data to files which could be read at any time).
 
 To override this, use the `mount` command.
 
-**Warning**: removing data files from the mass storage device may cause the 
-data fetch service to become unstable.
 
+<span class="alert alert-warn"> 
+**Warning:** Manually deleting (or otherwise removing) data files from the mass storage device may cause the 
+data fetch service to become unstable.
+</span>
 
 
 ## Network Access

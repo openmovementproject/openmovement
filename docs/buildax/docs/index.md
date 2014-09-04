@@ -38,6 +38,7 @@ For the BAX2 Sensor Node:
 
 Other items
 
+ * UDP connection
  * Power Switch – PSW
  * Re-look at the Firmware update section to prevent wrong hex files (warnings!)
  * Bootstrap colour dialogs for info/warnings/errors
