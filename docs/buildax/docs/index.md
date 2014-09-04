@@ -3,10 +3,10 @@
 
 The BuildAX family of wireless monitoring devices comprises of sensors, 
 actuators and a logger/router made available under an open license. The devices
-were developed within a joint research project undertaken by Strathclyde 
-University’s [Energy Systems Research Unit](http://www.strath.ac.uk/esru/), 
-and the [Digital Interaction Group](http://di.ncl.ac.uk/) at Newcastle 
-University. 
+were developed within a joint research project undertaken by Newcastle 
+University's [Digital Interaction Group](http://di.ncl.ac.uk/) and 
+[Sir Joseph Swan Centre for Energy Research](http://www.ncl.ac.uk/energy/)
+and Strathclyde University’s [Energy Systems Research Unit](http://www.strath.ac.uk/esru/), 
 
 The devices can be rapidly deployed to enable low cost built environment 
 monitoring, and are fully compatible with the Open Source 

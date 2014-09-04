@@ -96,7 +96,7 @@ For information on using the web interface, please see the [Web Interface User G
 
 
 
-# Connecting to the a BuildAX ENV Sensor
+# Connecting to a BuildAX ENV Sensor
 
 **TODO**
 
