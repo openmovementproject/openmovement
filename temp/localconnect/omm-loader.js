@@ -69,7 +69,7 @@ var OmmLoader = (function () {
 		{ 
 			// Determine the default address
 			var protocol = (location.protocol == "https:") ? "https:" : "http:";
-			var host = "localhost"; //"127.0.0.1"; // "localhost";
+			var host = "127.0.0.1"; //"127.0.0.1"; // "localhost";	// IMPORTANT: IE11 doesn't seem to issue a CORS request for 'localhost'?
 			var port = (protocol == "https:") ? 1235 : 1234;
 			managerParameters.domain = protocol + "//" + host + ":" + port;
 		}
