@@ -22,7 +22,7 @@ namespace OmGui
         //bool warningsOn = true;
 
         private Dictionary<string, string> SettingsProfileDictionary { get; set; }
-        private string settingsProfileFilePath = Properties.Settings.Default.CurrentWorkingFolder + "\\" + "recordSetup.xml";
+        private string settingsProfileFilePath = Path.Combine(Properties.Settings.Default.CurrentWorkingFolder, "recordSetup.xml");
         //private OmDevice Device { get; set; }
         private OmDevice[] Devices { get; set; }
 
@@ -147,6 +147,7 @@ namespace OmGui
             settingsDictionary.Add("Duration", Duration.TotalSeconds.ToString());
             settingsDictionary.Add("RecordingTime", radioButtonImmediately.Checked ? "Immediately" : (radioButtonDuration.Checked ? "Duration" : ""));
             settingsDictionary.Add("Flash", checkBoxFlash.Checked ? "True" : "False");
+            settingsDictionary.Add("Unpacked", checkBoxUnpacked.Checked ? "True" : "False");
         }
         
         private void resetFieldsToDictionary(Dictionary<string, string> settingsDictionary)
@@ -243,7 +244,12 @@ namespace OmGui
                 else if (pair.Key.Equals("Flash"))
                 {
                     if (pair.Value.Equals("True")) { checkBoxFlash.Checked = true; }
-                    else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = true; }
+                    else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = false; }
+                }
+                else if (pair.Key.Equals("Unpacked"))
+                {
+                    if (pair.Value.Equals("True")) { checkBoxUnpacked.Checked = true; }
+                    else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = false; }
                 }
             }
         }
@@ -464,6 +470,14 @@ Cursor.Current = Cursors.WaitCursor;
             }
         }
 
+        public bool Unpacked
+        {
+            get
+            {
+                return checkBoxUnpacked.Checked;
+            }
+        }
+
         // Roughly estimate battery life (in seconds) based on percentage remaining and sampling frequency
         static double EstimateBatteryLife(int percent, int rate)
         {
@@ -476,11 +490,12 @@ Cursor.Current = Cursors.WaitCursor;
             return (percent - percentReserved) / dischargeRate * 60 * 60;
         }
 
-        static double EstimateCapacityFromBytesFree(long bytesFree, int rate)
+        static double EstimateCapacityFromBytesFree(long bytesFree, int rate, bool unpacked)
         {
             long clustersFree = (bytesFree / 32768);
             if (clustersFree <= 0) { return 0; }
-            long numSamples = (clustersFree * (32768 / 512) - 2) * 120;    // assume 32kB clusters, 120 samples per sector, reserve two sectors for header
+            int samplesPerSector = unpacked ? 80 : 120;
+            long numSamples = (clustersFree * (32768 / 512) - 2) * samplesPerSector;    // assume 32kB clusters, 120 samples per sector, reserve two sectors for header
             return (numSamples / (1.06 * rate));      // assume actual sampling rate could be up to 6% over
         }
 
@@ -788,6 +803,11 @@ Cursor.Current = Cursors.WaitCursor;
         private void textBox_Enter(object sender, EventArgs e)
         {
             ((TextBox)sender).SelectAll();
+        }
+
+        private void checkBoxUnpacked_CheckedChanged(object sender, EventArgs e)
+        {
+            updateWarningMessages();
         }
 
     }

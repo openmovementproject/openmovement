@@ -92,6 +92,7 @@
             this.textBoxStudyExerciseType = new System.Windows.Forms.TextBox();
             this.textBoxStudyCentre = new System.Windows.Forms.TextBox();
             this.textBoxStudyInvestigator = new System.Windows.Forms.TextBox();
+            this.checkBoxUnpacked = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.daysPicker)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.hoursPicker)).BeginInit();
@@ -108,25 +109,25 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.panel1.Controls.Add(this.checkBoxUnpacked);
             this.panel1.Controls.Add(this.checkBoxFlash);
             this.panel1.Controls.Add(this.richTextBoxWarning);
             this.panel1.Controls.Add(this.buttonCancel);
             this.panel1.Controls.Add(this.buttonOk);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 713);
+            this.panel1.Location = new System.Drawing.Point(0, 619);
             this.panel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(705, 101);
+            this.panel1.Size = new System.Drawing.Size(709, 101);
             this.panel1.TabIndex = 5;
             // 
             // checkBoxFlash
             // 
             this.checkBoxFlash.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBoxFlash.AutoSize = true;
-            this.checkBoxFlash.Location = new System.Drawing.Point(462, 7);
+            this.checkBoxFlash.Location = new System.Drawing.Point(468, 7);
             this.checkBoxFlash.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxFlash.Name = "checkBoxFlash";
-            this.checkBoxFlash.Size = new System.Drawing.Size(172, 21);
+            this.checkBoxFlash.Size = new System.Drawing.Size(223, 23);
             this.checkBoxFlash.TabIndex = 7;
             this.checkBoxFlash.Text = "Flash during recording";
             this.checkBoxFlash.UseVisualStyleBackColor = true;
@@ -143,7 +144,7 @@
             this.richTextBoxWarning.Name = "richTextBoxWarning";
             this.richTextBoxWarning.ReadOnly = true;
             this.richTextBoxWarning.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxWarning.Size = new System.Drawing.Size(452, 86);
+            this.richTextBoxWarning.Size = new System.Drawing.Size(456, 86);
             this.richTextBoxWarning.TabIndex = 53;
             this.richTextBoxWarning.Text = "";
             // 
@@ -151,7 +152,7 @@
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(580, 53);
+            this.buttonCancel.Location = new System.Drawing.Point(584, 53);
             this.buttonCancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(113, 37);
@@ -163,7 +164,7 @@
             // 
             this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(461, 53);
+            this.buttonOk.Location = new System.Drawing.Point(465, 53);
             this.buttonOk.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(113, 37);
@@ -387,7 +388,7 @@
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(672, 69);
+            this.groupBox2.Size = new System.Drawing.Size(676, 69);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Sampling";
@@ -395,7 +396,7 @@
             // buttonDefault
             // 
             this.buttonDefault.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonDefault.Location = new System.Drawing.Point(577, 27);
+            this.buttonDefault.Location = new System.Drawing.Point(581, 27);
             this.buttonDefault.Margin = new System.Windows.Forms.Padding(4);
             this.buttonDefault.Name = "buttonDefault";
             this.buttonDefault.Size = new System.Drawing.Size(87, 33);
@@ -443,7 +444,7 @@
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(672, 210);
+            this.groupBox3.Size = new System.Drawing.Size(676, 210);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Recording Time";
@@ -597,7 +598,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(672, 352);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(676, 258);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
             // groupBox4
@@ -619,11 +620,11 @@
             this.groupBox4.Controls.Add(this.label23);
             this.groupBox4.Controls.Add(this.label24);
             this.groupBox4.Controls.Add(this.textBoxSubjectCode);
-            this.groupBox4.Location = new System.Drawing.Point(339, 2);
+            this.groupBox4.Location = new System.Drawing.Point(341, 2);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox4.Size = new System.Drawing.Size(330, 348);
+            this.groupBox4.Size = new System.Drawing.Size(332, 254);
             this.groupBox4.TabIndex = 5;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Subject";
@@ -672,7 +673,7 @@
             this.comboBoxSite.Location = new System.Drawing.Point(133, 172);
             this.comboBoxSite.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.comboBoxSite.Name = "comboBoxSite";
-            this.comboBoxSite.Size = new System.Drawing.Size(183, 24);
+            this.comboBoxSite.Size = new System.Drawing.Size(185, 24);
             this.comboBoxSite.TabIndex = 50;
             // 
             // label26
@@ -697,7 +698,7 @@
             this.comboBoxSubjectHandedness.Location = new System.Drawing.Point(132, 142);
             this.comboBoxSubjectHandedness.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.comboBoxSubjectHandedness.Name = "comboBoxSubjectHandedness";
-            this.comboBoxSubjectHandedness.Size = new System.Drawing.Size(184, 24);
+            this.comboBoxSubjectHandedness.Size = new System.Drawing.Size(186, 24);
             this.comboBoxSubjectHandedness.TabIndex = 48;
             // 
             // comboBoxSubjectSex
@@ -713,7 +714,7 @@
             this.comboBoxSubjectSex.Location = new System.Drawing.Point(131, 57);
             this.comboBoxSubjectSex.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.comboBoxSubjectSex.Name = "comboBoxSubjectSex";
-            this.comboBoxSubjectSex.Size = new System.Drawing.Size(184, 24);
+            this.comboBoxSubjectSex.Size = new System.Drawing.Size(186, 24);
             this.comboBoxSubjectSex.TabIndex = 42;
             // 
             // textBoxSubjectNotes
@@ -726,7 +727,7 @@
             this.textBoxSubjectNotes.MaxLength = 32;
             this.textBoxSubjectNotes.Multiline = true;
             this.textBoxSubjectNotes.Name = "textBoxSubjectNotes";
-            this.textBoxSubjectNotes.Size = new System.Drawing.Size(184, 133);
+            this.textBoxSubjectNotes.Size = new System.Drawing.Size(186, 39);
             this.textBoxSubjectNotes.TabIndex = 52;
             this.textBoxSubjectNotes.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -792,7 +793,7 @@
             this.textBoxSubjectCode.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxSubjectCode.MaxLength = 32;
             this.textBoxSubjectCode.Name = "textBoxSubjectCode";
-            this.textBoxSubjectCode.Size = new System.Drawing.Size(184, 22);
+            this.textBoxSubjectCode.Size = new System.Drawing.Size(186, 22);
             this.textBoxSubjectCode.TabIndex = 40;
             this.textBoxSubjectCode.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -817,7 +818,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox1.Size = new System.Drawing.Size(330, 348);
+            this.groupBox1.Size = new System.Drawing.Size(332, 254);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Study";
@@ -832,7 +833,7 @@
             this.textBoxStudyNotes.MaxLength = 32;
             this.textBoxStudyNotes.Multiline = true;
             this.textBoxStudyNotes.Name = "textBoxStudyNotes";
-            this.textBoxStudyNotes.Size = new System.Drawing.Size(184, 166);
+            this.textBoxStudyNotes.Size = new System.Drawing.Size(186, 72);
             this.textBoxStudyNotes.TabIndex = 37;
             this.textBoxStudyNotes.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -862,7 +863,7 @@
             this.textBoxStudyCode.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxStudyCode.MaxLength = 32;
             this.textBoxStudyCode.Name = "textBoxStudyCode";
-            this.textBoxStudyCode.Size = new System.Drawing.Size(184, 22);
+            this.textBoxStudyCode.Size = new System.Drawing.Size(186, 22);
             this.textBoxStudyCode.TabIndex = 29;
             this.textBoxStudyCode.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -901,7 +902,7 @@
             this.textBoxStudyOperator.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxStudyOperator.MaxLength = 32;
             this.textBoxStudyOperator.Name = "textBoxStudyOperator";
-            this.textBoxStudyOperator.Size = new System.Drawing.Size(184, 22);
+            this.textBoxStudyOperator.Size = new System.Drawing.Size(186, 22);
             this.textBoxStudyOperator.TabIndex = 35;
             this.textBoxStudyOperator.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -922,7 +923,7 @@
             this.textBoxStudyExerciseType.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxStudyExerciseType.MaxLength = 32;
             this.textBoxStudyExerciseType.Name = "textBoxStudyExerciseType";
-            this.textBoxStudyExerciseType.Size = new System.Drawing.Size(184, 22);
+            this.textBoxStudyExerciseType.Size = new System.Drawing.Size(186, 22);
             this.textBoxStudyExerciseType.TabIndex = 33;
             this.textBoxStudyExerciseType.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -934,7 +935,7 @@
             this.textBoxStudyCentre.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxStudyCentre.MaxLength = 32;
             this.textBoxStudyCentre.Name = "textBoxStudyCentre";
-            this.textBoxStudyCentre.Size = new System.Drawing.Size(184, 22);
+            this.textBoxStudyCentre.Size = new System.Drawing.Size(186, 22);
             this.textBoxStudyCentre.TabIndex = 27;
             this.textBoxStudyCentre.Enter += new System.EventHandler(this.textBox_Enter);
             // 
@@ -946,9 +947,21 @@
             this.textBoxStudyInvestigator.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBoxStudyInvestigator.MaxLength = 32;
             this.textBoxStudyInvestigator.Name = "textBoxStudyInvestigator";
-            this.textBoxStudyInvestigator.Size = new System.Drawing.Size(184, 22);
+            this.textBoxStudyInvestigator.Size = new System.Drawing.Size(186, 22);
             this.textBoxStudyInvestigator.TabIndex = 31;
             this.textBoxStudyInvestigator.Enter += new System.EventHandler(this.textBox_Enter);
+            // 
+            // checkBoxUnpacked
+            // 
+            this.checkBoxUnpacked.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxUnpacked.Location = new System.Drawing.Point(468, 26);
+            this.checkBoxUnpacked.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBoxUnpacked.Name = "checkBoxUnpacked";
+            this.checkBoxUnpacked.Size = new System.Drawing.Size(223, 21);
+            this.checkBoxUnpacked.TabIndex = 7;
+            this.checkBoxUnpacked.Text = "Unpacked data";
+            this.checkBoxUnpacked.UseVisualStyleBackColor = true;
+            this.checkBoxUnpacked.CheckedChanged += new System.EventHandler(this.checkBoxUnpacked_CheckedChanged);
             // 
             // DateRangeForm
             // 
@@ -957,7 +970,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(705, 814);
+            this.ClientSize = new System.Drawing.Size(709, 720);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -976,7 +989,6 @@
             this.Load += new System.EventHandler(this.DateRangeForm_Load);
             this.Shown += new System.EventHandler(this.DateRangeForm_Shown);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.daysPicker)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.hoursPicker)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minutesPicker)).EndInit();
@@ -1062,5 +1074,6 @@
         private System.Windows.Forms.CheckBox checkBoxFlash;
         private System.Windows.Forms.Label labelRateRangeSetting;
         private System.Windows.Forms.Button buttonDefault;
+        private System.Windows.Forms.CheckBox checkBoxUnpacked;
     }
 }

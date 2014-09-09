@@ -1286,6 +1286,13 @@ namespace OmGui
                        {
                            if (device is OmDevice && !((OmDevice)device).IsDownloading)
                            {
+                               string devicePath = null;
+                               string dataFile = ((OmDevice)device).Filename;
+                               if (dataFile != null && dataFile.Length > 0)
+                               {
+                                    devicePath = Path.GetDirectoryName(dataFile);
+                               }
+
                                // Nothing wrong so far...
                                string message = "Configuring device " + (i + 1) + " of " + devices.Length + ".... ";
 
@@ -1358,6 +1365,46 @@ namespace OmGui
                                }
 
 
+                               // Check unpacked
+                               if (rangeForm.Unpacked)
+                               {
+                                   recordBackgroundWorker.ReportProgress((100 * (5 * i + 4) / (devices.Length * 5)), message + "(unpacked setting)");
+                                   if (devicePath != null && devicePath.Length > 0)
+                                   {
+                                       // Wait to allow drive to re-mount
+                                       System.Threading.Thread.Sleep(800);
+
+                                       bool success = false;
+                                       for (int retries = 0; retries < 15 * 4; retries++)
+                                       {
+                                           try
+                                           {
+                                               if (Directory.Exists(devicePath))
+                                               {
+                                                   string configFile = Path.Combine(devicePath, "SETTINGS.INI");
+                                                   string config = "DATAMODE=20\r\n";
+                                                   File.WriteAllText(configFile, config, Encoding.ASCII);
+                                                   success = true;
+                                               }
+                                               if (success) { break; }
+                                               System.Threading.Thread.Sleep(250);
+                                           }
+                                           catch (Exception ex)
+                                           {
+                                               Console.Error.WriteLine("ERROR: Problem writing unpacked configuration: " + ex.Message);
+                                           }
+                                       }
+                                       if (!success)
+                                       {
+                                           error = "Failed to write unpacked configuration file.";
+                                       }
+                                   }
+                                   else
+                                   {
+                                       error = "Failed to find drive to write configuration file.";
+                                   }
+
+                               }
                            }
                            else
                            {
