@@ -5,6 +5,7 @@
 <!-- The two lines below allow the page to work via file: protocol in IE.  For Internet zone, x-ua-compatible won't be needed and use MOTW:  (0014)about:internet -->
 <!-- saved from url=(0016)http://localhost -->
 <meta http-equiv="x-ua-compatible" content="IE=edge" >
+<meta charset="utf-8">
 
 <style>
 body { font-family: sans-serif; }
@@ -123,14 +124,22 @@ function windowLoad()
 	var managerParameters = {};	
 	
 	// Manually choose the domain (otherwise the loader will automatically choose)
-	// var protocol = (location.protocol == "https:") ? "https:" : "http:";
-	// var host = "127.0.0.1"; // "localhost";
-	// var port = (protocol == "https:") ? 1235 : 1234;
-	//managerParameters.domain = protocol + "//" + host + ":" + port; }
+/*
+	if (location.hostname == "127.0.0.1")	// If we're accessing this page from 127.0.0.1, set the manager from the same host (prevents IE from having a Security Error by not doing a CORS request)
+	{
+	    var secure = (location.protocol == "https:");
+		var protocol = secure ? "https:" : "http:";
+		var host = "127.0.0.1"; // "localhost";
+		var port = secure ? 1235 : 1234;
+		managerParameters.domain = protocol + "//" + host + ":" + port;
+	}
+*/	
 
 	var manager = OmmLoader.getManager(managerParameters, function(theManager) {
 		//window.alert('Manager loaded!');
 		
+		print("STARTED (script " + (theManager ? theManager.version : "<null>") + " middleware " +  + (theManager && theManager.middlewareVersion ? theManager.middlewareVersion : "<null>") + ")");
+	
 		document.getElementById("connectButton").disabled = false;
 		document.getElementById("disconnectButton").disabled = true;
 		
@@ -151,7 +160,7 @@ function windowLoad()
 		theManager.onTransferUpdate(function (details) { 
 			print("UPDATE: Updates: " + JSON.stringify(details));	
 		});
-		
+				
 	}, function (reason) {
 		window.alert('Failed to load manager (' + reason + ')');
 	});
@@ -419,6 +428,17 @@ function doStoreGetMetadata()
 	}, function() { printError(); });
 }
 
+function doStoreGetMetadataAdvanced()
+{
+	print("OmmStore.getMetadataAdvanced()...");
+	var filename = document.getElementById("storeFilename").value;	
+	options = {};
+	options.annotations = true;
+	OmmManager.getStore().getMetadataAdvanced(filename, options, function(metadata) {
+		printResponse(JSON.stringify(metadata));
+	}, function() { printError(); });
+}
+
 function doStoreRemove()
 {
 	var filename = document.getElementById("storeFilename").value;	
@@ -429,6 +449,15 @@ function doStoreRemove()
 			printResponse("OK");
 		}, function() { printError(); });
 	}
+}
+
+function doStorePreview()
+{
+	var filename = document.getElementById("storeFilename").value;	
+	print("OmmStore.preview()...");
+	var url = OmmManager.getStore().preview(filename);
+	print("" + url);
+	document.getElementById("preview").src = url;
 }
 
 function doStoreDownload()
@@ -598,7 +627,9 @@ function doSendCommand()
 		</select>
 	</label>
 	<input id="storeGetMetadata"     type="button" value="storeGetMetadata()"     onclick="doStoreGetMetadata();     return false;" />
+	<input id="storeGetMetadataAdvanced" type="button" value="...Adv()" onclick="doStoreGetMetadataAdvanced(); return false;" />
 	<input id="storeRemove"          type="button" value="storeRemove()"          onclick="doStoreRemove();          return false;" />
+	<input id="storePreview"         type="button" value="storePreview()"         onclick="doStorePreview();         return false;" />
 	<br />
 	<label>Download destination filename: <input id="destinationFilename" type="text" value="download.omx" /></label>
 	<label>Upload URL: <input id="destinationUrl" type="text" value="http://localhost/upload/" /></label>
@@ -624,6 +655,8 @@ function doSendCommand()
 	</label>
 	<input id="send" type="submit" value="Send" onclick="return doSendCommand();" />
 </form>
+
+<div id="previewContainer"><img id="preview" src="" alt="" style="border: 0;" /></div>
 
 <div id="output" width="640" height="480" style="width: 640px; height: 320px; overflow-x: hidden; overflow-y: auto;"></div>
 
