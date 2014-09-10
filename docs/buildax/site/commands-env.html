@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commands (ENV) - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="commands-env.html">Commands (ENV)</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#commands">Commands</a></li>
+                
+            
+                <li class="toctree-l2"><a href="#buildax-env-command-list">BuildAX ENV Command List</a></li>
+                
+                    <li><a class="toctree-l3" href="#basic-commands">Basic commands</a></li>
+                
+                    <li><a class="toctree-l3" href="#complex-commands">Complex commands</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Commands (ENV)</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="commands">Commands</h1>
+<p>This section describes the commands which can be issued to a BuildAX ENV
+sensor. For information on connecting to the ENV sensors, please refer to 
+the <a href="connecting.html#connecting-to-a-buildax-env-sensor">Connection Guide</a>.</p>
+<p>Command strings are followed by <code>[CR][LF]</code> (carriage return, line feed) 
+in all cases; meaning that you should press the <code>Enter</code> key to send a command 
+after typing it. </p>
+<p>After most commands complete, the sensor will print its new operating status,
+and the list of basic commands. This will look like:</p>
+<pre class="prettyprint well"><code>    Settings:
+    Device:42609215
+    Name:dig0001
+    packet_header = 66
+    device_group = 96
+    device_id = 37397
+    batt_min = 2200
+    tx_power = 20
+    tx_channel = 87
+    pir_threshold = 20
+    pir_suspect_val = 10
+    pir_suspect_count = 8
+    pir_suspect_release = 8
+    pir_disarm_time = 24
+    pir_led_time = 8
+    sw_led_time = 8
+    sensor_settle_time = 8
+    credit_interval = 468
+    max_pir_credits = 10
+    max_switch_credits = 10
+    sensor_interval = 2343
+    num_tx_repeats = 1
+    Commands:save | defaults | name | renew | reset | sample | stream | exit (esc)
+</code></pre>
+
+<hr />
+<h1 id="buildax-env-command-list">BuildAX ENV Command List</h1>
+<h2 id="basic-commands">Basic commands</h2>
+<p>The following commands may be sent over the UART connection to perform an
+action on the device:</p>
+<hr />
+<h3 id="name"><code>name</code></h3>
+<p><strong>Summary:</strong> Set the device name to transmit on pairing</p>
+<p><strong>Example:</strong> <code>name=dig-bax0001</code></p>
+<pre class="prettyprint well"><code>    Done.
+</code></pre>
+
+<hr />
+<h3 id="save"><code>save</code></h3>
+<p><strong>Summary:</strong> Save current settings to non-volatile memory</p>
+<p><strong>Example:</strong> <code>save</code></p>
+<pre class="prettyprint well"><code>    Saved.
+</code></pre>
+
+<hr />
+<h3 id="defaults"><code>defaults</code></h3>
+<p><strong>Summary:</strong> Reset all settings to defaults and save them</p>
+<p><strong>Example:</strong> <code>defaults</code></p>
+<pre class="prettyprint well"><code>    Done.
+</code></pre>
+
+<hr />
+<h3 id="renew"><code>renew</code></h3>
+<p><strong>Summary:</strong> Reset all settings, id and encryption data</p>
+<p><strong>Example:</strong> <code>renew</code></p>
+<pre class="prettyprint well"><code>    Done.
+</code></pre>
+
+<hr />
+<h3 id="reset"><code>reset</code></h3>
+<p><strong>Summary:</strong> Reset the device, unsaved changes discarded</p>
+<p><strong>Example:</strong> <code>reset</code></p>
+<pre class="prettyprint well"><code>    Startup.
+    Initial battery: 1663mV
+    Setting loaded ok.
+</code></pre>
+
+<hr />
+<h3 id="sample"><code>sample</code></h3>
+<p><strong>Summary:</strong> Sample the sensors and print their values</p>
+<p><strong>Example:</strong> <code>sample</code></p>
+<pre class="prettyprint well"><code>    Sample:
+    Temp:24.7
+    Humidity:38.3, 302
+    Light:145
+    Batt:1663
+    PIR:165
+    SW:1
+</code></pre>
+
+<hr />
+<h3 id="stream"><code>stream</code></h3>
+<p><strong>Summary:</strong> Stream the sensor values in the same format as above</p>
+<p><strong>Example:</strong> <code>stream</code></p>
+<pre class="prettyprint well"><code>    &lt;Button/key exit&gt;
+    Sample:
+    Temp:24.7
+    Humidity:38.7, 316
+    Light:145
+    Batt:1663
+    PIR:159
+    SW:1
+</code></pre>
+
+<hr />
+<h3 id="exit"><code>exit</code></h3>
+<p><strong>Summary:</strong> Exit command mode, use current (possibly unsaved) settings now</p>
+<p><strong>Example:</strong> <code>exit</code></p>
+<pre class="prettyprint well"><code>    Ok.
+
+    Turn off
+</code></pre>
+
+<hr />
+<h2 id="complex-commands">Complex commands</h2>
+<p>These commands are complex in nature and should be used only by users who 
+fully understand the devices functionality, or are familiar with the source code.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packet_header=66</code></td>
+<td>ASCII 'B' (0x42, 66) code to identify BAX packets</td>
+</tr>
+<tr>
+<td><code>device_group=162</code></td>
+<td>Integer form of bits 16 to 24 of identifier, used for subnet mask</td>
+</tr>
+<tr>
+<td><code>device_id=62199</code></td>
+<td>Integer form of bottom 16 bits of address</td>
+</tr>
+<tr>
+<td><code>batt_min=2100</code></td>
+<td>Minimum battery state before sensor disables itself (mv)</td>
+</tr>
+<tr>
+<td><code>tx_power=10</code></td>
+<td>Transmit power in dBm</td>
+</tr>
+<tr>
+<td><code>pir_threshold=20</code></td>
+<td>High threshold for known movement</td>
+</tr>
+<tr>
+<td><code>pir_suspect_val=6</code></td>
+<td>Low threshold for suspected movement</td>
+</tr>
+<tr>
+<td><code>pir_suspect_count=4</code></td>
+<td>Number of suspected movements to reach threshold and make event</td>
+</tr>
+<tr>
+<td><code>pir_suspect_release=8</code></td>
+<td>Time in each suspect count persists for                                             &dagger;</td>
+</tr>
+<tr>
+<td><code>pir_disarm_time=8</code></td>
+<td>Time during which the PIR sensor will not create a new event (if triggered)         &dagger;</td>
+</tr>
+<tr>
+<td><code>pir_led_time=8</code></td>
+<td>Time for which the PIR led illuminates for                                          &dagger;</td>
+</tr>
+<tr>
+<td><code>sw_led_time=8</code></td>
+<td>Time for which the magnetic switch led illuminated for                              &dagger;</td>
+</tr>
+<tr>
+<td><code>sensor_settle_time=8</code></td>
+<td>Time after led illumination before continuing to monitor sensor events              &dagger;</td>
+</tr>
+<tr>
+<td><code>credit_interval=234</code></td>
+<td>Time between granting event transmit credits                                        &dagger;</td>
+</tr>
+<tr>
+<td><code>max_pir_credits=5</code></td>
+<td>Maximum number of PIR transmit credits</td>
+</tr>
+<tr>
+<td><code>max_switch_credits=5</code></td>
+<td>Maximum number of magnetic switch tx credits</td>
+</tr>
+<tr>
+<td><code>sensor_interval=234</code></td>
+<td>Time between sampling and transmitting environment sensors                          &dagger;</td>
+</tr>
+<tr>
+<td><code>num_tx_repeats=1</code></td>
+<td>Number of environment sensor packets to send (repeats)</td>
+</tr>
+</tbody>
+</table>
+<p><span class="alert alert-info"> 
+<strong>&dagger; Times</strong> Times are in Ticks which are ~128 ms. To work out the ticks
+required from a time in seconds, multiply by 1000 then divide by 128 
+(rounding any decimal places to the nearest integer).
+</span></p>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="datafiles.html" class="btn btn-neutral float-right" title="Data Files"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="commands-lrs.html" class="btn btn-neutral" title="Commands (LRS)"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

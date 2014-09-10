@@ -57,10 +57,12 @@ in the OpenMovement repository. The utility is designed to compile on most
 machines with a Make and GCC environment.
 
 Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
-similar to how it is rendered in CSV. The data type widths for a ENV sensor are described below:
+similar to how it is rendered in CSV. The data type widths for an ENV sensor 
+are described below:
 
 ![Data Width Description Image](img/datawidth.png)
 
 The data portion of the packet (darkest part in the diagram) is the part which
-will vary depending on the packet type. This diagram shows a packet from a BuildAX 
-environment sensor (types 1,2,3), which would vary with (for example) a CO2 sensor.
+will vary depending on the packet type. This diagram shows a packet from a 
+BuildAX environment sensor (types 1,2,3), which would vary with (for example)
+a CO2 sensor.

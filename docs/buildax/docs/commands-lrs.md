@@ -3,10 +3,14 @@
 
 # Commands
 
-This document summarizes the serial command set of the BuildAX-LRS. The serial command set is available through the remote `telnet` interface and through the USB CDC (Communication Device Class) serial port. The command set and responses are subject to change as the open source BuildAX project expands. 
+This document summarizes the serial command set of the BuildAX-LRS. The serial 
+command set is also available through the remote `telnet` interface and through
+the USB CDC (Communication Device Class) serial port. The command set and 
+responses are subject to change as the open source BuildAX project expands. 
 
-The commands strings are followed by `[CR][LF]` (carriage return, line feed) in all cases; 
-meaning that you should press the `Enter` key to send a command after typing it. 
+The command strings are followed by `[CR][LF]` (carriage return, line feed) 
+in all cases; meaning that you should press the `Enter` key to send a command 
+after typing it. 
 
 _(On Unix platforms, only an `[LF]` is sent- this is detected and handled accordingly.)_
 
@@ -59,7 +63,7 @@ Commands below are shown in the form: _command_, **summary**, `example` (and res
 **Example:** `help`
 
 ````
-	HELP: help|status|time|reset|mount|exit|save|setting.\r\n
+	HELP: help|status|time|reset|mount|exit|save|setting
 ````
 
 ---
@@ -369,7 +373,9 @@ or
 ---
 ## Complex commands
 
-These commands are complex in nature and should be used only by users who fully understand the devices functionality and those who are familiar with the source code.
+These commands are complex in nature and should be used only by users who 
+fully understand the devices functionality, or who are familiar with 
+the source code.
 
 ---
 ### `mount`
@@ -484,5 +490,7 @@ The hexidecimal format of the packet is shown after the response.
 ````
 	Bax->cw
 ````
+
+
 
 

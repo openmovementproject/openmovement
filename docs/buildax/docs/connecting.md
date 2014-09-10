@@ -59,7 +59,7 @@ On home networks, the IP address assigned will normally be of the form
 address from your network administrator, quoting the device's MAC address. 
 They may also be able to assign a DNS address for convenient access.
 
-## Finding the IP address
+### Finding the IP address
 The MAC and IP address assigned to the LRS may be discovered by connecting 
 via serial and typing `status`. You may also find it useful to assign a static 
 IP address to the device for the purposes of port forwarding.
@@ -70,7 +70,7 @@ IP address to the device for the purposes of port forwarding.
 
 Telnet can be used to access the LRS command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
-[Commands](commands.md) are supported.
+[Commands (LRS)](commands-lrs.md) are supported.
 
 The `telnet` command is used to connect to this console:
 
@@ -97,10 +97,66 @@ For information on using the web interface, please see the [Web Interface User G
 
 
 
-
+---
 # Connecting to a BuildAX ENV Sensor
 
-**TODO**
+In order to configure settings on the BuildAX ENV sensors, you may connect 
+directly to the sensor using an FTDI cable. You will require a VCP (Virtual 
+COM port) USB driver for FTDI, available [here](http://www.ftdichip.com/FTDrivers.htm).
 
-Connecting to a BuildAX Sensor requires an FTDI cable.
+This guide demonstrates how to connect to an ENV sensor using HyperTerminal.
+On other operating systems, the settings will be the same, though the procedure
+may differ.
+
+For information on flashing firmware to the device, please refer to the 
+[Firmware](firmware.md) section.
+
+On creating a new serial connection with HyperTerminal, you should select the 
+new COM port created by the FTDI driver (this will usually be a number greater
+than COM1). 
+
+ ![Hyperterminal](img/envht.png)
+
+Hyperterminal will enumerate the COM serial ports available on the system, as
+in this example. To connect using PuTTy, you will need to find the COM port
+number using the Device Manager in Windows, or use a fork of the project with
+COM enumeration. 
+
+To connect on a Unix platform, the `screen` command may be 
+used along with the device path (under `/dev/`). Details of using this command
+for serial connections can be found [here](https://wiki.archlinux.org/index.php/working_with_the_serial_console#Screen).
+
+All connection methods will require configuration with the correct serial parameters.
+
+
+## Connection Settings
+
+ * __Baud Rate__:    115200
+ * __Data bits__:    8
+ * __Parity__:       None
+ * __Stop bits__:    1
+ * __Flow control__: None
+
+ ![Hyperterminal ENV connect](img/envparams.png)
+
+ Select "OK", and the FTDI Serial connection will be open, ready to connect a
+ sensor.
+
+### Connecting to ENV sensors
+
+To connect to an ENV sensor:
+
+ 1. Remove one battery from the sensor.
+ 2. Push the 3-pin FTDI connector onto the header (1 in the diagram below)
+    with the red wire facing away from the antenna.
+ 
+ ![BuildAX Sensor Rear](img/baxsensor_rear.png)
+
+The FTDI cable will provide a voltage to power the sensor, which should start
+up and print its status over the connected UART:
+
+ ![ENV connected](img/envconnected.png)
+
+It is safe to re-insert the battery into the sensor at any time, even while
+the device is still connected to the FTDI cable.
 

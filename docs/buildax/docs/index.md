@@ -19,28 +19,20 @@ performance certification and the like.
 
 This documentation is currently being written and will be incrementally updated.  
 
-General documentation to be written:
+General documentation to be done:
 
  * Videos:
-    - Bootloading 
-        + Router
-        + Sensor
     - Quickstart
         + Router Setup
         + Pairing
         + Deploying
-
-For the BAX2 Sensor Node:
-
- * Firmware programming
- * Connection guide
- * Sensor commands & configuration
+    - Bootloading 
+        + Router
+        + Sensor
 
 Other items
 
  * UDP connection
  * Power Switch – PSW
- * Re-look at the Firmware update section to prevent wrong hex files (warnings!)
- * Bootstrap colour dialogs for info/warnings/errors
 
 For our other other projects, please visit the [Open Movement](https://code.google.com/p/openmovement/) repository.

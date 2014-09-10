@@ -70,7 +70,12 @@
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="commands.html">Commands</a>
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
         
     </li>
 
@@ -110,6 +115,8 @@
                     <li><a class="toctree-l3" href="#how-do-i-read-the-binary-data-format">How do I read the binary data format?</a></li>
                 
                     <li><a class="toctree-l3" href="#web-interface-issues">Web interface issues</a></li>
+                
+                    <li><a class="toctree-l3" href="#i-cannot-connect-to-a-device-using-serial">I cannot connect to a device using Serial!</a></li>
                 
                     <li><a class="toctree-l3" href="#i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</a></li>
                 
@@ -161,6 +168,7 @@ to check:</p>
 <li>Ensure the batteries are inserted correctly.</li>
 <li>Do other sensors pair correctly? Use the <a href="user-guide.html#sensors">live data web interface</a> to check.</li>
 </ol>
+<hr />
 <h2 id="networking-issues">Networking issues</h2>
 <p>Please read the <a href="connecting.html#network-access">Network Access</a> section. Still
 can't connect to the LRS over your network? Try these troubleshooting steps:</p>
@@ -185,14 +193,17 @@ address. When programming firmware it is possible to reset the MAC address by
 holding down the button and clicking "Run Program" in the bootloader tool. If
 this is the case you will have to obtain the new MAC via the serial connection
 and re-register the device.</p>
+<hr />
 <h2 id="how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</h2>
 <p>Please see <a href="developer-api.html#fetching-data">Fetching Data</a> in the developer
 guide for more information on how to fetch data over the network. To directly
 connect to the LRS as a Mass Storage device, see <a href="connecting.html#usb-mass-storage">USB Mass Storage</a>.</p>
+<hr />
 <h2 id="how-do-i-read-the-binary-data-format">How do I read the binary data format?</h2>
 <p>The <code>bax2csv</code> utility can be used to convert the binary data format into a
 usable plaintext csv format. Please read the <a href="datafiles.html">Data Files</a>
 documentation for more info.</p>
+<hr />
 <h2 id="web-interface-issues">Web interface issues</h2>
 <p>A number of HTTP error codes may be encountered with the web interface. The 
 following is not an exhaustive list, but these errors are the most common.</p>
@@ -217,10 +228,27 @@ exist on the LRS, for example:</p>
 <li>The ampersands (&amp;) in the URL are not correctly escaped (<code>\&amp;</code>) and the command has forked</li>
 <li>A request has been made which is impossible for the LRS to fulfill (missing data file?)</li>
 </ol>
+<hr />
+<h2 id="i-cannot-connect-to-a-device-using-serial">I cannot connect to a device using Serial!</h2>
+<p>There are a number of things you can check here:</p>
+<ul>
+<li>Am I connecting to the correct serial device (COM port in Windows)?</li>
+<li>Is the USB cable a known good (working) cable? </li>
+</ul>
+<p>LRS Specific checks:</p>
+<ul>
+<li>Is LED 2 (the USB Serial status LED) lit?</li>
+</ul>
+<p>ENV / other BAX sensors specific checks:</p>
+<ul>
+<li>Have I installed the <a href="http://www.ftdichip.com/FTDrivers.htm">driver</a> for my FTDI cable?</li>
+<li>Is my FTDI 3-pin connector connected the right way around? (Try it the other way!)</li>
+</ul>
+<hr />
 <h2 id="i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</h2>
 <p>The first thing you should do is reset the router, and check if this solves
 the problem. Locally, simply unplug the device and plug it in again. 
-This can also be done remotely by <a href="commands.html#reset">issuing the <code>reset</code> command</a>
+This can also be done remotely by <a href="commands-lrs.html#reset">issuing the <code>reset</code> command</a>
 over telnet or serial.</p>
 <p>If this does not solve your problem, you should check if there are any 
 assertions in the ERRORS.txt file on the SD card with timestamps around the 

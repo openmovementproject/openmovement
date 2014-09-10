@@ -34,16 +34,16 @@ footer p {
 	margin:0;
 }
 
-
 /* List types */
 #main ul li       { list-style: square  outside }
 #main ul ul li    { list-style: disc    outside }
 #main ul ul ul li { list-style: circle  outside }
 #main ol li       { list-style: decimal outside }
-#main ul,#main ol { margin-bottom: 24px }    	/* match paragraphs... */
-#main ul ul,#main ol ol { margin-bottom: 0 } 	/* except nested paragraphs */
+#main ul ul, #main ol ol { margin-bottom: 0 } 	/* except nested paragraphs */
 
-#main li {
+#main > ul, #main > ol { margin-bottom: 24px }    	/* match paragraphs... */
+
+#main > ul li, #main > ol li {
 	margin-left: 20px;
 	font-size: 16px;
 }
@@ -69,6 +69,18 @@ footer p {
 	text-align: left;
 }
 
+
+/*print css */
+@media print {
+	#main p { text-align: justify }
+
+	.rst-footer-buttons {
+		display: none;
+	}
+
+	/* video embeds */
+	iframe { display:none }
+}
 
 /* ==========================================================================
    Alert styles from Bootstrap

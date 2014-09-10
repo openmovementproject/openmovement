@@ -77,10 +77,10 @@
                 
                     <li><a class="toctree-l3" href="#network-access">Network Access</a></li>
                 
-                    <li><a class="toctree-l3" href="#finding-the-ip-address">Finding the IP address</a></li>
-                
             
                 <li class="toctree-l2"><a href="#connecting-to-a-buildax-env-sensor">Connecting to a BuildAX ENV Sensor</a></li>
+                
+                    <li><a class="toctree-l3" href="#connection-settings">Connection Settings</a></li>
                 
             
             </ul>
@@ -88,7 +88,12 @@
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="commands.html">Commands</a>
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
         
     </li>
 
@@ -187,14 +192,14 @@ will request an IP address using DHCP.</p>
 192.168.x.x. On corporate or academic networks you may need to request an
 address from your network administrator, quoting the device's MAC address. 
 They may also be able to assign a DNS address for convenient access.</p>
-<h2 id="finding-the-ip-address">Finding the IP address</h2>
+<h3 id="finding-the-ip-address">Finding the IP address</h3>
 <p>The MAC and IP address assigned to the LRS may be discovered by connecting 
 via serial and typing <code>status</code>. You may also find it useful to assign a static 
 IP address to the device for the purposes of port forwarding.</p>
 <h3 id="telnet">Telnet</h3>
 <p>Telnet can be used to access the LRS command terminal over the network 
 without needing to plug the USB cable into a PC. All of the commands listed in 
-<a href="commands.html">Commands</a> are supported.</p>
+<a href="commands-lrs.html">Commands (LRS)</a> are supported.</p>
 <p>The <code>telnet</code> command is used to connect to this console:</p>
 <pre class="prettyprint well"><code>    telnet 192.168.0.15
 </code></pre>
@@ -209,16 +214,59 @@ needing to use the text-mode terminal. </p>
 address bar. This will be in the form BAX-xxxxxx (e.g. <code>bax-434c32</code>), and can 
 be found on the sticker on the rear of the device.</p>
 <p>For information on using the web interface, please see the <a href="user-guide.html">Web Interface User Guide</a>.</p>
+<hr />
 <h1 id="connecting-to-a-buildax-env-sensor">Connecting to a BuildAX ENV Sensor</h1>
-<p><strong>TODO</strong></p>
-<p>Connecting to a BuildAX Sensor requires an FTDI cable.</p>
+<p>In order to configure settings on the BuildAX ENV sensors, you may connect 
+directly to the sensor using an FTDI cable. You will require a VCP (Virtual 
+COM port) USB driver for FTDI, available <a href="http://www.ftdichip.com/FTDrivers.htm">here</a>.</p>
+<p>This guide demonstrates how to connect to an ENV sensor using HyperTerminal.
+On other operating systems, the settings will be the same, though the procedure
+may differ.</p>
+<p>For information on flashing firmware to the device, please refer to the 
+<a href="firmware.html">Firmware</a> section.</p>
+<p>On creating a new serial connection with HyperTerminal, you should select the 
+new COM port created by the FTDI driver (this will usually be a number greater
+than COM1). </p>
+<p><img alt="Hyperterminal" src="img/envht.png" /></p>
+<p>Hyperterminal will enumerate the COM serial ports available on the system, as
+in this example. To connect using PuTTy, you will need to find the COM port
+number using the Device Manager in Windows, or use a fork of the project with
+COM enumeration. </p>
+<p>To connect on a Unix platform, the <code>screen</code> command may be 
+used along with the device path (under <code>/dev/</code>). Details of using this command
+for serial connections can be found <a href="https://wiki.archlinux.org/index.php/working_with_the_serial_console#Screen">here</a>.</p>
+<p>All connection methods will require configuration with the correct serial parameters.</p>
+<h2 id="connection-settings">Connection Settings</h2>
+<ul>
+<li><strong>Baud Rate</strong>:    115200</li>
+<li><strong>Data bits</strong>:    8</li>
+<li><strong>Parity</strong>:       None</li>
+<li><strong>Stop bits</strong>:    1</li>
+<li><strong>Flow control</strong>: None</li>
+</ul>
+<p><img alt="Hyperterminal ENV connect" src="img/envparams.png" /></p>
+<p>Select "OK", and the FTDI Serial connection will be open, ready to connect a
+ sensor.</p>
+<h3 id="connecting-to-env-sensors">Connecting to ENV sensors</h3>
+<p>To connect to an ENV sensor:</p>
+<ol>
+<li>Remove one battery from the sensor.</li>
+<li>Push the 3-pin FTDI connector onto the header (1 in the diagram below)
+    with the red wire facing away from the antenna.</li>
+</ol>
+<p><img alt="BuildAX Sensor Rear" src="img/baxsensor_rear.png" /></p>
+<p>The FTDI cable will provide a voltage to power the sensor, which should start
+up and print its status over the connected UART:</p>
+<p><img alt="ENV connected" src="img/envconnected.png" /></p>
+<p>It is safe to re-insert the battery into the sensor at any time, even while
+the device is still connected to the FTDI cable.</p>
 
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="commands.html" class="btn btn-neutral float-right" title="Commands"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="commands-lrs.html" class="btn btn-neutral float-right" title="Commands (LRS)"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
         <a href="deployment.html" class="btn btn-neutral" title="Deployment"><span class="icon icon-circle-arrow-left"></span> Previous</a>

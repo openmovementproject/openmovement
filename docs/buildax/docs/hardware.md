@@ -25,7 +25,7 @@ The BuildAX LRS includes 7 LEDs which indicate the status of the device:
   7  | Remote connection (telnet) active
 
 
-#### LED Flash Codes
+#### LRS LED Flash Codes
 
 There are a number of situations where a flashing pattern will be displayed on
 the LRS LEDs:
@@ -73,8 +73,7 @@ values:
 + PIR (Passive Infrared movement sensor)
 + Magnetic Reed Switch
 
-
-#### Front
+### Front
 
  ![Image with coin for scale](img/baxsensor.png)
 
@@ -85,7 +84,7 @@ working correctly.
 A green LED is displayed when the magnetic switch is triggered, or when the
 button inside the device is pressed to send an encryption packet.
 
-#### Rear
+### Rear
 
 The back panel of the device is removed to reveal the battery compartment and
 other components.
@@ -98,8 +97,8 @@ other components.
   2  | Pairing Button     | Press this to send the sensor's encryption packet. See [Pairing Sensors](deployment.md#pairing-sensors) for full instructions on pairing sensors to the LRS.
   3  | Antenna            | 433MHz Radio antenna for sending BuildAX sensor data to the LRS wirelessly.
   4  | Battery Holder     | Two AAA (triple A) batteries power the BuildAX sensor, expected battery life is over a year with the default configuration
-  5  | Temperature Sensor | Temperature sensor (±1% accuracy point-matched thermistor)
-  6  | Humidity Sensor    | Humidity sensor (±5% accuracy between 20-90% RH)
+  5  | Temperature Sensor | Temperature sensor (1% accuracy point-matched thermistor)
+  6  | Humidity Sensor    | Humidity sensor (5% accuracy between 20-90% RH)
 
 
 The inclusion of a magnetic switch allows the sensor to be mounted on a door
@@ -108,4 +107,73 @@ or window frame, and transmit data on whether the aperture is open or closed.
 A magnet similar to those used on cupboard doors should trigger the switch,
 and should be aligned on the opposite side of the device to the antenna.
 
+### ENV LED Flash Codes
+
+ Pattern                              | Meaning
+ ------------------------------------ | ------------------------- 
+ RED flash                            | PIR event (event detected)
+ GREEN flash                          | Magnetic switch event (either direction of magnet movement)
+ RED-GREEN-RED-GREEN-RED-GREEN flash  | Device reset(e.g. reset command or new batteries)
+ GREEN-OFF-GREEN-OFF-GREEN-OFF        | Device settings invalid or encryption+id changed (e.g. button hold + new batteries)               
+ RED dim flicker at 1 Hz              | Device battery depleted (remove depleted cells to avoid cell leakage)             
+
+
+### Device control
+
+ Pattern                              | Meaning
+ ------------------------------------ | ------------------------- 
+ Press button ( <10 seconds)          | <ul><li>    LED Flashes at 1Hz Green    </li><li>    Encryption data is transmitted at low power (short range)    </li><li>    Sensor data is transmitted at normal power    </li><li>    Full event credits are granted    </li></ul>
+ Hold button for 10 seconds           | <ul><li>    LED turns red    </li><li>    Factory default settings are latched     </li><li>    Device will reset on button release    </li></ul>
+ Connect cable and press button        | Device enters settings mode immediately
+ Insert batteries while holding button | Device factory resets AND generates new id and encryption
+
+
+--- 
+## Sensor Specification
+
+Full specification of the BuildAX ENV sensor hardware:
+
+### Battery power
+
+ * 2 standard AAA cells
+ * Battery life depends on usage and location e.g. for a 900 mAh typical alkaline battery:
+    + Sensor sample every minute + 1 event every minute = __ ~0.5 Years __
+    + Sensor sample every 5 minutes + 50 events per day = __ ~3.0 Years __
+
+### Temperature
+ * -10 to 50°C ±2°C  
+ * -7 to 47°C ±1°C
+ * 0.1°C resolution
+
+### Humidity
+ * 20 to 90% Saturation
+ * 5 to 60°C
+ * 5% accuracy
+ * 0.1% resolution
+ 
+### Light
+ * Linear sensor  with ±30% gain error max
+ * Typical gain error ±10% 
+ * Fluorecent lamp flicker filter
+ * 2 point calibration possible for more accuracy
+ * 1000 Lux range
+ * 1 Lux resolution
+
+### PIR
+ * PIR energy integrator indicates total movement
+ * PIR events count movement detections
+ * Events can trigger transmit of data 
+
+### Magnetic switch
+ * Reed switch magnetic sensor
+ * Switch events are generated when the magnetic field changes accross threshold
+ * Events can trigger transmit of data
+ * Events accumulate with LSB set to switch state.
+ * 0 = magnet present, 1 = magnet not present
+
+### Radio
+ * Si4032 433 MHz chipset
+ * Centre frequency is 434 MHz, 2GFSK 62.5KHz deviation 
+ * -96 dBm sensitivity, ±210 kHz MOD BW, +10dBm Tx power (0 - 20dBm configurable)
+ * AES encryption
 

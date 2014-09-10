@@ -65,6 +65,8 @@
                 
                     <li><a class="toctree-l3" href="#buildax-env">BuildAX ENV</a></li>
                 
+                    <li><a class="toctree-l3" href="#sensor-specification">Sensor Specification</a></li>
+                
             
             </ul>
         
@@ -86,7 +88,12 @@
     </li>
 
     <li class="toctree-l1 ">
-        <a class="" href="commands.html">Commands</a>
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
         
     </li>
 
@@ -194,7 +201,7 @@ deployment scenarios.</p>
 </tr>
 </tbody>
 </table>
-<h4 id="led-flash-codes">LED Flash Codes</h4>
+<h4 id="lrs-led-flash-codes">LRS LED Flash Codes</h4>
 <p>There are a number of situations where a flashing pattern will be displayed on
 the LRS LEDs:</p>
 <table>
@@ -291,14 +298,14 @@ values:</p>
 <li>PIR (Passive Infrared movement sensor)</li>
 <li>Magnetic Reed Switch</li>
 </ul>
-<h4 id="front">Front</h4>
+<h3 id="front">Front</h3>
 <p><img alt="Image with coin for scale" src="img/baxsensor.png" /></p>
 <p>The PIR sensor by default shows a red LED when triggered, similar to those 
 found in security/alarm systems. This indicates that the sensor node is 
 working correctly. </p>
 <p>A green LED is displayed when the magnetic switch is triggered, or when the
 button inside the device is pressed to send an encryption packet.</p>
-<h4 id="rear">Rear</h4>
+<h3 id="rear">Rear</h3>
 <p>The back panel of the device is removed to reveal the battery compartment and
 other components.</p>
 <p><img alt="BuildAX Sensor" src="img/baxsensor_rear.png" /></p>
@@ -334,12 +341,12 @@ other components.</p>
 <tr>
 <td>5</td>
 <td>Temperature Sensor</td>
-<td>Temperature sensor (±1% accuracy point-matched thermistor)</td>
+<td>Temperature sensor (1% accuracy point-matched thermistor)</td>
 </tr>
 <tr>
 <td>6</td>
 <td>Humidity Sensor</td>
-<td>Humidity sensor (±5% accuracy between 20-90% RH)</td>
+<td>Humidity sensor (5% accuracy between 20-90% RH)</td>
 </tr>
 </tbody>
 </table>
@@ -347,6 +354,119 @@ other components.</p>
 or window frame, and transmit data on whether the aperture is open or closed.</p>
 <p>A magnet similar to those used on cupboard doors should trigger the switch,
 and should be aligned on the opposite side of the device to the antenna.</p>
+<h3 id="env-led-flash-codes">ENV LED Flash Codes</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RED flash</td>
+<td>PIR event (event detected)</td>
+</tr>
+<tr>
+<td>GREEN flash</td>
+<td>Magnetic switch event (either direction of magnet movement)</td>
+</tr>
+<tr>
+<td>RED-GREEN-RED-GREEN-RED-GREEN flash</td>
+<td>Device reset(e.g. reset command or new batteries)</td>
+</tr>
+<tr>
+<td>GREEN-OFF-GREEN-OFF-GREEN-OFF</td>
+<td>Device settings invalid or encryption+id changed (e.g. button hold + new batteries)</td>
+</tr>
+<tr>
+<td>RED dim flicker at 1 Hz</td>
+<td>Device battery depleted (remove depleted cells to avoid cell leakage)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="device-control">Device control</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Press button ( &lt;10 seconds)</td>
+<td><ul><li>    LED Flashes at 1Hz Green    </li><li>    Encryption data is transmitted at low power (short range)    </li><li>    Sensor data is transmitted at normal power    </li><li>    Full event credits are granted    </li></ul></td>
+</tr>
+<tr>
+<td>Hold button for 10 seconds</td>
+<td><ul><li>    LED turns red    </li><li>    Factory default settings are latched     </li><li>    Device will reset on button release    </li></ul></td>
+</tr>
+<tr>
+<td>Connect cable and press button</td>
+<td>Device enters settings mode immediately</td>
+</tr>
+<tr>
+<td>Insert batteries while holding button</td>
+<td>Device factory resets AND generates new id and encryption</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sensor-specification">Sensor Specification</h2>
+<p>Full specification of the BuildAX ENV sensor hardware:</p>
+<h3 id="battery-power">Battery power</h3>
+<ul>
+<li>2 standard AAA cells</li>
+<li>Battery life depends on usage and location e.g. for a 900 mAh typical alkaline battery:<ul>
+<li>Sensor sample every minute + 1 event every minute = <strong> ~0.5 Years </strong></li>
+<li>Sensor sample every 5 minutes + 50 events per day = <strong> ~3.0 Years </strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="temperature">Temperature</h3>
+<ul>
+<li>-10 to 50°C ±2°C  </li>
+<li>-7 to 47°C ±1°C</li>
+<li>0.1°C resolution</li>
+</ul>
+<h3 id="humidity">Humidity</h3>
+<ul>
+<li>20 to 90% Saturation</li>
+<li>5 to 60°C</li>
+<li>5% accuracy</li>
+<li>0.1% resolution</li>
+</ul>
+<h3 id="light">Light</h3>
+<ul>
+<li>Linear sensor  with ±30% gain error max</li>
+<li>Typical gain error ±10% </li>
+<li>Fluorecent lamp flicker filter</li>
+<li>2 point calibration possible for more accuracy</li>
+<li>1000 Lux range</li>
+<li>1 Lux resolution</li>
+</ul>
+<h3 id="pir">PIR</h3>
+<ul>
+<li>PIR energy integrator indicates total movement</li>
+<li>PIR events count movement detections</li>
+<li>Events can trigger transmit of data </li>
+</ul>
+<h3 id="magnetic-switch">Magnetic switch</h3>
+<ul>
+<li>Reed switch magnetic sensor</li>
+<li>Switch events are generated when the magnetic field changes accross threshold</li>
+<li>Events can trigger transmit of data</li>
+<li>Events accumulate with LSB set to switch state.</li>
+<li>0 = magnet present, 1 = magnet not present</li>
+</ul>
+<h3 id="radio">Radio</h3>
+<ul>
+<li>Si4032 433 MHz chipset</li>
+<li>Centre frequency is 434 MHz, 2GFSK 62.5KHz deviation </li>
+<li>-96 dBm sensitivity, ±210 kHz MOD BW, +10dBm Tx power (0 - 20dBm configurable)</li>
+<li>AES encryption</li>
+</ul>
 
           </div>
           <footer>

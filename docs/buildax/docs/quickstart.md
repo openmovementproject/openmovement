@@ -21,7 +21,7 @@ The following components are required for a basic deployment:
  * Ethernet cable
 
 If you do not require network connectivity for your deployment, feel free to 
-disregard steps related to this and use the alternate [serial commands](commands.md).
+disregard steps related to this and use the alternate [serial commands](commands-lrs.md).
 
 ## LRS Setup
 
@@ -54,7 +54,7 @@ using the serial interface.
  7. Change default credentials
 
 Logging options can be set via the web interface (see [here](user-guide.md#settings))
-or via the console (see [here](commands.md#settings)).
+or via the console (see [here](commands-lrs.md#settings)).
 
 ### Video
 
@@ -71,7 +71,7 @@ Quick pairing steps:
  1. Press the button on the back of the LRS until the LEDs flash. You have 5 minutes to pair your sensors
  2. Open the BuildAX sensor. Press the button next to the battery compartment, holding the sensor close to the LRS.
  3. The LED on the front of the sensor should illuminate green to indicate that a pairing packet has been sent.
- 4. Determine if the sensor is paired using the [live data](user-guide.md#sensors) interface or [console](connecting.md#serial-usb)
+ 4. Determine if the sensor is paired using the [live data](user-guide.md#sensors) interface (or [console](connecting.md#serial-usb))
 
 Quick deployment steps:
 

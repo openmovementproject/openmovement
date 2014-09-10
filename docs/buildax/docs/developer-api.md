@@ -54,7 +54,7 @@ Equivalent `curl` command:
 ## Changing Settings
 
 Settings are passed to the server in the same format as the text command mode.
-Please refer to [commands](commands.md#settings) for a full description
+Please refer to the [LRS commands](commands-lrs.md#settings) for a full description
 of the settings commands which may be sent to the LRS. 
 
 Settings can be concatenated with an ampersand (&) in the POST body to change 

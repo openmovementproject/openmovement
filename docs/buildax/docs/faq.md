@@ -11,6 +11,8 @@ to check:
  3. Do other sensors pair correctly? Use the [live data web interface](user-guide.md#sensors) to check.
 
 
+
+---
 ## Networking issues
 
 Please read the [Network Access](connecting.md#network-access) section. Still
@@ -45,6 +47,8 @@ this is the case you will have to obtain the new MAC via the serial connection
 and re-register the device.
 
 
+
+---
 ## How do I retrieve data from the device?
 
 Please see [Fetching Data](developer-api.md#fetching-data) in the developer
@@ -53,6 +57,7 @@ connect to the LRS as a Mass Storage device, see [USB Mass Storage](connecting.m
 
 
 
+---
 ## How do I read the binary data format?
 
 The `bax2csv` utility can be used to convert the binary data format into a
@@ -60,6 +65,8 @@ usable plaintext csv format. Please read the [Data Files](datafiles.md)
 documentation for more info.
 
 
+
+---
 ## Web interface issues
 
 A number of HTTP error codes may be encountered with the web interface. The 
@@ -92,11 +99,31 @@ This error may also be seen when automating fetch requests with `wget` or
 
 
 
+---
+## I cannot connect to a device using Serial!
+
+There are a number of things you can check here:
+
+ - Am I connecting to the correct serial device (COM port in Windows)?
+ - Is the USB cable a known good (working) cable? 
+
+LRS Specific checks:
+
+ - Is LED 2 (the USB Serial status LED) lit?
+
+ENV / other BAX sensors specific checks:
+
+ - Have I installed the [driver](http://www.ftdichip.com/FTDrivers.htm) for my FTDI cable?
+ - Is my FTDI 3-pin connector connected the right way around? (Try it the other way!)
+
+
+
+---
 ## I have tried the above and still cannot solve my problem
 
 The first thing you should do is reset the router, and check if this solves
 the problem. Locally, simply unplug the device and plug it in again. 
-This can also be done remotely by [issuing the `reset` command](commands.md#reset)
+This can also be done remotely by [issuing the `reset` command](commands-lrs.md#reset)
 over telnet or serial.
 
 If this does not solve your problem, you should check if there are any 

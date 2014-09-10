@@ -35,7 +35,6 @@ later date and would otherwise be lost.
 </span>
 
 ## ENV Sensor Deployment
-
 ### ENV Sensor Range
 
 The achievable range of the sensors will depend on a number of factors,
@@ -55,6 +54,12 @@ Tips on deploying sensors in a building:
  * Walls appear "thicker" when the radio signal has to travel through them diagonally.
  * Try to avoid direct sunlight when attaching sensors to surfaces. This will skew the data they generate.
  * Also remember the position of the Sun will change throughout the day!
+
+<span class="alert alert-info">
+**Handling Sensors:** Note that after handling the ENV sensors, the humidity/temperature reading will
+be biased by the temperature of your hands. This will settle again after 5 
+minutes or so.
+</span>
 
 #### RSSI
 
