@@ -34,13 +34,15 @@ namespace OmGui
                 // Command-line options
                 string logFile = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + "log.txt";
                 string configDumpFile = null; // Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + "dump.csv";
+                string downloadDumpFile = null;
 
                 int positional = 0;
                 int uac = 0;
                 for (int i = 0; i < args.Length; i++)
                 {
                     if (args[i].ToLower() == "-log") { logFile = args[++i]; }
-                    else if (args[i].ToLower() == "-dump") { configDumpFile = args[++i]; }
+                    else if (args[i].ToLower() == "-configlog" || args[i].ToLower() == "-dump") { configDumpFile = args[++i]; }
+                    else if (args[i].ToLower() == "-downloadlog") { downloadDumpFile = args[++i]; }
                     else if (args[i].ToLower() == "-uac:none") { uac = 0; }
                     else if (args[i].ToLower() == "-uac:ask")     { uac = 1; }
                     else if (args[i].ToLower() == "-uac:always")  { uac = 2; }
@@ -64,7 +66,7 @@ namespace OmGui
                     }
                 }
 
-                MainForm mainForm = new MainForm(uac, configDumpFile);
+                MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile);
                 //mainForm.LogFile = logFile;
 
                 Application.Run(mainForm);
