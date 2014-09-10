@@ -91,9 +91,11 @@ namespace OmGui
         }
 
         private string configDumpFile = null;
-        public MainForm(int uac, string myConfigDumpFile)
+        private string downloadDumpFile = null;  
+        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile)
         {
             this.configDumpFile = myConfigDumpFile;
+            downloadDumpFile = myDownloadDumpFile;
 
             if (uac == 1)
             {
@@ -178,6 +180,30 @@ namespace OmGui
 
             filesListView.FullRowSelect = true;
         }
+
+        // /*OmDevice*/ public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
+        public void DownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename)
+        {
+            if (downloadDumpFile != null)
+            {
+                try
+                {
+                    StreamWriter sw = File.AppendText(downloadDumpFile);
+                    string timeNow, type;
+
+                    timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    type = "DOWNLOAD-OK";
+
+                    sw.WriteLine("" + timeNow + "," + type + "," + Path.GetFileName(filename));
+                    sw.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Warning: Problem while appending to dump file: " + ex.Message);
+                }
+            }
+        }
+
 
         #region List View Column Sorting
 
@@ -664,6 +690,7 @@ namespace OmGui
                     //Clicked OK and want to download.
                     if (deviceError == null)
                     {
+                        device.downloadComplete = DownloadCompleteCallback;
                         device.BeginDownloading(downloadFilename, finalFilename);
 
                         //TS - Device downloaded because user clicked OK.

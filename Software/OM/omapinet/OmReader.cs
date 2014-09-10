@@ -131,7 +131,7 @@ namespace OmApiNet
             Light = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_LIGHT);
             Temp = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_TEMPERATURE_MC);
             Batt = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY_PERCENT);
-            BattRaw = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY);
+            BattRaw = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY_MV);
 
             return samples;
         }

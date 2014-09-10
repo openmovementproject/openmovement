@@ -12,6 +12,9 @@ namespace OmApiNet
         private bool hasChanged;
         public DateTime lastBatteryUpdate = DateTime.MinValue;
 
+        public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
+        public OmDeviceDownloadCompleteCallback downloadComplete = null;
+
         public OmDevice(Om om, ushort deviceId)
         {
             this.om = om;
@@ -323,6 +326,13 @@ Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId);
                 {
                     File.Move(downloadFilename, downloadFilenameRename);
                 }
+
+                if (downloadComplete != null)
+                {
+                    string fn = ((downloadFilenameRename != null) ? downloadFilenameRename : downloadFilename);
+                    downloadComplete(this.deviceId, OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_COMPLETE, fn);
+                }
+
             }
         }
 

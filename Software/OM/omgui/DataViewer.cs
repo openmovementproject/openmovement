@@ -172,6 +172,20 @@ namespace OmGui
                     Pen penDataBattPercent = new Pen(Color.FromArgb(96, Color.DarkCyan));
                     Pen penDataBattRaw = new Pen(Color.FromArgb(96, Color.LightCyan));
 
+                    //Pen evenDayEvenHour = new Pen(Color.FromArgb(0xc8, 0xc8, 0xc8));
+                    //Pen evenDayOddHour  = new Pen(Color.FromArgb(0xc0, 0xc0, 0xc0));
+                    //Pen oddDayEvenHour  = new Pen(Color.FromArgb(0xb8, 0xb8, 0xb8));
+                    //Pen oddDayOddHour   = new Pen(Color.FromArgb(0xb0, 0xb0, 0xb0));
+
+                    Pen[] penHours = new Pen[24];
+                    for (int hour = 0; hour < 24; hour++)
+                    {
+                        byte v = (byte)(204 - hour);
+                        if ((hour & 1) == 0) { v += 10; }
+                        penHours[hour] = new Pen(Color.FromArgb(v, v, v));
+                    }
+
+
                     // Fade-zoom
                     //int fadedA = (int)(255 * (1.0f - animate));
                     //if (fadedA < 0) { fadedA = 0; }
@@ -216,6 +230,38 @@ namespace OmGui
                                 }
                                 */
 
+                                if (checkBoxTime.Checked)
+                                {
+                                    Pen background = penHours[aggregate.Min.T.Hour];
+
+                                    /*
+                                    if (((int)(aggregate.Min.T.Ticks / TimeSpan.TicksPerDay) & 1) != 0)
+                                    {
+                                        if (((int)(aggregate.Min.T.Ticks / TimeSpan.TicksPerHour) & 1) != 0)
+                                        {
+                                            background = evenDayEvenHour;
+                                        }
+                                        else
+                                        {
+                                            background = evenDayOddHour;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (((int)(aggregate.Min.T.Ticks / TimeSpan.TicksPerHour) & 1) != 0)
+                                        {
+                                            background = oddDayEvenHour;
+                                        }
+                                        else
+                                        {
+                                            background = oddDayOddHour;
+                                        }
+                                    }
+                                    */
+                                    g.DrawLine(background, x, 0, x, 0 + myBitmap.Height - 1);
+                                }
+
+
                                 float center = 0.5f;
                                 float scale = 0.10f;
 
@@ -231,7 +277,7 @@ namespace OmGui
                                 if (displayLight) { float height = ((aggregate.Max.Light - aggregate.Min.Light) / 1024.0f);     g.DrawRectangle(penDataLight, x, (1.0f - (height + aggregate.Min.Light / 1024.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                                 if (displayTemp) { float height = -0.02f * (aggregate.Max.Temp - aggregate.Min.Temp) / 1000.0f; g.DrawRectangle(penDataTemp,  x, (1.0f - (height + 0.02f * aggregate.Min.Temp / 1000.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                                 if (displayBattPercent) { float height = (aggregate.Max.BattPercent - aggregate.Min.BattPercent + 1) / 102.0f; g.DrawRectangle(penDataBattPercent, x, (1.0f - (height + (aggregate.Min.BattPercent + 1) / 102.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
-                                if (displayBattRaw) { float height = (aggregate.Max.BattRaw - aggregate.Min.BattRaw + 1) / 102.0f; g.DrawRectangle(penDataBattRaw, x, (1.0f - (height + (aggregate.Min.BattRaw + 1) / 1024.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
+                                if (displayBattRaw) { float height = (aggregate.Max.BattRaw - aggregate.Min.BattRaw + 1) / 4250.0f; g.DrawRectangle(penDataBattRaw, x, (1.0f - (height + (aggregate.Min.BattRaw + 1) / 4250.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                             }
                             else
                             {
@@ -411,10 +457,16 @@ namespace OmGui
             return (float)graphPanel.Width * (block - aFirstBlock) / aNumBlocks;
         }
 
-        public DateTime TimeForBlock(float block)
+        public Aggregate AggregateForBlock(float block)
         {
             float tolerance;
             Aggregate aggregate = dataBlockCache.GetAggregate(block, block, out tolerance);
+            return aggregate;
+        }
+
+        public DateTime TimeForBlock(float block)
+        {
+            Aggregate aggregate = AggregateForBlock(block);
             return aggregate.Min.T;
         }
 
@@ -542,7 +594,20 @@ namespace OmGui
                 {
                     lastLocation = e.Location;
 
-                    graphPanel.SetCursor(e.X, TimeString(TimeForBlock(blockAtCursor)));
+                    String label = "";
+                    label += TimeString(TimeForBlock(blockAtCursor));
+
+                    //if (checkBoxX.Checked) { label = label + "\r\nX: " + AggregateForBlock(blockAtCursor).Avg.X + " g"; }
+                    //if (checkBoxY.Checked) { label = label + "\r\nY: " + AggregateForBlock(blockAtCursor).Avg.Y + " g"; }
+                    //if (checkBoxZ.Checked) { label = label + "\r\nZ: " + AggregateForBlock(blockAtCursor).Avg.Z + " g"; }
+                    //if (checkBoxAccel.Checked) { label = label + "\r\nAccel: " + AggregateForBlock(blockAtCursor).Avg.Amplitude + " g"; }
+                    if (checkBoxLight.Checked) { label = label + "\r\nLight: " + AggregateForBlock(blockAtCursor).Avg.Light + ""; }
+                    if (checkBoxTemp.Checked) { label = label + "\r\nTemp: " + (AggregateForBlock(blockAtCursor).Avg.Temp / 1000) + " ^C"; }
+                    if (checkBoxBattPercent.Checked) { label = label + "\r\nBatt: " + AggregateForBlock(blockAtCursor).Avg.BattPercent + " %"; }
+                    if (checkBoxBattRaw.Checked) { label = label + "\r\nBatt: " + (AggregateForBlock(blockAtCursor).Avg.BattRaw / 1000) + " V"; }
+
+
+                    graphPanel.SetCursor(e.X, label);
 
                     /*
                     if (aggregate.Min.T > DateTime.MinValue)
@@ -727,6 +792,11 @@ namespace OmGui
             if (bitmapDirty) { Refresh(); }
         }
 
+        private void checkBoxTime_CheckedChanged(object sender, EventArgs e)
+        {
+            Refresh();
+        }
+
     }
 
 
@@ -774,6 +844,8 @@ namespace OmGui
                 Font font = SystemFonts.DefaultFont;
                 Size stringSize = e.Graphics.MeasureString(s, font).ToSize();
                 Point point = new Point((int)(cursorPos - stringSize.Width / 2), this.Height - stringSize.Height - 5);
+                if (point.X < 0) { point.X = 0; }
+                if (point.X > Width - stringSize.Width) { point.X = Width - stringSize.Width; }
                 e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x64, Color.FromKnownColor(KnownColor.Info))), new RectangleF(point, stringSize));
                 e.Graphics.DrawRectangle(Pens.Black, new Rectangle(point, stringSize));
                 e.Graphics.DrawString(s, font, SystemBrushes.InfoText, point);
@@ -850,6 +922,25 @@ namespace OmGui
         public bool present;
         public Sample Min;
         public Sample Max;
+        public Sample Avg
+        {
+            get
+            {
+                return Sample.Interpolate(Min, Max, 0.5f);
+                /*
+                Sample sample;
+                sample.BattPercent = (Min.BattPercent + Max.BattPercent) / 2;
+                sample.BattRaw = (Min.BattRaw + Max.BattRaw) / 2;
+                sample.Light = (Min.Light + Max.Light) / 2;
+                sample.T = new DateTime((Min.T.Ticks + Max.T.Ticks) / 2);
+                sample.Temp = (Min.Temp + Max.Temp) / 2;
+                sample.X = (Min.X + Max.X) / 2;
+                sample.Y = (Min.Y + Max.Y) / 2;
+                sample.Z = (Min.Z + Max.Z) / 2;
+                return sample;
+                */
+            }
+        }
         public static readonly Aggregate Zero = new Aggregate();
         
         public void Add(Sample sample)
