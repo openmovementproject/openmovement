@@ -36,6 +36,12 @@ LED not being lit:
  * Network not assigning IP address
  * Bad Ethernet cable
 
+Some gigabit unmanaged switches can also cause this behaviour (observed with a 
+Netgear GS108). The ethernet chip (enc28j60) used by the BuildAX LRS runs at
+10 Megabits/second, and some unmanaged switches do not negotiate the speed and 
+wire protocol of a 10M connection properly. Trying a different cable (for 
+example, CAT5 instead of 5e or 6) may mitigate this problem (untested).
+
 
 #### Corporate/Academic Networks
 
@@ -109,13 +115,13 @@ There are a number of things you can check here:
 
 LRS Specific checks:
 
+ - Have I installed a USB Serial driver?
  - Is LED 2 (the USB Serial status LED) lit?
 
 ENV / other BAX sensors specific checks:
 
  - Have I installed the [driver](http://www.ftdichip.com/FTDrivers.htm) for my FTDI cable?
- - Is my FTDI 3-pin connector connected the right way around? (Try it the other way!)
-
+ - Are the 3 pins of my FTDI connector connected in the [correct order](connecting.md#connecting-to-env-sensors)?
 
 
 ---

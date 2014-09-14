@@ -23,6 +23,7 @@ The following components are required for a basic deployment:
 If you do not require network connectivity for your deployment, feel free to 
 disregard steps related to this and use the alternate [serial commands](commands-lrs.md).
 
+
 ## LRS Setup
 
 <span class="alert alert-info"> 
@@ -32,12 +33,12 @@ than the USB mains power adapter) in order to troubleshoot network connectivity
 using the serial interface.
 </span>
 
+
 ### Pre-deployment steps:
 
+ * Download the [Web Interface zip file](https://code.google.com/p/openmovement/wiki/Downloads) found in the Downloads section of the OpenMovement repository to your computer
+ * Extract the files (keeping them inside the "WWW" directory) to the root of your SD card, using a card reader
 
- * Download the WWW files to your computer
- * Extract the files 
- * Drag & Drop “WWW" directory to the main (root) level of your SD card
 
 ### Setting up:
 

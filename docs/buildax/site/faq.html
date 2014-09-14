@@ -186,6 +186,11 @@ LED not being lit:</p>
 <li>Network not assigning IP address</li>
 <li>Bad Ethernet cable</li>
 </ul>
+<p>Some gigabit unmanaged switches can also cause this behaviour (observed with a 
+Netgear GS108). The ethernet chip (enc28j60) used by the BuildAX LRS runs at
+10 Megabits/second, and some unmanaged switches do not negotiate the speed and 
+wire protocol of a 10M connection properly. Trying a different cable (for 
+example, CAT5 instead of 5e or 6) may mitigate this problem (untested).</p>
 <h4 id="corporateacademic-networks">Corporate/Academic Networks</h4>
 <p>Are you on a corporate/academic network? Your network administrator may 
 require that the device MAC address is registered before it can be assigned an 
@@ -237,12 +242,13 @@ exist on the LRS, for example:</p>
 </ul>
 <p>LRS Specific checks:</p>
 <ul>
+<li>Have I installed a USB Serial driver?</li>
 <li>Is LED 2 (the USB Serial status LED) lit?</li>
 </ul>
 <p>ENV / other BAX sensors specific checks:</p>
 <ul>
 <li>Have I installed the <a href="http://www.ftdichip.com/FTDrivers.htm">driver</a> for my FTDI cable?</li>
-<li>Is my FTDI 3-pin connector connected the right way around? (Try it the other way!)</li>
+<li>Are the 3 pins of my FTDI connector connected in the <a href="connecting.html#connecting-to-env-sensors">correct order</a>?</li>
 </ul>
 <hr />
 <h2 id="i-have-tried-the-above-and-still-cannot-solve-my-problem">I have tried the above and still cannot solve my problem</h2>
