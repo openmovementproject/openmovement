@@ -4,7 +4,7 @@
 # Commands
 
 This document summarizes the serial command set of the BuildAX-LRS. The serial 
-command set is also available through the remote `telnet` interface and through
+command set is available through the remote `telnet` interface and through
 the USB CDC (Communication Device Class) serial port. The command set and 
 responses are subject to change as the open source BuildAX project expands. 
 

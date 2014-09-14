@@ -66,3 +66,28 @@ The data portion of the packet (darkest part in the diagram) is the part which
 will vary depending on the packet type. This diagram shows a packet from a 
 BuildAX environment sensor (types 1,2,3), which would vary with (for example)
 a CO2 sensor.
+
+## Other Files
+
+There are a number of different files on the SD card which are used by the LRS:
+
+ * `BAX_INFO.BIN`
+    + This binary file contains 16-byte long entries for each sensor paired
+      with the LRS. Contains the encryption key (5 bytes), and the name of each
+      sensor (11 bytes).
+ * `ERRORS.TXT`
+    + Error log for the router. Although this file is named "Errors", it is also 
+      used for logging a timestamp and reset code each time the router is powered
+      on (e.g. reset due to power loss).
+ * `DATxxxxx.BIN`
+    + Data files containing logged _binary_ sensor data
+ * `LOGxxxxx.TXT`
+    + Text files containing logged _plaintext_ sensor data
+ * `BAX_SURV.BMP`
+    + (Specialist option). If the LRS is flashed with a firmware supporting
+      radio-survey mode, it will generate this file containing a survey of
+      the radio spectrum noise at your location. Note that the router is not
+      currently distributed with this firmware as it is a specialist option.
+
+
+

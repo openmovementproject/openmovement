@@ -115,7 +115,7 @@ On creating a new serial connection with HyperTerminal, you should select the
 new COM port created by the FTDI driver (this will usually be a number greater
 than COM1). 
 
- ![Hyperterminal](img/envht.png)
+![Hyperterminal](img/envht.png)
 
 Hyperterminal will enumerate the COM serial ports available on the system, as
 in this example. To connect using PuTTy, you will need to find the COM port
@@ -137,26 +137,36 @@ All connection methods will require configuration with the correct serial parame
  * __Stop bits__:    1
  * __Flow control__: None
 
- ![Hyperterminal ENV connect](img/envparams.png)
+![Hyperterminal ENV connect](img/envparams.png)
 
  Select "OK", and the FTDI Serial connection will be open, ready to connect a
  sensor.
 
 ### Connecting to ENV sensors
 
+Starting from the corner of the sensor and working inwards, the following FTDI
+wires should be connected to the 3-pin connector:
+
+ 1. Orange (pin 1)
+ 2. Black  (pin 2)
+ 3. Yellow (pin 3)
+
+Your FTDI cable may also have Red, Brown and Green wires, these are not 
+used by the ENV sensor and should be left disconnected.
+
 To connect to an ENV sensor:
 
- 1. Remove one battery from the sensor.
- 2. Push the 3-pin FTDI connector onto the header (1 in the diagram below)
-    with the red wire facing away from the antenna.
- 
- ![BuildAX Sensor Rear](img/baxsensor_rear.png)
+ 0. Insert batteries into the sensor (if they are not already inserted)
+ 1. Push the 3 pins (listed above) of the FTDI connector onto the header 
+    ([see item __1__ here](hardware.md#rear)), with the orange wire on pin 1.
+ 2. Press the sensor button ([see item __2__ here](hardware.md#rear)) to enter into command mode.
+ 3. Watch your command terminal. The sensor should start up and print its status over the connected UART:
 
-The FTDI cable will provide a voltage to power the sensor, which should start
-up and print its status over the connected UART:
+![ENV connected](img/envconnected.png)
 
- ![ENV connected](img/envconnected.png)
+Note that while the FTDI cable will provide a voltage and power the sensor, 
+it is recommended that batteries are left in the device while the the serial 
+connection is accessed. 
 
-It is safe to re-insert the battery into the sensor at any time, even while
-the device is still connected to the FTDI cable.
+
 
