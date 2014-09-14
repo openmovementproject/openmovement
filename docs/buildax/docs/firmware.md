@@ -10,6 +10,8 @@ document describes the process of flashing the devices with updated firmware.
  bootloader application which has a bug) you could render it permanently unusable!
 </span>
 
+Tested bootloader software for the BAX devices is provided for Windows OSes
+in the OpenMovement repository [here](http://openmovement.googlecode.com/svn/downloads/BuildAX/)
 
 
 ## BuildAX LRS
