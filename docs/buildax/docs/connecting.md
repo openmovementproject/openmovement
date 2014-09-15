@@ -10,20 +10,26 @@ interface.
 
 ## Serial (USB)
 
+<span class="alert alert-info"> 
+**Driver:** On first-time use, the USB CDC serial driver will need to be installed. 
+([Download the CDC driver](http://openmovement.googlecode.com/svn/downloads/BuildAX/LRS-serial-driver.zip)).
+</span>
+
 The serial connection is available when the LRS is directly connected to a 
 PC via the USB cable. To access a serial connection, some additional (free)
 software is required. We have tested using the following apps on these 
 platforms:
 
+ * __Cross-platform__: [CoolTerm](http://freeware.the-meiers.org/)
  * __Windows__: [Hyperterminal](#),[PuTTy](http://www.chiark.greenend.org.uk/~sgtatham/putty/)
- * __Linux__ / __Mac OSX__: [GNU screen](http://www.gnu.org/software/screen/), [CoolTerm](http://freeware.the-meiers.org/)
+ * __Linux__ / __Mac OSX__: [GNU screen](http://www.gnu.org/software/screen/)
 
 
 
 ### Microsoft Windows
 
 The device will appear as a COM port on Windows (can be found in the Device 
-Manager, Hyperterminal will also enumerate serial ports). The COM port number 
+Manager, Hyperterminal and CoolTerm will also enumerate serial ports). The COM port number 
 will usually be COM2 or above (COM1 is now a virtual interface on modern 
 Windows).
 

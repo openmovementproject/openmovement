@@ -160,17 +160,22 @@
 two categories: a text-mode command interface, and a web configuration 
 interface.</p>
 <h2 id="serial-usb">Serial (USB)</h2>
+<p><span class="alert alert-info"> 
+<strong>Driver:</strong> On first-time use, the USB CDC serial driver will need to be installed. 
+(<a href="http://openmovement.googlecode.com/svn/downloads/BuildAX/LRS-serial-driver.zip">Download the CDC driver</a>).
+</span></p>
 <p>The serial connection is available when the LRS is directly connected to a 
 PC via the USB cable. To access a serial connection, some additional (free)
 software is required. We have tested using the following apps on these 
 platforms:</p>
 <ul>
+<li><strong>Cross-platform</strong>: <a href="http://freeware.the-meiers.org/">CoolTerm</a></li>
 <li><strong>Windows</strong>: <a href="#">Hyperterminal</a>,<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTy</a></li>
-<li><strong>Linux</strong> / <strong>Mac OSX</strong>: <a href="http://www.gnu.org/software/screen/">GNU screen</a>, <a href="http://freeware.the-meiers.org/">CoolTerm</a></li>
+<li><strong>Linux</strong> / <strong>Mac OSX</strong>: <a href="http://www.gnu.org/software/screen/">GNU screen</a></li>
 </ul>
 <h3 id="microsoft-windows">Microsoft Windows</h3>
 <p>The device will appear as a COM port on Windows (can be found in the Device 
-Manager, Hyperterminal will also enumerate serial ports). The COM port number 
+Manager, Hyperterminal and CoolTerm will also enumerate serial ports). The COM port number 
 will usually be COM2 or above (COM1 is now a virtual interface on modern 
 Windows).</p>
 <h3 id="linux-osx-nix-platforms">Linux, OSX (*nix platforms)</h3>
