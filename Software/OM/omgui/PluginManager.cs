@@ -34,19 +34,26 @@ namespace OmGui
 
             try
             {
-                string[] pluginPaths = Directory.GetDirectories(Properties.Settings.Default.CurrentPluginFolder);
-
-                foreach (string pluginPath in pluginPaths)
+                if (Directory.Exists(Properties.Settings.Default.CurrentPluginFolder))
                 {
-                    Plugin p = Plugin.CreatePlugin(pluginPath);
+                    string[] pluginPaths = Directory.GetDirectories(Properties.Settings.Default.CurrentPluginFolder);
 
-                    if (p != null)
-                        Plugins.Add(p);
+                    foreach (string pluginPath in pluginPaths)
+                    {
+                        Plugin p = Plugin.CreatePlugin(pluginPath);
+
+                        if (p != null)
+                            Plugins.Add(p);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Could not find plugin directory: " + Properties.Settings.Default.CurrentPluginFolder, "Plugins Error");
                 }
             }
-            catch (DirectoryNotFoundException e)
+            catch (Exception e)
             {
-                MessageBox.Show("Could not find plugin directory (" + e.Message + "): " + Properties.Settings.Default.CurrentPluginFolder, "Plugins Error");
+                MessageBox.Show("Problem while listing plugins (" + e.Message + ") from directory: " + Properties.Settings.Default.CurrentPluginFolder, "Plugins Error");
             }
         }
 

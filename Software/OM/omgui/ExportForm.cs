@@ -14,7 +14,7 @@ namespace OmGui
     public partial class ExportForm : Form
     {
         // Conversion Executable
-        public const string EXECUTABLE_NAME = @"cwa-convert.exe";
+        public const string EXECUTABLE_NAME = @"Plugins\Convert_CWA\cwa-convert.exe";
 
         public ExportForm(string inputFilename, string downloadPath, float blockStart, float blockCount)
         {
