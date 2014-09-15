@@ -354,11 +354,13 @@ namespace OmGui
             {
                 img = (int)device.LedColor;
                 if (img < 0 || img > 8) { img = 8; }
+                
+                bool hasData = false;
 
                 if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_CANCELLED) { download = "Cancelled"; }
                 else if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_COMPLETE) { download = "Complete"; }
                 else if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_ERROR) { download = string.Format("Error (0x{0:X})", device.DownloadValue); }
-                else if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_PROGRESS) { download = "" + device.DownloadValue + "%"; }
+                else if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_PROGRESS) { download = "" + device.DownloadValue + "%"; hasData = true; }
                 //else if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_NONE) { download = "-"; }
 
                 if (device.StartTime >= device.StopTime) { recording = "Stopped"; }
@@ -368,7 +370,8 @@ namespace OmGui
                     recording = string.Format("Interval {0:dd/MM/yy HH:mm:ss}-{1:dd/MM/yy HH:mm:ss}", device.StartTime, device.StopTime);
                 }
 
-                if (device.HasData)
+                if (!hasData) { hasData = device.HasData; }
+                if (hasData)
                 {
                     recording += " (with data)";
                 }
@@ -456,6 +459,8 @@ namespace OmGui
                 return;
             }
 
+Console.WriteLine("START: deviceManager_DeviceUpdate()...");
+
             // Values
             ushort deviceId = e.Device.DeviceId;
             //bool connected = e.Device.Connected;
@@ -476,6 +481,8 @@ namespace OmGui
 
                 devicesListViewUpdateEnabled();
             }
+Console.WriteLine("END: deviceManager_DeviceUpdate()...");
+
 
         }
 
@@ -517,10 +524,11 @@ namespace OmGui
             //If the device has been removed.
             if (device is OmDevice && !((OmDevice)device).Connected)
             {
-                //TODO - Dataviewer clear.
-
                 listViewDevices.Remove(device.DeviceId);
                 devicesListView.Items.Remove(item);
+
+                // Force dataViewer to reset
+                listViewDevices_SelectedIndexChanged(null, null);
             }
 
             //UpdateEnabled();
@@ -616,6 +624,9 @@ namespace OmGui
 
         private void toolStripButtonDownload_Click(object sender, EventArgs e)
         {
+Console.WriteLine("toolStripButtonDownload_Click() STARTED...");
+            dataViewer.CancelPreview();
+    
             //TS - Recording how many are downloading from selected items to display in prompt.
             int numDevicesDownloaded = 0;
             //int numDevicesNotDownloaded = 0;
@@ -734,6 +745,7 @@ namespace OmGui
 
             //    MessageBox.Show(message, "Download Status", MessageBoxButtons.OK);
             //}
+Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         }
 
         //TS - [P] - Updates toolstrip buttons based on what has been selected in devicesListView
@@ -875,6 +887,7 @@ namespace OmGui
                 foreach (ListViewItem item in devicesListView.SelectedItems)
                 {
                     OmDevice device = (OmDevice)item.Tag;
+                    bool hasData;
 
                     numTotal++;
 
@@ -883,12 +896,17 @@ namespace OmGui
                     if (device.DownloadStatus == OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_PROGRESS)
                     {
                         numDownloading++;
+                        hasData = true;
                     }
- 
-                    //HASDATA
-                    //If it has data then some have data.
-                    if (device.HasData)
+                    else 
                     {
+                        hasData = device.HasData;
+                    }
+
+                    if (hasData)
+                    {
+                        //HASDATA
+                        //If it has data then some have data.
                         numData++;
                     }
 
@@ -904,7 +922,7 @@ namespace OmGui
                     //    numFutureRecording++;
                     //}
 
-                    if ((device.HasData && (device.StartTime >= device.StopTime || device.StopTime < now)) || (!device.HasData && device.StartTime < device.StopTime))
+                    if ((hasData && (device.StartTime >= device.StopTime || device.StopTime < now)) || (!hasData && device.StartTime < device.StopTime))
                     {
                         numDataAndStoppedOrNoDataAndConfigured++;
                     }
@@ -974,7 +992,7 @@ namespace OmGui
             propertyGridDevice.SelectedObjects = selected;
 
             //TS - [P] - If there is one device selected then open it in the dataViewer
-            if (selected.Length == 1 && selected[0] is OmDevice && ((OmDevice)selected[0]).Connected)
+            if (selected.Length == 1 && selected[0] is OmDevice && ((OmDevice)selected[0]).Connected && !((OmDevice)selected[0]).IsDownloading)
             {
                 dataViewer.Open(selected[0].DeviceId);
             }
@@ -1689,6 +1707,9 @@ namespace OmGui
                     //Cursor.Current = Cursors.Default;
                 }
             }
+
+            // Force dataViewer to reset
+            listViewDevices_SelectedIndexChanged(null, null);
         }
 
         private void ShowProgressWithBackground(string title, string message, BackgroundWorker backgroundWorker)
@@ -3365,6 +3386,11 @@ Application.DoEvents();
                 }
             }
             BackgroundTaskStatus(false);
+        }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportDataConstruct();
         } 
 
     }

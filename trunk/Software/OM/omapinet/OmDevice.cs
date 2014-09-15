@@ -133,6 +133,8 @@ category = SourceCategory.Other;
         {
             get
             {
+                if (IsDownloading) { return true; }     // Otherwise the below code seems very costly while downloading from a device
+
                 string fName = "";
                 StringBuilder filenamesb = new StringBuilder(256);
                 if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
@@ -166,6 +168,7 @@ category = SourceCategory.Other;
         {
             get 
             {
+                if (IsDownloading) { return true; }     // Otherwise code below is very costly while downloading
                 if (Filename == null) { Console.Error.WriteLine("ERROR: Problem getting filename attributes for device " + deviceId + " with unknown data file name."); return false; }
                 try
                 {
