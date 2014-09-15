@@ -53,6 +53,15 @@ this is the case you will have to obtain the new MAC via the serial connection
 and re-register the device.
 
 
+#### Have you just flashed new firmware to the device?
+
+It is possible that when the firmware is written to the device and the device
+reset, the MAC address which the LRS uses to negotiate with the network will
+be re-generated. To do this intentionally, hold down the button on the LRS when 
+clicking "Run Application" from the bootloader app.
+
+To change the MAC address, use the [`mac!` command](commands-lrs.md#mac)
+followed by `setting.save` and `reset`.
 
 ---
 ## How do I retrieve data from the device?
