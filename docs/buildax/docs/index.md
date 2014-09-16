@@ -20,21 +20,10 @@ BuildAX resources and downloads are available in the OpenMovement subversion
 repository ([click here](http://openmovement.googlecode.com/svn/downloads/BuildAX/)),
 including firmware and utilities.
 
-
-## TODO Documentation
-
-This documentation is currently being written and will be incrementally updated.  
-
-Video documentation to be done:
-
- * Quickstart
-    + Router Setup
-    + Pairing
-
-APIs still to be documented:
+## APIs yet to be documented
 
  * UDP connection
- * Power Switch – PSW
+ * Actuators / Power Switches
 
 For our other other projects, please visit the [Open Movement](https://code.google.com/p/openmovement/) repository.
 
