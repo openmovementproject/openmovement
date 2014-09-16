@@ -1,7 +1,7 @@
 
 [//]: # (BuildAX Hardware walkthrough, including the LRS and sensors)
 
-# LRS
+# BuildAX LRS
 The BuildAX LRS (Logger Router Server) is primarily a data-logger , but has 
 a lot of extra functionality which you may find useful in a wide range of
 deployment scenarios.

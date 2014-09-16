@@ -59,9 +59,9 @@ or via the console (see [here](commands-lrs.md#settings)).
 
 ### Video
 
-**TODO**
+<iframe width="560" height="315" src="//www.youtube.com/embed/8GK42VeqjOI" frameborder="0" allowfullscreen></iframe>
 
- <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe>
+
 
 ## Pair/Deploy ENV Sensors
 
@@ -83,8 +83,6 @@ Quick deployment steps:
 
 ### Video
 
-**TODO**
-
- <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="//www.youtube.com/embed/eoTs1xR43Pc" frameborder="0" allowfullscreen></iframe>
 
 You're done!
