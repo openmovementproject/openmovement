@@ -50,9 +50,8 @@ stage. Note that this may result in the LRS not being able to access the
 network if you have used the device's old MAC address to assign it an IP.
 
 ### Video
-**TODO**
 
- <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="//www.youtube.com/embed/pa5SAfqBDH0" frameborder="0" allowfullscreen></iframe>
 
 
 
@@ -100,7 +99,6 @@ mode.
 
 
 ### Video
-**TODO**
 
- <iframe width="560" height="315" src="//www.youtube.com/embed/dZBaF6EE0Cc" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="//www.youtube.com/embed/jz1PkleHc5E" frameborder="0" allowfullscreen></iframe>
 

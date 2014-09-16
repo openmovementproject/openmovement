@@ -1,7 +1,7 @@
 
 # BuildAX Documentation
 
-The BuildAX family of wireless monitoring devices comprises of sensors, 
+The BuildAX family of wireless environmental monitoring devices comprises of sensors, 
 actuators and a logger/router made available under an open license. The devices
 were developed within a joint research project undertaken by Newcastle 
 University's [Digital Interaction Group](http://di.ncl.ac.uk/) and 
@@ -14,25 +14,28 @@ monitoring, and are fully compatible with the Open Source
 to deploy ‘eServices’ for systems conditions monitoring, occupant feedback, 
 performance certification and the like.
 
+## Downloads
+
+BuildAX resources and downloads are available in the OpenMovement subversion 
+repository ([click here](http://openmovement.googlecode.com/svn/downloads/BuildAX/)),
+including firmware and utilities.
+
 
 ## TODO Documentation
 
 This documentation is currently being written and will be incrementally updated.  
 
-General documentation to be done:
+Video documentation to be done:
 
- * Videos:
-    - Quickstart
-        + Router Setup
-        + Pairing
-        + Deploying
-    - Bootloading 
-        + Router
-        + Sensor
+ * Quickstart
+    + Router Setup
+    + Pairing
 
-Other items
+APIs still to be documented:
 
  * UDP connection
  * Power Switch – PSW
 
 For our other other projects, please visit the [Open Movement](https://code.google.com/p/openmovement/) repository.
+
+

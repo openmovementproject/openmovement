@@ -198,6 +198,13 @@ address. When programming firmware it is possible to reset the MAC address by
 holding down the button and clicking "Run Program" in the bootloader tool. If
 this is the case you will have to obtain the new MAC via the serial connection
 and re-register the device.</p>
+<h4 id="have-you-just-flashed-new-firmware-to-the-device">Have you just flashed new firmware to the device?</h4>
+<p>It is possible that when the firmware is written to the device and the device
+reset, the MAC address which the LRS uses to negotiate with the network will
+be re-generated. To do this intentionally, hold down the button on the LRS when 
+clicking "Run Application" from the bootloader app.</p>
+<p>To change the MAC address, use the <a href="commands-lrs.html#mac"><code>mac!</code> command</a>
+followed by <code>setting.save</code> and <code>reset</code>.</p>
 <hr />
 <h2 id="how-do-i-retrieve-data-from-the-device">How do I retrieve data from the device?</h2>
 <p>Please see <a href="developer-api.html#fetching-data">Fetching Data</a> in the developer
