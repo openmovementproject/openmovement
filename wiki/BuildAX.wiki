@@ -2,7 +2,11 @@
 
 = Open Movement - BuildAX Building Monitoring =
 
-The BuildAX wireless sensors measure building environment/occupancy and include temperature, humidity, light and movement.  (V1 sensors include acoustic noise, V2 sensors include a door opening sensor).
+The BuildAX wireless sensors measure building environment/occupancy and include temperature, humidity, light and movement.
+
+The BuildAX family of sensors, actuators and a logger/router are made available under an open license.  The devices were developed within a joint research project undertaken by Newcastle University's Digital Interaction Group and Sir Joseph Swan Centre for Energy Research and Strathclyde University's Energy Systems Research Unit.
+
+The devices can be rapidly deployed to enable low cost built environment monitoring, and are fully compatible with the Open Source EnTrak(tm) system as a means to deploy 'eServices' for systems conditions monitoring, occupant feedback, performance certification and the like.
 
 <wiki:comment>
 == Documentation ==
