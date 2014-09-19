@@ -61,6 +61,10 @@ static FILE *ofp = NULL;
 typedef enum { DEVICE_DISCONNECTED = 0, DEVICE_CONNECTED, DEVICE_ERROR, DEVICE_DONE } devicestatus_t;
 devicestatus_t deviceStatus[65536] = {DEVICE_DISCONNECTED};
 
+// Start time
+int startDays = 1, startHour = 0;
+int durationDays = 8, endHour = 0;
+
 
 // Experimental: Check NAND id
 #define ID_NAND
@@ -214,23 +218,25 @@ int record_setup(int deviceId)
         /* Get the current time */
         now = time(NULL);
 
-        printf("RECORD #%d: Setting delayed start/stop times (start at midnight, stop after 8 days)\n", deviceId);
+        printf("RECORD #%d: Setting delayed start/stop times (start in +%d day(s) at %02d:00:00, stop after %d day(s) at %02d:00:00)\n", deviceId, startDays, startHour, durationDays, endHour);
 
         /* Start recording on the day 1 day from now, at midnight on that day */
-        now += 1 * 24 * 60 * 60;    /* 1 day in seconds */
+        now += startDays * 24 * 60 * 60;    /* 1 day in seconds */
         tm = localtime(&now);
-        tm->tm_hour = 0;
+        tm->tm_hour = startHour;
         tm->tm_min = 0;
         tm->tm_sec = 0;
         startTime = OM_DATETIME_FROM_YMDHMS(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+		printf("RECORD #%d: START %04d-%02d-%02d %02d:%02d:%02d\n", deviceId, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
         /* Stop recording 8 days from that day, at midnight */
-        now += 8 * 24 * 60 * 60;    /* 8 days in seconds */
+        now += durationDays * 24 * 60 * 60;    /* 8 days in seconds */
         tm = localtime(&now);
-        tm->tm_hour = 0;
+        tm->tm_hour = endHour;
         tm->tm_min = 0;
         tm->tm_sec = 0;
         stopTime = OM_DATETIME_FROM_YMDHMS(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+		printf("RECORD #%d: STOP  %04d-%02d-%02d %02d:%02d:%02d\n", deviceId, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
         result = OmSetDelays(deviceId, startTime, stopTime);
         if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); return 0; }
@@ -377,19 +383,28 @@ int record_main(int argc, char *argv[])
 {
     printf("RECORD: batch sets clear and record fully-charged devices.\n");
     printf("\n");
-    if (argc > 1)
-    {
-        int i = 1;
-        const char *outfile = NULL;
+	if (argc > 1)
+	{
+		int i;
+		const char *outfile = NULL;
 
-        if (strcmp(argv[i], "-id") == 0) 
-        { 
-            i++; 
-            onlySingleId = atoi(argv[i]); 
-            i++; 
-            printf("*** SINGLE ID MODE FOR %d ***\n", onlySingleId);
-        }
-        if (i < argc) { outfile = argv[i]; }
+		for (i = 1; i < argc; i++)
+		{
+			if (strcmp(argv[i], "-id") == 0)
+			{
+				onlySingleId = atoi(argv[++i]);
+				printf("*** SINGLE ID MODE FOR %d ***\n", onlySingleId);
+			}
+			else if (strcmp(argv[i], "-startdays") == 0) { startDays = atoi(argv[++i]); printf("PARAM: startDays=%d\n", startDays); }
+			else if (strcmp(argv[i], "-starthour") == 0) { startHour = atoi(argv[++i]); printf("PARAM: startHour=%d\n", startHour); }
+			else if (strcmp(argv[i], "-durationdays") == 0) { durationDays = atoi(argv[++i]); printf("PARAM: durationDays=%d\n", durationDays); }
+			else if (strcmp(argv[i], "-endhour") == 0) { endHour = atoi(argv[++i]); printf("PARAM: endHour=%d\n", endHour); }
+			else if (argv[i][0] == '-') { printf("WARNING: Ignoring parameter: %s\n", argv[i]); }
+			else
+			{
+				outfile = argv[i];
+			}
+		}
 
         return record(outfile);
     }
