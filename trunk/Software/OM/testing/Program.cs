@@ -41,15 +41,27 @@ namespace OMTesting
 
                 // Command-line options
                 string logFile = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + "log.txt";
+                bool autoAdd = false;
+                int minBattery = 85;
+                int startDays = 1;
+                int startHour = 0;
+                int durationDays = 8;
+                int endHour = 0;
 
                 int positional = 0;
                 string loadFile = null;
                 for (int i = 0; i < args.Length; i++)
                 {
                     if (args[i].ToLower() == "-log") { logFile = args[++i]; }
+                    else if (args[i].ToLower() == "-auto") { autoAdd = true; }
+                    else if (args[i].ToLower() == "-minbattery") { minBattery = int.Parse(args[++i]); }
+                    else if (args[i].ToLower() == "-startdays") { startDays = int.Parse(args[++i]); }
+                    else if (args[i].ToLower() == "-starthour") { startHour = int.Parse(args[++i]); }
+                    else if (args[i].ToLower() == "-durationdays") { durationDays = int.Parse(args[++i]); }
+                    else if (args[i].ToLower() == "-endhour") { endHour = int.Parse(args[++i]); }
                     else if (args[i][0] == '-' || args[i][0] == '/')
                     {
-                        string error = "ERROR: Ignoring unknown option: " + args[i];
+                        string error = "ERROR: Ignoring unknown option: " + args[i] + "\r\n(-minbattery / -startdays / -starthour / -durationdays / -endhour)";
                         Console.Error.WriteLine(error);
                         MessageBox.Show(null, error, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
@@ -66,7 +78,7 @@ namespace OMTesting
                     }
                 }
 
-                MainForm mainForm = new MainForm(loadFile);
+                MainForm mainForm = new MainForm(loadFile, autoAdd, minBattery, startDays, startHour, durationDays, endHour);
                 //mainForm.LogFile = logFile;
 
                 Application.Run(mainForm);

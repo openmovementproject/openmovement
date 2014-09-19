@@ -577,6 +577,7 @@
             this.buttonAdd.Text = "&Add";
             this.buttonAdd.UseVisualStyleBackColor = true;
             this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
+            this.buttonAdd.Enter += new System.EventHandler(this.buttonAdd_Enter);
             // 
             // labelId
             // 
@@ -604,6 +605,7 @@
             this.formattedNumericUpDownId.TabIndex = 1;
             this.formattedNumericUpDownId.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.formattedNumericUpDownId.ValueChanged += new System.EventHandler(this.formattedNumericUpDownId_ValueChanged);
+            this.formattedNumericUpDownId.Leave += new System.EventHandler(this.formattedNumericUpDownId_Leave);
             // 
             // textBoxLog
             // 
@@ -621,7 +623,7 @@
             // timerUpdate
             // 
             this.timerUpdate.Enabled = true;
-            this.timerUpdate.Interval = 3000;
+            this.timerUpdate.Interval = 1000;
             this.timerUpdate.Tick += new System.EventHandler(this.timerUpdate_Tick);
             // 
             // timerIdentify
@@ -649,6 +651,7 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
+            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.MainForm_PreviewKeyDown);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.toolStrip.ResumeLayout(false);

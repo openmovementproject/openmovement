@@ -13,29 +13,22 @@ namespace OMTesting
 {
     public partial class MainForm : Form
     {
-        protected const int MIN_BATTERY_TO_CONFIGURE = 85;
+
+        bool autoAdd;
+        public int MinBattery;
+        public int StartDays;
+        public int StartHour;
+        public int DurationDays;
+        public int EndHour;
 
         // Device status tracker
         class DeviceStatus
         {
-            // Create the Panopticon command-line-interface wrapper
-            Configure configure;
-
             public enum DeviceMode { Unknown = -2, Unexpected = -1, Waiting = 0, Charging = 1, Configuring = 2, Complete = 3, Failed = 4, Error = 5 };
             public DeviceStatus(int id) 
             { 
-                string configCommand = @"omapi-examples.exe";
-                string args = "record -id $id";
-                string basePath;
-
                 BatteryLevel = -1;
 
-                //basePath = AppDomain.CurrentDomain.BaseDirectory;
-                basePath = Path.GetDirectoryName(Application.ExecutablePath);
-                configCommand = Path.Combine(basePath, configCommand);
-
-                configure = new Configure(configCommand, args);
-                configure.Completed += configure_Completed;
                 this.Id = id; 
                 this.Mode = DeviceMode.Unknown;
                 this.Info = "";
@@ -102,49 +95,62 @@ namespace OMTesting
 
             private DateTime lastUpdatedBattery = DateTime.MinValue;
 
-            public bool Update(bool batteryInteresting)
+            public bool Update(bool canUpdate, bool batteryInteresting)
             {
-                bool ret;
+                bool ret = false;
                 OmDevice omdev = GetDevice();
 
                 if (omdev == null) { return false; }
-                ret = omdev.Update();
-
-                if (batteryInteresting && lastUpdatedBattery == DateTime.MinValue || DateTime.Now - lastUpdatedBattery > TimeSpan.FromSeconds(5))
+                if (canUpdate)
                 {
-                    int batteryLevel = OmApi.OmGetBatteryLevel(Id);
-                    if (batteryLevel != this.BatteryLevel)
+                    ret = omdev.Update();
+
+                    if (batteryInteresting && lastUpdatedBattery == DateTime.MinValue || DateTime.Now - lastUpdatedBattery > TimeSpan.FromSeconds(5))
                     {
-                        this.BatteryLevel = batteryLevel;
-                        ret = true;
+                        int batteryLevel = OmApi.OmGetBatteryLevel(Id);
+                        if (batteryLevel != this.BatteryLevel)
+                        {
+                            this.BatteryLevel = batteryLevel;
+                            ret = true;
+                        }
                     }
                 }
 
                 return ret;
             }
 
-            public bool CanConfigure
+            public bool CanConfigure(int minBattery)
             {
-                get
-                {
-                    if (Mode != DeviceStatus.DeviceMode.Charging) { return false; }
-                    OmDevice omdev = GetDevice();
-                    if (omdev == null) { return false; }
-                    if (omdev.BatteryLevel < MIN_BATTERY_TO_CONFIGURE) { return false;  }
-                    return true;
-                }
+                if (Mode != DeviceStatus.DeviceMode.Charging) { return false; }
+                OmDevice omdev = GetDevice();
+                if (omdev == null) { return false; }
+                if (omdev.BatteryLevel < minBattery) { return false; }
+                return true;
             }
 
 
-            public bool StartConfigure()
+            public bool StartConfigure(int startDays, int startHour, int durationDays, int endHour)
             {
                 // See if a charging device should be configured
                 if (Mode != DeviceStatus.DeviceMode.Charging) { return false; }
 
                 Mode = DeviceStatus.DeviceMode.Configuring;
 
+                // Create the command-line-interface wrapper
+                Configure configure;
+                string configCommand = @"omapi-examples.exe";
+                string args = "record -id $id -startdays $startdays -starthour $starthour -durationdays $durationdays -endhour $endhour";
+                string basePath;
+
+                //basePath = AppDomain.CurrentDomain.BaseDirectory;
+                basePath = Path.GetDirectoryName(Application.ExecutablePath);
+                configCommand = Path.Combine(basePath, configCommand);
+
+                configure = new Configure(configCommand, args);
+                configure.Completed += configure_Completed;
+
                 // Begin background configure
-                configure.ConfigureAsync(Id);
+                configure.ConfigureAsync(Id, startDays, startHour, durationDays, endHour);
 
                 return true;
             }
@@ -210,14 +216,20 @@ namespace OMTesting
                 return false;
             }
         }
-       
 
 
-        public MainForm(string loadFile = null)
+
+        public MainForm(string loadFile, bool autoAdd, int minBattery, int startDays, int startHour, int durationDays, int endHour)
         {
             InitializeComponent();
 
             (new TextBoxStreamWriter(textBoxLog)).SetConsoleOut();
+            this.autoAdd = autoAdd;
+            this.MinBattery = minBattery;
+            this.StartDays = startDays;
+            this.StartHour = startHour;
+            this.DurationDays = durationDays;
+            this.EndHour = endHour;
 
             Console.WriteLine("Started.");
         }
@@ -350,6 +362,7 @@ namespace OMTesting
             }
 
             device.Connected = true;
+
             UpdateDevices();
         }
 
@@ -424,6 +437,7 @@ namespace OMTesting
                 AddExpectedDevice(id);
             }
             UpdateDevices();
+            formattedNumericUpDownId.Focus();
         }
 
 
@@ -455,8 +469,12 @@ namespace OMTesting
 
 
         int checkIndex = 0;
+        private DateTime lastRun = DateTime.MinValue;
         private void timerUpdate_Tick(object sender, EventArgs e)
         {
+            TimeSpan elapsed = DateTime.UtcNow - lastRun;
+            if (elapsed.TotalMilliseconds < 800) { return; }
+
             int count = listViewDevices.Items.Count;
             bool changed = false;
 
@@ -467,17 +485,27 @@ namespace OMTesting
 
                 if (device.Changed) { changed = true; device.Changed = false; }
 
-                if (device.Update(device.Mode == DeviceStatus.DeviceMode.Charging)) { changed = true; }
+                if (device.Update(device.Mode != DeviceStatus.DeviceMode.Configuring, device.Mode == DeviceStatus.DeviceMode.Charging)) { changed = true; }
 
                 // See if a charging device should be configured
-                if (device.Mode == DeviceStatus.DeviceMode.Charging && device.CanConfigure)
+                if (device.Mode == DeviceStatus.DeviceMode.Charging && device.CanConfigure(MinBattery))
                 {
-                    device.StartConfigure();
+                    device.StartConfigure(StartDays, StartHour, DurationDays, EndHour);
                     changed = true;
+                }
+
+                if (device.Mode == DeviceStatus.DeviceMode.Unexpected)
+                {
+                    if (autoAdd)
+                    {
+                        AddExpectedDevice(device.Id);
+                    }
                 }
             }
 
             if (changed) { UpdateDevices(); }
+
+            lastRun = DateTime.UtcNow;
         }
 
 
@@ -532,6 +560,59 @@ namespace OMTesting
             }
         }
 
+        private void MainForm_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            /*
+            if (e.KeyValue == 9) // Tab
+            {
+                //e.Handled = true;
+                buttonAdd.PerformClick();
+            }
+             */
+        }
+
+        private void buttonAdd_Enter(object sender, EventArgs e)
+        {
+            DateTime enteredAdd = DateTime.UtcNow;
+            TimeSpan interval = enteredAdd - leftNumeric;
+            if (buttonAdd.Enabled && interval.TotalMilliseconds < 20)
+            {
+                buttonAdd.PerformClick();
+            }
+        }
+
+        DateTime leftNumeric = DateTime.MinValue;
+        private void formattedNumericUpDownId_Leave(object sender, EventArgs e)
+        {
+            leftNumeric = DateTime.UtcNow;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Delete)
+            {
+                if (listViewDevices.Focused && buttonRemove.Enabled)
+                {
+                    buttonRemove.PerformClick();
+                    return false;
+                }
+            }
+            if (keyData == Keys.Insert)
+            {
+                if (listViewDevices.Focused && buttonIdentify.Enabled)
+                {
+                    buttonIdentify.PerformClick();
+                    return false;
+                }
+            }
+            if (keyData == Keys.F12)
+            {
+                autoAdd = !autoAdd;
+                this.Text = this.Text.Replace("*", "") + (autoAdd ? "*" : "");
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
 
     }
 }

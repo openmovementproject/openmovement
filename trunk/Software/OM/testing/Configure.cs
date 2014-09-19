@@ -4,7 +4,7 @@
 /*
     // *** EXAMPLE ****
  
-    // Create the Panopticon command-line-interface wrapper
+    // Create the command-line-interface wrapper
     Configure configure = new Configure(@"config.cmd");
 
     // Handler for completion (optional if not using asynchronous conversion)
@@ -125,7 +125,7 @@ namespace OMTesting
             return;
         }
 
-        public bool ConfigureSync(int id)
+        public bool ConfigureSync(int id, int startDays, int startHour, int durationDays, int endHour)
         {
             ErrorMessages = null;
             try
@@ -150,6 +150,10 @@ namespace OMTesting
                 // Sort out args
                 string args = Args;
                 args = args.Replace("$id", Id.ToString());
+                args = args.Replace("$startdays", startDays.ToString());
+                args = args.Replace("$starthour", startHour.ToString());
+                args = args.Replace("$durationdays", durationDays.ToString());
+                args = args.Replace("$endhour", endHour.ToString());
 
                 // Create the process structure
                 ProcessStartInfo processInformation = new ProcessStartInfo();
@@ -173,6 +177,7 @@ namespace OMTesting
                 // Start process
                 try
                 {
+                    Console.WriteLine("PROCESS: " + Executable + " " + args);
                     process.Start();
                 }
                 catch (Exception e)
@@ -238,12 +243,12 @@ namespace OMTesting
         }
 
 
-        public void ConfigureAsync(int id)
+        public void ConfigureAsync(int id, int startDays, int startHour, int durationDays, int endHour)
         {
             Thread thread = new Thread(() => {
                 try
                 {
-                    ConfigureSync(id);
+                    ConfigureSync(id, startDays, startHour, durationDays, endHour);
                 }
                 catch { ; }     // Swallow any re-thrown (ConvertSync will have called 'Completed' call-back with exception)
             });
