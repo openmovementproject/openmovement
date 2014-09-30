@@ -38,6 +38,7 @@ namespace OmGui
                 if (!backgroundWorker.WorkerSupportsCancellation)
                 {
                     buttonCancel.Enabled = false;
+                    buttonCancel.Visible = false;
                 }
 
                 if (backgroundWorker.WorkerReportsProgress)

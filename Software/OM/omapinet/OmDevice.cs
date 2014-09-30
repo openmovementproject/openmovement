@@ -430,5 +430,11 @@ Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId);
             return !failed;
         }
 
+
+        public int Reset()
+        {
+            // [DllImport("libomapi.dll")] public static extern int OmCommand(int deviceId, string command, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata, int bufferSize, string expected, uint timeoutMs, IntPtr parseParts, int parseMax); // char **parseParts
+            return OmApi.OmCommand((int)deviceId, "\r\nreset\r\n", (StringBuilder)null, 0, "RESET", (uint)2000, IntPtr.Zero, 0);
+        }
     }
 }
