@@ -1265,6 +1265,179 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             Cursor.Current = Cursors.Default;
         }
 
+
+        bool CheckFirmware(OmDevice[] devices)
+        {
+            // Read bootload information from file
+            string bootloadInformation = @"firmware\bootload.ini";
+            string bootloadExecutable = null;
+            string latestVersion = "";
+            IDictionary<string, string> blacklist = new Dictionary<string, string>(); // Black-list of version numbers
+
+            string[] lines = new string[0];
+            try
+            {
+                lines = File.ReadAllLines(bootloadInformation);
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("Problem reading firmware information file " + bootloadInformation + " (" + e.Message + ").");
+                return false;
+            }
+
+            // Rough .INI parser
+            string section = "";
+            foreach (string rawLine in lines)
+            {
+                string line = rawLine.Trim();
+                if (line.Length == 0 || line.StartsWith(";") || line.StartsWith("#")) { continue; }                             // Empty lines and comments
+                if (line.StartsWith("[")  && line.EndsWith("]")) { section = line.Substring(1, line.Length - 2); continue; }    // Section
+                string[] parts = line.Split(new char[] {'=', ':'}, 2);
+                if (parts.Length <= 0) { continue; }
+                string name = parts[0].Trim();
+                string value = (parts.Length > 1) ? parts[1].Trim() : null;
+
+                if (section == "upgrade")
+                {
+                    blacklist.Add(name, value);
+                }
+                else if (section == "bootload")
+                {
+                    if (name == "executable") { bootloadExecutable = value; }       // @"firmware\CWA17_44.cmd"
+                    else if (name == "version") { latestVersion = value; }          // @"CWA17_44"
+                    
+                }
+            }
+
+            // Check firmware version
+            foreach (OmDevice device in devices)
+            {
+                string currentFirmware = "CWA17_" + device.FirmwareVersion + "";
+                if (blacklist.ContainsKey(currentFirmware))
+                {
+                    string reason = blacklist[currentFirmware];
+                    DialogResult drUpdate = MessageBox.Show(this, "Device " + device.DeviceId + " is running firmware version " + currentFirmware + ".\r\n\r\n" + reason + "\r\n\r\nUpdate the device firmware to " + latestVersion + " now?", "Firmware Update Receommended", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    if (drUpdate == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        DialogResult okUpdate = MessageBox.Show(this, "Important:\r\n\r\n* Do not disconnect device " + device.DeviceId + ".\r\n\r\n* Do not connect any new devices.\r\n\r\n* Check no devices are currently flashing red.\r\n\r\nContinue?", "Firmware Update Warnings", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                        if (okUpdate == System.Windows.Forms.DialogResult.OK)
+                        {
+                            if (device.IsDownloading)
+                            {
+                                MessageBox.Show(this, "Device is busy downloading data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return true;
+                            }
+
+                            Cursor.Current = Cursors.WaitCursor;
+                            dataViewer.CancelPreview();
+
+                            Process updateProcess = new Process();
+                            BackgroundWorker updateBackgroundWorker = new BackgroundWorker();
+                            updateBackgroundWorker.WorkerReportsProgress = true;
+                            updateBackgroundWorker.WorkerSupportsCancellation = false;
+                            updateBackgroundWorker.DoWork += (s, ea) =>
+                            {
+                                updateBackgroundWorker.ReportProgress(-1, "Running bootloader...");
+
+                                // Convert the file
+                                ProcessStartInfo processInformation = new ProcessStartInfo();
+
+                                processInformation.FileName = bootloadExecutable;
+
+                                List<string> args = new List<string>();
+                                //args.Add("\"" + param + "\"");
+
+                                // Construct arguments
+                                processInformation.Arguments = string.Join(" ", args.ToArray());
+                                processInformation.UseShellExecute = false;
+
+                                // ???
+                                bool redirect = true;
+
+                                processInformation.RedirectStandardError = redirect;
+                                processInformation.RedirectStandardOutput = true;
+                                processInformation.CreateNoWindow = (processInformation.RedirectStandardError || processInformation.RedirectStandardOutput) ? true : false;
+                                updateProcess.EnableRaisingEvents = true;
+                                updateProcess.StartInfo = processInformation;
+
+                                try
+                                {
+                                    updateProcess.Start();
+                                }
+                                catch (Exception ex)
+                                {
+                                    updateBackgroundWorker.ReportProgress(100, "Problem running bootloader (" + ex.Message + ").");
+                                    MessageBox.Show(null, "Problem running bootloader (" + ex.Message + ").", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+
+
+                                updateBackgroundWorker.ReportProgress(-1, "Resetting device...");
+                                if (device.Reset() != 0)
+                                {
+                                    updateBackgroundWorker.ReportProgress(100, "Problem resetting device.");
+                                    updateProcess.StandardInput.Write((char)27);
+                                    try { updateProcess.Kill(); } catch { ; }
+                                    try { updateProcess.WaitForExit(); } catch { ; }
+                                    updateProcess = null;
+                                    MessageBox.Show(null, "Problem resetting device.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+
+
+                                if (redirect)
+                                {
+                                    for (; ; )
+                                    {
+                                        //if (updateProcess.StandardError.EndOfStream) { break; }
+                                        string line = updateProcess.StandardError.ReadLine();
+                                        if (line == null) { break; }
+                                        Trace.WriteLine("BOOTLOADER: " + line);
+                                        updateBackgroundWorker.ReportProgress(-1, "BOOTLOADER: " + line);
+                                    }
+                                }
+                                updateBackgroundWorker.ReportProgress(-1, "Waiting for bootloader to complete...");
+                                updateProcess.WaitForExit();
+
+                                int exitCode = updateProcess.ExitCode;
+                                updateProcess = null;
+                                if (exitCode != 0)
+                                {
+                                    updateBackgroundWorker.ReportProgress(100, "Problem running bootloader (exit code " + exitCode + ")");
+                                    MessageBox.Show(null, "Problem running bootloader (exit code " + exitCode + ").", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+
+                                updateBackgroundWorker.ReportProgress(100, "Done - wait for device to restart...");
+                                Thread.Sleep(2000);
+                            };
+                            updateBackgroundWorker.RunWorkerCompleted += (s, ea) =>
+                            {
+                                //devicesListViewUpdateEnabled();
+                                if (updateProcess != null)
+                                {
+                                    try { updateProcess.Kill(); } catch { ; }
+                                    try { updateProcess.WaitForExit(); } catch { ; }
+                                    updateProcess = null;
+                                }
+                            };
+
+
+                            ShowProgressWithBackground("Updating", "Updating device...", updateBackgroundWorker);
+
+                            Cursor.Current = Cursors.Default;
+                        }
+
+                        // Let's not do anything else (the user can just press 'clear' or 'record' again)
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+
         //private void toolStripButtonRecord_Click(object sender, EventArgs e)
         //{
         //    //TS - [P] - If nothing is downloading then cancel preview of dataViewer and turn on AlwaysRecord() for each device selected.
@@ -1295,6 +1468,19 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             for (int i = 0; i < devicesListView.SelectedItems.Count; i++)
             {
                 devices[i] = (OmDevice) devicesListView.SelectedItems[i].Tag;
+            }
+
+            // Check none are downloading
+            if (!EnsureNoSelectedDownloading())
+            {
+                return;
+            }
+
+            // Check and prompt for firmware updates
+            if (CheckFirmware(devices))
+            {
+                // Don't do anything else now (user can press button again)
+                return;
             }
 
             DateRangeForm rangeForm = new DateRangeForm("Recording Settings", devices);
@@ -1656,6 +1842,24 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
             if (EnsureNoSelectedDownloading())
             {
+                List<OmDevice> devices = new List<OmDevice>();
+                foreach (ListViewItem i in devicesListView.SelectedItems)
+                {
+                    OmSource device = (OmSource)i.Tag;
+                    if (device is OmDevice && !((OmDevice)device).IsDownloading)
+                    {
+                        devices.Add((OmDevice)device);
+                    }
+                }
+
+                // Check and prompt for firmware updates
+                if (CheckFirmware(devices.ToArray()))
+                {
+                    // Don't do anything else now (user can press button again)
+                    return;
+                }
+
+
                 DialogResult dr = MessageBox.Show(this, (wipe ? "Wipe" : "Clear") + " " + devicesListView.SelectedItems.Count + " device(s)?", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
                 if (dr == System.Windows.Forms.DialogResult.OK)
                 {
@@ -1664,16 +1868,6 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                     dataViewer.CancelPreview();
                     dataViewer.Reader = null;
                     dataViewer.Close();
-
-                    List<OmDevice> devices = new List<OmDevice>();
-                    foreach (ListViewItem i in devicesListView.SelectedItems)
-                    {
-                        OmSource device = (OmSource)i.Tag;
-                        if (device is OmDevice && !((OmDevice)device).IsDownloading)
-                        {
-                            devices.Add((OmDevice)device);
-                        }
-                    }
 
                     BackgroundWorker clearBackgroundWorker = new BackgroundWorker();
                     clearBackgroundWorker.WorkerReportsProgress = true;
