@@ -171,7 +171,7 @@ fully understand the devices functionality, or are familiar with the source code
  `packet_header=66      ` | ASCII 'B' (0x42, 66) code to identify BAX packets                                   
  `device_group=162      ` | Integer form of bits 16 to 24 of identifier, used for subnet mask                   
  `device_id=62199       ` | Integer form of bottom 16 bits of address                                           
- `batt_min=2100         ` | Minimum battery state before sensor disables itself (mv)                            
+ `batt_min=2100         ` | Minimum battery state before sensor disables itself (millivolts mV)                            
  `tx_power=10           ` | Transmit power in dBm                                                               
  `pir_threshold=20      ` | High threshold for known movement                                                   
  `pir_suspect_val=6     ` | Low threshold for suspected movement                                                
@@ -183,16 +183,33 @@ fully understand the devices functionality, or are familiar with the source code
  `sensor_settle_time=8  ` | Time after led illumination before continuing to monitor sensor events              &dagger;
  `credit_interval=234   ` | Time between granting event transmit credits                                        &dagger;
  `max_pir_credits=5     ` | Maximum number of PIR transmit credits                                              
- `max_switch_credits=5  ` | Maximum number of magnetic switch tx credits                                        
+ `max_switch_credits=5  ` | Maximum number of magnetic switch TX (transmit) credits                                        
  `sensor_interval=234   ` | Time between sampling and transmitting environment sensors                          &dagger;
  `num_tx_repeats=1      ` | Number of environment sensor packets to send (repeats)                              
 
 
 <span class="alert alert-info"> 
 **&dagger; Times** Times are in Ticks which are ~128 ms. To work out the ticks
-required from a time in seconds, multiply by 1000 then divide by 128 
+required from a time _in seconds_, multiply by 1000 then divide by 128 
 (rounding any decimal places to the nearest integer).
 </span>
 
+### Example Timings
+
+The following values are multiples of 128ms ticks, rounded to the nearest integer.
+Exact timing is not possible with extremely low-power hardware such as the ENV,
+so there will be some drift over time. This also helps to prevent radio data packet
+collisions in deployments with many sensors, as no two sensors will drift by the 
+same amount.
+
+
+ Time       | Value (ticks)
+ ---------- | ----------------
+ 1 second   | 8
+ 5 seconds  | 39
+ 30 seconds | 234
+ 1 minute   | 469
+ 5 minutes  | 2344
+ 30 minutes | 14063
 
 

@@ -55,6 +55,10 @@ Tips on deploying sensors in a building:
  * Try to avoid direct sunlight when attaching sensors to surfaces. This will skew the data they generate.
  * Also remember the position of the Sun will change throughout the day!
 
+Note also that the battery life of the ENV sensor will be lower on average
+in high-traffic areas, as a data packet will be transmitted every time the 
+PIR sensor is triggered.
+
 <span class="alert alert-info">
 **Handling Sensors:** Note that after handling the ENV sensors, the humidity/temperature reading will
 be biased by the temperature of your hands. This will settle again after 5 

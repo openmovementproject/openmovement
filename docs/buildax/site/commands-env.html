@@ -289,7 +289,7 @@ fully understand the devices functionality, or are familiar with the source code
 </tr>
 <tr>
 <td><code>batt_min=2100</code></td>
-<td>Minimum battery state before sensor disables itself (mv)</td>
+<td>Minimum battery state before sensor disables itself (millivolts mV)</td>
 </tr>
 <tr>
 <td><code>tx_power=10</code></td>
@@ -337,7 +337,7 @@ fully understand the devices functionality, or are familiar with the source code
 </tr>
 <tr>
 <td><code>max_switch_credits=5</code></td>
-<td>Maximum number of magnetic switch tx credits</td>
+<td>Maximum number of magnetic switch TX (transmit) credits</td>
 </tr>
 <tr>
 <td><code>sensor_interval=234</code></td>
@@ -351,9 +351,49 @@ fully understand the devices functionality, or are familiar with the source code
 </table>
 <p><span class="alert alert-info"> 
 <strong>&dagger; Times</strong> Times are in Ticks which are ~128 ms. To work out the ticks
-required from a time in seconds, multiply by 1000 then divide by 128 
+required from a time <em>in seconds</em>, multiply by 1000 then divide by 128 
 (rounding any decimal places to the nearest integer).
 </span></p>
+<h3 id="example-timings">Example Timings</h3>
+<p>The following values are multiples of 128ms ticks, rounded to the nearest integer.
+Exact timing is not possible with extremely low-power hardware such as the ENV,
+so there will be some drift over time. This also helps to prevent radio data packet
+collisions in deployments with many sensors, as no two sensors will drift by the 
+same amount.</p>
+<table>
+<thead>
+<tr>
+<th>Time</th>
+<th>Value (ticks)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 second</td>
+<td>8</td>
+</tr>
+<tr>
+<td>5 seconds</td>
+<td>39</td>
+</tr>
+<tr>
+<td>30 seconds</td>
+<td>234</td>
+</tr>
+<tr>
+<td>1 minute</td>
+<td>469</td>
+</tr>
+<tr>
+<td>5 minutes</td>
+<td>2344</td>
+</tr>
+<tr>
+<td>30 minutes</td>
+<td>14063</td>
+</tr>
+</tbody>
+</table>
 
           </div>
           <footer>

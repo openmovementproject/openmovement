@@ -6,15 +6,22 @@ document describes the process of flashing the devices with updated firmware.
 
 <span class="alert alert-error"> 
 **Warning:** Updating the firmware is a potentially risky process. If you 
- flash a device with an incorrect firmware file (or even if you use a third-party
+ flash a device with an incorrect firmware file (or use a third-party
  bootloader application which has a bug) you could render it permanently unusable!
 </span>
 
 Tested bootloader software for the BAX devices is provided for Windows OSes
-in the OpenMovement repository [here](http://openmovement.googlecode.com/svn/downloads/BuildAX/)
+in the OpenMovement repository [here](http://openmovement.googlecode.com/svn/downloads/BuildAX/).
 
 
 ## BuildAX LRS
+
+<span class="alert alert-info"> 
+**Web Interface Upgrades:**
+The web interface data files do not also need to be upgraded when a firmware
+upgrade is applied, but this is recommended in order to access new and
+improved functionality. See [here](quickstart.md#lrs-setup) for more information.
+</span>
 
 ### Put the LRS into bootloader mode
 
@@ -52,7 +59,6 @@ network if you have used the device's old MAC address to assign it an IP.
 ### Video
 
 <iframe width="560" height="315" src="//www.youtube.com/embed/pa5SAfqBDH0" frameborder="0" allowfullscreen></iframe>
-
 
 
 ---

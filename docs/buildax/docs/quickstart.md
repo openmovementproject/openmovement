@@ -36,7 +36,7 @@ using the serial interface.
 
 ### Pre-deployment steps:
 
- * Download the [Web Interface zip file](https://code.google.com/p/openmovement/wiki/Downloads) found in the Downloads section of the OpenMovement repository to your computer
+ * Download the [Web Interface zip file](https://code.google.com/p/openmovement/wiki/Downloads) found in the Downloads section of the OpenMovement repository to your computer. Note that this only needs to be done once, when you first set up the LRS.
  * Extract the files (keeping them inside the "WWW" directory) to the root of your SD card, using a card reader
 
 

@@ -14,6 +14,26 @@ experience reduced functionality, for example Microsoft Internet Explorer
 version 8 or lower. A warning message will be displayed in this case.
 </span>
 
+## Setting up
+
+As described in the [Quick-Start guide](quickstart.md#lrs-setup), the data files
+for the web-administration interface must be copied onto the SD card before
+use. A 404 error will be reported if the files are not found in the correct
+location on-disk, under the WWW folder. The data files for the most recent 
+version can be downloaded [here](http://openmovement.googlecode.com/svn/downloads/BuildAX/).
+
+<span class="alert alert-info">
+**Upgrading the Web Interface:**
+The web data files may be periodically updated as new features become
+available. The new files will be uploaded to the Open Movement repository,
+and can be upgraded on the LRS by deleting the previous version from the
+SD card, and copying over the new files.
+
+Note that you may also need to [upgrade the firmware](firmware.md) on the
+LRS if you experience error messages after upgrading the web UI files.
+</span>
+
+
 ## Login
 
 The LRS configuration interface is protected with a username and password. 
@@ -26,7 +46,11 @@ The default login credentials for the BuildAX LRS are:
 *   Username: admin
 *   Password: password
 
-For information on how to change these credentials, see [here](#admin).
+For information on how to change these credentials, see [here](#admin). Note
+also that the login form on this page is not yet protected by SSL encryption
+(the https:// scheme), so using a unique password is encouraged. A future 
+firmware update will be deployed to enable this functionality for self-signed
+SSL certificates.
 
 
 ## Status 

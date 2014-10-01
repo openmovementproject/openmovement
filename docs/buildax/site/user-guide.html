@@ -91,6 +91,8 @@
             
                 <li class="toctree-l2"><a href="#buildax-lrs-admin-panel">BuildAX LRS Admin Panel</a></li>
                 
+                    <li><a class="toctree-l3" href="#setting-up">Setting up</a></li>
+                
                     <li><a class="toctree-l3" href="#login">Login</a></li>
                 
                     <li><a class="toctree-l3" href="#status">Status</a></li>
@@ -166,6 +168,21 @@ All modern, standards-compliant web browsers are supported. Older browsers may
 experience reduced functionality, for example Microsoft Internet Explorer
 version 8 or lower. A warning message will be displayed in this case.
 </span></p>
+<h2 id="setting-up">Setting up</h2>
+<p>As described in the <a href="quickstart.html#lrs-setup">Quick-Start guide</a>, the data files
+for the web-administration interface must be copied onto the SD card before
+use. A 404 error will be reported if the files are not found in the correct
+location on-disk, under the WWW folder. The data files for the most recent 
+version can be downloaded <a href="http://openmovement.googlecode.com/svn/downloads/BuildAX/">here</a>.</p>
+<p><span class="alert alert-info">
+<strong>Upgrading the Web Interface:</strong>
+The web data files may be periodically updated as new features become
+available. The new files will be uploaded to the Open Movement repository,
+and can be upgraded on the LRS by deleting the previous version from the
+SD card, and copying over the new files.</p>
+<p>Note that you may also need to <a href="firmware.html">upgrade the firmware</a> on the
+LRS if you experience error messages after upgrading the web UI files.
+</span></p>
 <h2 id="login">Login</h2>
 <p>The LRS configuration interface is protected with a username and password. 
 These should be updated from the Admin panel when you first log into the site.</p>
@@ -175,7 +192,11 @@ These should be updated from the Admin panel when you first log into the site.</
 <li>Username: admin</li>
 <li>Password: password</li>
 </ul>
-<p>For information on how to change these credentials, see <a href="#admin">here</a>.</p>
+<p>For information on how to change these credentials, see <a href="#admin">here</a>. Note
+also that the login form on this page is not yet protected by SSL encryption
+(the https:// scheme), so using a unique password is encouraged. A future 
+firmware update will be deployed to enable this functionality for self-signed
+SSL certificates.</p>
 <h2 id="status">Status</h2>
 <p>The Status tab is the landing page for the system, and allows users to verify
 the running state of the device, including the log file (binary or plaintext)
