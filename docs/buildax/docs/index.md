@@ -6,7 +6,7 @@ actuators and a logger/router made available under an open license. The devices
 were developed within a joint research project undertaken by Newcastle 
 University's [Digital Interaction Group](http://di.ncl.ac.uk/) and 
 [Sir Joseph Swan Centre for Energy Research](http://www.ncl.ac.uk/energy/)
-and Strathclyde University’s [Energy Systems Research Unit](http://www.strath.ac.uk/esru/).
+and the University of Strathclyde’s [Energy Systems Research Unit](http://www.strath.ac.uk/esru/).
 
 The devices can be rapidly deployed to enable low cost built environment 
 monitoring, and are fully compatible with the Open Source 
@@ -32,4 +32,4 @@ For our other other projects, please visit the [Open Movement](https://code.goog
  - [Karim Ladha](http://di.ncl.ac.uk/people/nksl6) - Hardware, lead Firmware developer
  - [Sam Mitchell Finnigan](http://di.ncl.ac.uk/people/nsmf) - Software, LRS Firmware, Documentation 
 
-Thanks also to Jon Hand at Strathclyde ESRU for feedback, usability testing, and bug reports.
+Thanks also to Jon Hand at ESRU (University of Strathclyde) for feedback, usability testing, and bug reports.
