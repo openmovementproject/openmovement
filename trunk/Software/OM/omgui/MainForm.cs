@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Xml;
 
@@ -91,8 +92,9 @@ namespace OmGui
         }
 
         private string configDumpFile = null;
-        private string downloadDumpFile = null;  
-        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile)
+        private string downloadDumpFile = null;
+        private bool noUpdateCheck = false;
+        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck)
         {
             this.configDumpFile = myConfigDumpFile;
             downloadDumpFile = myDownloadDumpFile;
@@ -184,22 +186,34 @@ namespace OmGui
         // /*OmDevice*/ public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
         public void DownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename)
         {
+            string timeNow, type;
+
+            timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            type = "DOWNLOAD-OK";
+
+            string logLine = "" + timeNow + "," + type + "," + Path.GetFileName(filename);
+
             if (downloadDumpFile != null)
             {
-                try
+                for (; ; )  // [dump]
                 {
-                    StreamWriter sw = File.AppendText(downloadDumpFile);
-                    string timeNow, type;
+                    string errorMessage = "Problem while appending to config log file (" + downloadDumpFile + ") - check the folder exists, you have write permission, and the file is not locked open by another process.";
 
-                    timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    type = "DOWNLOAD-OK";
+                    try
+                    {
+                        StreamWriter sw = File.AppendText(downloadDumpFile);
+                        sw.WriteLine(logLine);
+                        sw.Close();
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        errorMessage = errorMessage + "\r\n\r\nDetails: " + ex.Message + "";
+                        Console.WriteLine("Warning: " + errorMessage);
+                    }
 
-                    sw.WriteLine("" + timeNow + "," + type + "," + Path.GetFileName(filename));
-                    sw.Close();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Warning: Problem while appending to dump file: " + ex.Message);
+                    DialogResult ddr = MessageBox.Show(null, errorMessage, "Warning", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                    if (ddr != System.Windows.Forms.DialogResult.Retry) { break; }
                 }
             }
         }
@@ -1652,41 +1666,56 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                             fails.Add(device.DeviceId.ToString(), error); 
                         }
 
-                        if (configDumpFile != null)
+                        // Logging
                         {
-                            try
+                            string timeNow, type, start, stop;
+
+                            timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                            if (error == null)
                             {
-                                StreamWriter sw = File.AppendText(configDumpFile);
-                                string timeNow, type, start, stop;
-
-                                timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-                                if (error == null)
-                                {
-                                    type = "AX3-CONFIG-OK";
-                                }
-                                else
-                                {
-                                    type = "AX3-CONFIG-ERROR";
-                                }
-
-                                if (rangeForm.Always)
-                                {
-                                    start = "0";
-                                    stop = "-1";
-                                }
-                                else
-                                {
-                                    start = rangeForm.StartDate.ToString("yyyy-MM-dd HH:mm:ss");
-                                    stop = rangeForm.EndDate.ToString("yyyy-MM-dd HH:mm:ss");
-                                }
-
-                                sw.WriteLine("" + timeNow + "," + type + "," + device.DeviceId + "," + rangeForm.SessionID + "," + start + "," + stop + "," + (int)rangeForm.SamplingFrequency + "," + rangeForm.Range + "," + ((rangeForm.metaData != null && rangeForm.metaData.Length > 0) ? ("\"" + rangeForm.metaData.Replace("\"", "\"\"") + "\"") : ""));
-                                sw.Close();
+                                type = "AX3-CONFIG-OK";
                             }
-                            catch (Exception ex)
+                            else
                             {
-                                Console.WriteLine("Warning: Problem while appending to dump file: " + ex.Message);
+                                type = "AX3-CONFIG-ERROR";
+                            }
+
+                            if (rangeForm.Always)
+                            {
+                                start = "0";
+                                stop = "-1";
+                            }
+                            else
+                            {
+                                start = rangeForm.StartDate.ToString("yyyy-MM-dd HH:mm:ss");
+                                stop = rangeForm.EndDate.ToString("yyyy-MM-dd HH:mm:ss");
+                            }
+
+                            string logLine = "" + timeNow + "," + type + "," + device.DeviceId + "," + rangeForm.SessionID + "," + start + "," + stop + "," + (int)rangeForm.SamplingFrequency + "," + rangeForm.Range + "," + ((rangeForm.metaData != null && rangeForm.metaData.Length > 0) ? ("\"" + rangeForm.metaData.Replace("\"", "\"\"") + "\"") : "");
+
+                            if (configDumpFile != null)
+                            {
+                                for (; ; )  // [dump]
+                                {
+                                    string errorMessage = "Problem while appending to config log file (" + configDumpFile + ") - check the folder exists, you have write permission, and the file is not locked open by another process.";
+
+                                    try
+                                    {
+                                        StreamWriter sw = File.AppendText(configDumpFile);
+                                        sw.WriteLine(logLine);
+                                        sw.Close();
+                                        break;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        errorMessage = errorMessage + "\r\n\r\nDetails: " + ex.Message + "";
+                                        Console.WriteLine("Warning: " + errorMessage);
+                                    }
+
+                                    DialogResult ddr = MessageBox.Show(null, errorMessage, "Warning", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                    if (ddr != System.Windows.Forms.DialogResult.Retry) { break; }
+                                }
                             }
                         }
 
@@ -2258,6 +2287,182 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
             //Setup Column Sorting
             setupColumnSorter();
+
+
+            DoUpdateCheck();
+        }
+
+
+        private void DoUpdateCheck()
+        {
+            // Update check
+            if (noUpdateCheck)
+            {
+                Console.WriteLine("UPDATE: Update checking suppressed.");
+            }
+            else
+            {
+                const string updateUrl = "https://openmovement.googlecode.com/svn/downloads/AX3/omgui.ini";
+                Console.WriteLine("UPDATE: Using address: " + updateUrl);
+
+                BackgroundWorker updateWorker = new BackgroundWorker();
+                //updateWorker.WorkerReportsProgress = true;
+                //updateWorker.WorkerSupportsCancellation = true;
+                updateWorker.DoWork += (s, ea) =>
+                {
+                    try
+                    {
+                        WebRequest webRequest = WebRequest.Create(updateUrl);
+                        HttpWebResponse response = webRequest.GetResponse() as HttpWebResponse;
+
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            // Read all lines
+                            List<string> lineList = new List<string>();
+                            Stream stream = response.GetResponseStream();
+                            StreamReader reader = new StreamReader(stream);
+                            string newLine;
+                            while ((newLine = reader.ReadLine()) != null)
+                            {
+                                lineList.Add(newLine);
+                            }
+                            Console.ReadLine();
+                            reader.Close();
+                            stream.Close();
+                            response.Close();
+                            string[] lines = lineList.ToArray();
+
+                            // Read bootload information from file
+                            string installVersion = null;
+                            string installUrl = null;
+                            string installDescription = null;
+                            IDictionary<string, string> upgrades = new Dictionary<string, string>(); // Version-specific information
+
+                            // Rough .INI parser
+                            string section = "";
+                            foreach (string rawLine in lines)
+                            {
+                                string line = rawLine.Trim();
+                                if (line.Length == 0 || line.StartsWith(";") || line.StartsWith("#")) { continue; }                             // Empty lines and comments
+                                if (line.StartsWith("[") && line.EndsWith("]")) { section = line.Substring(1, line.Length - 2); continue; }    // Section
+                                string[] parts = line.Split(new char[] { '=', ':' }, 2);
+                                if (parts.Length <= 0) { continue; }
+                                string name = parts[0].Trim();
+                                string value = (parts.Length > 1) ? parts[1].Trim() : null;
+
+                                if (section == "upgrade")
+                                {
+                                    upgrades.Add(name, value);
+                                }
+                                else if (section == "install")
+                                {
+                                    if (name == "version") { installVersion = value; }
+                                    else if (name == "url") { installUrl = value; }
+                                    else if (name == "description") { installDescription = value; }
+                                }
+                            }
+
+                            // Current version
+                            Version currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                            int[] currentVersionParts = new int[4];
+                            currentVersionParts[0] = currentVersion.Major;
+                            currentVersionParts[1] = currentVersion.MajorRevision;
+                            currentVersionParts[2] = currentVersion.Minor;
+                            currentVersionParts[3] = currentVersion.MinorRevision;
+
+                            // Install version
+                            int[] installVersionParts = new int[4];
+                            if (installVersion != null)
+                            {
+                                string[] parts = installVersion.Split(new char[] { '.' });
+                                for (int i = 0; i < installVersionParts.Length; i++)
+                                {
+                                    if (parts.Length > i) { int.TryParse(parts[i], out installVersionParts[i]); }
+                                }
+                            }
+
+                            // Compare if newer
+                            bool outdated = false;
+                            for (int i = 0; i < installVersionParts.Length; i++)
+                            {
+                                if (installVersionParts[i] > currentVersionParts[i]) { outdated = true; break; }
+                                if (installVersionParts[i] < currentVersionParts[i]) { break; }
+                            }
+
+                            // Messages
+                            string currentVersionString = currentVersionParts[0] + "." + currentVersionParts[1] + "." + currentVersionParts[2] + "." + currentVersionParts[3];
+                            string installVersionString = installVersionParts[0] + "." + installVersionParts[1] + "." + installVersionParts[2] + "." + installVersionParts[3];
+                            string upgradeMessage = null;
+                            if (upgrades.ContainsKey(currentVersionString)) { upgradeMessage = upgrades[currentVersionString]; }
+
+                            // Prompt
+                            if (!outdated)
+                            {
+                                Console.WriteLine("UPDATE: Current version " + currentVersionString + " is up to date (" + installVersionString + ")");
+                            }
+                            else
+                            {
+                                Console.WriteLine("UPDATE: Current version " + currentVersionString + " is needs updating (" + installVersionString + ")");
+
+                                string promptMessage = "";
+                                promptMessage += "There is an update available.\r\n";
+                                promptMessage += "\r\n";
+                                promptMessage += "The update is V" + installVersionString + " (you are currently running V" + currentVersionString + "):\r\n";
+                                if (installDescription != null)
+                                {
+                                    promptMessage += "" + installDescription.Replace("|", "\r\n") + "\r\n";
+                                }
+                                if (upgradeMessage != null)
+                                {
+                                    promptMessage += "" + upgradeMessage.Replace("|", "\r\n") + "\r\n";
+                                }
+                                if (installUrl != null)
+                                {
+                                    promptMessage += "\r\n";
+                                    promptMessage += "Update address:\r\n";
+                                    promptMessage += "" + installUrl + "\r\n";
+                                    promptMessage += "\r\n";
+                                    promptMessage += "Download update now?";
+                                }
+
+                                DialogResult dr = MessageBox.Show(null, promptMessage, "Update Available", (installUrl == null) ? MessageBoxButtons.OK : MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                                if (dr == System.Windows.Forms.DialogResult.Yes)
+                                {
+                                    if (installUrl != null && (installUrl.StartsWith("http://") || installUrl.StartsWith("https://")))
+                                    {
+                                        Console.WriteLine("UPDATE: User downloading update.");
+                                        System.Diagnostics.Process.Start(installUrl);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("UPDATE: Error, URL prefix was invalid.");
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("UPDATE: User not downloading update.");
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            Console.WriteLine("UPDATE: Unexpected response status code: " + response.StatusCode + " - " + response.StatusDescription + "");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("UPDATE: Problem while checking: " + e.Message + "");
+                    }
+                };
+                updateWorker.RunWorkerCompleted += (s, ea) =>
+                {
+                    Console.WriteLine("UPDATE: Check finished.");
+                };
+
+                Console.WriteLine("UPDATE: Check starting...");
+                updateWorker.RunWorkerAsync();
+            }
         }
 
         private void AddProfilePluginsToToolStrip()
