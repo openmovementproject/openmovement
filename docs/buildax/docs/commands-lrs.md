@@ -425,19 +425,6 @@ or
 
 
 ---
-### `rpc`
-
-**Summary:** Sends the remote plug socket packet using the argument sent.
-The hexidecimal format of the packet is shown after the response.
-
-**Example:** `rpc6`
-
-````
-	Rpc->C93B06
-````
-
-
----
 ### `setting.bax.subnet`
 
 **Summary:** Change the subnet of the radio, accepts hex input.
