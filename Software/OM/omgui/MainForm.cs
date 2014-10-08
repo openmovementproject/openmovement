@@ -1331,6 +1331,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 {
                     string reason = blacklist[currentFirmware];
                     DialogResult drUpdate = MessageBox.Show(this, "Device " + device.DeviceId + " is running firmware version " + currentFirmware + ".\r\n\r\n" + reason + "\r\n\r\nUpdate the device firmware to " + latestVersion + " now?", "Firmware Update Receommended", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    Console.WriteLine("FIRMWARE: Device " + device.DeviceId + " is running firmware version " + currentFirmware + " - update to version " + latestVersion + " (Reason: " + reason + ").");
                     if (drUpdate == System.Windows.Forms.DialogResult.Yes)
                     {
                         DialogResult okUpdate = MessageBox.Show(this, "Important:\r\n\r\n* Do not disconnect device " + device.DeviceId + ".\r\n\r\n* Do not connect any new devices.\r\n\r\n* Check no devices are currently flashing red.\r\n\r\nContinue?", "Firmware Update Warnings", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
@@ -1446,6 +1447,10 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                         // Let's not do anything else (the user can just press 'clear' or 'record' again)
                         return true;
                     }
+                }
+                else
+                {
+                    Console.WriteLine("FIRMWARE: Device " + device.DeviceId + " is running firmware version " + currentFirmware + " (not required to update to version " + latestVersion + ").");
                 }
             }
             return false;
