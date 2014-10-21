@@ -11,7 +11,7 @@ For downloadable and on-line documentation, see:
 
 == Software Binaries ==
 
-  * [https://openmovement.googlecode.com/svn/downloads/AX3/AX3-GUI-beta-20.zip AX3 OmGui beta 20] (Includes driver and CSV converter, requires the [http://www.microsoft.com/download/en/details.aspx?id=22 .NET Framework 3.5 SP1])
+  * [https://openmovement.googlecode.com/svn/downloads/AX3/AX3-GUI.html AX3 OmGui (Latest version, 20)] (Includes driver and CSV converter, requires the [http://www.microsoft.com/download/en/details.aspx?id=22 .NET Framework 3.5 SP1])
   * [http://openmovement.googlecode.com/svn/downloads/AX3/AX3-Utils-Win-3.zip AX3 Utilities r3 (Windows)]
   * [http://openmovement.googlecode.com/svn/downloads/WAX3/WAX3-Utils-Win-2.zip WAX3 Utilities r2 (Windows)]
   * [http://openmovement.googlecode.com/svn/trunk/Software/ThirdParty/OMPA/plugin_v0p2/distrib/OMPA_plugin%20v0.2.zip OMPA Plugin v0.2 (Windows)]
@@ -28,7 +28,7 @@ Drivers:
 
 Firmware binaries: (including boot-loader for Windows)
 
-  * [http://openmovement.googlecode.com/svn/downloads/AX3/AX3-1.7-Firmware-36.zip AX3 r1.7 Firmware 36]
+  * [http://openmovement.googlecode.com/svn/downloads/AX3/AX3-1.7-Firmware.html AX3 r1.7 Firmware (Latest version, 44)]
   * [http://openmovement.googlecode.com/svn/downloads/WAX3/WAX3-2.1-Firmware-28.zip WAX3 r2.1 Firmware 28]
   * [http://openmovement.googlecode.com/svn/downloads/WAX9/WAX9-Firmware-3.2.zip WAX9 Firmware 3.2]
 
