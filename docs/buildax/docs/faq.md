@@ -152,3 +152,15 @@ register.
 If you encounter a line reading "ASSERT" and a file/line number, this might 
 indicate a firmware issue. Please send us this file and a description of what 
 you were trying to do, and steps to reproduce your problem (if possible).
+
+
+---
+## Will BuildAX interfere with my other equipment/BMS/WiFi/etc
+
+As BuildAX runs on the 433MHz ISM radio band, it will not interfere with (or be disrupted by) networks like 802.11n WiFi which run on the 2.4GHz band.
+
+Additionally, the design of the radio protocol means that our packets are very short- this reduces the probability that they will interfere with other 433MHz protocols (or each other).
+
+Finally, the radio chipsets used have been EMC-tested (and type-approved) in order for the hardware to receive the CE marking. This means that BuildAX conforms to the EEA directives for electromagnetic noise emission.
+
+
