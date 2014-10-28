@@ -162,3 +162,27 @@ Get data within a time range:
 One possible 'gotcha' is that the ampersand (&) symbol has a special meaning
 in most command terminals, and must be escaped with a backslash (as in the 
 above examples) so that the command is not forked.
+
+## Generic Commands
+In addition to the commands listed above, some commands listed in the 
+[LRS Commands](#commands-lrs) section can be sent using this interface.
+
+Method | Resource | Valid Parameters | Response 
+------ | -------- | ---------------- | ----------
+`POST` | `/cmd`   | LRS command      | `200 OK` (even if the command failed)
+
+A specific limitation of this HTTP interface is that it is not currently
+possible to include feedback from this command in the HTTP response. The
+server will return the response code, along with an empty response body. This
+means that commands (e.g. `status`) which are only useful for their response
+will not be useful to call through this interface. Commands which perform 
+some action (e.g. `save`) are the use case for this feature.
+
+Example:
+
+	http://your-bax/cmd?save
+
+Additionally, HTTP special characters will not be parsed correctly until 
+firmware v1.4. This will make it possible to set the RTC time via the REST
+interface.
+

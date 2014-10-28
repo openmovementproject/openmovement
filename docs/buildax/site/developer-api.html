@@ -104,6 +104,8 @@
                 
                     <li><a class="toctree-l3" href="#example-wget-commands">Example wget commands</a></li>
                 
+                    <li><a class="toctree-l3" href="#generic-commands">Generic Commands</a></li>
+                
             
             </ul>
         
@@ -360,6 +362,39 @@ session cookie!
 <p>One possible 'gotcha' is that the ampersand (&amp;) symbol has a special meaning
 in most command terminals, and must be escaped with a backslash (as in the 
 above examples) so that the command is not forked.</p>
+<h2 id="generic-commands">Generic Commands</h2>
+<p>In addition to the commands listed above, some commands listed in the 
+<a href="#commands-lrs">LRS Commands</a> section can be sent using this interface.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Resource</th>
+<th>Valid Parameters</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/cmd</code></td>
+<td>LRS command</td>
+<td><code>200 OK</code> (even if the command failed)</td>
+</tr>
+</tbody>
+</table>
+<p>A specific limitation of this HTTP interface is that it is not currently
+possible to include feedback from this command in the HTTP response. The
+server will return the response code, along with an empty response body. This
+means that commands (e.g. <code>status</code>) which are only useful for their response
+will not be useful to call through this interface. Commands which perform 
+some action (e.g. <code>save</code>) are the use case for this feature.</p>
+<p>Example:</p>
+<pre class="prettyprint well"><code>http://your-bax/cmd?save
+</code></pre>
+<p>Additionally, HTTP special characters will not be parsed correctly until 
+firmware v1.4. This will make it possible to set the RTC time via the REST
+interface.</p>
 
           </div>
           <footer>
