@@ -60,9 +60,35 @@ namespace OmGui
             //TODO - get metadata from file into url.
             if (Plugin.WantMetaData)
             {
-                OmApiNet.OmReader reader = OmApiNet.OmReader.Open(CWAFilenames[0]);
 
-                string md = reader.MetaData;
+                // Read meta-data
+                string md = "";
+                OmApiNet.OmReader reader = null;
+                try
+                {
+                    reader = OmApiNet.OmReader.Open(CWAFilenames[0]);
+                    md = reader.MetaData;
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine("ERROR: Problem reading metadata: " + e.Message);
+                }
+                finally
+                {
+                    if (reader != null)
+                    {
+                        try
+                        {
+                            reader.Close();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.Error.WriteLine("ERROR: Problem closing reader: " + e.Message);
+                        }
+                        reader = null;
+                    }
+                }
+
                 Dictionary<string, string> parsed = (Dictionary<string, string>)MetaDataTools.ParseMetaData(md, MetaDataTools.mdStringList);
 
                 Dictionary<string, string> metadataBuiltReadable = new Dictionary<string, string>();
@@ -181,7 +207,7 @@ namespace OmGui
             }
             else
             {
-                MessageBox.Show("The plugin has peformed an illegal operation.", "Plugin Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The plugin has peformed an illegal operation.\r\n", "Plugin Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 DialogResult = System.Windows.Forms.DialogResult.Abort;
             }
         }

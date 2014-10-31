@@ -3343,13 +3343,12 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             errorMessage = "";
 
             //OUTPUT
-            if (outputLine != null && outputLine.Length > 1)
+            if (outputLine != null && outputLine.Length > 2)
             {
-                if (outputLine[0] == 'p' || outputLine[0] == 'P')
+                if ((outputLine[0] == 'p' || outputLine[0] == 'P') && (outputLine[1] == ' ' || outputLine[1] == ':'))
                 {
-                    string percentage = outputLine.Split(' ').ElementAt(1);
-
-                    progress = Int32.Parse(percentage);
+                    string percentage = outputLine.Substring(2);
+                    Int32.TryParse(percentage, out progress);
                     //runPluginProgressBar.Value = Int32.Parse(percentage);
                 }
                 //else if (outputLine[0] == 's' || outputLine[0] == 'S')
@@ -3357,9 +3356,9 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 //    statusMessage = outputLine.Split(new char[] { ' ' }, 2).Last();
                 //    //labelStatus.Text = message;
                 //}
-                else if (outputLine[0] == 'e' || outputLine[0] == 'E')
+                else if ((outputLine[0] == 'e' || outputLine[0] == 'E') && (outputLine[1] == ' ' || outputLine[1] == ':'))
                 {
-                    errorMessage = outputLine.Split(new char[] { ' ' }, 2).Last();
+                    errorMessage = outputLine.Substring(2);
                 }
 
 
