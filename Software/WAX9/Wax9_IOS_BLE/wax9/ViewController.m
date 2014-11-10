@@ -113,6 +113,7 @@
             self.wax9Peripheral = peripheral;
             peripheral.delegate = self;
             [self.centralManager connectPeripheral:peripheral options:nil];
+            [self.centralManager stopScan];
         }
     }
 }
