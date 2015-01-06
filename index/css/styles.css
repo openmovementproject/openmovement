@@ -1,0 +1,18 @@
+
+.jumbotron.head  {
+	text-align:center;
+	color:#eee;
+    background: url(tris.svg) repeat top left #354b5e;
+}
+.norm-fw {
+	font-weight:normal;
+}
+.light-fw {
+	font-weight: lighter;
+}
+.navbar {
+    margin-bottom: 0;
+}
+.logos img {
+	padding:5%;
+}

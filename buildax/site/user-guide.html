@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Interface - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="user-guide.html">Web Interface</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#buildax-lrs-admin-panel">BuildAX LRS Admin Panel</a></li>
+                
+                    <li><a class="toctree-l3" href="#setting-up">Setting up</a></li>
+                
+                    <li><a class="toctree-l3" href="#login">Login</a></li>
+                
+                    <li><a class="toctree-l3" href="#status">Status</a></li>
+                
+                    <li><a class="toctree-l3" href="#sensors">Sensors</a></li>
+                
+                    <li><a class="toctree-l3" href="#settings">Settings</a></li>
+                
+                    <li><a class="toctree-l3" href="#fetch">Fetch</a></li>
+                
+                    <li><a class="toctree-l3" href="#admin">Admin</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Web Interface</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="buildax-lrs-admin-panel">BuildAX LRS Admin Panel</h1>
+<p>A web configuration interface is provided to make setting up a BuildAX 
+installation easier. This document gives an overview of the admin panel 
+functionality.</p>
+<p><span class="alert alert-warn">
+<strong>Browser Support:</strong>
+All modern, standards-compliant web browsers are supported. Older browsers may
+experience reduced functionality, for example Microsoft Internet Explorer
+version 8 or lower. A warning message will be displayed in this case.
+</span></p>
+<h2 id="setting-up">Setting up</h2>
+<p>As described in the <a href="quickstart.html#lrs-setup">Quick-Start guide</a>, the data files
+for the web-administration interface must be copied onto the SD card before
+use. A 404 error will be reported if the files are not found in the correct
+location on-disk, under the WWW folder. The data files for the most recent 
+version can be downloaded <a href="http://openmovement.googlecode.com/svn/downloads/BuildAX/">here</a>.</p>
+<p><span class="alert alert-info">
+<strong>Upgrading the Web Interface:</strong>
+The web data files may be periodically updated as new features become
+available. The new files will be uploaded to the Open Movement repository,
+and can be upgraded on the LRS by deleting the previous version from the
+SD card, and copying over the new files.</p>
+<p>Note that you may also need to <a href="firmware.html">upgrade the firmware</a> on the
+LRS if you experience error messages after upgrading the web UI files.
+</span></p>
+<h2 id="login">Login</h2>
+<p>The LRS configuration interface is protected with a username and password. 
+These should be updated from the Admin panel when you first log into the site.</p>
+<p><img alt="Login" src="img/login.png" /></p>
+<p>The default login credentials for the BuildAX LRS are:</p>
+<ul>
+<li>Username: admin</li>
+<li>Password: password</li>
+</ul>
+<p>For information on how to change these credentials, see <a href="#admin">here</a>. Note
+also that the login form on this page is not yet protected by SSL encryption
+(the https:// scheme), so using a unique password is encouraged. A future 
+firmware update will be deployed to enable this functionality for self-signed
+SSL certificates.</p>
+<h2 id="status">Status</h2>
+<p>The Status tab is the landing page for the system, and allows users to verify
+the running state of the device, including the log file (binary or plaintext)
+and the status of LRS peripherals.</p>
+<p><img alt="Status" src="img/status.png" /></p>
+<h2 id="sensors">Sensors</h2>
+<p>The sensor display page shows a live data stream from the sensors. This can be
+useful while paring sensors, as they will appear immediately on the graph when
+connected to the LRS.</p>
+<p><img alt="Live Data" src="img/live.png" /></p>
+<p>The duration of the graph can be adjusted at the bottom of the page, showing a
+range of data up to 60 minutes. The number of sensors displayed is not limited,
+and a sensors can be excluded from the graph individually using the checkboxes.</p>
+<p>Sensor data can also be viewed as a table. The static page shows the sensors
+currently loaded into memory on the LRS, along with their details and the 
+last values received. Only the last 20 sensors seen will be displayed.</p>
+<p><img alt="Sensor List" src="img/sensors.png" /></p>
+<h3 id="name">Name</h3>
+<p>The name of the BuildAX sensor device can be set when it is programmed using an 
+FTDI cable, and will be sent as part of the encryption key transmission at 
+pairing time. This is stored along with the key on the root of the SD card 
+(external storage), and as such can be subsequently modified. The maximum 
+length of a sensor node name is 32 characters.</p>
+<h3 id="last-seen">Last Seen</h3>
+<p>The last time a packet was received from a sensor, as defined by the internal
+RTC on the BuildAX LRS.</p>
+<h3 id="address">Address</h3>
+<p>The unique hardware identifier of the BuildAX sensor. This is generated at random 
+by the sensor, but the pool of values (48-bit) is large enough to make 
+collisions very unlikely.</p>
+<h3 id="last-packet">Last Packet</h3>
+<p>The last packet field is broken down into the individual values broadcast by 
+the sensor. For a breakdown of the sensor values, see the <a href="datafiles.html#field-list">Field List</a>
+section.</p>
+<h3 id="limitations">Limitations</h3>
+<p>Sensors appear in this table while their encryption keys are loaded into RAM on
+the LRS. As the amount of RAM on the device is limited, only the most recent
+20 sensors will be displayed in this table. This may become possible with future
+hardware revisions.</p>
+<h2 id="settings">Settings</h2>
+<p>The BuildAX LRS has the ability to route streams of data to various different
+data sources. The Settings page is used to turn on/off different streams, and
+switch between streaming formats (binary or plaintext). The form is arranged by
+stream type.</p>
+<p><img alt="Settings" src="img/settings.png" /></p>
+<p>When a setting has been changed, it needs to be applied before it becomes
+active. The Update button will appear when a setting needs to be applied.</p>
+<p><img alt="Change dialog" src="img/setchange.png" /></p>
+<p>If successfully applied, you will see the confirmation dialog appear below the
+settings form:</p>
+<p><img alt="Update OK" src="img/setok.png" /></p>
+<h2 id="fetch">Fetch</h2>
+<p>Data can be retrieved from the LRS remotely via the fetch interface. The form
+on the Data tab is used to format requests to the LRS.</p>
+<p><img alt="Fetch" src="img/fetch.png" /></p>
+<p>Fetch types relate directly to the logging types- if your LRS is logging in
+plaintext mode you should use the plaintext fetch- the same goes for if the
+LRS is logging in binary.</p>
+<p>The Fetch form exposes four different ways to request data:</p>
+<ul>
+<li>Date/Time</li>
+<li>File</li>
+<li>Sample Number (as a range)</li>
+<li>Last N Samples (from most recent backwards)</li>
+</ul>
+<p>In addition, if the LRS determines that the parameters entered do not
+translate to an acceptable range, an error 400 (Bad Request) will be returned.</p>
+<h2 id="admin">Admin</h2>
+<p>To update the login credentials for the LRS, simply fill in the form on the
+Admin tab. There are no hard-coded complexity requirements for the password, but
+normal convention should be followed. The maximum password length is 32
+characters.</p>
+<p><img alt="Admin" src="img/admin.png" /></p>
+<p><span class="alert alert-info">
+<strong>Reset Password:</strong>
+If the password is forgotten, it must be reset by physically
+accessing the LRS and loading the default settings. This reset procedure can
+be performed by holding down the button on the rear of the LRS for 12
+seconds.
+</span></p>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="developer-api.html" class="btn btn-neutral float-right" title="Developer Guide"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="datafiles.html" class="btn btn-neutral" title="Data Files"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

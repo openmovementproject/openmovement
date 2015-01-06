@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="deployment.html">Deployment</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#deployment">Deployment</a></li>
+                
+                    <li><a class="toctree-l3" href="#pairing-sensors">Pairing Sensors</a></li>
+                
+                    <li><a class="toctree-l3" href="#env-sensor-deployment">ENV Sensor Deployment</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Deployment</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="deployment">Deployment</h1>
+<p>This section covers topics that might affect your sensor deployment as well as some basic best practices.</p>
+<h2 id="pairing-sensors">Pairing Sensors</h2>
+<p>To pair sensors to the BuildAX LRS it must first be put into 
+Pairing Mode. To do this, hold the button on the rear of the device until the 
+lights flash alternately. The LRS will stay in pairing mode for a period of
+5 minutes.</p>
+<h3 id="what-is-pairing">What is "Pairing"?</h3>
+<p>The BuildAX sensors broadcast data packets containing information about 
+their environment over the air. This data could potentially be used by
+eavesdroppers to infer whether a building is occupied, something existing 
+systems have typically not addressed. As a security measure, all BuildAX 
+sensors use 128-bit AES encryption to prevent packets being read while in 
+transmission.</p>
+<p>To decrypt data from the sensors, the LRS must know the key which was used
+to encrypt it. An encryption key is transmitted from the sensor to the LRS 
+when the button on the rear of the sensor (see <a href="hardware.html#rear">#2 on the hardware diagram</a>) 
+is pressed. The radio broadcast power is set to the minimum on the sensor, to
+limit the range at which the packet can be received. </p>
+<p>The LRS then stores the unique key for the sensor in the <code>BAX_INFO.BIN</code> 
+file on the SD card. To instruct the LRS to listen for keys, it must be put
+into "Pairing Mode", by pressing the button on the rear of the device.</p>
+<p><span class="alert alert-info">
+<strong>Note:</strong> The LRS will log packets from BuildAX sensors regardless of 
+whether it has received an encryption packet, as these may be decrypted at a 
+later date and would otherwise be lost. 
+</span></p>
+<h2 id="env-sensor-deployment">ENV Sensor Deployment</h2>
+<h3 id="env-sensor-range">ENV Sensor Range</h3>
+<p>The achievable range of the sensors will depend on a number of factors,
+including the materials used in the construction of the building, the thickness
+of the walls, and the "noise-floor" of your deployment environment. </p>
+<p>If there are a lot of devices transmitting on the same 433MHz band as the 
+sensors (for example, in a city environment) the radio frequency will be 
+noisier and the sensors will not be "heard" by the LRS at further distances.</p>
+<p>Tips on deploying sensors in a building:</p>
+<ul>
+<li>Position the LRS at a central location, so as to be in range of all sensors.</li>
+<li>Air temperature and humidity in a room are stratified (change based on height). </li>
+<li>The PIR lens is directional. Mount sensors on the wall <strong>vertically</strong> if this is important.</li>
+<li>If a sensor at the limit of its range, try upping the transmission interval.</li>
+<li>Walls appear "thicker" when the radio signal has to travel through them diagonally.</li>
+<li>Try to avoid direct sunlight when attaching sensors to surfaces. This will skew the data they generate.</li>
+<li>Also remember the position of the Sun will change throughout the day!</li>
+</ul>
+<p>Note also that the battery life of the ENV sensor will be lower on average
+in high-traffic areas, as a data packet will be transmitted every time the 
+PIR sensor is triggered.</p>
+<p><span class="alert alert-info">
+<strong>Handling Sensors:</strong> Note that after handling the ENV sensors, the humidity/temperature reading will
+be biased by the temperature of your hands. This will settle again after 5 
+minutes or so.
+</span></p>
+<h4 id="rssi">RSSI</h4>
+<p>A sensor's signal strength is indicated by its RSSI value (Received Signal
+Strength Indication). This can be thought of as the "loudness" of the radio
+signal and is measured in dBm.</p>
+<p>RSSI values can be found in the web interface (see the <a href="user-guide.html#sensors">Live Data</a>
+page), or in the 4th column of the CSV-format data available as a file, or
+over the various streaming interfaces (telnet, serial, websocket).</p>
+<p>Signal strength will be affected by the battery level of the sensor, the 
+distance from the LRS, and any obstacles which the signal has to travel
+through in-between.</p>
+<h4 id="noise-floor">Noise floor</h4>
+<p>All environments will have a certain amount of potential noise present in the radio 
+spectrum used by the BuildAX sensors. This level of noise is referred to as the
+noise "floor", and sensors transmitting must be "louder" than this background
+noise level in order to be heard.</p>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="connecting.html" class="btn btn-neutral float-right" title="Connection Guide"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="quickstart.html" class="btn btn-neutral" title="Quick Start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

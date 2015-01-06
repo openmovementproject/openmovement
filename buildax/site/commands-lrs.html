@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commands (LRS) - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="commands-lrs.html">Commands (LRS)</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#commands">Commands</a></li>
+                
+                    <li><a class="toctree-l3" href="#settings">Settings</a></li>
+                
+            
+                <li class="toctree-l2"><a href="#buildax-lrs-command-list">BuildAX LRS Command List</a></li>
+                
+                    <li><a class="toctree-l3" href="#basic-commands">Basic commands</a></li>
+                
+                    <li><a class="toctree-l3" href="#complex-commands">Complex commands</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Commands (LRS)</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="commands">Commands</h1>
+<p>This document summarizes the serial command set of the BuildAX-LRS. The serial 
+command set is available through the remote <code>telnet</code> interface and through
+the USB CDC (Communication Device Class) serial port. The command set and 
+responses are subject to change as the open source BuildAX project expands. </p>
+<p>The command strings are followed by <code>[CR][LF]</code> (carriage return, line feed) 
+in all cases; meaning that you should press the <code>Enter</code> key to send a command 
+after typing it. </p>
+<p><em>(On Unix platforms, only an <code>[LF]</code> is sent- this is detected and handled accordingly.)</em></p>
+<p>For information on how to access the text-mode command terminal, please see the
+<a href="connecting.html">Connection Guide</a>.</p>
+<h2 id="settings">Settings</h2>
+<p>Settings commands are expressed in the form <code>setting.type.x=y</code> and are used by the
+LRS to determine where to route messages. A 'message' in this context is a 
+data packet sent by the environment sensors and received by the device, which 
+must be routed to various outputs.</p>
+<p>Each <code>setting.type</code> describes a data output, or "stream":</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>usb</td>
+<td>USB CDC (Communications Device Class) Serial connection</td>
+</tr>
+<tr>
+<td>file</td>
+<td>Logging of data packets to a file on the SD card</td>
+</tr>
+<tr>
+<td>udp</td>
+<td>Network packet-forwarding over UDP (User Datagram Protocol)</td>
+</tr>
+<tr>
+<td>telnet</td>
+<td>Telnet protocol (virtual terminal connection) provided as a networked alternative to the serial interface</td>
+</tr>
+<tr>
+<td>websocket</td>
+<td>Websocket packet-forwarding (used in the <a href="user-guide.html#sensors">Web Interface</a> to provide real-time data)</td>
+</tr>
+</tbody>
+</table>
+<p>Each stream has two configurable options: <code>stream</code> and <code>mode</code>.</p>
+<ul>
+<li><strong>Stream</strong>: Enable/disable the data output. Off: <code>stream=0</code>, On: <code>stream=1</code></li>
+<li><strong>Mode</strong>: Output as plaintext (<code>mode=0</code>) or slip-encoded binary (<code>mode=1</code>)</li>
+</ul>
+<p>The LRS will print a summary to confirm the command after it is typed.</p>
+<p>It is possible to configure the LRS with options which are 
+potentially useless- streaming data over Telnet in binary, for instance, 
+would be undesirable in most situations. </p>
+<hr />
+<h1 id="buildax-lrs-command-list">BuildAX LRS Command List</h1>
+<h2 id="basic-commands">Basic commands</h2>
+<p>These commands are for the normal user and provide access to the devices usual functions.</p>
+<p>Commands below are shown in the form: <em>command</em>, <strong>summary</strong>, <code>example</code> (and response).</p>
+<hr />
+<h3 id="help"><code>help</code></h3>
+<p><strong>Summary:</strong> Requests LRS to print a summary of common commands</p>
+<p><strong>Example:</strong> <code>help</code></p>
+<pre class="prettyprint well"><code>    HELP: help|status|time|reset|mount|exit|save|setting
+</code></pre>
+
+<hr />
+<h3 id="status"><code>status</code></h3>
+<p><strong>Summary:</strong> Request a printout of current status and settings</p>
+<p><strong>Example:</strong> <code>status</code></p>
+<pre class="prettyprint well"><code>    BAX, HW:1.1, FW:1.1
+    NAME: BAX-434C32
+    Start time: 2014/09/03,14:57:01
+    Time:       2014/09/03,15:26:43
+    SysVolts: 4850mV
+    VddVolts: 3321mV
+    SysTemp: 39.5?C
+    Settings: From eeprom
+
+    Username:admin
+    Password:password
+    Si44 Radio:  On
+    Subnet:4200
+    Mask:FF00
+
+    ETHERNET: Connected
+    MAC:02:04:A3:43:4C:32
+    IP: 10.67.34.50
+    MSK:255:255:240:0
+
+    USB:
+    Mode: 0
+    Setting: Turned on
+    Status:  Streaming
+
+    File: 
+    Mode: 1
+    Setting: Turned off
+    Status:  Card present
+
+    Telnet:
+    Mode:0
+    Setting: Turned on
+    Status:  Streaming
+
+    Udp:
+    Mode: 0
+    Setting: Turned on
+    Status:  Enabled
+
+    Websocket:
+    Mode: 0
+    Setting: Turned on
+    Status:  Enabled
+
+</code></pre>
+
+<hr />
+<h3 id="time"><code>time</code></h3>
+<p><strong>Summary:</strong> Request a printout of or set the time</p>
+<p><strong>Example:</strong> <code>time</code> or <code>time=2014/08/14,10:48:54</code></p>
+<pre class="prettyprint well"><code>    Time: 2014/08/14,10:48:54
+</code></pre>
+
+<hr />
+<h3 id="save"><code>save</code></h3>
+<p><strong>Summary:</strong> Request all open filed to be saved. This ensures all the cluster chains are written to disk. Files in use will be re-opened.</p>
+<p><strong>Example:</strong> <code>save</code></p>
+<pre class="prettyprint well"><code>    Saved files
+</code></pre>
+
+<hr />
+<h3 id="reset"><code>reset</code></h3>
+<p><strong>Summary:</strong> Request a reset. Unsaved settings are lost. Open files are closed in orderly fashion</p>
+<p><strong>Example:</strong> <code>reset</code></p>
+<pre class="prettyprint well"><code>    Resetting
+</code></pre>
+
+<hr />
+<h3 id="exit"><code>exit</code></h3>
+<p><strong>Summary:</strong> Request to close the terminal. Not possible for USB connections</p>
+<p><strong>Example:</strong> <code>exit</code></p>
+<pre class="prettyprint well"><code>    Telnet session closed 
+</code></pre>
+
+<p>or </p>
+<pre class="prettyprint well"><code>    Cannot exit this Terminal
+</code></pre>
+
+<hr />
+<h3 id="settingsave"><code>setting.save</code></h3>
+<p><strong>Summary:</strong> Saves the current settings to non-volatile memory. Without this command, the settings are lost on reset or power loss.</p>
+<p><strong>Example:</strong> <code>setting.save</code></p>
+<pre class="prettyprint well"><code>    Saved settings
+</code></pre>
+
+<hr />
+<h3 id="settingusername"><code>setting.username</code></h3>
+<p><strong>Summary:</strong> Change the device username</p>
+<p><strong>Example:</strong> <code>setting.username=newuser</code></p>
+<pre class="prettyprint well"><code>    Username:newuser
+    Password:password
+</code></pre>
+
+<hr />
+<h3 id="settingpassword"><code>setting.password</code></h3>
+<p><strong>Summary:</strong> Change the device password</p>
+<p><strong>Example:</strong> <code>setting.username=newpassword</code></p>
+<pre class="prettyprint well"><code>    Username:admin
+    Password:newpassword
+</code></pre>
+
+<hr />
+<h3 id="settingname"><code>setting.name</code></h3>
+<p><strong>Summary:</strong> Change the device name. This is also the NETBIOS name. NETBIOS names must be 15 or fewer characters.</p>
+<p><strong>Example:</strong> <code>setting.name=BAX_ROUTER6</code></p>
+<pre class="prettyprint well"><code>    Name: BAX_ROUTER6
+</code></pre>
+
+<hr />
+<h3 id="settingsession"><code>setting.session</code></h3>
+<p><strong>Summary:</strong> Changes the text session number. The current file will be used until a save command is issued or the device autosaves. Permitted range is 0 to 65535.</p>
+<p><strong>Example:</strong> <code>setting.session=12345</code></p>
+<pre class="prettyprint well"><code>    Text session: 12345
+</code></pre>
+
+<hr />
+<h3 id="settingusbstream"><code>setting.usb.stream</code></h3>
+<p><strong>Summary:</strong> Enable of disable the stream of the USB serial port. If turned off, ALL COMMUNICATIONS ARE SUSPENDED including the response to this setting</p>
+<p><strong>Example:</strong> <code>setting.usb.stream=1</code></p>
+<pre class="prettyprint well"><code>    USB:
+    Mode: 0
+    Setting: Turned on
+    Status: Streaming
+</code></pre>
+
+<hr />
+<h3 id="settingusbmode"><code>setting.usb.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream output mode to text (0) or binary slip encoded (1)</p>
+<p><strong>Example:</strong> <code>setting.usb.mode=0</code></p>
+<pre class="prettyprint well"><code>    USB:
+    Mode: 0
+    Setting: Turned on
+    Status: Streaming
+</code></pre>
+
+<hr />
+<h3 id="settingtelnetstream"><code>setting.telnet.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable the stream of the telnet server (0 is off)</p>
+<p><strong>Example:</strong> <code>setting.telnet.stream=0</code></p>
+<pre class="prettyprint well"><code>    Telnet
+    Mode:0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingtelnetmode"><code>setting.telnet.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream mode of the telnet connection to text (0) or binary slip (1)</p>
+<p><strong>Example:</strong> <code>setting.telnet.mode=0</code></p>
+<pre class="prettyprint well"><code>    Telnet
+    Mode:0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingfilestream"><code>setting.file.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable logging to file</p>
+<p><strong>Example:</strong> <code>setting.file.stream=0</code></p>
+<pre class="prettyprint well"><code>    File:
+    Mode: 0
+    Setting: Turned off
+    Status: Card present
+</code></pre>
+
+<hr />
+<h3 id="settingfilemode"><code>setting.file.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream mode of the log file to text (0) or binary raw (1)</p>
+<p><strong>Example:</strong> <code>setting.file.mode=1</code></p>
+<pre class="prettyprint well"><code>    File:
+    Mode: 1
+    Setting: Turned off
+    Status: Card present
+</code></pre>
+
+<hr />
+<h3 id="settingudpstream"><code>setting.udp.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable the udp output (0=off)</p>
+<p><strong>Example:</strong> <code>setting.udp.stream=0</code></p>
+<pre class="prettyprint well"><code>    Udp:
+    Mode: 0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingudpmode"><code>setting.udp.mode</code></h3>
+<p><strong>Summary:</strong> Change the stream mode of the telnet connection to text (0) or binary slip (1)</p>
+<p><strong>Example:</strong> <code>setting.udp.mode=0</code></p>
+<pre class="prettyprint well"><code>    Udp:
+    Mode: 0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h3 id="settingwebsocketstream"><code>setting.websocket.stream</code></h3>
+<p><strong>Summary:</strong> Enable or disable the websocket output (0=off)</p>
+<p><strong>Example:</strong> <code>setting.websocket.stream=0</code></p>
+<pre class="prettyprint well"><code>    Websocket:
+    Mode: 0
+    Setting: Turned on
+    Status: Enabled
+</code></pre>
+
+<hr />
+<h2 id="complex-commands">Complex commands</h2>
+<p>These commands are complex in nature and should be used only by users who 
+fully understand the devices functionality, or who are familiar with 
+the source code.</p>
+<hr />
+<h3 id="mount"><code>mount</code></h3>
+<p><strong>Summary:</strong> Request to mount the memory card so it is available to the PC connection. If data logging is running, this is not safe. When logging the disk will appear write protected to the operating system.</p>
+<p><strong>Example:</strong> <code>mount=1</code> or <code>mount=0</code></p>
+<p>The first number represents the mount state, the second number is the write protect state.</p>
+<pre class="prettyprint well"><code>    Mounted: 1, 0
+</code></pre>
+
+<p>or </p>
+<pre class="prettyprint well"><code>    Mounted: 0, 0
+</code></pre>
+
+<hr />
+<h3 id="format"><code>format</code></h3>
+<p><strong>Summary:</strong> Request an SD card format. ALL DATA WILL BE LOST.
+The number on failure is the internal error code.</p>
+<p><strong>Example:</strong> <code>format</code></p>
+<pre class="prettyprint well"><code>    Formatted
+</code></pre>
+
+<p>or </p>
+<pre class="prettyprint well"><code>    Format failed: 00
+</code></pre>
+
+<hr />
+<h3 id="hash"><code>hash</code></h3>
+<p><strong>Summary:</strong> Request the binary hash for opening a UDP session. Debug purposes only</p>
+<p><strong>Example:</strong> <code>hash</code></p>
+<pre class="prettyprint well"><code>    3C24B1A1C87BAA6290049ACCB387A556AA58C1299B38C099E57F5C68ECECC0EB6207B8A6309D99272E565BDFE80842B302E1936D4031ADFB26C3A77DAAA5395EA8AF66348949F2A4CB6CB15F31F97A5C0C3E
+</code></pre>
+
+<hr />
+<h3 id="settingbaxsubnet"><code>setting.bax.subnet</code></h3>
+<p><strong>Summary:</strong> Change the subnet of the radio, accepts hex input.</p>
+<p><strong>Example:</strong> <code>setting.bax.subnet=4201</code></p>
+<pre class="prettyprint well"><code>    Si44 Radio: On
+    Subnet:4201
+    Mask:FF00
+</code></pre>
+
+<hr />
+<h3 id="settingbaxmask"><code>setting.bax.mask</code></h3>
+<p><strong>Summary:</strong> Change the OR mask of the radio subnet, accepts hex input. The mask is used in the same way as an ethernet subnet mask upon the subnet value.</p>
+<p><strong>Example:</strong> <code>setting.bax.mask=FF01</code></p>
+<pre class="prettyprint well"><code>    Si44 Radio: On
+    Subnet:4201
+    Mask:FF01
+</code></pre>
+
+<hr />
+<h3 id="mac"><code>mac!</code></h3>
+<p><strong>Summary:</strong> This is used to change the device mac address. Value is not latched unless saved and device is reset. IEEE format used.</p>
+<p><strong>Example:</strong> <code>mac!=12:34:56:78:90:ab</code></p>
+<pre class="prettyprint well"><code>    ETHERNET: Disconnected
+    MAC:12:34:56:78:90:AB
+    IP: 169.254.1.1
+    MSK:255:255:0:0
+</code></pre>
+
+<hr />
+<h3 id="bax_test"><code>bax_test</code></h3>
+<p><strong>Summary:</strong> Sets the bax radio to go into a pre-defined test mode. Reception is halted (0=test off, 1=CW carrier, 2=PN9 modulation pattern).</p>
+<p><strong>Example:</strong> <code>bax_test=1</code></p>
+<pre class="prettyprint well"><code>    Bax-&gt;cw
+</code></pre>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="commands-env.html" class="btn btn-neutral float-right" title="Commands (ENV)"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="connecting.html" class="btn btn-neutral" title="Connection Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

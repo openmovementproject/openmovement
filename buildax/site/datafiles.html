@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Files - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="datafiles.html">Data Files</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#buildax-data-file-format">BuildAX Data File Format</a></li>
+                
+                    <li><a class="toctree-l3" href="#csv">CSV</a></li>
+                
+                    <li><a class="toctree-l3" href="#binary">Binary</a></li>
+                
+                    <li><a class="toctree-l3" href="#other-files">Other Files</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Data Files</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="buildax-data-file-format">BuildAX Data File Format</h1>
+<h2 id="csv">CSV</h2>
+<p>CSV Format data is logged to files named <code>LOGxxxxx.TXT</code> on the SD card when
+the logging format is set to plaintext mode. It can also be streamed over the 
+serial console and telnet.</p>
+<p>A CSV formatted packet from a BuildAX Environment Sensor looks like this:</p>
+<pre class="prettyprint well"><code>    2014/08/29,09:26:05,Bedroom,-48,1,171,0,2911,50.25,220,241,13876,36099,25
+</code></pre>
+
+<h3 id="field-list">Field List</h3>
+<table>
+<thead>
+<tr>
+<th>Field Name</th>
+<th>Data Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Date</td>
+<td>YYYY/MM/DD formatted ISO 8601 date of the packet</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>HH:MM:SS formatted time the packet was received at</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>The sensor's name, or its address if none has been assigned</td>
+</tr>
+<tr>
+<td>RSSI</td>
+<td>Received Signal Strength Indication, in dBm</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>Received packet type. See <a href="#packet-types">Packet Types</a> for full definition</td>
+</tr>
+<tr>
+<td>Sequence No.</td>
+<td>Packet identifier (sensors send packets incrementally)</td>
+</tr>
+<tr>
+<td>Transmit Power</td>
+<td>Sensor-configured transmission power in dBm</td>
+</tr>
+<tr>
+<td>Battery</td>
+<td>Battery level, in millivolts, of the BuildAX sensor</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>Relative Humidity (percentage of the saturation vapour pressure)</td>
+</tr>
+<tr>
+<td>Temp</td>
+<td>Temperature in degrees Celsius (°C), multiplied by 10.</td>
+</tr>
+<tr>
+<td>Light</td>
+<td>Luminous flux measurement in Lux</td>
+</tr>
+<tr>
+<td>PIR Count</td>
+<td>Activation counts of the Passive Infra-red sensor</td>
+</tr>
+<tr>
+<td>PIR Energy</td>
+<td>PIR energy last captured</td>
+</tr>
+<tr>
+<td>Switch</td>
+<td>Magnetic switch triggers on the device</td>
+</tr>
+</tbody>
+</table>
+<h3 id="packet-types">Packet Types</h3>
+<p>The type of a BuildAX packet indicates its transmission source. Listed here are
+the currently defined packet types:</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Encryption packet type (not seen in CSV output)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Normal Packet RX'd at sensor transmit interval</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Packet sent when PIR sensor triggered</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Packet sent when Magnetic Switch triggered</td>
+</tr>
+</tbody>
+</table>
+<p>Further packet types will be defined as more types of BuildAX sensor are 
+developed. </p>
+<h2 id="binary">Binary</h2>
+<p>The binary format can be converted into CSV using the <code>bax2csv</code> utility found
+in the OpenMovement repository. The utility is designed to compile on most
+machines with a Make and GCC environment.</p>
+<p>Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
+similar to how it is rendered in CSV. The data type widths for an ENV sensor 
+are described below:</p>
+<p><img alt="Data Width Description Image" src="img/datawidth.png" /></p>
+<p>The data portion of the packet (darkest part in the diagram) is the part which
+will vary depending on the packet type. This diagram shows a packet from a 
+BuildAX environment sensor (types 1,2,3), which would vary with (for example)
+a CO2 sensor.</p>
+<h2 id="other-files">Other Files</h2>
+<p>There are a number of different files on the SD card which are used by the LRS:</p>
+<ul>
+<li><code>BAX_INFO.BIN</code><ul>
+<li>This binary file contains 16-byte long entries for each sensor paired
+  with the LRS. Contains the encryption key (5 bytes), and the name of each
+  sensor (11 bytes).</li>
+</ul>
+</li>
+<li><code>ERRORS.TXT</code><ul>
+<li>Error log for the router. Although this file is named "Errors", it is also 
+  used for logging a timestamp and reset code each time the router is powered
+  on (e.g. reset due to power loss).</li>
+</ul>
+</li>
+<li><code>DATxxxxx.BIN</code><ul>
+<li>Data files containing logged <em>binary</em> sensor data</li>
+</ul>
+</li>
+<li><code>LOGxxxxx.TXT</code><ul>
+<li>Text files containing logged <em>plaintext</em> sensor data</li>
+</ul>
+</li>
+<li><code>BAX_SURV.BMP</code><ul>
+<li>(Specialist option). If the LRS is flashed with a firmware supporting
+  radio-survey mode, it will generate this file containing a survey of
+  the radio spectrum noise at your location. Note that the router is not
+  currently distributed with this firmware as it is a specialist option.</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="user-guide.html" class="btn btn-neutral float-right" title="Web Interface"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="commands-env.html" class="btn btn-neutral" title="Commands (ENV)"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

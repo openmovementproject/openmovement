@@ -1,0 +1,31 @@
+# MkDocs configuration file
+site_name: BuildAX
+site_description: BuildAX project documentation  
+
+repo_url: https://code.google.com/p/openmovement/
+repo_name: Google Code
+
+site_author: Sam Mitchell Finnigan, Newcastle University
+copyright: Creative Commons 3.0 BY Atribution licence
+
+#theme: readthedocs
+#extra_css: extra.css
+theme_dir: theme
+
+pages:
+- [index.md, Home]
+- [hardware.md, Hardware]
+- [quickstart.md, Quick Start]
+- [deployment.md, Deployment]
+- [connecting.md, Connection Guide]
+- [commands-lrs.md, Commands (LRS)]
+- [commands-env.md, Commands (ENV)]
+- [datafiles.md, Data Files]
+- [user-guide.md, Web Interface]
+- [developer-api.md, Developer Guide]
+- [firmware.md, Firmware]
+- [faq.md, FAQs]
+
+#use_directory_urls: False
+url_format: file
+

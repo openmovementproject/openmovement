@@ -1,0 +1,177 @@
+/* CSS overrides for ReadTheDocs customization */
+
+/* Colour Scheme for sidebar */
+.wy-side-nav-search {
+    z-index: 200;
+    background-color: #354B5E;
+    padding: 0;
+	margin:0;
+}
+
+.wy-side-nav-search a {
+    width:100%;
+	padding: 33px 11px;
+	margin:0;
+}
+
+.wy-nav-top {
+	background: #354B5E;
+}
+
+.icon-home a:hover {
+    color: #3091D1;
+}
+
+
+/* Search disabled until search works in mkdocs */
+div[role=search] { display:none }
+/* #rtd-search-form input { border-color: #30424A; }*/
+
+/* Footer */
+footer p {
+	font-size: 90%;
+	text-align:right;
+	margin:0;
+}
+
+/* List types */
+#main ul li       { list-style: square  outside }
+#main ul ul li    { list-style: disc    outside }
+#main ul ul ul li { list-style: circle  outside }
+#main ol li       { list-style: decimal outside }
+#main ul ul, #main ol ol { margin-bottom: 0 } 	/* except nested paragraphs */
+
+#main > ul, #main > ol { margin-bottom: 24px }    	/* match paragraphs... */
+
+#main > ul li, #main > ol li {
+	margin-left: 20px;
+	font-size: 16px;
+}
+
+
+/* Table styles */
+#main table  {
+	border: none;
+	width: 100%;
+	margin-bottom: 24px
+}
+
+#main table th {
+	background-color: #E3E3E3;
+	border-bottom: 1px solid #E1E4E5;
+	border-top: 1px solid #ccc;
+}
+
+#main table tr:nth-child(even){ background-color: #E3E3E3 }
+#main table tr:last-child td{ border-bottom: 1px solid #ccc }
+#main table td, #main table th {
+	padding: 7px;
+	text-align: left;
+}
+
+
+/*print css */
+@media print {
+	#main p { text-align: justify }
+
+	.rst-footer-buttons {
+		display: none;
+	}
+
+	/* video embeds */
+	iframe { display:none }
+}
+
+/* ==========================================================================
+   Alert styles from Bootstrap
+   ========================================================================== */
+.alert {
+	padding:15px;
+	margin-bottom:20px;
+	border:1px solid transparent;
+	border-radius:4px;
+	display:block;
+}
+
+.alert input {
+	margin:-5px 0px;
+	float:right;
+}
+
+.alert h4{
+	margin-top:0;
+	color:inherit
+}
+
+.alert strong {
+	padding-right:1em;
+	display:block;
+}
+
+.alert .alert-link{
+	font-weight:700
+}
+
+.alert>p,.alert>ul{
+	margin-bottom:0
+}
+
+.alert>p+p{
+	margin-top:5px
+}
+
+.alert-success{
+	background-color:#dff0d8;
+	border-color:#d6e9c6;
+	color:#3c763d
+}
+
+.alert-success hr{
+	border-top-color:#c9e2b3
+}
+
+.alert-success .alert-link{
+	color:#2b542c
+}
+
+.alert-info{
+	background-color:#d8ebff;
+	border-color:#bce8f1;
+	color:#31708f
+}
+
+.alert-info hr{
+	border-top-color:#a6e1ec
+}
+
+.alert-info .alert-link{
+	color:#245269
+}
+
+.alert-warn{
+	background-color:#fcf8e3;
+	border-color:#faebcc;
+	color:#8a6d3b
+}
+
+.alert-warn hr{
+	border-top-color:#f7e1b5
+}
+
+.alert-warn .alert-link{
+	color:#66512c
+}
+
+.alert-error{
+	background-color:#f2dede;
+	border-color:#ebccd1;
+	color:#a94442
+}
+
+.alert-error hr{
+	border-top-color:#e4b9c0
+}
+
+.alert-error .alert-link{
+	color:#843534
+}

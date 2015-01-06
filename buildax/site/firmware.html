@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firmware - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="firmware.html">Firmware</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#device-firmware">Device Firmware</a></li>
+                
+                    <li><a class="toctree-l3" href="#downloads">Downloads</a></li>
+                
+                    <li><a class="toctree-l3" href="#buildax-lrs">BuildAX LRS</a></li>
+                
+                    <li><a class="toctree-l3" href="#buildax-env-sensor">BuildAX ENV Sensor</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Firmware</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="device-firmware">Device Firmware</h1>
+<p>Firmware updates for BuildAX devices will be provided as a .hex file. This 
+document describes the process of flashing the devices with updated firmware.</p>
+<p><span class="alert alert-error"> 
+<strong>Warning:</strong> Updating the firmware is a potentially risky process. If you 
+ flash a device with an incorrect firmware file (or use a third-party
+ bootloader application which has a bug) you could render it permanently unusable!
+</span></p>
+<h2 id="downloads">Downloads</h2>
+<p>Tested bootloader software for the BAX devices is provided for Windows OSes
+in the OpenMovement repository, along with the firmware for each device. </p>
+<p><a href="http://openmovement.googlecode.com/svn/downloads/BuildAX/">Download BuildAX Firmware here</a>. 
+Ensure you download the correct firmware for your device.</p>
+<h2 id="buildax-lrs">BuildAX LRS</h2>
+<p><span class="alert alert-info"> 
+<strong>Web Interface Upgrades:</strong>
+The web interface data files do not also need to be upgraded when a firmware
+upgrade is applied, but this is recommended in order to access new and
+improved functionality. See <a href="quickstart.html#lrs-setup">here</a> for more information.
+</span></p>
+<h3 id="put-the-lrs-into-bootloader-mode">Put the LRS into bootloader mode</h3>
+<p>Remove the USB power connector from the LRS. Hold down the button on the 
+rear of the device and connect the USB cable between the PC and the LRS. 
+The LRS should enter bootloader mode, indicated by the LEDs counting up 
+from 1-7 continuously. </p>
+<h3 id="connecting-to-the-pc">Connecting to the PC</h3>
+<p>Open the firmware flashing tool provided in the OpenMovement repository. 
+Tools for other platforms may be available online.</p>
+<p>Enable the USB checkbox. The Vendor ID should be <code>0x4D8</code>, and the Product ID<br />
+<code>0x03C</code>. Now hit the "Connect" button. The tool should show that it has 
+connected to the device.</p>
+<p><img alt="BuildAX Bootloader" src="img/baxbootloader.png" /></p>
+<p>Next, click "Load Hex File" and select the new firmware. <strong>Double check</strong> that
+you have selected the correct firmware file for the LRS. Then, click
+"Erase-Program-Verify", and the new firmware will be written to the device.</p>
+<p>When this is completed, "Run Application" will cause the LRS to exit
+bootloader mode. If using a USB wall power adaptor, it is now safe to remove 
+the device from the PC and re-connect it to its own adapter.</p>
+<h4 id="reset-all-settings-re-generate-mac-address">Reset ALL Settings (re-generate MAC address)</h4>
+<p>To permanently reset all settings, including assigning a new random MAC address,
+hold the button on the rear of the LRS and click "Run Application" at this
+stage. Note that this may result in the LRS not being able to access the
+network if you have used the device's old MAC address to assign it an IP.</p>
+<h3 id="video">Video</h3>
+<iframe width="560" height="315" src="//www.youtube.com/embed/pa5SAfqBDH0" frameborder="0" allowfullscreen></iframe>
+
+<hr />
+<h2 id="buildax-env-sensor">BuildAX ENV Sensor</h2>
+<p>Writing a firmware <code>.hex</code> file onto a BuildAX ENV sensor requires a PIC18f 
+bootloader application. A Windows executable will be provided in the 
+OpenMovement repository for this purpose (AN1310ui.exe).</p>
+<p><span class="alert alert-warn"> 
+<strong>FTDI cable:</strong> To connect to a BuildAX sensor, a suitable FTDI cable is 
+    required. Please refer to the <a href="connecting.html">Connection Guide</a> for details 
+    of the cable and driver installation.
+</span></p>
+<h3 id="put-the-env-into-bootloader-mode">Put the ENV into bootloader mode</h3>
+<ol>
+<li>Remove one of the AAA batteries from the ENV. </li>
+<li>Push the FTDI cable onto the 3-pin header on the device, with the orange
+    wire facing the corner of the device (the USB end should be connected to 
+    your PC).</li>
+<li>Re-insert the battery</li>
+<li>Push the button next to the programming header while the green LED on the 
+    sensor is lit.</li>
+</ol>
+<p>The LED will flash red/green briefly before lighting solid red. This indicates
+that the sensor is now in bootloader mode.</p>
+<h3 id="writing-new-firmware">Writing new firmware</h3>
+<p>While the red LED is lit on the device, you should connect the PC bootloader
+application to the sensor. In the AN1310 PIC18f bootloader, this is the red 
+"stop" button in the toolbar. Then, load the new firmware into the application
+using the "open" menu. The application should now look similar to this: </p>
+<p><img alt="ENV Bootloader app" src="img/envbootloader.png" /></p>
+<p>Hit the "Write Device" button on the toolbar (rectangle with red arrow) to 
+program the device with the new firmware. When completed, the status bar 
+should show "Write complete (Flash 11.897s)" or similar time. Finally, hit the
+"Run Application Firmware" button (the green "play" arrow) to exit bootloader 
+mode.</p>
+<h3 id="video_1">Video</h3>
+<iframe width="560" height="315" src="//www.youtube.com/embed/jz1PkleHc5E" frameborder="0" allowfullscreen></iframe>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="faq.html" class="btn btn-neutral float-right" title="FAQs"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="developer-api.html" class="btn btn-neutral" title="Developer Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

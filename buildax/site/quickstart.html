@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Start - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="quickstart.html">Quick Start</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#quick-start-guide">Quick Start Guide</a></li>
+                
+                    <li><a class="toctree-l3" href="#part-list">Part List</a></li>
+                
+                    <li><a class="toctree-l3" href="#lrs-setup">LRS Setup</a></li>
+                
+                    <li><a class="toctree-l3" href="#pairdeploy-env-sensors">Pair/Deploy ENV Sensors</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="connecting.html">Connection Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Quick Start</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="quick-start-guide">Quick Start Guide</h1>
+<p>Depending on the number of sensors needing to be paired, and the size of the
+building a full BuildAX deployment may be done from scratch in as little as 
+20 minutes. There are three main parts in this guide:</p>
+<ol>
+<li>Set up the BuildAX LRS</li>
+<li>Pair sensors to LRS</li>
+<li>Deploy sensors in building </li>
+</ol>
+<h2 id="part-list">Part List</h2>
+<p>The following components are required for a basic deployment:</p>
+<ul>
+<li>BuildAX LRS</li>
+<li>SD Card (1GB+ recommended)</li>
+<li>USB A-B cable</li>
+<li>USB Mains power adapter</li>
+<li>Ethernet cable</li>
+</ul>
+<p>If you do not require network connectivity for your deployment, feel free to 
+disregard steps related to this and use the alternate <a href="commands-lrs.html">serial commands</a>.</p>
+<h2 id="lrs-setup">LRS Setup</h2>
+<p><span class="alert alert-info"> 
+<strong>First-time Setup</strong>
+For first-time setup, you may prefer to connect the LRS to a laptop (rather
+than the USB mains power adapter) in order to troubleshoot network connectivity
+using the serial interface.
+</span></p>
+<h3 id="pre-deployment-steps">Pre-deployment steps:</h3>
+<ul>
+<li>Download the <a href="https://code.google.com/p/openmovement/wiki/Downloads">Web Interface zip file</a> found in the Downloads section of the OpenMovement repository to your computer. Note that this only needs to be done once, when you first set up the LRS.</li>
+<li>Extract the files (keeping them inside the "WWW" directory) to the root of your SD card, using a card reader</li>
+</ul>
+<h3 id="setting-up">Setting up:</h3>
+<ol>
+<li>With the LRS powered OFF, eject card from computer &amp; insert into LRS</li>
+<li>Connect the ethernet cable between the BuildAX LRS and a network access 
+ point (or home Broadband router)</li>
+<li>Connect USB power cable to the BuildAX LRS and wall adapter</li>
+<li>Connect to the LRS by typing its address into your browser (click [here] for tips on finding address).
+ (<a href="connecting.html#finding-the-ip-address">Additional steps</a> are required if your 
+ network doesn't support NETBIOS or your LRS is missing the sticker with 
+ this information)</li>
+<li>Log into the LRS with the default credentials (<code>admin</code>/<code>password</code>)</li>
+<li>Click "Settings" and turn on logging (and set other options if required)</li>
+<li>Change default credentials</li>
+</ol>
+<p>Logging options can be set via the web interface (see <a href="user-guide.html#settings">here</a>)
+or via the console (see <a href="commands-lrs.html#settings">here</a>).</p>
+<h3 id="video">Video</h3>
+<iframe width="560" height="315" src="//www.youtube.com/embed/8GK42VeqjOI" frameborder="0" allowfullscreen></iframe>
+
+<h2 id="pairdeploy-env-sensors">Pair/Deploy ENV Sensors</h2>
+<p>For a more in-depth walk through pairing, please see the the <a href="deployment.html#sensor-deployment">deployment</a> section.</p>
+<p>Quick pairing steps:</p>
+<ol>
+<li>Press the button on the back of the LRS until the LEDs flash. You have 5 minutes to pair your sensors</li>
+<li>Open the BuildAX sensor. Press the button next to the battery compartment, holding the sensor close to the LRS.</li>
+<li>The LED on the front of the sensor should illuminate green to indicate that a pairing packet has been sent.</li>
+<li>Determine if the sensor is paired using the <a href="user-guide.html#sensors">live data</a> interface (or <a href="connecting.html#serial-usb">console</a>)</li>
+</ol>
+<p>Quick deployment steps:</p>
+<ol>
+<li>Choose a location out of direct sunlight, with good airflow.</li>
+<li>Using a sticky pad or hook, attach the back plate of the sensor to the wall</li>
+<li>Clip the sensor into the backplate</li>
+<li>Verify that packets are still being received from the device</li>
+</ol>
+<h3 id="video_1">Video</h3>
+<iframe width="560" height="315" src="//www.youtube.com/embed/eoTs1xR43Pc" frameborder="0" allowfullscreen></iframe>
+
+<p>You're done!</p>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="deployment.html" class="btn btn-neutral float-right" title="Deployment"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="hardware.html" class="btn btn-neutral" title="Hardware"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>

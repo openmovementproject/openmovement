@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connection Guide - BuildAX</title>
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/extra.css" type="text/css" />
+  
+
+  <script type="text/javascript" src="./js/theme.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  
+
+  <style>
+    body {font-size: 90%;}
+    pre, code {font-size: 100%;}
+    h3, h4, h5, h6 {color: #2980b9; font-weight: 300}
+  </style>
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="icon icon-home"> BuildAX</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+       <ul class="current">
+
+    <li class="toctree-l1 ">
+        <a class="" href="index.html">Home</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="hardware.html">Hardware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="quickstart.html">Quick Start</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="deployment.html">Deployment</a>
+        
+    </li>
+
+    <li class="toctree-l1 current">
+        <a class="current" href="connecting.html">Connection Guide</a>
+        
+            <ul>
+            
+                <li class="toctree-l2"><a href="#connecting-to-the-buildax-lrs">Connecting to the BuildAX LRS</a></li>
+                
+                    <li><a class="toctree-l3" href="#serial-usb">Serial (USB)</a></li>
+                
+                    <li><a class="toctree-l3" href="#usb-mass-storage">USB Mass Storage</a></li>
+                
+                    <li><a class="toctree-l3" href="#network-access">Network Access</a></li>
+                
+            
+                <li class="toctree-l2"><a href="#connecting-to-a-buildax-env-sensor">Connecting to a BuildAX ENV Sensor</a></li>
+                
+                    <li><a class="toctree-l3" href="#connection-settings">Connection Settings</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-lrs.html">Commands (LRS)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="commands-env.html">Commands (ENV)</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="datafiles.html">Data Files</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="user-guide.html">Web Interface</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="developer-api.html">Developer Guide</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="firmware.html">Firmware</a>
+        
+    </li>
+
+    <li class="toctree-l1 ">
+        <a class="" href="faq.html">FAQs</a>
+        
+    </li>
+
+</ul>
+
+
+
+
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+        <a href="index.html"></a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    <li>Connection Guide</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" id="main">
+            <h1 id="connecting-to-the-buildax-lrs">Connecting to the BuildAX LRS</h1>
+<p>Multiple methods of connecting to the LRS are supported- these fall into 
+two categories: a text-mode command interface, and a web configuration 
+interface.</p>
+<h2 id="serial-usb">Serial (USB)</h2>
+<p><span class="alert alert-info"> 
+<strong>Driver:</strong> On first-time use, the USB CDC serial driver will need to be installed. 
+(<a href="http://openmovement.googlecode.com/svn/downloads/BuildAX/LRS-serial-driver.zip">Download the CDC driver</a>).
+</span></p>
+<p>The serial connection is available when the LRS is directly connected to a 
+PC via the USB cable. To access a serial connection, some additional (free)
+software is required. We have tested using the following apps on these 
+platforms:</p>
+<ul>
+<li><strong>Cross-platform</strong>: <a href="http://freeware.the-meiers.org/">CoolTerm</a></li>
+<li><strong>Windows</strong>: <a href="#">Hyperterminal</a>,<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTy</a></li>
+<li><strong>Linux</strong> / <strong>Mac OSX</strong>: <a href="http://www.gnu.org/software/screen/">GNU screen</a></li>
+</ul>
+<h3 id="microsoft-windows">Microsoft Windows</h3>
+<p>The device will appear as a COM port on Windows (can be found in the Device 
+Manager, Hyperterminal and CoolTerm will also enumerate serial ports). The COM port number 
+will usually be COM2 or above (COM1 is now a virtual interface on modern 
+Windows).</p>
+<h3 id="linux-osx-nix-platforms">Linux, OSX (*nix platforms)</h3>
+<p>Devices on *nix platforms are listed under the <code>/dev/</code> directory. </p>
+<h2 id="usb-mass-storage">USB Mass Storage</h2>
+<p>Finally, data files logged by the LRS can be retrieved directly by using 
+it as a USB Mass Storage device. For this option to be available, data 
+logging on the LRS must be disabled (this is because it would be 
+unsafe to continue writing data to files which could be read at any time).</p>
+<p>To override this, use the <code>mount</code> command.</p>
+<p><span class="alert alert-warn"> 
+<strong>Warning:</strong> Manually deleting (or otherwise removing) data files from the mass storage device may cause the 
+data fetch service to become unstable.
+</span></p>
+<h2 id="network-access">Network Access</h2>
+<p>When the BuildAX LRS is connected to your network using an Ethernet cable, it 
+will request an IP address using DHCP.</p>
+<p>On home networks, the IP address assigned will normally be of the form
+192.168.x.x. On corporate or academic networks you may need to request an
+address from your network administrator, quoting the device's MAC address. 
+They may also be able to assign a DNS address for convenient access.</p>
+<h3 id="finding-the-ip-address">Finding the IP address</h3>
+<p>The MAC and IP address assigned to the LRS may be discovered by connecting 
+via serial and typing <code>status</code>. You may also find it useful to assign a static 
+IP address to the device for the purposes of port forwarding.</p>
+<h3 id="telnet">Telnet</h3>
+<p>Telnet can be used to access the LRS command terminal over the network 
+without needing to plug the USB cable into a PC. All of the commands listed in 
+<a href="commands-lrs.html">Commands (LRS)</a> are supported.</p>
+<p>The <code>telnet</code> command is used to connect to this console:</p>
+<pre class="prettyprint well"><code>    telnet 192.168.0.15
+</code></pre>
+
+<p>... or use PuTTy on Windows. The LRS's telnet service runs on the default 
+TCP port 23.</p>
+<h3 id="web-interface-http">Web Interface (HTTP)</h3>
+<p>The BuildAX LRS configuration interface is accessed using a web browser, 
+providing a convenient way to change settings and view LRS status without
+needing to use the text-mode terminal. </p>
+<p>On Windows, type the NETBIOS name of the device may be typed directly into the
+address bar. This will be in the form BAX-xxxxxx (e.g. <code>bax-434c32</code>), and can 
+be found on the sticker on the rear of the device.</p>
+<p>For information on using the web interface, please see the <a href="user-guide.html">Web Interface User Guide</a>.</p>
+<hr />
+<h1 id="connecting-to-a-buildax-env-sensor">Connecting to a BuildAX ENV Sensor</h1>
+<p>In order to configure settings on the BuildAX ENV sensors, you may connect 
+directly to the sensor using an FTDI cable. You will require a VCP (Virtual 
+COM port) USB driver for FTDI, available <a href="http://www.ftdichip.com/FTDrivers.htm">here</a>.</p>
+<p>This guide demonstrates how to connect to an ENV sensor using HyperTerminal.
+On other operating systems, the settings will be the same, though the procedure
+may differ.</p>
+<p>For information on flashing firmware to the device, please refer to the 
+<a href="firmware.html">Firmware</a> section.</p>
+<p>On creating a new serial connection with HyperTerminal, you should select the 
+new COM port created by the FTDI driver (this will usually be a number greater
+than COM1). </p>
+<p><img alt="Hyperterminal" src="img/envht.png" /></p>
+<p>Hyperterminal will enumerate the COM serial ports available on the system, as
+in this example. To connect using PuTTy, you will need to find the COM port
+number using the Device Manager in Windows, or use a fork of the project with
+COM enumeration. </p>
+<p>To connect on a Unix platform, the <code>screen</code> command may be 
+used along with the device path (under <code>/dev/</code>). Details of using this command
+for serial connections can be found <a href="https://wiki.archlinux.org/index.php/working_with_the_serial_console#Screen">here</a>.</p>
+<p>All connection methods will require configuration with the correct serial parameters.</p>
+<h2 id="connection-settings">Connection Settings</h2>
+<ul>
+<li><strong>Baud Rate</strong>:    115200</li>
+<li><strong>Data bits</strong>:    8</li>
+<li><strong>Parity</strong>:       None</li>
+<li><strong>Stop bits</strong>:    1</li>
+<li><strong>Flow control</strong>: None</li>
+</ul>
+<p><img alt="Hyperterminal ENV connect" src="img/envparams.png" /></p>
+<p>Select "OK", and the FTDI Serial connection will be open, ready to connect a
+ sensor.</p>
+<h3 id="connecting-to-env-sensors">Connecting to ENV sensors</h3>
+<p>Starting from the corner of the sensor and working inwards, the following FTDI
+wires should be connected to the 3-pin connector:</p>
+<ol>
+<li>Orange (pin 1)</li>
+<li>Black  (pin 2)</li>
+<li>Yellow (pin 3)</li>
+</ol>
+<p>Your FTDI cable may also have Red, Brown and Green wires, these are not 
+used by the ENV sensor and should be left disconnected.</p>
+<p>To connect to an ENV sensor:</p>
+<ol>
+<li>Insert batteries into the sensor (if they are not already inserted)</li>
+<li>Push the 3 pins (listed above) of the FTDI connector onto the header 
+    (<a href="hardware.html#rear">see item <strong>1</strong> here</a>), with the orange wire on pin 1.</li>
+<li>Press the sensor button (<a href="hardware.html#rear">see item <strong>2</strong> here</a>) to enter into command mode.</li>
+<li>Watch your command terminal. The sensor should start up and print its status over the connected UART:</li>
+</ol>
+<p><img alt="ENV connected" src="img/envconnected.png" /></p>
+<p>Note that while the FTDI cable will provide a voltage and power the sensor, 
+it is recommended that batteries are left in the device while the the serial 
+connection is accessed. </p>
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="commands-lrs.html" class="btn btn-neutral float-right" title="Commands (LRS)"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="deployment.html" class="btn btn-neutral" title="Deployment"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      Developed at <a href="http://di.ncl.ac.uk/blog/open-movement/" rel="nofollow">Newcastle University, UK</a>.
+      Available under <a href="http://creativecommons.org/licenses/by/3.0/" rel="nofollow">CC 3.0 BY Attribution</a> License
+    </p>
+  </div>
+
+  <p>
+    Docs built with <a href="http://www.mkdocs.org">MkDocs</a> &bull; Theme based on <a href="https://github.com/snide/sphinx_rtd_theme">Read the Docs</a> 
+  </p>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+<!--
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span><a href="" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      <span style="margin-left: 15px"><a href="" style="color: #fcfcfc">Next &raquo;</a></span>
+    </span>
+</div>
+-->
+</body>
+</html>
