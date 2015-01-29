@@ -11,7 +11,7 @@ Open Movement devices are miniature, embeddable, open source sensors developed a
 * [BuildAX Building monitoring](http://github.com/digitalinteraction/openmovement/wiki/BuildAX)
 * [WeighAX Weight monitoring](http://github.com/digitalinteraction/openmovement/wiki/WeighAX)
 
-[Downloads](http://github.com/digitalinteraction/openmovement/wiki/Downloads) 
+[Downloads](https://github.com/digitalinteraction/openmovement/tree/master/Downloads)
 
 [Documentation Wiki](http://github.com/digitalinteraction/openmovement/wiki/Documentation)
 
