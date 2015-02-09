@@ -1,0 +1,42 @@
+// 1. Update IMU
+//accel
+
+// 2. Gravity estimate
+gravity[0] = 2 * (q[1]*q[3] - q[0]*q[2]);
+gravity[1] = 2 * (q[0]*q[1] + q[2]*q[3]);
+gravity[2] = q[0]*q[0] - q[1]*q[1] - q[2]*q[2] + q[3]*q[3];
+
+// 3. (Optional) Calculate yaw pitch roll
+sgyz = sqrt(gravity[1] * gravity[1] + gravity[2] * gravity[2]);
+sgxz = sqrt(gravity[0] * gravity[0] + gravity[2] * gravity[2]);
+ypr[0] = atan2(2 * q[1] * q[2] - 2 * q[0] * q[3], 2 * q[0]*q[0] + 2 * q[1] * q[1] - 1);
+ypr[1] = (sgyz < 0.05f) ? 0.0f : atan(gravity[0] / sgyz);
+ypr[2] = (sgxz < 0.05f) ? 0.0f : atan(gravity[1] / sgxz);
+
+// 4. Now swap gravity axes to match output
+temp = gravity[0];
+gravity[0] = -gravity[1];
+gravity[1] = -gravity[2];
+gravity[2] = -temp;
+
+// 5. Quaternion to Euler (psi, theta, phi)
+euler[0] = (float)atan2(2 * q[1] * q[2] - 2 * q[0] * q[3], 2 * q[0]*q[0] + 2 * q[1] * q[1] - 1); // psi
+euler[1] = -(float)asin(2 * q[1] * q[3] + 2 * q[0] * q[2]); // theta
+euler[2] = (float)atan2(2 * q[2] * q[3] - 2 * q[0] * q[1], 2 * q[0] * q[0] + 2 * q[3] * q[3] - 1); // phi
+
+// 6. Calculate relative acceleration for the device after gravity is removed (reordering to YZX)
+relAccel[0] = accel[1] + gravity[0];
+relAccel[1] = accel[2] + gravity[1];
+relAccel[2] = accel[0] + gravity[2];
+
+// 7. Calculate the linear acceleration in world coordinates (do a ZXY rotation)
+rotZ = MatrixLoadZRotation(-euler[2], phi);    // Z: phi (roll)
+rotX = MatrixLoadXRotation(-euler[1], theta);  // X: theta (pitch) (actually Y)
+rotY = MatrixLoadYRotation(-euler[0], psi);    // Y: psi (yaw) (actually X)
+temp = MatrixMultiply(rotZ, rotX);
+matrixRotation = MatrixMultiply(temp, rotY);
+
+point = relAccel;
+linearAccel = Point3MultiplyMatrix(point, matrixRotation);
+
+

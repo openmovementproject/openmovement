@@ -1,0 +1,11 @@
+glut-3.7.6 Install
+~~~~~~~~~~~~~~~~~~
+
+glut.h      -->  C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include\gl
+            or   C:\Program Files (x86)\Windows Kits\8.1\Include\um\gl
+
+glut32.lib  -->  C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib
+            or   C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x86
+
+glut32.dll  -->  C:\Windows\System32
+            or   C:\Windows\SysWOW64
