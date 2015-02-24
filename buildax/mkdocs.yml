@@ -2,8 +2,8 @@
 site_name: BuildAX
 site_description: BuildAX project documentation  
 
-repo_url: https://code.google.com/p/openmovement/
-repo_name: Google Code
+repo_url: https://github.com/digitalinteraction/openmovement 
+repo_name: GitHub 
 
 site_author: Sam Mitchell Finnigan, Newcastle University
 copyright: Creative Commons 3.0 BY Atribution licence
