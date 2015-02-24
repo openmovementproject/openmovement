@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firmware - BuildAX</title>
+  <title>Firmware</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -140,7 +140,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Firmware</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -181,7 +181,7 @@ Tools for other platforms may be available online.</p>
 <p>Enable the USB checkbox. The Vendor ID should be <code>0x4D8</code>, and the Product ID<br />
 <code>0x03C</code>. Now hit the "Connect" button. The tool should show that it has 
 connected to the device.</p>
-<p><img alt="BuildAX Bootloader" src="img/baxbootloader.png" /></p>
+<p><img alt="BuildAX Bootloader" src="./img/baxbootloader.png" /></p>
 <p>Next, click "Load Hex File" and select the new firmware. <strong>Double check</strong> that
 you have selected the correct firmware file for the LRS. Then, click
 "Erase-Program-Verify", and the new firmware will be written to the device.</p>
@@ -208,22 +208,24 @@ OpenMovement repository for this purpose (AN1310ui.exe).</p>
 </span></p>
 <h3 id="put-the-env-into-bootloader-mode">Put the ENV into bootloader mode</h3>
 <ol>
-<li>Remove one of the AAA batteries from the ENV. </li>
+<li>Insert batteries into the ENV sensor</li>
 <li>Push the FTDI cable onto the 3-pin header on the device, with the orange
     wire facing the corner of the device (the USB end should be connected to 
-    your PC).</li>
-<li>Re-insert the battery</li>
+    your PC).1</li>
 <li>Push the button next to the programming header while the green LED on the 
     sensor is lit.</li>
 </ol>
 <p>The LED will flash red/green briefly before lighting solid red. This indicates
 that the sensor is now in bootloader mode.</p>
 <h3 id="writing-new-firmware">Writing new firmware</h3>
-<p>While the red LED is lit on the device, you should connect the PC bootloader
-application to the sensor. In the AN1310 PIC18f bootloader, this is the red 
-"stop" button in the toolbar. Then, load the new firmware into the application
-using the "open" menu. The application should now look similar to this: </p>
-<p><img alt="ENV Bootloader app" src="img/envbootloader.png" /></p>
+<p>Now you should connect the PC bootloader application to the sensor. You will 
+need to set the correct serial port and baud rate in the settings dialog 
+(program -&gt; settings).</p>
+<p><img alt="ENV Bootloader app" src="./img/env_flash_settings.png" /></p>
+<p>In the AN1310 PIC18f bootloader, click the red "stop" button in the toolbar. 
+Then, load the new firmware into the application using the "open" menu. The 
+application should now look similar to this: </p>
+<p><img alt="ENV Bootloader app" src="./img/envbootloader.png" /></p>
 <p>Hit the "Write Device" button on the toolbar (rectangle with red arrow) to 
 program the device with the new firmware. When completed, the status bar 
 should show "Write complete (Flash 11.897s)" or similar time. Finally, hit the
@@ -231,8 +233,6 @@ should show "Write complete (Flash 11.897s)" or similar time. Finally, hit the
 mode.</p>
 <h3 id="video_1">Video</h3>
 <iframe width="560" height="315" src="//www.youtube.com/embed/jz1PkleHc5E" frameborder="0" allowfullscreen></iframe>
-
-
           </div>
           <footer>
   

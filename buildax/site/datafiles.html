@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Files - BuildAX</title>
+  <title>Data Files</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -140,7 +140,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Data Files</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -156,7 +156,7 @@
 the logging format is set to plaintext mode. It can also be streamed over the 
 serial console and telnet.</p>
 <p>A CSV formatted packet from a BuildAX Environment Sensor looks like this:</p>
-<pre class="prettyprint well"><code>    2014/08/29,09:26:05,Bedroom,-48,1,171,0,2911,50.25,220,241,13876,36099,25
+<pre><code>    2014/08/29,09:26:05,Bedroom,-48,1,171,0,2911,50.25,220,241,13876,36099,25
 </code></pre>
 
 <h3 id="field-list">Field List</h3>
@@ -264,7 +264,7 @@ machines with a Make and GCC environment.</p>
 <p>Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
 similar to how it is rendered in CSV. The data type widths for an ENV sensor 
 are described below:</p>
-<p><img alt="Data Width Description Image" src="img/datawidth.png" /></p>
+<p><img alt="Data Width Description Image" src="./img/datawidth.png" /></p>
 <p>The data portion of the packet (darkest part in the diagram) is the part which
 will vary depending on the packet type. This diagram shows a packet from a 
 BuildAX environment sensor (types 1,2,3), which would vary with (for example)
@@ -300,7 +300,6 @@ a CO2 sensor.</p>
 </ul>
 </li>
 </ul>
-
           </div>
           <footer>
   

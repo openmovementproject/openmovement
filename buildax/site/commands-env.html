@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commands (ENV) - BuildAX</title>
+  <title>Commands (ENV)</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -141,7 +141,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Commands (ENV)</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -160,7 +160,7 @@ in all cases; meaning that you should press the <code>Enter</code> key to send a
 after typing it. </p>
 <p>After most commands complete, the sensor will print its new operating status,
 and the list of basic commands. This will look like:</p>
-<pre class="prettyprint well"><code>    Settings:
+<pre><code>    Settings:
     Device:42609215
     Name:dig0001
     packet_header = 66
@@ -194,35 +194,35 @@ action on the device:</p>
 <h3 id="name"><code>name</code></h3>
 <p><strong>Summary:</strong> Set the device name to transmit on pairing</p>
 <p><strong>Example:</strong> <code>name=dig-bax0001</code></p>
-<pre class="prettyprint well"><code>    Done.
+<pre><code>    Done.
 </code></pre>
 
 <hr />
 <h3 id="save"><code>save</code></h3>
 <p><strong>Summary:</strong> Save current settings to non-volatile memory</p>
 <p><strong>Example:</strong> <code>save</code></p>
-<pre class="prettyprint well"><code>    Saved.
+<pre><code>    Saved.
 </code></pre>
 
 <hr />
 <h3 id="defaults"><code>defaults</code></h3>
 <p><strong>Summary:</strong> Reset all settings to defaults and save them</p>
 <p><strong>Example:</strong> <code>defaults</code></p>
-<pre class="prettyprint well"><code>    Done.
+<pre><code>    Done.
 </code></pre>
 
 <hr />
 <h3 id="renew"><code>renew</code></h3>
 <p><strong>Summary:</strong> Reset all settings, id and encryption data</p>
 <p><strong>Example:</strong> <code>renew</code></p>
-<pre class="prettyprint well"><code>    Done.
+<pre><code>    Done.
 </code></pre>
 
 <hr />
 <h3 id="reset"><code>reset</code></h3>
 <p><strong>Summary:</strong> Reset the device, unsaved changes discarded</p>
 <p><strong>Example:</strong> <code>reset</code></p>
-<pre class="prettyprint well"><code>    Startup.
+<pre><code>    Startup.
     Initial battery: 1663mV
     Setting loaded ok.
 </code></pre>
@@ -231,7 +231,7 @@ action on the device:</p>
 <h3 id="sample"><code>sample</code></h3>
 <p><strong>Summary:</strong> Sample the sensors and print their values</p>
 <p><strong>Example:</strong> <code>sample</code></p>
-<pre class="prettyprint well"><code>    Sample:
+<pre><code>    Sample:
     Temp:24.7
     Humidity:38.3, 302
     Light:145
@@ -244,7 +244,7 @@ action on the device:</p>
 <h3 id="stream"><code>stream</code></h3>
 <p><strong>Summary:</strong> Stream the sensor values in the same format as above</p>
 <p><strong>Example:</strong> <code>stream</code></p>
-<pre class="prettyprint well"><code>    &lt;Button/key exit&gt;
+<pre><code>    &lt;Button/key exit&gt;
     Sample:
     Temp:24.7
     Humidity:38.7, 316
@@ -258,7 +258,7 @@ action on the device:</p>
 <h3 id="exit"><code>exit</code></h3>
 <p><strong>Summary:</strong> Exit command mode, use current (possibly unsaved) settings now</p>
 <p><strong>Example:</strong> <code>exit</code></p>
-<pre class="prettyprint well"><code>    Ok.
+<pre><code>    Ok.
 
     Turn off
 </code></pre>
@@ -394,7 +394,6 @@ same amount.</p>
 </tr>
 </tbody>
 </table>
-
           </div>
           <footer>
   

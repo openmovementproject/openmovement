@@ -80,24 +80,27 @@ OpenMovement repository for this purpose (AN1310ui.exe).
 
 ### Put the ENV into bootloader mode
 
- 1. Remove one of the AAA batteries from the ENV. 
+ 1. Insert batteries into the ENV sensor
  2. Push the FTDI cable onto the 3-pin header on the device, with the orange
     wire facing the corner of the device (the USB end should be connected to 
-    your PC).
- 3. Re-insert the battery
- 4. Push the button next to the programming header while the green LED on the 
+    your PC).1
+ 3. Push the button next to the programming header while the green LED on the 
     sensor is lit.
 
 The LED will flash red/green briefly before lighting solid red. This indicates
 that the sensor is now in bootloader mode.
 
-
 ### Writing new firmware
 
-While the red LED is lit on the device, you should connect the PC bootloader
-application to the sensor. In the AN1310 PIC18f bootloader, this is the red 
-"stop" button in the toolbar. Then, load the new firmware into the application
-using the "open" menu. The application should now look similar to this: 
+Now you should connect the PC bootloader application to the sensor. You will 
+need to set the correct serial port and baud rate in the settings dialog 
+(program -> settings).
+
+ ![ENV Bootloader app](img/env_flash_settings.png)
+
+In the AN1310 PIC18f bootloader, click the red "stop" button in the toolbar. 
+Then, load the new firmware into the application using the "open" menu. The 
+application should now look similar to this: 
 
  ![ENV Bootloader app](img/envbootloader.png)
 

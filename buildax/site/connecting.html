@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connection Guide - BuildAX</title>
+  <title>Connection Guide</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -145,7 +145,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Connection Guide</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -206,7 +206,7 @@ IP address to the device for the purposes of port forwarding.</p>
 without needing to plug the USB cable into a PC. All of the commands listed in 
 <a href="commands-lrs.html">Commands (LRS)</a> are supported.</p>
 <p>The <code>telnet</code> command is used to connect to this console:</p>
-<pre class="prettyprint well"><code>    telnet 192.168.0.15
+<pre><code>    telnet 192.168.0.15
 </code></pre>
 
 <p>... or use PuTTy on Windows. The LRS's telnet service runs on the default 
@@ -232,7 +232,7 @@ may differ.</p>
 <p>On creating a new serial connection with HyperTerminal, you should select the 
 new COM port created by the FTDI driver (this will usually be a number greater
 than COM1). </p>
-<p><img alt="Hyperterminal" src="img/envht.png" /></p>
+<p><img alt="Hyperterminal" src="./img/envht.png" /></p>
 <p>Hyperterminal will enumerate the COM serial ports available on the system, as
 in this example. To connect using PuTTy, you will need to find the COM port
 number using the Device Manager in Windows, or use a fork of the project with
@@ -249,7 +249,7 @@ for serial connections can be found <a href="https://wiki.archlinux.org/index.ph
 <li><strong>Stop bits</strong>:    1</li>
 <li><strong>Flow control</strong>: None</li>
 </ul>
-<p><img alt="Hyperterminal ENV connect" src="img/envparams.png" /></p>
+<p><img alt="Hyperterminal ENV connect" src="./img/envparams.png" /></p>
 <p>Select "OK", and the FTDI Serial connection will be open, ready to connect a
  sensor.</p>
 <h3 id="connecting-to-env-sensors">Connecting to ENV sensors</h3>
@@ -270,11 +270,10 @@ used by the ENV sensor and should be left disconnected.</p>
 <li>Press the sensor button (<a href="hardware.html#rear">see item <strong>2</strong> here</a>) to enter into command mode.</li>
 <li>Watch your command terminal. The sensor should start up and print its status over the connected UART:</li>
 </ol>
-<p><img alt="ENV connected" src="img/envconnected.png" /></p>
+<p><img alt="ENV connected" src="./img/envconnected.png" /></p>
 <p>Note that while the FTDI cable will provide a voltage and power the sensor, 
 it is recommended that batteries are left in the device while the the serial 
 connection is accessed. </p>
-
           </div>
           <footer>
   

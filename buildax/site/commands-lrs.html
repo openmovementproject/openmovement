@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commands (LRS) - BuildAX</title>
+  <title>Commands (LRS)</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -143,7 +143,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Commands (LRS)</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -218,14 +218,14 @@ would be undesirable in most situations. </p>
 <h3 id="help"><code>help</code></h3>
 <p><strong>Summary:</strong> Requests LRS to print a summary of common commands</p>
 <p><strong>Example:</strong> <code>help</code></p>
-<pre class="prettyprint well"><code>    HELP: help|status|time|reset|mount|exit|save|setting
+<pre><code>    HELP: help|status|time|reset|mount|exit|save|setting
 </code></pre>
 
 <hr />
 <h3 id="status"><code>status</code></h3>
 <p><strong>Summary:</strong> Request a printout of current status and settings</p>
 <p><strong>Example:</strong> <code>status</code></p>
-<pre class="prettyprint well"><code>    BAX, HW:1.1, FW:1.1
+<pre><code>    BAX, HW:1.1, FW:1.1
     NAME: BAX-434C32
     Start time: 2014/09/03,14:57:01
     Time:       2014/09/03,15:26:43
@@ -276,46 +276,46 @@ would be undesirable in most situations. </p>
 <h3 id="time"><code>time</code></h3>
 <p><strong>Summary:</strong> Request a printout of or set the time</p>
 <p><strong>Example:</strong> <code>time</code> or <code>time=2014/08/14,10:48:54</code></p>
-<pre class="prettyprint well"><code>    Time: 2014/08/14,10:48:54
+<pre><code>    Time: 2014/08/14,10:48:54
 </code></pre>
 
 <hr />
 <h3 id="save"><code>save</code></h3>
 <p><strong>Summary:</strong> Request all open filed to be saved. This ensures all the cluster chains are written to disk. Files in use will be re-opened.</p>
 <p><strong>Example:</strong> <code>save</code></p>
-<pre class="prettyprint well"><code>    Saved files
+<pre><code>    Saved files
 </code></pre>
 
 <hr />
 <h3 id="reset"><code>reset</code></h3>
 <p><strong>Summary:</strong> Request a reset. Unsaved settings are lost. Open files are closed in orderly fashion</p>
 <p><strong>Example:</strong> <code>reset</code></p>
-<pre class="prettyprint well"><code>    Resetting
+<pre><code>    Resetting
 </code></pre>
 
 <hr />
 <h3 id="exit"><code>exit</code></h3>
 <p><strong>Summary:</strong> Request to close the terminal. Not possible for USB connections</p>
 <p><strong>Example:</strong> <code>exit</code></p>
-<pre class="prettyprint well"><code>    Telnet session closed 
+<pre><code>    Telnet session closed 
 </code></pre>
 
 <p>or </p>
-<pre class="prettyprint well"><code>    Cannot exit this Terminal
+<pre><code>    Cannot exit this Terminal
 </code></pre>
 
 <hr />
 <h3 id="settingsave"><code>setting.save</code></h3>
 <p><strong>Summary:</strong> Saves the current settings to non-volatile memory. Without this command, the settings are lost on reset or power loss.</p>
 <p><strong>Example:</strong> <code>setting.save</code></p>
-<pre class="prettyprint well"><code>    Saved settings
+<pre><code>    Saved settings
 </code></pre>
 
 <hr />
 <h3 id="settingusername"><code>setting.username</code></h3>
 <p><strong>Summary:</strong> Change the device username</p>
 <p><strong>Example:</strong> <code>setting.username=newuser</code></p>
-<pre class="prettyprint well"><code>    Username:newuser
+<pre><code>    Username:newuser
     Password:password
 </code></pre>
 
@@ -323,7 +323,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingpassword"><code>setting.password</code></h3>
 <p><strong>Summary:</strong> Change the device password</p>
 <p><strong>Example:</strong> <code>setting.username=newpassword</code></p>
-<pre class="prettyprint well"><code>    Username:admin
+<pre><code>    Username:admin
     Password:newpassword
 </code></pre>
 
@@ -331,21 +331,21 @@ would be undesirable in most situations. </p>
 <h3 id="settingname"><code>setting.name</code></h3>
 <p><strong>Summary:</strong> Change the device name. This is also the NETBIOS name. NETBIOS names must be 15 or fewer characters.</p>
 <p><strong>Example:</strong> <code>setting.name=BAX_ROUTER6</code></p>
-<pre class="prettyprint well"><code>    Name: BAX_ROUTER6
+<pre><code>    Name: BAX_ROUTER6
 </code></pre>
 
 <hr />
 <h3 id="settingsession"><code>setting.session</code></h3>
 <p><strong>Summary:</strong> Changes the text session number. The current file will be used until a save command is issued or the device autosaves. Permitted range is 0 to 65535.</p>
 <p><strong>Example:</strong> <code>setting.session=12345</code></p>
-<pre class="prettyprint well"><code>    Text session: 12345
+<pre><code>    Text session: 12345
 </code></pre>
 
 <hr />
 <h3 id="settingusbstream"><code>setting.usb.stream</code></h3>
 <p><strong>Summary:</strong> Enable of disable the stream of the USB serial port. If turned off, ALL COMMUNICATIONS ARE SUSPENDED including the response to this setting</p>
 <p><strong>Example:</strong> <code>setting.usb.stream=1</code></p>
-<pre class="prettyprint well"><code>    USB:
+<pre><code>    USB:
     Mode: 0
     Setting: Turned on
     Status: Streaming
@@ -355,7 +355,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingusbmode"><code>setting.usb.mode</code></h3>
 <p><strong>Summary:</strong> Change the stream output mode to text (0) or binary slip encoded (1)</p>
 <p><strong>Example:</strong> <code>setting.usb.mode=0</code></p>
-<pre class="prettyprint well"><code>    USB:
+<pre><code>    USB:
     Mode: 0
     Setting: Turned on
     Status: Streaming
@@ -365,7 +365,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingtelnetstream"><code>setting.telnet.stream</code></h3>
 <p><strong>Summary:</strong> Enable or disable the stream of the telnet server (0 is off)</p>
 <p><strong>Example:</strong> <code>setting.telnet.stream=0</code></p>
-<pre class="prettyprint well"><code>    Telnet
+<pre><code>    Telnet
     Mode:0
     Setting: Turned on
     Status: Enabled
@@ -375,7 +375,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingtelnetmode"><code>setting.telnet.mode</code></h3>
 <p><strong>Summary:</strong> Change the stream mode of the telnet connection to text (0) or binary slip (1)</p>
 <p><strong>Example:</strong> <code>setting.telnet.mode=0</code></p>
-<pre class="prettyprint well"><code>    Telnet
+<pre><code>    Telnet
     Mode:0
     Setting: Turned on
     Status: Enabled
@@ -385,7 +385,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingfilestream"><code>setting.file.stream</code></h3>
 <p><strong>Summary:</strong> Enable or disable logging to file</p>
 <p><strong>Example:</strong> <code>setting.file.stream=0</code></p>
-<pre class="prettyprint well"><code>    File:
+<pre><code>    File:
     Mode: 0
     Setting: Turned off
     Status: Card present
@@ -395,7 +395,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingfilemode"><code>setting.file.mode</code></h3>
 <p><strong>Summary:</strong> Change the stream mode of the log file to text (0) or binary raw (1)</p>
 <p><strong>Example:</strong> <code>setting.file.mode=1</code></p>
-<pre class="prettyprint well"><code>    File:
+<pre><code>    File:
     Mode: 1
     Setting: Turned off
     Status: Card present
@@ -405,7 +405,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingudpstream"><code>setting.udp.stream</code></h3>
 <p><strong>Summary:</strong> Enable or disable the udp output (0=off)</p>
 <p><strong>Example:</strong> <code>setting.udp.stream=0</code></p>
-<pre class="prettyprint well"><code>    Udp:
+<pre><code>    Udp:
     Mode: 0
     Setting: Turned on
     Status: Enabled
@@ -415,7 +415,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingudpmode"><code>setting.udp.mode</code></h3>
 <p><strong>Summary:</strong> Change the stream mode of the telnet connection to text (0) or binary slip (1)</p>
 <p><strong>Example:</strong> <code>setting.udp.mode=0</code></p>
-<pre class="prettyprint well"><code>    Udp:
+<pre><code>    Udp:
     Mode: 0
     Setting: Turned on
     Status: Enabled
@@ -425,7 +425,7 @@ would be undesirable in most situations. </p>
 <h3 id="settingwebsocketstream"><code>setting.websocket.stream</code></h3>
 <p><strong>Summary:</strong> Enable or disable the websocket output (0=off)</p>
 <p><strong>Example:</strong> <code>setting.websocket.stream=0</code></p>
-<pre class="prettyprint well"><code>    Websocket:
+<pre><code>    Websocket:
     Mode: 0
     Setting: Turned on
     Status: Enabled
@@ -441,11 +441,11 @@ the source code.</p>
 <p><strong>Summary:</strong> Request to mount the memory card so it is available to the PC connection. If data logging is running, this is not safe. When logging the disk will appear write protected to the operating system.</p>
 <p><strong>Example:</strong> <code>mount=1</code> or <code>mount=0</code></p>
 <p>The first number represents the mount state, the second number is the write protect state.</p>
-<pre class="prettyprint well"><code>    Mounted: 1, 0
+<pre><code>    Mounted: 1, 0
 </code></pre>
 
 <p>or </p>
-<pre class="prettyprint well"><code>    Mounted: 0, 0
+<pre><code>    Mounted: 0, 0
 </code></pre>
 
 <hr />
@@ -453,25 +453,25 @@ the source code.</p>
 <p><strong>Summary:</strong> Request an SD card format. ALL DATA WILL BE LOST.
 The number on failure is the internal error code.</p>
 <p><strong>Example:</strong> <code>format</code></p>
-<pre class="prettyprint well"><code>    Formatted
+<pre><code>    Formatted
 </code></pre>
 
 <p>or </p>
-<pre class="prettyprint well"><code>    Format failed: 00
+<pre><code>    Format failed: 00
 </code></pre>
 
 <hr />
 <h3 id="hash"><code>hash</code></h3>
 <p><strong>Summary:</strong> Request the binary hash for opening a UDP session. Debug purposes only</p>
 <p><strong>Example:</strong> <code>hash</code></p>
-<pre class="prettyprint well"><code>    3C24B1A1C87BAA6290049ACCB387A556AA58C1299B38C099E57F5C68ECECC0EB6207B8A6309D99272E565BDFE80842B302E1936D4031ADFB26C3A77DAAA5395EA8AF66348949F2A4CB6CB15F31F97A5C0C3E
+<pre><code>    3C24B1A1C87BAA6290049ACCB387A556AA58C1299B38C099E57F5C68ECECC0EB6207B8A6309D99272E565BDFE80842B302E1936D4031ADFB26C3A77DAAA5395EA8AF66348949F2A4CB6CB15F31F97A5C0C3E
 </code></pre>
 
 <hr />
 <h3 id="settingbaxsubnet"><code>setting.bax.subnet</code></h3>
 <p><strong>Summary:</strong> Change the subnet of the radio, accepts hex input.</p>
 <p><strong>Example:</strong> <code>setting.bax.subnet=4201</code></p>
-<pre class="prettyprint well"><code>    Si44 Radio: On
+<pre><code>    Si44 Radio: On
     Subnet:4201
     Mask:FF00
 </code></pre>
@@ -480,7 +480,7 @@ The number on failure is the internal error code.</p>
 <h3 id="settingbaxmask"><code>setting.bax.mask</code></h3>
 <p><strong>Summary:</strong> Change the OR mask of the radio subnet, accepts hex input. The mask is used in the same way as an ethernet subnet mask upon the subnet value.</p>
 <p><strong>Example:</strong> <code>setting.bax.mask=FF01</code></p>
-<pre class="prettyprint well"><code>    Si44 Radio: On
+<pre><code>    Si44 Radio: On
     Subnet:4201
     Mask:FF01
 </code></pre>
@@ -489,7 +489,7 @@ The number on failure is the internal error code.</p>
 <h3 id="mac"><code>mac!</code></h3>
 <p><strong>Summary:</strong> This is used to change the device mac address. Value is not latched unless saved and device is reset. IEEE format used.</p>
 <p><strong>Example:</strong> <code>mac!=12:34:56:78:90:ab</code></p>
-<pre class="prettyprint well"><code>    ETHERNET: Disconnected
+<pre><code>    ETHERNET: Disconnected
     MAC:12:34:56:78:90:AB
     IP: 169.254.1.1
     MSK:255:255:0:0
@@ -499,10 +499,8 @@ The number on failure is the internal error code.</p>
 <h3 id="bax_test"><code>bax_test</code></h3>
 <p><strong>Summary:</strong> Sets the bax radio to go into a pre-defined test mode. Reception is halted (0=test off, 1=CW carrier, 2=PN9 modulation pattern).</p>
 <p><strong>Example:</strong> <code>bax_test=1</code></p>
-<pre class="prettyprint well"><code>    Bax-&gt;cw
+<pre><code>    Bax-&gt;cw
 </code></pre>
-
-
           </div>
           <footer>
   

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Developer Guide - BuildAX</title>
+  <title>Developer Guide</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -144,7 +144,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Developer Guide</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -190,7 +190,7 @@ cookie before further REST API requests can be made:</p>
 </table>
 <p>Example <code>wget</code> command (a backslash is used to separate the command onto 
 multiple lines):</p>
-<pre class="prettyprint well"><code>    wget --save-cookies cookies.txt \
+<pre><code>    wget --save-cookies cookies.txt \
         --delete-after \
         --no-http-keep-alive \
         --post-data 'user=admin&amp;pass=password' \
@@ -199,7 +199,7 @@ multiple lines):</p>
 </code></pre>
 
 <p>Equivalent <code>curl</code> command:</p>
-<pre class="prettyprint well"><code>    curl --silent --output /dev/null \
+<pre><code>    curl --silent --output /dev/null \
         -c cookies.txt \
         --data 'user=admin&amp;pass=password' \
         http://your-bax/WWW/login.htm
@@ -229,7 +229,7 @@ multiple settings simultaneously. </p>
 </tr>
 </tbody>
 </table>
-<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+<pre><code>wget --load-cookies cookies.txt \
     --post-data 'setting.usb.stream=0' \
     http://your-bax/WWW/a\_settng.htm
 </code></pre>
@@ -237,7 +237,7 @@ multiple settings simultaneously. </p>
 <h2 id="fetching-data">Fetching Data</h2>
 <p>Data fetching is performed via GET request, so parameters are passed in the
 URL.</p>
-<pre class="prettyprint well"><code>http://your-bax/fetch?type=BT&amp;start=449622000&amp;end=485434800
+<pre><code>http://your-bax/fetch?type=BT&amp;start=449622000&amp;end=485434800
 </code></pre>
 <p>There are three parameters in a fetch request: a type, and the start/end range
 specifiers.</p>
@@ -328,7 +328,7 @@ changes based on the type of request.</p>
 <p>To calculate the time range, take the Unix timestamp for the time required (a
 standard time representation) and subtract the Unix timestamp for the date
 <code>2000-01-01</code>. Eg:</p>
-<pre class="prettyprint well"><code>    Current Unix Time – (2000-01-01 00:00) = BuildAX RTC Timestamp
+<pre><code>    Current Unix Time – (2000-01-01 00:00) = BuildAX RTC Timestamp
            1407940334 –      946684800     = 461255534
 </code></pre>
 
@@ -342,19 +342,19 @@ Remember that you must first run the <a href="#logging-in">Login</a> command to 
 session cookie!
 </span></p>
 <p>Get data file 0 from the SD card (no more than 5 files (10MB) may be requested in one download):</p>
-<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+<pre><code>wget --load-cookies cookies.txt \
     --no-http-keep-alive \
     --content-disposition \
     http://your-bax/fetch?type=BF\&amp;start=0\&amp;end=0
 </code></pre>
 <p>Get last 500 samples:</p>
-<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+<pre><code>wget --load-cookies cookies.txt \
     --no-http-keep-alive \
     --content-disposition \
     http://your-bax/fetch?type=LS&amp;start=500&amp;end=
 </code></pre>
 <p>Get data within a time range:</p>
-<pre class="prettyprint well"><code>wget --load-cookies cookies.txt \
+<pre><code>wget --load-cookies cookies.txt \
     --no-http-keep-alive \
     --content-disposition \
     http://your-bax/fetch?type=BT\&amp;start=449622000\&amp;end=485434800
@@ -390,12 +390,11 @@ means that commands (e.g. <code>status</code>) which are only useful for their r
 will not be useful to call through this interface. Commands which perform 
 some action (e.g. <code>save</code>) are the use case for this feature.</p>
 <p>Example:</p>
-<pre class="prettyprint well"><code>http://your-bax/cmd?save
+<pre><code>http://your-bax/cmd?save
 </code></pre>
 <p>Additionally, HTTP special characters will not be parsed correctly until 
 firmware v1.4. This will make it possible to set the RTC time via the REST
 interface.</p>
-
           </div>
           <footer>
   

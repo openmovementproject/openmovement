@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FAQs - BuildAX</title>
+  <title>FAQs</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -150,7 +150,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>FAQs</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -222,7 +222,7 @@ documentation for more info.</p>
 <p>A number of HTTP error codes may be encountered with the web interface. The 
 following is not an exhaustive list, but these errors are the most common.</p>
 <h3 id="404-file-not-found">404 File Not Found</h3>
-<p><img alt="404" src="img/bax404.png" /></p>
+<p><img alt="404" src="./img/bax404.png" /></p>
 <p>This error indicates that the files for the web interface on the SD card are 
 missing or in the wrong place. These should be copied to the SD card manually 
 before running, and should be placed under the directory "WWW". </p>
@@ -280,7 +280,6 @@ you were trying to do, and steps to reproduce your problem (if possible).</p>
 <p>As BuildAX runs on the 433MHz ISM radio band, it will not interfere with (or be disrupted by) networks like 802.11n WiFi which run on the 2.4GHz band.</p>
 <p>Additionally, the design of the radio protocol means that our packets are very short- this reduces the probability that they will interfere with other 433MHz protocols (or each other).</p>
 <p>Finally, the radio chipsets used have been EMC-tested (and type-approved) in order for the hardware to receive the CE marking. This means that BuildAX conforms to the EEA directives for electromagnetic noise emission.</p>
-
           </div>
           <footer>
   

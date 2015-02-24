@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Interface - BuildAX</title>
+  <title>Web Interface</title>
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -148,7 +148,7 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-    <li>Web Interface</li>
+<!--    <li>\{\{ current_page.title \}\}</li> -->
       <li class="wy-breadcrumbs-aside">
         
           <a href="https://code.google.com/p/openmovement/">OpenMovement</a>
@@ -186,7 +186,7 @@ LRS if you experience error messages after upgrading the web UI files.
 <h2 id="login">Login</h2>
 <p>The LRS configuration interface is protected with a username and password. 
 These should be updated from the Admin panel when you first log into the site.</p>
-<p><img alt="Login" src="img/login.png" /></p>
+<p><img alt="Login" src="./img/login.png" /></p>
 <p>The default login credentials for the BuildAX LRS are:</p>
 <ul>
 <li>Username: admin</li>
@@ -201,19 +201,19 @@ SSL certificates.</p>
 <p>The Status tab is the landing page for the system, and allows users to verify
 the running state of the device, including the log file (binary or plaintext)
 and the status of LRS peripherals.</p>
-<p><img alt="Status" src="img/status.png" /></p>
+<p><img alt="Status" src="./img/status.png" /></p>
 <h2 id="sensors">Sensors</h2>
 <p>The sensor display page shows a live data stream from the sensors. This can be
 useful while paring sensors, as they will appear immediately on the graph when
 connected to the LRS.</p>
-<p><img alt="Live Data" src="img/live.png" /></p>
+<p><img alt="Live Data" src="./img/live.png" /></p>
 <p>The duration of the graph can be adjusted at the bottom of the page, showing a
 range of data up to 60 minutes. The number of sensors displayed is not limited,
 and a sensors can be excluded from the graph individually using the checkboxes.</p>
 <p>Sensor data can also be viewed as a table. The static page shows the sensors
 currently loaded into memory on the LRS, along with their details and the 
 last values received. Only the last 20 sensors seen will be displayed.</p>
-<p><img alt="Sensor List" src="img/sensors.png" /></p>
+<p><img alt="Sensor List" src="./img/sensors.png" /></p>
 <h3 id="name">Name</h3>
 <p>The name of the BuildAX sensor device can be set when it is programmed using an 
 FTDI cable, and will be sent as part of the encryption key transmission at 
@@ -241,17 +241,17 @@ hardware revisions.</p>
 data sources. The Settings page is used to turn on/off different streams, and
 switch between streaming formats (binary or plaintext). The form is arranged by
 stream type.</p>
-<p><img alt="Settings" src="img/settings.png" /></p>
+<p><img alt="Settings" src="./img/settings.png" /></p>
 <p>When a setting has been changed, it needs to be applied before it becomes
 active. The Update button will appear when a setting needs to be applied.</p>
-<p><img alt="Change dialog" src="img/setchange.png" /></p>
+<p><img alt="Change dialog" src="./img/setchange.png" /></p>
 <p>If successfully applied, you will see the confirmation dialog appear below the
 settings form:</p>
-<p><img alt="Update OK" src="img/setok.png" /></p>
+<p><img alt="Update OK" src="./img/setok.png" /></p>
 <h2 id="fetch">Fetch</h2>
 <p>Data can be retrieved from the LRS remotely via the fetch interface. The form
 on the Data tab is used to format requests to the LRS.</p>
-<p><img alt="Fetch" src="img/fetch.png" /></p>
+<p><img alt="Fetch" src="./img/fetch.png" /></p>
 <p>Fetch types relate directly to the logging types- if your LRS is logging in
 plaintext mode you should use the plaintext fetch- the same goes for if the
 LRS is logging in binary.</p>
@@ -269,7 +269,7 @@ translate to an acceptable range, an error 400 (Bad Request) will be returned.</
 Admin tab. There are no hard-coded complexity requirements for the password, but
 normal convention should be followed. The maximum password length is 32
 characters.</p>
-<p><img alt="Admin" src="img/admin.png" /></p>
+<p><img alt="Admin" src="./img/admin.png" /></p>
 <p><span class="alert alert-info">
 <strong>Reset Password:</strong>
 If the password is forgotten, it must be reset by physically
@@ -277,7 +277,6 @@ accessing the LRS and loading the default settings. This reset procedure can
 be performed by holding down the button on the rear of the LRS for 12
 seconds.
 </span></p>
-
           </div>
           <footer>
   
