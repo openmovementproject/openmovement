@@ -16,8 +16,7 @@ performance certification and the like.
 
 ## Downloads
 
-BuildAX resources and downloads are available in the OpenMovement subversion 
-repository ([click here](http://openmovement.googlecode.com/svn/downloads/BuildAX/)),
+BuildAX resources and downloads are available in the OpenMovement Git repo ([click here](https://github.com/digitalinteraction/openmovement/tree/master/Downloads/BuildAX)),
 including firmware and utilities.
 
 ## APIs to be documented
@@ -25,11 +24,11 @@ including firmware and utilities.
  * UDP connection
  * Actuators / Power Switches
 
-For our other other projects, please visit the [Open Movement](https://code.google.com/p/openmovement/) repository.
+For our other other projects, please visit the [Open Movement](https://github.com/digitalinteraction/openmovement) GitHub.
 
 ## People
 
  - [Karim Ladha](http://di.ncl.ac.uk/people/nksl6) - Hardware, lead Firmware developer
  - [Sam Mitchell Finnigan](http://di.ncl.ac.uk/people/nsmf) - Software, LRS Firmware, Documentation 
 
-Thanks also to Jon Hand at ESRU (University of Strathclyde) for feedback, usability testing, and bug reports.
+Thanks also to [Jon Hand](http://cms.mecheng.strath.ac.uk/people/default.aspx?id=20769) at ESRU (University of Strathclyde) for feedback, usability testing, and bug reports.

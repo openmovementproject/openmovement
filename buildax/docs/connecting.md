@@ -12,7 +12,7 @@ interface.
 
 <span class="alert alert-info"> 
 **Driver:** On first-time use, the USB CDC serial driver will need to be installed. 
-([Download the CDC driver](http://openmovement.googlecode.com/svn/downloads/BuildAX/LRS-serial-driver.zip)).
+([Download the CDC driver](https://github.com/digitalinteraction/openmovement/raw/master/Downloads/BuildAX/LRS-serial-driver.zip)).
 </span>
 
 The serial connection is available when the LRS is directly connected to a 

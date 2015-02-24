@@ -20,7 +20,7 @@ As described in the [Quick-Start guide](quickstart.md#lrs-setup), the data files
 for the web-administration interface must be copied onto the SD card before
 use. A 404 error will be reported if the files are not found in the correct
 location on-disk, under the WWW folder. The data files for the most recent 
-version can be downloaded [here](http://openmovement.googlecode.com/svn/downloads/BuildAX/).
+version can be downloaded [here](https://github.com/digitalinteraction/openmovement/tree/master/Downloads/BuildAX/LRS-Firmware).
 
 <span class="alert alert-info">
 **Upgrading the Web Interface:**

@@ -14,7 +14,7 @@ document describes the process of flashing the devices with updated firmware.
 Tested bootloader software for the BAX devices is provided for Windows OSes
 in the OpenMovement repository, along with the firmware for each device. 
 
-[Download BuildAX Firmware here](http://openmovement.googlecode.com/svn/downloads/BuildAX/). 
+[Download BuildAX Firmware here](https://github.com/digitalinteraction/openmovement/tree/master/Downloads/BuildAX). 
 Ensure you download the correct firmware for your device.
 
 
