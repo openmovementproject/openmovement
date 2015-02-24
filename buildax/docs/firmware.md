@@ -83,7 +83,7 @@ OpenMovement repository for this purpose (AN1310ui.exe).
  1. Insert batteries into the ENV sensor
  2. Push the FTDI cable onto the 3-pin header on the device, with the orange
     wire facing the corner of the device (the USB end should be connected to 
-    your PC).1
+    your PC).
  3. Push the button next to the programming header while the green LED on the 
     sensor is lit.
 
