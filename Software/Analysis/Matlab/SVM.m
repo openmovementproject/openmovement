@@ -16,10 +16,10 @@
 function svm = SVM(data, Fs, Fc1, Fc2, FN)
 
     % Defaults for unspecified arguments
-    if nargin < 2; Fs = 100; end    % 100 Hz
-    if nargin < 3; Fc1 = 0.5; end   % First Cut-off Frequency (0.2 Hz or 0.5 Hz)
-    if nargin < 4; Fc2 = 15; end    % Second Cut-off Frequency (15 Hz)
-    if nargin < 5; FN  = 4; end     % Order (4)
+    if nargin < 2; Fs = 100; end    % Sample data frequency (e.g. 100 Hz)
+    if nargin < 3; Fc1 = 0.5; end   % First Cut-off Frequency (typically 0.5 Hz, could be 0.2 Hz)
+    if nargin < 4; Fc2 = 20; end    % Second Cut-off Frequency (typically 20 Hz, could be 15 Hz)
+    if nargin < 5; FN  = 4; end     % Order (typically 4th order)
 
     % Calculate SVM-1 on last three columns: sqrt(x^2 + y^2 + z^2) - 1;
     svm = sqrt(sum(data(:, end-2:end) .^ 2, 2)) - 1;
