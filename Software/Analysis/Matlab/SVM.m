@@ -25,7 +25,7 @@ function svm = SVM(data, Fs, Fc1, Fc2, FN)
     svm = sqrt(sum(data(:, end-2:end) .^ 2, 2)) - 1;
 
     % Only filter if valid args
-    if Fs > 0 && Fc1 > 0 && Fc2 > 0 && Fc2 > Fc1 && FN > 0
+    if Fs > 0 & Fc1 > 0 & Fc2 > 0 & Fc2 > Fc1 & FN > 0
         % Create Butterworth filter parameters
         [B,A] = butter(FN, [Fc1, Fc2] ./ (Fs / 2)); 
 
