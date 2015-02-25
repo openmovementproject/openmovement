@@ -6,7 +6,7 @@
 % Fs = 100;
 % data = resampleCWA('CWA-DATA.CWA', Fs);
 % 
-% % HP-Filtered SVM-1
+% % BP-Filtered SVM-1
 % svm = SVM(data, Fs, 1);
 %
 % % Convert to 60 second epochs (sum of absolute SVM-1 values)
