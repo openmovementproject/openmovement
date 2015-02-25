@@ -1,5 +1,5 @@
 % Calculate SVM-1, with optional HP-filter
-% Assumes tri-axial data with the format: [timestamp x y z] in units of 'g'
+% Assumes tri-axial data with the format: [x y z] or [timestamp x y z] in units of 'g'
 %
 % Example:
 %
@@ -7,44 +7,30 @@
 % Fs = 100;
 % data = resampleCWA('CWA-DATA.CWA', Fs);
 % 
-% % HP-Filtered SVM-1
+% % BP-Filtered SVM-1
 % svm = SVM(data, Fs, 1);
 %
 % % Convert to 60 second epochs (sum of absolute SVM-1 values)
 % epochSVM = epochs(abs(svm), 60 * Fs);
 %
-function ret = SVM(data, Fs, Fc1, Fc2, FN)
+function svm = SVM(data, Fs, Fc1, Fc2, FN)
 
-    if nargin < 3
-        Fc1 = 0.5;  % First Cutoff Frequency (0.2 Hz or 0.5 Hz)
-    end
-    if nargin < 4
-        Fc2 = 15;   % Second Cutoff Frequency (15 Hz)
-    end
-    if nargin < 5
-        FN  = 4;    % Order (4)
-    end
+    % Defaults for unspecified arguments
+    if nargin < 2; Fs = 100; end    % 100 Hz
+    if nargin < 3; Fc1 = 0.5; end   % First Cut-off Frequency (0.2 Hz or 0.5 Hz)
+    if nargin < 4; Fc2 = 15; end    % Second Cut-off Frequency (15 Hz)
+    if nargin < 5; FN  = 4; end     % Order (4)
 
-    % Calculate SVM-1
-    svm = sqrt(data(:,2) .^ 2 + data(:,3) .^ 2 + data(:,4) .^ 2) - 1;
+    % Calculate SVM-1 on last three columns: sqrt(x^2 + y^2 + z^2) - 1;
+    svm = sqrt(sum(data(:, end-2:end) .^ 2, 2)) - 1;
 
-    % No filtering...
-    if Fc1 <= 0 | Fc2 <= 0 | Fc2 <= Fc1 | FN <= 0
-        filteredSVM = svm;
-        
-    else
-        
+    % Only filter if valid args
+    if Fs > 0 && Fc1 > 0 && Fc2 > 0 && Fc2 > Fc1 && FN > 0
         % Create Butterworth filter parameters
-        %[B,A] = butter(FN, [Fc1, Fc2] ./ (Fs / 2)); 
-        [B,A] = filterCoefficients(FN, Fc1, Fc2, Fs); 
+        [B,A] = butter(FN, [Fc1, Fc2] ./ (Fs / 2)); 
 
         % Calculate filtered SVM
-        %filteredSVM = filter(B, A, svm);
-        filteredSVM = manualFilter(B, A, svm);
-        
+        svm = filter(B, A, svm);
     end
 	
-    % Return filteredSVM
-    ret = filteredSVM;
-
 end
