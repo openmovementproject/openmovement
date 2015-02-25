@@ -1,2 +1,2 @@
 Moved to:
-  http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab
+  https://github.com/digitalinteraction/openmovement/tree/master/Software/Analysis/Matlab
