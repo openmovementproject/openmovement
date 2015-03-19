@@ -1,15 +1,5 @@
-# AX3 GUI Setup/Download Tool
-
-###[Download AX3 OM GUI V28 for Windows](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
-<!--
-   * [Release page for AX3 OM GUI V28](https://github.com/digitalinteraction/openmovement/releases/tag/AX3-OmGui-v28)
-   * [(Repos link) AX3 GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
--->
-
-
 ![OMGUI Software](./img/omgui_window.jpg "OMGUI Software")
 
-#Introduction
 The OMGUI software is a lightweight application designed to provide the following functionality:
 
 + Setup and configure AX3 sensors for recording
@@ -19,8 +9,18 @@ The OMGUI software is a lightweight application designed to provide the followin
 
 This document is intended as a guide to get to grips using the OMGUI software; learn about its features; and serve as a technical reference document.
 
+---------------------------------------------------
+# Download OMGUI
+
+Download OMGUI for AX3 devices:
+   * [OM GUI V28 for Windows](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
+<!--
+   * [Release page for AX3 OM GUI V28](https://github.com/digitalinteraction/openmovement/releases/tag/AX3-OmGui-v28)
+   * [(Repos link) AX3 GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
+-->
 
 ---------------------------------------------------
+
 #Quick Start
 This section explains how to configure you device with the default settings and start collecting data. The default settings for configuration are:
 
