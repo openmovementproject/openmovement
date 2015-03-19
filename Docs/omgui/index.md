@@ -1,23 +1,42 @@
+<!-- Relative images "./img/" change to absolute "https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Docs/omgui/img/" -->
+
 ![OMGUI Software](./img/omgui_window.jpg "OMGUI Software")
 
 The OMGUI software is a lightweight application designed to provide the following functionality:
 
 + Setup and configure AX3 sensors for recording
-+ Download and visualise recorded data from AX3 devices
++ Download and visualize recorded data from AX3 devices
 + Provide an easy to use interface to convert binary AX3 recordings 
 + Provide access to validated analysis algorithms on recorded AX3 data
 
 This document is intended as a guide to get to grips using the OMGUI software; learn about its features; and serve as a technical reference document.
 
 ---------------------------------------------------
-# Download OMGUI
+#Downloading and Installing
+The OMGUI software is available from the open source GitHub repository::
 
-Download OMGUI for AX3 devices:
    * [OM GUI V28 for Windows](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
 <!--
    * [Release page for AX3 OM GUI V28](https://github.com/digitalinteraction/openmovement/releases/tag/AX3-OmGui-v28)
    * [(Repos link) AX3 GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
 -->
+
+The software has an inbuilt facility to update itself for major releases as well as updating connected devices to the latest available firmware.
+
+The system requirements for the OMGUI software are as follows:
+
++ Windows PC with XP SP3 or later operating system
++ .NET Framework v3.5 or later
++ 1GB RAM memory
++ 5GB HDD space
+
+To connect with a sensor you will need to install the drivers as well as the software. These drivers come pre-packaged with the OMGUI software and are preconfigured to install as default during the installation process. 
+
+To install the software, just click the installer package.
+
+>**NOTE**: Administrator privileges may be required to install software if you are using a profiled or networked computer. The default location for installation is C:\Program Files but this can be changed to suit user or system needs.
+
+>**NOTE**: The OMGUI software uses My Documents as a default working folder location. If you require other users to be able to view data files, consider using a shared or network drive location as the Working Folder.
 
 ---------------------------------------------------
 
@@ -78,27 +97,6 @@ Files generated in using the __Export__ function will appear in the __Working Fo
 It is important to note that files exported to CSV format may become very large. Typically Excel can only handle a few hours or data before it struggles. For multi-day recordings, the user should consider working directly with the binary files if developing algorithms, or if the user is happy with one of the existing inbuilt algorithms in the software, using summary measures. These will be covered later in this document.
 
 ---------------------------------------------------
-#Downloading and Installing
-The OMGUI software may be downloaded [here](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
-
-The software has an inbuilt facility to update itself for major releases as well as updating connected devices to the latest available firmware.
-
-The system requirements for the OMGUI software are as follows:
-
-+ Windows PC with XP SP3 or later operating system
-+ .NET Framework v3.5 or later
-+ 1GB RAM memory
-+ 5GB HDD space
-
-To connect with a sensor you will need to install the drivers as well as the software. These drivers come pre-packaged with the OMGUI software and are preconfigured to install as default during the installation process. 
-
-To install the software, just click the installer package.
-
->**NOTE**: Administrator privileges may be required to install software if you are using a profiled or networked computer. The default location for installation is C:\Program Files but this can be changed to suit user or system needs.
-
->**NOTE**: The OMGUI software uses My Documents as a default working folder location. If you require other users to be able to view data files, consider using a shared or network drive location as the Working Folder.
-
----------------------------------------------------
 
 #Software Features
 
@@ -152,7 +150,7 @@ With a device in the __Device Browser Pane__ selected, the buttons on the __Devi
 
 ![Recording Window](./img/numbered_recording_dialogue.jpg "default settings in CSV Export Window")
 
-1. **Recording Session ID.** This field provides utility to mark the recording with a unique ID. This is useful in studies where patient data needs to be anonymised as the ID can be linked to a patient record.
+1. **Recording Session ID.** This field provides utility to mark the recording with a unique ID. This is useful in studies where patient data needs to be anonymized as the ID can be linked to a patient record.
 
 2. **Sampling Frequency.** This is the number of times per second the sensor data will be recorded. For more information on choosing a sample frequency please see the sensor user manual. The default value is 100Hz which is adequate for most human movement studies.
 
@@ -177,7 +175,7 @@ With a device in the __Device Browser Pane__ selected, the buttons on the __Devi
 12. **Notes Area.** This section is used to relay Warnings and Messages to the user about the current configuration and any potential issues.
 
 ##Previewing and downloading data
-Any connected devices will appear in the __Device Browser Pane__ marked as having data. When highlighted, data on these devices can be previewed in the __Data Preview Window__. There is a __Zoom__ tool and __Highlight__ tool in the __Selection Tools__ section. In the __Preview Filters__ section, a number of checkboxes exist to help the user visualise the data. On mousing over the data, the user is able to get a precise data preview at any given instant in the recording.
+Any connected devices will appear in the __Device Browser Pane__ marked as having data. When highlighted, data on these devices can be previewed in the __Data Preview Window__. There is a __Zoom__ tool and __Highlight__ tool in the __Selection Tools__ section. In the __Preview Filters__ section, a number of checkboxes exist to help the user visualize the data. On mousing over the data, the user is able to get a precise data preview at any given instant in the recording.
 
 Recorded data stored on the sensor can be downloaded to the __Working Folder__ by clicking the __Download__ button. Download time is approximately 6 minutes for 7 days worth of data.
 
@@ -274,7 +272,7 @@ either:
 The output of the SVM tool is a CSV file stored in the working folder. For more details on the SVM algorithm please see [1].
 
 ##Cutpoints
-When using the accelerometers to measure physical activity, time spent in specific states has been demonstrated to be a useful output. The __Cutpoint__ analysis reports the time user has spent in a specific intensity of physical activity where each intensity band is categorised in units of Metabolic Equivalent of task (METS).
+When using the accelerometers to measure physical activity, time spent in specific states has been demonstrated to be a useful output. The __Cutpoint__ analysis reports the time user has spent in a specific intensity of physical activity where each intensity band is categorized in units of Metabolic Equivalent of task (METS).
 
 |Activity Level | MET  Threshold |
 |:--------------|:--------------:|
