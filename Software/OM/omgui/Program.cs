@@ -36,6 +36,7 @@ namespace OmGui
                 string configDumpFile = null; // Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + "dump.csv";
                 string downloadDumpFile = null;
                 bool noUpdateCheck = false;
+                string startupPath = null;
 
                 int positional = 0;
                 int uac = 0;
@@ -45,6 +46,7 @@ namespace OmGui
                     else if (args[i].ToLower() == "-configlog" || args[i].ToLower() == "-dump") { configDumpFile = args[++i]; }
                     else if (args[i].ToLower() == "-downloadlog") { downloadDumpFile = args[++i]; }
                     else if (args[i].ToLower() == "-noupdatecheck") { noUpdateCheck = true; }
+                    else if (args[i].ToLower() == "-folder") { startupPath = args[++i]; }
                     else if (args[i].ToLower() == "-uac:none") { uac = 0; }
                     else if (args[i].ToLower() == "-uac:ask")     { uac = 1; }
                     else if (args[i].ToLower() == "-uac:always")  { uac = 2; }
@@ -68,7 +70,7 @@ namespace OmGui
                     }
                 }
 
-                MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile, noUpdateCheck);
+                MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile, noUpdateCheck, startupPath);
                 //mainForm.LogFile = logFile;
 
                 Application.Run(mainForm);

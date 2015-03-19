@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+<!-- This is a sample XML document -->
+<Plugin>
+	<height>500</height>
+	<width>700</width>
+	<runFilePath>run-omconvert.cmd</runFilePath>
+	<htmlFilePath>AX_OMConvert.html</htmlFilePath>
+	<savedValuesFilePath>saved.xml</savedValuesFilePath>
+	<iconName>64x64 converter.ico</iconName>
+	<description>OMConvert</description>
+	<fileName>OMConvert</fileName>
+	<readableName>OMConvert</readableName>
+	<outputExtensions>
+		<extension></extension>
+	</outputExtensions>
+	<numberOfInputFiles>1</numberOfInputFiles>
+	<wantMetadata>false</wantMetadata>
+	<requiresCWANames>true</requiresCWANames>
+</Plugin>

@@ -1,0 +1,275 @@
+
+<style>
+@font-face { 
+  	font-family: Bebas; 
+  	src: url("./svg/font_bebas.svg#BebasNeueRegular") format("svg");
+	}
+	h2 { font-family: "Bebas";}
+
+body {
+	width: 100%;
+	background-color: white;
+	margin: 0;
+	padding: 0;
+}
+
+div#header {
+	height: 106px;
+	background-color: white;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	background-image: url('../images/headerbackground.png');
+	background-repeat: repeat-x; 
+}
+
+div#header img {
+	position:relative;
+	top: 34px;
+	left:10px;
+	transition: left 1s;
+	-moz-transition: left 1s; /* Firefox 4 */
+	-webkit-transition: left 1s; /* Safari and Chrome */
+	-o-transition: left 1s; /* Opera */
+}
+
+div#header h1 {
+	margin: 0;
+}
+
+div#contentHolder {
+	position: relative;
+	width:100%;
+	height: 390px;
+	padding-top: 20px;
+	background-color: rgb(227,227,227);
+	border-image: url('../images/innerglow.png') 211 / 220px stretch stretch;
+}
+
+div#content {
+	position: relative;
+	max-height: 428px;
+	width: 950px;
+	margin: 0px auto 0px auto;
+	-moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+	border-radius: 8px;
+	background-color: white;
+	z-index: 500;
+	border: 1px solid white;
+	border-bottom: none;
+	background-image: url('../images/contentbackground428.png');
+	background-repeat: repeat-x;
+	
+	
+}
+
+div#grid {
+	position: relative;
+	width: 100%;
+	height: 428px;
+	-moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+	border-radius: 8px;
+	background-image: url('../images/grid.png');
+	z-index: 1000;
+
+}
+
+
+div#participant {
+	float: left;
+	width: 150px;
+	height:37px;
+	margin-top: 20px;
+	margin-left: 20px;
+}
+
+div#axivity {
+	float: right;
+	margin-top: 10px;
+	margin-right: 10px;
+	height:37px;
+	width: 54px;
+	background: url('../images/axivity.png');
+	z-index: 1300;
+}
+
+div#arrows {
+	float: left;
+	height: 20px;
+	width: 850px;
+	margin-top: 20px;
+	margin-left: -125px;
+	z-index: 1300;
+}
+
+div#leftarrow {
+	float:left;
+}
+
+div#rightarrow {
+	float:right;
+}
+
+div#date {
+	display: block-inline;
+	width: 200px;
+	height:37px;
+	margin: 0px auto 0px auto;
+	padding-top: 75px;
+}
+
+div#centralGraph {
+	float:left;
+	height: 275px;
+	width: 700px;
+	top: 20px;
+	left: 35px;
+	z-index: 1200;
+}
+
+.morris-hover{
+	position:absolute;
+	z-index:1000;
+}
+
+.morris-hover.morris-default-style {
+border-radius:10px;
+padding:6px;
+color:#666;
+background:rgba(255, 255, 255, 0.8);
+border:solid 2px rgba(230, 230, 230, 0.8);
+font-family:sans-serif;
+font-size:12px;
+text-align:center;
+}
+
+.morris-hover.morris-default-style .morris-hover-row-label {
+font-weight:bold;
+margin:0.25em 0;
+}
+
+.morris-hover.morris-default-style .morris-hover-point {
+white-space:nowrap;
+margin:0.1em 0;
+}
+
+div#donutgraph {
+	float: left;
+	margin-top:20px;
+	margin-left: 40px;
+	z-index: 2200;
+}
+
+
+div#buttonnoselect {
+	position: relative;
+	height: 34px;
+	width: 200px;
+	margin-left: 360px;
+	bottom: 40px;
+	z-index: 1300;	
+}
+
+#buttonnoselect div {
+	display: inline-block;
+}
+#button1 {
+	height:34px;
+	width:95px;
+	background-image: url('../images/button1.png');
+	cursor:pointer;
+	border:none;
+}
+
+#button1.active {
+	height:34px;
+	width:95px;
+	background-image: url('../images/button1selected.png');
+	cursor:arrow;
+	border:none;	
+	
+
+}
+
+#button2 {
+	height:34px;
+	width:90px;
+	background-image: url('../images/button2.png');
+	cursor:pointer;
+	border:none;
+}
+
+#button2.active {
+	height:34px;
+	width:90px;
+	background-image: url('../images/button2selected.png');
+	cursor:arrow;
+	border:none;
+	
+}
+
+div#shadow {
+	height: 20px;
+	background: url('../images/contentshadow.png') top center no-repeat;
+	z-index:400;
+}
+
+div#uppergradient {
+	height: 20px;
+	background: url('../images/gradupper.png') center bottom no-repeat;
+	z-indez: 500;
+}
+div#stats{
+	display: float;
+	margin:0px auto;
+	text-align: center;
+	height:40px;
+	width: 950px;
+}
+input#steps{
+	margin-top: 10px;
+	margin-left: 50px;
+}		
+div#stepsread{
+	margin-top:10px;
+	margin-left: 20px;
+	margin-right: 20px;
+}	
+input#ee{
+	margin-top: 10px;
+	margin-left: 150px;
+}	
+div#eeread{
+	margin-top: 10px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+input#dist{
+	margin-top: 10px;
+	margin-left: 50px
+}
+div#distread{
+	margin-top: 10px;
+	margin-left: 20px;
+	margin-right: 20px;
+}		
+.selector {
+	top: 10px;
+	display:float;
+	cursor: pointer;
+	z-indez: 500;
+}
+div#lowergradient {
+	height: 20px;
+	background: url('../images/gradlower.png') center top no-repeat;
+	z-indez: 500;
+}
+
+
+div#footer {
+	height: 400px;
+	z-index: 100;
+}
+</style>	

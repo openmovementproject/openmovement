@@ -1,0 +1,270 @@
+<!DOCTYPE html> 
+<html>
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="utf-8">
+	<title>AX OmConvert Converter</title>
+	<link href="./css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="./css/bootstrap.css" rel="stylesheet">
+	<link href="./css/page.css" rel="stylesheet">
+	<script type="text/javascript" src="./js/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/bootstrap.min.js"></script>
+	
+<script language="javascript">
+function positionLogo() {
+	document.getElementById('logo').style.left = document.getElementById('content').offsetLeft + 'px';
+}
+
+</script>
+
+<!-- Leave this script as it is otherwise the program won't pick it up and it won't run. -->
+<script language="javascript" type="text/javascript">
+    //var $ = function (e) { return document.getElementById(e); }
+	
+	var blockStart = -1;
+	var blockCount = -1;
+	
+	var rawInput1;
+	var rawInput2;
+	
+	function fillValues()
+	{
+		var url = document.URL;
+		
+		var folderURL = "";
+		
+		var urlSplit = unescape(url).split('?');
+		
+		var input1;
+		var input2;
+		
+		if(urlSplit.length > 1)
+		{
+			var pairsString = unescape(url).split('?')[1];
+			
+			if(pairsString != "")
+			{
+				var pairs = pairsString.split('&');
+				
+				for (var i = 0; i < pairs.length; i++)
+				{			
+					var keyValuePair = pairs[i].split('=');
+					
+					if(keyValuePair[0] == "startBlock")
+					{
+						blockStart = keyValuePair[1];
+						
+						//document.forms[0].elements["startBlock"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "blockCount")
+					{
+						blockCount = keyValuePair[1];
+						
+						//document.forms[0].elements["blockCount"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "startTime")
+					{
+						document.forms[0].elements["startTime"].value = keyValuePair[1];
+					}
+					
+					if(keyValuePair[0] == "endTime")
+					{
+						document.forms[0].elements["stopTime"].value = keyValuePair[1];
+					}
+
+					if(keyValuePair[0] == "meta_weight")
+					{
+						document.forms[0].elements["subjectWeight"].value = keyValuePair[1];
+					}
+
+					/*if(keyValuePair[0] == "meta_site")
+					{
+						if(keyValuePair[1] == "waist")
+						{
+							document.forms[0].elements["select_mounting"].selectedIndex = 2;
+						}
+						else if(keyValuePair[1] == "left wrist")
+						{
+							document.forms[0].elements["select_mounting"].selectedIndex = 0;
+						}
+						else if(keyValuePair[1] == "right wrist")
+						{
+							document.forms[0].elements["select_mounting"].selectedIndex = 1;
+						}
+					}*/
+					
+					if(keyValuePair[0] == "folderURL")
+					{
+						folderURL = keyValuePair[1];
+					}
+					
+					/*
+					if(keyValuePair[0] == "input1")
+					{
+						
+						rawInput1 = keyValuePair[1];
+						
+						var split = rawInput1.split('/');
+						input1 = split[split.length - 1];
+						
+						var option = new Option(input1, input1);
+						var option2 = new Option(input1, input1);
+						
+						option.id = 'mountingOne';
+						option2.id = 'mountingOne';
+						
+						document.forms[0].elements["mountingLeft"].appendChild(option2);
+						document.forms[0].elements["mountingRight"].appendChild(option);
+						
+						document.forms[0].elements["mountingLeft"].options[0].selected = true;
+					}
+					
+					if(keyValuePair[0] == "input2")
+					{
+						
+						rawInput2 = keyValuePair[1];
+						
+						var split = rawInput2.split('/');
+						input2 = split[split.length - 1];
+						
+						var option = new Option(input2, input2);
+						var option2 = new Option(input2, input2);
+
+						option.id = 'mountingTwo';
+						option2.id = 'mountingTwo';
+						
+						document.forms[0].elements["mountingLeft"].appendChild(option2);
+						document.forms[0].elements["mountingRight"].appendChild(option);
+						
+						document.forms[0].elements["mountingRight"].options[1].selected = true;
+					}
+					*/
+				}
+			}
+			
+			//Change URL
+			/*if(folderURL != "")
+			{
+				document.getElementById("folderURL").href = folderURL;
+			}*/
+		}
+	}
+	
+	//Onload to get start block and block count...may want to get rid of the text fields...
+	window.onload = function() {
+		positionLogo();
+		
+		//fillValues();
+		
+		//document.forms[0].elements["outputName"].focus();
+		//document.forms[0].elements["outputName"].select();
+	};
+	
+	//Return Function
+    function func()
+    {
+		var hash = "";
+
+			
+		//Output File Value
+		var name = "";
+		//name = document.forms[0].elements["outputName"].value;
+
+		//if(name == "")
+		//{
+		//	alert("Please enter an output file name.");
+		//	return;
+		//}
+		
+		//Output file type.
+		var fileCSVValue = "_";
+		
+		//if(document.getElementById('output_csv').checked)
+		//{
+			//var suffix = ".csv";
+			
+			// Check the suffix hasn't already been appended (case-insensitve)
+		    //if (name.length < suffix.length || name.substring(this.length - suffix.length, suffix.length).toLowerCase() != suffix.toLowerCase())
+			//{
+			//	name = name + suffix;
+			//}
+		//}	
+		
+		//start and stop times
+		/*var startTimeValue = "fileStart";
+		var endTimeValue = "fileEnd";
+
+		var startTime = document.forms[0].elements["startTime"].value;
+		var stopTime = document.forms[0].elements["stopTime"].value;
+
+		if(startTime.length > 0)
+			startTimeValue = startTime;
+
+		if(stopTime.length > 0)
+			endTimeValue = stopTime;*/
+
+		var quote = "\"";
+				
+		hash = quote + name + quote + "?" + quote + name + quote;
+		
+		//alert("hash: " + hash);
+		
+		window.location.hash = hash;
+        return 0;
+    }
+</script>
+
+</head> 
+
+<body onresize="positionLogo();">
+
+<div id="header" class="foo">
+<img src="./img/logoOMConvert.png" id="logo" alt="AX_CBR">
+
+</div>
+
+<div id="contentHolder">
+	<div id="content">
+		<div class="container">
+		
+		<form name="Form1" onsubmit="return func()">
+
+			<hr>
+			<div class="container-fluid">
+			<!--
+				<div class="row-fluid">
+					<h2 class='muted'>Output File Name</h2>
+					<h5>e.g "Fido_Monday"</h5>
+					<label class="input-medium search-query">
+						<input class="text" type="text" name="reportName" id="outputName" />
+					</label>
+
+					<label class="checkbox inline">
+						<input class="radio" type="radio" name="outputType" id="output_csv" checked > CSV</input>
+					</label>
+					
+					<br>
+					<br>
+					<p>This is the format the output will take.</p>
+					
+				</div>
+			-->
+			</div>
+			<hr>
+			<button type="submit" class="btn">Convert Now</button>
+
+		</form>
+		
+	</div>
+<!--<div id="shadow">
+	<img src="images/contentshadow.png">
+</div>-->
+
+<div id="footer">
+</div>
+
+
+</body>
+</html>
+	

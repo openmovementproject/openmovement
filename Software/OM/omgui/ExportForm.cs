@@ -14,9 +14,9 @@ namespace OmGui
     public partial class ExportForm : Form
     {
         // Conversion Executable
-        public const string EXECUTABLE_NAME = @"Plugins\Convert_CWA\cwa-convert.exe";
+        public const string EXECUTABLE_NAME = @"Plugins\Convert_CWA\cwa-convert.exe";        
 
-        public ExportForm(string inputFilename, string downloadPath, float blockStart, float blockCount)
+        public ExportForm(string inputFilename, string downloadPath, float blockStart, float blockCount, string blockDescription)
         {
             InitializeComponent();
 
@@ -33,6 +33,16 @@ namespace OmGui
             if (blockCount >= 0)
             {
                 textBoxBlockCount.Text = ((int)Math.Ceiling(blockCount)).ToString();
+            }
+
+            if (blockDescription == null || blockDescription.Length <= 0)
+            {
+                labelBlocks.Text = "";
+                groupBoxTimeSlice.Visible = false;
+            } 
+            else
+            {
+                labelBlocks.Text = blockDescription.Replace(" - ", "\r\n- ");
             }
         }
 
@@ -164,6 +174,16 @@ namespace OmGui
         {
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
+        }
+
+        private void textBoxBlockStart_TextChanged(object sender, EventArgs e)
+        {
+            labelBlocks.Text = "";
+        }
+
+        private void textBoxBlockCount_TextChanged(object sender, EventArgs e)
+        {
+            labelBlocks.Text = "";
         }
 
 

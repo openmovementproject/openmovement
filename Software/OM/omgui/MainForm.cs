@@ -1,4 +1,33 @@
-﻿using System;
+﻿// TODO
+
+// TODO: Use queue (what about errors)
+// TODO: Merged view of files/queue/outputs (remove queue and outputs)
+// TODO: Consider a preview for .WAV (wavs) and .CSV (grid, graph) files
+// TODO: Time-span (from selection), at least for .WAV export
+
+
+/*
+Make .WAV:
+ * Form compatible with multiple source files
+ * - Interpolated sample rate (100Hz, 50Hz, 25Hz)
+ * - No auto-calibrate
+ * (note: derived summaries can be affected by the sample rate)
+
+Make .SVM.CSV
+ * Epoch (60 seconds)
+ * Filter (off, 0.5-20Hz)
+ * Mode: abs(sqrt(svm-1)) vs max(0,sqrt(svm-1))
+
+Make .WTV.CSV
+ * Epochs (number of 0.5 minute periods)
+
+Make .CUT.CSV
+ * Epochs (number of 1 minute periods)
+ * Model (dominant/"right" hand, non-dominant/"left" hand, weight)
+
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,8 +53,11 @@ namespace OmGui
         Om om;
         DeviceManager deviceManager;
 
+
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern uint RegisterWindowMessage(string lpString);
+
 
         public static uint queryCancelAutoPlayID = 0;
 
@@ -37,7 +69,7 @@ namespace OmGui
         protected override void WndProc(ref Message msg)
         {
             base.WndProc(ref msg);
-            if (MainForm.queryCancelAutoPlayID != 0 && msg.Msg == MainForm.queryCancelAutoPlayID)
+            if (msg.Msg == MainForm.queryCancelAutoPlayID && MainForm.queryCancelAutoPlayID != 0)
             {
                 msg.Result = (IntPtr)1;    // Cancel autoplay
             }
@@ -94,10 +126,12 @@ namespace OmGui
         private string configDumpFile = null;
         private string downloadDumpFile = null;
         private bool noUpdateCheck = false;
-        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck)
+        private string startupPath = null;
+        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck, string startupPath)
         {
             this.configDumpFile = myConfigDumpFile;
             downloadDumpFile = myDownloadDumpFile;
+            this.startupPath = startupPath;
 
             if (uac == 1)
             {
@@ -197,7 +231,7 @@ namespace OmGui
             {
                 for (; ; )  // [dump]
                 {
-                    string errorMessage = "Problem while appending to config log file (" + downloadDumpFile + ") - check the folder exists, you have write permission, and the file is not locked open by another process.";
+                    string errorMessage = "Problem while appending to download log file (" + downloadDumpFile + ") - check the folder exists, you have write permission, and the file is not locked open by another process.";
 
                     try
                     {
@@ -1952,16 +1986,12 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
         }
 
-        private void openDownloadFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // "explorer.exe /select, <filename>"
-            System.Diagnostics.Process.Start(GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder));
-        }
 
         private void ExportDataConstruct()
         {
             float blockStart = -1;
             float blockCount = -1;
+            string blockDescription = null;
 
             // Selection
             if (dataViewer != null)
@@ -1970,6 +2000,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 {
                     blockStart = dataViewer.SelectionBeginBlock + dataViewer.OffsetBlocks;
                     blockCount = dataViewer.SelectionEndBlock - dataViewer.SelectionBeginBlock;
+                    blockDescription = dataViewer.SelectionDescription;
                 }
             }
 
@@ -2031,15 +2062,15 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             //Export files
             //If we are chosing from the dataViewer then we only have one else we can have many.
             if (blockStart > -1 && blockCount > -1)
-                ExportData(files[0], blockStart, blockCount);
+                ExportData(files[0], blockStart, blockCount, blockDescription);
             else
                 ExportData(files, devicesSelected);
         }
 
-        private void ExportData(string fileName, float blockStart, float blockCount)
+        private void ExportData(string fileName, float blockStart, float blockCount, string blockDescription)
         {
             string folder = GetPath(Properties.Settings.Default.CurrentWorkingFolder);
-            ExportForm exportForm = new ExportForm(fileName, folder, blockStart, blockCount);
+            ExportForm exportForm = new ExportForm(fileName, folder, blockStart, blockCount, blockDescription);
             DialogResult result = exportForm.ShowDialog(this);
         }
 
@@ -2052,7 +2083,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
             foreach (string fileName in files)
             {
-                exportForm = new ExportForm(fileName, folder, -1, -1);
+                exportForm = new ExportForm(fileName, folder, -1, -1, null);
                 exportForm.ShowDialog();
             }
 
@@ -2071,7 +2102,32 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
         //TS - Fields
         public bool inWorkingFolder = false;
-        string defaultTitleText = "Open Movement (Beta Testing Version )" + " [V" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + "]";
+        string defaultTitleText = "Open Movement " + " [V" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + "]";
+
+        private void ChangeWorkingFolder(string newPath)
+        {
+            Properties.Settings.Default.CurrentWorkingFolder = newPath;
+            LoadWorkingFolder();
+
+            //Add to recent folders.
+            if (!Properties.Settings.Default.RecentFolders.Contains(newPath))
+            {
+                if (Properties.Settings.Default.RecentFolders.Count == 5)
+                {
+                    Properties.Settings.Default.RecentFolders.RemoveAt(4);
+                }
+
+                Properties.Settings.Default.RecentFolders.Insert(0, newPath);
+            }
+            else
+            {
+                //If we have it we should move it up the list so it is the most recent.
+                Properties.Settings.Default.RecentFolders.Remove(newPath);
+                Properties.Settings.Default.RecentFolders.Insert(0, newPath);
+            }
+
+            UpdateRecentFoldersInGUI();
+        }
 
         private void workingFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2084,29 +2140,10 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
-                Properties.Settings.Default.CurrentWorkingFolder = fbd.SelectedPath;
+                string newPath = fbd.SelectedPath;
+                ChangeWorkingFolder(newPath);
             }
 
-            LoadWorkingFolder();
-
-            //Add to recent folders.
-            if (!Properties.Settings.Default.RecentFolders.Contains(fbd.SelectedPath))
-            {
-                if (Properties.Settings.Default.RecentFolders.Count == 5)
-                {
-                    Properties.Settings.Default.RecentFolders.RemoveAt(4);
-                }
-
-                Properties.Settings.Default.RecentFolders.Insert(0, fbd.SelectedPath);
-            }
-            else
-            {
-                //If we have it we should move it up the list so it is the most recent.
-                Properties.Settings.Default.RecentFolders.Remove(fbd.SelectedPath);
-                Properties.Settings.Default.RecentFolders.Insert(0, fbd.SelectedPath);
-            }
-
-            UpdateRecentFoldersInGUI();
         }
 
         private void UpdateRecentFoldersInGUI()
@@ -2147,6 +2184,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             }
         }
 
+        // Toolstrip handler for recentFoldersToolStripMenuItem
         void MainForm_Click(object sender, EventArgs e)
         {
             ToolStripItem t = (ToolStripItem)sender;
@@ -2175,6 +2213,8 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             {
                 string folder = GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder);
 
+                toolStripDirectoryChooser.Text = folder;
+
                 if (!System.IO.Directory.Exists(folder))
                 {
                     System.IO.Directory.CreateDirectory(folder);
@@ -2186,6 +2226,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 //Files Watcher
                 fileSystemWatcher.Path = folder;
                 fileListViewRefreshList();
+
             }
             catch (Exception e)
             {
@@ -2202,7 +2243,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             //}
 
             //Set watcher path
-            fileSystemWatcher.Path = OmGui.Properties.Settings.Default.CurrentWorkingFolder;
+            //fileSystemWatcher.Path = OmGui.Properties.Settings.Default.CurrentWorkingFolder;
 
             //Profile Plugins
             AddProfilePluginsToToolStrip();
@@ -2228,7 +2269,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             string[] filePaths = Directory.GetFiles(fileSystemWatcherOutput.Path, fileSystemWatcherOutput.Filter, System.IO.SearchOption.TopDirectoryOnly);
             foreach (string f in filePaths)
             {
-                if(!Path.GetExtension(f).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+                if (!Path.GetExtension(f).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase) && !Path.GetExtension(f).Equals(".part", StringComparison.CurrentCultureIgnoreCase) && !f.StartsWith(".") && (File.GetAttributes(f) & FileAttributes.Hidden) == 0)
                     outputListAddItem(f);
             }
         }
@@ -2280,7 +2321,14 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 Properties.Settings.Default.CurrentWorkingFolder = GetPath("{MyDocuments}");
             }
 
-            LoadWorkingFolder();
+            if (startupPath != null)
+            {
+                ChangeWorkingFolder(startupPath);
+            }
+            else
+            {
+                LoadWorkingFolder();
+            }
 
             //Recent Folders
             if (Properties.Settings.Default.RecentFolders.Count == 0)
@@ -2307,7 +2355,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             }
             else
             {
-                const string updateUrl = "https://openmovement.googlecode.com/svn/downloads/AX3/omgui.ini";
+                const string updateUrl = "https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/omgui.ini"; // "https://openmovement.googlecode.com/svn/downloads/AX3/omgui.ini";
                 Console.WriteLine("UPDATE: Using address: " + updateUrl);
 
                 BackgroundWorker updateWorker = new BackgroundWorker();
@@ -2474,7 +2522,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         {
             for(int i = toolStripFiles.Items.Count; i > 4; i--)
             {
-                toolStripFiles.Items.RemoveAt(toolStripFiles.Items.Count-1);
+                //toolStripFiles.Items.RemoveAt(toolStripFiles.Items.Count-1);
             }
             
             if (pluginManager.LoadProfilePlugins())
@@ -2661,7 +2709,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 devicesListView.SelectedItems.Clear();
 
                 //Enable plugins
-                for (int i = 1; i < toolStripFiles.Items.Count; i++)
+                for (int i = 0; i < toolStripFiles.Items.Count; i++)
                 {
                     toolStripFiles.Items[i].Enabled = true;
                 }
@@ -2687,7 +2735,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         private void FilesResetToolStripButtons()
         {
             //Disable buttons
-            for (int i = 1; i < toolStripFiles.Items.Count; i++)
+            for (int i = 0; i < toolStripFiles.Items.Count; i++)
             {
                 toolStripFiles.Items[i].Enabled = false;
             }
@@ -3371,15 +3419,6 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         //TS - This will become a plugin so keep the code here for now just so we can see the Form.
         //ExportDataConstruct(OmSource.SourceCategory.File);
 
-        private void gotoDefaultFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            LoadWorkingFolder();
-        }
-
-        private void setDefaultWorkingFolderToCurrentWorkingFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
         private void pluginsToolStripButton_Click(object sender, EventArgs e)
         {
             RunPluginsProcess(filesListView.SelectedItems);
@@ -3387,7 +3426,9 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
         private void openCurrentWorkingFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(Properties.Settings.Default.CurrentWorkingFolder);
+            // "explorer.exe /select, <filename>"
+            System.Diagnostics.Process.Start(GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder));
+            //Process.Start(Properties.Settings.Default.CurrentWorkingFolder);
         }
 
         private void toolStripMain_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -3488,7 +3529,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
         private void fileSystemWatcherOutput_Created(object sender, FileSystemEventArgs e)
         {
-            if(!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase) && !Path.GetExtension(e.FullPath).Equals(".part", StringComparison.CurrentCultureIgnoreCase))
                 outputListAddItem(e.FullPath);
         }
 
@@ -3502,7 +3543,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
         private void fileSystemWatcherOutput_Deleted(object sender, FileSystemEventArgs e)
         {
-            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase) && !Path.GetExtension(e.FullPath).Equals(".part", StringComparison.CurrentCultureIgnoreCase))
                 outputListRemoveItem(e.FullPath, false);
         }
 
@@ -3529,9 +3570,12 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
         private void fileSystemWatcherOutput_Renamed(object sender, RenamedEventArgs e)
         {
-            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase))
+            if (!Path.GetExtension(e.OldFullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase) && !Path.GetExtension(e.OldFullPath).Equals(".part", StringComparison.CurrentCultureIgnoreCase))
             {
                 outputListRemoveItem(e.OldFullPath, false);
+            }
+            if (!Path.GetExtension(e.FullPath).Equals(".cwa", StringComparison.CurrentCultureIgnoreCase) && !Path.GetExtension(e.FullPath).Equals(".part", StringComparison.CurrentCultureIgnoreCase))
+            {
                 outputListAddItem(e.FullPath);
             }
         }
@@ -3558,7 +3602,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
             {
                 fileSystemWatcher.Filter = "*.*";
                 fileListViewRefreshList();
-                toolStripButtonShowFiles.Text = "Show *.cwa Only";
+                toolStripButtonShowFiles.Text = "Show *.CWA Only";
                 showAll = false;
             }
             else
@@ -3791,10 +3835,352 @@ Application.DoEvents();
             BackgroundTaskStatus(false);
         }
 
+
+        // ---------- EXPORT ----------
+
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ExportDataConstruct();
-        } 
+        }
+
+        string[] GetSelectedFilesForConvert(string newExtension)
+        {
+            // Check no devices selected
+            if (devicesListView.SelectedItems.Count > 0)
+            {
+                DialogResult dr = MessageBox.Show(this, "Cannot perform this action on files until they have been downloaded.\nDownload the files or deselect the device(s).", "Device(s) selected", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                return null;
+            }
+
+            // Get list of files selected
+            List<string> files = new List<string>();
+            foreach (ListViewItem item in filesListView.SelectedItems)
+            {
+                OmReader reader = (OmReader)item.Tag;
+                files.Add(reader.Filename);
+            }
+
+            // Check at least one file selected
+            if (files.Count <= 0)
+            {
+                DialogResult dr = MessageBox.Show(this, "No files selected.", "No files selected", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                return null;
+            }
+
+            // Build a list of messages for the overwrite prompt
+            StringBuilder sb = new StringBuilder();
+            foreach (string file in files)
+            {
+                string resultFile = Path.ChangeExtension(file, newExtension);
+                if (File.Exists(resultFile))
+                {
+                    DateTime sourceTime = DateTime.MinValue;
+                    try { sourceTime = File.GetLastWriteTime(file); }
+                    catch { ; }
+                    DateTime destinationTime = DateTime.MinValue;
+                    try { destinationTime = File.GetLastWriteTime(resultFile); }
+                    catch { ; }
+
+                    if (sourceTime <= destinationTime)
+                    {
+                        sb.Append("File already exists: " + resultFile + "\r\n");
+                    }
+                    else
+                    {
+                        sb.Append("Caution, newer file exists: " + resultFile + "\r\n");
+                    }
+                }
+            }
+
+            // Overwrite prompt
+            if (sb.Length > 0)
+            {
+                DialogResult dr = MessageBoxEx.Show(this, "Overwrite the following files:\r\n\r\n" + sb.ToString() + "\r\nAre you sure you want to overwrite?", "Overwrite existing files", MessageBoxExButtons.YesNoCancel, MessageBoxExIcon.Question, MessageBoxExDefaultButton.Button3);
+                if (dr != DialogResult.Yes)
+                {
+                    return null;
+                }
+            }
+
+            return files.ToArray();
+        }
+
+        string[] CheckWavConversion(string[] inputFiles, bool regenerateWav, bool promptBeforeConvert = false)
+        {
+            StringBuilder sb;
+
+            if (inputFiles == null) { return null; }
+
+            // We need .WAV files, check if any are missing
+            sb = new StringBuilder();
+            List<string> wavSourceFiles = new List<string>();
+            List<string> wavOutputFiles = new List<string>();
+            foreach (string file in inputFiles)
+            {
+                string wavFile = Path.ChangeExtension(file, ".wav");
+                wavOutputFiles.Add(file);
+                if (regenerateWav)
+                {
+                    wavSourceFiles.Add(file);
+                    sb.Append(".WAV regeneration requested: " + wavFile + "\r\n");
+                }
+                else if (File.Exists(wavFile))
+                {
+                    DateTime sourceTime = DateTime.MinValue;
+                    try { sourceTime = File.GetLastWriteTime(file); } catch { ; }
+                    DateTime destinationTime = DateTime.MinValue;
+                    try { destinationTime = File.GetLastWriteTime(wavFile); } catch { ; }
+
+                    if (destinationTime < sourceTime)
+                    {
+                        wavSourceFiles.Add(file);
+                        sb.Append(".WAV conversion older than source file: " + wavFile + "\r\n");
+                    }
+                }
+                else
+                {
+                    wavSourceFiles.Add(file);
+                    sb.Append(".WAV conversion required: " + wavFile + "\r\n");
+                }
+            }
+
+            // Overwrite prompt
+            if (sb.Length > 0)
+            {
+                DialogResult dr = DialogResult.OK;
+                if (promptBeforeConvert)
+                {
+                    dr = MessageBox.Show(this, "One or more files needs resampling to .WAV format first:\r\n\r\n" + sb.ToString() + "\r\n", "Resample to WAV first?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                }
+                if (dr == DialogResult.OK)
+                {
+                    if (!DoWavConvert(wavSourceFiles.ToArray(), ".wav", -1, true, true))
+                    {
+//MessageBox.Show(this, ".WAV convert not successful.", "Conversion Unsuccessful", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                        return null;
+                    }
+
+                    // Confirm converted files exist
+                    sb = new StringBuilder();
+                    foreach (string wavFile in wavOutputFiles)
+                    {
+                        if (!File.Exists(wavFile)) 
+                        {
+                            sb.Append(wavFile + "\r\n");
+                        }
+                    }
+                    if (sb.Length > 0)
+                    {
+                        MessageBox.Show(this, "One or more requied .WAV files is missing:\r\n\r\n" + sb.ToString() + "\r\n", "Files missing after conversion", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                        return null;
+                    }
+
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return inputFiles;
+        }
+
+        //string[] UtilityCheckOverwrites(string newExtension)
+        //{
+        //}
+
+        private static string OMCONVERT_EXE = @"Plugins\OmConvertPlugin\omconvert.exe";
+
+        private bool DoWavConvert(string[] files, string ext, int rate, bool calibrate, bool autoClose)
+        {
+            if (files == null) { return false; }
+            List<string> outputList = new List<string>();
+
+            foreach (string file in files)
+            {
+                List<string> args = new List<string>();
+                string input = file;
+                string final = Path.ChangeExtension(file, ".wav");
+                string output = final + ".part";
+
+                args.Add("\"" + input + "\"");
+                if (rate > 0) { args.Add("-resample"); args.Add("" + rate); }
+                args.Add("-calibrate"); args.Add(calibrate ? "1" : "0");
+                args.Add("-out"); args.Add("\"" + output + "\"");
+                ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
+                DialogResult dr = processingForm.ShowDialog();
+                if (dr == DialogResult.Cancel) { return false; }
+                outputList.Add(Path.GetFileName(final));
+            }
+
+            if (!autoClose)
+            {
+                MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
+            }
+            return true;
+        }
+
+
+        private void wavToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Make .WAV:
+            //  * Form compatible with multiple source files
+            //  * - Interpolated sample rate (100Hz, 50Hz, 25Hz)
+            //  * - No auto-calibrate
+            //  * (note: derived summaries can be affected by the sample rate)
+
+            string[] files = GetSelectedFilesForConvert(".resampled.wav");
+            if (files == null) { return; }
+            ExportWavForm optionsForm = new ExportWavForm();
+            DialogResult dr = optionsForm.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            int rate = optionsForm.Rate;
+            bool autoCalibrate = optionsForm.AutoCalibrate;
+            DoWavConvert(files, ".resampled.wav", rate, autoCalibrate, false);
+        }
+
+
+
+        private void svmToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Make .SVM.CSV
+            //  * Epoch (60 seconds)
+            //  * Filter (off, 0.5-20Hz)
+            //  * Mode: abs(sum(svm-1)) vs sum(max(0,svm-1))
+            bool regenerateWav = (Control.ModifierKeys & Keys.Shift) != 0;
+            string[] inputFiles = GetSelectedFilesForConvert(".svm.csv");
+            if (inputFiles == null) { return; }
+            ExportSvmForm optionsForm = new ExportSvmForm();
+            DialogResult dr = optionsForm.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            string[] files = CheckWavConversion(inputFiles, regenerateWav);
+            if (files == null) { return; }
+            List<string> outputList = new List<string>();
+            foreach (string file in files)
+            {
+                List<string> args = new List<string>();
+                string input = Path.ChangeExtension(file, ".wav");
+                string final = Path.ChangeExtension(file, ".svm.csv");
+                string output = final + ".part";
+
+                args.Add("\"" + input + "\"");
+                args.Add("-svm-epoch"); args.Add("" + optionsForm.Epoch);
+                args.Add("-svm-filter"); args.Add("" + optionsForm.Filter);
+                args.Add("-svm-mode"); args.Add("" + optionsForm.Mode);
+                args.Add("-svm-file"); args.Add("\"" + output + "\"");
+                ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
+                dr = processingForm.ShowDialog();
+                if (dr == System.Windows.Forms.DialogResult.Cancel) { break; }
+                outputList.Add(Path.GetFileName(final));
+            }
+            MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
+        }
+
+        private void cutPointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Make .CUT.CSV
+            //  * Epochs (number of 1 minute periods)
+            //  * Model (dominant/"right" hand, non-dominant/"left" hand, weight)
+            bool regenerateWav = (Control.ModifierKeys & Keys.Shift) != 0;
+            string[] inputFiles = GetSelectedFilesForConvert(".cut.csv");
+            if (inputFiles == null) { return; }
+            ExportPaeeForm optionsForm = new ExportPaeeForm();
+            DialogResult dr = optionsForm.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            string[] files = CheckWavConversion(inputFiles, regenerateWav);
+            if (files == null) { return; }
+            List<string> outputList = new List<string>();
+            foreach (string file in files)
+            {
+                List<string> args = new List<string>();
+                string input = Path.ChangeExtension(file, ".wav");
+                string final = Path.ChangeExtension(file, ".cut.csv");
+                string output = final + ".part";
+
+                args.Add("\"" + input + "\"");
+                args.Add("-paee-epoch"); args.Add("" + optionsForm.Epoch);
+                args.Add("-paee-model"); args.Add("" + optionsForm.Model);
+                args.Add("-paee-file"); args.Add("\"" + output + "\"");
+                ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
+                dr = processingForm.ShowDialog();
+                if (dr == System.Windows.Forms.DialogResult.Cancel) { break; }
+                outputList.Add(Path.GetFileName(final));
+            }
+            MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
+        }
+
+        private void wearTimeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Make .WTV.CSV
+            //  * Epochs (number of 0.5 minute periods)
+            bool regenerateWav = (Control.ModifierKeys & Keys.Shift) != 0;
+            string[] inputFiles = GetSelectedFilesForConvert(".wtv.csv");
+            if (inputFiles == null) { return; }
+            ExportWtvForm optionsForm = new ExportWtvForm();
+            DialogResult dr = optionsForm.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            string[] files = CheckWavConversion(inputFiles, regenerateWav);
+            if (files == null) { return; }
+            List<string> outputList = new List<string>();
+            foreach (string file in files)
+            {
+                List<string> args = new List<string>();
+                string input = Path.ChangeExtension(file, ".wav");
+                string final = Path.ChangeExtension(file, ".wtv.csv");
+                string output = final + ".part";
+
+                args.Add("\"" + input + "\"");
+                args.Add("-wtv-epoch"); args.Add("" + optionsForm.Epoch);
+                args.Add("-wtv-file"); args.Add("\"" + output + "\"");
+                ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
+                dr = processingForm.ShowDialog();
+                if (dr == System.Windows.Forms.DialogResult.Cancel) { break; }
+                outputList.Add(Path.GetFileName(final));
+            }
+            MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
+        }
+
+
+        private void dataViewer_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripButtonRefresh_Click(object sender, EventArgs e)
+        {
+            LoadWorkingFolder();
+        }
+
+        private void toolStripButtonCSV_Click_1(object sender, EventArgs e)
+        {
+            // Make .CSV (resampled)
+            bool regenerateWav = (Control.ModifierKeys & Keys.Shift) != 0;
+            string[] inputFiles = GetSelectedFilesForConvert(".resampled.csv");
+            if (inputFiles == null) { return; }
+            ExportCsvForm optionsForm = new ExportCsvForm();
+            DialogResult dr = optionsForm.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            string[] files = CheckWavConversion(inputFiles, regenerateWav);
+            if (files == null) { return; }
+            List<string> outputList = new List<string>();
+            foreach (string file in files)
+            {
+                List<string> args = new List<string>();
+                string input = Path.ChangeExtension(file, ".wav");
+                string final = Path.ChangeExtension(file, ".resampled.csv");
+                string output = final + ".part";
+
+                args.Add("\"" + input + "\"");
+                args.Add("-csv-file"); args.Add("\"" + output + "\"");
+                ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
+                dr = processingForm.ShowDialog();
+                if (dr == System.Windows.Forms.DialogResult.Cancel) { break; }
+                outputList.Add(Path.GetFileName(final));
+            }
+            MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
+        }
+
+
 
     }
 }

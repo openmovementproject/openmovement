@@ -38,7 +38,7 @@
             this.checkBoxX = new System.Windows.Forms.CheckBox();
             this.checkBoxY = new System.Windows.Forms.CheckBox();
             this.checkBoxZ = new System.Windows.Forms.CheckBox();
-            this.checkBoxAccel = new System.Windows.Forms.CheckBox();
+            this.checkBoxOneG = new System.Windows.Forms.CheckBox();
             this.checkBoxLight = new System.Windows.Forms.CheckBox();
             this.checkBoxTemp = new System.Windows.Forms.CheckBox();
             this.checkBoxBattPercent = new System.Windows.Forms.CheckBox();
@@ -46,9 +46,11 @@
             this.checkBoxTime = new System.Windows.Forms.CheckBox();
             this.timerAnimate = new System.Windows.Forms.Timer(this.components);
             this.graphPanel = new OmGui.GraphPanel();
+            this.hScrollBar = new System.Windows.Forms.HScrollBar();
             this.groupBoxOptions.SuspendLayout();
             this.toolStripData.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            this.graphPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBoxOptions
@@ -108,7 +110,7 @@
             this.tableLayoutPanel1.Controls.Add(this.checkBoxX, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxY, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxZ, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.checkBoxAccel, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.checkBoxOneG, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxLight, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxTemp, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxBattPercent, 0, 6);
@@ -172,18 +174,19 @@
             this.checkBoxZ.UseVisualStyleBackColor = true;
             this.checkBoxZ.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
-            // checkBoxAccel
+            // checkBoxOneG
             // 
-            this.checkBoxAccel.AutoSize = true;
-            this.checkBoxAccel.Enabled = false;
-            this.checkBoxAccel.Location = new System.Drawing.Point(2, 77);
-            this.checkBoxAccel.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBoxAccel.Name = "checkBoxAccel";
-            this.checkBoxAccel.Size = new System.Drawing.Size(68, 21);
-            this.checkBoxAccel.TabIndex = 0;
-            this.checkBoxAccel.Text = "Accel.";
-            this.checkBoxAccel.UseVisualStyleBackColor = true;
-            this.checkBoxAccel.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
+            this.checkBoxOneG.AutoSize = true;
+            this.checkBoxOneG.Checked = true;
+            this.checkBoxOneG.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxOneG.Location = new System.Drawing.Point(2, 77);
+            this.checkBoxOneG.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBoxOneG.Name = "checkBoxOneG";
+            this.checkBoxOneG.Size = new System.Drawing.Size(54, 21);
+            this.checkBoxOneG.TabIndex = 0;
+            this.checkBoxOneG.Text = "±1g";
+            this.checkBoxOneG.UseVisualStyleBackColor = true;
+            this.checkBoxOneG.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // checkBoxLight
             // 
@@ -254,6 +257,7 @@
             // 
             // graphPanel
             // 
+            this.graphPanel.Controls.Add(this.hScrollBar);
             this.graphPanel.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.graphPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.graphPanel.Image = null;
@@ -271,6 +275,21 @@
             this.graphPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseMove);
             this.graphPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseUp);
             // 
+            // hScrollBar
+            // 
+            this.hScrollBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.hScrollBar.Cursor = System.Windows.Forms.Cursors.Default;
+            this.hScrollBar.LargeChange = 0;
+            this.hScrollBar.Location = new System.Drawing.Point(0, 253);
+            this.hScrollBar.Maximum = 0;
+            this.hScrollBar.Name = "hScrollBar";
+            this.hScrollBar.Size = new System.Drawing.Size(650, 16);
+            this.hScrollBar.SmallChange = 0;
+            this.hScrollBar.TabIndex = 0;
+            this.hScrollBar.Visible = false;
+            this.hScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar_Scroll);
+            // 
             // DataViewer
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -285,6 +304,7 @@
             this.toolStripData.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.graphPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -296,7 +316,7 @@
         private System.Windows.Forms.CheckBox checkBoxX;
         private System.Windows.Forms.CheckBox checkBoxY;
         private System.Windows.Forms.CheckBox checkBoxZ;
-        private System.Windows.Forms.CheckBox checkBoxAccel;
+        private System.Windows.Forms.CheckBox checkBoxOneG;
         private System.Windows.Forms.CheckBox checkBoxLight;
         private System.Windows.Forms.CheckBox checkBoxTemp;
         private GraphPanel graphPanel;
@@ -307,5 +327,6 @@
         private System.Windows.Forms.CheckBox checkBoxBattPercent;
         private System.Windows.Forms.CheckBox checkBoxBattRaw;
         private System.Windows.Forms.CheckBox checkBoxTime;
+        private System.Windows.Forms.HScrollBar hScrollBar;
     }
 }

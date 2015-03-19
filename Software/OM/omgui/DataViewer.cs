@@ -127,6 +127,17 @@ namespace OmGui
 
         DataBlockCache dataBlockCache = new DataBlockCache();
 
+
+        public string SelectionDescription
+        {
+            get
+            {
+                if (endBlock == beginBlock) return null;
+                return TimeForBlock(beginBlock) + " - " + TimeForBlock(endBlock);
+            }
+        }
+
+
         public new void Refresh()
         {
             bitmapDirty = true;
@@ -136,7 +147,7 @@ namespace OmGui
             }
             else
             {
-                graphPanel.SetSelection(PointForBlock(beginBlock), PointForBlock(endBlock), TimeForBlock(beginBlock) + " - " + TimeForBlock(endBlock));
+                graphPanel.SetSelection(PointForBlock(beginBlock), PointForBlock(endBlock), SelectionDescription);
             }
             Invalidate();
         }
@@ -148,7 +159,8 @@ namespace OmGui
                 if (bitmapDirty)
                 {
                     bool displayX = checkBoxX.Checked, displayY = checkBoxY.Checked, displayZ = checkBoxZ.Checked;
-                    bool displayAccel = checkBoxAccel.Checked;
+                    bool displayOneG = checkBoxOneG.Checked;
+                    bool displayAccel = false;
                     bool displayLight = checkBoxLight.Checked, displayTemp = checkBoxTemp.Checked, displayBattPercent = checkBoxBattPercent.Checked, displayBattRaw = checkBoxBattRaw.Checked;
 
                     int width = graphPanel.Width;
@@ -158,7 +170,7 @@ namespace OmGui
                     }
 
                     Pen penMissing = new Pen(Brushes.LightGray);
-                    Pen penMissing2 = new Pen(Brushes.LightGray);
+                    Pen penMissing2 = new Pen(Brushes.Gray);
                     Pen penLine = new Pen(Brushes.LightGray);
                     Pen penUnprocessed = new Pen(Brushes.LightGray);
                     Pen penCurrent = new Pen(Brushes.Black);
@@ -267,12 +279,14 @@ namespace OmGui
 
                                 // Axis
                                 if ((x & 3) < 2) g.DrawRectangle(penMissing2, x, (center + scale * 0.0f) * myBitmap.Height, 1, 1);
+                                if (displayOneG && (x & 7) < 1) g.DrawRectangle(penMissing2, x, (center + scale * 1.0f) * myBitmap.Height, 1, 1);
+                                if (displayOneG && (x & 7) < 1) g.DrawRectangle(penMissing2, x, (center + scale * -1.0f) * myBitmap.Height, 1, 1);
 
-                                if (displayX) g.DrawRectangle(penDataX, x, (center + scale * aggregate.Min.X) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.X - aggregate.Min.X))) * myBitmap.Height);
-                                if (displayY) g.DrawRectangle(penDataY, x, (center + scale * aggregate.Min.Y) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Y - aggregate.Min.Y))) * myBitmap.Height);
-                                if (displayZ) g.DrawRectangle(penDataZ, x, (center + scale * aggregate.Min.Z) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Z - aggregate.Min.Z))) * myBitmap.Height);
+                                if (displayX) g.DrawRectangle(penDataX, x, (center - scale * aggregate.Max.X) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.X - aggregate.Min.X))) * myBitmap.Height);
+                                if (displayY) g.DrawRectangle(penDataY, x, (center - scale * aggregate.Max.Y) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Y - aggregate.Min.Y))) * myBitmap.Height);
+                                if (displayZ) g.DrawRectangle(penDataZ, x, (center - scale * aggregate.Max.Z) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Z - aggregate.Min.Z))) * myBitmap.Height);
 
-                                //if (displayAccel) g.DrawRectangle(penDataAccel, x, (center + scale * aggregate.Min.Amplitude) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Amplitude - aggregate.Min.Amplitude))) * myBitmap.Height);
+                                if (displayAccel) g.DrawRectangle(penDataAccel, x, (center - scale * aggregate.Max.Amplitude) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Amplitude - aggregate.Min.Amplitude))) * myBitmap.Height);
 
                                 if (displayLight) { float height = ((aggregate.Max.Light - aggregate.Min.Light) / 1024.0f);     g.DrawRectangle(penDataLight, x, (1.0f - (height + aggregate.Min.Light / 1024.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
                                 if (displayTemp) { float height = -0.02f * (aggregate.Max.Temp - aggregate.Min.Temp) / 1000.0f; g.DrawRectangle(penDataTemp,  x, (1.0f - (height + 0.02f * aggregate.Min.Temp / 1000.0f)) * myBitmap.Height, 1, 1 + height * myBitmap.Height); }
@@ -597,15 +611,14 @@ namespace OmGui
                     String label = "";
                     label += TimeString(TimeForBlock(blockAtCursor));
 
-                    //if (checkBoxX.Checked) { label = label + "\r\nX: " + AggregateForBlock(blockAtCursor).Avg.X + " g"; }
-                    //if (checkBoxY.Checked) { label = label + "\r\nY: " + AggregateForBlock(blockAtCursor).Avg.Y + " g"; }
-                    //if (checkBoxZ.Checked) { label = label + "\r\nZ: " + AggregateForBlock(blockAtCursor).Avg.Z + " g"; }
-                    //if (checkBoxAccel.Checked) { label = label + "\r\nAccel: " + AggregateForBlock(blockAtCursor).Avg.Amplitude + " g"; }
+                    //if (checkBoxX.Checked) { label = label + "\r\nX: " + AggregateForBlock(blockAtCursor).Avg.X.ToString("+0.00;-0.00") + " g"; }
+                    //if (checkBoxY.Checked) { label = label + "\r\nY: " + AggregateForBlock(blockAtCursor).Avg.Y.ToString("+0.00;-0.00") + " g"; }
+                    //if (checkBoxZ.Checked) { label = label + "\r\nZ: " + AggregateForBlock(blockAtCursor).Avg.Z.ToString("+0.00;-0.00") + " g"; }
+                    //if (checkBoxAccel.Checked) { label = label + "\r\nAccel: " + AggregateForBlock(blockAtCursor).Avg.Amplitude.ToString("+0.00;-0.00") + " g"; }
                     if (checkBoxLight.Checked) { label = label + "\r\nLight: " + AggregateForBlock(blockAtCursor).Avg.Light + ""; }
-                    if (checkBoxTemp.Checked) { label = label + "\r\nTemp: " + (AggregateForBlock(blockAtCursor).Avg.Temp / 1000) + " ^C"; }
+                    if (checkBoxTemp.Checked) { label = label + "\r\nTemp: " + (AggregateForBlock(blockAtCursor).Avg.Temp / 1000).ToString("0.00") + " ^C"; }
                     if (checkBoxBattPercent.Checked) { label = label + "\r\nBatt: " + AggregateForBlock(blockAtCursor).Avg.BattPercent + " %"; }
-                    if (checkBoxBattRaw.Checked) { label = label + "\r\nBatt: " + (AggregateForBlock(blockAtCursor).Avg.BattRaw / 1000) + " V"; }
-
+                    if (checkBoxBattRaw.Checked) { label = label + "\r\nBatt: " + (AggregateForBlock(blockAtCursor).Avg.BattRaw / 1000).ToString("0.000") + " V"; }
 
                     graphPanel.SetCursor(e.X, label);
 
@@ -797,6 +810,11 @@ namespace OmGui
             Refresh();
         }
 
+        private void hScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+
+        }
+
     }
 
 
@@ -841,14 +859,25 @@ namespace OmGui
                 e.Graphics.DrawLine(pen, cursorPos, 0.0f, cursorPos, this.Height);
 
                 string s = cursorLabel;
-                Font font = SystemFonts.DefaultFont;
-                Size stringSize = e.Graphics.MeasureString(s, font).ToSize();
-                Point point = new Point((int)(cursorPos - stringSize.Width / 2), this.Height - stringSize.Height - 5);
-                if (point.X < 0) { point.X = 0; }
-                if (point.X > Width - stringSize.Width) { point.X = Width - stringSize.Width; }
-                e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x64, Color.FromKnownColor(KnownColor.Info))), new RectangleF(point, stringSize));
-                e.Graphics.DrawRectangle(Pens.Black, new Rectangle(point, stringSize));
-                e.Graphics.DrawString(s, font, SystemBrushes.InfoText, point);
+                if (s != null && s.Length > 0)
+                {
+                    int padding = 3;
+                    int margin = 2;
+                    Font font = SystemFonts.DefaultFont;
+                    Size stringSize = e.Graphics.MeasureString(s, font).ToSize();
+                    stringSize.Width += 2 * padding;
+                    stringSize.Height += 2 * padding;
+                    Point point = new Point((int)(cursorPos - stringSize.Width / 2), this.Height - stringSize.Height - margin - 1);
+                    if (point.X < margin) { point.X = margin; }
+                    if (point.X >= Width - stringSize.Width - margin) { point.X = Width - stringSize.Width - margin - 1; }
+                    if (stringSize.Width + (2 * margin) >= Width)
+                    {
+                        point.X = (Width / 2) - (stringSize.Width / 2);
+                    }
+                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x64, Color.FromKnownColor(KnownColor.Info))), new RectangleF(point, stringSize));
+                    e.Graphics.DrawRectangle(Pens.Black, new Rectangle(point, stringSize));
+                    e.Graphics.DrawString(s, font, SystemBrushes.InfoText, point.X + padding, point.Y + padding);
+                }
             }
 //e.Graphics.DrawString("" + this.ClientRectangle.Width, Font, new SolidBrush(ForeColor), ClientRectangle);
         }

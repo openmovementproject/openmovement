@@ -155,6 +155,36 @@
     <Compile Include="ExportForm.Designer.cs">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExportSvmForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportSvmForm.Designer.cs">
+      <DependentUpon>ExportSvmForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExportCsvForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportCsvForm.Designer.cs">
+      <DependentUpon>ExportCsvForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExportWtvForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportWtvForm.Designer.cs">
+      <DependentUpon>ExportWtvForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExportPaeeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportPaeeForm.Designer.cs">
+      <DependentUpon>ExportPaeeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExportWavForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportWavForm.Designer.cs">
+      <DependentUpon>ExportWavForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="InputBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -188,6 +218,18 @@
     <Compile Include="PluginsForm.Designer.cs">
       <DependentUpon>PluginsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProcessingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProcessingForm.Designer.cs">
+      <DependentUpon>ProcessingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MessageBoxEx.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MessageBoxEx.Designer.cs">
+      <DependentUpon>MessageBoxEx.cs</DependentUpon>
+    </Compile>
     <Compile Include="ProgressBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -210,6 +252,12 @@
     </Compile>
     <Compile Include="ShellContextMenu.cs" />
     <Compile Include="TextBoxStreamWriter.cs" />
+    <Compile Include="ToolStripDirectoryChooser.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ToolStripDirectoryChooser.Designer.cs">
+      <DependentUpon>ToolStripDirectoryChooser.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utils.cs" />
     <EmbeddedResource Include="AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
@@ -227,6 +275,21 @@
     <EmbeddedResource Include="ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ExportSvmForm.resx">
+      <DependentUpon>ExportSvmForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExportCsvForm.resx">
+      <DependentUpon>ExportCsvForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExportWtvForm.resx">
+      <DependentUpon>ExportWtvForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExportPaeeForm.resx">
+      <DependentUpon>ExportPaeeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExportWavForm.resx">
+      <DependentUpon>ExportWavForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="InputBox.resx">
       <DependentUpon>InputBox.cs</DependentUpon>
     </EmbeddedResource>
@@ -241,6 +304,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PluginsForm.resx">
       <DependentUpon>PluginsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProcessingForm.resx">
+      <DependentUpon>ProcessingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MessageBoxEx.resx">
+      <DependentUpon>MessageBoxEx.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProgressBox.resx">
       <DependentUpon>ProgressBox.cs</DependentUpon>
@@ -281,6 +350,15 @@
     </Content>
     <Content Include="Application Icon.ico" />
     <Content Include="OmGui.ico" />
+    <None Include="Resources\loading2.gif" />
+    <None Include="Resources\Download.png" />
+    <None Include="Resources\User.png" />
+    <None Include="Resources\tag.png" />
+    <None Include="Resources\SyncTime.png" />
+    <None Include="Resources\DisplayInColorHS.png" />
+    <None Include="Resources\GetLatestVersion.png" />
+    <None Include="Resources\Data.png" />
+    <None Include="Resources\FunctionHS.png" />
     <None Include="Resources\DeleteHS.png" />
     <None Include="Resources\Export.png" />
     <None Include="Resources\Refresh.png" />

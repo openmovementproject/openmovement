@@ -38,6 +38,177 @@
             System.Windows.Forms.ListViewGroup listViewGroup7 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup8 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup9 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup10 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup11 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup12 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup13 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup14 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup15 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup16 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup17 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup18 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup19 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup20 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup21 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup22 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup23 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup24 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup25 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup26 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup27 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup28 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup29 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup30 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup31 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup32 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup33 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup34 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup35 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup36 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup37 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup38 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup39 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup40 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup41 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup42 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup43 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup44 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup45 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup46 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup47 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup48 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup49 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup50 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup51 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup52 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup53 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup54 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup55 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup56 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup57 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup58 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup59 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup60 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup61 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup62 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup63 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup64 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup65 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup66 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup67 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup68 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup69 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup70 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup71 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup72 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup73 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup74 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup75 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup76 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup77 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup78 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup79 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup80 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup81 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup82 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup83 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup84 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup85 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup86 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup87 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup88 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup89 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup90 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup91 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup92 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup93 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup94 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup95 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup96 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup97 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup98 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup99 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup100 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup101 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup102 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup103 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup104 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup105 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup106 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup107 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup108 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup109 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup110 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup111 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup112 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup113 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup114 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup115 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup116 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup117 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup118 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup119 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup120 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup121 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup122 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup123 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup124 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup125 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup126 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup127 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup128 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup129 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup130 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup131 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup132 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup133 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup134 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup135 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup136 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup137 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup138 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup139 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup140 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup141 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup142 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup143 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup144 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup145 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup146 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup147 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup148 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup149 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup150 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup151 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup152 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup153 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup154 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup155 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup156 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup157 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup158 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup159 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup160 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup161 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup162 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup163 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup164 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup165 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup166 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup167 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup168 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup169 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup170 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup171 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup172 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup173 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup174 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup175 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup176 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup177 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup178 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup179 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup180 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
@@ -59,8 +230,11 @@
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.workingFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openCurrentWorkingFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recentFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.wavToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,8 +251,12 @@
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openCurrentWorkingFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.svmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cutPointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wearTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.pluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,6 +270,12 @@
             this.propertyGridDevice = new System.Windows.Forms.PropertyGrid();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dataViewer = new OmGui.DataViewer();
+            this.toolStripWorkingFolder = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripDirectoryChooser = new OmGui.ToolStripDirectoryChooser();
+            this.toolStripButtonChooseWorkspace = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonOpenWorkspace = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonRefresh = new System.Windows.Forms.ToolStripButton();
             this.tabControlFiles = new System.Windows.Forms.TabControl();
             this.tabPageFiles = new System.Windows.Forms.TabPage();
             this.filesListView = new System.Windows.Forms.ListView();
@@ -100,10 +284,13 @@
             this.sizeFilesColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.dateModifiedColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStripFiles = new System.Windows.Forms.ToolStrip();
-            this.toolStripButtonShowFiles = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripExportDropDown = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolStripButtonSvm = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonCutPoints = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonWearTime = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.pluginsToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.DeleteFilesToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonShowFiles = new System.Windows.Forms.ToolStripButton();
             this.tabPageQueue = new System.Windows.Forms.TabPage();
             this.toolStripQueue = new System.Windows.Forms.ToolStrip();
             this.toolStripQueueButtonCancel = new System.Windows.Forms.ToolStripButton();
@@ -123,6 +310,9 @@
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.fileSystemWatcherOutput = new System.IO.FileSystemWatcher();
             this.backgroundWorkerUpdate = new System.ComponentModel.BackgroundWorker();
+            this.toolStripButtonWav = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButtonCSV = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButtonExport = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.toolStripContainer2.SuspendLayout();
             this.statusStripMain.SuspendLayout();
@@ -140,6 +330,7 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.toolStripWorkingFolder.SuspendLayout();
             this.tabControlFiles.SuspendLayout();
             this.tabPageFiles.SuspendLayout();
             this.toolStripFiles.SuspendLayout();
@@ -173,11 +364,11 @@
             // toolStripContainer2.ContentPanel
             // 
             this.toolStripContainer2.ContentPanel.AutoScroll = true;
-            this.toolStripContainer2.ContentPanel.Size = new System.Drawing.Size(906, 610);
+            this.toolStripContainer2.ContentPanel.Size = new System.Drawing.Size(1054, 818);
             this.toolStripContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer2.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer2.Name = "toolStripContainer2";
-            this.toolStripContainer2.Size = new System.Drawing.Size(906, 635);
+            this.toolStripContainer2.Size = new System.Drawing.Size(1054, 843);
             this.toolStripContainer2.TabIndex = 1;
             this.toolStripContainer2.Text = "toolStripContainer2";
             // 
@@ -197,13 +388,14 @@
             this.toolStripBackgroundTask});
             this.statusStripMain.Location = new System.Drawing.Point(0, 0);
             this.statusStripMain.Name = "statusStripMain";
-            this.statusStripMain.Size = new System.Drawing.Size(906, 22);
+            this.statusStripMain.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
+            this.statusStripMain.Size = new System.Drawing.Size(1054, 22);
             this.statusStripMain.TabIndex = 0;
             // 
             // toolStripStatusLabelMain
             // 
             this.toolStripStatusLabelMain.Name = "toolStripStatusLabelMain";
-            this.toolStripStatusLabelMain.Size = new System.Drawing.Size(891, 17);
+            this.toolStripStatusLabelMain.Size = new System.Drawing.Size(1039, 17);
             this.toolStripStatusLabelMain.Spring = true;
             this.toolStripStatusLabelMain.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -237,8 +429,7 @@
             this.devicesToolStripButtonIdentify});
             this.toolStripMain.Location = new System.Drawing.Point(0, 28);
             this.toolStripMain.Name = "toolStripMain";
-            this.toolStripMain.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStripMain.Size = new System.Drawing.Size(906, 27);
+            this.toolStripMain.Size = new System.Drawing.Size(1054, 27);
             this.toolStripMain.Stretch = true;
             this.toolStripMain.TabIndex = 1;
             this.toolStripMain.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStripMain_ItemClicked);
@@ -292,8 +483,8 @@
             this.toolStripButtonStopRecording.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonStopRecording.Image")));
             this.toolStripButtonStopRecording.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonStopRecording.Name = "toolStripButtonStopRecording";
-            this.toolStripButtonStopRecording.Size = new System.Drawing.Size(132, 24);
-            this.toolStripButtonStopRecording.Text = "Stop Recording";
+            this.toolStripButtonStopRecording.Size = new System.Drawing.Size(60, 24);
+            this.toolStripButtonStopRecording.Text = "Stop";
             this.toolStripButtonStopRecording.ToolTipText = "Stop Recording";
             this.toolStripButtonStopRecording.Click += new System.EventHandler(this.toolStripButtonStop_Click);
             // 
@@ -322,7 +513,7 @@
             this.helpToolStripMenuItem});
             this.menuStripMain.Location = new System.Drawing.Point(0, 0);
             this.menuStripMain.Name = "menuStripMain";
-            this.menuStripMain.Size = new System.Drawing.Size(906, 28);
+            this.menuStripMain.Size = new System.Drawing.Size(1054, 28);
             this.menuStripMain.TabIndex = 0;
             this.menuStripMain.Text = "menuStrip1";
             // 
@@ -330,8 +521,11 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.workingFolderToolStripMenuItem,
+            this.openCurrentWorkingFolderToolStripMenuItem,
             this.recentFoldersToolStripMenuItem,
             this.toolStripSeparator2,
+            this.wavToolStripMenuItem,
+            this.toolStripMenuItem1,
             this.exportToolStripMenuItem,
             this.toolStripSeparator5,
             this.exitToolStripMenuItem});
@@ -341,38 +535,65 @@
             // 
             // workingFolderToolStripMenuItem
             // 
+            this.workingFolderToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("workingFolderToolStripMenuItem.Image")));
+            this.workingFolderToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Fuchsia;
             this.workingFolderToolStripMenuItem.Name = "workingFolderToolStripMenuItem";
-            this.workingFolderToolStripMenuItem.Size = new System.Drawing.Size(236, 24);
-            this.workingFolderToolStripMenuItem.Text = "Switch Working Folder...";
+            this.workingFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 24);
+            this.workingFolderToolStripMenuItem.Text = "Choose Working Folder...";
             this.workingFolderToolStripMenuItem.Click += new System.EventHandler(this.workingFolderToolStripMenuItem_Click);
+            // 
+            // openCurrentWorkingFolderToolStripMenuItem
+            // 
+            this.openCurrentWorkingFolderToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openCurrentWorkingFolderToolStripMenuItem.Image")));
+            this.openCurrentWorkingFolderToolStripMenuItem.Name = "openCurrentWorkingFolderToolStripMenuItem";
+            this.openCurrentWorkingFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 24);
+            this.openCurrentWorkingFolderToolStripMenuItem.Text = "Open &Working Folder";
             // 
             // recentFoldersToolStripMenuItem
             // 
+            this.recentFoldersToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("recentFoldersToolStripMenuItem.Image")));
             this.recentFoldersToolStripMenuItem.Name = "recentFoldersToolStripMenuItem";
-            this.recentFoldersToolStripMenuItem.Size = new System.Drawing.Size(236, 24);
+            this.recentFoldersToolStripMenuItem.Size = new System.Drawing.Size(245, 24);
             this.recentFoldersToolStripMenuItem.Text = "Recent Folders";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(233, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(242, 6);
+            // 
+            // wavToolStripMenuItem
+            // 
+            this.wavToolStripMenuItem.Image = global::OmGui.Properties.Resources.Data;
+            this.wavToolStripMenuItem.Name = "wavToolStripMenuItem";
+            this.wavToolStripMenuItem.Size = new System.Drawing.Size(245, 24);
+            this.wavToolStripMenuItem.Text = "Export Resampled &WAV...";
+            this.wavToolStripMenuItem.Click += new System.EventHandler(this.wavToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Image = global::OmGui.Properties.Resources.Export;
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(245, 24);
+            this.toolStripMenuItem1.Text = "Export &Resampled CSV...";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripButtonCSV_Click_1);
             // 
             // exportToolStripMenuItem
             // 
+            this.exportToolStripMenuItem.Image = global::OmGui.Properties.Resources.Export;
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(236, 24);
-            this.exportToolStripMenuItem.Text = "&Export CSV...";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(245, 24);
+            this.exportToolStripMenuItem.Text = "Export Ra&w CSV...";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(233, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(242, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(236, 24);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(245, 24);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -387,6 +608,7 @@
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(47, 24);
             this.editToolStripMenuItem.Text = "&Edit";
+            this.editToolStripMenuItem.Visible = false;
             // 
             // cutToolStripMenuItem
             // 
@@ -425,6 +647,7 @@
             // 
             // selectAllToolStripMenuItem
             // 
+            this.selectAllToolStripMenuItem.Enabled = false;
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
             this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
             this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(192, 24);
@@ -476,10 +699,10 @@
             // propertiesToolStripMenuItem
             // 
             this.propertiesToolStripMenuItem.CheckOnClick = true;
-            this.propertiesToolStripMenuItem.Enabled = false;
             this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
             this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(145, 24);
             this.propertiesToolStripMenuItem.Text = "&Properties";
+            this.propertiesToolStripMenuItem.Visible = false;
             this.propertiesToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
             // 
             // logToolStripMenuItem
@@ -493,32 +716,64 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openCurrentWorkingFolderToolStripMenuItem,
+            this.svmToolStripMenuItem,
+            this.cutPointsToolStripMenuItem,
+            this.wearTimeToolStripMenuItem,
             this.toolStripSeparator1,
+            this.pluginsToolStripMenuItem,
+            this.toolStripSeparator3,
             this.optionsToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(57, 24);
             this.toolsToolStripMenuItem.Text = "&Tools";
             // 
-            // openCurrentWorkingFolderToolStripMenuItem
+            // svmToolStripMenuItem
             // 
-            this.openCurrentWorkingFolderToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openCurrentWorkingFolderToolStripMenuItem.Image")));
-            this.openCurrentWorkingFolderToolStripMenuItem.Name = "openCurrentWorkingFolderToolStripMenuItem";
-            this.openCurrentWorkingFolderToolStripMenuItem.Size = new System.Drawing.Size(272, 24);
-            this.openCurrentWorkingFolderToolStripMenuItem.Text = "Open &Current Working Folder";
-            this.openCurrentWorkingFolderToolStripMenuItem.Click += new System.EventHandler(this.openCurrentWorkingFolderToolStripMenuItem_Click);
+            this.svmToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("svmToolStripMenuItem.Image")));
+            this.svmToolStripMenuItem.Name = "svmToolStripMenuItem";
+            this.svmToolStripMenuItem.Size = new System.Drawing.Size(224, 24);
+            this.svmToolStripMenuItem.Text = "Calculate S&VM...";
+            this.svmToolStripMenuItem.Click += new System.EventHandler(this.svmToolStripMenuItem_Click);
+            // 
+            // cutPointsToolStripMenuItem
+            // 
+            this.cutPointsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("cutPointsToolStripMenuItem.Image")));
+            this.cutPointsToolStripMenuItem.Name = "cutPointsToolStripMenuItem";
+            this.cutPointsToolStripMenuItem.Size = new System.Drawing.Size(224, 24);
+            this.cutPointsToolStripMenuItem.Text = "Calculate &Cut Points...";
+            this.cutPointsToolStripMenuItem.Click += new System.EventHandler(this.cutPointsToolStripMenuItem_Click);
+            // 
+            // wearTimeToolStripMenuItem
+            // 
+            this.wearTimeToolStripMenuItem.Image = global::OmGui.Properties.Resources.SyncTime;
+            this.wearTimeToolStripMenuItem.Name = "wearTimeToolStripMenuItem";
+            this.wearTimeToolStripMenuItem.Size = new System.Drawing.Size(224, 24);
+            this.wearTimeToolStripMenuItem.Text = "Calculate Wear &Time...";
+            this.wearTimeToolStripMenuItem.Click += new System.EventHandler(this.wearTimeToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(269, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            // 
+            // pluginsToolStripMenuItem
+            // 
+            this.pluginsToolStripMenuItem.Name = "pluginsToolStripMenuItem";
+            this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(224, 24);
+            this.pluginsToolStripMenuItem.Text = "&Plugins...";
+            this.pluginsToolStripMenuItem.Click += new System.EventHandler(this.pluginsToolStripButton_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(221, 6);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("optionsToolStripMenuItem.Image")));
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(272, 24);
-            this.optionsToolStripMenuItem.Text = "&Options";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(224, 24);
+            this.optionsToolStripMenuItem.Text = "&Options...";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
@@ -573,8 +828,8 @@
             // splitContainerLog.Panel2
             // 
             this.splitContainerLog.Panel2.Controls.Add(this.textBoxLog);
-            this.splitContainerLog.Size = new System.Drawing.Size(906, 558);
-            this.splitContainerLog.SplitterDistance = 530;
+            this.splitContainerLog.Size = new System.Drawing.Size(1054, 766);
+            this.splitContainerLog.SplitterDistance = 738;
             this.splitContainerLog.SplitterWidth = 3;
             this.splitContainerLog.TabIndex = 0;
             // 
@@ -594,8 +849,8 @@
             // splitContainerPreview.Panel2
             // 
             this.splitContainerPreview.Panel2.Controls.Add(this.splitContainer1);
-            this.splitContainerPreview.Size = new System.Drawing.Size(906, 530);
-            this.splitContainerPreview.SplitterDistance = 236;
+            this.splitContainerPreview.Size = new System.Drawing.Size(1054, 738);
+            this.splitContainerPreview.SplitterDistance = 222;
             this.splitContainerPreview.SplitterWidth = 3;
             this.splitContainerPreview.TabIndex = 0;
             // 
@@ -614,8 +869,8 @@
             // splitContainerDevices.Panel2
             // 
             this.splitContainerDevices.Panel2.Controls.Add(this.propertyGridDevice);
-            this.splitContainerDevices.Size = new System.Drawing.Size(906, 236);
-            this.splitContainerDevices.SplitterDistance = 642;
+            this.splitContainerDevices.Size = new System.Drawing.Size(1054, 222);
+            this.splitContainerDevices.SplitterDistance = 746;
             this.splitContainerDevices.SplitterWidth = 3;
             this.splitContainerDevices.TabIndex = 1;
             // 
@@ -643,6 +898,348 @@
             listViewGroup8.Name = "Removed";
             listViewGroup9.Header = "Files";
             listViewGroup9.Name = "File";
+            listViewGroup10.Header = "Devices";
+            listViewGroup10.Name = "Other";
+            listViewGroup11.Header = "New Data";
+            listViewGroup11.Name = "NewData";
+            listViewGroup12.Header = "Downloading";
+            listViewGroup12.Name = "Downloading";
+            listViewGroup13.Header = "Downloaded";
+            listViewGroup13.Name = "Downloaded";
+            listViewGroup14.Header = "Charging";
+            listViewGroup14.Name = "Charging";
+            listViewGroup15.Header = "Standby";
+            listViewGroup15.Name = "Standby";
+            listViewGroup16.Header = "Outbox";
+            listViewGroup16.Name = "Outbox";
+            listViewGroup17.Header = "Removed";
+            listViewGroup17.Name = "Removed";
+            listViewGroup18.Header = "Files";
+            listViewGroup18.Name = "File";
+            listViewGroup19.Header = "Devices";
+            listViewGroup19.Name = "Other";
+            listViewGroup20.Header = "New Data";
+            listViewGroup20.Name = "NewData";
+            listViewGroup21.Header = "Downloading";
+            listViewGroup21.Name = "Downloading";
+            listViewGroup22.Header = "Downloaded";
+            listViewGroup22.Name = "Downloaded";
+            listViewGroup23.Header = "Charging";
+            listViewGroup23.Name = "Charging";
+            listViewGroup24.Header = "Standby";
+            listViewGroup24.Name = "Standby";
+            listViewGroup25.Header = "Outbox";
+            listViewGroup25.Name = "Outbox";
+            listViewGroup26.Header = "Removed";
+            listViewGroup26.Name = "Removed";
+            listViewGroup27.Header = "Files";
+            listViewGroup27.Name = "File";
+            listViewGroup28.Header = "Devices";
+            listViewGroup28.Name = "Other";
+            listViewGroup29.Header = "New Data";
+            listViewGroup29.Name = "NewData";
+            listViewGroup30.Header = "Downloading";
+            listViewGroup30.Name = "Downloading";
+            listViewGroup31.Header = "Downloaded";
+            listViewGroup31.Name = "Downloaded";
+            listViewGroup32.Header = "Charging";
+            listViewGroup32.Name = "Charging";
+            listViewGroup33.Header = "Standby";
+            listViewGroup33.Name = "Standby";
+            listViewGroup34.Header = "Outbox";
+            listViewGroup34.Name = "Outbox";
+            listViewGroup35.Header = "Removed";
+            listViewGroup35.Name = "Removed";
+            listViewGroup36.Header = "Files";
+            listViewGroup36.Name = "File";
+            listViewGroup37.Header = "Devices";
+            listViewGroup37.Name = "Other";
+            listViewGroup38.Header = "New Data";
+            listViewGroup38.Name = "NewData";
+            listViewGroup39.Header = "Downloading";
+            listViewGroup39.Name = "Downloading";
+            listViewGroup40.Header = "Downloaded";
+            listViewGroup40.Name = "Downloaded";
+            listViewGroup41.Header = "Charging";
+            listViewGroup41.Name = "Charging";
+            listViewGroup42.Header = "Standby";
+            listViewGroup42.Name = "Standby";
+            listViewGroup43.Header = "Outbox";
+            listViewGroup43.Name = "Outbox";
+            listViewGroup44.Header = "Removed";
+            listViewGroup44.Name = "Removed";
+            listViewGroup45.Header = "Files";
+            listViewGroup45.Name = "File";
+            listViewGroup46.Header = "Devices";
+            listViewGroup46.Name = "Other";
+            listViewGroup47.Header = "New Data";
+            listViewGroup47.Name = "NewData";
+            listViewGroup48.Header = "Downloading";
+            listViewGroup48.Name = "Downloading";
+            listViewGroup49.Header = "Downloaded";
+            listViewGroup49.Name = "Downloaded";
+            listViewGroup50.Header = "Charging";
+            listViewGroup50.Name = "Charging";
+            listViewGroup51.Header = "Standby";
+            listViewGroup51.Name = "Standby";
+            listViewGroup52.Header = "Outbox";
+            listViewGroup52.Name = "Outbox";
+            listViewGroup53.Header = "Removed";
+            listViewGroup53.Name = "Removed";
+            listViewGroup54.Header = "Files";
+            listViewGroup54.Name = "File";
+            listViewGroup55.Header = "Devices";
+            listViewGroup55.Name = "Other";
+            listViewGroup56.Header = "New Data";
+            listViewGroup56.Name = "NewData";
+            listViewGroup57.Header = "Downloading";
+            listViewGroup57.Name = "Downloading";
+            listViewGroup58.Header = "Downloaded";
+            listViewGroup58.Name = "Downloaded";
+            listViewGroup59.Header = "Charging";
+            listViewGroup59.Name = "Charging";
+            listViewGroup60.Header = "Standby";
+            listViewGroup60.Name = "Standby";
+            listViewGroup61.Header = "Outbox";
+            listViewGroup61.Name = "Outbox";
+            listViewGroup62.Header = "Removed";
+            listViewGroup62.Name = "Removed";
+            listViewGroup63.Header = "Files";
+            listViewGroup63.Name = "File";
+            listViewGroup64.Header = "Devices";
+            listViewGroup64.Name = "Other";
+            listViewGroup65.Header = "New Data";
+            listViewGroup65.Name = "NewData";
+            listViewGroup66.Header = "Downloading";
+            listViewGroup66.Name = "Downloading";
+            listViewGroup67.Header = "Downloaded";
+            listViewGroup67.Name = "Downloaded";
+            listViewGroup68.Header = "Charging";
+            listViewGroup68.Name = "Charging";
+            listViewGroup69.Header = "Standby";
+            listViewGroup69.Name = "Standby";
+            listViewGroup70.Header = "Outbox";
+            listViewGroup70.Name = "Outbox";
+            listViewGroup71.Header = "Removed";
+            listViewGroup71.Name = "Removed";
+            listViewGroup72.Header = "Files";
+            listViewGroup72.Name = "File";
+            listViewGroup73.Header = "Devices";
+            listViewGroup73.Name = "Other";
+            listViewGroup74.Header = "New Data";
+            listViewGroup74.Name = "NewData";
+            listViewGroup75.Header = "Downloading";
+            listViewGroup75.Name = "Downloading";
+            listViewGroup76.Header = "Downloaded";
+            listViewGroup76.Name = "Downloaded";
+            listViewGroup77.Header = "Charging";
+            listViewGroup77.Name = "Charging";
+            listViewGroup78.Header = "Standby";
+            listViewGroup78.Name = "Standby";
+            listViewGroup79.Header = "Outbox";
+            listViewGroup79.Name = "Outbox";
+            listViewGroup80.Header = "Removed";
+            listViewGroup80.Name = "Removed";
+            listViewGroup81.Header = "Files";
+            listViewGroup81.Name = "File";
+            listViewGroup82.Header = "Devices";
+            listViewGroup82.Name = "Other";
+            listViewGroup83.Header = "New Data";
+            listViewGroup83.Name = "NewData";
+            listViewGroup84.Header = "Downloading";
+            listViewGroup84.Name = "Downloading";
+            listViewGroup85.Header = "Downloaded";
+            listViewGroup85.Name = "Downloaded";
+            listViewGroup86.Header = "Charging";
+            listViewGroup86.Name = "Charging";
+            listViewGroup87.Header = "Standby";
+            listViewGroup87.Name = "Standby";
+            listViewGroup88.Header = "Outbox";
+            listViewGroup88.Name = "Outbox";
+            listViewGroup89.Header = "Removed";
+            listViewGroup89.Name = "Removed";
+            listViewGroup90.Header = "Files";
+            listViewGroup90.Name = "File";
+            listViewGroup91.Header = "Devices";
+            listViewGroup91.Name = "Other";
+            listViewGroup92.Header = "New Data";
+            listViewGroup92.Name = "NewData";
+            listViewGroup93.Header = "Downloading";
+            listViewGroup93.Name = "Downloading";
+            listViewGroup94.Header = "Downloaded";
+            listViewGroup94.Name = "Downloaded";
+            listViewGroup95.Header = "Charging";
+            listViewGroup95.Name = "Charging";
+            listViewGroup96.Header = "Standby";
+            listViewGroup96.Name = "Standby";
+            listViewGroup97.Header = "Outbox";
+            listViewGroup97.Name = "Outbox";
+            listViewGroup98.Header = "Removed";
+            listViewGroup98.Name = "Removed";
+            listViewGroup99.Header = "Files";
+            listViewGroup99.Name = "File";
+            listViewGroup100.Header = "Devices";
+            listViewGroup100.Name = "Other";
+            listViewGroup101.Header = "New Data";
+            listViewGroup101.Name = "NewData";
+            listViewGroup102.Header = "Downloading";
+            listViewGroup102.Name = "Downloading";
+            listViewGroup103.Header = "Downloaded";
+            listViewGroup103.Name = "Downloaded";
+            listViewGroup104.Header = "Charging";
+            listViewGroup104.Name = "Charging";
+            listViewGroup105.Header = "Standby";
+            listViewGroup105.Name = "Standby";
+            listViewGroup106.Header = "Outbox";
+            listViewGroup106.Name = "Outbox";
+            listViewGroup107.Header = "Removed";
+            listViewGroup107.Name = "Removed";
+            listViewGroup108.Header = "Files";
+            listViewGroup108.Name = "File";
+            listViewGroup109.Header = "Devices";
+            listViewGroup109.Name = "Other";
+            listViewGroup110.Header = "New Data";
+            listViewGroup110.Name = "NewData";
+            listViewGroup111.Header = "Downloading";
+            listViewGroup111.Name = "Downloading";
+            listViewGroup112.Header = "Downloaded";
+            listViewGroup112.Name = "Downloaded";
+            listViewGroup113.Header = "Charging";
+            listViewGroup113.Name = "Charging";
+            listViewGroup114.Header = "Standby";
+            listViewGroup114.Name = "Standby";
+            listViewGroup115.Header = "Outbox";
+            listViewGroup115.Name = "Outbox";
+            listViewGroup116.Header = "Removed";
+            listViewGroup116.Name = "Removed";
+            listViewGroup117.Header = "Files";
+            listViewGroup117.Name = "File";
+            listViewGroup118.Header = "Devices";
+            listViewGroup118.Name = "Other";
+            listViewGroup119.Header = "New Data";
+            listViewGroup119.Name = "NewData";
+            listViewGroup120.Header = "Downloading";
+            listViewGroup120.Name = "Downloading";
+            listViewGroup121.Header = "Downloaded";
+            listViewGroup121.Name = "Downloaded";
+            listViewGroup122.Header = "Charging";
+            listViewGroup122.Name = "Charging";
+            listViewGroup123.Header = "Standby";
+            listViewGroup123.Name = "Standby";
+            listViewGroup124.Header = "Outbox";
+            listViewGroup124.Name = "Outbox";
+            listViewGroup125.Header = "Removed";
+            listViewGroup125.Name = "Removed";
+            listViewGroup126.Header = "Files";
+            listViewGroup126.Name = "File";
+            listViewGroup127.Header = "Devices";
+            listViewGroup127.Name = "Other";
+            listViewGroup128.Header = "New Data";
+            listViewGroup128.Name = "NewData";
+            listViewGroup129.Header = "Downloading";
+            listViewGroup129.Name = "Downloading";
+            listViewGroup130.Header = "Downloaded";
+            listViewGroup130.Name = "Downloaded";
+            listViewGroup131.Header = "Charging";
+            listViewGroup131.Name = "Charging";
+            listViewGroup132.Header = "Standby";
+            listViewGroup132.Name = "Standby";
+            listViewGroup133.Header = "Outbox";
+            listViewGroup133.Name = "Outbox";
+            listViewGroup134.Header = "Removed";
+            listViewGroup134.Name = "Removed";
+            listViewGroup135.Header = "Files";
+            listViewGroup135.Name = "File";
+            listViewGroup136.Header = "Devices";
+            listViewGroup136.Name = "Other";
+            listViewGroup137.Header = "New Data";
+            listViewGroup137.Name = "NewData";
+            listViewGroup138.Header = "Downloading";
+            listViewGroup138.Name = "Downloading";
+            listViewGroup139.Header = "Downloaded";
+            listViewGroup139.Name = "Downloaded";
+            listViewGroup140.Header = "Charging";
+            listViewGroup140.Name = "Charging";
+            listViewGroup141.Header = "Standby";
+            listViewGroup141.Name = "Standby";
+            listViewGroup142.Header = "Outbox";
+            listViewGroup142.Name = "Outbox";
+            listViewGroup143.Header = "Removed";
+            listViewGroup143.Name = "Removed";
+            listViewGroup144.Header = "Files";
+            listViewGroup144.Name = "File";
+            listViewGroup145.Header = "Devices";
+            listViewGroup145.Name = "Other";
+            listViewGroup146.Header = "New Data";
+            listViewGroup146.Name = "NewData";
+            listViewGroup147.Header = "Downloading";
+            listViewGroup147.Name = "Downloading";
+            listViewGroup148.Header = "Downloaded";
+            listViewGroup148.Name = "Downloaded";
+            listViewGroup149.Header = "Charging";
+            listViewGroup149.Name = "Charging";
+            listViewGroup150.Header = "Standby";
+            listViewGroup150.Name = "Standby";
+            listViewGroup151.Header = "Outbox";
+            listViewGroup151.Name = "Outbox";
+            listViewGroup152.Header = "Removed";
+            listViewGroup152.Name = "Removed";
+            listViewGroup153.Header = "Files";
+            listViewGroup153.Name = "File";
+            listViewGroup154.Header = "Devices";
+            listViewGroup154.Name = "Other";
+            listViewGroup155.Header = "New Data";
+            listViewGroup155.Name = "NewData";
+            listViewGroup156.Header = "Downloading";
+            listViewGroup156.Name = "Downloading";
+            listViewGroup157.Header = "Downloaded";
+            listViewGroup157.Name = "Downloaded";
+            listViewGroup158.Header = "Charging";
+            listViewGroup158.Name = "Charging";
+            listViewGroup159.Header = "Standby";
+            listViewGroup159.Name = "Standby";
+            listViewGroup160.Header = "Outbox";
+            listViewGroup160.Name = "Outbox";
+            listViewGroup161.Header = "Removed";
+            listViewGroup161.Name = "Removed";
+            listViewGroup162.Header = "Files";
+            listViewGroup162.Name = "File";
+            listViewGroup163.Header = "Devices";
+            listViewGroup163.Name = "Other";
+            listViewGroup164.Header = "New Data";
+            listViewGroup164.Name = "NewData";
+            listViewGroup165.Header = "Downloading";
+            listViewGroup165.Name = "Downloading";
+            listViewGroup166.Header = "Downloaded";
+            listViewGroup166.Name = "Downloaded";
+            listViewGroup167.Header = "Charging";
+            listViewGroup167.Name = "Charging";
+            listViewGroup168.Header = "Standby";
+            listViewGroup168.Name = "Standby";
+            listViewGroup169.Header = "Outbox";
+            listViewGroup169.Name = "Outbox";
+            listViewGroup170.Header = "Removed";
+            listViewGroup170.Name = "Removed";
+            listViewGroup171.Header = "Files";
+            listViewGroup171.Name = "File";
+            listViewGroup172.Header = "Devices";
+            listViewGroup172.Name = "Other";
+            listViewGroup173.Header = "New Data";
+            listViewGroup173.Name = "NewData";
+            listViewGroup174.Header = "Downloading";
+            listViewGroup174.Name = "Downloading";
+            listViewGroup175.Header = "Downloaded";
+            listViewGroup175.Name = "Downloaded";
+            listViewGroup176.Header = "Charging";
+            listViewGroup176.Name = "Charging";
+            listViewGroup177.Header = "Standby";
+            listViewGroup177.Name = "Standby";
+            listViewGroup178.Header = "Outbox";
+            listViewGroup178.Name = "Outbox";
+            listViewGroup179.Header = "Removed";
+            listViewGroup179.Name = "Removed";
+            listViewGroup180.Header = "Files";
+            listViewGroup180.Name = "File";
             this.devicesListView.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
             listViewGroup1,
             listViewGroup2,
@@ -652,12 +1249,183 @@
             listViewGroup6,
             listViewGroup7,
             listViewGroup8,
-            listViewGroup9});
+            listViewGroup9,
+            listViewGroup10,
+            listViewGroup11,
+            listViewGroup12,
+            listViewGroup13,
+            listViewGroup14,
+            listViewGroup15,
+            listViewGroup16,
+            listViewGroup17,
+            listViewGroup18,
+            listViewGroup19,
+            listViewGroup20,
+            listViewGroup21,
+            listViewGroup22,
+            listViewGroup23,
+            listViewGroup24,
+            listViewGroup25,
+            listViewGroup26,
+            listViewGroup27,
+            listViewGroup28,
+            listViewGroup29,
+            listViewGroup30,
+            listViewGroup31,
+            listViewGroup32,
+            listViewGroup33,
+            listViewGroup34,
+            listViewGroup35,
+            listViewGroup36,
+            listViewGroup37,
+            listViewGroup38,
+            listViewGroup39,
+            listViewGroup40,
+            listViewGroup41,
+            listViewGroup42,
+            listViewGroup43,
+            listViewGroup44,
+            listViewGroup45,
+            listViewGroup46,
+            listViewGroup47,
+            listViewGroup48,
+            listViewGroup49,
+            listViewGroup50,
+            listViewGroup51,
+            listViewGroup52,
+            listViewGroup53,
+            listViewGroup54,
+            listViewGroup55,
+            listViewGroup56,
+            listViewGroup57,
+            listViewGroup58,
+            listViewGroup59,
+            listViewGroup60,
+            listViewGroup61,
+            listViewGroup62,
+            listViewGroup63,
+            listViewGroup64,
+            listViewGroup65,
+            listViewGroup66,
+            listViewGroup67,
+            listViewGroup68,
+            listViewGroup69,
+            listViewGroup70,
+            listViewGroup71,
+            listViewGroup72,
+            listViewGroup73,
+            listViewGroup74,
+            listViewGroup75,
+            listViewGroup76,
+            listViewGroup77,
+            listViewGroup78,
+            listViewGroup79,
+            listViewGroup80,
+            listViewGroup81,
+            listViewGroup82,
+            listViewGroup83,
+            listViewGroup84,
+            listViewGroup85,
+            listViewGroup86,
+            listViewGroup87,
+            listViewGroup88,
+            listViewGroup89,
+            listViewGroup90,
+            listViewGroup91,
+            listViewGroup92,
+            listViewGroup93,
+            listViewGroup94,
+            listViewGroup95,
+            listViewGroup96,
+            listViewGroup97,
+            listViewGroup98,
+            listViewGroup99,
+            listViewGroup100,
+            listViewGroup101,
+            listViewGroup102,
+            listViewGroup103,
+            listViewGroup104,
+            listViewGroup105,
+            listViewGroup106,
+            listViewGroup107,
+            listViewGroup108,
+            listViewGroup109,
+            listViewGroup110,
+            listViewGroup111,
+            listViewGroup112,
+            listViewGroup113,
+            listViewGroup114,
+            listViewGroup115,
+            listViewGroup116,
+            listViewGroup117,
+            listViewGroup118,
+            listViewGroup119,
+            listViewGroup120,
+            listViewGroup121,
+            listViewGroup122,
+            listViewGroup123,
+            listViewGroup124,
+            listViewGroup125,
+            listViewGroup126,
+            listViewGroup127,
+            listViewGroup128,
+            listViewGroup129,
+            listViewGroup130,
+            listViewGroup131,
+            listViewGroup132,
+            listViewGroup133,
+            listViewGroup134,
+            listViewGroup135,
+            listViewGroup136,
+            listViewGroup137,
+            listViewGroup138,
+            listViewGroup139,
+            listViewGroup140,
+            listViewGroup141,
+            listViewGroup142,
+            listViewGroup143,
+            listViewGroup144,
+            listViewGroup145,
+            listViewGroup146,
+            listViewGroup147,
+            listViewGroup148,
+            listViewGroup149,
+            listViewGroup150,
+            listViewGroup151,
+            listViewGroup152,
+            listViewGroup153,
+            listViewGroup154,
+            listViewGroup155,
+            listViewGroup156,
+            listViewGroup157,
+            listViewGroup158,
+            listViewGroup159,
+            listViewGroup160,
+            listViewGroup161,
+            listViewGroup162,
+            listViewGroup163,
+            listViewGroup164,
+            listViewGroup165,
+            listViewGroup166,
+            listViewGroup167,
+            listViewGroup168,
+            listViewGroup169,
+            listViewGroup170,
+            listViewGroup171,
+            listViewGroup172,
+            listViewGroup173,
+            listViewGroup174,
+            listViewGroup175,
+            listViewGroup176,
+            listViewGroup177,
+            listViewGroup178,
+            listViewGroup179,
+            listViewGroup180});
             this.devicesListView.HideSelection = false;
             this.devicesListView.LabelWrap = false;
             this.devicesListView.Location = new System.Drawing.Point(0, 0);
             this.devicesListView.Name = "devicesListView";
-            this.devicesListView.Size = new System.Drawing.Size(642, 236);
+            this.devicesListView.Size = new System.Drawing.Size(746, 222);
             this.devicesListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.devicesListView.TabIndex = 0;
             this.devicesListView.UseCompatibleStateImageBehavior = false;
@@ -670,7 +1438,7 @@
             this.propertyGridDevice.Location = new System.Drawing.Point(0, 0);
             this.propertyGridDevice.Margin = new System.Windows.Forms.Padding(2);
             this.propertyGridDevice.Name = "propertyGridDevice";
-            this.propertyGridDevice.Size = new System.Drawing.Size(261, 236);
+            this.propertyGridDevice.Size = new System.Drawing.Size(305, 222);
             this.propertyGridDevice.TabIndex = 0;
             this.propertyGridDevice.ToolbarVisible = false;
             // 
@@ -688,9 +1456,10 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.toolStripWorkingFolder);
             this.splitContainer1.Panel2.Controls.Add(this.tabControlFiles);
-            this.splitContainer1.Size = new System.Drawing.Size(906, 291);
-            this.splitContainer1.SplitterDistance = 111;
+            this.splitContainer1.Size = new System.Drawing.Size(1054, 513);
+            this.splitContainer1.SplitterDistance = 174;
             this.splitContainer1.TabIndex = 2;
             // 
             // dataViewer
@@ -703,8 +1472,72 @@
             this.dataViewer.Mode = OmGui.DataViewer.ModeType.Zoom;
             this.dataViewer.Name = "dataViewer";
             this.dataViewer.Reader = null;
-            this.dataViewer.Size = new System.Drawing.Size(904, 107);
+            this.dataViewer.Size = new System.Drawing.Size(1052, 170);
             this.dataViewer.TabIndex = 3;
+            this.dataViewer.Load += new System.EventHandler(this.dataViewer_Load);
+            // 
+            // toolStripWorkingFolder
+            // 
+            this.toolStripWorkingFolder.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStripWorkingFolder.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel1,
+            this.toolStripDirectoryChooser,
+            this.toolStripButtonChooseWorkspace,
+            this.toolStripButtonOpenWorkspace,
+            this.toolStripButtonRefresh});
+            this.toolStripWorkingFolder.Location = new System.Drawing.Point(0, 0);
+            this.toolStripWorkingFolder.Name = "toolStripWorkingFolder";
+            this.toolStripWorkingFolder.Size = new System.Drawing.Size(1054, 27);
+            this.toolStripWorkingFolder.TabIndex = 3;
+            this.toolStripWorkingFolder.Text = "Working Folder";
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLabel1.Image")));
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(101, 24);
+            this.toolStripLabel1.Text = "Workspace:";
+            this.toolStripLabel1.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            // 
+            // toolStripDirectoryChooser
+            // 
+            this.toolStripDirectoryChooser.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.toolStripDirectoryChooser.Margin = new System.Windows.Forms.Padding(0, 0, 1, 0);
+            this.toolStripDirectoryChooser.Name = "toolStripDirectoryChooser";
+            this.toolStripDirectoryChooser.ReadOnly = true;
+            this.toolStripDirectoryChooser.Size = new System.Drawing.Size(843, 27);
+            // 
+            // toolStripButtonChooseWorkspace
+            // 
+            this.toolStripButtonChooseWorkspace.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonChooseWorkspace.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonChooseWorkspace.Image")));
+            this.toolStripButtonChooseWorkspace.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonChooseWorkspace.Name = "toolStripButtonChooseWorkspace";
+            this.toolStripButtonChooseWorkspace.Size = new System.Drawing.Size(23, 24);
+            this.toolStripButtonChooseWorkspace.Text = "...";
+            this.toolStripButtonChooseWorkspace.ToolTipText = "Choose working folder";
+            this.toolStripButtonChooseWorkspace.Click += new System.EventHandler(this.workingFolderToolStripMenuItem_Click);
+            // 
+            // toolStripButtonOpenWorkspace
+            // 
+            this.toolStripButtonOpenWorkspace.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonOpenWorkspace.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonOpenWorkspace.Image")));
+            this.toolStripButtonOpenWorkspace.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonOpenWorkspace.Name = "toolStripButtonOpenWorkspace";
+            this.toolStripButtonOpenWorkspace.Size = new System.Drawing.Size(23, 24);
+            this.toolStripButtonOpenWorkspace.Text = "Open...";
+            this.toolStripButtonOpenWorkspace.ToolTipText = "Open working folder";
+            this.toolStripButtonOpenWorkspace.Click += new System.EventHandler(this.openCurrentWorkingFolderToolStripMenuItem_Click);
+            // 
+            // toolStripButtonRefresh
+            // 
+            this.toolStripButtonRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonRefresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRefresh.Image")));
+            this.toolStripButtonRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRefresh.Name = "toolStripButtonRefresh";
+            this.toolStripButtonRefresh.Size = new System.Drawing.Size(23, 24);
+            this.toolStripButtonRefresh.Text = "Refresh";
+            this.toolStripButtonRefresh.Click += new System.EventHandler(this.toolStripButtonRefresh_Click);
             // 
             // tabControlFiles
             // 
@@ -714,11 +1547,11 @@
             this.tabControlFiles.Controls.Add(this.tabPageFiles);
             this.tabControlFiles.Controls.Add(this.tabPageQueue);
             this.tabControlFiles.Controls.Add(this.tabPageOutput);
-            this.tabControlFiles.Location = new System.Drawing.Point(0, 2);
+            this.tabControlFiles.Location = new System.Drawing.Point(2, 27);
             this.tabControlFiles.Margin = new System.Windows.Forms.Padding(2);
             this.tabControlFiles.Name = "tabControlFiles";
             this.tabControlFiles.SelectedIndex = 0;
-            this.tabControlFiles.Size = new System.Drawing.Size(906, 365);
+            this.tabControlFiles.Size = new System.Drawing.Size(1050, 306);
             this.tabControlFiles.TabIndex = 2;
             this.tabControlFiles.SelectedIndexChanged += new System.EventHandler(this.tabControlFiles_SelectedIndexChanged);
             // 
@@ -730,9 +1563,9 @@
             this.tabPageFiles.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageFiles.Name = "tabPageFiles";
             this.tabPageFiles.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPageFiles.Size = new System.Drawing.Size(898, 336);
+            this.tabPageFiles.Size = new System.Drawing.Size(1042, 277);
             this.tabPageFiles.TabIndex = 0;
-            this.tabPageFiles.Text = "Files";
+            this.tabPageFiles.Text = "Data Files";
             this.tabPageFiles.UseVisualStyleBackColor = true;
             // 
             // filesListView
@@ -747,7 +1580,7 @@
             this.dateModifiedColumnHeader});
             this.filesListView.Location = new System.Drawing.Point(2, 30);
             this.filesListView.Name = "filesListView";
-            this.filesListView.Size = new System.Drawing.Size(894, 119);
+            this.filesListView.Size = new System.Drawing.Size(1038, 242);
             this.filesListView.TabIndex = 1;
             this.filesListView.UseCompatibleStateImageBehavior = false;
             this.filesListView.View = System.Windows.Forms.View.Details;
@@ -759,16 +1592,16 @@
             // nameFilesColumnHeader
             // 
             this.nameFilesColumnHeader.Text = "Name";
-            this.nameFilesColumnHeader.Width = 101;
+            this.nameFilesColumnHeader.Width = 335;
             // 
             // locationFilesColumnHeader
             // 
             this.locationFilesColumnHeader.Text = "File Location";
-            this.locationFilesColumnHeader.Width = 125;
+            this.locationFilesColumnHeader.Width = 0;
             // 
             // sizeFilesColumnHeader
             // 
-            this.sizeFilesColumnHeader.Text = "Filesize (MB)";
+            this.sizeFilesColumnHeader.Text = "Size (MB)";
             this.sizeFilesColumnHeader.Width = 78;
             // 
             // dateModifiedColumnHeader
@@ -778,16 +1611,76 @@
             // 
             // toolStripFiles
             // 
+            this.toolStripFiles.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStripFiles.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButtonShowFiles,
-            this.toolStripSeparator3,
+            this.toolStripExportDropDown,
+            this.toolStripButtonSvm,
+            this.toolStripButtonCutPoints,
+            this.toolStripButtonWearTime,
+            this.toolStripSeparator10,
             this.pluginsToolStripButton,
-            this.DeleteFilesToolStripButton});
+            this.toolStripButtonShowFiles});
             this.toolStripFiles.Location = new System.Drawing.Point(2, 2);
             this.toolStripFiles.Name = "toolStripFiles";
-            this.toolStripFiles.Size = new System.Drawing.Size(894, 27);
+            this.toolStripFiles.Size = new System.Drawing.Size(1038, 27);
             this.toolStripFiles.TabIndex = 1;
             this.toolStripFiles.Text = "toolStripFiles";
+            // 
+            // toolStripExportDropDown
+            // 
+            this.toolStripExportDropDown.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButtonWav,
+            this.toolStripButtonCSV,
+            this.toolStripButtonExport});
+            this.toolStripExportDropDown.Image = global::OmGui.Properties.Resources.Export;
+            this.toolStripExportDropDown.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripExportDropDown.Name = "toolStripExportDropDown";
+            this.toolStripExportDropDown.Size = new System.Drawing.Size(81, 24);
+            this.toolStripExportDropDown.Text = "&Export";
+            this.toolStripExportDropDown.ToolTipText = "Export data";
+            // 
+            // toolStripButtonSvm
+            // 
+            this.toolStripButtonSvm.Image = global::OmGui.Properties.Resources.FunctionHS;
+            this.toolStripButtonSvm.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonSvm.Name = "toolStripButtonSvm";
+            this.toolStripButtonSvm.Size = new System.Drawing.Size(68, 24);
+            this.toolStripButtonSvm.Text = "SVM...";
+            this.toolStripButtonSvm.ToolTipText = "Calculate the scalar vector magnitude";
+            this.toolStripButtonSvm.Click += new System.EventHandler(this.svmToolStripMenuItem_Click);
+            // 
+            // toolStripButtonCutPoints
+            // 
+            this.toolStripButtonCutPoints.Image = global::OmGui.Properties.Resources.User;
+            this.toolStripButtonCutPoints.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonCutPoints.Name = "toolStripButtonCutPoints";
+            this.toolStripButtonCutPoints.Size = new System.Drawing.Size(104, 24);
+            this.toolStripButtonCutPoints.Text = "Cut Points...";
+            this.toolStripButtonCutPoints.ToolTipText = "Calculate energy \'cut points\'";
+            this.toolStripButtonCutPoints.Click += new System.EventHandler(this.cutPointsToolStripMenuItem_Click);
+            // 
+            // toolStripButtonWearTime
+            // 
+            this.toolStripButtonWearTime.Image = global::OmGui.Properties.Resources.SyncTime;
+            this.toolStripButtonWearTime.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonWearTime.Name = "toolStripButtonWearTime";
+            this.toolStripButtonWearTime.Size = new System.Drawing.Size(107, 24);
+            this.toolStripButtonWearTime.Text = "Wear time...";
+            this.toolStripButtonWearTime.ToolTipText = "Calculate wear time";
+            this.toolStripButtonWearTime.Click += new System.EventHandler(this.wearTimeToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(6, 27);
+            // 
+            // pluginsToolStripButton
+            // 
+            this.pluginsToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.pluginsToolStripButton.Name = "pluginsToolStripButton";
+            this.pluginsToolStripButton.Size = new System.Drawing.Size(69, 24);
+            this.pluginsToolStripButton.Text = "&Plugins...";
+            this.pluginsToolStripButton.Click += new System.EventHandler(this.pluginsToolStripButton_Click);
             // 
             // toolStripButtonShowFiles
             // 
@@ -797,30 +1690,8 @@
             this.toolStripButtonShowFiles.Name = "toolStripButtonShowFiles";
             this.toolStripButtonShowFiles.Size = new System.Drawing.Size(104, 24);
             this.toolStripButtonShowFiles.Text = "Show All Files";
+            this.toolStripButtonShowFiles.Visible = false;
             this.toolStripButtonShowFiles.Click += new System.EventHandler(this.toolStripButtonShowFiles_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 27);
-            // 
-            // pluginsToolStripButton
-            // 
-            this.pluginsToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("pluginsToolStripButton.Image")));
-            this.pluginsToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.pluginsToolStripButton.Name = "pluginsToolStripButton";
-            this.pluginsToolStripButton.Size = new System.Drawing.Size(85, 24);
-            this.pluginsToolStripButton.Text = "&Plugins...";
-            this.pluginsToolStripButton.Click += new System.EventHandler(this.pluginsToolStripButton_Click);
-            // 
-            // DeleteFilesToolStripButton
-            // 
-            this.DeleteFilesToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("DeleteFilesToolStripButton.Image")));
-            this.DeleteFilesToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.DeleteFilesToolStripButton.Name = "DeleteFilesToolStripButton";
-            this.DeleteFilesToolStripButton.Size = new System.Drawing.Size(73, 24);
-            this.DeleteFilesToolStripButton.Text = "Delete";
-            this.DeleteFilesToolStripButton.Click += new System.EventHandler(this.DeleteFilesToolStripButton_Click_1);
             // 
             // tabPageQueue
             // 
@@ -830,19 +1701,20 @@
             this.tabPageQueue.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageQueue.Name = "tabPageQueue";
             this.tabPageQueue.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPageQueue.Size = new System.Drawing.Size(898, 336);
+            this.tabPageQueue.Size = new System.Drawing.Size(1042, 277);
             this.tabPageQueue.TabIndex = 1;
-            this.tabPageQueue.Text = "Queue";
+            this.tabPageQueue.Text = "Plugin Queue";
             this.tabPageQueue.UseVisualStyleBackColor = true;
             // 
             // toolStripQueue
             // 
+            this.toolStripQueue.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStripQueue.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripQueueButtonCancel,
             this.toolStripButtonClearCompleted});
             this.toolStripQueue.Location = new System.Drawing.Point(2, 2);
             this.toolStripQueue.Name = "toolStripQueue";
-            this.toolStripQueue.Size = new System.Drawing.Size(894, 27);
+            this.toolStripQueue.Size = new System.Drawing.Size(1038, 27);
             this.toolStripQueue.TabIndex = 1;
             this.toolStripQueue.Text = "Clear All";
             // 
@@ -858,11 +1730,12 @@
             // 
             // toolStripButtonClearCompleted
             // 
+            this.toolStripButtonClearCompleted.Enabled = false;
             this.toolStripButtonClearCompleted.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonClearCompleted.Image")));
             this.toolStripButtonClearCompleted.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButtonClearCompleted.Name = "toolStripButtonClearCompleted";
-            this.toolStripButtonClearCompleted.Size = new System.Drawing.Size(121, 24);
-            this.toolStripButtonClearCompleted.Text = "Clear Finished";
+            this.toolStripButtonClearCompleted.Size = new System.Drawing.Size(141, 24);
+            this.toolStripButtonClearCompleted.Text = "Clear Completed";
             this.toolStripButtonClearCompleted.Click += new System.EventHandler(this.toolStripButtonClearCompleted_Click);
             // 
             // queueListViewItems2
@@ -877,7 +1750,7 @@
             this.queueListViewItems2.FullRowSelect = true;
             this.queueListViewItems2.Location = new System.Drawing.Point(2, 28);
             this.queueListViewItems2.Name = "queueListViewItems2";
-            this.queueListViewItems2.Size = new System.Drawing.Size(897, 121);
+            this.queueListViewItems2.Size = new System.Drawing.Size(1041, 244);
             this.queueListViewItems2.TabIndex = 0;
             this.queueListViewItems2.UseCompatibleStateImageBehavior = false;
             this.queueListViewItems2.View = System.Windows.Forms.View.Details;
@@ -886,18 +1759,18 @@
             // 
             // colName
             // 
-            this.colName.Text = "Plugin Name";
-            this.colName.Width = 91;
+            this.colName.Text = "Plugin";
+            this.colName.Width = 162;
             // 
             // colFileName
             // 
-            this.colFileName.Text = "Filenames (.cwa)";
-            this.colFileName.Width = 105;
+            this.colFileName.Text = "Source";
+            this.colFileName.Width = 392;
             // 
             // colProgress
             // 
             this.colProgress.Text = "Progress (%)";
-            this.colProgress.Width = 82;
+            this.colProgress.Width = 121;
             // 
             // tabPageOutput
             // 
@@ -905,16 +1778,17 @@
             this.tabPageOutput.Controls.Add(this.outputListView);
             this.tabPageOutput.Location = new System.Drawing.Point(4, 25);
             this.tabPageOutput.Name = "tabPageOutput";
-            this.tabPageOutput.Size = new System.Drawing.Size(898, 336);
+            this.tabPageOutput.Size = new System.Drawing.Size(1042, 277);
             this.tabPageOutput.TabIndex = 2;
-            this.tabPageOutput.Text = "Output";
+            this.tabPageOutput.Text = "Output Files";
             this.tabPageOutput.UseVisualStyleBackColor = true;
             // 
             // toolStrip1
             // 
+            this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(898, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1042, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -931,7 +1805,7 @@
             this.outputListView.FullRowSelect = true;
             this.outputListView.Location = new System.Drawing.Point(0, 28);
             this.outputListView.Name = "outputListView";
-            this.outputListView.Size = new System.Drawing.Size(898, 121);
+            this.outputListView.Size = new System.Drawing.Size(1042, 246);
             this.outputListView.TabIndex = 0;
             this.outputListView.UseCompatibleStateImageBehavior = false;
             this.outputListView.View = System.Windows.Forms.View.Details;
@@ -943,22 +1817,22 @@
             // columnHeaderFileName
             // 
             this.columnHeaderFileName.Text = "File Name";
-            this.columnHeaderFileName.Width = 98;
+            this.columnHeaderFileName.Width = 351;
             // 
             // columnHeaderFilePath
             // 
             this.columnHeaderFilePath.Text = "File Location";
-            this.columnHeaderFilePath.Width = 120;
+            this.columnHeaderFilePath.Width = 0;
             // 
             // columnHeaderSize
             // 
             this.columnHeaderSize.Text = "File Size (MB)";
-            this.columnHeaderSize.Width = 86;
+            this.columnHeaderSize.Width = 116;
             // 
             // columnHeaderDateModified
             // 
             this.columnHeaderDateModified.Text = "Date Modified";
-            this.columnHeaderDateModified.Width = 122;
+            this.columnHeaderDateModified.Width = 187;
             // 
             // textBoxLog
             // 
@@ -971,7 +1845,7 @@
             this.textBoxLog.Name = "textBoxLog";
             this.textBoxLog.ReadOnly = true;
             this.textBoxLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLog.Size = new System.Drawing.Size(906, 25);
+            this.textBoxLog.Size = new System.Drawing.Size(1054, 25);
             this.textBoxLog.TabIndex = 0;
             // 
             // toolStripContainer1
@@ -985,12 +1859,12 @@
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitContainerLog);
             this.toolStripContainer1.ContentPanel.Margin = new System.Windows.Forms.Padding(2);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(906, 558);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1054, 766);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Margin = new System.Windows.Forms.Padding(2);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(906, 635);
+            this.toolStripContainer1.Size = new System.Drawing.Size(1054, 843);
             this.toolStripContainer1.TabIndex = 0;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -1012,10 +1886,40 @@
             // 
             this.backgroundWorkerUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerUpdate_DoWork);
             // 
+            // toolStripButtonWav
+            // 
+            this.toolStripButtonWav.Image = global::OmGui.Properties.Resources.Data;
+            this.toolStripButtonWav.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonWav.Name = "toolStripButtonWav";
+            this.toolStripButtonWav.Size = new System.Drawing.Size(245, 24);
+            this.toolStripButtonWav.Text = "Export Resampled WAV...";
+            this.toolStripButtonWav.ToolTipText = "Resample data to .WAV";
+            this.toolStripButtonWav.Click += new System.EventHandler(this.wavToolStripMenuItem_Click);
+            // 
+            // toolStripButtonCSV
+            // 
+            this.toolStripButtonCSV.Image = global::OmGui.Properties.Resources.Export;
+            this.toolStripButtonCSV.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonCSV.Name = "toolStripButtonCSV";
+            this.toolStripButtonCSV.Size = new System.Drawing.Size(245, 24);
+            this.toolStripButtonCSV.Text = "Export Resampled CSV...";
+            this.toolStripButtonCSV.ToolTipText = "Resample data to .CSV";
+            this.toolStripButtonCSV.Click += new System.EventHandler(this.toolStripButtonCSV_Click_1);
+            // 
+            // toolStripButtonExport
+            // 
+            this.toolStripButtonExport.Image = global::OmGui.Properties.Resources.Export;
+            this.toolStripButtonExport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonExport.Name = "toolStripButtonExport";
+            this.toolStripButtonExport.Size = new System.Drawing.Size(245, 24);
+            this.toolStripButtonExport.Text = "Export Raw CSV...";
+            this.toolStripButtonExport.ToolTipText = "Export raw data to .CSV (no resampling/calibration)";
+            this.toolStripButtonExport.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(906, 635);
+            this.ClientSize = new System.Drawing.Size(1054, 843);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.toolStripContainer2);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1046,7 +1950,10 @@
             this.splitContainerDevices.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             this.splitContainer1.ResumeLayout(false);
+            this.toolStripWorkingFolder.ResumeLayout(false);
+            this.toolStripWorkingFolder.PerformLayout();
             this.tabControlFiles.ResumeLayout(false);
             this.tabPageFiles.ResumeLayout(false);
             this.tabPageFiles.PerformLayout();
@@ -1102,7 +2009,6 @@
         private System.Windows.Forms.ToolStripMenuItem propertiesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openCurrentWorkingFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
@@ -1116,7 +2022,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripContainer toolStripContainer2;
         private System.Windows.Forms.ToolStripButton pluginsToolStripButton;
-        private System.Windows.Forms.ToolStripButton DeleteFilesToolStripButton;
         private System.Windows.Forms.ToolStripButton devicesToolStripButtonIdentify;
         private System.Windows.Forms.ToolStripButton toolStripButtonStopRecording;
         private System.Windows.Forms.ListView filesListView;
@@ -1148,7 +2053,6 @@
         private System.Windows.Forms.ColumnHeader columnHeaderDateModified;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolStripButtonShowFiles;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripButton toolStripButtonClearCompleted;
         private DataViewer dataViewer;
         private System.Windows.Forms.ToolStripMenuItem recentFoldersToolStripMenuItem;
@@ -1156,6 +2060,28 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripBackgroundTask;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripButton toolStripButtonSvm;
+        private System.Windows.Forms.ToolStripButton toolStripButtonCutPoints;
+        private System.Windows.Forms.ToolStripButton toolStripButtonWearTime;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
+        private System.Windows.Forms.ToolStripMenuItem wavToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripExportDropDown;
+        private System.Windows.Forms.ToolStrip toolStripWorkingFolder;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private ToolStripDirectoryChooser toolStripDirectoryChooser;
+        private System.Windows.Forms.ToolStripButton toolStripButtonOpenWorkspace;
+        private System.Windows.Forms.ToolStripButton toolStripButtonChooseWorkspace;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRefresh;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem openCurrentWorkingFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem svmToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cutPointsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem wearTimeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pluginsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem toolStripButtonWav;
+        private System.Windows.Forms.ToolStripMenuItem toolStripButtonCSV;
+        private System.Windows.Forms.ToolStripMenuItem toolStripButtonExport;
     }
 }
 
