@@ -2,13 +2,13 @@
 
 ## AX3
 
-* [AX3 GUI setup/download tool](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
+* [AX3 OMGUI Configuration and Analysis Tool](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
 
-* (Included in the GUI) [AX3 Driver](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Driver-Win-5.zip)
+* (Included in OMGUI) [AX3 Driver](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Driver-Win-5.zip)
 
-* (Included in the GUI) [AX3 Utilities](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip)
+* (Included in OMGUI) [AX3 Utilities](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip)
 
-* [AX3 Firmware](https://github.com/digitalinteraction/openmovement/wiki/AX3-Firmware)
+* (Included in OMGUI) [AX3 Firmware](https://github.com/digitalinteraction/openmovement/wiki/AX3-Firmware)
 
 
 ## WAX3
