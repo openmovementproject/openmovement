@@ -13,31 +13,23 @@ This document is intended as a guide to get to grips using the OMGUI software; l
 
 ---------------------------------------------------
 #Downloading and Installing
-The OMGUI software is available from the open source GitHub repository::
+The OMGUI software is available from the open source GitHub repository:
 
-   * [Download OM GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip) (Windows, zipped executable installer)
+   * [![Download OM GUI](./img/download-button.png)](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip) (Windows, zipped executable installer)
 
 <!--
    * [Release page for AX3 OM GUI V28](https://github.com/digitalinteraction/openmovement/releases/tag/AX3-OmGui-v28)
    * [(Repos link) AX3 GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
 -->
 
+The system requirements for the OMGUI software are a Windows PC with XP SP3 or later operating system and Microsoft .NET Framework v3.5 or later.  To install the software, open the downloaded archive and double-click the executable installer package.  
+
+To connect with a sensor you will need to install the drivers as well as the software. These drivers come packaged with the OMGUI software and are configured to install as default during the installation process. 
 The software has an inbuilt facility to update itself for major releases as well as updating connected devices to the latest available firmware.
 
-The system requirements for the OMGUI software are as follows:
+>**NOTE**: Administrator privileges may be required to install software if you are using a profiled or networked computer. The default location for installation is `C:\Program Files` but this can be changed to suit user- or system needs.
 
-+ Windows PC with XP SP3 or later operating system
-+ .NET Framework v3.5 or later
-+ 1GB RAM memory
-+ 5GB HDD space
-
-To connect with a sensor you will need to install the drivers as well as the software. These drivers come pre-packaged with the OMGUI software and are preconfigured to install as default during the installation process. 
-
-To install the software, just click the installer package.
-
->**NOTE**: Administrator privileges may be required to install software if you are using a profiled or networked computer. The default location for installation is C:\Program Files but this can be changed to suit user or system needs.
-
->**NOTE**: The OMGUI software uses My Documents as a default working folder location. If you require other users to be able to view data files, consider using a shared or network drive location as the Working Folder.
+>**NOTE**: The OMGUI software uses `My Documents` as a default working folder location. If you require other users to be able to view data files, consider using a shared or network drive location as the Working Folder.
 
 ---------------------------------------------------
 
