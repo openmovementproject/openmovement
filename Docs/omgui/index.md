@@ -15,7 +15,8 @@ This document is intended as a guide to get to grips using the OMGUI software; l
 #Downloading and Installing
 The OMGUI software is available from the open source GitHub repository::
 
-   * [OM GUI V28 for Windows](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
+   * [Download OM GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip) (Windows, zipped executable installer)
+
 <!--
    * [Release page for AX3 OM GUI V28](https://github.com/digitalinteraction/openmovement/releases/tag/AX3-OmGui-v28)
    * [(Repos link) AX3 GUI](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip)
