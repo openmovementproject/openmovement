@@ -132,18 +132,28 @@ public class CwaBlock implements Cloneable {
 			byteBuffer = ByteBuffer.wrap(source.byteBuffer.array().clone());
 			bufferValid = source.bufferValid;
 			dataBlockOk = source.dataBlockOk;
-			sampleValues = source.sampleValues.clone();
-			sampleTimes = source.sampleTimes.clone();
-			deviceId = source.deviceId;
 			sessionId = source.sessionId;
+			deviceId = source.deviceId;
+			light = source.light;
+			temp = source.temp;
+			batt = source.batt;
+			events = source.events;
+			sampleCount = source.sampleCount;
+			sampleTimes = source.sampleTimes.clone();
+			sampleValues = source.sampleValues.clone();
 		} else {
 			byteBuffer = ByteBuffer.wrap(new byte[BLOCK_SIZE]);
 			bufferValid = false;
 			dataBlockOk = false;
-			sampleValues = new short[0];
-			sampleTimes = new long[0];
-			deviceId = -1;
 			sessionId = -1;
+			deviceId = -1;
+			light = -1;
+			temp = -1;
+			batt = -1;
+			events = 0;
+			sampleCount = 0;
+			sampleTimes = new long[0];
+			sampleValues = new short[0];
 		}
 		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);	// All little endian values
 		
