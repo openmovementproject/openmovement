@@ -270,9 +270,9 @@ public class CwaBlock implements Cloneable {
                                                 
                         if (bytesPerSample == 4) {
                             long value = byteBuffer.getInt(30 + 4 * i);
-                        	x = (short)((short)(0xffffffc0 & (value <<  6)) >> (6 - ((byte)(value >> 30))));		// Sign-extend 10-bit value, adjust for exponent
-                        	y = (short)((short)(0xffffffc0 & (value >>  4)) >> (6 - ((byte)(value >> 30))));		// Sign-extend 10-bit value, adjust for exponent
-                        	z = (short)((short)(0xffffffc0 & (value >> 14)) >> (6 - ((byte)(value >> 30))));      // Sign-extend 10-bit value, adjust for exponent
+                        	x = (short)((short)(0xffffffc0 & (value <<  6)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
+                        	y = (short)((short)(0xffffffc0 & (value >>  4)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
+                        	z = (short)((short)(0xffffffc0 & (value >> 14)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
                         } else if (bytesPerSample == 6) {
 	    					x = byteBuffer.getShort(30 + 2 * NUM_AXES_PER_SAMPLE * i + 0);
 	    					y = byteBuffer.getShort(30 + 2 * NUM_AXES_PER_SAMPLE * i + 2);
