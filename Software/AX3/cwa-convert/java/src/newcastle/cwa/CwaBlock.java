@@ -209,10 +209,10 @@ public class CwaBlock implements Cloneable {
 				int blockTimestamp = byteBuffer.getInt(14);				
 				light = byteBuffer.getShort(18);				
 				temp = byteBuffer.getShort(20);				
-				events = (short)byteBuffer.get(22);				
-				batt = (short)byteBuffer.get(23);				
-                byte sampleRate = byteBuffer.get(24);
-                byte numAxesBPS = byteBuffer.get(25);
+				events = (short)(byteBuffer.get(22) & 0xff);
+				batt = (short)(byteBuffer.get(23) & 0xff);
+                short sampleRate = (short)(byteBuffer.get(24) & 0xff);
+                short numAxesBPS = (short)(byteBuffer.get(25) & 0xff);
                 short timestampOffset = byteBuffer.getShort(26);
 				sampleCount = byteBuffer.getShort(28);
 				short sum = 0;
