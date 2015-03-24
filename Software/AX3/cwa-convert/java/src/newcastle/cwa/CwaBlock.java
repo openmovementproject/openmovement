@@ -122,12 +122,12 @@ public class CwaBlock implements Cloneable {
 	
 	
 	/** Constructor for mutable version of this class used by the reader */
-	/* package */ CwaBlock() {
+	public CwaBlock() {
 		this(null);
 	}
 
 	/** Copy constructor */
-	CwaBlock(CwaBlock source) {
+	public CwaBlock(CwaBlock source) {
 		if (source != null) {
 			byteBuffer = ByteBuffer.wrap(source.byteBuffer.array().clone());
 			bufferValid = source.bufferValid;
