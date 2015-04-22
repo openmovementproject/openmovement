@@ -199,6 +199,8 @@ typedef struct
     uint32_t pressure;                      // @30 Pressure (Pascal)
     //unsigned short deviceId;                // @34 Device identifier
     //                                        // @36
+
+	char hasExtended;					// Has extended data (could do off packet version)
 } Wax9Packet;
 
 
@@ -958,11 +960,13 @@ Wax9Packet *parseWax9Packet(const void *inputBuffer, size_t len, unsigned long l
         if (len >= 34)
         {
             wax9Packet.pressure = buffer[30] | ((unsigned int)buffer[31] << 8) | ((unsigned int)buffer[32] << 16) | ((unsigned int)buffer[33] << 24);
+			wax9Packet.hasExtended = 1;
         }
         else
         {
             wax9Packet.pressure = 0xfffffffful;
-        }
+			wax9Packet.hasExtended = 0;
+		}
 
         return &wax9Packet;
     }
@@ -1187,25 +1191,48 @@ void waxDump(WaxPacket *waxPacket, FILE *ofp, char tee, int timeformat)
     {
         const char *timeString = timestamp(waxPacket->samples[i].timestamp, timeformat);
         fprintf(ofp, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
-        if (tee) fprintf(stderr, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
+        if (tee & 1) fprintf(stderr, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
+		if (tee & 2) fprintf(stderr, ".");
     }
     return;
 }
 
 
 /* Dumps a WAX9 packet */
-void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsigned long long receivedTime)
+void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsigned long long receivedTime, int format)
 {
+	static char extended[128] = "0,0,0";
     int i;
     const char *timeString = timestamp(receivedTime, timeformat);
-    for (i = 0; i <= tee ? 1 : 0; i++)
+    for (i = 0; i <= (tee & 1); i++)
     {
-        fprintf((i == 0) ? ofp : stderr, "$WAX9,%s,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", timeString, wax9Packet->sampleNumber, wax9Packet->timestamp / 65536.0, 
+		if (format == 1) // short format, never any extended data
+		{
+			extended[0] = '\0';
+		}
+		else if (wax9Packet->hasExtended)		// not-short format, and packet has extended data, update
+		{
+			sprintf(extended, ",%.3f,%.1f,%u", wax9Packet->battery * 0.001f, wax9Packet->temperature * 0.1f, wax9Packet->pressure);	// battery (V), temperature (deg. C), pressure (Pascal)
+		}
+		else if (format == 0)	// default format, with no extended data
+		{
+			extended[0] = '\0';
+		}
+		else
+		{
+			;			// bit of a hack, but leaving the extended data allows an always 'long format' for mixed normal/extended packets (by duplicating the last extended info seen)
+		}
+
+		// TODO: This scaling is for the default sensor set-up (can't recover setup from the packet data)
+        fprintf((i == 0) ? ofp : stderr, "$WAX9,%s,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f%s\n", timeString, wax9Packet->sampleNumber, wax9Packet->timestamp / 65536.0, 
 			wax9Packet->accel.x / 4096.0f, wax9Packet->accel.y / 4096.0f, wax9Packet->accel.z / 4096.0f,	// 'G' (9.81 m/s/s)
             wax9Packet->gyro.x * 0.07f,    wax9Packet->gyro.y * 0.07f,    wax9Packet->gyro.z * 0.07f,		// degrees/sec
-			wax9Packet->mag.x * 0.10f, wax9Packet->mag.y * 0.10f, wax9Packet->mag.z * 0.10f * -1			// uT (magnetic field ranges between 25-65 uT)
-            );
+			wax9Packet->mag.x * 0.10f, wax9Packet->mag.y * 0.10f, wax9Packet->mag.z * 0.10f * -1,			// uT (magnetic field ranges between 25-65 uT), invert Z axis to match accel/gyro
+            extended);
     }
+
+	if (tee & 2) fprintf(stderr, ".");
+
     return;
 }
 
@@ -1280,8 +1307,9 @@ void teddiDump(TeddiPacket *teddiPacket, FILE *ofp, char tee, int format, char i
     }
 
     fprintf(ofp, "%s", line);
-    if (tee) fprintf(stderr, "%s", line);
-    return;
+	if (tee & 1) fprintf(stderr, "%s", line);
+	if (tee & 2) fprintf(stderr, ".");
+	return;
 }
 
 
@@ -2329,8 +2357,9 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                 if (receiveUdpSocket == SOCKET_ERROR && fd != -1 && text)
                 {
                     printf("%s\n", buffer);
-                    if (tee) { fprintf(stderr, "%s\n", buffer); }
-                }
+					if (tee & 1) fprintf(stderr, "%s\n", buffer);
+					if (tee & 2) fprintf(stderr, ".");
+				}
 
                 /* If it appears to be a binary WAX packet... */
                 if (len > 1 && buffer[0] == 0x12 && (buffer[1] == 0x78 || buffer[1] == 0x58))
@@ -2383,7 +2412,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                     if (wax9Packet != NULL)
                     {
                         /* Output text version */
-                        if (outfp != NULL) { wax9Dump(wax9Packet, outfp, tee, timeformat, now); }
+						if (outfp != NULL) { wax9Dump(wax9Packet, outfp, tee, timeformat, now, format); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -2606,7 +2635,7 @@ int main(int argc, char *argv[])
 	int waitTimeout = -1;
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.95     by Daniel Jackson, 2011-2013\n");
+    fprintf(stderr, "V1.96     by Daniel Jackson, 2011-2015\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2627,11 +2656,15 @@ int main(int argc, char *argv[])
         {
             logfile = argv[++i];
         }
-        else if (strcasecmp(argv[i], "-tee") == 0)
-        {
-            tee = 1;
-        }
-        else if (strcasecmp(argv[i], "-dump") == 0)
+		else if (strcasecmp(argv[i], "-tee") == 0)
+		{
+			tee |= 1;
+		}
+		else if (strcasecmp(argv[i], "-teedot") == 0)
+		{
+			tee |= 2;
+		}
+		else if (strcasecmp(argv[i], "-dump") == 0)
         {
             dump = 1;
         }
@@ -2669,8 +2702,10 @@ int main(int argc, char *argv[])
             host = argv[++i];
             convertToOsc = 0;
         }
-        else if (strcasecmp(argv[i], "-format:short") == 0) { format = 1; }
-        else if (strcasecmp(argv[i], "-stomphost") == 0)
+		else if (strcasecmp(argv[i], "-format:default") == 0) { format = 0; }
+		else if (strcasecmp(argv[i], "-format:short") == 0) { format = 1; }
+		else if (strcasecmp(argv[i], "-format:long") == 0) { format = 2; }
+		else if (strcasecmp(argv[i], "-stomphost") == 0)
         {
             strcpy(stompHost, argv[++i]);
         }
@@ -2731,7 +2766,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "        [-invalid:ignore|-invalid:label]       Ingore or label invalid packets\n");
 		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
 		fprintf(stderr, "        [-out <file.csv>]                      Output to a specific log file\n");
-        fprintf(stderr, "        [-format:short]                        Format as short output (TEDDI packets only)\n");
+        fprintf(stderr, "        [-format:short]                        Format as short output (TEDDI/WAX9 packets only)\n");
         fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Log example: waxrec %s -log -tee -init \"MODE=1\\r\\n\" > log.csv\n", EXAMPLE_DEVICE);
