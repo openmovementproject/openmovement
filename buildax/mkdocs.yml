@@ -9,7 +9,21 @@ site_author: Sam Mitchell Finnigan, Newcastle University
 copyright: Creative Commons 3.0 BY Atribution licence
 
 #theme: readthedocs
-#extra_css: extra.css
+extra_css: 
+- ./css/theme.css
+- ./css/extra.css
+
+extra_javascript:
+- //cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+- //cdnjs.cloudflare.com/ajax/libs/jspdf/1.0.272/jspdf.min.js
+#- //cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js
+#- ./js/jsPDF-1.0.272/jspdf.js
+#- ./js/jsPDF-1.0.272/jspdf.plugin.from_html.js
+#- ./js/jsPDF-1.0.272/jspdf.plugin.split_text_to_size.js
+#- ./js/jsPDF-1.0.272/jspdf.plugin.standard_fonts_metrics.js
+- ./js/pdf.js
+- ./js/theme.js
+
 theme_dir: theme
 
 pages:

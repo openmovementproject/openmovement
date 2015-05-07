@@ -10,15 +10,13 @@
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="{{ base_url }}/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="{{ base_url }}/css/extra.css" type="text/css" />
   {% for path in extra_css %}
     <link href="{{ base_url }}/{{ path }}" rel="stylesheet">
   {% endfor %}
 
-  <script type="text/javascript" src="{{ base_url }}/js/theme.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
   {% for path in extra_javascript %}
-    <script src="{{ base_url }}/{{ path }}"></script>
+    <script src="{{ path }}"></script>
   {% endfor %}
 
   <style>
@@ -29,7 +27,6 @@
 </head>
 
 <body class="wy-body-for-nav" role="document">
-
   <div class="wy-grid-for-nav">
 
     {# SIDE NAV, TOGGLES ON MOBILE #}
@@ -61,6 +58,7 @@
             {{ content }}
           </div>
           {% include "footer.html" %}
+          <a href="#pdf" id="pdf">Download this page as PDF (experimental)</a>
         </div>
       </div>
 
