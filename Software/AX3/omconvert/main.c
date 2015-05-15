@@ -1,0 +1,196 @@
+// TODO: Other output range scaling other than +/- 8g (for CWA & OMX)
+
+
+// REMINDER: Double-check fractional timestamp 
+
+// TODO: Adjust 'session' to the requested start/end time (if close enough)
+
+// CONSIDER: NaNs propagate in SVM code
+// CONSIDER: NaNs in .CSV (blanks?)
+// CONSIDER: Re-arranging to perform calibration accross all sessions and at native sampling rate (not interpolated)
+
+// LATER: Sleep analysis algorithm (te Lindert et al 2013 in the journal SLEEP, volume 36, issue 5, page 781)
+// LATER: Check what output we want with multiple 'sessions' - how to override for normal 7-day data (up to 1 week missing)?
+// LATER: Determine and apply calibration even if accelerometer X/Y/Z is not first three output channels
+// LATER: Other conversion scaling other than just 1/256 (e.g. for OMX)
+// LATER: Other temperature conversions (OMX)
+
+
+
+/*
+* Copyright (c) 2014, Newcastle University, UK.
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+* 1. Redistributions of source code must retain the above copyright notice,
+*    this list of conditions and the following disclaimer.
+* 2. Redistributions in binary form must reproduce the above copyright notice,
+*    this list of conditions and the following disclaimer in the documentation
+*    and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// Open Movement Converter Main Code
+// Dan Jackson, 2014
+
+#ifdef _WIN32
+#include <windows.h>
+#define strcasecmp _stricmp
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "omconvert.h"
+#include "exits.h"
+
+
+int main(int argc, char *argv[])
+{
+	int i;
+	char help = 0;
+	int positional = 0;
+	int ret;
+	omconvert_settings_t settings = { 0 };
+
+#ifdef _WIN32
+	static char stdoutbuf[20];
+	static char stderrbuf[20];
+	setvbuf(stdout, stdoutbuf, _IOFBF, sizeof(2));
+	setvbuf(stderr, stderrbuf, _IOFBF, sizeof(2));
+#endif
+
+	// Default settings
+	memset(&settings, 0, sizeof(omconvert_settings_t));
+	settings.sampleRate = -1;
+	settings.interpolate = 3;
+	settings.auxChannel = 1;
+	settings.headerCsv = -1;
+	settings.calibrate = -1;
+	settings.stationaryTime = 10.0;
+	settings.svmEpoch = 60;
+	settings.svmFilter = -1;
+	settings.svmMode = 0;
+	settings.wtvEpoch = 1;	// measured in 30 minute windows
+	settings.paeeEpoch = 1;	// measured in 1 minute windows
+	settings.paeeFilter = -1;
+
+	for (i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "--help") == 0) { help = 1; }
+
+		else if (strcmp(argv[i], "-out") == 0) { settings.outFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-resample") == 0) { settings.sampleRate = atof(argv[++i]); }
+		else if (strcmp(argv[i], "-interpolate-mode") == 0) { settings.interpolate = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-aux-channel") == 0) { settings.auxChannel = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-info") == 0) { settings.infoFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-header-csv") == 0) { settings.headerCsv = atoi(argv[++i]); }
+		
+		else if (strcmp(argv[i], "-calibrate") == 0) { settings.calibrate = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-calibrate-repeated") == 0) { settings.repeatedStationary = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-calibrate-stationary") == 0) { settings.stationaryTime = atof(argv[++i]); }
+
+		else if (strcmp(argv[i], "-csv-file") == 0) { settings.csvFilename = argv[++i]; }
+
+		else if (strcmp(argv[i], "-svm-file") == 0) { settings.svmFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-svm-epoch") == 0) { settings.svmEpoch = atof(argv[++i]); }
+		else if (strcmp(argv[i], "-svm-filter") == 0) { settings.svmFilter = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-svm-mode") == 0) { settings.svmMode = atoi(argv[++i]); }
+
+		else if (strcmp(argv[i], "-wtv-file") == 0) { settings.wtvFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-wtv-epoch") == 0) { settings.wtvEpoch = atoi(argv[++i]); }
+
+		else if (strcmp(argv[i], "-paee-file") == 0) { settings.paeeFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-paee-model") == 0) { settings.paeeCutPoints = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-paee-epoch") == 0) { settings.paeeEpoch = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-paee-filter") == 0) { settings.paeeFilter = atoi(argv[++i]); }
+
+		else if (argv[i][0] == '-')
+		{
+			fprintf(stderr, "Unknown option: %s\n", argv[i]);
+			help = 1;
+		}
+		else
+		{
+			if (positional == 0)
+			{
+				settings.filename = argv[i];
+			}
+			else if (positional == 1)
+			{
+				settings.outFilename = argv[i];
+			}
+			else
+			{
+				fprintf(stderr, "Unknown positional parameter (%d): %s\n", positional + 1, argv[i]);
+				help = 1;
+			}
+			positional++;
+		}
+	}
+
+
+	if (settings.filename == NULL) { fprintf(stderr, "ERROR: Input file not specified.\n"); help = 1; }
+	//if (settings.outFilename == NULL && settings.svmFilename == NULL) { fprintf(stderr, "ERROR: Output/SVM file not specified.\n"); help = 1; }
+
+	if (help)
+	{
+		fprintf(stderr, "Usage: omconvert <filename.cwa> [<options>...]\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "Where <options> are:\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-out <filename.wav>\n");
+		fprintf(stderr, "\t-resample <rate (default auto)>\n");
+		fprintf(stderr, "\t-interpolate-mode <1=nearest, 2=linear, 3=cubic (default)>\n");
+//		fprintf(stderr, "\t-aux-channel <0=ignore, 1=include (default)>\n");
+		fprintf(stderr, "\t-info <filename.txt>\n");
+		fprintf(stderr, "\t-header-csv <0=none, 1=header in first row (default)>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-calibrate <0=off, 1=auto (default)>\n");
+		fprintf(stderr, "\t-calibrate-repeated <0=include (default), 1=ignore>\n");
+		fprintf(stderr, "\t-calibrate-stationary <time (default 10 seconds)>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-csv-file <filename.csv>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-svm-file <filename.svm.csv>\n");
+		fprintf(stderr, "\t-svm-epoch <time (default 60 seconds)>\n");
+		fprintf(stderr, "\t-svm-filter <0=off, 1=BP 0.5-20 Hz (default)>\n");
+		fprintf(stderr, "\t-svm-mode <0=abs(sqrt(x^2+y^2+z^2)-1) (default), 1=max(0,sqrt(x^2+y^2+z^2)-1)>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-wtv-file <filename.wtv.csv>\n");
+		fprintf(stderr, "\t-wtv-epoch <number of 30-minute windows (default 1)>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-paee-file <filename.paee.csv>\n");
+		fprintf(stderr, "\t-paee-model <0=wrist, 1=right wrist, 2=left wrist, 3=waist>\n");
+		fprintf(stderr, "\t-paee-epoch <minutes (default 1)>\n");
+		fprintf(stderr, "\t-paee-filter <0=off, 1=BP 0.5-20 Hz (default)>\n");
+		fprintf(stderr, "\n");
+
+		ret = EXIT_USAGE;
+	}
+	else
+	{
+		// Run converter
+		ret = OmConvertRun(&settings);
+	}
+
+#if defined(_WIN32) && defined(_DEBUG)
+	if (IsDebuggerPresent()) { fprintf(stderr, "\nPress [enter] to exit <%d>....", ret); getc(stdin); }
+#endif
+
+	return ret;
+}
+
