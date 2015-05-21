@@ -216,6 +216,8 @@ int OmDataDump(omdata_t *omdata);
 // Retrieve values from a segment-offset (returns if clipped)
 char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int16_t *values);
 
+// Get the timestamp and sample offset for a specific sector
+double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIndexOffset);
 
 // Free data resources
 int OmDataFree(omdata_t *omdata);

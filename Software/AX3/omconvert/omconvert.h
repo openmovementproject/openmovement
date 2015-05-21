@@ -47,7 +47,7 @@ typedef struct
 	char headerCsv;				// 0=off, 1=on
 
 	// Calibrate
-	char calibrate;				// 0=off, 1=auto
+	char calibrate;				// 0=off, 1=auto (prefer from data), 2=auto (always use interpolated player)
 	double stationaryTime;
 	char repeatedStationary;	// 0=use, 1=ignore (future: 2=combine?)
 

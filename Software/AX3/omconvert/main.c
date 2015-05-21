@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-info <filename.txt>\n");
 		fprintf(stderr, "\t-header-csv <0=none, 1=header in first row (default)>\n");
 		fprintf(stderr, "\n");
-		fprintf(stderr, "\t-calibrate <0=off, 1=auto (default)>\n");
+		fprintf(stderr, "\t-calibrate <0=off, 1=auto (default)>\n");	// 2=auto (force interpolator)
 		fprintf(stderr, "\t-calibrate-repeated <0=include (default), 1=ignore>\n");
 		fprintf(stderr, "\t-calibrate-stationary <time (default 10 seconds)>\n");
 		fprintf(stderr, "\n");

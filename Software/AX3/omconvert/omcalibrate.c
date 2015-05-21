@@ -47,9 +47,49 @@
 #define ALT_SD	// More stable - see Knuth TAOCP vol 2, 3rd edition, page 232
 
 
-// Find stationary points
-omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_config_t *config, om_convert_player_t *player)
+// (Internal) Find stationary points (using either a player or direct data)
+static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_config_t *config, omdata_t *data, om_convert_player_t *player)
 {
+	double sampleRate, startTime;
+	double firstSampleTime = 0;
+	int lastWindow = -1;
+	int numSamples;
+	int samplesInPreviousSegments = 0;
+	omdata_segment_t *dataSegment = NULL;
+
+	if (player != NULL)
+	{
+		sampleRate = player->sampleRate;
+		startTime = player->arrangement->startTime;
+		numSamples = player->numSamples;
+	}
+	else if (data != NULL)
+	{
+		omdata_stream_t *stream = &data->stream['a'];
+		if (!stream->inUse) 
+		{
+			fprintf(stderr, "ERROR: Calibration failed as accelerometer stream not found.\n");
+			return NULL;
+		}
+		dataSegment = stream->segmentFirst;
+
+		sampleRate = dataSegment->sampleRate;
+		startTime = dataSegment->startTime;
+
+		// Determine total number of samples
+		numSamples = 0;
+		omdata_segment_t *seg;
+		for (seg = dataSegment; seg != NULL; seg = seg->segmentNext)
+		{
+			numSamples += seg->numSamples;
+		}
+	}
+	else
+	{
+		return NULL;
+	}
+
+
 	omcalibrate_stationary_points_t *stationaryPoints = (omcalibrate_stationary_points_t *)malloc(sizeof(omcalibrate_stationary_points_t));
 	memset(stationaryPoints, 0, sizeof(omcalibrate_stationary_points_t));
 
@@ -72,72 +112,174 @@ omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_con
 #endif
 	double tempSum = 0;
 
-	int numStationary = (int)(config->stationaryTime * player->sampleRate + 0.5);
 	int sampleCount = 0;
 
+	// Time interpolation for direct data
+	int lastSectorIndex = -1;
+	int nextTimestampSample = -1, lastTimestampSample = -1;
+	double nextTimestampValue = 0, lastTimestampValue = 0;
+
 	int sample;
-	for (sample = 0; sample < player->numSamples; sample++)
+	for (sample = 0; sample < numSamples; sample++)
 	{
 		int c;
-
-		OmConvertPlayerSeek(player, sample);
-		if (!player->valid) { sampleCount = 0; continue;  }
-
-		// If the accumulators need to be reset...
-		if (sampleCount == 0)
-		{
-			// Clear accumulators
-			for (c = 0; c < OMCALIBRATE_AXES; c++)
-			{
-#ifdef ALT_SD
-				oldM[c] = newM[c] = oldS[c] = newS[c] = 0;
-				n[c] = 0;
-#else
-				axisSum[c] = 0;
-				axisSumSquared[c] = 0;
-#endif
-			}
-			tempSum = 0;
-		}
-		sampleCount++;
-
-		// Convert to units
 		double values[OMCALIBRATE_AXES];
-		for (c = 0; c < OMCALIBRATE_AXES; c++)	// player.arrangement->numChannels
-		{
-			values[c] = player->scale[c] * player->values[c];
-		}
-		double temp = player->temp;
+		double temp;
+		double currentTime;
+		bool windowFilled = false;
 
-		// Accumulate
-		for (c = 0; c < OMCALIBRATE_AXES; c++)	// player.arrangement->numChannels
+		if (player != NULL)
 		{
-			double x = values[c];
-#ifdef ALT_SD
-			n[c]++;
-			if (n[c] == 1)
+			OmConvertPlayerSeek(player, sample);
+			if (!player->valid) { sampleCount = 0; continue; }
+			// Convert to units
+			for (c = 0; c < OMCALIBRATE_AXES; c++)	// player.arrangement->numChannels
 			{
-				oldM[c] = newM[c] = x;
-				oldS[c] = 0.0;
+				values[c] = player->scale[c] * player->values[c];
+			}
+			temp = player->temp;
+			currentTime = ((double)sample / sampleRate) + startTime;
+
+			// Have we filled a window?
+			int numStationary = (int)(config->stationaryTime * sampleRate + 0.5);
+			if (sampleCount >= numStationary) { windowFilled = true; }
+		}
+		else if (data != NULL)
+		{
+			int sampleWithinSegment = sample - samplesInPreviousSegments;
+
+			// Check we have data
+			if (dataSegment == NULL)
+			{
+				fprintf(stderr, "WARNING: Less data than was expected.\n");
+				break;
+			}
+
+			int sectorWithinSegment = sampleWithinSegment / dataSegment->samplesPerSector;
+			if (sectorWithinSegment >= dataSegment->sectorCount)
+			{
+				fprintf(stderr, "WARNING: Invalid sector within segment.\n");
+				break;
+			}
+
+			// Advance to next segment?
+			if (sampleWithinSegment >= dataSegment->numSamples)
+			{
+				dataSegment = dataSegment->segmentNext;
+				samplesInPreviousSegments = sample;
+				sampleWithinSegment = 0;
+
+				// Update rates/times
+				if (dataSegment != NULL)
+				{
+					sampleRate = dataSegment->sampleRate;
+					startTime = dataSegment->startTime;
+				}
+
+				// Reset accumulator on segment change (break in sample stream)
+				sampleCount = 0; 
+				firstSampleTime = 0;	// Trigger time reset
+				lastSectorIndex = -1;	// Force no time interpolation
+				nextTimestampSample = -1;	// Force restart of time interpolation
+				lastWindow = -1;
+				continue;
+			}
+
+			// Sector index
+			int sectorIndex = dataSegment->sectorIndex[sectorWithinSegment];
+
+#if 1
+			if (sectorIndex != lastSectorIndex)
+			{
+				lastSectorIndex = sectorIndex;
+
+				// Get current sector time
+				int sampleIndexOffset = 0;
+				double newTimestampValue = OmDataTimestampForSector(data, sectorIndex, &sampleIndexOffset);
+				int newTimestampSample = sample + sampleIndexOffset;
+
+				// Replace 'next' timestamp if different
+				if (newTimestampSample != nextTimestampSample)
+				{
+					if (nextTimestampSample < 0) 
+					{
+						nextTimestampSample = newTimestampSample;
+						nextTimestampValue = newTimestampValue;
+					}
+					lastTimestampSample = nextTimestampSample;
+					lastTimestampValue = nextTimestampValue;
+					nextTimestampSample = newTimestampSample;
+					nextTimestampValue = newTimestampValue;
+				}
+			}
+
+			// If we only have one timestamp to estimate from
+			int elapsedSamples = sample - lastTimestampSample;
+			if (nextTimestampSample <= lastTimestampSample)
+			{
+				currentTime = lastTimestampValue + (elapsedSamples / sampleRate);
 			}
 			else
 			{
-				newM[c] = oldM[c] + (x - oldM[c]) / n[c];
-				newS[c] = oldS[c] + (x - oldM[c]) * (x - newM[c]);
-				oldM[c] = newM[c];
-				oldS[c] = newS[c];
+				currentTime = lastTimestampValue + (elapsedSamples * (nextTimestampValue - lastTimestampValue) / (nextTimestampSample - lastTimestampSample));
 			}
+
 #else
-			axisSum[c] += x;
-			axisSumSquared[c] += x * x;
+			// HACK: This is a bogus time as the sample rate is not fixed
+			currentTime = ((double)sampleWithinSegment / sampleRate) + startTime;
 #endif
+
+#if 0
+			// Debug out of time delta
+			static double lastTime = -1;
+			if (lastTime < 0) { lastTime = currentTime; }
+			double deltaTime = currentTime - lastTime;
+			printf("%f\n", deltaTime);
+			lastTime = currentTime;
+#endif
+
+			// Get samples
+			int16_t intvalues[OMCALIBRATE_AXES];
+			OmDataGetValues(data, dataSegment, sampleWithinSegment, intvalues);
+
+			// Get temperature
+			temp = 0;
+			if (dataSegment->offset == 30)
+			{
+				const unsigned char *p = (const unsigned char *)data->buffer + (OMDATA_SECTOR_SIZE * sectorIndex);
+				int16_t inttemp = p[20] | ((int16_t)p[21] << 8);		// @20 WORD Temperature
+				// Convert
+				temp = ((int)inttemp * 150 - 20500) / 1000.0;
+				//temp = (double)inttemp * 75 / 256.0 - 50;
+			}
+
+			// Scale values
+			for (c = 0; c < OMCALIBRATE_AXES; c++)
+			{
+				values[c] = intvalues[c] * dataSegment->scaling;
+			}
+
+			// Check whether a window is filled
+			if (firstSampleTime <= 0) { firstSampleTime = currentTime; lastWindow = -1; }
+			int currentWindow = (currentTime - firstSampleTime) / config->stationaryTime;
+			if (lastWindow < 0) { lastWindow = currentWindow; }
+			if (currentWindow != lastWindow)
+			{
+				windowFilled = true; 
+				lastWindow = currentWindow;
+			}
+
 		}
-		tempSum += temp;
-		
+		else 
+		{
+			break;
+		}
+
 		// Filled window
-		if (sampleCount >= numStationary)
+		if (windowFilled)
 		{
 			bool stationary = true;
+			if (sampleCount <= 0) { sampleCount = 1; stationary = false; }
 
 			// Check whether stationary
 			for (c = 0; c < OMCALIBRATE_AXES; c++)
@@ -148,12 +290,12 @@ omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_con
 				double variance = (n[c] > 1) ? newS[c] / (n[c] - 1) : 0.0;
 				double standardDeviation = sqrt(variance);
 #else
-				double mean = axisSum[c] / numStationary;
+				double mean = axisSum[c] / sampleCount;
 				double squareOfMean = mean * mean;
-				double averageOfSquares = (axisSumSquared[c] / numStationary);
+				double averageOfSquares = (axisSumSquared[c] / sampleCount);
 				double standardDeviation = sqrt(averageOfSquares - squareOfMean);
 
-				//double standardDeviation = sqrt(numStationary * axisSumSquared[c] - (axisSum[c] * axisSum[c])) / numStationary;
+				//double standardDeviation = sqrt(sampleCount * axisSumSquared[c] - (axisSum[c] * axisSum[c])) / sampleCount;
 #endif
 				if (standardDeviation > config->stationaryMaxDeviation)
 				{
@@ -162,14 +304,14 @@ omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_con
 			}
 
 			// Calculate mean values
-			double time = ((sample - (numStationary / 2)) / player->sampleRate) + player->arrangement->startTime;
+			double time = currentTime - ((((double)sampleCount / 2)) / sampleRate);
 			double mean[OMCALIBRATE_AXES];
 			for (c = 0; c < OMCALIBRATE_AXES; c++)
 			{
 #ifdef ALT_SD
 				mean[c] = (n[c] > 0) ? newM[c] : 0.0;
 #else
-				mean[c] = axisSum[c] / numStationary;
+				mean[c] = axisSum[c] / sampleCount;
 #endif
 			}
 
@@ -214,7 +356,7 @@ omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_con
 				{
 					point.mean[c] = mean[c];
 				}
-				point.actualTemperature = tempSum / numStationary;
+				point.actualTemperature = tempSum / sampleCount;
 				//point.temperature = 0;
 
 				// Check whether we have to grow the buffer
@@ -231,9 +373,71 @@ omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_con
 			sampleCount = 0;
 		}
 
+
+
+
+		// If the accumulators need to be reset...
+		if (sampleCount == 0)
+		{
+			if (firstSampleTime <= 0) { firstSampleTime = currentTime; }
+
+			// Clear accumulators
+			for (c = 0; c < OMCALIBRATE_AXES; c++)
+			{
+#ifdef ALT_SD
+				oldM[c] = newM[c] = oldS[c] = newS[c] = 0;
+				n[c] = 0;
+#else
+				axisSum[c] = 0;
+				axisSumSquared[c] = 0;
+#endif
+			}
+			tempSum = 0;
+		}
+		sampleCount++;
+
+		// Accumulate
+		for (c = 0; c < OMCALIBRATE_AXES; c++)	// player.arrangement->numChannels
+		{
+			double x = values[c];
+#ifdef ALT_SD
+			n[c]++;
+			if (n[c] == 1)
+			{
+				oldM[c] = newM[c] = x;
+				oldS[c] = 0.0;
+			}
+			else
+			{
+				newM[c] = oldM[c] + (x - oldM[c]) / n[c];
+				newS[c] = oldS[c] + (x - oldM[c]) * (x - newM[c]);
+				oldM[c] = newM[c];
+				oldS[c] = newS[c];
+			}
+#else
+			axisSum[c] += x;
+			axisSumSquared[c] += x * x;
+#endif
+		}
+		tempSum += temp;
+
+
 	}
 
 	return stationaryPoints;
+}
+
+
+// Find stationary points (using an interpolating player)
+omcalibrate_stationary_points_t *OmCalibrateFindStationaryPointsFromPlayer(omcalibrate_config_t *config, om_convert_player_t *player)
+{
+	return OmCalibrateFindStationaryPoints(config, NULL, player);
+}
+
+// Find stationary points (using direct data)
+omcalibrate_stationary_points_t *OmCalibrateFindStationaryPointsFromData(omcalibrate_config_t *config, omdata_t *data)
+{
+	return OmCalibrateFindStationaryPoints(config, data, NULL);
 }
 
 
@@ -352,7 +556,7 @@ void OmCalibrateConfigInit(omcalibrate_config_t *calibrateConfig)
 	calibrateConfig->stationaryMaxDeviation = 0.013;	// 0.013
 	calibrateConfig->useTemp = 1;						// use temperature
 	calibrateConfig->maxIter = 1000;					// 100
-	calibrateConfig->convCrit = 0.000001;				// 0.001
+	calibrateConfig->convCrit = 0.000001;				// 0.0000000001; 0.001
 	calibrateConfig->stationaryRepeated = 0;			// include
 	calibrateConfig->stationaryRepeatedAccel = 0.032;	// Accel is 0.015625 g/bit
 	calibrateConfig->stationaryRepeatedTemp = 0.16;		// Temp is 0.15^C/bit

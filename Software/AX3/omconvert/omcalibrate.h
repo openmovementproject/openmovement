@@ -74,8 +74,11 @@ typedef struct
 	int capacity;
 } omcalibrate_stationary_points_t;
 
-// Find stationary points
-omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibrate_config_t *config, om_convert_player_t *player);
+// Find stationary points (using an interpolating player)
+omcalibrate_stationary_points_t *OmCalibrateFindStationaryPointsFromPlayer(omcalibrate_config_t *config, om_convert_player_t *player);
+
+// Find stationary points (using direct data)
+omcalibrate_stationary_points_t *OmCalibrateFindStationaryPointsFromData(omcalibrate_config_t *config, omdata_t *data);
 
 // Free stationary points
 void OmCalibrateFreeStationaryPoints(omcalibrate_stationary_points_t *stationaryPoints);

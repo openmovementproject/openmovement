@@ -248,7 +248,7 @@ static uint32_t OmDataTimestamp(uint32_t timestamp)
 }
 
 
-static double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIndexOffset)
+double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIndexOffset)
 {
 	const unsigned char *p = (const unsigned char *)omdata->buffer + (OMDATA_SECTOR_SIZE * sectorIndex);
 	uint32_t timestamp = 0;

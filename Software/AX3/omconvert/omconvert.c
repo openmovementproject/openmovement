@@ -526,17 +526,28 @@ void OmConvertPlayerInitialize(om_convert_player_t *player, om_convert_arrangeme
 
 	player->interpolate = interpolate;
 
-	// Calculate number of samples
-	if (sampleRate >= 0)
+	// If not interpolating...
+	if (player->interpolate < 0)
 	{
-		player->sampleRate = sampleRate;
+		player->sampleRate = arrangement->defaultRate;
+		player->numSamples = -1;
+		fprintf(stderr, "ERROR: Non-interpolated player not supported.\n");
 	}
 	else
 	{
-		player->sampleRate = arrangement->defaultRate;
+		// Calculate number of samples
+		if (sampleRate > 0)
+		{
+			player->sampleRate = sampleRate;
+		}
+		else
+		{
+			player->sampleRate = arrangement->defaultRate;
+		}
+
+		player->numSamples = (int)(arrangement->duration * player->sampleRate + 0.5);
 	}
 
-	player->numSamples = (int)(arrangement->duration * player->sampleRate + 0.5);
 	fprintf(stderr, "DEBUG: Session between t0=%f, t1=%f  ==>  %f seconds at %f Hz  ==> %d samples * %d channels\n", session->startTime, session->endTime, arrangement->duration, player->sampleRate, player->numSamples, arrangement->numChannels);
 
 	// Start tracking each stream with an omdata_interpolator_t over each segment... (tracks up to four different index-timestamp pairs, advance converts time a fractional index point, then sample each sub-channel at that point)
@@ -814,6 +825,18 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 
 	OmDataDump(&omdata);
 
+
+	// Calibration configuration
+	omcalibrate_config_t calibrateConfig = { 0 };
+	OmCalibrateConfigInit(&calibrateConfig);
+	calibrateConfig.stationaryTime = settings->stationaryTime; // 10.0;
+	calibrateConfig.stationaryRepeated = settings->repeatedStationary;
+	bool doneCalibration = false;
+
+	// Initialize identity calibration
+	omcalibrate_calibration_t calibration;
+	OmCalibrateInit(&calibration);
+
 	// For each session:
 	omdata_session_t *session;
 	int sessionCount = 0;
@@ -831,26 +854,36 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 		// Find a configuration
 		OmConvertFindArrangement(&arrangement, settings, &omdata, session, defaultChannelPriority);
 
-		// Calibration configuration
-		omcalibrate_config_t calibrateConfig = { 0 };
-		OmCalibrateConfigInit(&calibrateConfig);
-		calibrateConfig.stationaryTime = settings->stationaryTime; // 10.0;
-		calibrateConfig.stationaryRepeated = settings->repeatedStationary;
-
-		// Start a player
-		om_convert_player_t player = { 0 };
-		OmConvertPlayerInitialize(&player, &arrangement, settings->sampleRate, settings->interpolate);					// Initialize here for find stationary points
-
-		// Initialize calibration
-		omcalibrate_calibration_t calibration;
-		OmCalibrateInit(&calibration);
-
-		if (settings->calibrate)
+		// Calibrate now?
+		if (!doneCalibration && settings->calibrate)
 		{
+			doneCalibration = true;
+
 			// Find stationary points
+			// - If this is a CWA file with co-located temperature and accelerometer readings, use the data directly,
+			// - otherwise, use a 'player' to interpolate over the data.
 			omcalibrate_stationary_points_t *stationaryPoints;
-			fprintf(stderr, "Finding stationary points...\n");
-			stationaryPoints = OmCalibrateFindStationaryPoints(&calibrateConfig, &player);		// Player already initialized
+			bool calibrateFromData = (settings->calibrate != 0 && settings->calibrate != 2);
+			if (calibrateFromData && (!omdata.stream['a'].inUse || omdata.stream['a'].segmentFirst->offset != 30))
+			{
+				calibrateFromData = false;
+				fprintf(stderr, "NOTE: Calibration requested directly from data, but an interpolater must be used instead.\n");
+			}
+
+			if (calibrateFromData)
+			{
+				fprintf(stderr, "Finding stationary points from data...\n");
+				stationaryPoints = OmCalibrateFindStationaryPointsFromData(&calibrateConfig, &omdata);
+			}
+			else
+			{
+				// Start a player
+				om_convert_player_t calibrationPlayer = { 0 };
+				OmConvertPlayerInitialize(&calibrationPlayer, &arrangement, settings->sampleRate, settings->interpolate);	// Initialize here for find stationary points
+				fprintf(stderr, "Finding stationary points from player...\n");
+				stationaryPoints = OmCalibrateFindStationaryPointsFromPlayer(&calibrateConfig, &calibrationPlayer);		// Player already initialized
+			}
+
 			fprintf(stderr, "Found stationary points: %d\n", stationaryPoints->numValues);
 
 			// Dump no calibration
@@ -872,8 +905,11 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 
 			// Free stationary points
 			OmCalibrateFreeStationaryPoints(stationaryPoints);
-
 		}
+
+		// Player for the session
+		om_convert_player_t player = { 0 };
+		OmConvertPlayerInitialize(&player, &arrangement, settings->sampleRate, settings->interpolate);
 
 		// Output range scalings 
 		int outputAccelRange = 8;								// TODO: Possibly allow for +/- 16 outputs (currently always +/-8g -> 16-bit signed)?
@@ -967,9 +1003,6 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			}
 		}
 
-
-		// Re-start the player
-		OmConvertPlayerInitialize(&player, &arrangement, settings->sampleRate, settings->interpolate);
 
 		int outputOk = CalcInit(calc, player.sampleRate, player.arrangement->startTime);		// Whether any processing outputs are used
 
