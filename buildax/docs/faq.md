@@ -156,7 +156,7 @@ you were trying to do, and steps to reproduce your problem (if possible).
 ---
 ## Will BuildAX interfere with my other equipment/BMS/WiFi/etc
 
-As the BuildAX v2 sensors documented here run on the 433MHz ISM radio band, they will not interfere with (or be disrupted by) networks like 802.11n WiFi which run on the 2.4GHz band.
+As the BuildAX v2 sensors documented here run on the 433MHz ISM radio band, they will not interfere with (or be disrupted by) networks like the 802.11 WiFi protocol family which run on the 2.4GHz band.
 
 Additionally, the design of the radio protocol means that our packets are very short- this further reduces the probability that they will interfere with other 433MHz protocols (or each other).
 
