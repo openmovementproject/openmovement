@@ -155,6 +155,12 @@
     <Compile Include="ExportForm.Designer.cs">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExportSleepForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExportSleepForm.Designer.cs">
+      <DependentUpon>ExportSleepForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ExportSvmForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -274,6 +280,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ExportSleepForm.resx">
+      <DependentUpon>ExportSleepForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ExportSvmForm.resx">
       <DependentUpon>ExportSvmForm.cs</DependentUpon>

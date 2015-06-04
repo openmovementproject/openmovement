@@ -4180,6 +4180,35 @@ Application.DoEvents();
             MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
         }
 
+        private void toolStripButtonSleep_Click(object sender, EventArgs e)
+        {
+            // Make .SLEEP.CSV
+            //  * Epochs (number of 0.5 minute periods)
+            bool regenerateWav = (Control.ModifierKeys & Keys.Shift) != 0;
+            string[] inputFiles = GetSelectedFilesForConvert(".sleep.csv");
+            if (inputFiles == null) { return; }
+            ExportSleepForm optionsForm = new ExportSleepForm();
+            DialogResult dr = optionsForm.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            string[] files = CheckWavConversion(inputFiles, regenerateWav);
+            if (files == null) { return; }
+            List<string> outputList = new List<string>();
+            foreach (string file in files)
+            {
+                List<string> args = new List<string>();
+                string input = Path.ChangeExtension(file, ".wav");
+                string final = Path.ChangeExtension(file, ".sleep.csv");
+                string output = final + ".part";
+
+                args.Add("\"" + input + "\"");
+                args.Add("-sleep-file"); args.Add("\"" + output + "\"");
+                ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
+                dr = processingForm.ShowDialog();
+                if (dr == System.Windows.Forms.DialogResult.Cancel) { break; }
+                outputList.Add(Path.GetFileName(final));
+            }
+            MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
+        }  
 
 
     }
