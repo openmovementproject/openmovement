@@ -78,7 +78,7 @@ namespace OmGui
             string executableFile = Path.Combine(Application.StartupPath, executableName);
             if (!File.Exists(executableFile))
             {
-                MessageBox.Show(this, "This process requires the external executable " + executableName + ".\r\n\r\nThe file was not found at:\r\n\r\n" + executableFile + "\r\n\r\nPlease locate the executable there and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                MessageBox.Show(null, "This process requires the external executable " + executableName + ".\r\n\r\nThe file was not found at:\r\n\r\n" + executableFile + "\r\n\r\nPlease locate the executable there and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
                 return false;
             }
 
@@ -185,7 +185,9 @@ namespace OmGui
                 if (!Execute())
                 {
                     // Failed - show details
-                    checkBoxDetail.Checked = true;
+                    this.Invoke(new MethodInvoker(() => {
+                        checkBoxDetail.Checked = true;
+                    }));
                 }
                 else
                 {

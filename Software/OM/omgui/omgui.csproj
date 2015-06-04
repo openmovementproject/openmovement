@@ -359,6 +359,7 @@
     </Content>
     <Content Include="Application Icon.ico" />
     <Content Include="OmGui.ico" />
+    <None Include="Resources\EditBrightContrastHS.png" />
     <None Include="Resources\loading2.gif" />
     <None Include="Resources\Download.png" />
     <None Include="Resources\User.png" />

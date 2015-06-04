@@ -29,204 +29,213 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup3 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup4 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup5 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup6 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup7 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup8 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup9 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup10 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup11 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup12 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup13 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup14 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup15 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup16 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup17 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup18 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup19 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup20 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup21 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup22 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup23 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup24 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup25 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup26 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup27 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup28 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup29 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup30 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup31 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup32 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup33 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup34 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup35 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup36 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup37 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup38 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup39 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup40 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup41 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup42 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup43 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup44 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup45 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup46 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup47 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup48 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup49 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup50 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup51 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup52 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup53 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup54 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup55 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup56 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup57 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup58 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup59 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup60 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup61 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup62 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup63 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup64 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup65 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup66 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup67 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup68 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup69 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup70 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup71 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup72 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup73 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup74 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup75 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup76 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup77 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup78 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup79 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup80 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup81 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup82 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup83 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup84 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup85 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup86 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup87 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup88 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup89 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup90 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup91 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup92 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup93 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup94 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup95 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup96 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup97 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup98 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup99 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup100 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup101 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup102 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup103 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup104 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup105 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup106 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup107 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup108 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup109 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup110 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup111 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup112 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup113 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup114 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup115 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup116 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup117 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup118 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup119 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup120 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup121 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup122 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup123 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup124 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup125 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup126 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup127 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup128 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup129 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup130 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup131 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup132 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup133 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup134 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup135 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup136 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup137 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup138 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup139 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup140 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup141 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup142 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup143 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup144 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup145 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup146 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup147 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup148 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup149 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup150 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup151 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup152 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup153 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup154 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup155 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup156 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup157 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup158 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup159 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup160 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup161 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup162 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup163 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup164 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup165 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup166 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup167 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup168 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup169 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup170 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup171 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup172 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup173 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup174 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup175 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup176 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup177 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup178 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup179 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup180 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup181 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup182 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup183 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup184 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup185 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup186 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup187 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup188 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup189 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup190 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup191 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup192 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup193 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup194 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup195 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup196 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup197 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup198 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup208 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup209 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup210 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup211 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup212 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup213 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup214 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup215 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup216 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup217 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup218 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup219 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup220 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup221 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup222 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup223 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup224 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup225 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup226 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup227 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup228 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup229 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup230 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup231 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup232 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup233 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup234 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup235 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup236 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup237 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup238 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup239 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup240 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup241 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup242 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup243 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup244 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup245 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup246 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup247 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup248 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup249 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup250 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup251 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup252 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup253 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup254 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup255 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup256 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup257 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup258 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup259 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup260 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup261 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup262 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup263 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup264 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup265 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup266 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup267 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup268 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup269 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup270 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup271 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup272 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup273 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup274 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup275 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup276 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup277 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup278 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup279 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup280 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup281 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup282 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup283 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup284 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup285 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup286 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup287 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup288 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup289 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup290 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup291 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup292 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup293 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup294 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup295 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup296 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup297 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup298 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup299 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup300 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup301 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup302 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup303 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup304 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup305 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup306 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup307 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup308 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup309 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup310 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup311 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup312 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup313 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup314 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup315 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup316 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup317 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup318 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup319 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup320 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup321 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup322 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup323 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup324 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup325 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup326 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup327 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup328 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup329 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup330 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup331 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup332 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup333 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup334 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup335 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup336 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup337 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup338 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup339 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup340 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup341 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup342 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup343 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup344 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup345 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup346 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup347 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup348 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup349 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup350 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup351 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup352 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup353 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup354 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup355 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup356 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup357 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup358 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup359 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup360 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup361 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup362 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup363 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup364 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup365 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup366 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup367 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup368 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup369 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup370 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup371 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup372 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup373 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup374 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup375 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup376 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup377 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup378 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup379 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup380 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup381 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup382 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup383 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup384 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup385 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup386 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup387 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup388 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup389 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup390 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup391 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup392 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup393 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup394 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup395 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup396 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup397 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup398 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup399 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup400 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup401 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup402 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup403 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup404 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup405 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup406 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup407 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup408 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup409 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup410 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup411 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup412 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup413 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup414 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
@@ -332,6 +341,7 @@
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.fileSystemWatcherOutput = new System.IO.FileSystemWatcher();
             this.backgroundWorkerUpdate = new System.ComponentModel.BackgroundWorker();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.toolStripContainer2.SuspendLayout();
             this.statusStripMain.SuspendLayout();
@@ -741,6 +751,7 @@
             this.svmToolStripMenuItem,
             this.cutPointsToolStripMenuItem,
             this.wearTimeToolStripMenuItem,
+            this.toolStripMenuItem2,
             this.toolStripSeparator1,
             this.pluginsToolStripMenuItem,
             this.toolStripSeparator3,
@@ -753,7 +764,7 @@
             // 
             this.svmToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("svmToolStripMenuItem.Image")));
             this.svmToolStripMenuItem.Name = "svmToolStripMenuItem";
-            this.svmToolStripMenuItem.Size = new System.Drawing.Size(228, 26);
+            this.svmToolStripMenuItem.Size = new System.Drawing.Size(230, 26);
             this.svmToolStripMenuItem.Text = "Calculate S&VM...";
             this.svmToolStripMenuItem.Click += new System.EventHandler(this.svmToolStripMenuItem_Click);
             // 
@@ -761,7 +772,7 @@
             // 
             this.cutPointsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("cutPointsToolStripMenuItem.Image")));
             this.cutPointsToolStripMenuItem.Name = "cutPointsToolStripMenuItem";
-            this.cutPointsToolStripMenuItem.Size = new System.Drawing.Size(228, 26);
+            this.cutPointsToolStripMenuItem.Size = new System.Drawing.Size(230, 26);
             this.cutPointsToolStripMenuItem.Text = "Calculate &Cut Points...";
             this.cutPointsToolStripMenuItem.Click += new System.EventHandler(this.cutPointsToolStripMenuItem_Click);
             // 
@@ -769,32 +780,32 @@
             // 
             this.wearTimeToolStripMenuItem.Image = global::OmGui.Properties.Resources.SyncTime;
             this.wearTimeToolStripMenuItem.Name = "wearTimeToolStripMenuItem";
-            this.wearTimeToolStripMenuItem.Size = new System.Drawing.Size(228, 26);
+            this.wearTimeToolStripMenuItem.Size = new System.Drawing.Size(230, 26);
             this.wearTimeToolStripMenuItem.Text = "Calculate Wear &Time...";
             this.wearTimeToolStripMenuItem.Click += new System.EventHandler(this.wearTimeToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(225, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(227, 6);
             // 
             // pluginsToolStripMenuItem
             // 
             this.pluginsToolStripMenuItem.Name = "pluginsToolStripMenuItem";
-            this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(228, 26);
+            this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(230, 26);
             this.pluginsToolStripMenuItem.Text = "&Plugins...";
             this.pluginsToolStripMenuItem.Click += new System.EventHandler(this.pluginsToolStripButton_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(225, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(227, 6);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("optionsToolStripMenuItem.Image")));
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(228, 26);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(230, 26);
             this.optionsToolStripMenuItem.Text = "&Options...";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
@@ -902,601 +913,628 @@
             this.devicesListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.devicesListView.FullRowSelect = true;
             this.devicesListView.GridLines = true;
-            listViewGroup1.Header = "Devices";
-            listViewGroup1.Name = "Other";
-            listViewGroup2.Header = "New Data";
-            listViewGroup2.Name = "NewData";
-            listViewGroup3.Header = "Downloading";
-            listViewGroup3.Name = "Downloading";
-            listViewGroup4.Header = "Downloaded";
-            listViewGroup4.Name = "Downloaded";
-            listViewGroup5.Header = "Charging";
-            listViewGroup5.Name = "Charging";
-            listViewGroup6.Header = "Standby";
-            listViewGroup6.Name = "Standby";
-            listViewGroup7.Header = "Outbox";
-            listViewGroup7.Name = "Outbox";
-            listViewGroup8.Header = "Removed";
-            listViewGroup8.Name = "Removed";
-            listViewGroup9.Header = "Files";
-            listViewGroup9.Name = "File";
-            listViewGroup10.Header = "Devices";
-            listViewGroup10.Name = "Other";
-            listViewGroup11.Header = "New Data";
-            listViewGroup11.Name = "NewData";
-            listViewGroup12.Header = "Downloading";
-            listViewGroup12.Name = "Downloading";
-            listViewGroup13.Header = "Downloaded";
-            listViewGroup13.Name = "Downloaded";
-            listViewGroup14.Header = "Charging";
-            listViewGroup14.Name = "Charging";
-            listViewGroup15.Header = "Standby";
-            listViewGroup15.Name = "Standby";
-            listViewGroup16.Header = "Outbox";
-            listViewGroup16.Name = "Outbox";
-            listViewGroup17.Header = "Removed";
-            listViewGroup17.Name = "Removed";
-            listViewGroup18.Header = "Files";
-            listViewGroup18.Name = "File";
-            listViewGroup19.Header = "Devices";
-            listViewGroup19.Name = "Other";
-            listViewGroup20.Header = "New Data";
-            listViewGroup20.Name = "NewData";
-            listViewGroup21.Header = "Downloading";
-            listViewGroup21.Name = "Downloading";
-            listViewGroup22.Header = "Downloaded";
-            listViewGroup22.Name = "Downloaded";
-            listViewGroup23.Header = "Charging";
-            listViewGroup23.Name = "Charging";
-            listViewGroup24.Header = "Standby";
-            listViewGroup24.Name = "Standby";
-            listViewGroup25.Header = "Outbox";
-            listViewGroup25.Name = "Outbox";
-            listViewGroup26.Header = "Removed";
-            listViewGroup26.Name = "Removed";
-            listViewGroup27.Header = "Files";
-            listViewGroup27.Name = "File";
-            listViewGroup28.Header = "Devices";
-            listViewGroup28.Name = "Other";
-            listViewGroup29.Header = "New Data";
-            listViewGroup29.Name = "NewData";
-            listViewGroup30.Header = "Downloading";
-            listViewGroup30.Name = "Downloading";
-            listViewGroup31.Header = "Downloaded";
-            listViewGroup31.Name = "Downloaded";
-            listViewGroup32.Header = "Charging";
-            listViewGroup32.Name = "Charging";
-            listViewGroup33.Header = "Standby";
-            listViewGroup33.Name = "Standby";
-            listViewGroup34.Header = "Outbox";
-            listViewGroup34.Name = "Outbox";
-            listViewGroup35.Header = "Removed";
-            listViewGroup35.Name = "Removed";
-            listViewGroup36.Header = "Files";
-            listViewGroup36.Name = "File";
-            listViewGroup37.Header = "Devices";
-            listViewGroup37.Name = "Other";
-            listViewGroup38.Header = "New Data";
-            listViewGroup38.Name = "NewData";
-            listViewGroup39.Header = "Downloading";
-            listViewGroup39.Name = "Downloading";
-            listViewGroup40.Header = "Downloaded";
-            listViewGroup40.Name = "Downloaded";
-            listViewGroup41.Header = "Charging";
-            listViewGroup41.Name = "Charging";
-            listViewGroup42.Header = "Standby";
-            listViewGroup42.Name = "Standby";
-            listViewGroup43.Header = "Outbox";
-            listViewGroup43.Name = "Outbox";
-            listViewGroup44.Header = "Removed";
-            listViewGroup44.Name = "Removed";
-            listViewGroup45.Header = "Files";
-            listViewGroup45.Name = "File";
-            listViewGroup46.Header = "Devices";
-            listViewGroup46.Name = "Other";
-            listViewGroup47.Header = "New Data";
-            listViewGroup47.Name = "NewData";
-            listViewGroup48.Header = "Downloading";
-            listViewGroup48.Name = "Downloading";
-            listViewGroup49.Header = "Downloaded";
-            listViewGroup49.Name = "Downloaded";
-            listViewGroup50.Header = "Charging";
-            listViewGroup50.Name = "Charging";
-            listViewGroup51.Header = "Standby";
-            listViewGroup51.Name = "Standby";
-            listViewGroup52.Header = "Outbox";
-            listViewGroup52.Name = "Outbox";
-            listViewGroup53.Header = "Removed";
-            listViewGroup53.Name = "Removed";
-            listViewGroup54.Header = "Files";
-            listViewGroup54.Name = "File";
-            listViewGroup55.Header = "Devices";
-            listViewGroup55.Name = "Other";
-            listViewGroup56.Header = "New Data";
-            listViewGroup56.Name = "NewData";
-            listViewGroup57.Header = "Downloading";
-            listViewGroup57.Name = "Downloading";
-            listViewGroup58.Header = "Downloaded";
-            listViewGroup58.Name = "Downloaded";
-            listViewGroup59.Header = "Charging";
-            listViewGroup59.Name = "Charging";
-            listViewGroup60.Header = "Standby";
-            listViewGroup60.Name = "Standby";
-            listViewGroup61.Header = "Outbox";
-            listViewGroup61.Name = "Outbox";
-            listViewGroup62.Header = "Removed";
-            listViewGroup62.Name = "Removed";
-            listViewGroup63.Header = "Files";
-            listViewGroup63.Name = "File";
-            listViewGroup64.Header = "Devices";
-            listViewGroup64.Name = "Other";
-            listViewGroup65.Header = "New Data";
-            listViewGroup65.Name = "NewData";
-            listViewGroup66.Header = "Downloading";
-            listViewGroup66.Name = "Downloading";
-            listViewGroup67.Header = "Downloaded";
-            listViewGroup67.Name = "Downloaded";
-            listViewGroup68.Header = "Charging";
-            listViewGroup68.Name = "Charging";
-            listViewGroup69.Header = "Standby";
-            listViewGroup69.Name = "Standby";
-            listViewGroup70.Header = "Outbox";
-            listViewGroup70.Name = "Outbox";
-            listViewGroup71.Header = "Removed";
-            listViewGroup71.Name = "Removed";
-            listViewGroup72.Header = "Files";
-            listViewGroup72.Name = "File";
-            listViewGroup73.Header = "Devices";
-            listViewGroup73.Name = "Other";
-            listViewGroup74.Header = "New Data";
-            listViewGroup74.Name = "NewData";
-            listViewGroup75.Header = "Downloading";
-            listViewGroup75.Name = "Downloading";
-            listViewGroup76.Header = "Downloaded";
-            listViewGroup76.Name = "Downloaded";
-            listViewGroup77.Header = "Charging";
-            listViewGroup77.Name = "Charging";
-            listViewGroup78.Header = "Standby";
-            listViewGroup78.Name = "Standby";
-            listViewGroup79.Header = "Outbox";
-            listViewGroup79.Name = "Outbox";
-            listViewGroup80.Header = "Removed";
-            listViewGroup80.Name = "Removed";
-            listViewGroup81.Header = "Files";
-            listViewGroup81.Name = "File";
-            listViewGroup82.Header = "Devices";
-            listViewGroup82.Name = "Other";
-            listViewGroup83.Header = "New Data";
-            listViewGroup83.Name = "NewData";
-            listViewGroup84.Header = "Downloading";
-            listViewGroup84.Name = "Downloading";
-            listViewGroup85.Header = "Downloaded";
-            listViewGroup85.Name = "Downloaded";
-            listViewGroup86.Header = "Charging";
-            listViewGroup86.Name = "Charging";
-            listViewGroup87.Header = "Standby";
-            listViewGroup87.Name = "Standby";
-            listViewGroup88.Header = "Outbox";
-            listViewGroup88.Name = "Outbox";
-            listViewGroup89.Header = "Removed";
-            listViewGroup89.Name = "Removed";
-            listViewGroup90.Header = "Files";
-            listViewGroup90.Name = "File";
-            listViewGroup91.Header = "Devices";
-            listViewGroup91.Name = "Other";
-            listViewGroup92.Header = "New Data";
-            listViewGroup92.Name = "NewData";
-            listViewGroup93.Header = "Downloading";
-            listViewGroup93.Name = "Downloading";
-            listViewGroup94.Header = "Downloaded";
-            listViewGroup94.Name = "Downloaded";
-            listViewGroup95.Header = "Charging";
-            listViewGroup95.Name = "Charging";
-            listViewGroup96.Header = "Standby";
-            listViewGroup96.Name = "Standby";
-            listViewGroup97.Header = "Outbox";
-            listViewGroup97.Name = "Outbox";
-            listViewGroup98.Header = "Removed";
-            listViewGroup98.Name = "Removed";
-            listViewGroup99.Header = "Files";
-            listViewGroup99.Name = "File";
-            listViewGroup100.Header = "Devices";
-            listViewGroup100.Name = "Other";
-            listViewGroup101.Header = "New Data";
-            listViewGroup101.Name = "NewData";
-            listViewGroup102.Header = "Downloading";
-            listViewGroup102.Name = "Downloading";
-            listViewGroup103.Header = "Downloaded";
-            listViewGroup103.Name = "Downloaded";
-            listViewGroup104.Header = "Charging";
-            listViewGroup104.Name = "Charging";
-            listViewGroup105.Header = "Standby";
-            listViewGroup105.Name = "Standby";
-            listViewGroup106.Header = "Outbox";
-            listViewGroup106.Name = "Outbox";
-            listViewGroup107.Header = "Removed";
-            listViewGroup107.Name = "Removed";
-            listViewGroup108.Header = "Files";
-            listViewGroup108.Name = "File";
-            listViewGroup109.Header = "Devices";
-            listViewGroup109.Name = "Other";
-            listViewGroup110.Header = "New Data";
-            listViewGroup110.Name = "NewData";
-            listViewGroup111.Header = "Downloading";
-            listViewGroup111.Name = "Downloading";
-            listViewGroup112.Header = "Downloaded";
-            listViewGroup112.Name = "Downloaded";
-            listViewGroup113.Header = "Charging";
-            listViewGroup113.Name = "Charging";
-            listViewGroup114.Header = "Standby";
-            listViewGroup114.Name = "Standby";
-            listViewGroup115.Header = "Outbox";
-            listViewGroup115.Name = "Outbox";
-            listViewGroup116.Header = "Removed";
-            listViewGroup116.Name = "Removed";
-            listViewGroup117.Header = "Files";
-            listViewGroup117.Name = "File";
-            listViewGroup118.Header = "Devices";
-            listViewGroup118.Name = "Other";
-            listViewGroup119.Header = "New Data";
-            listViewGroup119.Name = "NewData";
-            listViewGroup120.Header = "Downloading";
-            listViewGroup120.Name = "Downloading";
-            listViewGroup121.Header = "Downloaded";
-            listViewGroup121.Name = "Downloaded";
-            listViewGroup122.Header = "Charging";
-            listViewGroup122.Name = "Charging";
-            listViewGroup123.Header = "Standby";
-            listViewGroup123.Name = "Standby";
-            listViewGroup124.Header = "Outbox";
-            listViewGroup124.Name = "Outbox";
-            listViewGroup125.Header = "Removed";
-            listViewGroup125.Name = "Removed";
-            listViewGroup126.Header = "Files";
-            listViewGroup126.Name = "File";
-            listViewGroup127.Header = "Devices";
-            listViewGroup127.Name = "Other";
-            listViewGroup128.Header = "New Data";
-            listViewGroup128.Name = "NewData";
-            listViewGroup129.Header = "Downloading";
-            listViewGroup129.Name = "Downloading";
-            listViewGroup130.Header = "Downloaded";
-            listViewGroup130.Name = "Downloaded";
-            listViewGroup131.Header = "Charging";
-            listViewGroup131.Name = "Charging";
-            listViewGroup132.Header = "Standby";
-            listViewGroup132.Name = "Standby";
-            listViewGroup133.Header = "Outbox";
-            listViewGroup133.Name = "Outbox";
-            listViewGroup134.Header = "Removed";
-            listViewGroup134.Name = "Removed";
-            listViewGroup135.Header = "Files";
-            listViewGroup135.Name = "File";
-            listViewGroup136.Header = "Devices";
-            listViewGroup136.Name = "Other";
-            listViewGroup137.Header = "New Data";
-            listViewGroup137.Name = "NewData";
-            listViewGroup138.Header = "Downloading";
-            listViewGroup138.Name = "Downloading";
-            listViewGroup139.Header = "Downloaded";
-            listViewGroup139.Name = "Downloaded";
-            listViewGroup140.Header = "Charging";
-            listViewGroup140.Name = "Charging";
-            listViewGroup141.Header = "Standby";
-            listViewGroup141.Name = "Standby";
-            listViewGroup142.Header = "Outbox";
-            listViewGroup142.Name = "Outbox";
-            listViewGroup143.Header = "Removed";
-            listViewGroup143.Name = "Removed";
-            listViewGroup144.Header = "Files";
-            listViewGroup144.Name = "File";
-            listViewGroup145.Header = "Devices";
-            listViewGroup145.Name = "Other";
-            listViewGroup146.Header = "New Data";
-            listViewGroup146.Name = "NewData";
-            listViewGroup147.Header = "Downloading";
-            listViewGroup147.Name = "Downloading";
-            listViewGroup148.Header = "Downloaded";
-            listViewGroup148.Name = "Downloaded";
-            listViewGroup149.Header = "Charging";
-            listViewGroup149.Name = "Charging";
-            listViewGroup150.Header = "Standby";
-            listViewGroup150.Name = "Standby";
-            listViewGroup151.Header = "Outbox";
-            listViewGroup151.Name = "Outbox";
-            listViewGroup152.Header = "Removed";
-            listViewGroup152.Name = "Removed";
-            listViewGroup153.Header = "Files";
-            listViewGroup153.Name = "File";
-            listViewGroup154.Header = "Devices";
-            listViewGroup154.Name = "Other";
-            listViewGroup155.Header = "New Data";
-            listViewGroup155.Name = "NewData";
-            listViewGroup156.Header = "Downloading";
-            listViewGroup156.Name = "Downloading";
-            listViewGroup157.Header = "Downloaded";
-            listViewGroup157.Name = "Downloaded";
-            listViewGroup158.Header = "Charging";
-            listViewGroup158.Name = "Charging";
-            listViewGroup159.Header = "Standby";
-            listViewGroup159.Name = "Standby";
-            listViewGroup160.Header = "Outbox";
-            listViewGroup160.Name = "Outbox";
-            listViewGroup161.Header = "Removed";
-            listViewGroup161.Name = "Removed";
-            listViewGroup162.Header = "Files";
-            listViewGroup162.Name = "File";
-            listViewGroup163.Header = "Devices";
-            listViewGroup163.Name = "Other";
-            listViewGroup164.Header = "New Data";
-            listViewGroup164.Name = "NewData";
-            listViewGroup165.Header = "Downloading";
-            listViewGroup165.Name = "Downloading";
-            listViewGroup166.Header = "Downloaded";
-            listViewGroup166.Name = "Downloaded";
-            listViewGroup167.Header = "Charging";
-            listViewGroup167.Name = "Charging";
-            listViewGroup168.Header = "Standby";
-            listViewGroup168.Name = "Standby";
-            listViewGroup169.Header = "Outbox";
-            listViewGroup169.Name = "Outbox";
-            listViewGroup170.Header = "Removed";
-            listViewGroup170.Name = "Removed";
-            listViewGroup171.Header = "Files";
-            listViewGroup171.Name = "File";
-            listViewGroup172.Header = "Devices";
-            listViewGroup172.Name = "Other";
-            listViewGroup173.Header = "New Data";
-            listViewGroup173.Name = "NewData";
-            listViewGroup174.Header = "Downloading";
-            listViewGroup174.Name = "Downloading";
-            listViewGroup175.Header = "Downloaded";
-            listViewGroup175.Name = "Downloaded";
-            listViewGroup176.Header = "Charging";
-            listViewGroup176.Name = "Charging";
-            listViewGroup177.Header = "Standby";
-            listViewGroup177.Name = "Standby";
-            listViewGroup178.Header = "Outbox";
-            listViewGroup178.Name = "Outbox";
-            listViewGroup179.Header = "Removed";
-            listViewGroup179.Name = "Removed";
-            listViewGroup180.Header = "Files";
-            listViewGroup180.Name = "File";
-            listViewGroup181.Header = "Devices";
-            listViewGroup181.Name = "Other";
-            listViewGroup182.Header = "New Data";
-            listViewGroup182.Name = "NewData";
-            listViewGroup183.Header = "Downloading";
-            listViewGroup183.Name = "Downloading";
-            listViewGroup184.Header = "Downloaded";
-            listViewGroup184.Name = "Downloaded";
-            listViewGroup185.Header = "Charging";
-            listViewGroup185.Name = "Charging";
-            listViewGroup186.Header = "Standby";
-            listViewGroup186.Name = "Standby";
-            listViewGroup187.Header = "Outbox";
-            listViewGroup187.Name = "Outbox";
-            listViewGroup188.Header = "Removed";
-            listViewGroup188.Name = "Removed";
-            listViewGroup189.Header = "Files";
-            listViewGroup189.Name = "File";
-            listViewGroup190.Header = "Devices";
-            listViewGroup190.Name = "Other";
-            listViewGroup191.Header = "New Data";
-            listViewGroup191.Name = "NewData";
-            listViewGroup192.Header = "Downloading";
-            listViewGroup192.Name = "Downloading";
-            listViewGroup193.Header = "Downloaded";
-            listViewGroup193.Name = "Downloaded";
-            listViewGroup194.Header = "Charging";
-            listViewGroup194.Name = "Charging";
-            listViewGroup195.Header = "Standby";
-            listViewGroup195.Name = "Standby";
-            listViewGroup196.Header = "Outbox";
-            listViewGroup196.Name = "Outbox";
-            listViewGroup197.Header = "Removed";
-            listViewGroup197.Name = "Removed";
-            listViewGroup198.Header = "Files";
-            listViewGroup198.Name = "File";
+            listViewGroup208.Header = "Devices";
+            listViewGroup208.Name = "Other";
+            listViewGroup209.Header = "New Data";
+            listViewGroup209.Name = "NewData";
+            listViewGroup210.Header = "Downloading";
+            listViewGroup210.Name = "Downloading";
+            listViewGroup211.Header = "Downloaded";
+            listViewGroup211.Name = "Downloaded";
+            listViewGroup212.Header = "Charging";
+            listViewGroup212.Name = "Charging";
+            listViewGroup213.Header = "Standby";
+            listViewGroup213.Name = "Standby";
+            listViewGroup214.Header = "Outbox";
+            listViewGroup214.Name = "Outbox";
+            listViewGroup215.Header = "Removed";
+            listViewGroup215.Name = "Removed";
+            listViewGroup216.Header = "Files";
+            listViewGroup216.Name = "File";
+            listViewGroup217.Header = "Devices";
+            listViewGroup217.Name = "Other";
+            listViewGroup218.Header = "New Data";
+            listViewGroup218.Name = "NewData";
+            listViewGroup219.Header = "Downloading";
+            listViewGroup219.Name = "Downloading";
+            listViewGroup220.Header = "Downloaded";
+            listViewGroup220.Name = "Downloaded";
+            listViewGroup221.Header = "Charging";
+            listViewGroup221.Name = "Charging";
+            listViewGroup222.Header = "Standby";
+            listViewGroup222.Name = "Standby";
+            listViewGroup223.Header = "Outbox";
+            listViewGroup223.Name = "Outbox";
+            listViewGroup224.Header = "Removed";
+            listViewGroup224.Name = "Removed";
+            listViewGroup225.Header = "Files";
+            listViewGroup225.Name = "File";
+            listViewGroup226.Header = "Devices";
+            listViewGroup226.Name = "Other";
+            listViewGroup227.Header = "New Data";
+            listViewGroup227.Name = "NewData";
+            listViewGroup228.Header = "Downloading";
+            listViewGroup228.Name = "Downloading";
+            listViewGroup229.Header = "Downloaded";
+            listViewGroup229.Name = "Downloaded";
+            listViewGroup230.Header = "Charging";
+            listViewGroup230.Name = "Charging";
+            listViewGroup231.Header = "Standby";
+            listViewGroup231.Name = "Standby";
+            listViewGroup232.Header = "Outbox";
+            listViewGroup232.Name = "Outbox";
+            listViewGroup233.Header = "Removed";
+            listViewGroup233.Name = "Removed";
+            listViewGroup234.Header = "Files";
+            listViewGroup234.Name = "File";
+            listViewGroup235.Header = "Devices";
+            listViewGroup235.Name = "Other";
+            listViewGroup236.Header = "New Data";
+            listViewGroup236.Name = "NewData";
+            listViewGroup237.Header = "Downloading";
+            listViewGroup237.Name = "Downloading";
+            listViewGroup238.Header = "Downloaded";
+            listViewGroup238.Name = "Downloaded";
+            listViewGroup239.Header = "Charging";
+            listViewGroup239.Name = "Charging";
+            listViewGroup240.Header = "Standby";
+            listViewGroup240.Name = "Standby";
+            listViewGroup241.Header = "Outbox";
+            listViewGroup241.Name = "Outbox";
+            listViewGroup242.Header = "Removed";
+            listViewGroup242.Name = "Removed";
+            listViewGroup243.Header = "Files";
+            listViewGroup243.Name = "File";
+            listViewGroup244.Header = "Devices";
+            listViewGroup244.Name = "Other";
+            listViewGroup245.Header = "New Data";
+            listViewGroup245.Name = "NewData";
+            listViewGroup246.Header = "Downloading";
+            listViewGroup246.Name = "Downloading";
+            listViewGroup247.Header = "Downloaded";
+            listViewGroup247.Name = "Downloaded";
+            listViewGroup248.Header = "Charging";
+            listViewGroup248.Name = "Charging";
+            listViewGroup249.Header = "Standby";
+            listViewGroup249.Name = "Standby";
+            listViewGroup250.Header = "Outbox";
+            listViewGroup250.Name = "Outbox";
+            listViewGroup251.Header = "Removed";
+            listViewGroup251.Name = "Removed";
+            listViewGroup252.Header = "Files";
+            listViewGroup252.Name = "File";
+            listViewGroup253.Header = "Devices";
+            listViewGroup253.Name = "Other";
+            listViewGroup254.Header = "New Data";
+            listViewGroup254.Name = "NewData";
+            listViewGroup255.Header = "Downloading";
+            listViewGroup255.Name = "Downloading";
+            listViewGroup256.Header = "Downloaded";
+            listViewGroup256.Name = "Downloaded";
+            listViewGroup257.Header = "Charging";
+            listViewGroup257.Name = "Charging";
+            listViewGroup258.Header = "Standby";
+            listViewGroup258.Name = "Standby";
+            listViewGroup259.Header = "Outbox";
+            listViewGroup259.Name = "Outbox";
+            listViewGroup260.Header = "Removed";
+            listViewGroup260.Name = "Removed";
+            listViewGroup261.Header = "Files";
+            listViewGroup261.Name = "File";
+            listViewGroup262.Header = "Devices";
+            listViewGroup262.Name = "Other";
+            listViewGroup263.Header = "New Data";
+            listViewGroup263.Name = "NewData";
+            listViewGroup264.Header = "Downloading";
+            listViewGroup264.Name = "Downloading";
+            listViewGroup265.Header = "Downloaded";
+            listViewGroup265.Name = "Downloaded";
+            listViewGroup266.Header = "Charging";
+            listViewGroup266.Name = "Charging";
+            listViewGroup267.Header = "Standby";
+            listViewGroup267.Name = "Standby";
+            listViewGroup268.Header = "Outbox";
+            listViewGroup268.Name = "Outbox";
+            listViewGroup269.Header = "Removed";
+            listViewGroup269.Name = "Removed";
+            listViewGroup270.Header = "Files";
+            listViewGroup270.Name = "File";
+            listViewGroup271.Header = "Devices";
+            listViewGroup271.Name = "Other";
+            listViewGroup272.Header = "New Data";
+            listViewGroup272.Name = "NewData";
+            listViewGroup273.Header = "Downloading";
+            listViewGroup273.Name = "Downloading";
+            listViewGroup274.Header = "Downloaded";
+            listViewGroup274.Name = "Downloaded";
+            listViewGroup275.Header = "Charging";
+            listViewGroup275.Name = "Charging";
+            listViewGroup276.Header = "Standby";
+            listViewGroup276.Name = "Standby";
+            listViewGroup277.Header = "Outbox";
+            listViewGroup277.Name = "Outbox";
+            listViewGroup278.Header = "Removed";
+            listViewGroup278.Name = "Removed";
+            listViewGroup279.Header = "Files";
+            listViewGroup279.Name = "File";
+            listViewGroup280.Header = "Devices";
+            listViewGroup280.Name = "Other";
+            listViewGroup281.Header = "New Data";
+            listViewGroup281.Name = "NewData";
+            listViewGroup282.Header = "Downloading";
+            listViewGroup282.Name = "Downloading";
+            listViewGroup283.Header = "Downloaded";
+            listViewGroup283.Name = "Downloaded";
+            listViewGroup284.Header = "Charging";
+            listViewGroup284.Name = "Charging";
+            listViewGroup285.Header = "Standby";
+            listViewGroup285.Name = "Standby";
+            listViewGroup286.Header = "Outbox";
+            listViewGroup286.Name = "Outbox";
+            listViewGroup287.Header = "Removed";
+            listViewGroup287.Name = "Removed";
+            listViewGroup288.Header = "Files";
+            listViewGroup288.Name = "File";
+            listViewGroup289.Header = "Devices";
+            listViewGroup289.Name = "Other";
+            listViewGroup290.Header = "New Data";
+            listViewGroup290.Name = "NewData";
+            listViewGroup291.Header = "Downloading";
+            listViewGroup291.Name = "Downloading";
+            listViewGroup292.Header = "Downloaded";
+            listViewGroup292.Name = "Downloaded";
+            listViewGroup293.Header = "Charging";
+            listViewGroup293.Name = "Charging";
+            listViewGroup294.Header = "Standby";
+            listViewGroup294.Name = "Standby";
+            listViewGroup295.Header = "Outbox";
+            listViewGroup295.Name = "Outbox";
+            listViewGroup296.Header = "Removed";
+            listViewGroup296.Name = "Removed";
+            listViewGroup297.Header = "Files";
+            listViewGroup297.Name = "File";
+            listViewGroup298.Header = "Devices";
+            listViewGroup298.Name = "Other";
+            listViewGroup299.Header = "New Data";
+            listViewGroup299.Name = "NewData";
+            listViewGroup300.Header = "Downloading";
+            listViewGroup300.Name = "Downloading";
+            listViewGroup301.Header = "Downloaded";
+            listViewGroup301.Name = "Downloaded";
+            listViewGroup302.Header = "Charging";
+            listViewGroup302.Name = "Charging";
+            listViewGroup303.Header = "Standby";
+            listViewGroup303.Name = "Standby";
+            listViewGroup304.Header = "Outbox";
+            listViewGroup304.Name = "Outbox";
+            listViewGroup305.Header = "Removed";
+            listViewGroup305.Name = "Removed";
+            listViewGroup306.Header = "Files";
+            listViewGroup306.Name = "File";
+            listViewGroup307.Header = "Devices";
+            listViewGroup307.Name = "Other";
+            listViewGroup308.Header = "New Data";
+            listViewGroup308.Name = "NewData";
+            listViewGroup309.Header = "Downloading";
+            listViewGroup309.Name = "Downloading";
+            listViewGroup310.Header = "Downloaded";
+            listViewGroup310.Name = "Downloaded";
+            listViewGroup311.Header = "Charging";
+            listViewGroup311.Name = "Charging";
+            listViewGroup312.Header = "Standby";
+            listViewGroup312.Name = "Standby";
+            listViewGroup313.Header = "Outbox";
+            listViewGroup313.Name = "Outbox";
+            listViewGroup314.Header = "Removed";
+            listViewGroup314.Name = "Removed";
+            listViewGroup315.Header = "Files";
+            listViewGroup315.Name = "File";
+            listViewGroup316.Header = "Devices";
+            listViewGroup316.Name = "Other";
+            listViewGroup317.Header = "New Data";
+            listViewGroup317.Name = "NewData";
+            listViewGroup318.Header = "Downloading";
+            listViewGroup318.Name = "Downloading";
+            listViewGroup319.Header = "Downloaded";
+            listViewGroup319.Name = "Downloaded";
+            listViewGroup320.Header = "Charging";
+            listViewGroup320.Name = "Charging";
+            listViewGroup321.Header = "Standby";
+            listViewGroup321.Name = "Standby";
+            listViewGroup322.Header = "Outbox";
+            listViewGroup322.Name = "Outbox";
+            listViewGroup323.Header = "Removed";
+            listViewGroup323.Name = "Removed";
+            listViewGroup324.Header = "Files";
+            listViewGroup324.Name = "File";
+            listViewGroup325.Header = "Devices";
+            listViewGroup325.Name = "Other";
+            listViewGroup326.Header = "New Data";
+            listViewGroup326.Name = "NewData";
+            listViewGroup327.Header = "Downloading";
+            listViewGroup327.Name = "Downloading";
+            listViewGroup328.Header = "Downloaded";
+            listViewGroup328.Name = "Downloaded";
+            listViewGroup329.Header = "Charging";
+            listViewGroup329.Name = "Charging";
+            listViewGroup330.Header = "Standby";
+            listViewGroup330.Name = "Standby";
+            listViewGroup331.Header = "Outbox";
+            listViewGroup331.Name = "Outbox";
+            listViewGroup332.Header = "Removed";
+            listViewGroup332.Name = "Removed";
+            listViewGroup333.Header = "Files";
+            listViewGroup333.Name = "File";
+            listViewGroup334.Header = "Devices";
+            listViewGroup334.Name = "Other";
+            listViewGroup335.Header = "New Data";
+            listViewGroup335.Name = "NewData";
+            listViewGroup336.Header = "Downloading";
+            listViewGroup336.Name = "Downloading";
+            listViewGroup337.Header = "Downloaded";
+            listViewGroup337.Name = "Downloaded";
+            listViewGroup338.Header = "Charging";
+            listViewGroup338.Name = "Charging";
+            listViewGroup339.Header = "Standby";
+            listViewGroup339.Name = "Standby";
+            listViewGroup340.Header = "Outbox";
+            listViewGroup340.Name = "Outbox";
+            listViewGroup341.Header = "Removed";
+            listViewGroup341.Name = "Removed";
+            listViewGroup342.Header = "Files";
+            listViewGroup342.Name = "File";
+            listViewGroup343.Header = "Devices";
+            listViewGroup343.Name = "Other";
+            listViewGroup344.Header = "New Data";
+            listViewGroup344.Name = "NewData";
+            listViewGroup345.Header = "Downloading";
+            listViewGroup345.Name = "Downloading";
+            listViewGroup346.Header = "Downloaded";
+            listViewGroup346.Name = "Downloaded";
+            listViewGroup347.Header = "Charging";
+            listViewGroup347.Name = "Charging";
+            listViewGroup348.Header = "Standby";
+            listViewGroup348.Name = "Standby";
+            listViewGroup349.Header = "Outbox";
+            listViewGroup349.Name = "Outbox";
+            listViewGroup350.Header = "Removed";
+            listViewGroup350.Name = "Removed";
+            listViewGroup351.Header = "Files";
+            listViewGroup351.Name = "File";
+            listViewGroup352.Header = "Devices";
+            listViewGroup352.Name = "Other";
+            listViewGroup353.Header = "New Data";
+            listViewGroup353.Name = "NewData";
+            listViewGroup354.Header = "Downloading";
+            listViewGroup354.Name = "Downloading";
+            listViewGroup355.Header = "Downloaded";
+            listViewGroup355.Name = "Downloaded";
+            listViewGroup356.Header = "Charging";
+            listViewGroup356.Name = "Charging";
+            listViewGroup357.Header = "Standby";
+            listViewGroup357.Name = "Standby";
+            listViewGroup358.Header = "Outbox";
+            listViewGroup358.Name = "Outbox";
+            listViewGroup359.Header = "Removed";
+            listViewGroup359.Name = "Removed";
+            listViewGroup360.Header = "Files";
+            listViewGroup360.Name = "File";
+            listViewGroup361.Header = "Devices";
+            listViewGroup361.Name = "Other";
+            listViewGroup362.Header = "New Data";
+            listViewGroup362.Name = "NewData";
+            listViewGroup363.Header = "Downloading";
+            listViewGroup363.Name = "Downloading";
+            listViewGroup364.Header = "Downloaded";
+            listViewGroup364.Name = "Downloaded";
+            listViewGroup365.Header = "Charging";
+            listViewGroup365.Name = "Charging";
+            listViewGroup366.Header = "Standby";
+            listViewGroup366.Name = "Standby";
+            listViewGroup367.Header = "Outbox";
+            listViewGroup367.Name = "Outbox";
+            listViewGroup368.Header = "Removed";
+            listViewGroup368.Name = "Removed";
+            listViewGroup369.Header = "Files";
+            listViewGroup369.Name = "File";
+            listViewGroup370.Header = "Devices";
+            listViewGroup370.Name = "Other";
+            listViewGroup371.Header = "New Data";
+            listViewGroup371.Name = "NewData";
+            listViewGroup372.Header = "Downloading";
+            listViewGroup372.Name = "Downloading";
+            listViewGroup373.Header = "Downloaded";
+            listViewGroup373.Name = "Downloaded";
+            listViewGroup374.Header = "Charging";
+            listViewGroup374.Name = "Charging";
+            listViewGroup375.Header = "Standby";
+            listViewGroup375.Name = "Standby";
+            listViewGroup376.Header = "Outbox";
+            listViewGroup376.Name = "Outbox";
+            listViewGroup377.Header = "Removed";
+            listViewGroup377.Name = "Removed";
+            listViewGroup378.Header = "Files";
+            listViewGroup378.Name = "File";
+            listViewGroup379.Header = "Devices";
+            listViewGroup379.Name = "Other";
+            listViewGroup380.Header = "New Data";
+            listViewGroup380.Name = "NewData";
+            listViewGroup381.Header = "Downloading";
+            listViewGroup381.Name = "Downloading";
+            listViewGroup382.Header = "Downloaded";
+            listViewGroup382.Name = "Downloaded";
+            listViewGroup383.Header = "Charging";
+            listViewGroup383.Name = "Charging";
+            listViewGroup384.Header = "Standby";
+            listViewGroup384.Name = "Standby";
+            listViewGroup385.Header = "Outbox";
+            listViewGroup385.Name = "Outbox";
+            listViewGroup386.Header = "Removed";
+            listViewGroup386.Name = "Removed";
+            listViewGroup387.Header = "Files";
+            listViewGroup387.Name = "File";
+            listViewGroup388.Header = "Devices";
+            listViewGroup388.Name = "Other";
+            listViewGroup389.Header = "New Data";
+            listViewGroup389.Name = "NewData";
+            listViewGroup390.Header = "Downloading";
+            listViewGroup390.Name = "Downloading";
+            listViewGroup391.Header = "Downloaded";
+            listViewGroup391.Name = "Downloaded";
+            listViewGroup392.Header = "Charging";
+            listViewGroup392.Name = "Charging";
+            listViewGroup393.Header = "Standby";
+            listViewGroup393.Name = "Standby";
+            listViewGroup394.Header = "Outbox";
+            listViewGroup394.Name = "Outbox";
+            listViewGroup395.Header = "Removed";
+            listViewGroup395.Name = "Removed";
+            listViewGroup396.Header = "Files";
+            listViewGroup396.Name = "File";
+            listViewGroup397.Header = "Devices";
+            listViewGroup397.Name = "Other";
+            listViewGroup398.Header = "New Data";
+            listViewGroup398.Name = "NewData";
+            listViewGroup399.Header = "Downloading";
+            listViewGroup399.Name = "Downloading";
+            listViewGroup400.Header = "Downloaded";
+            listViewGroup400.Name = "Downloaded";
+            listViewGroup401.Header = "Charging";
+            listViewGroup401.Name = "Charging";
+            listViewGroup402.Header = "Standby";
+            listViewGroup402.Name = "Standby";
+            listViewGroup403.Header = "Outbox";
+            listViewGroup403.Name = "Outbox";
+            listViewGroup404.Header = "Removed";
+            listViewGroup404.Name = "Removed";
+            listViewGroup405.Header = "Files";
+            listViewGroup405.Name = "File";
+            listViewGroup406.Header = "Devices";
+            listViewGroup406.Name = "Other";
+            listViewGroup407.Header = "New Data";
+            listViewGroup407.Name = "NewData";
+            listViewGroup408.Header = "Downloading";
+            listViewGroup408.Name = "Downloading";
+            listViewGroup409.Header = "Downloaded";
+            listViewGroup409.Name = "Downloaded";
+            listViewGroup410.Header = "Charging";
+            listViewGroup410.Name = "Charging";
+            listViewGroup411.Header = "Standby";
+            listViewGroup411.Name = "Standby";
+            listViewGroup412.Header = "Outbox";
+            listViewGroup412.Name = "Outbox";
+            listViewGroup413.Header = "Removed";
+            listViewGroup413.Name = "Removed";
+            listViewGroup414.Header = "Files";
+            listViewGroup414.Name = "File";
             this.devicesListView.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup1,
-            listViewGroup2,
-            listViewGroup3,
-            listViewGroup4,
-            listViewGroup5,
-            listViewGroup6,
-            listViewGroup7,
-            listViewGroup8,
-            listViewGroup9,
-            listViewGroup10,
-            listViewGroup11,
-            listViewGroup12,
-            listViewGroup13,
-            listViewGroup14,
-            listViewGroup15,
-            listViewGroup16,
-            listViewGroup17,
-            listViewGroup18,
-            listViewGroup19,
-            listViewGroup20,
-            listViewGroup21,
-            listViewGroup22,
-            listViewGroup23,
-            listViewGroup24,
-            listViewGroup25,
-            listViewGroup26,
-            listViewGroup27,
-            listViewGroup28,
-            listViewGroup29,
-            listViewGroup30,
-            listViewGroup31,
-            listViewGroup32,
-            listViewGroup33,
-            listViewGroup34,
-            listViewGroup35,
-            listViewGroup36,
-            listViewGroup37,
-            listViewGroup38,
-            listViewGroup39,
-            listViewGroup40,
-            listViewGroup41,
-            listViewGroup42,
-            listViewGroup43,
-            listViewGroup44,
-            listViewGroup45,
-            listViewGroup46,
-            listViewGroup47,
-            listViewGroup48,
-            listViewGroup49,
-            listViewGroup50,
-            listViewGroup51,
-            listViewGroup52,
-            listViewGroup53,
-            listViewGroup54,
-            listViewGroup55,
-            listViewGroup56,
-            listViewGroup57,
-            listViewGroup58,
-            listViewGroup59,
-            listViewGroup60,
-            listViewGroup61,
-            listViewGroup62,
-            listViewGroup63,
-            listViewGroup64,
-            listViewGroup65,
-            listViewGroup66,
-            listViewGroup67,
-            listViewGroup68,
-            listViewGroup69,
-            listViewGroup70,
-            listViewGroup71,
-            listViewGroup72,
-            listViewGroup73,
-            listViewGroup74,
-            listViewGroup75,
-            listViewGroup76,
-            listViewGroup77,
-            listViewGroup78,
-            listViewGroup79,
-            listViewGroup80,
-            listViewGroup81,
-            listViewGroup82,
-            listViewGroup83,
-            listViewGroup84,
-            listViewGroup85,
-            listViewGroup86,
-            listViewGroup87,
-            listViewGroup88,
-            listViewGroup89,
-            listViewGroup90,
-            listViewGroup91,
-            listViewGroup92,
-            listViewGroup93,
-            listViewGroup94,
-            listViewGroup95,
-            listViewGroup96,
-            listViewGroup97,
-            listViewGroup98,
-            listViewGroup99,
-            listViewGroup100,
-            listViewGroup101,
-            listViewGroup102,
-            listViewGroup103,
-            listViewGroup104,
-            listViewGroup105,
-            listViewGroup106,
-            listViewGroup107,
-            listViewGroup108,
-            listViewGroup109,
-            listViewGroup110,
-            listViewGroup111,
-            listViewGroup112,
-            listViewGroup113,
-            listViewGroup114,
-            listViewGroup115,
-            listViewGroup116,
-            listViewGroup117,
-            listViewGroup118,
-            listViewGroup119,
-            listViewGroup120,
-            listViewGroup121,
-            listViewGroup122,
-            listViewGroup123,
-            listViewGroup124,
-            listViewGroup125,
-            listViewGroup126,
-            listViewGroup127,
-            listViewGroup128,
-            listViewGroup129,
-            listViewGroup130,
-            listViewGroup131,
-            listViewGroup132,
-            listViewGroup133,
-            listViewGroup134,
-            listViewGroup135,
-            listViewGroup136,
-            listViewGroup137,
-            listViewGroup138,
-            listViewGroup139,
-            listViewGroup140,
-            listViewGroup141,
-            listViewGroup142,
-            listViewGroup143,
-            listViewGroup144,
-            listViewGroup145,
-            listViewGroup146,
-            listViewGroup147,
-            listViewGroup148,
-            listViewGroup149,
-            listViewGroup150,
-            listViewGroup151,
-            listViewGroup152,
-            listViewGroup153,
-            listViewGroup154,
-            listViewGroup155,
-            listViewGroup156,
-            listViewGroup157,
-            listViewGroup158,
-            listViewGroup159,
-            listViewGroup160,
-            listViewGroup161,
-            listViewGroup162,
-            listViewGroup163,
-            listViewGroup164,
-            listViewGroup165,
-            listViewGroup166,
-            listViewGroup167,
-            listViewGroup168,
-            listViewGroup169,
-            listViewGroup170,
-            listViewGroup171,
-            listViewGroup172,
-            listViewGroup173,
-            listViewGroup174,
-            listViewGroup175,
-            listViewGroup176,
-            listViewGroup177,
-            listViewGroup178,
-            listViewGroup179,
-            listViewGroup180,
-            listViewGroup181,
-            listViewGroup182,
-            listViewGroup183,
-            listViewGroup184,
-            listViewGroup185,
-            listViewGroup186,
-            listViewGroup187,
-            listViewGroup188,
-            listViewGroup189,
-            listViewGroup190,
-            listViewGroup191,
-            listViewGroup192,
-            listViewGroup193,
-            listViewGroup194,
-            listViewGroup195,
-            listViewGroup196,
-            listViewGroup197,
-            listViewGroup198});
+            listViewGroup208,
+            listViewGroup209,
+            listViewGroup210,
+            listViewGroup211,
+            listViewGroup212,
+            listViewGroup213,
+            listViewGroup214,
+            listViewGroup215,
+            listViewGroup216,
+            listViewGroup217,
+            listViewGroup218,
+            listViewGroup219,
+            listViewGroup220,
+            listViewGroup221,
+            listViewGroup222,
+            listViewGroup223,
+            listViewGroup224,
+            listViewGroup225,
+            listViewGroup226,
+            listViewGroup227,
+            listViewGroup228,
+            listViewGroup229,
+            listViewGroup230,
+            listViewGroup231,
+            listViewGroup232,
+            listViewGroup233,
+            listViewGroup234,
+            listViewGroup235,
+            listViewGroup236,
+            listViewGroup237,
+            listViewGroup238,
+            listViewGroup239,
+            listViewGroup240,
+            listViewGroup241,
+            listViewGroup242,
+            listViewGroup243,
+            listViewGroup244,
+            listViewGroup245,
+            listViewGroup246,
+            listViewGroup247,
+            listViewGroup248,
+            listViewGroup249,
+            listViewGroup250,
+            listViewGroup251,
+            listViewGroup252,
+            listViewGroup253,
+            listViewGroup254,
+            listViewGroup255,
+            listViewGroup256,
+            listViewGroup257,
+            listViewGroup258,
+            listViewGroup259,
+            listViewGroup260,
+            listViewGroup261,
+            listViewGroup262,
+            listViewGroup263,
+            listViewGroup264,
+            listViewGroup265,
+            listViewGroup266,
+            listViewGroup267,
+            listViewGroup268,
+            listViewGroup269,
+            listViewGroup270,
+            listViewGroup271,
+            listViewGroup272,
+            listViewGroup273,
+            listViewGroup274,
+            listViewGroup275,
+            listViewGroup276,
+            listViewGroup277,
+            listViewGroup278,
+            listViewGroup279,
+            listViewGroup280,
+            listViewGroup281,
+            listViewGroup282,
+            listViewGroup283,
+            listViewGroup284,
+            listViewGroup285,
+            listViewGroup286,
+            listViewGroup287,
+            listViewGroup288,
+            listViewGroup289,
+            listViewGroup290,
+            listViewGroup291,
+            listViewGroup292,
+            listViewGroup293,
+            listViewGroup294,
+            listViewGroup295,
+            listViewGroup296,
+            listViewGroup297,
+            listViewGroup298,
+            listViewGroup299,
+            listViewGroup300,
+            listViewGroup301,
+            listViewGroup302,
+            listViewGroup303,
+            listViewGroup304,
+            listViewGroup305,
+            listViewGroup306,
+            listViewGroup307,
+            listViewGroup308,
+            listViewGroup309,
+            listViewGroup310,
+            listViewGroup311,
+            listViewGroup312,
+            listViewGroup313,
+            listViewGroup314,
+            listViewGroup315,
+            listViewGroup316,
+            listViewGroup317,
+            listViewGroup318,
+            listViewGroup319,
+            listViewGroup320,
+            listViewGroup321,
+            listViewGroup322,
+            listViewGroup323,
+            listViewGroup324,
+            listViewGroup325,
+            listViewGroup326,
+            listViewGroup327,
+            listViewGroup328,
+            listViewGroup329,
+            listViewGroup330,
+            listViewGroup331,
+            listViewGroup332,
+            listViewGroup333,
+            listViewGroup334,
+            listViewGroup335,
+            listViewGroup336,
+            listViewGroup337,
+            listViewGroup338,
+            listViewGroup339,
+            listViewGroup340,
+            listViewGroup341,
+            listViewGroup342,
+            listViewGroup343,
+            listViewGroup344,
+            listViewGroup345,
+            listViewGroup346,
+            listViewGroup347,
+            listViewGroup348,
+            listViewGroup349,
+            listViewGroup350,
+            listViewGroup351,
+            listViewGroup352,
+            listViewGroup353,
+            listViewGroup354,
+            listViewGroup355,
+            listViewGroup356,
+            listViewGroup357,
+            listViewGroup358,
+            listViewGroup359,
+            listViewGroup360,
+            listViewGroup361,
+            listViewGroup362,
+            listViewGroup363,
+            listViewGroup364,
+            listViewGroup365,
+            listViewGroup366,
+            listViewGroup367,
+            listViewGroup368,
+            listViewGroup369,
+            listViewGroup370,
+            listViewGroup371,
+            listViewGroup372,
+            listViewGroup373,
+            listViewGroup374,
+            listViewGroup375,
+            listViewGroup376,
+            listViewGroup377,
+            listViewGroup378,
+            listViewGroup379,
+            listViewGroup380,
+            listViewGroup381,
+            listViewGroup382,
+            listViewGroup383,
+            listViewGroup384,
+            listViewGroup385,
+            listViewGroup386,
+            listViewGroup387,
+            listViewGroup388,
+            listViewGroup389,
+            listViewGroup390,
+            listViewGroup391,
+            listViewGroup392,
+            listViewGroup393,
+            listViewGroup394,
+            listViewGroup395,
+            listViewGroup396,
+            listViewGroup397,
+            listViewGroup398,
+            listViewGroup399,
+            listViewGroup400,
+            listViewGroup401,
+            listViewGroup402,
+            listViewGroup403,
+            listViewGroup404,
+            listViewGroup405,
+            listViewGroup406,
+            listViewGroup407,
+            listViewGroup408,
+            listViewGroup409,
+            listViewGroup410,
+            listViewGroup411,
+            listViewGroup412,
+            listViewGroup413,
+            listViewGroup414});
             this.devicesListView.HideSelection = false;
             this.devicesListView.LabelWrap = false;
             this.devicesListView.Location = new System.Drawing.Point(0, 0);
@@ -2006,6 +2044,14 @@
             // 
             this.backgroundWorkerUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerUpdate_DoWork);
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Image = global::OmGui.Properties.Resources.EditBrightContrastHS;
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(230, 26);
+            this.toolStripMenuItem2.Text = "Calculate &Sleep Time...";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripButtonSleep_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -2173,6 +2219,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripButtonCSV;
         private System.Windows.Forms.ToolStripMenuItem toolStripButtonExport;
         private System.Windows.Forms.ToolStripButton toolStripButtonSleep;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
     }
 }
 
