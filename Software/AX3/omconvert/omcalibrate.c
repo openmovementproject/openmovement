@@ -189,6 +189,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 			int sectorIndex = dataSegment->sectorIndex[sectorWithinSegment];
 
 #if 1
+
 			if (sectorIndex != lastSectorIndex)
 			{
 				lastSectorIndex = sectorIndex;
@@ -212,9 +213,9 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 					nextTimestampValue = newTimestampValue;
 				}
 			}
-
+			
 			// If we only have one timestamp to estimate from
-			int elapsedSamples = sample - lastTimestampSample;
+			int elapsedSamples = sample - lastTimestampSample + 1;
 			if (nextTimestampSample <= lastTimestampSample)
 			{
 				currentTime = lastTimestampValue + (elapsedSamples / sampleRate);
@@ -346,6 +347,18 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 			{
 				consecutive = 0;
 			}
+
+#if 0
+			// Debug out of time delta
+			static int windowNumber = 0;
+			static double lastTime = -1;
+			if (lastTime < 0) { lastTime = currentTime; }
+			double deltaTime = currentTime - lastTime;
+			if (stationary)
+				printf("WINDOW: %d, from=%.3f, to=%.3f, period=%.3f\n", windowNumber++, lastTime, currentTime, deltaTime);
+			lastTime = currentTime;
+			windowNumber++;
+#endif
 
 			// Create new point
 			if (stationary)

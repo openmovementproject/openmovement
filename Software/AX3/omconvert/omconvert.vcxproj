@@ -86,6 +86,7 @@
     <ClCompile Include="butter4bp.c" />
     <ClCompile Include="calc-csv.c" />
     <ClCompile Include="calc-paee.c" />
+    <ClCompile Include="calc-sleep.c" />
     <ClCompile Include="calc-svm.c" />
     <ClCompile Include="calc-wtv.c" />
     <ClCompile Include="linearregression.c" />
@@ -99,6 +100,7 @@
     <ClInclude Include="butter4bp.h" />
     <ClInclude Include="calc-csv.h" />
     <ClInclude Include="calc-paee.h" />
+    <ClInclude Include="calc-sleep.h" />
     <ClInclude Include="calc-svm.h" />
     <ClInclude Include="calc-wtv.h" />
     <ClInclude Include="linearregression.h" />

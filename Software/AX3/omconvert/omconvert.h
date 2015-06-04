@@ -71,6 +71,9 @@ typedef struct
 	int paeeEpoch;			// in minutes
 	char paeeFilter;		// 0=off, 1=band-pass (0.2-50 Hz)
 
+	// Sleep
+	const char *sleepFilename;
+
 } omconvert_settings_t;
 
 

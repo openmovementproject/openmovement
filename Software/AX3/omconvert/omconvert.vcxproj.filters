@@ -36,16 +36,19 @@
     <ClCompile Include="linearregression.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="svm.c">
+    <ClCompile Include="calc-csv.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wtv.c">
+    <ClCompile Include="calc-paee.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="paee.c">
+    <ClCompile Include="calc-svm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="csv.c">
+    <ClCompile Include="calc-wtv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="calc-sleep.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,16 +71,19 @@
     <ClInclude Include="linearregression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="svm.h">
+    <ClInclude Include="calc-csv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wtv.h">
+    <ClInclude Include="calc-paee.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="paee.h">
+    <ClInclude Include="calc-svm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="csv.h">
+    <ClInclude Include="calc-wtv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="calc-sleep.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

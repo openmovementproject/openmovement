@@ -55,11 +55,14 @@
 
 #define CONVERT_VERSION 1
 
+// Calculations
 #include "calc-csv.h"
 #include "calc-svm.h"
 #include "calc-wtv.h"
 #include "calc-paee.h"
+#include "calc-sleep.h"
 
+// Calculation state
 typedef struct
 {
 	// CSV
@@ -81,6 +84,12 @@ typedef struct
 	paee_configuration_t paeeConfiguration;
 	paee_status_t paeeStatus;
 	int paeeOk;
+
+	// Sleep
+	sleep_configuration_t sleepConfiguration;
+	sleep_status_t sleepStatus;
+	int sleepOk;
+
 } calc_t;
 
 
@@ -116,36 +125,54 @@ static void CalcCreate(calc_t *calc, omconvert_settings_t *settings)
 	calc->paeeConfiguration.minuteEpochs = settings->paeeEpoch;
 	calc->paeeConfiguration.filter = settings->paeeFilter;
 
+	// Sleep status
+	memset(&calc->sleepConfiguration, 0, sizeof(sleep_configuration_t));
+	calc->sleepConfiguration.headerCsv = settings->headerCsv;
+	calc->sleepConfiguration.filename = settings->sleepFilename;
+
 	return;
 }
 
 static int CalcInit(calc_t *calc, double sampleRate, double startTime)
 {
+	int ok = 0;
+
 	// Init. CSV
 	memset(&calc->csvStatus, 0, sizeof(csv_status_t));
 	calc->csvConfiguration.sampleRate = sampleRate;
 	calc->csvConfiguration.startTime = startTime;
 	calc->csvOk = CsvInit(&calc->csvStatus, &calc->csvConfiguration);
+	ok |= calc->csvOk;
 
 	// Init. SVM
 	memset(&calc->svmStatus, 0, sizeof(svm_status_t));
 	calc->svmConfiguration.sampleRate = sampleRate;
 	calc->svmConfiguration.startTime = startTime;
 	calc->svmOk = SvmInit(&calc->svmStatus, &calc->svmConfiguration);
+	ok |= calc->svmOk;
 
 	// Init. WTV
 	memset(&calc->wtvStatus, 0, sizeof(wtv_status_t));
 	calc->wtvConfiguration.sampleRate = sampleRate;
 	calc->wtvConfiguration.startTime = startTime;
 	calc->wtvOk = WtvInit(&calc->wtvStatus, &calc->wtvConfiguration);
+	ok |= calc->wtvOk;
 
 	// Init. PAEE
 	memset(&calc->paeeStatus, 0, sizeof(paee_status_t));
 	calc->paeeConfiguration.sampleRate = sampleRate;
 	calc->paeeConfiguration.startTime = startTime;
 	calc->paeeOk = PaeeInit(&calc->paeeStatus, &calc->paeeConfiguration);
+	ok |= calc->paeeOk;
 
-	return (calc->svmOk | calc->wtvOk | calc->paeeOk | calc->csvOk);		// Whether any processing outputs are used
+	// Init. Sleep
+	memset(&calc->sleepStatus, 0, sizeof(sleep_status_t));
+	calc->sleepConfiguration.sampleRate = sampleRate;
+	calc->sleepConfiguration.startTime = startTime;
+	calc->sleepOk = SleepInit(&calc->sleepStatus, &calc->sleepConfiguration);
+	ok |= calc->sleepOk;
+
+	return ok;		// Whether any processing outputs are used
 }
 
 
@@ -156,6 +183,7 @@ static bool CalcAddValue(calc_t *calc, double* accel, double temp, bool valid)
 	if (calc->wtvOk) { ok &= WtvAddValue(&calc->wtvStatus, accel, temp, valid); }
 	if (calc->paeeOk) { ok &= PaeeAddValue(&calc->paeeStatus, accel, temp, valid); }
 	if (calc->csvOk) { ok &= CsvAddValue(&calc->csvStatus, accel, temp, valid); }
+	if (calc->sleepOk) { ok &= SleepAddValue(&calc->sleepStatus, accel, temp, valid); }
 	return ok;
 }
 
@@ -166,6 +194,7 @@ static void CalcClose(calc_t *calc)
 	if (calc->wtvOk) { WtvClose(&calc->wtvStatus); }
 	if (calc->paeeOk) { PaeeClose(&calc->paeeStatus); }
 	if (calc->csvOk) { CsvClose(&calc->csvStatus); }
+	if (calc->sleepOk) { SleepClose(&calc->sleepStatus); }
 }
 
 
@@ -419,10 +448,11 @@ double TimeNow()
 	return ((unsigned long long)tp.time * 1000 + tp.millitm) / 1000.0;
 }
 
-const char *TimeString(double t)
+#define MAX_TIME_STRING 26
+const char *TimeString(double t, char *buff)
 {
-	// 2000-01-01 20:00:00.000|
-	static char buff[26] = { 0 };
+	static char staticBuffer[MAX_TIME_STRING] = { 0 };	// 2000-01-01 20:00:00.000|
+	if (buff == NULL) { buff = staticBuffer; }
 	time_t tn = (time_t)t;
 	struct tm *tmn = gmtime(&tn);
 	float sec = tmn->tm_sec + (float)(t - (time_t)t);
@@ -509,8 +539,8 @@ int OmConvertFindArrangement(om_convert_arrangement_t *arrangement, omconvert_se
 	double limit = 15.000;
 	if (omdata->metadata.recordingStart < omdata->metadata.recordingStop && (omdata->metadata.recordingStop - omdata->metadata.recordingStart) > 2 * limit)
 	{
-		if (fabs(arrangement->startTime - omdata->metadata.recordingStart) < limit) { arrangement->startTime = omdata->metadata.recordingStart; fprintf(stderr, "Clamping session to recording start time (%s)...\n", TimeString(omdata->metadata.recordingStart)); }
-		if (fabs(arrangement->endTime - omdata->metadata.recordingStop) < limit) { arrangement->endTime = omdata->metadata.recordingStop; fprintf(stderr, "Clamping session to recording stop time (%s)...\n", TimeString(omdata->metadata.recordingStop)); }
+		if (fabs(arrangement->startTime - omdata->metadata.recordingStart) < limit) { arrangement->startTime = omdata->metadata.recordingStart; fprintf(stderr, "Clamping session to recording start time (%s)...\n", TimeString(omdata->metadata.recordingStart, NULL)); }
+		if (fabs(arrangement->endTime - omdata->metadata.recordingStop) < limit) { arrangement->endTime = omdata->metadata.recordingStop; fprintf(stderr, "Clamping session to recording stop time (%s)...\n", TimeString(omdata->metadata.recordingStop, NULL)); }
 	}
 
 	arrangement->duration = arrangement->endTime - arrangement->startTime;
@@ -711,7 +741,7 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 		if (strncmp(commentLines[i], "Time:", 5) == 0) 
 		{
 			startTime = ParseTime(commentLines[i] + 5);
-			fprintf(stderr, "Time: %s\n", TimeString(startTime));
+			fprintf(stderr, "Time: %s\n", TimeString(startTime, NULL));
 			if (startTime > 0) { parsedTime = true; }
 		}
 		else if (strncmp(commentLines[i], "Scale-", 6) == 0 && (commentLines[i][6] >= '1' && commentLines[i][6] <= '9') && commentLines[i][7] == ':')
@@ -934,6 +964,8 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			);
 
 		// Metadata - [Title "INAM" WAV chunk] Data about the recording configuration
+		char startTime[MAX_TIME_STRING] = { 0 };	// 2000-01-01 20:00:00.000|
+		char stopTime[MAX_TIME_STRING] = { 0 };	// 2000-01-01 20:00:00.000|
 		char name[WAV_META_LENGTH] = { 0 };
 		sprintf(name,
 			"Session: %u\n"
@@ -942,15 +974,15 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			"Config-A: %d,%d\n"
 			"Metadata: %s",
 			(unsigned int)omdata.metadata.sessionId,
-			TimeString(omdata.metadata.recordingStart),
-			TimeString(omdata.metadata.recordingStop),
+			TimeString(omdata.metadata.recordingStart, startTime),
+			TimeString(omdata.metadata.recordingStop, stopTime),
 			omdata.metadata.configAccel.frequency, omdata.metadata.configAccel.sensitivity,
 			omdata.metadata.metadata
 			);
 
 		// Metadata - [Creation date "ICRD" WAV chunk] - Specify the time of the first sample (also in the comment for Matlab)
 		char datetime[WAV_META_LENGTH] = { 0 };
-		sprintf(datetime, "%s", TimeString(arrangement.startTime));
+		sprintf(datetime, "%s", TimeString(arrangement.startTime, NULL));
 
 		// Metadata - [Comment "ICMT" WAV chunk] Data about this file representation
 		char comment[WAV_META_LENGTH] = { 0 };
@@ -963,7 +995,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			"Channel-3: Accel-Z\n"
 			"Scale-3: %d\n"
 			"Channel-4: Aux",
-			TimeString(arrangement.startTime),
+			TimeString(arrangement.startTime, NULL),
 			outputAccelRange,
 			outputAccelRange,
 			outputAccelRange
@@ -1023,7 +1055,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 				fprintf(infofp, "::: Data about the conversion process\n");
 				fprintf(infofp, "Result-file-version: %d\n", 1);
 				fprintf(infofp, "Convert-version: %d\n", CONVERT_VERSION);
-				fprintf(infofp, "Processed: %s\n", TimeString(TimeNow()));
+				fprintf(infofp, "Processed: %s\n", TimeString(TimeNow(), NULL));
 				fprintf(infofp, "File-input: %s\n", settings->filename);
 				fprintf(infofp, "File-output: %s\n", settings->outFilename);
 				fprintf(infofp, "Results-output: %s\n", settings->infoFilename);

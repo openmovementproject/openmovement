@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-paee-epoch") == 0) { settings.paeeEpoch = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-paee-filter") == 0) { settings.paeeFilter = atoi(argv[++i]); }
 
+		else if (strcmp(argv[i], "-sleep-file") == 0) { settings.sleepFilename = argv[++i]; }
+
 		else if (argv[i][0] == '-')
 		{
 			fprintf(stderr, "Unknown option: %s\n", argv[i]);
@@ -177,6 +179,8 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-paee-model <0=wrist, 1=right wrist, 2=left wrist, 3=waist>\n");
 		fprintf(stderr, "\t-paee-epoch <minutes (default 1)>\n");
 		fprintf(stderr, "\t-paee-filter <0=off, 1=BP 0.5-20 Hz (default)>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-sleep-file <filename.sleep.csv>\n");
 		fprintf(stderr, "\n");
 
 		ret = EXIT_USAGE;
