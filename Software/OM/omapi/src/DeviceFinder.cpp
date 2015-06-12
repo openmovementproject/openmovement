@@ -128,7 +128,7 @@ bool DeviceFinder::Initialize(void)
 
     // Set COM security levels
     hr =  CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-	if (FAILED(hr)) { Log(0, "WARNING: Failed to initialize security: 0x%08x\n", hr); }
+	if (FAILED(hr)) { Log(0, "NOTE: Initialize security result: 0x%08x\n", hr); }
 
     // Obtain the WMI initial locator
     hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);

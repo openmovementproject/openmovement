@@ -3783,6 +3783,8 @@ Application.DoEvents();
 
         private void BackgroundTaskStatus(bool active)
         {
+// HACK: Put this back (fix problem - perhaps only if log window open?)
+/*
             if (InvokeRequired)
             {
                 this.Invoke((MethodInvoker)delegate
@@ -3792,6 +3794,7 @@ Application.DoEvents();
                 return;
             }
             toolStripBackgroundTask.Visible = active;
+*/
         }
 
         private void backgroundWorkerUpdate_DoWork(object sender, DoWorkEventArgs e)

@@ -438,179 +438,214 @@ unsigned long OmMilliseconds(void)
 }
 
 
-/** Internal method to open a serial port */
+
+#ifdef _WIN32
+
+#define NUM_RETRIES_OPEN 5
+
+/** (Win32-specific) Internal method to open a serial port */
 static int OmPortOpen(const char *infile, char writeable)
 {
-    int fd = -1;        // fd = fileno(stdin);
+	int retries = 0;
+	int fd = -1;        // fd = fileno(stdin);
 
-    if (infile != NULL && infile[0] != '\0')
-    {
-#ifdef _WIN32
-        int flags = O_BINARY;
+	if (infile != NULL && infile[0] == '\0') { return -1; }		// Invalid parameter
+
+	// Attempt to open the port, retrying on failure.
+	for (;;)
+	{
+		int flags;
+
+		// If retrying and already open, close the port.
+		if (fd >= 0) { close(fd); fd = -1; }
+
+		// If we have any attempts left
+		if (retries > NUM_RETRIES_OPEN) { break; }
+		else if (retries > 0) { OmLog(0, "NOTE: Retry %d to open: %s\n", retries, infile); }
+		retries++;
+
+		//OmLog(0, "Opening with retries: %s\n", infile);
+		flags = O_BINARY;
+		flags |= (writeable) ? O_RDWR : O_RDONLY;
+		fd = open(infile, flags);
+		if (fd < 0)
+		{
+			OmLog(0, "ERROR: Problem opening input (%s: %d): %s\n", (errno == ENOENT ? "ENOENT" : (errno == EACCES ? "EACCES" : "other: ")), errno, infile);
+			continue;
+		}
+
+		/* Set serial port parameters (OS-specific) */
+		{
+			HANDLE hSerial;
+			DCB dcbSerialParams = { 0 };
+			COMMTIMEOUTS timeouts = { 0 };
+			char dcbOk;
+
+			hSerial = (HANDLE)_get_osfhandle(fd);
+			if (hSerial == INVALID_HANDLE_VALUE)
+			{
+				OmLog(0, "WARNING: Failed to get HANDLE from file: %s\n", infile);
+				continue;		// retry
+			}
+
+			// Always call ClearCommError() here
+			{
+				DWORD comErrors = 0;
+				COMSTAT comStat = { 0 };
+				ClearCommError(hSerial, &comErrors, &comStat);
+			}
+
+			if (SetupComm(hSerial, 4096, 4096) == 0)
+			{
+				OmLog(0, "WARNING: SetupComm() failed: %s\n", infile);
+				continue;		// retry
+			}
+
+			if (PurgeComm(hSerial, PURGE_TXABORT | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_RXCLEAR) == 0)
+			{
+				OmLog(0, "WARNING: PurgeComm() failed.\n");
+				continue;		// retry
+			}
+
+			if (ClearCommBreak(hSerial) == 0)
+			{
+				//OmLog(0, "NOTE: ClearCommBreak() failed.\n");
+			}
+
+			dcbOk = 0;
+			dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+			if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
+
+			if (!dcbOk)
+			{
+				// If GetCommState() failed with error 995, call ClearCommError() before retrying
+				DWORD comErrors = 0;
+				COMSTAT comStat = { 0 };
+				OmLog(0, "WARNING: GetCommState() failed (clearing errors and retrying this): %s\n", infile);
+				ClearCommError(hSerial, &comErrors, &comStat);
+				if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
+			}
+
+			if (!dcbOk)
+			{
+				OmLog(0, "WARNING: Retrying GetCommState() failed: %s\n", infile);
+				continue;		// retry
+			}
+
+			//dcbSerialParams.BaudRate = CBR_115200;
+			dcbSerialParams.fBinary = TRUE;
+			dcbSerialParams.fParity = FALSE;
+			dcbSerialParams.fOutxCtsFlow = FALSE;
+			dcbSerialParams.fOutxDsrFlow = FALSE;
+			dcbSerialParams.fDtrControl = DTR_CONTROL_DISABLE;
+			dcbSerialParams.fDsrSensitivity = FALSE;
+			dcbSerialParams.fTXContinueOnXoff = FALSE;
+			dcbSerialParams.fOutX = FALSE;
+			dcbSerialParams.fInX = FALSE;
+			dcbSerialParams.fErrorChar = FALSE;
+			dcbSerialParams.fNull = FALSE;
+			dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
+			dcbSerialParams.fAbortOnError = 0;  // SetDcbFlag bit 14 to zero (clears fAbortOnError).
+			//dcbSerialParams.fDummy2 = <do-not-use>;
+			dcbSerialParams.wReserved = 0;
+			dcbSerialParams.XonLim = 0;
+			dcbSerialParams.XoffLim = 0;
+			dcbSerialParams.ByteSize = 8;
+			dcbSerialParams.Parity = NOPARITY;
+			dcbSerialParams.StopBits = ONESTOPBIT;
+			//dcbSerialParams.XonChar;
+			//dcbSerialParams.XoffChar;
+			dcbSerialParams.ErrorChar = 0;
+			//dcbSerialParams.EofChar;
+			//dcbSerialParams.EvtChar;
+			//dcbSerialParams.wReserved1;
+
+			if (!SetCommState(hSerial, &dcbSerialParams))
+			{
+				// If SetCommState() failed with error 995, call ClearCommError() before retrying
+				DWORD comErrors = 0;
+				COMSTAT comStat = { 0 };
+				OmLog(0, "WARNING: SetCommState() failed (clearing errors and retrying this): %s\n", infile);
+				ClearCommError(hSerial, &comErrors, &comStat);
+				if (SetCommState(hSerial, &dcbSerialParams))
+				{
+					OmLog(0, "WARNING: Retrying SetCommState() failed: %s\n", infile);
+					continue;		// retry
+				}
+			};
+
+			//PurgeComm(PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR);
+			//ClearCommBreak(hFile);
+			//FlushFileBuffers();
+
+			timeouts.ReadIntervalTimeout = 0;
+#define TIMEOUT_CONSTANT 20
+#ifdef TIMEOUT_CONSTANT
+			timeouts.ReadTotalTimeoutConstant = TIMEOUT_CONSTANT;
 #else
-        int flags = O_NOCTTY | O_NDELAY;
+			timeouts.ReadTotalTimeoutConstant = 20;
 #endif
-        flags |= (writeable) ? O_RDWR : O_RDONLY;
+			timeouts.ReadTotalTimeoutMultiplier = 0;
+			timeouts.WriteTotalTimeoutConstant = 2500;
+			timeouts.WriteTotalTimeoutMultiplier = 0;
+			if (!SetCommTimeouts(hSerial, &timeouts))
+			{
+				OmLog(0, "WARNING: SetCommTimeouts() failed: %s\n", infile);
+				continue;		// retry
+			}
 
-        fd = open(infile, flags);
-        if (fd < 0)
-        {
-            if (errno == ENOENT) { OmLog(0, "ERROR: Problem opening input (ENOENT): %s\n", infile); }
-            else if (errno == EACCES) { OmLog(0, "ERROR: Problem opening input (EACCES): %s\n", infile); }
-            else { OmLog(0, "ERROR: Problem opening input (other): %s\n", infile); }
-            return -1;
-        }
+			//GetCommProperties();
 
-        /* Set serial port parameters (OS-specific) */
-#ifdef _WIN32
-        {
-            HANDLE hSerial;
-            DCB dcbSerialParams = {0};
-            COMMTIMEOUTS timeouts = {0};
+		}
 
-            hSerial = (HANDLE)_get_osfhandle(fd);
-            if (hSerial == INVALID_HANDLE_VALUE)
-            {
-                OmLog(0, "ERROR: Failed to get HANDLE from file.\n");
-            }
-            else
-            {
-                char dcbOk;
+		// Everything went OK, return handle.
+		return fd;
+	}
 
-#if 1
-                // Always call ClearCommError() here
-                {
-                    DWORD comErrors = 0;
-                    COMSTAT comStat = {0};
-                    ClearCommError(hSerial, &comErrors, &comStat);
-                }
-#endif
-
-#if 1
-				if (SetupComm(hSerial, 4096, 4096) == 0)
-				{
-                    OmLog(0, "NOTE: SetupComm() failed.\n");
-				}
-#endif
-
-#if 1
-				if (PurgeComm(hSerial, PURGE_TXABORT|PURGE_TXCLEAR|PURGE_RXABORT|PURGE_RXCLEAR) == 0)
-				{
-                    OmLog(0, "NOTE: PurgeComm() failed.\n");
-				}
-#endif
-
-#if 1
-				if (ClearCommBreak(hSerial) == 0)
-				{
-                    //OmLog(0, "NOTE: ClearCommBreak() failed.\n");
-				}
-#endif
-
-
-				dcbOk = 0;
-                dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-                if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
-
-                if (!dcbOk)
-                {
-                    // If GetCommState() failed with error 995, call ClearCommError() before retrying
-                    DWORD comErrors = 0;
-                    COMSTAT comStat = {0};
-                    OmLog(0, "WARNING: GetCommState() failed (clearing errors and retrying).\n");
-                    ClearCommError(hSerial, &comErrors, &comStat);
-                    if (GetCommState(hSerial, &dcbSerialParams)) { dcbOk = 1; }
-                }
-
-                if (!dcbOk)
-                {
-                    OmLog(0, "ERROR: GetCommState() failed.\n");
-                }
-                else
-                {
-                    //dcbSerialParams.BaudRate = CBR_115200;
-                    dcbSerialParams.fBinary = TRUE;
-                    dcbSerialParams.fParity = FALSE;
-                    dcbSerialParams.fOutxCtsFlow = FALSE;
-                    dcbSerialParams.fOutxDsrFlow = FALSE;
-                    dcbSerialParams.fDtrControl = DTR_CONTROL_DISABLE;
-                    dcbSerialParams.fDsrSensitivity = FALSE;
-                    dcbSerialParams.fTXContinueOnXoff = FALSE;
-                    dcbSerialParams.fOutX = FALSE;
-                    dcbSerialParams.fInX = FALSE;
-                    dcbSerialParams.fErrorChar = FALSE;
-                    dcbSerialParams.fNull = FALSE;
-                    dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
-                    dcbSerialParams.fAbortOnError = 0;  // SetDcbFlag bit 14 to zero (clears fAbortOnError).
-                    //dcbSerialParams.fDummy2 = <do-not-use>;
-                    dcbSerialParams.wReserved = 0;
-                    dcbSerialParams.XonLim = 0;
-                    dcbSerialParams.XoffLim = 0;
-                    dcbSerialParams.ByteSize = 8;
-                    dcbSerialParams.Parity = NOPARITY;
-                    dcbSerialParams.StopBits = ONESTOPBIT;
-                    //dcbSerialParams.XonChar;
-                    //dcbSerialParams.XoffChar;
-                    dcbSerialParams.ErrorChar = 0;
-                    //dcbSerialParams.EofChar;
-                    //dcbSerialParams.EvtChar;
-                    //dcbSerialParams.wReserved1;
-
-                    if (!SetCommState(hSerial, &dcbSerialParams))
-                    {
-                        // If SetCommState() failed with error 995, call ClearCommError() before retrying
-                        DWORD comErrors = 0;
-                        COMSTAT comStat = {0};
-                        OmLog(0, "WARNING: SetCommState() failed (clearing errors and retrying).\n");
-                        ClearCommError(hSerial, &comErrors, &comStat);
-                        if (SetCommState(hSerial, &dcbSerialParams))
-                        {
-                            OmLog(0, "ERROR: SetCommState() failed.\n");
-                        }
-                    };
-                }
-
-
-//PurgeComm(PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR);
-//ClearCommBreak(hFile);
-//FlushFileBuffers();
-
-
-                timeouts.ReadIntervalTimeout = 0;
-				#define TIMEOUT_CONSTANT 20
-				#ifdef TIMEOUT_CONSTANT
-					timeouts.ReadTotalTimeoutConstant = TIMEOUT_CONSTANT;
-				#else
-					timeouts.ReadTotalTimeoutConstant = 20;
-				#endif
-                timeouts.ReadTotalTimeoutMultiplier = 0;
-                timeouts.WriteTotalTimeoutConstant = 2500;
-                timeouts.WriteTotalTimeoutMultiplier = 0;
-                if (!SetCommTimeouts(hSerial, &timeouts))
-                {
-                    OmLog(0, "ERROR: SetCommTimeouts() failed.\n");
-                }
-
-//GetCommProperties();
-
-            }
-        }
-#else
-        fcntl(fd, F_SETFL, 0);    /* Clear all descriptor flags */
-        /* Set the port options */
-        {
-            struct termios options;
-            tcgetattr(fd, &options);
-            options.c_cflag = (options.c_cflag | CLOCAL | CREAD | CS8) & ~(PARENB | CSTOPB | CSIZE | CRTSCTS);
-            options.c_lflag &= ~(ICANON | ECHO | ISIG); /* Enable data to be processed as raw input */
-            tcsetattr(fd, TCSANOW, &options);
-#warning "Must set up serial port timeout values"
-        }
-#endif
-
-    }
-    return fd;
+	// Failed, even after retries
+	OmLog(0, "ERROR: Open failed: %s\n", infile);
+	return -1;
 }
+
+#else
+
+/** (Non-Windows) Internal method to open a serial port */
+static int OmPortOpen(const char *infile, char writeable)
+{
+	int fd = -1;        // fd = fileno(stdin);
+	int flags;
+
+	if (infile == NULL && infile[0] == '\0') { return -1; }
+
+	flags = O_NOCTTY | O_NDELAY;
+	flags |= (writeable) ? O_RDWR : O_RDONLY;
+
+	fd = open(infile, flags);
+	if (fd < 0)
+	{
+		if (errno == ENOENT) { OmLog(0, "ERROR: Problem opening input (ENOENT): %s\n", infile); }
+		else if (errno == EACCES) { OmLog(0, "ERROR: Problem opening input (EACCES): %s\n", infile); }
+		else { OmLog(0, "ERROR: Problem opening input (other): %s\n", infile); }
+		return -1;
+	}
+
+	/* Set serial port parameters (OS-specific) */
+	fcntl(fd, F_SETFL, 0);    /* Clear all descriptor flags */
+	/* Set the port options */
+	{
+		struct termios options;
+		tcgetattr(fd, &options);
+		options.c_cflag = (options.c_cflag | CLOCAL | CREAD | CS8) & ~(PARENB | CSTOPB | CSIZE | CRTSCTS);
+		options.c_lflag &= ~(ICANON | ECHO | ISIG); /* Enable data to be processed as raw input */
+		tcsetattr(fd, TCSANOW, &options);
+		#warning "Must set up serial port timeout values"
+	}
+
+	return fd;
+}
+
+#endif
+
 
 
 /** Internal method to read a line from the device */

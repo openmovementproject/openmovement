@@ -35,8 +35,6 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="OmApiNet, Version=1.4.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\OmApiNet.dll</HintPath>
@@ -88,13 +86,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\omapinet\bin\Release\libomapi.dll">
+      <Link>libomapi.dll</Link>
+    </Content>
+    <Content Include="..\omapinet\bin\Release\OmApiNet.dll">
+      <Link>OmApiNet.dll</Link>
+    </Content>
     <Content Include="Icon.ico" />
-    <Content Include="libomapi.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="OmApiNet.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

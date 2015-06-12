@@ -227,32 +227,33 @@ category = SourceCategory.Other;
 
             if (!validData)
             {
-                bool error = false;
+                int error = 0;
                 int res;
 
                 // TODO: Error checking
                 res = OmApi.OmGetVersion(deviceId, out firmwareVersion, out hardwareVersion);
-                error |= OmApi.OM_FAILED(res);
+                error |= (OmApi.OM_FAILED(res) ? 0x01 : 0);
                  
                 uint time;
                 res = OmApi.OmGetTime(deviceId, out time);
-                error |= OmApi.OM_FAILED(res);
+                error |= (OmApi.OM_FAILED(res) ? 0x02 : 0);
                 timeDifference = (OmApi.OmDateTimeUnpack(time) - now);
 
                 uint startTimeValue, stopTimeValue;
                 res = OmApi.OmGetDelays(deviceId, out startTimeValue, out stopTimeValue);
-                error |= OmApi.OM_FAILED(res);
+                error |= (OmApi.OM_FAILED(res) ? 0x04 : 0);
                 startTime = OmApi.OmDateTimeUnpack(startTimeValue);
                 stopTime = OmApi.OmDateTimeUnpack(stopTimeValue);
 
                 res = OmApi.OmGetSessionId(deviceId, out sessionId);
-                error |= OmApi.OM_FAILED(res);
+                error |= (OmApi.OM_FAILED(res) ? 0x08 : 0);
 
-error = false;      // Ignore error here as retrying won't help up (log to console)
-Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId);
+if (error != 0) { Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId + " (code " + error + ")"); }
+
+error = 0;      // HACK: Ignore error here as retrying won't help up (log to console)
 
                 changed = true;
-                if (!error) { validData = true; }
+                if (error == 0) { validData = true; }
             }
 
             if (lastBatteryUpdate == DateTime.MinValue || (now - lastBatteryUpdate) > TimeSpan.FromSeconds(60.0f))
