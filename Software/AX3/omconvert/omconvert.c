@@ -986,15 +986,23 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			int i;
 			for (i = 0; i < stationaryPoints->numValues; i++)
 			{
+				char timestring[24];	// 2000-01-01 12:00:00.000\0
+				time_t tn = (time_t)stationaryPoints->values[i].time;
+				struct tm *tmn = gmtime(&tn);
+				float sec = tmn->tm_sec + (float)(stationaryPoints->values[i].time - (time_t)stationaryPoints->values[i].time);
+				sprintf(timestring, "%04d-%02d-%02d %02d:%02d:%02d", 1900 + tmn->tm_year, tmn->tm_mon + 1, tmn->tm_mday, tmn->tm_hour, tmn->tm_min, (int)sec);	// (int)((sec - (int)sec) * 1000)
+
 				double temp = stationaryPoints->values[i].actualTemperature;
 				int c;
+				if (sfp != NULL) { fprintf(sfp, "%s", timestring); }
 				for (c = 0; c < OMCALIBRATE_AXES; c++)
 				{
 					double v = stationaryPoints->values[i].mean[c];
-					if (sfp != NULL) { fprintf(sfp, "%s%.10f", c == 0 ? "" : ",", v); }
+					if (sfp != NULL) { fprintf(sfp, ",%.10f", v); }
 					if (i == 0 || v < stationaryMin[c]) { stationaryMin[c] = v; }
 					if (i == 0 || v > stationaryMax[c]) { stationaryMax[c] = v; }
 				}
+				if (sfp != NULL) { fprintf(sfp, ",%.10f", stationaryPoints->values[i].actualTemperature); }
 				if (sfp != NULL) { fprintf(sfp, "\n"); }
 			}
 			if (sfp != NULL) { fclose(sfp); }
