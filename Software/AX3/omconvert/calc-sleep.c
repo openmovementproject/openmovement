@@ -82,7 +82,7 @@ static const char *TimeString(double t, char *buff)
 // Load data
 char SleepInit(sleep_status_t *status, sleep_configuration_t *configuration)
 {
-	memset(status, 0, sizeof(status));
+	memset(status, 0, sizeof(sleep_status_t));
 	status->configuration = configuration;
 
 	if (configuration->summaryEpochs <= 0) { configuration->summaryEpochs = 1; }

@@ -992,7 +992,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 				float sec = tmn->tm_sec + (float)(stationaryPoints->values[i].time - (time_t)stationaryPoints->values[i].time);
 				sprintf(timestring, "%04d-%02d-%02d %02d:%02d:%02d", 1900 + tmn->tm_year, tmn->tm_mon + 1, tmn->tm_mday, tmn->tm_hour, tmn->tm_min, (int)sec);	// (int)((sec - (int)sec) * 1000)
 
-				double temp = stationaryPoints->values[i].actualTemperature;
+				//double temp = stationaryPoints->values[i].actualTemperature;
 				int c;
 				if (sfp != NULL) { fprintf(sfp, "%s", timestring); }
 				for (c = 0; c < OMCALIBRATE_AXES; c++)
@@ -1056,7 +1056,8 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 
 		// Metadata - channel assignment and scale
 		int chan = 0;
-		for (int axis = 0; axis < arrangement.numChannels; axis++)
+		int axis;
+		for (axis = 0; axis < arrangement.numChannels; axis++)
 		{
 			char label[32] = "";
 			int range = 1;

@@ -179,7 +179,7 @@ static double OmDataSampleRate(const void *buffer, double *outScale, double *out
 		double scale = 1.0;
 		double range = 1.0;
 		unsigned char dataType = p[19];
-		unsigned char dataConversion = p[20];  // @20 [1] Conversion of raw values to units (-24 to 24 = * 2^n; < -24 divide -(n+24); > 24 multiply (n-24))
+		//unsigned char dataConversion = p[20];  // @20 [1] Conversion of raw values to units (-24 to 24 = * 2^n; < -24 divide -(n+24); > 24 multiply (n-24))
 
 		if (sampleRateModifier == 1)        // 1 = Sample rate in Hz
 		{
