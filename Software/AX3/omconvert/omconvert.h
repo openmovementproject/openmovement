@@ -43,7 +43,8 @@ typedef struct
 	double sampleRate;
 	int auxChannel;
 	char interpolate;			// 1=nearest, 2=linear, 3=cubic
-	const char *infoFilename;
+	const char *infoFilename;			// Information file name
+	const char *stationaryFilename;		// Stationary points file name
 	char headerCsv;				// 0=off, 1=on
 
 	// Calibrate
@@ -60,6 +61,7 @@ typedef struct
 	double svmEpoch;
 	char svmFilter;				// 0=off, 1=band-pass (0.2-50 Hz)
 	char svmMode;				// 0=abs(), 1=clamp-zero
+	char svmExtended;			// 0=standard values, 1=extended (std, range, etc.)
 
 	// WTV
 	const char *wtvFilename;
@@ -136,7 +138,7 @@ typedef struct om_convert_player_tag
 	short aux[3];
 	double temp;
 	char valid;
-	char clipped;
+	bool clipped;
 } om_convert_player_t;
 
 

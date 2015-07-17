@@ -262,7 +262,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 
 			// Check whether a window is filled
 			if (firstSampleTime <= 0) { firstSampleTime = currentTime; lastWindow = -1; }
-			int currentWindow = (currentTime - firstSampleTime) / config->stationaryTime;
+			int currentWindow = (int)((currentTime - firstSampleTime) / config->stationaryTime);
 			if (lastWindow < 0) { lastWindow = currentWindow; }
 			if (currentWindow != lastWindow)
 			{
@@ -490,6 +490,43 @@ void OmCalibrateInit(omcalibrate_calibration_t *calibration)
 }
 
 
+
+
+
+// Mean svm of stationary points with the calibration
+double OmCalibrateMeanSvmError(omcalibrate_calibration_t *calibration, omcalibrate_stationary_points_t *stationaryPoints)
+{
+	// Evalulate mean svm
+	int i;
+	double sumSvm = 0;
+	double sumSvmSquared = 0;
+	for (i = 0; i < stationaryPoints->numValues; i++)
+	{
+		double temp = stationaryPoints->values[i].actualTemperature;
+		double values[OMCALIBRATE_AXES];
+		int c;
+		for (c = 0; c < OMCALIBRATE_AXES; c++)
+		{
+			double v = stationaryPoints->values[i].mean[c];
+			// Rescaling is:  v = (v + offset) * scale + (temp - referenceTemperature) * tempOffset
+			v = (v + calibration->offset[c]) * calibration->scale[c] + (temp - calibration->referenceTemperature) * calibration->tempOffset[c];
+			values[c] = v;
+		}
+
+		// SVM
+		double svm = fabs(sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]) - 1.0);
+		sumSvm += svm;
+		sumSvmSquared += svm * svm;
+	}
+	double meanSvm = 0;
+	if (stationaryPoints->numValues > 0)
+	{
+		meanSvm = sumSvm / stationaryPoints->numValues;
+	}
+	return meanSvm;
+}
+
+
 // Print out calibration
 void OmCalibrateDump(omcalibrate_calibration_t *calibration, omcalibrate_stationary_points_t *stationaryPoints, char finalResult)
 {
@@ -528,37 +565,10 @@ void OmCalibrateDump(omcalibrate_calibration_t *calibration, omcalibrate_station
 
 	printf("};\n");
 
-
-
-	// Evalulate mean svm
-	int i;
-	double sumSvm = 0;
-	double sumSvmSquared = 0;
-	for (i = 0; i < stationaryPoints->numValues; i++)
-	{
-		double temp = stationaryPoints->values[i].actualTemperature;
-		double values[OMCALIBRATE_AXES];
-		int c;
-		for (c = 0; c < OMCALIBRATE_AXES; c++)
-		{
-			double v = stationaryPoints->values[i].mean[c];
-			// Rescaling is:  v = (v + offset) * scale + (temp - referenceTemperature) * tempOffset
-			v = (v + calibration->offset[c]) * calibration->scale[c] + (temp - calibration->referenceTemperature) * calibration->tempOffset[c];
-			values[c] = v;
-		}
-
-		// SVM
-		double svm = fabs(sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]) - 1.0);
-		sumSvm += svm;
-		sumSvmSquared += svm * svm;
-	}
-	double meanSvm = 0;
-	if (stationaryPoints->numValues > 0)
-	{
-		meanSvm = sumSvm / stationaryPoints->numValues;
-	}
+	double meanSvm = OmCalibrateMeanSvmError(calibration, stationaryPoints);
 	printf("// meanSvm = %f; numPoints = %d; errorCode = %d; numAxes = %d; \n", meanSvm, stationaryPoints->numValues, calibration->errorCode, calibration->numAxes);
 
+	return;
 }
 
 

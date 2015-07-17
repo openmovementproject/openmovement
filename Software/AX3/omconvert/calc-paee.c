@@ -104,6 +104,7 @@ char PaeeInit(paee_status_t *status, paee_configuration_t *configuration)
 	}
 
 	// Filter parameters
+	int order = 4;
 	double Fc1 = 0.5;
 	double Fc2 = 20;			// 15
 	double Fs = status->configuration->sampleRate;
@@ -113,21 +114,16 @@ char PaeeInit(paee_status_t *status, paee_configuration_t *configuration)
 	double W2 = Fc2 / (Fs / 2);
 
 	// Calculate coefficients
-	CoefficientsButterworth4BP(W1, W2, status->B, status->A);
+	status->numCoefficients = CoefficientsButterworth(order, W1, W2, status->B, status->A);
 
 	/*
 	// Display coefficients
+	int i;
 	printf("B: ");
-	for (i = 0; i < BUTTERWORTH4_NUM_COEFFICIENTS; i++)
-	{
-	printf("%f ", B[i]);
-	}
+	for (i = 0; i < status->numCoefficients; i++) { printf("%f ", status->B[i]); }
 	printf("\n");
 	printf("A: ");
-	for (i = 0; i < BUTTERWORTH4_NUM_COEFFICIENTS; i++)
-	{
-	printf("%f ", A[i]);
-	}
+	for (i = 0; i < status->numCoefficients; i++) { printf("%f ", status->A[i]); }
 	printf("\n");
 	*/
 
@@ -180,24 +176,34 @@ bool PaeeAddValue(paee_status_t *status, double* accel, double temp, bool valid)
 		double v = accel[c];
 		sumSquared += v * v;
 	}
-	double svm = sqrt(sumSquared) - 1;
+	double svm = sqrt(sumSquared);
+
+#if 0
+	if (!(status->configuration->mode < 4))	// Mode 0/1 are SVM-1, modes 2-4 are SVM
+#endif
+	{
+		svm -= 1;
+	}
 
 	if (status->configuration->filter)
 	{
-		filter(status->B, status->A, &svm, 1, status->z);
+		filter(status->numCoefficients, status->B, status->A, &svm, &svm, 1, status->z);
 	}
 
 #if 0
 	// SVM mode (must be after filtering)
-	if (status->configuration->mode == 1)		// Clamp mode
+	switch (status->configuration->mode & 3)
 	{
-		if (svm < 0) { svm = 0.0; }
-	}
-	else
+		case 0: 
 #endif
-	{
-		svm = fabs(svm);			// Standard abs() mode
+			svm = fabs(svm); 
+#if 0
+			break;					// Standard abs(v) mode
+		case 1: if (svm < 0) { svm = 0.0; } break;		// Clamp max(0,v) mode
+		case 2: break;									// Pass-through mode (sum will include values <0 !)
+		case 3:	break;									// (reserved)
 	}
+#endif
 
 	if (valid)
 	{

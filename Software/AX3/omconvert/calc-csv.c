@@ -37,7 +37,7 @@
 #include <time.h>
 #include <math.h>
 
-#include "butter4bp.h"
+#include "butter.h"
 #include "calc-csv.h"
 
 

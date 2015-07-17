@@ -49,7 +49,7 @@ typedef struct
 	double startTime;
 } paee_configuration_t;
 
-#include "butter4bp.h"
+#include "butter.h"
 
 #define PAEE_CUT_POINTS 3
 
@@ -67,9 +67,10 @@ typedef struct
 	double minutesAtLevel[PAEE_CUT_POINTS + 1];	// Minutes at each cut level
 
 	// Standard SVM Filter values
-	double B[BUTTERWORTH4_NUM_COEFFICIENTS];
-	double A[BUTTERWORTH4_NUM_COEFFICIENTS];
-	double z[BUTTERWORTH4_NUM_COEFFICIENTS];		// Final/initial condition tracking
+	double B[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];
+	double A[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];
+	double z[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];		// Final/initial condition tracking
+	int numCoefficients;
 
 	double sumSvm;
 

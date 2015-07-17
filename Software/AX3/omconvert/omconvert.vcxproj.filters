@@ -30,9 +30,6 @@
     <ClCompile Include="omcalibrate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="butter4bp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="linearregression.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,6 +48,9 @@
     <ClCompile Include="calc-sleep.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="butter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="omdata.h">
@@ -63,9 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="omcalibrate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="butter4bp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="linearregression.h">
@@ -84,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="calc-sleep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="butter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

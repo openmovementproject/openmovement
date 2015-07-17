@@ -1,8 +1,8 @@
 #CC = gcc
 CFLAGS = -O2 -Wall
 LIBS = -lm
-SRC = main.c omconvert.c butter4bp.c omcalibrate.c omdata.c linearregression.c wav.c calc-svm.c calc-csv.c calc-paee.c calc-wtv.c
-INC =        omconvert.h butter4bp.h omcalibrate.h omdata.h linearregression.h wav.h calc-svm.h calc-csv.h calc-paee.h calc-wtv.h
+SRC = butter.c calc-csv.c calc-paee.c calc-sleep.c calc-svm.c calc-wtv.c linearregression.c main.c mmap-win32.c omcalibrate.c omconvert.c omdata.c wav.c
+INC = butter.h calc-csv.h calc-paee.h calc-sleep.h calc-svm.h calc-wtv.h exits.h linearregression.h omcalibrate.h omconvert.h omdata.h wav.h
 
 all: omconvert
 
@@ -11,4 +11,5 @@ omconvert: Makefile $(SRC) $(INC)
 
 clean:
 	rm -f *.o core omconvert
+
 

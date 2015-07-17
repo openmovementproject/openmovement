@@ -36,6 +36,19 @@
 #include <stdio.h>
 
 
+// SVM Mode
+enum SVM_MODE {
+	SVMMO_ABS = 0,			// 0: abs(SVM-1)
+	SVMMO_CLAMP = 1,		// 1: max(SVM-1, 0)
+	SVMMO = 2,				// 2: SVM-1
+	_SVMMO_RESERVED = 3,	// 3: (reserved)
+	SVM_ABS = 4,			// 4: abs(SVM)			(VM input won't be below zero, but filtered output can be)
+	SVM_CLAMP = 5,			// 5: max(SVM, 0)		(VM input won't be below zero, but filtered output can be)
+	SVM = 6,				// 6: SVM				(VM input won't be below zero, but filtered output can be)
+	_SVM_RESERVED = 7,		// 7: (reserved)
+};
+
+
 // SVM configuration
 typedef struct
 {
@@ -44,12 +57,13 @@ typedef struct
 	const char *filename;
 	char filter;
 	char mode;
+	char extended;		// Extended reporting (range, std, etc)
 	double epoch;
 	double startTime;
 } svm_configuration_t;
 
 
-#include "butter4bp.h"
+#include "butter.h"
 
 // SVM status
 typedef struct
@@ -63,11 +77,33 @@ typedef struct
 	int intervalSample;		// Valid samples within this interval
 
 	// Standard SVM Filter values
-	double B[BUTTERWORTH4_NUM_COEFFICIENTS];
-	double A[BUTTERWORTH4_NUM_COEFFICIENTS];
-	double z[BUTTERWORTH4_NUM_COEFFICIENTS];		// Final/initial condition tracking
+	double B[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];
+	double A[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];
+	double z[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];		// Final/initial condition tracking
+	int numCoefficients;
 
+
+	// For average SVM
 	double sumSvm;
+	double sumTemperature;
+
+	// StdDev & range
+	double axisSum[3];
+	double axisSumSquared[3];
+	double axisMin[3];
+	double axisMax[3];
+
+	// Resulting mean and StdDev
+	double resultMean[3];
+	double resultRange[3];
+	double resultStdDev[3];
+	double resultTemperature;
+
+	// Per-ecoch stats
+	int countInvalid;
+	int countClipped;
+	int countClippedInput;
+	int countClippedOutput;
 
 } svm_status_t;
 
@@ -76,7 +112,7 @@ typedef struct
 char SvmInit(svm_status_t *status, svm_configuration_t *configuration);
 
 // Processes the specified value
-bool SvmAddValue(svm_status_t *status, double *value, double temp, bool valid);
+bool SvmAddValue(svm_status_t *status, double *value, double temp, char validity);
 
 // Free data resources
 int SvmClose(svm_status_t *status);

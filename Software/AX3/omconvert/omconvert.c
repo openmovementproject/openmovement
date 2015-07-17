@@ -90,6 +90,12 @@ typedef struct
 	sleep_status_t sleepStatus;
 	int sleepOk;
 
+	// Overall stats
+	int countInvalid;
+	int countClipped;
+	int countClippedInput;
+	int countClippedOutput;
+
 } calc_t;
 
 
@@ -107,6 +113,7 @@ static void CalcCreate(calc_t *calc, omconvert_settings_t *settings)
 	calc->svmConfiguration.filter = settings->svmFilter;
 	calc->svmConfiguration.mode = settings->svmMode;
 	calc->svmConfiguration.epoch = settings->svmEpoch;
+	calc->svmConfiguration.extended = settings->svmExtended;
 
 	// WTV status
 	memset(&calc->wtvConfiguration, 0, sizeof(wtv_configuration_t));
@@ -176,14 +183,23 @@ static int CalcInit(calc_t *calc, double sampleRate, double startTime)
 }
 
 
-static bool CalcAddValue(calc_t *calc, double* accel, double temp, bool valid)
+static bool CalcAddValue(calc_t *calc, double* accel, double temp, char validity)
 {
 	bool ok = true;
-	if (calc->svmOk) { ok &= SvmAddValue(&calc->svmStatus, accel, temp, valid); }
+	bool valid = (validity & 1) ? false : true;		 // Valid if not invalid(!)
+
+	if (calc->svmOk) { ok &= SvmAddValue(&calc->svmStatus, accel, temp, validity); }
 	if (calc->wtvOk) { ok &= WtvAddValue(&calc->wtvStatus, accel, temp, valid); }
 	if (calc->paeeOk) { ok &= PaeeAddValue(&calc->paeeStatus, accel, temp, valid); }
 	if (calc->csvOk) { ok &= CsvAddValue(&calc->csvStatus, accel, temp, valid); }
 	if (calc->sleepOk) { ok &= SleepAddValue(&calc->sleepStatus, accel, temp, valid); }
+
+	// Overall stats
+	if (validity & 0x01) { calc->countInvalid++; }
+	if (validity & 0x02) { calc->countClippedInput++; }
+	if (validity & 0x04) { calc->countClippedOutput++; }
+	if ((validity & 0x02) || (validity & 0x04)) { calc->countClipped++; }
+
 	return ok;
 }
 
@@ -260,7 +276,7 @@ Creation date ("ICRD" WAV chunk): to specify the time of the first sample (this 
 // Desired mapping of channels
 static om_convert_channel_t defaultChannelPriority[] =
 {
-	{ 'x', 0 }, { 'x', 1 }, { 'x', 2 }, { 'x', 3 }, { 'x', 4 }, { 'x', 5 }, { 'x', 6 }, { 'x', 7 }, { 'x', 8 }, // "All-axis" channels
+	//{ 'x', 0 }, { 'x', 1 }, { 'x', 2 }, { 'x', 3 }, { 'x', 4 }, { 'x', 5 }, { 'x', 6 }, { 'x', 7 }, { 'x', 8 }, // "All-axis" channels
 	{ 'a', 0 }, { 'a', 1 }, { 'a', 2 },		// Accelerometer
 	{ 'g', 0 }, { 'g', 1 }, { 'g', 2 },		// Gyroscope
 	{ 'm', 0 }, { 'm', 1 }, { 'm', 2 },		// Magnetometer
@@ -485,51 +501,56 @@ int OmConvertFindArrangement(om_convert_arrangement_t *arrangement, omconvert_se
 		int streamIndex = channelPriority[cpi].stream;
 		int subchannel = channelPriority[cpi].subchannel;
 
-		if (streamIndex < 0 || streamIndex >= OMDATA_MAX_STREAM) { fprintf(stderr, "WARNING: Ignoring stream index %d (0x%02x = %c).\n", subchannel, subchannel, subchannel); continue; }
+//fprintf(stderr, "DEBUG: Finding stream %c:%d.\n", streamIndex, subchannel); 
+
+		if (streamIndex < 0 || streamIndex >= OMDATA_MAX_STREAM) { fprintf(stderr, "WARNING: Ignoring stream index %d (0x%02x = %c).\n", streamIndex, streamIndex, streamIndex); continue; }
 		if (subchannel < 0 || subchannel > 9) { fprintf(stderr, "WARNING: Ignoring invalid sub-channel index %d.\n", subchannel); continue; }
 
 		// Check each session
 		omdata_stream_t *stream = &arrangement->session->stream[streamIndex];
-		if (!stream->inUse) { continue; }
-		if (!stream->segmentFirst || !stream->segmentLast) { continue; }
+		if (!stream->inUse) { fprintf(stderr, "DEBUG: Stream %c not found...\n", streamIndex); continue; }
+		if (!stream->segmentFirst || !stream->segmentLast) { fprintf(stderr, "DEBUG: Stream %c not first/last segment.\n", streamIndex); continue; }
 
 		// Check each segment for the maximum number of sub-channels
 		omdata_segment_t *seg;
 		int numSubChannels = 0;
 		for (seg = stream->segmentFirst; seg != NULL; seg = seg->segmentNext)
 		{
-			if (seg->channels > arrangement->numChannels) { numSubChannels = seg->channels; }
+			if (seg->channels > numSubChannels) { numSubChannels = seg->channels; }
 			if (seg->sampleRate > arrangement->defaultRate) { arrangement->defaultRate = seg->sampleRate; }
 		}
 
 		// Check we have the subchannel
-		if (subchannel >= numSubChannels) { continue; }
-
-		// Assign channel
-		if (arrangement->numChannels < OMDATA_MAX_CHANNELS)
+		if (subchannel >= numSubChannels) { fprintf(stderr, "DEBUG: Stream %c cannot use sub-channel index %d (has %d sub-channels).\n", streamIndex, subchannel, numSubChannels); continue; }
+		
+		// Check not too many channels
+		if (arrangement->numChannels >= OMDATA_MAX_CHANNELS)
 		{
-			arrangement->channelAssignment[arrangement->numChannels].stream = streamIndex;
-			arrangement->channelAssignment[arrangement->numChannels].subchannel = subchannel;
-
-			// Track which streams need updating
-			bool found = false;
-			int j;
-			for (j = 0; j < arrangement->numStreamIndexes; j++)
-			{
-				if (arrangement->streamIndexes[j] == streamIndex) { found = true; break; }
-			}
-			if (!found && arrangement->numStreamIndexes < OMDATA_MAX_CHANNELS)
-			{
-				arrangement->streamIndexes[arrangement->numStreamIndexes] = streamIndex;
-				arrangement->numStreamIndexes++;
-			}
-
-
-			fprintf(stderr, "DEBUG: Output channel %d is stream '%c' channel %d...\n", arrangement->numChannels, streamIndex, subchannel);
-
-			arrangement->numChannels++;
+			fprintf(stderr, "DEBUG: Stream %c:%d cannot be assigned as exceeded %d maximum number of channels.\n", streamIndex, subchannel, OMDATA_MAX_CHANNELS); 
+			continue;
 		}
 
+		// Assign channel
+		arrangement->channelAssignment[arrangement->numChannels].stream = streamIndex;
+		arrangement->channelAssignment[arrangement->numChannels].subchannel = subchannel;
+
+		// Track which streams need updating
+		bool found = false;
+		int j;
+		for (j = 0; j < arrangement->numStreamIndexes; j++)
+		{
+			if (arrangement->streamIndexes[j] == streamIndex) { found = true; break; }
+		}
+		if (!found && arrangement->numStreamIndexes < OMDATA_MAX_CHANNELS)
+		{
+			arrangement->streamIndexes[arrangement->numStreamIndexes] = streamIndex;
+			arrangement->numStreamIndexes++;
+		}
+
+
+//		fprintf(stderr, "DEBUG: Output channel %d is stream '%c' channel %d...\n", arrangement->numChannels, streamIndex, subchannel);
+
+		arrangement->numChannels++;
 	}
 
 	arrangement->startTime = session->startTime;
@@ -703,11 +724,13 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 	char infoName[WAV_META_LENGTH] = { 0 };
 	char infoComment[WAV_META_LENGTH] = { 0 };
 	char infoDate[WAV_META_LENGTH] = { 0 };
-	double scale[10] = { 8.0 / 32768.0, 8.0 / 32768.0, 8.0 / 32768.0 };
+	#define MAX_CHANNELS (3 + 3 + 3 + 4 + 1)
+	double scale[MAX_CHANNELS] = { 8.0 / 32768.0, 8.0 / 32768.0, 8.0 / 32768.0 };
 
 	// Check config.
 	if (settings->outFilename != NULL) { fprintf(stderr, "ERROR: Cannot output to WAV when input is WAV.\n"); return EXIT_CONFIG; }
 	if (settings->infoFilename != NULL) { fprintf(stderr, "ERROR: Cannot output to info file when input is WAV.\n"); return EXIT_CONFIG; }
+	if (settings->stationaryFilename != NULL) { fprintf(stderr, "ERROR: Cannot output to stationary points file when input is WAV.\n"); return EXIT_CONFIG; }
 
 	fp = fopen(settings->filename, "rb");
 	if (fp == NULL) { fprintf(stderr, "ERROR: Cannot open WAV file.\n"); return EXIT_NOINPUT; }
@@ -734,7 +757,7 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 
 	// Parse headers
 	bool parsedTime = false;
-	bool parsedScale[10] = { 0 };
+	bool parsedScale[MAX_CHANNELS] = { 0 };
 	double startTime = 0;
 	for (i = 0; i < numCommentLines; i++)
 	{
@@ -795,18 +818,29 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 				const short *v = buffer + i * wavInfo.chans;
 
 				// Auxilliary channel is last channel
-				bool valid = true;
+				int validity = 0;
 				if (wavInfo.chans > 3)
 				{
 					uint16_t aux = v[wavInfo.chans - 1];
-					if (aux & WAV_AUX_UNAVAILABLE) { valid = false; }
+					if (aux & WAV_AUX_UNAVAILABLE) { validity |= 0x01; }		// Invalid sample
+					if (aux & WAV_AUX_CLIPPING)
+					{ 
+						if (v[0] > -32768 && v[0] < 32767 && v[1] > -32768 && v[1] < 32767 && v[2] > -32768 && v[2] < 32767)
+						{
+							validity |= 0x02;	// Not clipped after calibration, must have been clipped before calibration
+						}
+						else
+						{
+							validity |= 0x04;	// Clipped after calibration, may have also been clipped before calibration.
+						}
+					}
 				}
 
 				// Scaling from metadata
 				values[0] = v[0] * scale[0];
 				values[1] = v[1] * scale[1];
 				values[2] = v[2] * scale[2];
-				if (!CalcAddValue(calc, values, 0.0, valid))
+				if (!CalcAddValue(calc, values, 0.0, validity))
 				{
 					fprintf(stderr, "ERROR: Problem writing calculations.\n");
 					retVal = EXIT_IOERR;
@@ -830,6 +864,8 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 	int retVal = EXIT_OK;
 	omdata_t omdata = { 0 };
 	om_convert_arrangement_t arrangement = { 0 };
+
+	if (!settings->calibrate && settings->stationaryFilename != NULL) { fprintf(stderr, "ERROR: Cannot output to stationary points file when not auto-calibrating.\n"); return EXIT_CONFIG; }
 
 	// Output information file
 	FILE *infofp = NULL;
@@ -862,6 +898,10 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 	calibrateConfig.stationaryTime = settings->stationaryTime; // 10.0;
 	calibrateConfig.stationaryRepeated = settings->repeatedStationary;
 	bool doneCalibration = false;
+	double errorBeforeCalibration = 0.0;
+	double errorAfterCalibration = 0.0;
+	double stationaryMin[3] = { 0 }, stationaryMax[3] = { 0 };
+	int stationaryCount = 0;
 
 	// Initialize identity calibration
 	omcalibrate_calibration_t calibration;
@@ -915,6 +955,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			}
 
 			fprintf(stderr, "Found stationary points: %d\n", stationaryPoints->numValues);
+			errorBeforeCalibration = OmCalibrateMeanSvmError(&calibration, stationaryPoints);
 
 			// Dump no calibration
 			OmCalibrateDump(&calibration, stationaryPoints, 0);
@@ -922,6 +963,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			// Auto-calibrate
 			fprintf(stderr, "Auto-calibrating...\n");
 			int calibrationResult = OmCalibrateFindAutoCalibration(&calibrateConfig, stationaryPoints, &calibration);
+			errorAfterCalibration = OmCalibrateMeanSvmError(&calibration, stationaryPoints);
 			OmCalibrateDump(&calibration, stationaryPoints, 1);
 			if (calibrationResult < 0)
 			{
@@ -933,6 +975,30 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 				calibration.numAxes = na;			// ...and num-axes
 			}
 
+			// Find min/max x/y/z
+			stationaryCount = stationaryPoints->numValues;
+			FILE *sfp = NULL;
+			if (settings->stationaryFilename != NULL)
+			{
+				sfp = fopen(settings->stationaryFilename, "wt");
+				if (sfp == NULL) { fprintf(stderr, "WARNING: Couldn't write stationary points to file: %s\n", settings->stationaryFilename); }
+			}
+			int i;
+			for (i = 0; i < stationaryPoints->numValues; i++)
+			{
+				double temp = stationaryPoints->values[i].actualTemperature;
+				int c;
+				for (c = 0; c < OMCALIBRATE_AXES; c++)
+				{
+					double v = stationaryPoints->values[i].mean[c];
+					if (sfp != NULL) { fprintf(sfp, "%s%.10f", c == 0 ? "" : ",", v); }
+					if (i == 0 || v < stationaryMin[c]) { stationaryMin[c] = v; }
+					if (i == 0 || v > stationaryMax[c]) { stationaryMax[c] = v; }
+				}
+				if (sfp != NULL) { fprintf(sfp, "\n"); }
+			}
+			if (sfp != NULL) { fclose(sfp); }
+
 			// Free stationary points
 			OmCalibrateFreeStationaryPoints(stationaryPoints);
 		}
@@ -941,44 +1007,27 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 		om_convert_player_t player = { 0 };
 		OmConvertPlayerInitialize(&player, &arrangement, settings->sampleRate, settings->interpolate);
 
-		// Output range scalings 
-		int outputAccelRange = 8;								// TODO: Possibly allow for +/- 16 outputs (currently always +/-8g -> 16-bit signed)?
-		if (outputAccelRange < 8) { outputAccelRange = 8; }		// Minimum of +/-2, +/-4, +/-8 all get output coded as +/-8
-		int outputAccelScale = 65536 / (2 * outputAccelRange);
-
+		// Channels, rate, samples
 		int outputChannels = arrangement.numChannels + 1;
 		int outputRate = (int)(player.sampleRate + 0.5);
 		int outputSamples = player.numSamples;
 
 		// Metadata - [Artist "IART" WAV chunk] Data about the device that made the recording
 		char artist[WAV_META_LENGTH] = { 0 };
-		sprintf(artist,
-			"Id: %u\n"
-			"Device: %s\n"
-			"Revision: %d\n"
-			"Firmware: %d",
-			omdata.metadata.deviceId,
-			omdata.metadata.deviceTypeString,
-			omdata.metadata.deviceVersion,
-			omdata.metadata.firmwareVer
-			);
+		sprintf(artist + strlen(artist), "Id: %u\n", omdata.metadata.deviceId);
+		sprintf(artist + strlen(artist), "Device: %s\n", omdata.metadata.deviceTypeString);
+		sprintf(artist + strlen(artist), "Revision: %d\n", omdata.metadata.deviceVersion);
+		sprintf(artist + strlen(artist), "Firmware: %d\n", omdata.metadata.firmwareVer);
 
 		// Metadata - [Title "INAM" WAV chunk] Data about the recording configuration
 		char startTime[MAX_TIME_STRING] = { 0 };	// 2000-01-01 20:00:00.000|
 		char stopTime[MAX_TIME_STRING] = { 0 };	// 2000-01-01 20:00:00.000|
 		char name[WAV_META_LENGTH] = { 0 };
-		sprintf(name,
-			"Session: %u\n"
-			"Start: %s\n"
-			"Stop: %s\n"
-			"Config-A: %d,%d\n"
-			"Metadata: %s",
-			(unsigned int)omdata.metadata.sessionId,
-			TimeString(omdata.metadata.recordingStart, startTime),
-			TimeString(omdata.metadata.recordingStop, stopTime),
-			omdata.metadata.configAccel.frequency, omdata.metadata.configAccel.sensitivity,
-			omdata.metadata.metadata
-			);
+		sprintf(name + strlen(name), "Session: %u\n", (unsigned int)omdata.metadata.sessionId);
+		sprintf(name + strlen(name), "Start: %s\n", TimeString(omdata.metadata.recordingStart, startTime));
+		sprintf(name + strlen(name), "Stop: %s\n", TimeString(omdata.metadata.recordingStop, stopTime));
+		sprintf(name + strlen(name), "Config-A: %d,%d\n", omdata.metadata.configAccel.frequency, omdata.metadata.configAccel.sensitivity);
+		sprintf(name + strlen(name), "Metadata: %s\n", omdata.metadata.metadata);
 
 		// Metadata - [Creation date "ICRD" WAV chunk] - Specify the time of the first sample (also in the comment for Matlab)
 		char datetime[WAV_META_LENGTH] = { 0 };
@@ -986,23 +1035,50 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 
 		// Metadata - [Comment "ICMT" WAV chunk] Data about this file representation
 		char comment[WAV_META_LENGTH] = { 0 };
-		sprintf(comment,
-			"Time: %s\n"
-			"Channel-1: Accel-X\n"
-			"Scale-1: %d\n"
-			"Channel-2: Accel-Y\n"
-			"Scale-2: %d\n"
-			"Channel-3: Accel-Z\n"
-			"Scale-3: %d\n"
-			"Channel-4: Aux",
-			TimeString(arrangement.startTime, NULL),
-			outputAccelRange,
-			outputAccelRange,
-			outputAccelRange
-			);
+		sprintf(comment + strlen(comment), "Time: %s\n", TimeString(arrangement.startTime, NULL));
+
+		// Output scaling
+		float outputScale[MAX_CHANNELS] = { 0 };
+
+		// Sensor output range scalings 
+		int outputAccelRange = 8;								// TODO: Possibly allow for +/- 16 outputs (currently always +/-8g -> 16-bit signed)?
+		if (outputAccelRange < 8) { outputAccelRange = 8; }		// Minimum of +/-2, +/-4, +/-8 all get output coded as +/-8
+		int outputGyroRange = 2000;
+		int outputMagRange = 3277;
+
+		// Metadata - channel assignment and scale
+		int chan = 0;
+		for (int axis = 0; axis < arrangement.numChannels; axis++)
+		{
+			char label[32] = "";
+			int range = 1;
+
+			if (arrangement.channelAssignment[axis].stream == 'a') { 
+				sprintf(label, "Accel-%c", 'X' + arrangement.channelAssignment[axis].subchannel); 
+				range = outputAccelRange; 
+			} else if (arrangement.channelAssignment[axis].stream == 'g') {
+				sprintf(label, "Gyro-%c", 'X' + arrangement.channelAssignment[axis].subchannel);
+				range = outputGyroRange;
+			} else if (arrangement.channelAssignment[axis].stream == 'm') {
+				sprintf(label, "Mag-%c", 'X' + arrangement.channelAssignment[axis].subchannel);
+				range = outputMagRange;
+			} else {
+				sprintf(label, "%c%d", arrangement.channelAssignment[axis].stream, arrangement.channelAssignment[axis].subchannel);
+			}
+
+			sprintf(comment + strlen(comment), "Channel-%d: %s\nScale-%d: %d\n", chan + 1, label, chan + 1, range);
+
+			outputScale[chan] = 65536.0f / (2 * range);
+			chan++;
+		}
+
+		// Other axes
+fprintf(stderr, "COMMENT: %s\n", comment);
+//		???
+//Accelerometer scaling...
 
 		// Create output WAV file
-		FILE *ofp = NULL;
+  		FILE *ofp = NULL;
 		if (settings->outFilename != NULL && strlen(settings->outFilename) > 0)
 		{
 			fprintf(stderr, "Generating WAV file: %s\n", settings->outFilename);
@@ -1059,6 +1135,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 				fprintf(infofp, "File-input: %s\n", settings->filename);
 				fprintf(infofp, "File-output: %s\n", settings->outFilename);
 				fprintf(infofp, "Results-output: %s\n", settings->infoFilename);
+
 				fprintf(infofp, "Auto-calibration: %d\n", settings->calibrate);
 				fprintf(infofp, "Calibration-Result: %d\n", calibration.errorCode);
 				fprintf(infofp, "Calibration: %.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f\n",
@@ -1066,13 +1143,28 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 					calibration.offset[0], calibration.offset[1], calibration.offset[2],
 					calibration.tempOffset[0], calibration.tempOffset[1], calibration.tempOffset[2],
 					calibration.referenceTemperature);
+				fprintf(infofp, "Calibration-Stationary-Count: %d\n", stationaryCount);
+				fprintf(infofp, "Calibration-Stationary-Min: %.10f,%.10f,%.10f\n", stationaryMin[0], stationaryMin[1], stationaryMin[2]);
+				fprintf(infofp, "Calibration-Stationary-Max: %.10f,%.10f,%.10f\n", stationaryMax[0], stationaryMax[1], stationaryMax[2]);
+				fprintf(infofp, "Calibration-Stationary-Error-Pre: %.10f\n", errorBeforeCalibration);
+				fprintf(infofp, "Calibration-Stationary-Error-Post: %.10f\n", errorAfterCalibration);
+
 				fprintf(infofp, "Input-sectors-total: %d\n", omdata.statsTotalSectors);
 				fprintf(infofp, "Input-sectors-data: %d\n", omdata.statsDataSectors);
 				fprintf(infofp, "Input-sectors-bad: %d\n", omdata.statsBadSectors);
+
 				fprintf(infofp, "Output-rate: %d\n", outputRate);
 				fprintf(infofp, "Output-channels: %d\n", outputChannels);
 				fprintf(infofp, "Output-duration: %f\n", (float)outputSamples / outputRate);
 				fprintf(infofp, "Output-samples: %d\n", outputSamples);
+				fprintf(infofp, "Output-duration-invalid: %f\n", (float)calc->countInvalid / outputRate);
+				fprintf(infofp, "Output-samples-invalid: %d\n", calc->countInvalid);
+				fprintf(infofp, "Output-duration-clipped: %f\n", (float)calc->countClipped / outputRate);
+				fprintf(infofp, "Output-samples-clipped: %d\n", calc->countClipped);
+				fprintf(infofp, "Output-samples-clipped-before-calibration: %d\n", calc->countClippedInput);
+				fprintf(infofp, "Output-samples-clipped-after-calibration: %d\n", calc->countClippedOutput);
+
+
 				fprintf(infofp, ":\n");
 				fprintf(infofp, "::: Data about the device that made the recording\n");
 				fprintf(infofp, "%s\n", artist);
@@ -1093,7 +1185,9 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 				// Convert to integers
 				int c;
 				double temp = player.temp;
-				char clipped = player.clipped;
+				char validity = 0;
+				if (!player.valid) { validity |= 0x01; }		// Invalid
+				if (player.clipped) { validity |= 0x02; }		// Input clipped
 
 				double accel[OMCALIBRATE_AXES];
 				for (c = 0; c < player.arrangement->numChannels; c++)
@@ -1114,11 +1208,11 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 					}
 
 					// Output range scaled
-					double ov = v * outputAccelScale;
+					double ov = v * outputScale[c];
 
 					// Saturate
-					if (ov < -32768.0) { ov = -32768.0; clipped = 1; }
-					if (ov > 32767.0) { ov = 32767.0; clipped = 1; }
+					if (ov <= -32768.0) { ov = -32768.0; validity |= 0x04; }	// Output clipped
+					if (ov >= 32767.0) { ov = 32767.0; validity |= 0x04; }	// Output clipped
 
 					// Save
 					values[c] = (signed short)(ov);
@@ -1127,8 +1221,8 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 
 				// Auxilliary channel
 				uint16_t aux = 0;
-				if (!player.valid) { aux |= WAV_AUX_UNAVAILABLE; }
-				if (clipped) { aux |= WAV_AUX_CLIPPING; }
+				if (validity & 0x01) { aux |= WAV_AUX_UNAVAILABLE; }
+				if (validity & 0x06) { aux |= WAV_AUX_CLIPPING; }
 
 				int cycle = sample % (int)player.sampleRate;
 				if (cycle == 0) { aux |= WAV_AUX_SENSOR_BATTERY | (player.aux[0] & 0x3ff); }
@@ -1138,7 +1232,8 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 				//player.ettings.auxChannel
 
 				values[player.arrangement->numChannels] = aux;
-				if (!CalcAddValue(calc, accel, 0.0, player.valid ? true : false))
+
+				if (!CalcAddValue(calc, accel, 0.0, validity))
 				{
 					fprintf(stderr, "ERROR: Problem writing calculations.\n");
 					retVal = EXIT_IOERR;

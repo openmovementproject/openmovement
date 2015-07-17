@@ -104,6 +104,9 @@ void OmCalibrateInit(omcalibrate_calibration_t *calibration);
 // Create a default calibration configuration
 void OmCalibrateConfigInit(omcalibrate_config_t *calibrateConfig);
 
+// Calculate the mean SVM of the stationary points with the specified calibration
+double OmCalibrateMeanSvmError(omcalibrate_calibration_t *calibration, omcalibrate_stationary_points_t *stationaryPoints);
+
 // Print out calibration
 void OmCalibrateDump(omcalibrate_calibration_t *calibration, omcalibrate_stationary_points_t *stationaryPoints, char finalResult);
 

@@ -127,7 +127,7 @@
 #define FILESTREAM_PACKING_SINT8           0x01
 #define FILESTREAM_PACKING_SINT16          0x02
 //#define FILESTREAM_PACKING_SINT24          0x03
-//#define FILESTREAM_PACKING_SINT32          0x04
+#define FILESTREAM_PACKING_SINT32          0x04
 //#define FILESTREAM_PACKING_SINT64          0x05
 //#define FILESTREAM_PACKING_FLOAT           0x06
 //#define FILESTREAM_PACKING_DOUBLE          0x07
@@ -135,7 +135,7 @@
 #define FILESTREAM_PACKING_UINT8           0x09
 #define FILESTREAM_PACKING_UINT16          0x0a
 //#define FILESTREAM_PACKING_UINT24          0x0b
-//#define FILESTREAM_PACKING_UINT32          0x0c
+#define FILESTREAM_PACKING_UINT32          0x0c
 //#define FILESTREAM_PACKING_UINT64          0x0d
 //#define FILESTREAM_PACKING_RESERVED2       0x0e
 //#define FILESTREAM_PACKING_RESERVED3       0x0f
@@ -178,6 +178,8 @@ static double OmDataSampleRate(const void *buffer, double *outScale, double *out
 		double sampleRate = (double)((unsigned short)p[16] | ((unsigned short)p[17] << 8));
 		double scale = 1.0;
 		double range = 1.0;
+		unsigned char dataType = p[19];
+		unsigned char dataConversion = p[20];  // @20 [1] Conversion of raw values to units (-24 to 24 = * 2^n; < -24 divide -(n+24); > 24 multiply (n-24))
 
 		if (sampleRateModifier == 1)        // 1 = Sample rate in Hz
 		{
@@ -200,12 +202,55 @@ static double OmDataSampleRate(const void *buffer, double *outScale, double *out
 			if (sampleRate != 0) { sampleRate = 1.0 / (sampleRate * 60.0); }
 		}
 
-		// TODO: From data
-		if (p[0] == 'a')
+		// Calculate scale
+		if (p[1] == 'a')
 		{
 			range = 8.0;
-			scale = 1.0 / 4096;
+			switch (dataType)
+			{
+				case FILESTREAM_DATATYPE_ACCEL_2G: range = 2.0; break;		// dataConversion = -14;
+				case FILESTREAM_DATATYPE_ACCEL_4G: range = 4.0; break;		// dataConversion = -13;
+				case FILESTREAM_DATATYPE_ACCEL_8G: range = 8.0; break;		// dataConversion = -12;
+				case FILESTREAM_DATATYPE_ACCEL_16G: range = 16.0; break;	// dataConversion = -11;
+			}
+			scale = (2 * range) / 65536.0;
 		}
+		else if (p[1] == 'g')
+		{
+			range = 2000.0; scale = 0.07;
+			switch (dataType)
+			{
+				case FILESTREAM_DATATYPE_GYRO_250:  range =  250.0; scale = 0.00875; break;
+				case FILESTREAM_DATATYPE_GYRO_500:  range =  500.0; scale = 0.0175; break;
+				case FILESTREAM_DATATYPE_GYRO_2000: range = 2000.0; scale = 0.07; break;
+			}
+		}
+		else if (p[1] == 'm')
+		{
+			range = 3276.8;
+			scale = 0.1;
+		}
+		else if (p[1] == 'p')
+		{
+			// Pressure/temperature
+			//fileStream->streamId = 'p';                   // [1] Stream identifier (by convention: a-ccel, g-yro, m-agnetometer, p-ressure, other-ASCII, non-alphanumeric=reserved, *=all streams)
+			//fileStream->dataType = FILESTREAM_DATATYPE_PRESSURE; // [1] Data type - see FileStream.h
+			//fileStream->channelPacking = (FILESTREAM_PACKING_1_CHANNEL | FILESTREAM_PACKING_SINT32);      		// [1] Packing type (0x32 = 3-channel 2-bytes-per-sample (16-bit); 0x12 = single-channel 16-bit; 0x30 = DWORD packing of 3-axis 10-bit 0-3 binary shifted)
+		}
+		else if (p[1] == 'l')
+		{
+			// ADC
+			//fileStream->streamId = 'l';            			// [1] Stream identifier (by convention: a-ccel, g-yro, m-agnetometer, p-ressure, other-ASCII, non-alphanumeric=reserved, *=all streams)
+			//fileStream->dataType = FILESTREAM_DATATYPE_RAW_UINT; // [1] Data type - see FileStream.h
+			//fileStream->channelPacking = (FILESTREAM_PACKING_3_CHANNEL|FILESTREAM_PACKING_UINT16);      			// [1] Packing type (0x32 = 3-channel 2-bytes-per-sample (16-bit); 0x12 = single-channel 16-bit; 0x30 = DWORD packing of 3-axis 10-bit 0-3 binary shifted)
+		}
+		//else if (p[1] == 'x')
+		//{
+			// All-axis
+			//fileStream->streamId = 'x';                             // [1] Stream identifier (by convention: a-ccel, g-yro, m-agnetometer, p-ressure, other-ASCII, non-alphanumeric=reserved, *=all streams)
+			//fileStream->dataType = FILESTREAM_DATATYPE_ACCEL_GYRO_MAG;   // [1] Data type - see FileStream.h
+			//fileStream->channelPacking = (FILESTREAM_PACKING_9_CHANNEL|FILESTREAM_PACKING_SINT16);      		// [1] Packing type (0x32 = 3-channel 2-bytes-per-sample (16-bit); 0x12 = single-channel 16-bit; 0x30 = DWORD packing of 3-axis 10-bit 0-3 binary shifted)
+		//}
 
 		if (outRange != NULL) { *outRange = range; }
 		if (outScale != NULL) { *outScale = scale; }
@@ -215,6 +260,7 @@ static double OmDataSampleRate(const void *buffer, double *outScale, double *out
 
 	return 0;
 }
+
 
 
 static uint32_t OmDataTimestamp(uint32_t timestamp)
@@ -407,13 +453,13 @@ static int OmDataAddSector(omdata_t *omdata, int sectorIndex, bool extractSideCh
 		channels = (packing >> 4);
 		if (!channels) channels = 1;
 
-		if (packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2) { channels = 3; maxValues = 360 / channels; }
-		//else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT32) { packing = FILESTREAM_PACKING_SINT32; maxValues = 480 / 4 / channels; }
-		//else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT32) { packing = FILESTREAM_PACKING_UINT32; maxValues = 480 / 4 / channels; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16) { packing = FILESTREAM_PACKING_SINT16; maxValues = 480 / 2 / channels; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16) { packing = FILESTREAM_PACKING_UINT16; maxValues = 480 / 2 / channels; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT8)  { packing = FILESTREAM_PACKING_SINT8; maxValues = 480 / channels; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT8)  { packing = FILESTREAM_PACKING_UINT8; maxValues = 480 / channels; }
+		if (packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2) { channels = 3; maxValues = 360; }
+		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT32) { packing = FILESTREAM_PACKING_SINT32; maxValues = 480 / 4; }
+		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT32) { packing = FILESTREAM_PACKING_UINT32; maxValues = 480 / 4; }
+		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16) { packing = FILESTREAM_PACKING_SINT16; maxValues = 480 / 2; }
+		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16) { packing = FILESTREAM_PACKING_UINT16; maxValues = 480 / 2; }
+		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT8)  { packing = FILESTREAM_PACKING_SINT8; maxValues = 480; }
+		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT8)  { packing = FILESTREAM_PACKING_UINT8; maxValues = 480; }
 
 		//dataType = p[19];         // @19 [1] Data type [NOT FINALIZED!] (top-bit set indicates "non-standard" conversion; bottom 7-bits: 0x00 = reserved,  0x10-0x13 = accelerometer (g, at +-2,4,8,16g sensitivity), 0x20 = gyroscope (dps), 0x30 = magnetometer (uT/raw?), 0x40 = light (CWA-raw), 0x50 = temperature (CWA-raw), 0x60 = battery (CWA-raw), 0x70 = pressure (raw?))
 		//state->dataConversion = p[20];   // @20 [1] Conversion of raw values to units (-24 to 24 = * 2^n; < -24 divide -(n+24); > 24 multiply (n-24))
@@ -466,13 +512,14 @@ static int OmDataAddSector(omdata_t *omdata, int sectorIndex, bool extractSideCh
 		// If this was already marked as having read a short (final) packet, or if any of the parameters have changed (allow the samples-per-sector to be less) -- change format
 		if (seg->lastPacketShort || offset != seg->offset || packing != seg->packing || channels != seg->channels || scaling != seg->scaling || samplesPerSector > seg->samplesPerSector || sampleRate != seg->sampleRate)
 		{
-			fprintf(stderr, "OMDATA: Stream %c last packet short or config changed.\n", streamIndex);
+			fprintf(stderr, "OMDATA: Stream %c config changed or after last short packet.\n", streamIndex);
 			startNewSegment = true;
 		}
 
 		// If we're not changing the format now, if the samples-per-sector is less, mark this as a final packet
 		if (!startNewSegment && samplesPerSector < seg->samplesPerSector)
 		{
+			fprintf(stderr, "OMDATA: Stream %c last packet short (%d of %d).\n", streamIndex, samplesPerSector, seg->samplesPerSector);
 			seg->lastPacketShort = true;
 		}
 
@@ -697,8 +744,8 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 
 			memcpy(md->calibration, p + 244, 32);	// OMX@244 32 calibration words
 			memset(md->metadata, 0, sizeof(md->metadata));
-			memcpy(md->metadata, p + 64, 192);		// OMX@318/CWA@64 Metadata (6x32=192 in OMX, 14x32=448 in CWA)
-			for (j = 0; i < sizeof(md->metadata); j++)
+			memcpy(md->metadata, p + 318, 192);		// OMX@318/CWA@64 Metadata (6x32=192 in OMX, 14x32=448 in CWA)
+			for (j = 0; j < sizeof(md->metadata); j++)
 			{
 				if (md->metadata[j] == 0xff) { md->metadata[j] = '\0'; }
 			}
@@ -742,7 +789,14 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 
 		if (streamIndex < 0 || streamIndex >= OMDATA_MAX_STREAM)
 		{
-			fprintf(stderr, "OMDATA: Unhandled sector @%d header=%c%c\n", i, p[0], p[1]);
+			if (p[0] == 's')
+			{
+				;	// Skipping string sector
+			}
+			else
+			{
+				fprintf(stderr, "OMDATA: Unhandled sector @%d header=%c%c\n", i, p[0], p[1]);
+			}
 			continue;
 		}
 
@@ -1249,6 +1303,11 @@ char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int
 // TODO: Determine if any of the 16-bit values were clipped (limits need to come from segment format)
 
 				return 0;
+			}
+			else
+			{
+				// TODO: Fix API to work with variable width return types (currently 16-bit)
+				fprintf(stderr, "!");
 			}
 		}
 	}

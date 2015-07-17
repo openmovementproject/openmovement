@@ -49,7 +49,7 @@ or if the value range, for at least two out of three axes, was less than 50 mg.
 #include <time.h>
 #include <math.h>
 
-#include "butter4bp.h"
+#include "butter.h"
 #include "calc-wtv.h"
 
 

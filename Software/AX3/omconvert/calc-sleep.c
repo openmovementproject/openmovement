@@ -40,7 +40,6 @@ Algorithm:
   
 * Using just the Z axis which, from the hardware specification, is "out" of the wrist.
 * Standard deviation over each 1 second epoch window:  STD = sqrt(1/N * SUM( (z[i] - MEAN(z))^2 ))
-* Figure 3 in the paper shows the scaling in the standard deviation at 100Hz to be 1/99, but it is assumed that this should be 1/100.
 * A segment is extended by one 1 second epoch where:  STD < delta,  delta = 6.  The paper doesn't specify units, but from the data, and the way it is used by the code, this appears to be in untis of 1/32 G
 * Segments must be of a minimum length to count: 600 epochs => 600 seconds.
 

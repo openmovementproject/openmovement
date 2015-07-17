@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-interpolate-mode") == 0) { settings.interpolate = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-aux-channel") == 0) { settings.auxChannel = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-info") == 0) { settings.infoFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-stationary") == 0) { settings.stationaryFilename = argv[++i]; }
 		else if (strcmp(argv[i], "-header-csv") == 0) { settings.headerCsv = atoi(argv[++i]); }
 		
 		else if (strcmp(argv[i], "-calibrate") == 0) { settings.calibrate = atoi(argv[++i]); }
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-svm-epoch") == 0) { settings.svmEpoch = atof(argv[++i]); }
 		else if (strcmp(argv[i], "-svm-filter") == 0) { settings.svmFilter = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-svm-mode") == 0) { settings.svmMode = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-svm-extended") == 0) { settings.svmExtended = atoi(argv[++i]); }
 
 		else if (strcmp(argv[i], "-wtv-file") == 0) { settings.wtvFilename = argv[++i]; }
 		else if (strcmp(argv[i], "-wtv-epoch") == 0) { settings.wtvEpoch = atoi(argv[++i]); }
@@ -155,10 +157,11 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Where <options> are:\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-out <filename.wav>\n");
-		fprintf(stderr, "\t-resample <rate (default auto)>\n");
+		fprintf(stderr, "\t-resample <rate (default from input configuration)>\n");
 		fprintf(stderr, "\t-interpolate-mode <1=nearest, 2=linear, 3=cubic (default)>\n");
 //		fprintf(stderr, "\t-aux-channel <0=ignore, 1=include (default)>\n");
 		fprintf(stderr, "\t-info <filename.txt>\n");
+		fprintf(stderr, "\t-stationary <filename.csv>\n");
 		fprintf(stderr, "\t-header-csv <0=none, 1=header in first row (default)>\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-calibrate <0=off, 1=auto (default)>\n");	// 2=auto (force interpolator)
@@ -170,7 +173,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-svm-file <filename.svm.csv>\n");
 		fprintf(stderr, "\t-svm-epoch <time (default 60 seconds)>\n");
 		fprintf(stderr, "\t-svm-filter <0=off, 1=BP 0.5-20 Hz (default)>\n");
-		fprintf(stderr, "\t-svm-mode <0=abs(sqrt(x^2+y^2+z^2)-1) (default), 1=max(0,sqrt(x^2+y^2+z^2)-1)>\n");
+		fprintf(stderr, "\t-svm-extended <0=off (default), 1=on>\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-wtv-file <filename.wtv.csv>\n");
 		fprintf(stderr, "\t-wtv-epoch <number of 30-minute windows (default 1)>\n");

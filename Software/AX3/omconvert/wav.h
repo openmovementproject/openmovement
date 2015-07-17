@@ -57,7 +57,7 @@ typedef struct
 } WavInfo;
 
 
-#define WAV_META_LENGTH 1024      // Buffer size required for meta-data string reading (if not-NULL)
+#define WAV_META_LENGTH 16384      // Buffer size required for meta-data string reading (if not-NULL)
 
 // 'bytesPerChannel' values
 #define WAV_BPC_8BIT     1

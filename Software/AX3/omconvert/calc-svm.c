@@ -37,7 +37,7 @@
 #include <time.h>
 #include <math.h>
 
-#include "butter4bp.h"
+#include "butter.h"
 #include "calc-svm.h"
 
 
@@ -69,36 +69,40 @@ char SvmInit(svm_status_t *status, svm_configuration_t *configuration)
 	// .CSV header
 	if (status->file && configuration->headerCsv)
 	{
-		fprintf(status->file, "Time,Mean SVM (g)\n");
+		fprintf(status->file, "Time,Mean SVM (g)");
+		if (configuration->extended >= 1)
+		{
+			// Extended header
+			fprintf(status->file, ",Range X (g),Range Y (g),Range Z (g),STD X (g),STD Y (g),STD Z (g),Temperature (C),Total Samples,Invalid Samples,Clipped Input,Clipped Output");
+		}
+		fprintf(status->file, "\n");
 	}
 
 	// Filter parameters
+	int order = 4;
 	double Fc1 = 0.5;			// -> 0.2
 	double Fc2 = 20;			// 15
 	double Fs = status->configuration->sampleRate;
+
+	if (status->configuration->filter == 2) { Fc1 = -1; }		// Low-pass only
 
 	// Calculate normalized cut-offs
 	double W1 = Fc1 / (Fs / 2);
 	double W2 = Fc2 / (Fs / 2);
 
 	// Calculate coefficients
-	CoefficientsButterworth4BP(W1, W2, status->B, status->A);
+	status->numCoefficients = CoefficientsButterworth(order, W1, W2, status->B, status->A);
 
-	/*
+#if 0
+	// # Fc1 = 0.5; Fc2 = 20; Fs = 100; order = 4; [b, a] = butter(4, [Fc1, Fc2] . / (Fs / 2))
+	// # b = 0.0430         0 -0.1720         0    0.2580         0 -0.1720         0    0.0430
+	// # a = 1.0000 -4.7509    9.7480 -11.6172    9.1051 -4.8601    1.6715 -0.3294    0.0329
+
 	// Display coefficients
-	printf("B: ");
-	for (i = 0; i < BUTTERWORTH4_NUM_COEFFICIENTS; i++)
-	{
-	printf("%f ", B[i]);
-	}
-	printf("\n");
-	printf("A: ");
-	for (i = 0; i < BUTTERWORTH4_NUM_COEFFICIENTS; i++)
-	{
-	printf("%f ", A[i]);
-	}
-	printf("\n");
-	*/
+	int i;
+	printf("B: "); for (i = 0; i < status->numCoefficients; i++) { printf("%f ", status->B[i]); } printf("\n");
+	printf("A: "); for (i = 0; i < status->numCoefficients; i++) { printf("%f ", status->A[i]); } printf("\n");
+#endif
 
 	status->sample = 0;
 
@@ -119,18 +123,38 @@ static void SvmPrint(svm_status_t *status)
 		float sec = tmn->tm_sec + (float)(status->epochStartTime - (time_t)status->epochStartTime);
 		sprintf(timestring, "%04d-%02d-%02d %02d:%02d:%02d", 1900 + tmn->tm_year, tmn->tm_mon + 1, tmn->tm_mday, tmn->tm_hour, tmn->tm_min, (int)sec);	// (int)((sec - (int)sec) * 1000)
 
-		fprintf(status->file, "%s,%f\n", timestring, meanSvm);
+		// "Time, Mean SVM (g)"
+		fprintf(status->file, "%s,%f", timestring, meanSvm);
+		if (status->configuration->extended >= 1)
+		{
+			// "Range X (g),Range Y (g),Range Z (g),STD X (g),STD Y (g),STD Z (g),Temperature (C),Total Samples,Invalid Samples,Clipped Input,Clipped Output"
+			fprintf(status->file, ",%f,%f,%f", status->resultRange[0], status->resultRange[1], status->resultRange[2]);
+			fprintf(status->file, ",%f,%f,%f", status->resultStdDev[0], status->resultStdDev[1], status->resultStdDev[2]);
+			fprintf(status->file, ",%f", status->resultTemperature);
+			fprintf(status->file, ",%d", status->intervalSample);
+			fprintf(status->file, ",%d", status->countInvalid);
+			fprintf(status->file, ",%d", status->countClippedInput);
+			fprintf(status->file, ",%d", status->countClipped);			// Clipped input or output
+		}
+		fprintf(status->file, "\n");
 	}
 }
 
 // Processes the specified value
-bool SvmAddValue(svm_status_t *status, double* accel, double temp, bool valid)
+bool SvmAddValue(svm_status_t *status, double* accel, double temp, char validity)
 {
 	int c;
 
 	if (status->epochStartTime == 0)
 	{
 		status->epochStartTime = status->configuration->startTime + (status->sample / status->configuration->sampleRate);
+		for (c = 0; c < AXES; c++)
+		{
+			status->axisSum[c] = 0;
+			status->axisSumSquared[c] = 0;
+			status->axisMax[c] = accel[c];
+			status->axisMin[c] = accel[c];
+		}
 	}
 
 	// SVM
@@ -140,28 +164,56 @@ bool SvmAddValue(svm_status_t *status, double* accel, double temp, bool valid)
 		double v = accel[c];
 		sumSquared += v * v;
 	}
-	double svm = sqrt(sumSquared) - 1;
+	double svm = sqrt(sumSquared);
 
-	if (status->configuration->filter)
+	if (status->configuration->mode < 4)	// Mode 0-3 are SVM-1, modes 4-7 are straight SVM
 	{
-		filter(status->B, status->A, &svm, 1, status->z);
+		svm -= 1;
+	}
+	if (status->configuration->filter != 0)
+	{
+		filter(status->numCoefficients, status->B, status->A, &svm, &svm, 1, status->z);
 	}
 
 	// SVM mode (must be after filtering)
-	if (status->configuration->mode == 1)		// Clamp mode
+	switch (status->configuration->mode & 3)
 	{
-		if (svm < 0) { svm = 0.0; }
+		case 0: svm = fabs(svm); break;					// Standard abs(v) mode
+		case 1: if (svm < 0) { svm = 0.0; } break;		// Clamp max(0,v) mode
+		case 2: break;									// Pass-through mode (sum will include values <0 !)
+		case 3:	break;									// (reserved)
+	}
+
+	// Invalid?
+	if (validity & 0x01) 
+	{ 
+		status->countInvalid++; 
 	}
 	else
 	{
-		svm = fabs(svm);			// Standard abs() mode
-	}
+		// Count data if valid
 
-	if (valid)
-	{
+		// Axis StdDev & range
+		for (c = 0; c < AXES; c++)
+		{
+			double v = accel[c];
+			status->axisSum[c] += v;
+			status->axisSumSquared[c] += v * v;
+			if (status->intervalSample == 0 || accel[c] < status->axisMin[c]) { status->axisMin[c] = accel[c]; }
+			if (status->intervalSample == 0 || accel[c] > status->axisMax[c]) { status->axisMax[c] = accel[c]; }
+		}
+
+		// Mean SVM
 		status->sumSvm += svm;
+		status->sumTemperature += temp;
+
 		status->intervalSample++;
 	}
+
+	// Sum number of clipped samples
+	if (validity & 0x02) { status->countClippedInput++; }
+	if (validity & 0x04) { status->countClippedOutput++; }
+	if ((validity & 0x02) || (validity & 0x04)) { status->countClipped++; }
 
 	status->sample++;
 
@@ -169,10 +221,29 @@ bool SvmAddValue(svm_status_t *status, double* accel, double temp, bool valid)
 	int interval = ((int)(status->configuration->sampleRate * status->configuration->epoch + 0.5));
 	if (status->sample > 0 && status->sample % interval == 0)
 	{
+		// Per-axis StdDev and range
+		for (c = 0; c < AXES; c++)
+		{
+			double mean = status->intervalSample == 0 ? 0 : status->axisSum[c] / status->intervalSample;
+			double squareOfMean = mean * mean;
+			double averageOfSquares = status->intervalSample == 0 ? 0 : (status->axisSumSquared[c] / status->intervalSample);
+			double standardDeviation = sqrt(averageOfSquares - squareOfMean);
+			status->resultMean[c] = mean;
+			status->resultStdDev[c] = standardDeviation;
+			status->resultRange[c] = status->axisMax[c] - status->axisMin[c];
+		}
+		status->resultTemperature = status->intervalSample == 0 ? 0 : status->sumTemperature / status->intervalSample;
+
 		SvmPrint(status);
 		status->intervalSample = 0;
 		status->sumSvm = 0;
+		status->sumTemperature = 0;
 		status->epochStartTime = 0;
+
+		status->countInvalid = 0;
+		status->countClippedInput = 0;
+		status->countClippedOutput = 0;
+		status->countClipped = 0;
 	}
 
 	return true;

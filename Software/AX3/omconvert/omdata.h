@@ -103,26 +103,42 @@ typedef struct omdata_session_tag_t
 // CWA header
 //	unsigned short header;					// CWA@0 0x444D = ("MD") Meta data block
 //	unsigned short blockSize;				// CWA@2 0xFFFC = Packet size (2^16 - 2 - 2)
-//	unsigned char performClear;				// CWA@4 0 = none, 1 = data, 2 = full
+
+////1 x	unsigned char performClear;				// CWA@4 0 = none, 1 = data, 2 = full
+////[1 byte @ 4, previously performClear]
+////-> 1 byte calibrationEnabled (99 'c' = enabled but not present, 67 'C' = enabled and present)
+
 //	unsigned short deviceId;				// CWA@5
 //	unsigned long sessionId;				// CWA@7
-//	unsigned short shippingMinLightLevel;	// CWA@11
+//x	unsigned short shippingMinLightLevel;	// CWA@11
 //	unsigned long loggingStartTime;			// CWA@13
 //	unsigned long loggingEndTime;			// CWA@17
 //	unsigned long loggingCapacity;			// CWA@21
-//	unsigned char allowStandby;				// CWA@25 User allowed to transition LOGGING->STANDBY (and if POWERED->STANDBY/LOGGING)
+//x	unsigned char allowStandby;				// CWA@25 User allowed to transition LOGGING->STANDBY (and if POWERED->STANDBY/LOGGING)
 //	char debuggingInfo;						// CWA@26 Additional LED debugging info (0=no double-tap, 1=double-tap detection, 2=constant flash status)
-//	unsigned short batteryMinimumToLog;		// CWA@27 Minimum battery level required for logging
-//	unsigned short batteryWarning; 			// CWA@29 Battery level below which show warning colour for logging status
-//	unsigned char enableSerial;				// CWA@31 Serial commands enabled during logging (will consume more power as processor in IDLE not sleep
-//	unsigned long lastClearTime;			// CWA@32 Last clear data time
+
+//2 x	unsigned short batteryMinimumToLog;		// CWA@27 Minimum battery level required for logging
+//2 x	unsigned short batteryWarning; 			// CWA@29 Battery level below which show warning colour for logging status
+//1 x	unsigned char enableSerial;				// CWA@31 Serial commands enabled during logging (will consume more power as processor in IDLE not sleep
+//4 x	unsigned long lastClearTime;			// CWA@32 Last clear data time
+////[9 bytes @27, previously batteryMinimumToLog, batteryWarning, enableSerial, lastClearTime]
+////-> 1 byte  reserved (0)
+////-> 4 bytes temperatureOffsetX
+////-> 4 bytes temperatureOffsetY
+
 //	unsigned char samplingRate;				// CWA@36 Sampling rate
 //	unsigned long lastChangeTime;			// CWA@37 Last change metadata time
 //	unsigned char firmwareRevision;			// CWA@41 Firmware revision number
 //	signed short timeZone;					// CWA@42 Time Zone offset from UTC (in minutes), 0xffff = -1 = unknown
-//	unsigned char reserved[20];				// CWA@44 Another 20 bytes reserved before the annotation starts
-//	unsigned char annotation[448];			// CWA@64 Annotation (user text metadata), 14* 32-byte chunks (448 bytes total), "LBL=1234567890123456789012345678"
 
+////20 x	unsigned char reserved[20];				// CWA@44 Another 20 bytes reserved before the annotation starts
+////[20 bytes @44, previously reserved]
+////-> 6 bytes scaleMinusOneXYZ
+////-> 6 bytes offsetXYZ
+////-> 4 bytes referenceTemperature
+////-> 4 bytes temperatureOffsetZ
+
+//	unsigned char annotation[448];			// CWA@64 Annotation (user text metadata), 14* 32-byte chunks (448 bytes total), "LBL=1234567890123456789012345678"
 
 // OMX Header
 //	unsigned char packetType;				// OMX@0 Packet type (ASCII 'H' = header)
@@ -149,8 +165,7 @@ typedef struct omdata_session_tag_t
 //	omdata_sensor_config_t configAltimeter;	// OMX@220 Altimeter configuration
 //	omdata_sensor_config_t configAnalog;	// OMX@228 Analogue configuration (Temperature, Light & Battery)
 //	omdata_sensor_config_t configAllAxis;	// OMX@236 "All axis" configuration
-//	short calibration[32];					// OMX@244 32 calibration words
-//	unsigned char reserved6[10];			// OMX@308 (reserved, write as zero)
+//	unsigned char calibration[74];			// OMX@244 74 calibration bytes
 //	unsigned char metadata[192];			// OMX@318 Metadata (6x32=192)
 
 // Sensor settings
