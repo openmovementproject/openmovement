@@ -144,6 +144,9 @@ static int CalcInit(calc_t *calc, double sampleRate, double startTime)
 {
 	int ok = 0;
 
+	// Clear
+	memset(calc, 0, sizeof(calc_t));
+
 	// Init. CSV
 	memset(&calc->csvStatus, 0, sizeof(csv_status_t));
 	calc->csvConfiguration.sampleRate = sampleRate;
@@ -178,6 +181,13 @@ static int CalcInit(calc_t *calc, double sampleRate, double startTime)
 	calc->sleepConfiguration.startTime = startTime;
 	calc->sleepOk = SleepInit(&calc->sleepStatus, &calc->sleepConfiguration);
 	ok |= calc->sleepOk;
+
+
+	// Clear stats
+	calc->countInvalid = 0;
+	calc->countClippedInput = 0;
+	calc->countClippedOutput = 0;
+	calc->countClipped = 0;
 
 	return ok;		// Whether any processing outputs are used
 }
@@ -800,6 +810,7 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 		fprintf(stderr, "Working...\n");
 		unsigned long samplesOffset = 0;
 		unsigned long samplesRemaining = wavInfo.numSamples;
+		double temp = 0.0;
 		while (!feof(fp))
 		{
 			long offset = wavInfo.offset + ((sizeof(short) * wavInfo.chans) * samplesOffset);
@@ -834,13 +845,14 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 							validity |= 0x04;	// Clipped after calibration, may have also been clipped before calibration.
 						}
 					}
+					// TODO: Update temperature 'temp'
 				}
 
 				// Scaling from metadata
 				values[0] = v[0] * scale[0];
 				values[1] = v[1] * scale[1];
 				values[2] = v[2] * scale[2];
-				if (!CalcAddValue(calc, values, 0.0, validity))
+				if (!CalcAddValue(calc, values, temp, validity))
 				{
 					fprintf(stderr, "ERROR: Problem writing calculations.\n");
 					retVal = EXIT_IOERR;
@@ -1176,13 +1188,13 @@ fprintf(stderr, "COMMENT: %s\n", comment);
 
 				fprintf(infofp, ":\n");
 				fprintf(infofp, "::: Data about the device that made the recording\n");
-				fprintf(infofp, "%s\n", artist);
+				fprintf(infofp, "%s", artist);
 				fprintf(infofp, ":\n");
 				fprintf(infofp, "::: Data about the recording itself\n");
-				fprintf(infofp, "%s\n", name);
+				fprintf(infofp, "%s", name);
 				fprintf(infofp, ":\n");
 				fprintf(infofp, "::: Data about this file representation\n");
-				fprintf(infofp, "%s\n", comment);
+				fprintf(infofp, "%s", comment);
 			}
 
 			signed short values[OMDATA_MAX_CHANNELS + 1];
@@ -1242,7 +1254,7 @@ fprintf(stderr, "COMMENT: %s\n", comment);
 
 				values[player.arrangement->numChannels] = aux;
 
-				if (!CalcAddValue(calc, accel, 0.0, validity))
+				if (!CalcAddValue(calc, accel, temp, validity))
 				{
 					fprintf(stderr, "ERROR: Problem writing calculations.\n");
 					retVal = EXIT_IOERR;
