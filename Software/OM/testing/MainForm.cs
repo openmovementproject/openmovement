@@ -105,7 +105,7 @@ namespace OMTesting
                 {
                     ret = omdev.Update();
 
-                    if (batteryInteresting && lastUpdatedBattery == DateTime.MinValue || DateTime.Now - lastUpdatedBattery > TimeSpan.FromSeconds(5))
+                    if (batteryInteresting && lastUpdatedBattery == DateTime.MinValue || DateTime.Now - lastUpdatedBattery > TimeSpan.FromSeconds(30))
                     {
                         int batteryLevel = OmApi.OmGetBatteryLevel(Id);
                         if (batteryLevel != this.BatteryLevel)
@@ -175,18 +175,18 @@ namespace OMTesting
                 {
                     label = "FAIL";
                     info = "" + e.Error + " " + (e.ErrorMessages == null ? "" : e.ErrorMessages);
-                    Mode = DeviceStatus.DeviceMode.Failed;
                     OmDevice omdev = GetDevice();
                     if (omdev != null) { omdev.SetLed(OmApi.OM_LED_STATE.OM_LED_BLUE); }
+                    Mode = DeviceStatus.DeviceMode.Failed;
                 }
                 else
                 {
                     label = "OK";
                     info = "";
                     Console.WriteLine("Configuration stopped - OK");
-                    Mode = DeviceStatus.DeviceMode.Complete;
                     OmDevice omdev = GetDevice();
                     if (omdev != null) { omdev.SetLed(OmApi.OM_LED_STATE.OM_LED_MAGENTA); }
+                    Mode = DeviceStatus.DeviceMode.Complete;
                 }
                 this.Info = info;
                 Console.WriteLine("Configuration stopped - " + label + "," + info);
@@ -445,16 +445,23 @@ namespace OMTesting
         {
             bool allUserAdded = (listViewDevices.SelectedIndices.Count > 0);
             bool allConnected = (listViewDevices.SelectedIndices.Count > 0);
+            bool allFailed = (listViewDevices.SelectedIndices.Count > 0);
 
             foreach (int i in listViewDevices.SelectedIndices)
             {
                 int id = (int)listViewDevices.Items[i].Tag;
                 if (devices.ContainsKey(id) && devices[id].Connected) { allUserAdded = false; }
                 if (devices.ContainsKey(id) && !devices[id].Connected) { allConnected = false; }
+
+                if (!devices.ContainsKey(id) || (devices[id].Mode != DeviceStatus.DeviceMode.Error && devices[id].Mode != DeviceStatus.DeviceMode.Failed))
+                {
+                    allFailed = false;
+                }
             }
 
             buttonRemove.Enabled = allUserAdded;
             buttonIdentify.Enabled = allConnected;
+            buttonRetry.Enabled = allFailed;
         }
 
         private void buttonRemove_Click(object sender, EventArgs e)
@@ -478,31 +485,47 @@ namespace OMTesting
             int count = listViewDevices.Items.Count;
             bool changed = false;
 
+            // Any configuring?
+            bool configuring = false;
+            for (int i = 0; i < count; i++)
+            {
+                int testId = (int)listViewDevices.Items[i].Tag;
+                DeviceStatus device = devices[testId];
+                if (device.Mode == DeviceStatus.DeviceMode.Configuring) { configuring = true; break; }
+            }
+
+            // Update next element
             for (int i = 0; i < count; i++)
             {
                 int testId = (int)listViewDevices.Items[(checkIndex + i) % count].Tag;
                 DeviceStatus device = devices[testId];
 
-                if (device.Changed) { changed = true; device.Changed = false; }
-
-                if (device.Update(device.Mode != DeviceStatus.DeviceMode.Configuring, device.Mode == DeviceStatus.DeviceMode.Charging)) { changed = true; }
-
                 // See if a charging device should be configured
-                if (device.Mode == DeviceStatus.DeviceMode.Charging && device.CanConfigure(MinBattery))
+                if (!configuring && device.Mode == DeviceStatus.DeviceMode.Charging && device.CanConfigure(MinBattery))
                 {
                     device.StartConfigure(StartDays, StartHour, DurationDays, EndHour);
                     changed = true;
                 }
-
-                if (device.Mode == DeviceStatus.DeviceMode.Unexpected)
+                else
                 {
-                    if (autoAdd)
+                    if (device.Changed) { changed = true; device.Changed = false; }
+
+                    if (device.Update(device.Mode != DeviceStatus.DeviceMode.Configuring, device.Mode == DeviceStatus.DeviceMode.Charging)) { changed = true; }
+
+                    if (device.Mode == DeviceStatus.DeviceMode.Unexpected)
                     {
-                        AddExpectedDevice(device.Id);
+                        if (autoAdd)
+                        {
+                            AddExpectedDevice(device.Id);
+                        }
                     }
                 }
+
+                // NOTE: For now, only deal with one change per iteration
+                if (changed) { break; }
             }
 
+            checkIndex++;
             if (changed) { UpdateDevices(); }
 
             lastRun = DateTime.UtcNow;
@@ -560,6 +583,22 @@ namespace OMTesting
             }
         }
 
+        private void buttonRetry_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in listViewDevices.SelectedItems)
+            {
+                int id = (int)item.Tag;
+                if (devices.ContainsKey(id))
+                {
+                    if (devices[id].Mode == DeviceStatus.DeviceMode.Error || devices[id].Mode == DeviceStatus.DeviceMode.Failed)
+                    {
+                        devices[id].Mode = DeviceStatus.DeviceMode.Charging;
+                    }
+                }
+
+            }
+        }
+
         private void MainForm_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             /*
@@ -613,6 +652,7 @@ namespace OMTesting
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
+
 
     }
 }

@@ -2,3 +2,5 @@
 /Release
 /*.user
 /*.dll
+/*.ipdb
+/*.iobj

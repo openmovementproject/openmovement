@@ -896,7 +896,7 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
         /* Check if there's any data blocks stored (not just the headers) */
         if (dataNumBlocks - dataOffsetBlocks <= 0)
         {
-            printf("VERIFY #%d: Ignoring - no data stored.\n");
+            printf("VERIFY #%d: Ignoring - no data stored.\n", deviceId);
             OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
         }
         else

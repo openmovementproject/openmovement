@@ -30,9 +30,7 @@ Make .CUT.CSV
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using OmApiNet;
@@ -42,7 +40,6 @@ using System.Security.Principal;
 using System.IO;
 using System.Net;
 using System.Threading;
-using System.Xml;
 
 using AndreasJohansson.Win32.Shell;
 
@@ -62,6 +59,7 @@ namespace OmGui
         public static uint queryCancelAutoPlayID = 0;
 
         public static string ADVICE = "\r\n\r\n(If device communication problems persist, please disconnect, wait, then reconnect the device.)";
+        public int resetIfUnresponsive = 3;
 
         //PluginQueue
         Queue<PluginQueueItem> pluginQueueItems = new Queue<PluginQueueItem>();
@@ -127,11 +125,12 @@ namespace OmGui
         private string downloadDumpFile = null;
         private bool noUpdateCheck = false;
         private string startupPath = null;
-        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck, string startupPath)
+        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck, string startupPath, int resetIfUnresponsive)
         {
             this.configDumpFile = myConfigDumpFile;
             downloadDumpFile = myDownloadDumpFile;
             this.startupPath = startupPath;
+            this.resetIfUnresponsive = resetIfUnresponsive;
 
             if (uac == 1)
             {
@@ -1317,11 +1316,25 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         bool CheckFirmware(OmDevice[] devices)
         {
             // Read bootload information from file
-            string bootloadInformation = @"firmware\bootload.ini";
             string bootloadExecutable = null;
             string latestVersion = "";
             IDictionary<string, string> blacklist = new Dictionary<string, string>(); // Black-list of version numbers
 
+            // Find bootload information file
+            string bootloadInformation = @"firmware\bootload.ini";
+            // Search current directory first
+            if (!File.Exists(bootloadInformation))
+            {
+                // Search under executable folder
+                bootloadInformation = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + bootloadInformation;
+            }
+            if (!File.Exists(bootloadInformation))
+            {
+                Trace.WriteLine("Firmware information file not found " + bootloadInformation + "");
+                return false;
+            }
+
+            // Read bootload information
             string[] lines = new string[0];
             try
             {
@@ -2451,11 +2464,11 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                             // Prompt
                             if (!outdated)
                             {
-                                Console.WriteLine("UPDATE: Current version " + currentVersionString + " is up to date (" + installVersionString + ")");
+                                Console.WriteLine("UPDATE: Current version " + currentVersionString + " is up to date (>= " + installVersionString + ")");
                             }
                             else
                             {
-                                Console.WriteLine("UPDATE: Current version " + currentVersionString + " is needs updating (" + installVersionString + ")");
+                                Console.WriteLine("UPDATE: Current version " + currentVersionString + " is needs updating (< " + installVersionString + ")");
 
                                 string promptMessage = "";
                                 promptMessage += "There is an update available.\r\n";
@@ -3725,22 +3738,26 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         {
             // No more refreshes
             refreshTimer.Enabled = false;
+            Console.WriteLine("Blocking background tasks...");
             if (backgroundWorkerUpdate.IsBusy)
             {
+                Console.WriteLine("...waiting for current background task...");
                 Cursor.Current = Cursors.WaitCursor;
 
                 // Spin while waiting for background task (not great, but tasks should be short-lived)
                 while (backgroundWorkerUpdate.IsBusy)
                 {
-Application.DoEvents();
+                    Application.DoEvents();
                     Thread.Sleep(50);
                 }
                 Cursor.Current = Cursors.Default;
+                Console.WriteLine("...done.");
             }
         }
 
         private void EnableBackgroundTasks()
         {
+            Console.WriteLine("Enabling background tasks...");
             refreshTimer.Enabled = true;
         }
 
@@ -3754,7 +3771,11 @@ Application.DoEvents();
 
             if ((refreshCounter % 5) == 0) { doIdentifyTask = true; } // Latch state at 2 Hz
 
-            if (!backgroundWorkerUpdate.IsBusy)
+            if (backgroundWorkerUpdate.IsBusy)
+            {
+                Console.WriteLine("Update skipped as busy -- #" + refreshCounter + (doIdentifyTask ? " (identify " + identifyTicks + ")" : ""));
+            }
+            else
             {
                 if (doIdentifyTask && identifyTicks > 0)
                 {
@@ -3804,23 +3825,22 @@ Application.DoEvents();
             {
                 identifyTicks--;
 
-                //Turn off lights
+                OmApi.OM_LED_STATE state;
+                if (identifyTicks <= 0)
+                {
+                    state = OmApi.OM_LED_STATE.OM_LED_AUTO;
+                }
+                else
+                {
+                    bool turnOn = ((identifyTicks & 1) == 1);
+                    state = (turnOn) ? OmApi.OM_LED_STATE.OM_LED_BLUE : OmApi.OM_LED_STATE.OM_LED_MAGENTA;
+                }
+
+Console.WriteLine("backgroundWorkerUpdate - Identify task: " + state);
                 lock (identifyDevices)
                 {
                     foreach (OmDevice device in identifyDevices)
                     {
-                        OmApi.OM_LED_STATE state;
-
-                        if (identifyTicks <= 0)
-                        {
-                            state = OmApi.OM_LED_STATE.OM_LED_AUTO;
-                        }
-                        else
-                        {
-                            bool turnOn = ((identifyTicks & 1) == 1);
-                            state = (turnOn) ? OmApi.OM_LED_STATE.OM_LED_BLUE : OmApi.OM_LED_STATE.OM_LED_MAGENTA;
-                        }
-
                         device.SetLed(state);
                     }
                 }
@@ -3829,9 +3849,10 @@ Application.DoEvents();
             else
             {
                 OmDevice device = (OmDevice)e.Argument;
-                bool changed = device.Update();
+                bool changed = device.Update(resetIfUnresponsive);
                 if (changed)
                 {
+Console.WriteLine("backgroundWorkerUpdate - changed " + device.DeviceId);
                     UpdateDeviceId(device.DeviceId);
                 }
             }

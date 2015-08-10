@@ -86,6 +86,7 @@
             this.textBoxLog = new System.Windows.Forms.TextBox();
             this.timerUpdate = new System.Windows.Forms.Timer(this.components);
             this.timerIdentify = new System.Windows.Forms.Timer(this.components);
+            this.buttonRetry = new System.Windows.Forms.Button();
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -504,6 +505,7 @@
             this.groupBoxDevices.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxDevices.Controls.Add(this.buttonRetry);
             this.groupBoxDevices.Controls.Add(this.buttonIdentify);
             this.groupBoxDevices.Controls.Add(this.listViewDevices);
             this.groupBoxDevices.Controls.Add(this.buttonRemove);
@@ -627,7 +629,7 @@
             // timerUpdate
             // 
             this.timerUpdate.Enabled = true;
-            this.timerUpdate.Interval = 1000;
+            this.timerUpdate.Interval = 500;
             this.timerUpdate.Tick += new System.EventHandler(this.timerUpdate_Tick);
             // 
             // timerIdentify
@@ -635,6 +637,18 @@
             this.timerIdentify.Enabled = true;
             this.timerIdentify.Interval = 250;
             this.timerIdentify.Tick += new System.EventHandler(this.timerIdentify_Tick);
+            // 
+            // buttonRetry
+            // 
+            this.buttonRetry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonRetry.Enabled = false;
+            this.buttonRetry.Location = new System.Drawing.Point(437, 282);
+            this.buttonRetry.Name = "buttonRetry";
+            this.buttonRetry.Size = new System.Drawing.Size(75, 23);
+            this.buttonRetry.TabIndex = 4;
+            this.buttonRetry.Text = "&Retry";
+            this.buttonRetry.UseVisualStyleBackColor = true;
+            this.buttonRetry.Click += new System.EventHandler(this.buttonRetry_Click);
             // 
             // MainForm
             // 
@@ -732,6 +746,7 @@
         private System.Windows.Forms.Timer timerUpdate;
         private System.Windows.Forms.Button buttonIdentify;
         private System.Windows.Forms.Timer timerIdentify;
+        private System.Windows.Forms.Button buttonRetry;
     }
 }
 

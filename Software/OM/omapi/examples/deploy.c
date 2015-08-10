@@ -138,7 +138,7 @@ int deploy(const char *infile, const char *outfile)
             /* Check if there's any data blocks stored (more than just the headers) */
             if (dataNumBlocks - dataOffsetBlocks > 0)
             {
-                printf("DEPLOY #%d: Ignoring - has data stored on the device.\n");
+                printf("DEPLOY #%d: Ignoring - has data stored on the device.\n", deviceId);
                 /* Set the LED to red to indicate full but un-copied data */
                 OmSetLed(deviceId, OM_LED_RED);
                 printf("%d = HAS-DATA (run 'clear' example to reset)\n", deviceId);

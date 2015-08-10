@@ -9,8 +9,9 @@ namespace OmApiNet
         protected Om om;
 
         public bool validData;
+        public int failedCount = 0;
         private bool hasChanged;
-        public DateTime lastBatteryUpdate = DateTime.MinValue;
+        public DateTime lastUpdate = DateTime.MinValue;
 
         public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
         public OmDeviceDownloadCompleteCallback downloadComplete = null;
@@ -220,51 +221,70 @@ category = SourceCategory.Other;
         }
 
 
-        public bool Update()
+        public bool Update(int resetIfUnresponsive)
         {
             bool changed = false;
             DateTime now = DateTime.Now;
 
-            if (!validData)
+            double updateInterval = 30.0;                           // Usually a 30 second update interval
+            updateInterval = updateInterval + (failedCount * 10.0);
+            updateInterval = Math.Min(updateInterval, 120.0);       // At most, 2 minute interval if not communicating
+
+            if (lastUpdate == DateTime.MinValue || (now - lastUpdate) > TimeSpan.FromSeconds(updateInterval))
             {
                 int error = 0;
-                int res;
 
-                // TODO: Error checking
-                res = OmApi.OmGetVersion(deviceId, out firmwareVersion, out hardwareVersion);
-                error |= (OmApi.OM_FAILED(res) ? 0x01 : 0);
-                 
-                uint time;
-                res = OmApi.OmGetTime(deviceId, out time);
-                error |= (OmApi.OM_FAILED(res) ? 0x02 : 0);
-                timeDifference = (OmApi.OmDateTimeUnpack(time) - now);
-
-                uint startTimeValue, stopTimeValue;
-                res = OmApi.OmGetDelays(deviceId, out startTimeValue, out stopTimeValue);
-                error |= (OmApi.OM_FAILED(res) ? 0x04 : 0);
-                startTime = OmApi.OmDateTimeUnpack(startTimeValue);
-                stopTime = OmApi.OmDateTimeUnpack(stopTimeValue);
-
-                res = OmApi.OmGetSessionId(deviceId, out sessionId);
-                error |= (OmApi.OM_FAILED(res) ? 0x08 : 0);
-
-if (error != 0) { Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId + " (code " + error + ")"); }
-
-error = 0;      // HACK: Ignore error here as retrying won't help up (log to console)
-
-                changed = true;
-                if (error == 0) { validData = true; }
-            }
-
-            if (lastBatteryUpdate == DateTime.MinValue || (now - lastBatteryUpdate) > TimeSpan.FromSeconds(60.0f))
-            {
+//Console.WriteLine("backgroundWorkerUpdate - checking battery for " + this.deviceId + "...");
                 int newBatteryLevel = OmApi.OmGetBatteryLevel(deviceId);
-                lastBatteryUpdate = now;
+                lastUpdate = now;
+                if (OmApi.OM_FAILED(newBatteryLevel)) { error |= 0x10; }
 
-                if (newBatteryLevel != batteryLevel)
+                // Battery level has changed, or first error reading battery level
+                if (newBatteryLevel != batteryLevel || (error != 0 && failedCount == 0))
                 {
                     batteryLevel = newBatteryLevel;
                     changed = true;
+                }
+
+                if (error == 0 && !validData)
+                {
+                    //Console.WriteLine("backgroundWorkerUpdate - first check for " + this.deviceId + "...");
+                    int res;
+
+                    // TODO: Error checking
+                    res = OmApi.OmGetVersion(deviceId, out firmwareVersion, out hardwareVersion);
+                    error |= (OmApi.OM_FAILED(res) ? 0x01 : 0);
+
+                    uint time;
+                    res = OmApi.OmGetTime(deviceId, out time);
+                    error |= (OmApi.OM_FAILED(res) ? 0x02 : 0);
+                    timeDifference = (OmApi.OmDateTimeUnpack(time) - now);
+
+                    uint startTimeValue, stopTimeValue;
+                    res = OmApi.OmGetDelays(deviceId, out startTimeValue, out stopTimeValue);
+                    error |= (OmApi.OM_FAILED(res) ? 0x04 : 0);
+                    startTime = OmApi.OmDateTimeUnpack(startTimeValue);
+                    stopTime = OmApi.OmDateTimeUnpack(stopTimeValue);
+
+                    res = OmApi.OmGetSessionId(deviceId, out sessionId);
+                    error |= (OmApi.OM_FAILED(res) ? 0x08 : 0);
+
+                    changed = true;
+                    if (error == 0) { validData = true; }
+                }
+
+
+                if (error != 0)
+                {
+                    if (error != 0) { Console.WriteLine("ERROR: Problem fetching data for device: " + deviceId + " (code " + error + ")"); }
+                    failedCount++;
+
+                    // Every odd failure, try to reset the device
+                    if (resetIfUnresponsive > 0 && (failedCount % resetIfUnresponsive) == 0 && !this.IsDownloading)
+                    {
+                        Console.WriteLine("NOTE: Resetting device " + deviceId + " (failed " + failedCount + " times)...");
+                        Reset();
+                    }
                 }
             }
 
@@ -435,7 +455,7 @@ error = 0;      // HACK: Ignore error here as retrying won't help up (log to con
         public int Reset()
         {
             // [DllImport("libomapi.dll")] public static extern int OmCommand(int deviceId, string command, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata, int bufferSize, string expected, uint timeoutMs, IntPtr parseParts, int parseMax); // char **parseParts
-            return OmApi.OmCommand((int)deviceId, "\r\nreset\r\n", (StringBuilder)null, 0, "RESET", (uint)2000, IntPtr.Zero, 0);
+            return OmApi.OmCommand((int)deviceId, "\r\nreset\r\n", (StringBuilder)null, 0, "RESET", (uint)500, IntPtr.Zero, 0);
         }
     }
 }

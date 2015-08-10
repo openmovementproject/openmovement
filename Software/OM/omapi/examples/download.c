@@ -100,7 +100,7 @@ static void download_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STA
         /* Check if there's any data blocks stored (not just the headers) */
         if (dataNumBlocks - dataOffsetBlocks <= 0)
         {
-            printf("DOWNLOAD #%d: Ignoring - no data stored.\n");
+            printf("DOWNLOAD #%d: Ignoring - no data stored.\n", deviceId);
         }
         else
         {

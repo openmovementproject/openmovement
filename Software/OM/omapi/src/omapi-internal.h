@@ -76,7 +76,9 @@
     #define timegm _mkgmtime
 
     // Strings
-    #define snprintf _snprintf
+	#if _MSC_VER < 1900		// Before MSVC++ 14.0 (VS2015)
+		#define snprintf _snprintf
+	#endif
 
 #else
     // Headers
