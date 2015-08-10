@@ -101,6 +101,9 @@ typedef struct
 
 static void CalcCreate(calc_t *calc, omconvert_settings_t *settings)
 {
+	// Clear
+	memset(calc, 0, sizeof(calc_t));
+
 	// CSV status
 	memset(&calc->csvConfiguration, 0, sizeof(csv_configuration_t));
 	calc->csvConfiguration.headerCsv = settings->headerCsv;
@@ -135,6 +138,7 @@ static void CalcCreate(calc_t *calc, omconvert_settings_t *settings)
 	// Sleep status
 	memset(&calc->sleepConfiguration, 0, sizeof(sleep_configuration_t));
 	calc->sleepConfiguration.headerCsv = settings->headerCsv;
+	calc->sleepConfiguration.timeCsv = settings->timeCsv;
 	calc->sleepConfiguration.filename = settings->sleepFilename;
 
 	return;
@@ -144,8 +148,7 @@ static int CalcInit(calc_t *calc, double sampleRate, double startTime)
 {
 	int ok = 0;
 
-	// Clear
-	memset(calc, 0, sizeof(calc_t));
+	// Do not clear structure here, this is done in CalcCreate()
 
 	// Init. CSV
 	memset(&calc->csvStatus, 0, sizeof(csv_status_t));

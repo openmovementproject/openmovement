@@ -42,10 +42,11 @@ typedef struct
 	const char *outFilename;
 	double sampleRate;
 	int auxChannel;
-	char interpolate;			// 1=nearest, 2=linear, 3=cubic
+	char interpolate;					// 1=nearest, 2=linear, 3=cubic
 	const char *infoFilename;			// Information file name
 	const char *stationaryFilename;		// Stationary points file name
-	char headerCsv;				// 0=off, 1=on
+	char headerCsv;						// 0=off, 1=on
+	char timeCsv;						// 0=absolute, 1=relative
 
 	// Calibrate
 	char calibrate;				// 0=off, 1=auto (prefer from data), 2=auto (always use interpolated player)

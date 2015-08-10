@@ -40,6 +40,7 @@
 typedef struct
 {
 	char headerCsv;
+	char timeCsv;
 	double sampleRate;
 	const char *filename;
 	int summaryEpochs;			// Number of (1-second) epochs to summarize over

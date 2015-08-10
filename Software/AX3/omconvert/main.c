@@ -99,7 +99,8 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-info") == 0) { settings.infoFilename = argv[++i]; }
 		else if (strcmp(argv[i], "-stationary") == 0) { settings.stationaryFilename = argv[++i]; }
 		else if (strcmp(argv[i], "-header-csv") == 0) { settings.headerCsv = atoi(argv[++i]); }
-		
+		else if (strcmp(argv[i], "-time") == 0) { settings.timeCsv = atoi(argv[++i]); }
+
 		else if (strcmp(argv[i], "-calibrate") == 0) { settings.calibrate = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-calibrate-repeated") == 0) { settings.repeatedStationary = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-calibrate-stationary") == 0) { settings.stationaryTime = atof(argv[++i]); }
@@ -163,6 +164,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-info <filename.txt>\n");
 		fprintf(stderr, "\t-stationary <filename.csv>\n");
 		fprintf(stderr, "\t-header-csv <0=none, 1=header in first row (default)>\n");
+		fprintf(stderr, "\t-time <0=absolute (default), 1=UNIX epoch>\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-calibrate <0=off, 1=auto (default)>\n");	// 2=auto (force interpolator)
 		fprintf(stderr, "\t-calibrate-repeated <0=include (default), 1=ignore>\n");

@@ -219,7 +219,7 @@ bool SvmAddValue(svm_status_t *status, double* accel, double temp, char validity
 
 	// Report SVM epoch
 	int interval = ((int)(status->configuration->sampleRate * status->configuration->epoch + 0.5));
-	if (status->sample > 0 && status->sample % interval == 0)
+	if (status->sample > 0 && interval > 0 && status->sample % interval == 0)
 	{
 		// Per-axis StdDev and range
 		for (c = 0; c < AXES; c++)

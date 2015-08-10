@@ -478,10 +478,10 @@ unsigned long WavWrite(WavInfo *wavInfo, FILE *ofp)
     listInfoSize = 0;
     {
         // Get string lengths
-        short infoNameSize    = (wavInfo->infoName    != NULL) ? strlen(wavInfo->infoName)    : 0;
-        short infoArtistSize  = (wavInfo->infoArtist  != NULL) ? strlen(wavInfo->infoArtist)  : 0;
-        short infoCommentSize = (wavInfo->infoComment != NULL) ? strlen(wavInfo->infoComment) : 0;
-        short infoDateSize    = (wavInfo->infoDate    != NULL) ? strlen(wavInfo->infoDate)    : 0;
+        int infoNameSize    = (wavInfo->infoName    != NULL) ? (int)strlen(wavInfo->infoName)    : 0;
+        int infoArtistSize  = (wavInfo->infoArtist  != NULL) ? (int)strlen(wavInfo->infoArtist)  : 0;
+        int infoCommentSize = (wavInfo->infoComment != NULL) ? (int)strlen(wavInfo->infoComment) : 0;
+        int infoDateSize    = (wavInfo->infoDate    != NULL) ? (int)strlen(wavInfo->infoDate)    : 0;
 
         // Add NULL byte and padding to even number of bytes; sum sub-chunks
         if (infoNameSize > 0)    { listInfoSize += infoNameSize    + 2 - (infoNameSize    & 1) + 8; }   // "INAM<sz>"

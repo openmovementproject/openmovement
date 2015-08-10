@@ -67,14 +67,22 @@ Algorithm:
 
 
 #define MAX_TIME_STRING 26
-static const char *TimeString(double t, char *buff)
+static const char *TimeString(char timeCsv, double t, char *buff)
 {
 	static char staticBuffer[MAX_TIME_STRING] = { 0 };	// 2000-01-01 20:00:00.000|
 	if (buff == NULL) { buff = staticBuffer; }
 	time_t tn = (time_t)t;
 	struct tm *tmn = gmtime(&tn);
 	float sec = tmn->tm_sec + (float)(t - (time_t)t);
-	sprintf(buff, "%04d-%02d-%02d %02d:%02d:%02d" /*".%03d"*/, 1900 + tmn->tm_year, tmn->tm_mon + 1, tmn->tm_mday, tmn->tm_hour, tmn->tm_min, (int)sec /*, (int)((sec - (int)sec) * 1000) */);
+	if (timeCsv == 0)
+	{
+		sprintf(buff, "%04d-%02d-%02d %02d:%02d:%02d" /*".%03d"*/, 1900 + tmn->tm_year, tmn->tm_mon + 1, tmn->tm_mday, tmn->tm_hour, tmn->tm_min, (int)sec /*, (int)((sec - (int)sec) * 1000) */);
+	}
+	else if (timeCsv == 42) { sprintf(buff, "%d", (int)t-1); }		// // DELME: Special mode for algorithm comparison
+	else
+	{
+		sprintf(buff, "%.3f", t);
+	}
 	return buff;
 }
 
@@ -130,8 +138,9 @@ void SleepEndSegment(sleep_status_t *status)
 	{
 		if (status->file != NULL)
 		{
-			fprintf(status->file, "%s", TimeString(status->sleepStartTime, NULL));
-			fprintf(status->file, ",%s", TimeString(status->sleepStartTime + status->epochsSleeping, NULL));
+			fprintf(status->file, "%s", TimeString(status->configuration->timeCsv, status->sleepStartTime, NULL));
+			fprintf(status->file, ",%s", TimeString(status->configuration->timeCsv, status->sleepStartTime + status->epochsSleeping, NULL));
+if (status->configuration->timeCsv != 42)		// DELME: Special mode for algorithm comparison
 			fprintf(status->file, ",%u", status->epochsSleeping);
 			fprintf(status->file, "\n");
 		}
