@@ -12,7 +12,9 @@ The AX3 OMGUI Configuration and Analysis Tool is a lightweight application desig
 This document is intended as a guide to get to grips using the OMGUI software, learn about its features, and serve as a technical reference document.
 
 ---------------------------------------------------
-#Downloading and Installing
+
+# Downloading and Installing
+
 The OMGUI software is available from the open source GitHub repository:
 
 > [![Download OM GUI](./img/download-button.png)](https://github.com/digitalinteraction/openmovement/releases/download/AX3-OmGui-v28/AX3-GUI-28.zip) (Windows, zipped executable installer)
@@ -24,7 +26,7 @@ The OMGUI software is available from the open source GitHub repository:
 
 The system requirements for the OMGUI software are a Windows PC with XP SP3 or later operating system and Microsoft .NET Framework v3.5 or later.  To install the software, open the downloaded archive and double-click the executable installer package.  
 
->**NOTE**: Administrator privileges will be required to install software.  The default location for installation is `C:\Program Files` but this can be changed to suit user- or system needs.
+> **NOTE**: Administrator privileges will be required to install software.  The default location for installation is `C:\Program Files` but this can be changed to suit user- or system needs.
 
 To connect with a sensor you will need to install the drivers as well as the software. These drivers come packaged with the OMGUI software and are configured to install as default during the installation process. 
 The software has an inbuilt facility to update itself for major releases as well as updating the firmware on connected devices.
@@ -35,63 +37,74 @@ The OMGUI software uses `My Documents` as a default working folder location, you
 
 ---------------------------------------------------
 
-#Quick Start
+# Quick Start
+
 This section explains how to configure you device with the default settings and start collecting data. The default settings for configuration are:
 
 + 100Hz logging
-+ Range ±8 g
++ Range &plusmn;8 g
 + Start logging on sensor disconnect
 
 This section then proceeds to cover downloading data and exporting to a CSV file with timestamps. For more in-depth instructions and explanations, please read the relevant sections of this manual.
 
 
-##Configure device
+## Configure device
 
 Connect the device and ensure it appears in the __Device Browser Pane__.
 
-![connect sensor to computer](./img/puck_to_computer.jpg "connect sensor to computer")
+![Connect sensor to computer](./img/puck_to_computer.jpg "Connect sensor to computer")
 
-![device appears in __Device Browser Pane__](./img/device_connected.jpg "device appears in Device Browser Pane")
+![Device appears in __Device Browser Pane__](./img/device_connected.jpg "Device appears in Device Browser Pane")
 
-##Clear any existing data
+
+## Clear any existing data
+
 To remove any existing data that may be stored on the device, ensure the device is highlighted in the __Device Browser Pane__ and left click the __Clear__ button in the __Device Toolbar__.
 
-##Configure the sensor to record
+
+## Configure the sensor to record
+
 The sensor may be set to record in a variety of ways (covered later in this manual). For default operation, the __Recording Window__ is configured as shown. 
 
-![the __Recording Window__](./img/recording_dialogue.jpg "default setting in the Recording Window")
+![The __Recording Window__](./img/recording_dialogue.jpg "Default setting in the Recording Window")
 
 
-##Collecting Data
+## Collecting Data
+
 Once configured, click the __OK__ button to set the configuration. If you keep the default settings, at this stage the device browser pane will show that the device is set to "Always" record. The device can now be disconnected and it will start recording immediately.
 
-![sensor set to always record](./img/always_recording.jpg "sensor set to always record")
+![Sensor set to always record](./img/always_recording.jpg "Sensor set to always record")
 
 
-##Downloading the data
+## Downloading the data
+
 After the recording period the next step is to download the data from the device. To accomplish this, plug the device in to the USB port of the computer and wait for it to appear in the __Device Browser Pane__. If the device is still configured to record on disconnect, you will first have to click the __Stop__ button. Next, click the Download button in the __Device Toolbar__. The file then start to download to your working folder. Once downloaded the file will appear in the __Local Files Pane__. 
 
 The data file is stored in an __.CWA__ binary format. This format is not compatible with Excel or other third party software. To get it in a more friendly format it must first be converted using the __Export__ function.
 
-##Exporting to a comma separated value (.CSV) file
+
+## Exporting to a comma separated value (.CSV) file
+
 In order to use the raw data with a third-party software package, such as Excel, it must first be converted into a suitable format. This can be done using the __Export Window__. To instigate this, select the file in the __Files Tab__ within the Local Files Pane and click __Export__ button.
 
 The following window will appear. Set the configuration as shown below and click the OK button to generate the file.
 
 ![default settings in CSV Export Window](./img/export_dialogue.jpg "default settings in CSV Export Window")
 
-##Using Exported data
+
+## Using Exported data
+
 Files generated in using the __Export__ function will appear in the __Working Folder__. To open the __Working Folder__, click the button shown below at the side of the __Local Files Pane__.
 
-![open working folder button](./img/open_working_folder.jpg "open working folder button")
+![Open working folder button](./img/open_working_folder.jpg "Open working folder button")
 
 It is important to note that files exported to CSV format can become very large. Typically software such as Excel can only handle a few hours of data before it struggles. For multi-day recordings, the user should consider working directly with the binary files if developing algorithms, or if the user is happy with one of the existing inbuilt algorithms in the software, using summary measures. These will be covered later in this document.
 
 ---------------------------------------------------
 
-#Software Features
+# Software Features
 
-##Interface orientation
+## Interface orientation
 
 ![OMGUI interface orientation](./img/interface_orientation.jpg "OMGUI interface orientation")
 
@@ -120,10 +133,10 @@ The OMGUI software was programmed with the following functions in mind:
 The above topics will now be discussed in detail.
 
 
-##Configuring sensors for recording
+## Configuring sensors for recording
 The OMGUI software displays all connected devices and their states in the __Device Browser Pane__. This information can be used for checking a devices current configuration as well as making sure the battery level is sufficient to complete the recording required. 
 
->**NOTE**: Best practice not to issue a device with less than 85% battery level.
+> **NOTE**: Best practice not to issue a device with less than 85% battery level.
 
 With a device in the __Device Browser Pane__ selected, the buttons on the __Device Toolbar__ can be used to perform the following operations:
 
@@ -140,7 +153,7 @@ With a device in the __Device Browser Pane__ selected, the buttons on the __Devi
 + **Record.** This button is used to configure the device to record. The button brings up the __Recording Window__:
 
 
-![Recording Window](./img/numbered_recording_dialogue.jpg "default settings in CSV Export Window")
+![Recording Window](./img/numbered_recording_dialogue.jpg "Default settings in CSV Export Window")
 
 1. **Recording Session ID.** This field provides utility to mark the recording with a unique ID. This is useful in studies where patient data needs to be anonymized as the ID can be linked to a patient record.
 
@@ -166,24 +179,29 @@ With a device in the __Device Browser Pane__ selected, the buttons on the __Devi
 
 12. **Notes Area.** This section is used for warnings to the user about any potential issues with the chosen configuration.
 
-##Previewing and downloading data
+
+## Previewing and downloading data
+
 Any connected devices will appear in the __Device Browser Pane__ marked as having data. When highlighted, data on these devices can be previewed in the __Data Preview Window__. There is a __Zoom__ tool and __Highlight__ tool in the __Selection Tools__ section. In the __Preview Filters__ section, a number of checkboxes exist to help the user visualize the data. On mousing over the data, the user is able to get a precise data preview at any given instant in the recording.
 
 Recorded data stored on the sensor can be downloaded to the __Working Folder__ by clicking the __Download__ button. Download time is approximately 6 minutes for 7 days worth of data.
 
 To open and view the contents of the __Working Folder__ or change working folders, buttons are available in the __Working Folder Options__ part of the interface.
 
-##Analysis and data manipulation
+
+## Analysis and data manipulation
+
 Downloaded data will appear in the __Data Files Browser Pane__. This section of the interface displays all data files currently stored in the __Working Folder__. When a file is highlighted, a preview of the data is shown in the __Data Preview Window__. The OMGUI provides several ways for working with data:
 
 + Export Function for working with data in an external analysis package
 + Integrated algorithms (via __Analysis Toolbar__) for working with data via pre-validated algorithms
 + __Plugins__ for working with data via an externally developed analysis package within the OMGUI environment
 
-###Export Function
+### Export Function
 Captured recordings are stored in a binary format that is not always directly compatible with external program environments. For this reason a built-in export facility is provided to enable captured recordings to be transcribed into various formats. 
 
-###Export Re-sampled WAV 
+### Export Re-sampled WAV 
+
 This option can be used to transcribe the binary format file into an audio WAVE file (WAV). In this format the data streams are interpolated over the recording duration. This is done via a bi-cubic spline algorithm. 
 The WAV converter re-samples the binary data file produced on-board the
 accelerometer to produces a 4-channel, 16-bit standard WAVE file.  The
@@ -195,13 +213,15 @@ information from the logging device, such as temperature, light and
 battery measurements -- encoded into the 16-bit values.
 
 
-###Export Re-sampled CSV
+### Export Re-sampled CSV
+
 This operation can be used to convert a binary file into a CSV file format with a fixed sample period; useful for analysis that cannot handle variable sample rates. A bi-cubic interpolation is used to determine timestamps.
 
->**NOTE**: CSV files of samples are considerably larger than binary counterparts and thus consideration to memory requirements must be given when using them.  Binary WAV files should be preferred where it is possible to use them. 
+> **NOTE**: CSV files of samples are considerably larger than binary counterparts and thus consideration to memory requirements must be given when using them.  Binary WAV files should be preferred where it is possible to use them. 
 
 
-###Export Raw CSV
+### Export Raw CSV
+
 The __Export Raw__ function allows a destination to be chosen, and has a separate window where a variety of export options can be chosen:
 
 ![settings in CSV Export Window](./img/numbered_export_dialogue.jpg "settings in CSV Export Window")
@@ -230,10 +250,14 @@ The following options are available on the __Export Raw Window__
 
 11. **Fractional Days (Matlab)** will generate time in fractions of days since the Unix epoch (1st Jan 1970). This is the time format Matlab and R use. Column 2, 3 and 4 will be X, Y, Z accelerometer axis respectively.
 
-##Analysis Toolbar
+
+## Analysis Toolbar
+
 The __Analysis Toolbar__ provides the user fast provision to work with a selection of validated algorithms within the OMGUI environment. 
 
-##Standard Vector Magnitude (SVM)
+
+## Standard Vector Magnitude (SVM)
+
 The Standard Vector Magnitude (SVM) has been shown to be a useful measure for working with when axis specific information is not required. The SVM can be calculated in conjunction with, or without, a bandpass filter. Options for using the SVM calculation are now explained:
 
 ![SVM calculator window](./img/numbered_svm_dialogue.jpg "SVM calculator window")
@@ -264,7 +288,8 @@ either:
 For more details on the SVM algorithm please see [1].
 
 
-##Cut-points
+## Cut-points
+
 When using the accelerometers to measure physical activity, time spent in specific states has been demonstrated to be a useful output. The __Cut-point__ analysis reports the time user has spent in a specific intensity of physical activity where each intensity band is categorized in units of Metabolic Equivalent of Task (METS).
 
 |Activity Level | MET  Threshold |
@@ -272,7 +297,7 @@ When using the accelerometers to measure physical activity, time spent in specif
 | Sedentry      | < 1.5          |
 | Light         |1.5 < and < 3.99|
 | Moderate      |4.0 < and < 6.99|
-| Vigorous      |7.0 <
+| Vigorous      |7.0 <           |
 
 > 1 MET = 3.5 ml O2 . kg^-1 . min ^-1 which is the equivalent of 58.2 W/m^2 or the rate of energy produced per unit surface area of an average person seated at rest.
 
@@ -283,7 +308,9 @@ To provide utility of converting accelerometry data into METS for specific popul
 This algorithm is based on that proposed in [2], which takes an abs(SVM-1) values at 80Hz summed over 60 seconds.  Our implementation compares the mean SVM over 60 seconds against 'cut points' which divide the results into time spent in activity levels: sedentary (< 1.5 METS), light (>= 1.5 METS, < 4
 METS), moderate (>= 4 METS, < 7 METS), and vigorous (>=7 METS). The results are summed over user-defined multiples of the 1-minute epoch.
 
-##Wear Time Validation (WTV)
+
+## Wear Time Validation (WTV)
+
 The wear time validation (WTV) algorithm is designed to give a high level view if the device has been worn or not. It is unspecific to mounting site and based on the accelerometer readings. A screen-shot of the interface is give below.
 
 ![WTV calculator window](./img/wtv_dialogue.jpg "WTV calculator window")
@@ -295,9 +322,18 @@ are summed for user-defined multiples of 30 minute intervals.
 
 The units reported in the WTV are the sum of the number of 30min windows detected within the epoch period. For example, if the epoch period is 1 hour and the sensor is worn continuously, the result will be 2. If the sensor is worn for the first 30 mins and then removed, the result will be 1. In the WTV process, windows are non-overlapping and treated as discrete chunks.
 
-##Plug-ins for OMGUI
+
+## Plug-ins for OMGUI
+
 Plug-ins provide a way for developers to develop their own algorithms in their choice of environment and link them into the OMGUI interface. If you are interested in developing plug-ins or for more please consult the Open Movement source code pages at [www.openmovement.co.uk](www.openmovement.co.uk).
 
 [1]:http://www.ncbi.nlm.nih.gov/pubmed/21088628
 [2]:http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0022922
 [3]:http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=5534986
+
+
+# License
+
+This document is Copyright (c) 2009-2015, Newcastle University, UK. All rights reserved. Licensed under Creative Commons 3.0 Attribution License (BY), http://creativecommons.org/licenses/by/3.0/
+
+The software is Copyright (c) 2009-2015, Newcastle University, UK. All rights reserved. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
