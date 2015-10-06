@@ -20,6 +20,7 @@ namespace OmGui
             DefaultPluginName = Properties.Settings.Default.CurrentPluginFolder;
 
             textBoxDefaultPlugin.Text = Properties.Settings.Default.CurrentPluginFolder;
+            textBoxFilename.Text = Properties.Settings.Default.FilenameTemplate;
         }
 
         //Properties
@@ -53,6 +54,17 @@ namespace OmGui
         {
             DefaultPluginName = textBoxDefaultPlugin.Text;
             Properties.Settings.Default.CurrentPluginFolder = DefaultPluginName;
+            Properties.Settings.Default.FilenameTemplate = textBoxFilename.Text;
+        }
+
+        private void OptionsDialog_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonFilenameDefault_Click(object sender, EventArgs e)
+        {
+            textBoxFilename.Text = "{DeviceId}_{SessionId}";
         }
     }
 }

@@ -60,47 +60,11 @@ namespace OmGui
             //TODO - get metadata from file into url.
             if (Plugin.WantMetaData)
             {
-
-                // Read meta-data
-                string md = "";
-                OmApiNet.OmReader reader = null;
-                try
-                {
-                    reader = OmApiNet.OmReader.Open(CWAFilenames[0]);
-                    md = reader.MetaData;
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine("ERROR: Problem reading metadata: " + e.Message);
-                }
-                finally
-                {
-                    if (reader != null)
-                    {
-                        try
-                        {
-                            reader.Close();
-                        }
-                        catch (Exception e)
-                        {
-                            Console.Error.WriteLine("ERROR: Problem closing reader: " + e.Message);
-                        }
-                        reader = null;
-                    }
-                }
-
-                Dictionary<string, string> parsed = (Dictionary<string, string>)MetaDataTools.ParseMetaData(md, MetaDataTools.mdStringList);
-
-                Dictionary<string, string> metadataBuiltReadable = new Dictionary<string, string>();
-
-                foreach (KeyValuePair<string, string> kvp in parsed)
-                {
-                    metadataBuiltReadable.Add(MetaDataTools.metaDataMappingDictionary[kvp.Key], kvp.Value);
-                }
+                string filename = CWAFilenames[0];
+                Dictionary<string, string> metadataMap = MetaDataTools.MetadataFromReader(filename);
 
                 bool notFirst = false;
-
-                foreach (KeyValuePair<string, string> kvp in metadataBuiltReadable)
+                foreach (KeyValuePair<string, string> kvp in metadataMap)
                 {
                     if (!notFirst)
                         notFirst = true;

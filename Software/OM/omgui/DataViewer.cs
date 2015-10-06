@@ -481,13 +481,14 @@ namespace OmGui
         public DateTime TimeForBlock(float block)
         {
             Aggregate aggregate = AggregateForBlock(block);
-            return aggregate.Min.T;
+            //return new DateTime((aggregate.Min.T.Ticks + aggregate.Max.T.Ticks) / 2);
+            return aggregate.Min.T; 
         }
 
         public string TimeString(DateTime time)
         {
             if (time == DateTime.MinValue) { return ""; }
-            return String.Format("{0:yyyy-MM-dd HH:mm:ss}", time);
+            return String.Format("{0:yyyy-MM-dd HH:mm:ss.000}", time);
         }
 
         float beginBlock = 0;

@@ -71,5 +71,19 @@ namespace OmGui.Properties {
                 this["RecentFolders"] = value;
             }
         }
+
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("{DeviceId}_{SessionId}")]
+        public string FilenameTemplate {
+            get {
+                return ((string)(this["FilenameTemplate"]));
+            }
+            set {
+                this["FilenameTemplate"] = value;
+            }
+        }
+
     }
 }

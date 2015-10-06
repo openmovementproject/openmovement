@@ -86,6 +86,10 @@ namespace OmGui
             { "_w",  "SubjectWidth" },
             { "_ha",  "SubjectHandedness" }
         };
+        // "DeviceId"
+        // "SessionId"
+        // "StartTime" / "StartTimeNumeric"
+        // "EndTime" / "EndTimeNumeric"
 
         public static IDictionary<string, string> ParseMetaData(string source, ICollection<string> basicSet)
         {
@@ -529,5 +533,93 @@ namespace OmGui
             }
             return value;
         }
+
+
+        public static Dictionary<string, string> MetadataFromReader(string filename)
+        {
+            // Read meta-data
+            ushort? deviceId = null;
+            uint? sessionId = null;
+            DateTime? startTime = null;
+            DateTime? endTime = null;
+            string md = "";
+            OmApiNet.OmReader reader = null;
+            try
+            {
+                reader = OmApiNet.OmReader.Open(filename);
+                deviceId = reader.DeviceId;
+                sessionId = reader.SessionId;
+                startTime = reader.StartTime;
+                endTime = reader.EndTime;
+                md = reader.MetaData;
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("ERROR: Problem reading metadata: " + e.Message);
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    try
+                    {
+                        reader.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Error.WriteLine("ERROR: Problem closing reader: " + e.Message);
+                    }
+                    reader = null;
+                }
+            }
+
+            Dictionary<string, string> metadataMap = new Dictionary<string, string>();
+
+            Dictionary<string, string> parsed = (Dictionary<string, string>)MetaDataTools.ParseMetaData(md, MetaDataTools.mdStringList);
+            if (parsed != null)
+            {
+                foreach (KeyValuePair<string, string> kvp in parsed)
+                {
+                    metadataMap.Add(MetaDataTools.metaDataMappingDictionary[kvp.Key], kvp.Value);
+                }
+            }
+
+            if (deviceId.HasValue) { metadataMap.Add("DeviceId", string.Format("{0:00000}", deviceId.Value)); }
+            if (sessionId.HasValue) { metadataMap.Add("SessionId", string.Format("{0:0000000000}", sessionId.Value)); }
+            if (startTime.HasValue) { metadataMap.Add("StartTime", string.Format("{0:yyyy-MM-dd HH:mm:ss}", startTime.Value)); metadataMap.Add("StartTimeNumeric", string.Format("{0:yyyyMMddHHmmss}", startTime.Value)); }
+            if (endTime.HasValue) { metadataMap.Add("EndTime", string.Format("{0:yyyy-MM-dd HH:mm:ss}", endTime.Value)); metadataMap.Add("EndTimeNumeric", string.Format("{0:yyyyMMddHHmmss}", endTime.Value)); }
+
+            return metadataMap;
+            // Dictionary<string, string> metadataMap = MetaDataTools.MetadataFromFile(filename);
+            // foreach (KeyValuePair<string, string> kvp in metadataMap) { kvp.Key + "=" + kvp.Value; };
+        }
+
+
+        public static Dictionary<string, string> MetadataFromFile(string filename)
+        {
+            MetaDataTools tools = new MetaDataTools();
+            string md = tools.FromFile(filename);
+
+            Dictionary<string, string> metadataMap = new Dictionary<string, string>();
+
+            Dictionary<string, string> parsed = (Dictionary<string, string>)MetaDataTools.ParseMetaData(md, MetaDataTools.mdStringList);
+            if (parsed != null)
+            {
+                foreach (KeyValuePair<string, string> kvp in parsed)
+                {
+                    metadataMap.Add(MetaDataTools.metaDataMappingDictionary[kvp.Key], kvp.Value);
+                }
+            }
+
+            metadataMap.Add("DeviceId", string.Format("{0:00000}", tools.deviceId));
+            metadataMap.Add("SessionId", string.Format("{0:0000000000}", tools.deviceSessionId));
+            if (tools.startDate.HasValue) { metadataMap.Add("StartTime", string.Format("{0:yyyy-MM-dd HH:mm:ss}", tools.startDate.Value)); metadataMap.Add("StartTimeNumeric", string.Format("{0:yyyyMMddHHmmss}", tools.startDate.Value)); }
+            if (tools.endDate.HasValue) { metadataMap.Add("EndTime", string.Format("{0:yyyy-MM-dd HH:mm:ss}", tools.endDate.Value)); metadataMap.Add("EndTimeNumeric", string.Format("{0:yyyyMMddHHmmss}", tools.endDate.Value)); }
+
+            return metadataMap;
+        }
+
+
+
     }
 }

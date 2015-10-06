@@ -42,6 +42,7 @@ using System.Net;
 using System.Threading;
 
 using AndreasJohansson.Win32.Shell;
+using System.Collections.Specialized;
 
 namespace OmGui
 {
@@ -49,8 +50,6 @@ namespace OmGui
     {
         Om om;
         DeviceManager deviceManager;
-
-
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern uint RegisterWindowMessage(string lpString);
@@ -716,9 +715,53 @@ Console.WriteLine("toolStripButtonDownload_Click() STARTED...");
 
                 if (deviceError == null)
                 {
+                    string filename = OmGui.Properties.Settings.Default.FilenameTemplate;
+                    if (filename == null || filename.Length == 0) { filename = "{DeviceId}_{SessionId}"; }
+
                     string folder = GetPath(OmGui.Properties.Settings.Default.CurrentWorkingFolder);
                     System.IO.Directory.CreateDirectory(folder);
-                    string prefix = folder + string.Format("{0:00000}_{1:0000000000}", device.DeviceId, device.SessionId);
+
+                    Dictionary<string, string> metadataMap = new Dictionary<string, string>();
+                    if (true)
+                    {
+                        try
+                        {
+                            //metadataMap = MetaDataTools.MetadataFromReader(device.Filename);
+                            metadataMap = MetaDataTools.MetadataFromFile(device.Filename);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("ERROR: " + ex.Message);
+                        }
+                    }
+
+                    string deviceIdString = string.Format("{0:00000}", device.DeviceId);
+                    metadataMap.TryGetValue("DeviceId", out deviceIdString);
+
+                    string sessionIdString = string.Format("{0:0000000000}", device.SessionId);
+                    metadataMap.TryGetValue("SessionId", out sessionIdString);
+
+                    filename = filename.Replace("{DeviceId}", deviceIdString);
+                    filename = filename.Replace("{SessionId}", sessionIdString);
+                    string[] keys = new string[] { "StudyCentre", "StudyCode", "StudyInvestigator",  "StudyExerciseType", "StudyOperator", "StudyNotes", "SubjectSite", "SubjectCode", "SubjectSex", "SubjectHeight", "SubjectWidth", "SubjectHandedness" };
+                    foreach (string key in keys)
+                    {
+                        filename = filename.Replace("{" + key + "}", metadataMap.ContainsKey(key) ? metadataMap[key] : "");
+                    }
+
+                    // Remove forbidden filename characters
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < filename.Length; j++)
+                    {
+                        char c = filename[j];
+                        //if (c < 32 || c >= 127 || @"""<>:/\|?* ".IndexOf(c) >= 0) { c = '_'; }                                                            // blacklist
+                        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '-' || c == '_') { ; } else { c = '_'; }     // whitelist
+                        sb.Append(c);
+                    }
+                    filename = sb.ToString();
+                    if (filename.Length == 0) { filename = "-"; }
+
+                    string prefix = folder + filename;
                     string finalFilename = prefix + ".cwa";
                     string downloadFilename = finalFilename;
 
@@ -2672,8 +2715,8 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
                         startDateTime = dataViewer.TimeForBlock(blockStart);
                         endDateTime = dataViewer.TimeForBlock(blockEnd);
-                        string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
-                        string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss");
+                        string startDateTimeString = startDateTime.ToString("dd/MM/yyyy/_HH:mm:ss.000");
+                        string endDateTimeString = endDateTime.ToString("dd/MM/yyyy/_HH:mm:ss.000");
 
                         //See now if we want the dataViewer selection.
                         if (blockCount > -1 && blockStart > -1)
