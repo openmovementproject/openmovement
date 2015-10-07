@@ -267,9 +267,11 @@ the currently defined packet types:</p>
 <p>Further packet types will be defined as more types of BuildAX sensor are 
 developed. </p>
 <h2 id="binary">Binary</h2>
-<p>The binary format can be converted into CSV using the <code>bin2csv</code> utility found
-<a href="https://github.com/digitalinteraction/openmovement/raw/master/Software/BuildAX/bin2csv.exe">in the OpenMovement repository</a>. 
-The utility is designed to compile on most machines with <code>gcc</code>.</p>
+<p>The binary format can be converted into CSV using the <code>bin2csv</code> utility. An
+executable compiled for Windows can be found in <a href="https://github.com/digitalinteraction/openmovement/raw/master/Software/BuildAX/bin2csv.exe">the OpenMovement repository</a>. 
+The utility is designed to compile on most machines with <code>gcc</code> (e.g. Linux, OSX)
+and the source for this (<a href="https://github.com/digitalinteraction/openmovement/tree/master/Software/BuildAX/bin2csv">available here</a>)
+can be compiled using <code>make</code> on the command line.</p>
 <p>Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
 similar to how it is rendered in CSV. The data type widths for an ENV sensor 
 are described below:</p>

@@ -52,9 +52,11 @@ developed.
 
 ## Binary
 
-The binary format can be converted into CSV using the `bin2csv` utility found
-[in the OpenMovement repository](https://github.com/digitalinteraction/openmovement/raw/master/Software/BuildAX/bin2csv.exe). 
-The utility is designed to compile on most machines with `gcc`.
+The binary format can be converted into CSV using the `bin2csv` utility. An
+executable compiled for Windows can be found in [the OpenMovement repository](https://github.com/digitalinteraction/openmovement/raw/master/Software/BuildAX/bin2csv.exe). 
+The utility is designed to compile on most machines with `gcc` (e.g. Linux, OSX)
+and the source for this ([available here](https://github.com/digitalinteraction/openmovement/tree/master/Software/BuildAX/bin2csv))
+can be compiled using `make` on the command line.
 
 Binary BuildAX packets are 32 bytes long. The layout of the binary packet is 
 similar to how it is rendered in CSV. The data type widths for an ENV sensor 
