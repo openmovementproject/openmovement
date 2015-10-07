@@ -13,7 +13,7 @@ else
   LIBS := -lm
 endif
 
-TARGET = bax2csv
+TARGET = bin2csv
 CC = gcc
 CFLAGS = -g -Wall -Wno-attributes -Wno-unused-function $(OPTFLAGS)
 
