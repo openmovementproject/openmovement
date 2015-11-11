@@ -140,7 +140,7 @@ void SleepEndSegment(sleep_status_t *status)
 		{
 			fprintf(status->file, "%s", TimeString(status->configuration->timeCsv, status->sleepStartTime, NULL));
 			fprintf(status->file, ",%s", TimeString(status->configuration->timeCsv, status->sleepStartTime + status->epochsSleeping, NULL));
-if (status->configuration->timeCsv != 42)		// DELME: Special mode for algorithm comparison
+//if (status->configuration->timeCsv != 42)		// DELME: Special mode for algorithm comparison
 			fprintf(status->file, ",%u", status->epochsSleeping);
 			fprintf(status->file, "\n");
 		}

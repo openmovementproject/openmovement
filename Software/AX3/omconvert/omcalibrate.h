@@ -87,7 +87,7 @@ void OmCalibrateFreeStationaryPoints(omcalibrate_stationary_points_t *stationary
 // Calibration
 // NOTE: tempOffset (from original calibration code) should probably be called tempScale?
 // Rescaling is:  v = (v + offset) * scale + (temp - referenceTemperature) * tempOffset
-typedef struct
+typedef struct omcalibrate_calibration_tag
 {
 	double scale[OMCALIBRATE_AXES];
 	double offset[OMCALIBRATE_AXES];
@@ -100,6 +100,9 @@ typedef struct
 
 // Create a default (null) calibration
 void OmCalibrateInit(omcalibrate_calibration_t *calibration);
+
+// Copy a calibration
+void OmCalibrateCopy(omcalibrate_calibration_t *calibration, omcalibrate_calibration_t *source);
 
 // Create a default calibration configuration
 void OmCalibrateConfigInit(omcalibrate_config_t *calibrateConfig);

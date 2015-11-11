@@ -1,13 +1,14 @@
-// TODO: Other output range scaling other than +/- 8g (for CWA & OMX)
 
+// DONE: Occasional x / y / z std values were NaN (should now be 0 instead)
+// DONE: For interrupts, where there are no valid samples in the epoch, NaN can be emitted for the values:  use the parameter "-svm-extended", where 1=current behaviour of zero, 2=empty cell, 3="nan".
+// DONE: temperature field formatted to 2 decimal places
+// DONE: calibration parameters can be specified (combine with "-calibrate 0" to forcefully use them, otherwise will be used only if auto-calibration fails); the format is:  -calibration "scaleX,scaleY,scaleZ,offsetX,offsetY,offsetZ,tempX,tempY,tempZ,referenceTemp" (comma-, space- or semicolon- separated values, must use quotes if space-separated)
+// DONE: Fixed that clipped input/output values were overestimated (limits assumed 2G data)
+// DONE: SVM additional column to report the number of raw accelerometer samples (before interpolation).
 
-// REMINDER: Double-check fractional timestamp 
-
-// TODO: Adjust 'session' to the requested start/end time (if close enough)
-
-// CONSIDER: NaNs propagate in SVM code
-// CONSIDER: NaNs in .CSV (blanks?)
 // CONSIDER: Re-arranging to perform calibration accross all sessions and at native sampling rate (not interpolated)
+
+// TODO: Check other output range scaling other than +/- 8g (for CWA & OMX)
 
 // LATER: Sleep analysis algorithm (te Lindert et al 2013 in the journal SLEEP, volume 36, issue 5, page 781)
 // LATER: Check what output we want with multiple 'sessions' - how to override for normal 7-day data (up to 1 week missing)?
@@ -46,6 +47,7 @@
 // Dan Jackson, 2014
 
 #ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
 #define strcasecmp _stricmp
 #endif
@@ -55,6 +57,7 @@
 #include <string.h>
 
 #include "omconvert.h"
+#include "omcalibrate.h"
 #include "exits.h"
 
 
@@ -81,6 +84,8 @@ int main(int argc, char *argv[])
 	settings.headerCsv = -1;
 	settings.calibrate = -1;
 	settings.stationaryTime = 10.0;
+	settings.defaultCalibration = (omcalibrate_calibration_t *)malloc(sizeof(omcalibrate_calibration_t));
+	OmCalibrateInit(settings.defaultCalibration);
 	settings.svmEpoch = 60;
 	settings.svmFilter = -1;
 	settings.svmMode = 0;
@@ -104,6 +109,38 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-calibrate") == 0) { settings.calibrate = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-calibrate-repeated") == 0) { settings.repeatedStationary = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-calibrate-stationary") == 0) { settings.stationaryTime = atof(argv[++i]); }
+
+		else if (strcmp(argv[i], "-calibration") == 0) {
+			char *calibrationString = argv[++i];
+			double values[10] = { 0 };
+			int tokenCount = 0;
+			const char *token;
+			for (token = strtok(calibrationString, " ,;"); token != NULL; token = strtok(NULL, " ,;"), tokenCount++)
+			{
+				if (tokenCount < sizeof(values) / sizeof(values[0])) {
+					values[tokenCount] = atof(token);
+				}
+			}
+
+			if (tokenCount != sizeof(values) / sizeof(values[0]))
+			{
+				fprintf(stderr, "Cannot use calibration with invalid number of values (%d given but expected %d)\n", tokenCount, sizeof(values) / sizeof(values[0]));
+				help = 1;
+			}
+			else
+			{
+				settings.defaultCalibration->scale[0] = values[0];
+				settings.defaultCalibration->scale[1] = values[1];
+				settings.defaultCalibration->scale[2] = values[2];
+				settings.defaultCalibration->offset[0] = values[3];
+				settings.defaultCalibration->offset[1] = values[4];
+				settings.defaultCalibration->offset[2] = values[5];
+				settings.defaultCalibration->tempOffset[0] = values[6];
+				settings.defaultCalibration->tempOffset[1] = values[7];
+				settings.defaultCalibration->tempOffset[2] = values[8];
+				settings.defaultCalibration->referenceTemperature = values[9];
+			}
+		}
 
 		else if (strcmp(argv[i], "-csv-file") == 0) { settings.csvFilename = argv[++i]; }
 
@@ -175,7 +212,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-svm-file <filename.svm.csv>\n");
 		fprintf(stderr, "\t-svm-epoch <time (default 60 seconds)>\n");
 		fprintf(stderr, "\t-svm-filter <0=off, 1=BP 0.5-20 Hz (default)>\n");
-		fprintf(stderr, "\t-svm-extended <0=off (default), 1=on>\n");
+		fprintf(stderr, "\t-svm-extended <0=off (default), 1=zero invalid, 2=empty invalid, 3='nan' invalid>\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-wtv-file <filename.wtv.csv>\n");
 		fprintf(stderr, "\t-wtv-epoch <number of 30-minute windows (default 1)>\n");

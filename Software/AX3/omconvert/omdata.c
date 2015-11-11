@@ -34,7 +34,6 @@
 // ADC channel 'l' uint16_t values[3];  // [0]-batt, [1]-LDR, [2]-Temp
 
 
-
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #define timegm _mkgmtime
@@ -1284,15 +1283,20 @@ char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int
 				int bytesPerSample = 4;
 				const uint32_t *pp = (const uint32_t *)(p + seg->offset + (bytesPerSample * sampleWithinSector));
 				uint32_t value = *pp;
+				unsigned char e = (unsigned char)(value >> 30);		// 3=16g, 2=8g, 1=4g, 0=2g
 
 				// [byte-3] [byte-2] [byte-1] [byte-0]
 				// eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
 				// 10987654 32109876 54321098 76543210
-				values[0] = (signed short)((unsigned short)(value << 6) & (unsigned short)0xffc0) >> (6 - (unsigned char)(value >> 30));		// Sign-extend 10-bit value, adjust for exponent
-				values[1] = (signed short)((unsigned short)(value >> 4) & (unsigned short)0xffc0) >> (6 - (unsigned char)(value >> 30));		// Sign-extend 10-bit value, adjust for exponent
-				values[2] = (signed short)((unsigned short)(value >> 14) & (unsigned short)0xffc0) >> (6 - (unsigned char)(value >> 30));		// Sign-extend 10-bit value, adjust for exponent
+				values[0] = (signed short)((unsigned short)(value << 6) & (unsigned short)0xffc0) >> (6 - e);		// Sign-extend 10-bit value, adjust for exponent
+				values[1] = (signed short)((unsigned short)(value >> 4) & (unsigned short)0xffc0) >> (6 - e);		// Sign-extend 10-bit value, adjust for exponent
+				values[2] = (signed short)((unsigned short)(value >> 14) & (unsigned short)0xffc0) >> (6 - e);		// Sign-extend 10-bit value, adjust for exponent
 
-				return (values[0] <= -512 || values[0] >= 511 || values[1] <= -512 || values[1] >= 511 || values[2] <= -512 || values[2] >= 511);
+				// e: 3=16g (-4096 to 4095), 2=8g (-2048 to 2047), 1=4g (-1024 to 1023), 0=2g (-512 to 511).
+				int clipMin = -(1 << (9 + e));
+				int clipMax = -clipMin - 1;
+
+				return (values[0] <= clipMin || values[0] >= clipMax || values[1] <= clipMin || values[1] >= clipMax || values[2] <= clipMin || values[2] >= clipMax);
 			}
 			else if ((seg->packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16 || (seg->packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16)
 			{
@@ -1300,9 +1304,10 @@ char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int
 				const int16_t *pp = (const int16_t *)(p + seg->offset + (bytesPerSample * sampleWithinSector));
 				memcpy(values, pp, bytesPerSample);
 
-// TODO: Determine if any of the 16-bit values were clipped (limits need to come from segment format)
-
-				return 0;
+				// TODO: Correct limits need to come from segment format/type
+				int clipMin = -32768, clipMax = 32767;
+				
+				return (values[0] <= clipMin || values[0] >= clipMax || values[1] <= clipMin || values[1] >= clipMax || values[2] <= clipMin || values[2] >= clipMax);
 			}
 			else
 			{
