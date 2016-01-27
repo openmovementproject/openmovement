@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Management;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Wax9Gui
@@ -257,6 +260,25 @@ namespace Wax9Gui
 
 
 
+        // Does the async version of the enumeration in a synchronous way (apparently the usual sync version blocks things weirdly)
+        public void EnumerateInstances(string queryString, ObjectReadyEventHandler myObserver)
+        {
+            AutoResetEvent finished = new AutoResetEvent(false);
+
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", queryString);
+            ManagementOperationObserver observer = new ManagementOperationObserver();
+            observer.ObjectReady += myObserver;
+            observer.Completed += (sender, obj) => // CompletedEventHandler(object sender, CompletedEventArgs obj)
+            {
+                finished.Set();
+            };
+            searcher.Get(observer);      // Asynchronous
+            finished.WaitOne();
+            return;
+        }
+
+        
+
         public IDictionary<string, string> GetPorts()
         {
             // DeviceID PNPDeviceID
@@ -269,45 +291,64 @@ namespace Wax9Gui
 
             IDictionary <string, string> results = new Dictionary<string, string>();
 
-            // Add Reference: System.Management
-            System.Management.ManagementObjectCollection instances;
+            string queryString;
+            //queryString = "SELECT * FROM WIN32_SerialPort";
+            queryString = "SELECT * FROM Win32_PnPEntity WHERE ClassGuid=\"{4d36e978-e325-11ce-bfc1-08002be10318}\"";
 
-            //instances = new System.Management.ManagementClass("Win32_SerialPort").GetInstances();
-
-            System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher("Select * from WIN32_SerialPort");   // DeviceID, PNPDeviceID, Name
-            instances = searcher.Get();
-
-            foreach (System.Management.ManagementObject port in instances)
+            List<object> values = new List<object>();
+            EnumerateInstances(queryString, (sender, obj) => // ObjectReadyEventHandler(object sender, ObjectReadyEventArgs obj) 
             {
-
                 try
                 {
-//foreach (System.Management.PropertyData Property in port.Properties) { Console.WriteLine(Property.Name + " " + (Property.Value == null ? null : Property.Value.ToString())); }
+                    ManagementObject port = (ManagementObject)obj.NewObject;
 
-                    System.Management.PropertyData portProperty = port.Properties["DeviceID"];
-                    string portName = portProperty.Value.ToString();
+                    // DeviceId is "BTHENUM\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0002\7&4BFCAD4&0&C83E990CF8D8_C00000000"
+                    // Port number is "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\" + DeviceId + "\Device Parameters\PortName"
+                    // Device Name is in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\BTHENUM\Dev_$MAC\*\FriendlyName
 
-                    string label = null;
-
-                    string pnpDeviceId = null;
-                    if (port.Properties["PNPDeviceID"] != null)
+                    /*
+                    Console.WriteLine("---");
+                    foreach (System.Management.PropertyData Property in port.Properties)
                     {
-                        System.Management.PropertyData pnpDeviceIdProperty = port.Properties["PNPDeviceID"];
-                        pnpDeviceId = pnpDeviceIdProperty.Value.ToString();
+                        Console.WriteLine(Property.Name + " " + (Property.Value == null ? null : Property.Value.ToString()));
+                        if (Property.Value != null && Property.Value is string[])
+                        {
+                            string[] strings = (string[])Property.Value;
+                            foreach (string s in strings)
+                            {
+                                Console.WriteLine("..." + s);
+                            }
+                        }
+                    }
+                    */
+
+                    // Find Port
+                    string deviceId = port.Properties["DeviceID"].Value.ToString();
+                    string portName = null;
+                    try
+                    {
+                        RegistryKey deviceParameters = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Enum\" + deviceId + @"\Device Parameters");
+                        portName = deviceParameters.GetValue("PortName").ToString();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("ERROR: Exception determining port name for " + deviceId);
+                        return;
                     }
 
+                    // Find Name
+                    string label = null;
                     if (port.Properties["Name"] != null)
                     {
                         System.Management.PropertyData nameProperty = port.Properties["Name"];
                         label = "\"" + nameProperty.Value.ToString() + "\"";
                     }
 
-//Console.WriteLine(pnpDeviceId);
-
-                    if (pnpDeviceId != null && pnpDeviceId.StartsWith(@"BTHENUM\"))
+                    // Find Bluetooth MAC Address
+                    string mac = null;
+                    if (deviceId.StartsWith(@"BTHENUM\"))
                     {
-                        string mac = null;
-                        string[] slashParts = pnpDeviceId.Split(new char[] { '\\' });
+                        string[] slashParts = deviceId.Split(new char[] { '\\' });
                         if (slashParts.Length > 2)
                         {
                             string[] ampersandParts = slashParts[2].Split(new char[] { '&' });
@@ -322,23 +363,54 @@ namespace Wax9Gui
                         }
 
                         if (mac == "000000000000") { mac = null; }
+                    }
 
-                        //label = label + " Bluetooth";
-                        if (mac != null)
+                    // Find Bluetooth device name
+                    string deviceName = null;
+                    if (mac != null)
+                    {
+                        // Device Name is in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\BTHENUM\Dev_$MAC\*\FriendlyName
+                        try
                         {
-                            string address = "" + mac[0] + mac[1] + ':' + mac[2] + mac[3] + ':' + mac[4] + mac[5] + ':' + mac[6] + mac[7] + ':' + mac[8] + mac[9] + ':' + mac[10] + mac[11];
-                            label = label +  " <" + address + ">"; 
+                            RegistryKey devKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Enum\BTHENUM\" + "Dev_" + mac);
+                            // Find first sub-key
+                            string[] subKeys = devKey.GetSubKeyNames();
+                            if (subKeys.Length > 0)
+                            {
+                                // Device Name is in HKEY_LOCAL_MACHINE\  Dev_$MAC\*\FriendlyName
+                                RegistryKey devKey2 = devKey.OpenSubKey(subKeys[0]);
+                                deviceName = devKey2.GetValue("FriendlyName").ToString();
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("WARNING: Exception determining Bluetooth device name for " + deviceId);
                         }
                     }
 
-Console.WriteLine("Port: " + portName + " - " + label);
+                    if (deviceName != null)
+                    {
+                        label = label + " [" + deviceName + "]";
+                    }
+
+                    //label = label + " Bluetooth";
+                    if (mac != null)
+                    {
+                        string address = "" + mac[0] + mac[1] + ':' + mac[2] + mac[3] + ':' + mac[4] + mac[5] + ':' + mac[6] + mac[7] + ':' + mac[8] + mac[9] + ':' + mac[10] + mac[11];
+                        label = label + " <" + address + ">";
+                    }
+
+                    Console.WriteLine("Port: " + portName + " - " + label);
                     results.Add(portName, label);
+
+
                 }
-                catch (Exception ex)
+                catch (ManagementException e)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("Error: " + e.Message);
                 }
-            }
+            });
+
 
             Console.WriteLine("...done.");
             return results;
