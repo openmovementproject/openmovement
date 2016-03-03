@@ -76,7 +76,10 @@
 	#define _access access
 	#include <limits.h>
 	#define _MAX_FNAME NAME_MAX
-	// Should also get ARG_MAX from limits.h
+    // Should also get ARG_MAX from limits.h, but define it if it's not
+    #ifndef ARG_MAX
+        #define ARG_MAX 256
+    #endif
     #define strnicmp strncasecmp
 #endif
 
