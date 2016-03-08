@@ -621,6 +621,14 @@ namespace OmGui
                     if (checkBoxBattPercent.Checked) { label = label + "\r\nBatt: " + AggregateForBlock(blockAtCursor).Avg.BattPercent + " %"; }
                     if (checkBoxBattRaw.Checked) { label = label + "\r\nBatt: " + (AggregateForBlock(blockAtCursor).Avg.BattRaw / 1000).ToString("0.000") + " V"; }
 
+                    if ((Control.ModifierKeys & Keys.Shift) != 0)
+                    {
+                        int sequenceId = AggregateForBlock(blockAtCursor).Avg.Id;
+                        int block = AggregateForBlock(blockAtCursor).Avg.BlockNumber;
+                        label = label + "\r\nSequence: " + sequenceId;
+                        label = label + "\r\nBlock: " + block + " / " + reader.DataNumBlocks + " => @" + (reader.DataOffsetBlocks + block) * reader.DataBlockSize;
+                    }
+
                     graphPanel.SetCursor(e.X, label);
 
                     /*
@@ -908,7 +916,7 @@ namespace OmGui
 
     public struct Sample
     {
-        public Sample(DateTime t, float x, float y, float z, float light, float temp, float battpercent, float battraw) : this() { T = t; X = x; Y = y; Z = z; Light = light; Temp = temp; BattPercent = battpercent; BattRaw = battraw; }
+        public Sample(DateTime t, float x, float y, float z, float light, float temp, float battpercent, float battraw, int id, int blockNumber) : this() { T = t; X = x; Y = y; Z = z; Light = light; Temp = temp; BattPercent = battpercent; BattRaw = battraw; Id = id; BlockNumber = blockNumber; }
         public DateTime T { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
@@ -918,7 +926,9 @@ namespace OmGui
         public float BattPercent { get; set; }
         public float BattRaw { get; set; }
         public float Amplitude { get { return (float)Math.Sqrt(X * X + Y * Y + Z * Z); } }
-        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        public int Id { get; set; }
+        public int BlockNumber { get; set; }
+        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0);
         /*
         public static Sample Minimum(Sample a, Sample b)
         {
@@ -943,7 +953,9 @@ namespace OmGui
             float temp = (1.0f - p) * a.Temp + p * b.Temp;
             float battpercent = (1.0f - p) * a.BattPercent + p * b.BattPercent;
             float battraw = (1.0f - p) * a.BattRaw + p * b.BattRaw;
-            return new Sample(t, x, y, z, light, temp, battpercent, battraw);
+            int id = a.Id;              // Use lower bound
+            int blockNumber = a.BlockNumber;      // Use lower bound
+            return new Sample(t, x, y, z, light, temp, battpercent, battraw, id, blockNumber);
         }
     }
 
@@ -991,6 +1003,8 @@ namespace OmGui
             if (sample.Temp < Min.Temp) { Min.Temp = sample.Temp; } if (sample.Temp > Max.Temp) { Max.Temp = sample.Temp; }
             if (sample.BattPercent < Min.BattPercent) { Min.BattPercent = sample.BattPercent; } if (sample.BattPercent > Max.BattPercent) { Max.BattPercent = sample.BattPercent; }
             if (sample.BattRaw < Min.BattRaw) { Min.BattRaw = sample.BattRaw; } if (sample.BattRaw > Max.BattRaw) { Max.BattRaw = sample.BattRaw; }
+            if (sample.Id < Min.Id) { Min.Id = sample.Id; } if (sample.Id > Max.Id) { Max.Id = sample.Id; }
+            if (sample.BlockNumber > Min.BlockNumber) { Min.BlockNumber = sample.BlockNumber; } if (sample.BlockNumber > Max.BlockNumber) { Max.BlockNumber = sample.BlockNumber; }
             //Min = Sample.Minimum(Min, sample);
             //Max = Sample.Maximum(Max, sample);
         }
@@ -1019,7 +1033,7 @@ namespace OmGui
         private Aggregate aggregate;
         public Aggregate Aggregate { get { return aggregate; } }
 
-        public DataBlock(DateTime firstTime, DateTime lastTime, float light, float temp, float battpercent, float battraw, short[] raw)
+        public DataBlock(int id, int blockNumber, DateTime firstTime, DateTime lastTime, float light, float temp, float battpercent, float battraw, short[] raw)
         {
             RawValues = raw;
             Values = new Sample[raw.Length / 3];
@@ -1032,7 +1046,7 @@ namespace OmGui
                 float x = raw[3 * i + 0] / 256.0f;
                 float y = raw[3 * i + 1] / 256.0f;
                 float z = raw[3 * i + 2] / 256.0f;
-                Values[i] = new Sample(t, x, y, z, light, temp, battpercent, battraw);
+                Values[i] = new Sample(t, x, y, z, light, temp, battpercent, battraw, id, blockNumber);
             }
             aggregate.Add(Values);
         }
@@ -1055,7 +1069,10 @@ namespace OmGui
                 float battraw = reader.BattRaw;
                 if (values.Length == 0) { lastTime = firstTime; }
                 else { lastTime = reader.TimeForSample(values.Length - 1); }
-                return new DataBlock(firstTime, lastTime, light, temp, battpercent, battraw, values);
+
+                int id = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SEQUENCEID); // DWORD @10 offset in block
+
+                return new DataBlock(id, blockNumber, firstTime, lastTime, light, temp, battpercent, battraw, values);
             }
             catch (Exception)
             {
