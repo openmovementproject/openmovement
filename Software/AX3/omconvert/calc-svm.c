@@ -85,6 +85,7 @@ char SvmInit(svm_status_t *status, svm_configuration_t *configuration)
 	double Fs = status->configuration->sampleRate;
 
 	if (status->configuration->filter == 2) { Fc1 = -1; }		// Low-pass only
+	if (Fc2 >= Fs / 2) { Fc2 = -1.0; }				// High-pass filter instead (upper band cannot exceed Nyquist limit)
 
 	// Calculate normalized cut-offs
 	double W1 = Fc1 / (Fs / 2);

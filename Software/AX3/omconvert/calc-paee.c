@@ -108,6 +108,7 @@ char PaeeInit(paee_status_t *status, paee_configuration_t *configuration)
 	double Fc1 = 0.5;
 	double Fc2 = 20;			// 15
 	double Fs = status->configuration->sampleRate;
+	if (Fc2 >= Fs / 2) { Fc2 = -1.0; }				// High-pass filter instead (upper band cannot exceed Nyquist limit)
 
 	// Calculate normalized cut-offs
 	double W1 = Fc1 / (Fs / 2);
