@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:background="#22496b">
+
+
+    <TextView
+            android:id="@+id/createProfileHead"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/create_profile"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:background="@drawable/dark_blue_no_bottom_stroke"
+            android:textAllCaps="true"
+            android:gravity="center_horizontal"
+
+            />
+
+    <EditText
+            android:id="@+id/nameEntry"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:minWidth="200dp"
+            android:inputType="text"
+            android:layout_below="@id/createProfileHead"
+            android:hint="@string/profile_name_input"
+            android:background="@drawable/grid_background_default"
+            />
+
+
+    <TextView
+            android:id="@+id/locationsHead"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/locations"
+            android:layout_below="@id/nameEntry"
+            android:textSize="20dp"
+            android:gravity="center_horizontal"
+            android:textAllCaps="true"
+            android:textColor="#FFFFFF"
+            android:padding="10dp"
+            android:background="@drawable/dark_blue_no_top_or_bottom"
+
+            />
+
+    <ListView
+            android:id="@+id/profileLocationsListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/locationsHead"
+            android:layout_above="@+id/addLocationBtn"
+            android:background="@drawable/grid_background_default"
+            />
+
+    <Button
+            android:id="@id/addLocationBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_location"
+            android:layout_above="@+id/editLocationsButtonGroup"
+            android:onClick="addLocation"
+            android:layout_marginTop="5dp"
+            android:background="@android:drawable/btn_default"
+            />
+
+    <LinearLayout
+            android:id="@id/editLocationsButtonGroup"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_above="@+id/createButtonGroup"
+            android:gravity="center_horizontal"
+            >
+
+
+
+        <Button
+                android:id="@+id/editLocationButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:text="@string/edit"
+                android:layout_weight="1"
+                android:onClick="editLocation"
+                android:background="@android:drawable/btn_default"
+                />
+
+        <Button
+                android:id="@+id/deleteLocationButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:text="@string/delete"
+                android:layout_weight="1"
+                android:onClick="deleteLocation"
+                android:background="@android:drawable/btn_default"
+                />
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/createButtonGroup"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="3dp">
+
+        <Button
+                android:id="@+id/saveButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:text="@string/save"
+                android:layout_weight="1"
+                android:onClick="saveProfile"
+                android:background="@android:drawable/btn_default"/>
+
+        <Button
+                android:id="@+id/cancelButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:text="@string/cancel"
+                android:layout_weight="1"
+                android:onClick="cancel"
+                android:background="@android:drawable/btn_default"
+                />
+    </LinearLayout>
+
+</RelativeLayout>

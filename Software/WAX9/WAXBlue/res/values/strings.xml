@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">WAXBlue</string>
+    <string name="action_settings">Settings</string>
+    <string name="finish">Finish</string>
+    <string name="clearSelected">Clear Selected</string>
+    <string name="clearAll">Clear All</string>
+    <string name="rate">Rate (80Hz)</string>
+    <string name="connect">Connect</string>
+    <string name="stream">Stream</string>
+    <string name="stop">Stop</string>
+    <string name="mode_text">Text</string>
+    <string name="mode_text_long">Text\nLong</string>
+    <string name="mode_binary">Binary</string>
+    <string name="mode_binary_long">Binary\nLong</string>
+    <string name="action_exit">Exit</string>
+    <string name="profile_name_input">Profile Name:</string>
+    <string name="add_location">Add Location</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete Selected</string>
+    <string name="edit">Edit Selected</string>
+    <string name="profiles">Profiles</string>
+    <string name="launch">Launch</string>
+    <string name="create_profile">Create Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="locations">Locations</string>
+    <string name="delete_profile">Delete Profile</string>
+    <string name="files">FILES</string>
+    <string name="quit">Quit</string>
+    <string name="addPreset">Add Preset</string>
+</resources>

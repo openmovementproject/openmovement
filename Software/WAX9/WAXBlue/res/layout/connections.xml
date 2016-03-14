@@ -1,0 +1,78 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                tools:context=".ConnectionsActivity"
+                android:background="#22496b">
+
+
+    <GridView
+            android:id="@+id/connectionLocationGridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="auto_fit"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10sp"
+            android:horizontalSpacing="10sp"
+            android:gravity="fill"
+            android:layout_marginBottom="5sp"
+            android:layout_alignParentTop="true"
+            />
+
+    <ProgressBar
+            android:id="@+id/progress"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_centerInParent="true"
+            android:visibility="invisible"
+            android:layout_below="@id/connectionLocationGridView"
+            />
+
+
+    <RelativeLayout
+            android:id="@+id/connectButtonGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5sp"
+            >
+
+        <Button
+                android:id="@+id/connectButton"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="5sp"
+                android:text="@string/connect"
+                android:layout_toRightOf="@+id/rateEntry"
+                android:onClick="connectClick"
+                android:background="@android:drawable/btn_default"/>
+
+
+        <Button
+                android:id="@+id/stopButton"
+                android:layout_toRightOf="@+id/connectButton"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:enabled="false"
+                android:layout_marginLeft="5sp"
+                android:text="@string/stop"
+                android:onClick="stopClick"
+                android:background="@android:drawable/btn_default"/>
+
+        <Button
+            android:id="@+id/quitButton"
+            android:layout_toRightOf="@id/stopButton"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="5sp"
+            android:text="@string/quit"
+            android:onClick="quitClick"
+            android:background="@android:drawable/btn_default"/>
+    </RelativeLayout>
+
+</RelativeLayout>
+
