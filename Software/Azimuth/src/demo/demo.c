@@ -1896,7 +1896,7 @@ int main(int argc, char *argv[])
 	int i;
 
 	printf("IMU Demo  Inertial Measurement Unit Demonstration\n");
-	printf("V1.26     Dan Jackson, 2011-2013\n");
+	printf("V1.27     Dan Jackson, 2011-2016\n");
 	printf("\n");
 
 	glutInit(&argc, argv);
@@ -2069,7 +2069,7 @@ int main(int argc, char *argv[])
     }
 
     AzimuthInit(&azimuth, inputFile, initialCommand, 100, BETA);
-	azimuth.ahrs.mode = 1;		// 1 = Mayhony, -1 = Old Mayhony, other = Madgwick
+	azimuth.ahrs.mode = 0;		// 1 = Mayhony, -1 = Old Mayhony, other = Madgwick
 
 #ifdef INTEGRATE
     for (i = 0; i < 3; i++)
