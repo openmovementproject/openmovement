@@ -80,8 +80,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\demo\demo.c" />
+    <ClCompile Include="..\..\src\demo\MyVideoPlayer.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\demo\MyVideoPlayer.h" />
     <ClInclude Include="..\..\src\demo\resource.h" />
   </ItemGroup>
   <ItemGroup>

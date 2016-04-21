@@ -11,6 +11,7 @@
 #define BETA -1.0f
 
 #define INTEGRATE
+#define VIDEO
 
 #ifdef INTEGRATE
 #include "azimuth/integrator.h"
@@ -18,6 +19,10 @@ integrator_t velocityIntegrator[3] = {0};
 integrator_t positionIntegrator[3] = {0};
 float velocity[3] = {0};
 float position[3] = {0};
+#endif
+
+#ifdef VIDEO
+#include "MyVideoPlayer.h"
 #endif
 
 
@@ -115,9 +120,14 @@ static bool renderToDevice = false;
 static int ditherIndex = 4;
 static bool edgeEnhance = true;
 static bool showGraph = false;
+static bool showModel = true;
 #ifdef INTEGRATE
 static bool showOffset = false;
 #endif
+#ifdef VIDEO
+static bool useVideo = false;
+#endif
+
 
 //#define TIMER_RATE (1000/30)
 static float viewportSize = 0.98f;
@@ -253,6 +263,38 @@ unsigned int LoadTexture(const char* filename)
 	free(buffer);
 	return textureId;
 }
+
+
+#ifdef VIDEO
+static void *video = NULL;
+static int videoTextureId = -1;
+static int videoWidth = 0, videoHeight = 0, videoSize = 0;
+static unsigned char *videoBuffer = NULL;
+
+void UpdateVideoTexture(void)
+{
+	if (videoTextureId == -1)
+	{
+		glGenTextures(1, &videoTextureId);
+
+		video = video_new();
+		video_open(video, "");
+		video_play(video);
+		videoWidth = video_getSampleWidth(video);
+		videoHeight = video_getSampleHeight(video);
+		videoSize = video_getSampleSize(video);
+		videoBuffer = (unsigned char *)malloc(videoSize);
+		memset(videoBuffer, 0xcc, videoSize);
+	}
+	glBindTexture(GL_TEXTURE_2D, videoTextureId);
+	if (videoSize > 0)
+	{
+		video_getSampleData(video, videoBuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, videoWidth, videoHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, videoBuffer);
+	}
+	return;
+}
+#endif
 
 
 // Colors
@@ -1010,104 +1052,156 @@ static void displayWorld(int eye)
 	int viewport[4];
 	float w, h, aspect;
 
-	// Save state
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
 
-	// Get the viewport size
-	glLoadIdentity();
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	w = (float)viewport[2];
-	h = (float)viewport[3];
-	aspect = (float)w / (float)(h != 0.0f ? h : 1.0f);
-	if (drawHitTest) { gluPickMatrix(hitTestX, glutGet(GLUT_WINDOW_HEIGHT) - hitTestY, 1, 1, viewport); }
-
-	// Perspective projection
-	//gluPerspective(60.0f, aspect, 0.1f, 100.0f);
-	//glFrustum(-w / 4, w / 4, -h / 4 * (1.0f/aspect), h / 4 * (1.0f/aspect), 0.0f, 1000.0f);
-
-	//myPerspective(90.0f, aspect, 0.1f, 10.0f);
-	myPerspective(camFov, aspect, 0.1f, 10.0f);
-
-	glEnable(GL_DEPTH_TEST);
-	//glDepthMask(GL_TRUE);
-
-	// Clear the model-view matrix
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glEnable(GL_LIGHTING);
-
-	// Use the default GL Light settings
-	glEnable(GL_LIGHT0);
-
-	//glEnable(GL_COLOR_MATERIAL);
-
-	// Stereo eye separation
-	glTranslatef(eye * eyeSep / 2.0f, 0.0f, 0.0f);
-
-//	glTranslatef(0.0f, 0.0f, -(1.0f/ASPECT_RATIO)/2);
-
-	// Camera View
-	glTranslatef(panX, panY, -panZ); 
-	glRotatef(-camTwist, 0.0f, 0.0f, 1.0f );      
-	glRotatef(camLat, 1.0f, 0.0f, 0.0f ); 
-	glRotatef(-camLong, 0.0f, 1.0f, 0.0f );      
-#ifdef YAW_OFFSET
-glRotatef(-YAW_OFFSET, 0.0f, 1.0f, 0.0f );      
-#endif
-
-	//glTranslatef(-0.5f, -0.5f, -0.5f);
-
-	//glScalef(1.0f, -1.0f, 1.0f);
-	drawBoard();
-
-    // Lock around access to data structure
-//    ReaderLockMutex();
-
-
+#ifdef VIDEO
+	if (useVideo && !drawHitTest)
 	{
-		float ambient[4] = {0.2f, 0.2f, 0.2f, 1.0f};
-		float diffuse[4] = {0.5f, 0.5f, 0.5f, 1};
-		float specular[4] = {1, 1, 1, 1};
-		//float position[4] = {0, 0, 0, 1};
-		//float direction[4] = {0, 0, -1};
-		//exponent = 0;
-		//cutoff = 180;
-		//constant_attenuation = 1;
-		//linear_attenuation = 0;
-		//quadratic_attenuation = 0;
-		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+		// Save state
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+
+		// Get the viewport size
+		glLoadIdentity();
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		w = (float)viewport[2];
+		h = (float)viewport[3];
+
+		// Orthographic projection
+		glOrtho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+
+		// Clear the model-view matrix
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		UpdateVideoTexture();
+		glEnable(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);	// GL_LINEAR
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	// GL_LINEAR
+
+		glDisable(GL_LIGHTING);
+
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, 1.0f);
+		glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, 1.0f);
+		glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, 0.0f);
+		glEnd();
+
+		// Restore state
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+		glPopAttrib();
 	}
-
-    // TODO: Draw object
-    {
-#ifdef INTEGRATE
-        // (towards, up, left)
-        if (showOffset)
-        {
-            glTranslatef(position[0], position[1], position[2]);
-        }
 #endif
-        RenderObject(&azimuth);
-    }
 
-    // Unlock - finished reading from data structure
-//    ReaderUnlockMutex();
+	if (showModel)
+	{
+		// Save state
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
 
-	// Restore state
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-	glPopAttrib();
+		// Get the viewport size
+		glLoadIdentity();
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		w = (float)viewport[2];
+		h = (float)viewport[3];
+		aspect = (float)w / (float)(h != 0.0f ? h : 1.0f);
+		if (drawHitTest) { gluPickMatrix(hitTestX, glutGet(GLUT_WINDOW_HEIGHT) - hitTestY, 1, 1, viewport); }
+
+		// Perspective projection
+		//gluPerspective(60.0f, aspect, 0.1f, 100.0f);
+		//glFrustum(-w / 4, w / 4, -h / 4 * (1.0f/aspect), h / 4 * (1.0f/aspect), 0.0f, 1000.0f);
+
+		//myPerspective(90.0f, aspect, 0.1f, 10.0f);
+		myPerspective(camFov, aspect, 0.1f, 10.0f);
+
+		glEnable(GL_DEPTH_TEST);
+		//glDepthMask(GL_TRUE);
+
+		// Clear the model-view matrix
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glEnable(GL_LIGHTING);
+
+		// Use the default GL Light settings
+		glEnable(GL_LIGHT0);
+
+		//glEnable(GL_COLOR_MATERIAL);
+
+		// Stereo eye separation
+		glTranslatef(eye * eyeSep / 2.0f, 0.0f, 0.0f);
+
+		//	glTranslatef(0.0f, 0.0f, -(1.0f/ASPECT_RATIO)/2);
+
+			// Camera View
+		glTranslatef(panX, panY, -panZ);
+		glRotatef(-camTwist, 0.0f, 0.0f, 1.0f);
+		glRotatef(camLat, 1.0f, 0.0f, 0.0f);
+		glRotatef(-camLong, 0.0f, 1.0f, 0.0f);
+	#ifdef YAW_OFFSET
+		glRotatef(-YAW_OFFSET, 0.0f, 1.0f, 0.0f);
+	#endif
+
+		//glTranslatef(-0.5f, -0.5f, -0.5f);
+
+		//glScalef(1.0f, -1.0f, 1.0f);
+		drawBoard();
+
+		// Lock around access to data structure
+	//    ReaderLockMutex();
 
 
+		{
+			float ambient[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+			float diffuse[4] = { 0.5f, 0.5f, 0.5f, 1 };
+			float specular[4] = { 1, 1, 1, 1 };
+			//float position[4] = {0, 0, 0, 1};
+			//float direction[4] = {0, 0, -1};
+			//exponent = 0;
+			//cutoff = 180;
+			//constant_attenuation = 1;
+			//linear_attenuation = 0;
+			//quadratic_attenuation = 0;
+			glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+			glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+			glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+		}
+
+		// TODO: Draw object
+		{
+	#ifdef INTEGRATE
+			// (towards, up, left)
+			if (showOffset)
+			{
+				glTranslatef(position[0], position[1], position[2]);
+			}
+	#endif
+			RenderObject(&azimuth);
+		}
+
+		// Unlock - finished reading from data structure
+	//    ReaderUnlockMutex();
+
+		// Restore state
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+		glPopAttrib();
+
+	}
 
 	// Draw 2D scene
 
@@ -1441,6 +1535,12 @@ static void keyboard(unsigned char key, int x, int y)
 	{
 		setCursor(!isCursor);
 	}
+#ifdef VIDEO
+	if (key == 'v' || key == 'V')
+	{
+		useVideo = !useVideo;
+	}
+#endif
 	if ((key == '-' || key == '_') && panZ > 0.1f) { panZ -= 0.01f; printf("PAN-Z: %.2f\n", panZ); changed = true; }
 	if ((key == '+' || key == '=') && panZ < 5.0f) { panZ += 0.01f; printf("PAN-Z: %.2f\n", panZ); changed = true; }
 	if (key == '[' && camLat > -90.0f) { camLat -= 0.5f; printf("CAMERA-LAT: %.2f\n", camLat); changed = true; }
@@ -1517,6 +1617,10 @@ static void special(int key, int x, int y)
 #ifdef INTEGRATE
 		showOffset = !showOffset;
 #endif
+	}
+	if (key == GLUT_KEY_F7)
+	{
+		showModel = !showModel;
 	}
 	if (key == GLUT_KEY_F12)
 	{
@@ -1603,7 +1707,7 @@ static void motion(int x, int y)
 		}
 		else
 		{
-			int hit = findNameAt(x, y);
+//			int hit = findNameAt(x, y);
 			//glutSetCursor(GLUT_CURSOR_CROSSHAIR);
 		}
 	}
@@ -1896,7 +2000,7 @@ int main(int argc, char *argv[])
 	int i;
 
 	printf("IMU Demo  Inertial Measurement Unit Demonstration\n");
-	printf("V1.27     Dan Jackson, 2011-2016\n");
+	printf("V1.28     Dan Jackson, 2011-2016\n");
 	printf("\n");
 
 	glutInit(&argc, argv);
@@ -1969,7 +2073,24 @@ int main(int argc, char *argv[])
 			printf("NOTE: Setting border color\n");
 			if (!parseColor(argv[++i], borderColor)) { printf("ERROR: Problem parsing color value: %s\n", argv[i]); }
 		}
-		else 
+#ifdef VIDEO
+		else if (strcasecmp(argv[i], "-video") == 0)
+		{
+			useVideo = true;
+			printf("NOTE: Using video input.\n");
+		}
+#endif
+		else if (strcasecmp(argv[i], "-graph") == 0)
+		{
+			showGraph = true;
+			printf("NOTE: Showing graph.\n");
+		}
+		else if (strcasecmp(argv[i], "-hidemodel") == 0)
+		{
+			showModel = false;
+			printf("NOTE: Hiding model.\n");
+		}
+		else
 		{
 			printf("ERROR: Unknown parameter: %s\n", argv[i]);
 			showHelp = true;

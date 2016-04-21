@@ -581,7 +581,7 @@ Wax9Packet *parseWax9Packet(const void *inputBuffer, size_t len, unsigned long l
     }
     else
     {
-        fprintf(stderr, "WARNING: Unrecognized WAX9 packet -- ignoring.\n");
+        fprintf(stderr, "WARNING: Unrecognized WAX9 packet (type 0x%02x, version 0x%02x, length %d -- ignoring.\n", buffer[0], buffer[1], len);
     }
     return NULL;
 }
@@ -1104,7 +1104,26 @@ int AzimuthPoll(azimuth_t *azimuth)
             if (packet->pressure != 0xfffffffful) { azimuth->pressure = packet->pressure; }
             if (packet->battery != 0xffff) { azimuth->battery = packet->battery; }
 
-            AzimuthUpdate(azimuth, gyro, accel, mag);
+
+			// Bit of a hack -- make this nice
+			static int lastSample = -1;
+			if (lastSample == -1) { lastSample = packet->sampleNumber - 1; }
+			int elapsed = (unsigned short)(packet->sampleNumber - lastSample);	// 16-bit wrap-around
+			lastSample = packet->sampleNumber;
+
+			if (elapsed == 0) { fprintf(stderr, "WARNING: Duplicate packet (%d).\n", packet->sampleNumber); }
+			else if (elapsed > 1) { fprintf(stderr, "WARNING: Dropped packets detected: %d\n", elapsed - 1); }
+
+			// Catch-up
+			{
+				int z;
+				if (elapsed > 10) { elapsed = 10; }	// Limit to catch-up
+				for (z = 0; z < elapsed; z++)
+				{
+					AzimuthUpdate(azimuth, gyro, accel, mag);
+				}
+			}
+
         }
 
 	}
@@ -1162,7 +1181,7 @@ int AzimuthSend(azimuth_t *azimuth, const unsigned char *buffer, size_t length)
     if (buffer == NULL) { return 0; }
     if (azimuth->fd == -1) { return 0; }
 
-    for (total = 0; total < length; )
+    for (total = 0; (int)total < (int)length; )
     {
         int num = length - total;
 // Tweak this?
