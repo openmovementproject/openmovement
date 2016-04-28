@@ -3,8 +3,8 @@
 [Setup]
 AppId={{8CDD410D-4556-4A8A-BF86-D67276A10EA5}
 AppName=OmGui
-AppVersion=1.0.0.29
-;AppVerName=OmGui 1.0.0.29
+AppVersion=1.0.0.30
+;AppVerName=OmGui 1.0.0.30
 AppPublisher=Open Movement
 AppPublisherURL=http://www.openmovement.co.uk
 AppSupportURL=http://www.openmovement.co.uk
@@ -12,7 +12,7 @@ AppUpdatesURL=http://www.openmovement.co.uk
 DefaultDirName={pf}\Open Movement\OM GUI
 DefaultGroupName=OmGui
 AllowNoIcons=yes
-OutputBaseFilename=AX3-GUI-29
+OutputBaseFilename=AX3-GUI-30
 SetupIconFile=Application Icon.ico
 Compression=zip
 SolidCompression=no
@@ -54,7 +54,7 @@ Filename: "{app}\setup-ax3-driver.exe"; WorkingDir: "{app}"; Description: "Insta
 Filename: "{app}\OmGui.exe"; Description: "{cm:LaunchProgram,OmGui}"; Flags: nowait postinstall skipifsilent
 
 [CustomMessages]
-InstallDotNet=Download and install the required runtime for Microsoft .NET 3.5?
+InstallDotNet=Download and install the required runtime for Microsoft .NET 3.5?%n%nIf you get error 0x800f0906:%n1. Windows+R%n2. "gpedit.msc"%n3. 'Computer Configuration' / 'Administrative Templates' / 'System'%n4. 'Specify settings for optional component installation and component repair'%n5. 'Enabled'%n6. 'Contact Windows Update directly to download repair content instead of Windows Server Update Services (WSUS)'%n7. Start, "cmd", right-click, 'Run as Administrator'%n8. gpupdate /force
 
 [Code]
 const

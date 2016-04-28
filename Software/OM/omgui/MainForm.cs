@@ -1413,10 +1413,60 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 }
             }
 
+            // Do we know the firmware version for all the devices?
+            int unknownCount = 0;
+            foreach (OmDevice device in devices)
+            {
+                if (!device.ValidData || device.FirmwareVersion <= int.MinValue)
+                {
+                    unknownCount++;
+                }
+            }
+
+            // Update metadata on device
+            int remainingUnknownCount = 0;
+            if (unknownCount > 0)
+            {
+                BackgroundWorker checkBackgroundWorker = new BackgroundWorker();
+                checkBackgroundWorker.WorkerReportsProgress = true;
+                checkBackgroundWorker.WorkerSupportsCancellation = true;
+                checkBackgroundWorker.DoWork += (s, ea) =>
+                {
+                    int n = 0;
+                    foreach (OmDevice device in devices)
+                    {
+                        if (!device.ValidData || device.FirmwareVersion <= int.MinValue)
+                        {
+                            device.Update(0, true);
+                            if (!device.ValidData || device.FirmwareVersion <= int.MinValue)
+                            {
+                                remainingUnknownCount++;
+                            }
+                            checkBackgroundWorker.ReportProgress(100 * n++ / unknownCount, "Examining");
+                        }
+                    }
+                    checkBackgroundWorker.ReportProgress(100, "Done");
+                    if (remainingUnknownCount > 0)
+                    {
+                        this.Invoke(new Action(() =>
+                            MessageBox.Show(this, "Problem examining " + remainingUnknownCount + " device(s) - firmware version not checked." + ADVICE, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
+                        ));
+                    }
+                };
+                //checkBackgroundWorker.RunWorkerCompleted += (s, ea) =>
+                ShowProgressWithBackground("Examining", "Examining devices...", checkBackgroundWorker);
+            }
+
             // Check firmware version
             foreach (OmDevice device in devices)
             {
-                string currentFirmware = "CWA17_" + device.FirmwareVersion + "";
+                int firmwareVersion = device.FirmwareVersion;
+                if (firmwareVersion <= int.MinValue)
+                {
+                    Console.WriteLine("FIRMWARE: Warning, device " + device.DeviceId + " firmware version unknown (comms problem?).");
+                }
+
+                string currentFirmware = "CWA17_" + firmwareVersion + "";
                 if (blacklist.ContainsKey(currentFirmware))
                 {
                     string reason = blacklist[currentFirmware];
