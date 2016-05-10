@@ -1364,24 +1364,25 @@ size_t waxToOsc(WaxPacket *waxPacket, void *outputBuffer, char timetag)
     char address[16];
 
     sprintf(address, "/wax/%d", waxPacket->deviceId);
-
-    o += write_osc_string(buffer + o, "#bundle");                            /* [OSC string] bundle identifier: "#bundle" <pads to 8 bytes> */
-    o += write_osc_timetag(buffer + o, waxPacket->timestamp);                /* [OSC timetag] timestamp <8 bytes> */
+	
+    o += write_osc_string(buffer + o, "#bundle");                               /* [OSC string] bundle identifier: "#bundle" <pads to 8 bytes> */
+    o += write_osc_timetag(buffer + o, waxPacket->timestamp);                   /* [OSC timetag] timestamp <8 bytes> */
 
     /* OSC messages */
     for (i = 0; i < waxPacket->sampleCount; i++)
     {
         int msgLen = ((strlen(address) >= 8) ? 36 : 32) + (timetag ? 8 : 0);
-        o += write_osc_int(buffer + o, msgLen);                                /* [OSC int] message length: 32 or 36 (8 + 8/12 + 4 + 4 + 4 + 4) */
-        o += write_osc_string(buffer + o, address);                            /* [OSC string] address: "/wax/#####" <pads to 12 bytes if ID >= 100, or 8 bytes otherwise> */
-        o += write_osc_string(buffer + o, timetag ? ",fffit" : ",fffi");    /* [OSC string] type tag: <pads to 8 bytes> */
-        o += write_osc_float(buffer + o, waxPacket->samples[i].x / 256.0f);    /* [OSC float] X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, waxPacket->samples[i].y / 256.0f);    /* [OSC float] Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, waxPacket->samples[i].z / 256.0f);    /* [OSC float] Z-axis <4 bytes> */
-        o += write_osc_int(buffer + o, waxPacket->samples[i].sampleIndex);    /* [OSC int] sample index <4 bytes> */
+        o += write_osc_int(buffer + o, msgLen);                                 /* [OSC int] message length: 32 or 36 (8 + 8/12 + 4 + 4 + 4 + 4) */
+		// Message body:
+        o += write_osc_string(buffer + o, address);                             /* [OSC string] address: "/wax/#####" <pads to 12 bytes if ID >= 100, or 8 bytes otherwise> */
+        o += write_osc_string(buffer + o, timetag ? ",fffit" : ",fffi");        /* [OSC string] type tag: <pads to 8 bytes> */
+        o += write_osc_float(buffer + o, waxPacket->samples[i].x / 256.0f);     /* [OSC float] X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, waxPacket->samples[i].y / 256.0f);     /* [OSC float] Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, waxPacket->samples[i].z / 256.0f);     /* [OSC float] Z-axis <4 bytes> */
+        o += write_osc_int(buffer + o, waxPacket->samples[i].sampleIndex);      /* [OSC int] sample index <4 bytes> */
         if (timetag)
         {
-            o += write_osc_timetag(buffer + o, waxPacket->samples[i].timestamp);    /* [OSC timetag] timestamp <8 bytes> */
+            o += write_osc_timetag(buffer + o, waxPacket->samples[i].timestamp);/* [OSC timetag] timestamp <8 bytes> */
         }
     }
     return o;
@@ -1397,24 +1398,25 @@ size_t wax9ToOsc(Wax9Packet *wax9Packet, void *outputBuffer, char timetag, unsig
 
     sprintf(address, "/wax9");      //sprintf(address, "/wax9/%d", waxPacket->deviceId);
 
-    o += write_osc_string(buffer + o, "#bundle");                            /* [OSC string] bundle identifier: "#bundle" <pads to 8 bytes> */
-    o += write_osc_timetag(buffer + o, receivedTime);                        /* [OSC timetag] timestamp <8 bytes> */
+    o += write_osc_string(buffer + o, "#bundle");                               /* [OSC string] bundle identifier: "#bundle" <pads to 8 bytes> */
+    o += write_osc_timetag(buffer + o, receivedTime);                           /* [OSC timetag] timestamp <8 bytes> */
 
     /* OSC messages */
     {
-        int msgLen = 76 + ((strlen(address) >= 8) ? 4 : 0);
+		int msgLen = ((strlen(address) + 4) / 4 * 4) + 60;		
         o += write_osc_int(buffer + o, msgLen);                                 /* [OSC int] message length */
-        o += write_osc_string(buffer + o, address);                             /* [OSC string] address: "/wax9/#####" <pads to 12 bytes if ID >= 100, or 8 bytes otherwise> */
+		// Message body:
+        o += write_osc_string(buffer + o, address);                             /* [OSC string] address: "/wax9" <pads to 8 bytes> */
         o += write_osc_string(buffer + o, ",fffffffffii");                      /* [OSC string] type tag: <pads to 16 bytes> */
         o += write_osc_float(buffer + o, wax9Packet->accel.x / 4096.0f);        /* [OSC float] Accel. X-axis <4 bytes> */
         o += write_osc_float(buffer + o, wax9Packet->accel.y / 4096.0f);        /* [OSC float] Accel. Y-axis <4 bytes> */
         o += write_osc_float(buffer + o, wax9Packet->accel.z / 4096.0f);        /* [OSC float] Accel. Z-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->gyro.x * 0.07f);           /* [OSC float] Gyro. X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->gyro.y * 0.07f);           /* [OSC float] Gyro. Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->gyro.z * 0.07f);           /* [OSC float] Gyro. Z-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.x * 0.10f);            /* [OSC float] Mag. X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.y * 0.10f);            /* [OSC float] Mag. Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.z * 0.10f);            /* [OSC float] Mag. Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.x * 0.07f);           /* [OSC float] Gyro.  X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.y * 0.07f);           /* [OSC float] Gyro.  Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.z * 0.07f);           /* [OSC float] Gyro.  Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.x * 0.10f);            /* [OSC float] Mag.   X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.y * 0.10f);            /* [OSC float] Mag.   Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.z * 0.10f);            /* [OSC float] Mag.   Z-axis <4 bytes> */
         o += write_osc_int(buffer + o, wax9Packet->sampleNumber);               /* [OSC int] sample index <4 bytes> */
         o += write_osc_int(buffer + o, wax9Packet->timestamp);                  /* [OSC int] sample time (16.16) <4 bytes> */
     }

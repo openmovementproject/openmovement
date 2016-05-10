@@ -101,6 +101,8 @@ category = SourceCategory.Other;
         protected int firmwareVersion = int.MinValue;
         public int FirmwareVersion { get { return firmwareVersion; } }
 
+        public bool ValidData { get { return validData; } }
+
         protected int hardwareVersion = int.MinValue;
         public int HardwareVersion { get { return hardwareVersion; } }
 
@@ -221,7 +223,7 @@ category = SourceCategory.Other;
         }
 
 
-        public bool Update(int resetIfUnresponsive)
+        public bool Update(int resetIfUnresponsive, bool force = false)
         {
             bool changed = false;
             DateTime now = DateTime.Now;
@@ -230,7 +232,7 @@ category = SourceCategory.Other;
             updateInterval = updateInterval + (failedCount * 10.0);
             updateInterval = Math.Min(updateInterval, 120.0);       // At most, 2 minute interval if not communicating
 
-            if (lastUpdate == DateTime.MinValue || (now - lastUpdate) > TimeSpan.FromSeconds(updateInterval))
+            if (force || lastUpdate == DateTime.MinValue || (now - lastUpdate) > TimeSpan.FromSeconds(updateInterval))
             {
                 int error = 0;
 

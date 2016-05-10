@@ -18,6 +18,9 @@
     <ClCompile Include="..\..\src\demo\demo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\demo\MyVideoPlayer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\demo\resource.rc">
@@ -26,6 +29,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\demo\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\demo\MyVideoPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

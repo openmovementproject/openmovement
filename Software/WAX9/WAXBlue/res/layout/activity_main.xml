@@ -1,0 +1,80 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                tools:context=".MainActivity"
+                android:background="#22496b">
+
+    <GridView
+            android:id="@+id/locationGridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="auto_fit"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:gravity="fill"
+            android:layout_marginBottom="5dp"
+            android:layout_alignParentTop="true"
+            />
+
+
+    <ListView
+            android:id="@+id/deviceListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/locationGridView"
+            android:layout_above="@+id/pairButtonGroup"
+            android:background="@drawable/grid_background_default"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"/>
+
+
+    <RelativeLayout
+            android:id="@+id/pairButtonGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            >
+
+        <Button
+                android:id="@+id/finishButton"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="5sp"
+                android:text="@string/finish"
+                android:onClick="finishClick"
+                android:visibility="visible"
+                android:background="@android:drawable/btn_default"
+                />
+
+        <Button
+                android:id="@+id/clearSelectedButton"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="5sp"
+                android:text="@string/clearSelected"
+                android:layout_toRightOf="@+id/finishButton"
+                android:onClick="clearSelectedClick"
+                android:visibility="visible"
+                android:background="@android:drawable/btn_default"
+                />
+
+        <Button
+                android:id="@+id/clearButton"
+                android:layout_toRightOf="@+id/clearSelectedButton"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/clearAll"
+                android:onClick="clearClick"
+                android:visibility="visible"
+                android:background="@android:drawable/btn_default"
+                />
+
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

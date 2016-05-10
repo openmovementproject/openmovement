@@ -93,17 +93,14 @@ typedef struct
 	double axisMin[3];
 	double axisMax[3];
 
-	// Resulting mean and StdDev
-	double resultMean[3];
-	double resultRange[3];
-	double resultStdDev[3];
-	double resultTemperature;
-
 	// Per-ecoch stats
 	int countInvalid;
 	int countClipped;
 	int countClippedInput;
 	int countClippedOutput;
+
+	int rawIndex;
+	int countRaw;
 
 } svm_status_t;
 
@@ -112,7 +109,7 @@ typedef struct
 char SvmInit(svm_status_t *status, svm_configuration_t *configuration);
 
 // Processes the specified value
-bool SvmAddValue(svm_status_t *status, double *value, double temp, char validity);
+bool SvmAddValue(svm_status_t *status, double *value, double temp, char validity, int rawIndex);
 
 // Free data resources
 int SvmClose(svm_status_t *status);

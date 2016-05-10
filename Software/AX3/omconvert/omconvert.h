@@ -33,6 +33,8 @@
 
 #include "omdata.h"
 
+struct omcalibrate_calibration_tag;
+
 
 typedef struct
 {
@@ -52,6 +54,9 @@ typedef struct
 	char calibrate;				// 0=off, 1=auto (prefer from data), 2=auto (always use interpolated player)
 	double stationaryTime;
 	char repeatedStationary;	// 0=use, 1=ignore (future: 2=combine?)
+
+	// Calibration fallback (if no calibration or if auto-calibration fails)
+	struct omcalibrate_calibration_tag *defaultCalibration;
 
 	// CSV
 	const char *csvFilename;
@@ -115,6 +120,7 @@ typedef struct
 
 	// Sample index for "v1"
 	int sampleIndex;
+	int previousSegmentSamples;
 
 	// Values cached after seek
 	double prop;						// Proportion between v1-v2

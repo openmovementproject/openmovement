@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogDest.cs" />
+    <Compile Include="Wax9Packet.cs" />
     <Compile Include="WaxDevice.cs" />
     <Compile Include="WaxPacketConverter.cs" />
     <Compile Include="OscDest.cs" />

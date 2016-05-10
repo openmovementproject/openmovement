@@ -196,12 +196,12 @@ static int CalcInit(calc_t *calc, double sampleRate, double startTime)
 }
 
 
-static bool CalcAddValue(calc_t *calc, double* accel, double temp, char validity)
+static bool CalcAddValue(calc_t *calc, double* accel, double temp, char validity, int rawIndex)
 {
 	bool ok = true;
 	bool valid = (validity & 1) ? false : true;		 // Valid if not invalid(!)
 
-	if (calc->svmOk) { ok &= SvmAddValue(&calc->svmStatus, accel, temp, validity); }
+	if (calc->svmOk) { ok &= SvmAddValue(&calc->svmStatus, accel, temp, validity, rawIndex); }
 	if (calc->wtvOk) { ok &= WtvAddValue(&calc->wtvStatus, accel, temp, valid); }
 	if (calc->paeeOk) { ok &= PaeeAddValue(&calc->paeeStatus, accel, temp, valid); }
 	if (calc->csvOk) { ok &= CsvAddValue(&calc->csvStatus, accel, temp, valid); }
@@ -325,6 +325,7 @@ static double CubicInterpolate(double v0, double v1, double v2, double v3, doubl
 
 void InterpolatorInit(interpolator_t *interpolator, char mode, omdata_t *data, omdata_session_t *session, int streamIndex)
 {
+	memset(interpolator, 0, sizeof(interpolator_t));
 	interpolator->mode = mode;
 	interpolator->data = data;
 	interpolator->streamIndex = streamIndex;
@@ -346,6 +347,7 @@ void InterpolatorSeek(interpolator_t *interpolator, double t)
 	// Skip segment if needed
 	while (interpolator->seg != NULL && t > interpolator->seg->endTime)
 	{
+		interpolator->previousSegmentSamples += interpolator->seg->numSamples;
 		interpolator->seg = interpolator->seg->segmentNext;
 		interpolator->timeIndex = -1;
 		if (interpolator->seg != NULL)
@@ -354,7 +356,7 @@ void InterpolatorSeek(interpolator_t *interpolator, double t)
 		}
 	}
 
-	if (interpolator->seg != NULL)
+	if (interpolator->seg != NULL && t >= interpolator->seg->startTime)
 	{
 		// Skip time indices if needed
 		while (interpolator->timeIndex + 1 < interpolator->seg->timestampCount && t >= interpolator->seg->timestamps[interpolator->timeIndex + 1].timestamp)
@@ -452,7 +454,9 @@ double InterpolatorValue(interpolator_t *interpolator, int subchannel, char *val
 	// Check for invalid
 	if (!interpolator->valid || interpolator->seg == NULL || subchannel < 0 || subchannel >= interpolator->seg->channels)
 	{
-		if (valid != NULL) { *valid = 0; }
+		if (valid != NULL) { 
+			*valid = 0; 
+		}
 		return 0.0;
 	}
 
@@ -636,6 +640,21 @@ void OmConvertPlayerInitialize(om_convert_player_t *player, om_convert_arrangeme
 	}
 
 	return;
+}
+
+int OmConvertPlayerRawIndexWithinSegment(om_convert_player_t *player, char channel)
+{
+	// Update the interpolator for each stream to the current time
+	int j;
+	for (j = 0; j < player->arrangement->numStreamIndexes; j++)
+	{
+		int si = player->arrangement->streamIndexes[j];
+		if (si == channel)
+		{
+			return player->segmentInterpolators[si].previousSegmentSamples + player->segmentInterpolators[si].sampleIndex;
+		}
+	}
+	return -1;
 }
 
 void OmConvertPlayerSeek(om_convert_player_t *player, int sample)
@@ -855,7 +874,7 @@ int OmConvertRunWav(omconvert_settings_t *settings, calc_t *calc)
 				values[0] = v[0] * scale[0];
 				values[1] = v[1] * scale[1];
 				values[2] = v[2] * scale[2];
-				if (!CalcAddValue(calc, values, temp, validity))
+				if (!CalcAddValue(calc, values, temp, validity, samplesOffset + i))
 				{
 					fprintf(stderr, "ERROR: Problem writing calculations.\n");
 					retVal = EXIT_IOERR;
@@ -920,7 +939,7 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 
 	// Initialize identity calibration
 	omcalibrate_calibration_t calibration;
-	OmCalibrateInit(&calibration);
+	OmCalibrateCopy(&calibration, settings->defaultCalibration);
 
 	// For each session:
 	omdata_session_t *session;
@@ -982,10 +1001,10 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 			OmCalibrateDump(&calibration, stationaryPoints, 1);
 			if (calibrationResult < 0)
 			{
-				fprintf(stderr, "Auto-calibration: using identity calibration...\n");
+				fprintf(stderr, "Auto-calibration: using default calibration...\n");
 				int ec = calibration.errorCode;		// Copy error code
 				int na = calibration.numAxes;		// ...and num-axes
-				OmCalibrateInit(&calibration);
+				OmCalibrateCopy(&calibration, settings->defaultCalibration);
 				calibration.errorCode = ec;			// Copy error code to identity calibration
 				calibration.numAxes = na;			// ...and num-axes
 			}
@@ -1204,7 +1223,9 @@ fprintf(stderr, "COMMENT: %s\n", comment);
 			int sample;
 			for (sample = 0; sample < outputSamples; sample++)
 			{
+				int rawIndex = 0;
 				OmConvertPlayerSeek(&player, sample);
+				rawIndex = OmConvertPlayerRawIndexWithinSegment(&player, 'a');
 
 				// Convert to integers
 				int c;
@@ -1257,7 +1278,7 @@ fprintf(stderr, "COMMENT: %s\n", comment);
 
 				values[player.arrangement->numChannels] = aux;
 
-				if (!CalcAddValue(calc, accel, temp, validity))
+				if (!CalcAddValue(calc, accel, temp, validity, rawIndex))
 				{
 					fprintf(stderr, "ERROR: Problem writing calculations.\n");
 					retVal = EXIT_IOERR;

@@ -89,7 +89,6 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 		return NULL;
 	}
 
-
 	omcalibrate_stationary_points_t *stationaryPoints = (omcalibrate_stationary_points_t *)malloc(sizeof(omcalibrate_stationary_points_t));
 	memset(stationaryPoints, 0, sizeof(omcalibrate_stationary_points_t));
 
@@ -490,7 +489,18 @@ void OmCalibrateInit(omcalibrate_calibration_t *calibration)
 }
 
 
-
+// Copy a calibration
+void OmCalibrateCopy(omcalibrate_calibration_t *calibration, omcalibrate_calibration_t *source)
+{
+	if (source == NULL)
+	{
+		OmCalibrateInit(calibration);
+	}
+	else
+	{
+		memcpy(calibration, source, sizeof(omcalibrate_calibration_t));
+	}
+}
 
 
 // Mean svm of stationary points with the calibration

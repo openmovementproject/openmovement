@@ -273,7 +273,7 @@ void filter(int numCoefficients, const double *b, const double *a, const double 
 
 
 
-
+/*
 // !!!! TODO: Remove this
 #define BUTTERWORTH4_ORDER 4
 #define BUTTERWORTH4_NUM_COEFFICIENTS (BUTTERWORTH4_ORDER * 2 + 1)
@@ -293,3 +293,4 @@ void filterOrder4BP(double *b, double *a, double *X, int count, double *z)
 	}
 	return;
 }
+*/

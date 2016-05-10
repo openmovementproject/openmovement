@@ -2,3 +2,5 @@
 /Release
 /*.sdf
 /*.suo
+/.vs
+/*.opensdf

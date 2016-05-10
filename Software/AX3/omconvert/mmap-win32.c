@@ -24,7 +24,7 @@
 */
 
 // Memory mapped file - Implementation of mmap() for Windows
-// Dan Jackson, 2014 - 'TRACK_FILES' changes to clean up otherwise leaked handles from CreateFileMapping()
+// Dan Jackson, 2014 - 'MMAP_CLEANUP' changes to clean up otherwise leaked handles from CreateFileMapping()
 // Original author: Mike Frysinger <vapier@gentoo.org>, placed into the public domain.
 
 // References:
@@ -33,21 +33,21 @@
 //   MapViewOfFile:     http://msdn.microsoft.com/en-us/library/aa366761(VS.85).aspx
 //   UnmapViewOfFile:   http://msdn.microsoft.com/en-us/library/aa366882(VS.85).aspx
 
-#define TRACK_FILES		// Dan
+#define MMAP_CLEANUP		// Dan
 
 #include <io.h>
 #include <windows.h>
 #include <sys/types.h>
 
-#ifdef TRACK_FILES
+#ifdef MMAP_CLEANUP
 struct mmap_cleanup_tag;
 typedef struct mmap_cleanup_tag
 {
 	void *addr;
 	HANDLE h;
 	struct mmap_cleanup_tag *next;
-};
-struct mmap_cleanup_tag *mmap_cleanup = NULL;
+} mmap_cleanup_t;
+mmap_cleanup_t *mmap_cleanup = NULL;
 #endif
 
 
@@ -123,11 +123,11 @@ static void *mmap(void *start, size_t length, int prot, int flags, int fd, off_t
 		CloseHandle(h);
 		ret = MAP_FAILED;
 	}
-#ifdef TRACK_FILES
+#ifdef MMAP_CLEANUP
 	else
 	{
 		// Add a tracking element (to the start of our list)
-		struct mmap_cleanup_tag *mc = (struct mmap_cleanup_tag *)malloc(sizeof(struct mmap_cleanup_tag));
+		mmap_cleanup_t *mc = (mmap_cleanup_t *)malloc(sizeof(mmap_cleanup_t));
 		if (mc != NULL)
 		{
 			mc->addr = ret;
@@ -143,10 +143,10 @@ static void *mmap(void *start, size_t length, int prot, int flags, int fd, off_t
 static void munmap(void *addr, size_t length)
 {
 	UnmapViewOfFile(addr);
-#ifdef TRACK_FILES
+#ifdef MMAP_CLEANUP
 	// Look up through the tracking elements to close the handle
-	struct mmap_cleanup_tag **prevPtr = &mmap_cleanup;
-	struct mmap_cleanup_tag *mc;
+	mmap_cleanup_t **prevPtr = &mmap_cleanup;
+	mmap_cleanup_t *mc;
 	for (mc = *prevPtr; mc != NULL; prevPtr = &mc->next, mc = *prevPtr)
 	{
 		if (mc->addr == addr)

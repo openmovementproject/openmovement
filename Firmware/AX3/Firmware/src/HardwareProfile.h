@@ -36,7 +36,7 @@
 	#define HARDWARE_SELECT 0x17
     
     // Define firmware version
-    #define SOFTWARE_VERSION 42
+    #define SOFTWARE_VERSION 44
 
 // High-speed capable
 //#define HIGH_SPEED_USES_PLL	// Not fully tested (doesn't appear to be required anyway)

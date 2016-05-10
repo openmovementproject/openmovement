@@ -1,0 +1,13 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@android:id/text1"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textAppearance="?android:attr/textAppearanceListItemSmall"
+          android:gravity="center"
+          android:padding="2dp"
+          android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+          android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+          android:minHeight="?android:attr/listPreferredItemHeightSmall"
+          android:background="@drawable/grid_background_default"
+
+        />
