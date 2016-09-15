@@ -551,6 +551,10 @@ Console.WriteLine("END: deviceManager_DeviceUpdate()...");
             splitContainerLog.Panel2Collapsed = !logToolStripMenuItem.Checked;
             splitContainerPreview.Panel1Collapsed = !previewToolStripMenuItem.Checked;
             splitContainerDevices.Panel2Collapsed = !propertiesToolStripMenuItem.Checked;
+            splitContainerFileProperties.Panel2Collapsed = !filePropertiesToolStripMenuItem.Checked;
+
+            listViewDevices_SelectedIndexChanged(null, null);
+            filesListView_SelectedIndexChanged(null, null);
         }
 
         //private void UpdateFile(ListViewItem item)
@@ -743,7 +747,7 @@ Console.WriteLine("toolStripButtonDownload_Click() STARTED...");
 
                     filename = filename.Replace("{DeviceId}", deviceIdString);
                     filename = filename.Replace("{SessionId}", sessionIdString);
-                    string[] keys = new string[] { "StudyCentre", "StudyCode", "StudyInvestigator",  "StudyExerciseType", "StudyOperator", "StudyNotes", "SubjectSite", "SubjectCode", "SubjectSex", "SubjectHeight", "SubjectWidth", "SubjectHandedness" };
+                    string[] keys = new string[] { "StudyCentre", "StudyCode", "StudyInvestigator",  "StudyExerciseType", "StudyOperator", "StudyNotes", "SubjectSite", "SubjectCode", "SubjectSex", "SubjectHeight", "SubjectWeight", "SubjectHandedness", "SubjectNotes" };
                     foreach (string key in keys)
                     {
                         filename = filename.Replace("{" + key + "}", metadataMap.ContainsKey(key) ? metadataMap[key] : "");
@@ -1078,8 +1082,14 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 filesListView.SelectedItems.Clear();
             }
 
-            //TS - [P] - TODO - Ask Dan why we have a property window, it isn't used yet.
-            propertyGridDevice.SelectedObjects = selected;
+            if (propertiesToolStripMenuItem.Checked)
+            {
+                propertyGridDevice.SelectedObjects = selected;
+            }
+            else
+            {
+                propertyGridDevice.SelectedObjects = null;
+            }
 
             //TS - [P] - If there is one device selected then open it in the dataViewer
             if (selected.Length == 1 && selected[0] is OmDevice && ((OmDevice)selected[0]).Connected && !((OmDevice)selected[0]).IsDownloading)
@@ -2825,6 +2835,26 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 FilesResetToolStripButtons();
             }
 
+
+            if (filePropertiesToolStripMenuItem.Checked && filesListView.SelectedItems.Count == 1)
+            {
+                MetadataObject obj = null;
+                try
+                {
+                    OmReader reader = (OmReader)filesListView.SelectedItems[0].Tag;
+                    obj = MetadataObject.FromFile(reader.Filename);
+                }
+                catch (Exception)
+                {
+                    Console.Error.WriteLine("ERROR: Problem creating metadata object for file.");
+                }
+                propertyGridFile.SelectedObject = obj;
+            }
+            else
+            {
+                propertyGridFile.SelectedObjects = null;
+            }
+
             //Open DataViewer
             if (filesListView.SelectedItems.Count == 1)
             {
@@ -4325,8 +4355,8 @@ Console.WriteLine("backgroundWorkerUpdate - changed " + device.DeviceId);
                 outputList.Add(Path.GetFileName(final));
             }
             MessageBoxEx.Show(this, "Output " + outputList.Count + "/" + files.Length + ":\r\n\r\n" + string.Join("\r\n", outputList.ToArray()) + "\r\n\r\n", "Complete", MessageBoxExButtons.OK, MessageBoxExIcon.Information, MessageBoxExDefaultButton.Button1);
-        }  
+        }
 
-
+ 
     }
 }

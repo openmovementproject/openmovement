@@ -400,6 +400,11 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
 
         lastBlockStart = blockStart;
 
+		unsigned int rateCode = OmReaderGetValue(reader, OM_VALUE_SAMPLERATE);
+		unsigned int rate = (3200 / (1 << (15 - (rateCode & 0x0f))));
+		int minPacketCount = rate - (12 * rate / 100);	// -12%
+		int maxPacketCount = rate + (12 * rate / 100);	// +12%
+
         buffer = OmReaderBuffer(reader);
         for (i = 0; i < numSamples; i++)
         {
@@ -480,7 +485,7 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
             if (seconds != lastSecond)
             {
                 if (firstPacket) { /* fprintf(stderr, "!"); */ firstPacket = 0; }
-                else if (packetCount >= 88 && packetCount <= 112) { /* fprintf(stderr, "#"); */ }
+                else if (packetCount >= minPacketCount && packetCount <= maxPacketCount) { /* fprintf(stderr, "#"); */ }
                 else
                 { 
                     if (seconds == lastSecond + 1 || (seconds == 0 && lastSecond == 59))

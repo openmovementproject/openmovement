@@ -132,12 +132,13 @@ namespace OmGui
             settingsDictionary.Add("StudyOperator", textBoxStudyOperator.Text);
             settingsDictionary.Add("StudyNotes", textBoxStudyNotes.Text);
             settingsDictionary.Add("SubjectCode", textBoxSubjectCode.Text);
-            settingsDictionary.Add("SubjectSex", comboBoxSubjectSex.SelectedIndex <= 0 ? "" : comboBoxSubjectSex.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectSex", comboBoxSubjectSex.SelectedIndex <= 0 ? "" : comboBoxSubjectSex.SelectedItem.ToString());
             settingsDictionary.Add("SubjectHeight", textBoxHeight.Text.ToString());
-            settingsDictionary.Add("SubjectWidth", textBoxWeight.Text.ToString());
-            settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex <= 0 ? "" : comboBoxSubjectHandedness.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectWeight", textBoxWeight.Text.ToString());
+            settingsDictionary.Add("SubjectHandedness", comboBoxSubjectHandedness.SelectedIndex <= 0 ? "" : comboBoxSubjectHandedness.SelectedItem.ToString());
             //settingsDictionary.Add("SubjectTimezone", comboBoxSubjectTimezone.SelectedIndex.ToString());
-            settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex <= 0 ? "" : comboBoxSite.SelectedIndex.ToString());
+            settingsDictionary.Add("SubjectSite", comboBoxSite.SelectedIndex <= 0 ? "" : comboBoxSite.SelectedItem.ToString());
+            settingsDictionary.Add("SubjectNotes", textBoxSubjectNotes.Text);
 
             // New settings
             settingsDictionary.Add("Frequency", comboBoxSamplingFreq.SelectedItem.ToString());
@@ -206,7 +207,12 @@ namespace OmGui
                 else if (pair.Key.Equals("SubjectSite"))
                 {
                     comboBoxSite.SelectedIndex = Int32.Parse(pair.Value);
-                }*/
+                }
+                else if (pair.Key.Equals("SubjectNotes"))
+                {
+                    textBoxSubjectNotes.Text = pair.Value;
+                }
+                */
                 else if (pair.Key.Equals("Frequency"))
                 {
                     comboBoxSamplingFreq.SelectedValue = pair.Value;
@@ -423,8 +429,9 @@ Cursor.Current = Cursors.WaitCursor;
             metaDataList.Add(new MetaDataEntry("_sc", SettingsProfileDictionary["SubjectCode"])); mdStringList.Add("_sc");
             metaDataList.Add(new MetaDataEntry("_se", SettingsProfileDictionary["SubjectSex"])); mdStringList.Add("_se");
             metaDataList.Add(new MetaDataEntry("_h", SettingsProfileDictionary["SubjectHeight"])); mdStringList.Add("_h");
-            metaDataList.Add(new MetaDataEntry("_w", SettingsProfileDictionary["SubjectWidth"])); mdStringList.Add("_w");
+            metaDataList.Add(new MetaDataEntry("_w", SettingsProfileDictionary["SubjectWeight"])); mdStringList.Add("_w");
             metaDataList.Add(new MetaDataEntry("_ha", SettingsProfileDictionary["SubjectHandedness"])); mdStringList.Add("_ha");
+            metaDataList.Add(new MetaDataEntry("_sn", SettingsProfileDictionary["SubjectNotes"])); mdStringList.Add("_sn");
 
             //Create metadata
             metaData =  MetaDataTools.CreateMetaData(metaDataList);

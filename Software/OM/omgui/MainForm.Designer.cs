@@ -263,6 +263,33 @@
             System.Windows.Forms.ListViewGroup listViewGroup232 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup233 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup234 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup235 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup236 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup237 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup238 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup239 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup240 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup241 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup242 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup243 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup244 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup245 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup246 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup247 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup248 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup249 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup250 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup251 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup252 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup253 = new System.Windows.Forms.ListViewGroup("Devices", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup254 = new System.Windows.Forms.ListViewGroup("New Data", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup255 = new System.Windows.Forms.ListViewGroup("Downloading", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup256 = new System.Windows.Forms.ListViewGroup("Downloaded", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup257 = new System.Windows.Forms.ListViewGroup("Charging", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup258 = new System.Windows.Forms.ListViewGroup("Standby", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup259 = new System.Windows.Forms.ListViewGroup("Outbox", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup260 = new System.Windows.Forms.ListViewGroup("Removed", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup261 = new System.Windows.Forms.ListViewGroup("Files", System.Windows.Forms.HorizontalAlignment.Left);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
@@ -270,6 +297,7 @@
             this.BottomToolStripPanel = new System.Windows.Forms.ToolStripPanel();
             this.statusStripMain = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelMain = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelNoProgress = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripBackgroundTask = new System.Windows.Forms.ToolStripStatusLabel();
             this.TopToolStripPanel = new System.Windows.Forms.ToolStripPanel();
             this.toolStripMain = new System.Windows.Forms.ToolStrip();
@@ -303,6 +331,7 @@
             this.statusBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.previewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.svmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -333,11 +362,13 @@
             this.toolStripButtonRefresh = new System.Windows.Forms.ToolStripButton();
             this.tabControlFiles = new System.Windows.Forms.TabControl();
             this.tabPageFiles = new System.Windows.Forms.TabPage();
+            this.splitContainerFileProperties = new System.Windows.Forms.SplitContainer();
             this.filesListView = new System.Windows.Forms.ListView();
             this.nameFilesColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.locationFilesColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.sizeFilesColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.dateModifiedColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.propertyGridFile = new System.Windows.Forms.PropertyGrid();
             this.toolStripFiles = new System.Windows.Forms.ToolStrip();
             this.toolStripExportDropDown = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButtonWav = new System.Windows.Forms.ToolStripMenuItem();
@@ -369,7 +400,6 @@
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.fileSystemWatcherOutput = new System.IO.FileSystemWatcher();
             this.backgroundWorkerUpdate = new System.ComponentModel.BackgroundWorker();
-            this.toolStripStatusLabelNoProgress = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.toolStripContainer2.SuspendLayout();
             this.statusStripMain.SuspendLayout();
@@ -390,6 +420,9 @@
             this.toolStripWorkingFolder.SuspendLayout();
             this.tabControlFiles.SuspendLayout();
             this.tabPageFiles.SuspendLayout();
+            this.splitContainerFileProperties.Panel1.SuspendLayout();
+            this.splitContainerFileProperties.Panel2.SuspendLayout();
+            this.splitContainerFileProperties.SuspendLayout();
             this.toolStripFiles.SuspendLayout();
             this.tabPageQueue.SuspendLayout();
             this.toolStripQueue.SuspendLayout();
@@ -454,9 +487,16 @@
             // toolStripStatusLabelMain
             // 
             this.toolStripStatusLabelMain.Name = "toolStripStatusLabelMain";
-            this.toolStripStatusLabelMain.Size = new System.Drawing.Size(974, 20);
+            this.toolStripStatusLabelMain.Size = new System.Drawing.Size(1025, 20);
             this.toolStripStatusLabelMain.Spring = true;
             this.toolStripStatusLabelMain.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // toolStripStatusLabelNoProgress
+            // 
+            this.toolStripStatusLabelNoProgress.AutoSize = false;
+            this.toolStripStatusLabelNoProgress.Name = "toolStripStatusLabelNoProgress";
+            this.toolStripStatusLabelNoProgress.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
+            this.toolStripStatusLabelNoProgress.Size = new System.Drawing.Size(16, 20);
             // 
             // toolStripBackgroundTask
             // 
@@ -723,6 +763,7 @@
             this.statusBarToolStripMenuItem,
             this.previewToolStripMenuItem,
             this.propertiesToolStripMenuItem,
+            this.filePropertiesToolStripMenuItem,
             this.logToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
@@ -734,7 +775,7 @@
             this.toolbarToolStripMenuItem.CheckOnClick = true;
             this.toolbarToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.toolbarToolStripMenuItem.Name = "toolbarToolStripMenuItem";
-            this.toolbarToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.toolbarToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.toolbarToolStripMenuItem.Text = "&Toolbar";
             this.toolbarToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
             // 
@@ -744,7 +785,7 @@
             this.statusBarToolStripMenuItem.CheckOnClick = true;
             this.statusBarToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.statusBarToolStripMenuItem.Name = "statusBarToolStripMenuItem";
-            this.statusBarToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.statusBarToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.statusBarToolStripMenuItem.Text = "&Status Bar";
             this.statusBarToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
             // 
@@ -754,7 +795,7 @@
             this.previewToolStripMenuItem.CheckOnClick = true;
             this.previewToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.previewToolStripMenuItem.Name = "previewToolStripMenuItem";
-            this.previewToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.previewToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.previewToolStripMenuItem.Text = "Pre&view";
             this.previewToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
             // 
@@ -762,16 +803,23 @@
             // 
             this.propertiesToolStripMenuItem.CheckOnClick = true;
             this.propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
-            this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
-            this.propertiesToolStripMenuItem.Text = "&Properties";
-            this.propertiesToolStripMenuItem.Visible = false;
+            this.propertiesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.propertiesToolStripMenuItem.Text = "Device &Properties";
             this.propertiesToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
+            // 
+            // filePropertiesToolStripMenuItem
+            // 
+            this.filePropertiesToolStripMenuItem.CheckOnClick = true;
+            this.filePropertiesToolStripMenuItem.Name = "filePropertiesToolStripMenuItem";
+            this.filePropertiesToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.filePropertiesToolStripMenuItem.Text = "File P&roperties";
+            this.filePropertiesToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
             // 
             // logToolStripMenuItem
             // 
             this.logToolStripMenuItem.CheckOnClick = true;
             this.logToolStripMenuItem.Name = "logToolStripMenuItem";
-            this.logToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.logToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.logToolStripMenuItem.Text = "&Log";
             this.logToolStripMenuItem.CheckedChanged += new System.EventHandler(this.View_CheckChanged);
             // 
@@ -1419,6 +1467,60 @@
             listViewGroup233.Name = "Removed";
             listViewGroup234.Header = "Files";
             listViewGroup234.Name = "File";
+            listViewGroup235.Header = "Devices";
+            listViewGroup235.Name = "Other";
+            listViewGroup236.Header = "New Data";
+            listViewGroup236.Name = "NewData";
+            listViewGroup237.Header = "Downloading";
+            listViewGroup237.Name = "Downloading";
+            listViewGroup238.Header = "Downloaded";
+            listViewGroup238.Name = "Downloaded";
+            listViewGroup239.Header = "Charging";
+            listViewGroup239.Name = "Charging";
+            listViewGroup240.Header = "Standby";
+            listViewGroup240.Name = "Standby";
+            listViewGroup241.Header = "Outbox";
+            listViewGroup241.Name = "Outbox";
+            listViewGroup242.Header = "Removed";
+            listViewGroup242.Name = "Removed";
+            listViewGroup243.Header = "Files";
+            listViewGroup243.Name = "File";
+            listViewGroup244.Header = "Devices";
+            listViewGroup244.Name = "Other";
+            listViewGroup245.Header = "New Data";
+            listViewGroup245.Name = "NewData";
+            listViewGroup246.Header = "Downloading";
+            listViewGroup246.Name = "Downloading";
+            listViewGroup247.Header = "Downloaded";
+            listViewGroup247.Name = "Downloaded";
+            listViewGroup248.Header = "Charging";
+            listViewGroup248.Name = "Charging";
+            listViewGroup249.Header = "Standby";
+            listViewGroup249.Name = "Standby";
+            listViewGroup250.Header = "Outbox";
+            listViewGroup250.Name = "Outbox";
+            listViewGroup251.Header = "Removed";
+            listViewGroup251.Name = "Removed";
+            listViewGroup252.Header = "Files";
+            listViewGroup252.Name = "File";
+            listViewGroup253.Header = "Devices";
+            listViewGroup253.Name = "Other";
+            listViewGroup254.Header = "New Data";
+            listViewGroup254.Name = "NewData";
+            listViewGroup255.Header = "Downloading";
+            listViewGroup255.Name = "Downloading";
+            listViewGroup256.Header = "Downloaded";
+            listViewGroup256.Name = "Downloaded";
+            listViewGroup257.Header = "Charging";
+            listViewGroup257.Name = "Charging";
+            listViewGroup258.Header = "Standby";
+            listViewGroup258.Name = "Standby";
+            listViewGroup259.Header = "Outbox";
+            listViewGroup259.Name = "Outbox";
+            listViewGroup260.Header = "Removed";
+            listViewGroup260.Name = "Removed";
+            listViewGroup261.Header = "Files";
+            listViewGroup261.Name = "File";
             this.devicesListView.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
             listViewGroup1,
             listViewGroup2,
@@ -1653,7 +1755,34 @@
             listViewGroup231,
             listViewGroup232,
             listViewGroup233,
-            listViewGroup234});
+            listViewGroup234,
+            listViewGroup235,
+            listViewGroup236,
+            listViewGroup237,
+            listViewGroup238,
+            listViewGroup239,
+            listViewGroup240,
+            listViewGroup241,
+            listViewGroup242,
+            listViewGroup243,
+            listViewGroup244,
+            listViewGroup245,
+            listViewGroup246,
+            listViewGroup247,
+            listViewGroup248,
+            listViewGroup249,
+            listViewGroup250,
+            listViewGroup251,
+            listViewGroup252,
+            listViewGroup253,
+            listViewGroup254,
+            listViewGroup255,
+            listViewGroup256,
+            listViewGroup257,
+            listViewGroup258,
+            listViewGroup259,
+            listViewGroup260,
+            listViewGroup261});
             this.devicesListView.HideSelection = false;
             this.devicesListView.LabelWrap = false;
             this.devicesListView.Location = new System.Drawing.Point(0, 0);
@@ -1792,7 +1921,7 @@
             // 
             // tabPageFiles
             // 
-            this.tabPageFiles.Controls.Add(this.filesListView);
+            this.tabPageFiles.Controls.Add(this.splitContainerFileProperties);
             this.tabPageFiles.Controls.Add(this.toolStripFiles);
             this.tabPageFiles.Location = new System.Drawing.Point(4, 22);
             this.tabPageFiles.Margin = new System.Windows.Forms.Padding(2);
@@ -1803,26 +1932,39 @@
             this.tabPageFiles.Text = "Data Files";
             this.tabPageFiles.UseVisualStyleBackColor = true;
             // 
+            // splitContainerFileProperties
+            // 
+            this.splitContainerFileProperties.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerFileProperties.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainerFileProperties.Location = new System.Drawing.Point(2, 29);
+            this.splitContainerFileProperties.Name = "splitContainerFileProperties";
+            // 
+            // splitContainerFileProperties.Panel1
+            // 
+            this.splitContainerFileProperties.Panel1.Controls.Add(this.filesListView);
+            // 
+            // splitContainerFileProperties.Panel2
+            // 
+            this.splitContainerFileProperties.Panel2.Controls.Add(this.propertyGridFile);
+            this.splitContainerFileProperties.Size = new System.Drawing.Size(1040, 162);
+            this.splitContainerFileProperties.SplitterDistance = 738;
+            this.splitContainerFileProperties.TabIndex = 2;
+            // 
             // filesListView
             // 
-            this.filesListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.filesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.nameFilesColumnHeader,
             this.locationFilesColumnHeader,
             this.sizeFilesColumnHeader,
             this.dateModifiedColumnHeader});
-            this.filesListView.Location = new System.Drawing.Point(2, 30);
+            this.filesListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filesListView.Location = new System.Drawing.Point(0, 0);
             this.filesListView.Name = "filesListView";
-            this.filesListView.Size = new System.Drawing.Size(1040, 158);
-            this.filesListView.TabIndex = 1;
+            this.filesListView.Size = new System.Drawing.Size(738, 162);
+            this.filesListView.TabIndex = 2;
             this.filesListView.UseCompatibleStateImageBehavior = false;
             this.filesListView.View = System.Windows.Forms.View.Details;
-            this.filesListView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.filesListView_ColumnClick);
-            this.filesListView.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.filesListView_ItemDrag);
             this.filesListView.SelectedIndexChanged += new System.EventHandler(this.filesListView_SelectedIndexChanged);
-            this.filesListView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.filesListView_MouseClick);
             // 
             // nameFilesColumnHeader
             // 
@@ -1843,6 +1985,15 @@
             // 
             this.dateModifiedColumnHeader.Text = "Date Modified";
             this.dateModifiedColumnHeader.Width = 172;
+            // 
+            // propertyGridFile
+            // 
+            this.propertyGridFile.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGridFile.Location = new System.Drawing.Point(0, 0);
+            this.propertyGridFile.Name = "propertyGridFile";
+            this.propertyGridFile.Size = new System.Drawing.Size(298, 162);
+            this.propertyGridFile.TabIndex = 0;
+            this.propertyGridFile.ToolbarVisible = false;
             // 
             // toolStripFiles
             // 
@@ -2164,13 +2315,6 @@
             // 
             this.backgroundWorkerUpdate.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerUpdate_DoWork);
             // 
-            // toolStripStatusLabelNoProgress
-            // 
-            this.toolStripStatusLabelNoProgress.AutoSize = false;
-            this.toolStripStatusLabelNoProgress.Name = "toolStripStatusLabelNoProgress";
-            this.toolStripStatusLabelNoProgress.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.toolStripStatusLabelNoProgress.Size = new System.Drawing.Size(16, 20);
-            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -2212,6 +2356,9 @@
             this.tabControlFiles.ResumeLayout(false);
             this.tabPageFiles.ResumeLayout(false);
             this.tabPageFiles.PerformLayout();
+            this.splitContainerFileProperties.Panel1.ResumeLayout(false);
+            this.splitContainerFileProperties.Panel2.ResumeLayout(false);
+            this.splitContainerFileProperties.ResumeLayout(false);
             this.toolStripFiles.ResumeLayout(false);
             this.toolStripFiles.PerformLayout();
             this.tabPageQueue.ResumeLayout(false);
@@ -2279,11 +2426,6 @@
         private System.Windows.Forms.ToolStripButton pluginsToolStripButton;
         private System.Windows.Forms.ToolStripButton devicesToolStripButtonIdentify;
         private System.Windows.Forms.ToolStripButton toolStripButtonStopRecording;
-        private System.Windows.Forms.ListView filesListView;
-        private System.Windows.Forms.ColumnHeader nameFilesColumnHeader;
-        private System.Windows.Forms.ColumnHeader locationFilesColumnHeader;
-        private System.Windows.Forms.ColumnHeader sizeFilesColumnHeader;
-        private System.Windows.Forms.ColumnHeader dateModifiedColumnHeader;
         private DeviceListView devicesListView;
         private System.Windows.Forms.TabControl tabControlFiles;
         private System.Windows.Forms.TabPage tabPageFiles;
@@ -2340,6 +2482,14 @@
         private System.Windows.Forms.ToolStripButton toolStripButtonSleep;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelNoProgress;
+        private System.Windows.Forms.ToolStripMenuItem filePropertiesToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitContainerFileProperties;
+        private System.Windows.Forms.ListView filesListView;
+        private System.Windows.Forms.ColumnHeader nameFilesColumnHeader;
+        private System.Windows.Forms.ColumnHeader locationFilesColumnHeader;
+        private System.Windows.Forms.ColumnHeader sizeFilesColumnHeader;
+        private System.Windows.Forms.ColumnHeader dateModifiedColumnHeader;
+        private System.Windows.Forms.PropertyGrid propertyGridFile;
     }
 }
 

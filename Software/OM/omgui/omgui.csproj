@@ -206,6 +206,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MetaDataEntry.cs" />
+    <Compile Include="MetadataObject.cs" />
     <Compile Include="MetaDataTools.cs" />
     <Compile Include="Meter.cs">
       <SubType>Component</SubType>
