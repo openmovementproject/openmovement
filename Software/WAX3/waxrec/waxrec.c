@@ -61,7 +61,6 @@
     
     /* Strings */
     #define strcasecmp _stricmp
-    #define snprintf _snprintf    
 
     /* Files */
     #include <direct.h>
@@ -287,6 +286,17 @@ typedef struct
     unsigned char  neighbours[NUM_COORDINATOR/8];	// @ 16 [8] Neighbouring routers bitmap
     unsigned long long timestampReceived;
 } TeddiStatusPacket;
+
+
+
+/* Scaling */
+typedef struct
+{
+	float accel;	// 1/4096
+	float gyro;		// 0.07
+	float mag;		// 0.1
+} scale_t;
+
 
 
 /* Example serial port device path */
@@ -1199,7 +1209,7 @@ void waxDump(WaxPacket *waxPacket, FILE *ofp, char tee, int timeformat)
 
 
 /* Dumps a WAX9 packet */
-void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsigned long long receivedTime, int format)
+void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsigned long long receivedTime, int format, scale_t *scale)
 {
 	static char extended[128] = "0,0,0";
     int i;
@@ -1225,9 +1235,9 @@ void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsig
 
 		// TODO: This scaling is for the default sensor set-up (can't recover setup from the packet data)
         fprintf((i == 0) ? ofp : stderr, "$WAX9,%s,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f%s\n", timeString, wax9Packet->sampleNumber, wax9Packet->timestamp / 65536.0, 
-			wax9Packet->accel.x / 4096.0f, wax9Packet->accel.y / 4096.0f, wax9Packet->accel.z / 4096.0f,	// 'G' (9.81 m/s/s)
-            wax9Packet->gyro.x * 0.07f,    wax9Packet->gyro.y * 0.07f,    wax9Packet->gyro.z * 0.07f,		// degrees/sec
-			wax9Packet->mag.x * 0.10f, wax9Packet->mag.y * 0.10f, wax9Packet->mag.z * 0.10f * -1,			// uT (magnetic field ranges between 25-65 uT), invert Z axis to match accel/gyro
+			wax9Packet->accel.x * scale->accel, wax9Packet->accel.y * scale->accel, wax9Packet->accel.z * scale->accel,	// 'G' (9.81 m/s/s)
+            wax9Packet->gyro.x * scale->gyro,    wax9Packet->gyro.y * scale->gyro,    wax9Packet->gyro.z * scale->gyro,	// degrees/sec
+			wax9Packet->mag.x * scale->mag, wax9Packet->mag.y * scale->mag, wax9Packet->mag.z * -scale->mag ,			// uT (magnetic field ranges between 25-65 uT), invert Z axis to match accel/gyro
             extended);
     }
 
@@ -1390,7 +1400,7 @@ size_t waxToOsc(WaxPacket *waxPacket, void *outputBuffer, char timetag)
 
 
 /* Create an OSC bundle for the WAX9 data */
-size_t wax9ToOsc(Wax9Packet *wax9Packet, void *outputBuffer, char timetag, unsigned long long receivedTime)
+size_t wax9ToOsc(Wax9Packet *wax9Packet, void *outputBuffer, char timetag, unsigned long long receivedTime, scale_t *scale)
 {
     unsigned char *buffer = (unsigned char *)outputBuffer;
     size_t o = 0;
@@ -1408,15 +1418,15 @@ size_t wax9ToOsc(Wax9Packet *wax9Packet, void *outputBuffer, char timetag, unsig
 		// Message body:
         o += write_osc_string(buffer + o, address);                             /* [OSC string] address: "/wax9" <pads to 8 bytes> */
         o += write_osc_string(buffer + o, ",fffffffffii");                      /* [OSC string] type tag: <pads to 16 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->accel.x / 4096.0f);        /* [OSC float] Accel. X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->accel.y / 4096.0f);        /* [OSC float] Accel. Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->accel.z / 4096.0f);        /* [OSC float] Accel. Z-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->gyro.x * 0.07f);           /* [OSC float] Gyro.  X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->gyro.y * 0.07f);           /* [OSC float] Gyro.  Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->gyro.z * 0.07f);           /* [OSC float] Gyro.  Z-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.x * 0.10f);            /* [OSC float] Mag.   X-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.y * 0.10f);            /* [OSC float] Mag.   Y-axis <4 bytes> */
-        o += write_osc_float(buffer + o, wax9Packet->mag.z * 0.10f);            /* [OSC float] Mag.   Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.x * scale->accel);   /* [OSC float] Accel. X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.y * scale->accel);   /* [OSC float] Accel. Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->accel.z * scale->accel);   /* [OSC float] Accel. Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.x * scale->gyro);     /* [OSC float] Gyro.  X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.y * scale->gyro);     /* [OSC float] Gyro.  Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->gyro.z * scale->gyro);     /* [OSC float] Gyro.  Z-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.x * scale->mag);       /* [OSC float] Mag.   X-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.y * scale->mag);       /* [OSC float] Mag.   Y-axis <4 bytes> */
+        o += write_osc_float(buffer + o, wax9Packet->mag.z * -scale->mag);      /* [OSC float] Mag.   Z-axis, invert to match accel/gyro <4 bytes> */
         o += write_osc_int(buffer + o, wax9Packet->sampleNumber);               /* [OSC int] sample index <4 bytes> */
         o += write_osc_int(buffer + o, wax9Packet->timestamp);                  /* [OSC int] sample time (16.16) <4 bytes> */
     }
@@ -2012,7 +2022,7 @@ int CreateTestData(char *buffer, const char *fakeType)
 
 /* Parse SLIP-encoded packets, log or convert to UDP packets */
 // TODO: Turn this silly argument list into an configuration structure
-int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format, char ignoreInvalid, const char *waitPrefix, int waitTimeout)
+int waxrec(const char *infile, const char *host, const char *initString, const char *logfile, char tee, char dump, char timetag, char sendOnly, const char *stompHost, const char *stompAddress, const char *stompUser, const char *stompPassword, int writeFromUdp, int timeformat, char convertToOsc, int format, char ignoreInvalid, const char *waitPrefix, int waitTimeout, scale_t *scale)
 {
     #define BUFFER_SIZE 0xffff
     static char buffer[BUFFER_SIZE];
@@ -2325,7 +2335,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 					/* Check for timeout */
 					if (waitTimeout >= 0 && (now - start) >= waitTimeout)
 					{ 
-						fprintf(stderr, "NOTE: Time-out (%d) waiting for expected prefix: %s\n", (now - start), waitPrefix);
+						fprintf(stderr, "NOTE: Time-out (%d) waiting for expected prefix: %s\n", (int)(now - start), waitPrefix);
 						waiting = 0; 
 					}
 
@@ -2414,7 +2424,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                     if (wax9Packet != NULL)
                     {
                         /* Output text version */
-						if (outfp != NULL) { wax9Dump(wax9Packet, outfp, tee, timeformat, now, format); }
+						if (outfp != NULL) { wax9Dump(wax9Packet, outfp, tee, timeformat, now, format, scale); }
 
                         /* Create a STOMP packet */
 	                    if (stompTransmitter != NULL)
@@ -2432,7 +2442,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                                 p += sprintf(p, "\"Pressure\":\"%u\",", wax9Packet->pressure);
                             }
                             p += sprintf(p, "\"Samples\":[");
-                            p += sprintf(p, "[%llu,%u,%d,%d,%d,%d,%d,%d,%d,%d,%d]", wax9Packet->timestamp, wax9Packet->sampleNumber, 
+                            p += sprintf(p, "[%u,%u,%d,%d,%d,%d,%d,%d,%d,%d,%d]", (int)wax9Packet->timestamp, wax9Packet->sampleNumber,
                                 wax9Packet->accel.x, wax9Packet->accel.y, wax9Packet->accel.z, 
                                 wax9Packet->gyro.x,  wax9Packet->gyro.y,  wax9Packet->gyro.z, 
                                 wax9Packet->mag.x,   wax9Packet->mag.y,   wax9Packet->mag.z 
@@ -2443,7 +2453,7 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
                         }
 
                         /* Create an OSC bundle from the WAX packet */
-                        if (convertToOsc) { len = wax9ToOsc(wax9Packet, buffer, timetag, now); }
+                        if (convertToOsc) { len = wax9ToOsc(wax9Packet, buffer, timetag, now, scale); }
                     }
                 }
 
@@ -2635,9 +2645,11 @@ int main(int argc, char *argv[])
     char ignoreInvalid = 0;
 	char *waitPrefix = NULL;
 	int waitTimeout = -1;
+	scale_t scale = { 1.0f / 4096, 0.07f, 0.1f };		// accel, gyro, mag
+
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.96     by Daniel Jackson, 2011-2015\n");
+    fprintf(stderr, "V1.97     by Daniel Jackson, 2011-2016\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2731,7 +2743,13 @@ int main(int argc, char *argv[])
         {
             ignoreInvalid = 2;
         }
-        else if (strcasecmp(argv[i], "-t:none") == 0) { timeformat = 0; }
+		else if (strcasecmp(argv[i], "-scale") == 0)
+		{
+			scale.accel = (float)atof(argv[++i]);
+			scale.gyro = (float)atof(argv[++i]);
+			scale.mag = (float)atof(argv[++i]);
+		}
+		else if (strcasecmp(argv[i], "-t:none") == 0) { timeformat = 0; }
         else if (strcasecmp(argv[i], "-t:secs") == 0) { timeformat = 1; }
         else if (strcasecmp(argv[i], "-t:full") == 0) { timeformat = 2; }
         else if (strcasecmp(argv[i], "-t:both") == 0) { timeformat = 3; }
@@ -2769,8 +2787,9 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "        [-t:{none|secs|full|both}]             Timestamp format\n");
 		fprintf(stderr, "        [-out <file.csv>]                      Output to a specific log file\n");
         fprintf(stderr, "        [-format:short]                        Format as short output (TEDDI/WAX9 packets only)\n");
-        fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
-        fprintf(stderr, "\n");
+		fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
+		fprintf(stderr, "        [-scale <accel> <gyro> <mag>]          Scale for accel/gyro/mag\n");
+		fprintf(stderr, "\n");
         fprintf(stderr, "Log example: waxrec %s -log -tee -init \"MODE=1\\r\\n\" > log.csv\n", EXAMPLE_DEVICE);
         fprintf(stderr, "OSC example: waxrec %s -osc localhost:1234 -init \"MODE=1\\r\\n\"\n", EXAMPLE_DEVICE);
         fprintf(stderr, "STOMP example: waxrec %s -stomphost localhost:61613 -stomptopic /topic/Kitchen.Sensor.Wax -init \"MODE=1\\r\\n\"\n", EXAMPLE_DEVICE);
@@ -2790,7 +2809,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "INIT: %s\n", initString);
 
     // The function with the most arguments in the world... (I think a configuration structure might help here!)
-    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid, waitPrefix, waitTimeout);
+    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid, waitPrefix, waitTimeout, &scale);
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
