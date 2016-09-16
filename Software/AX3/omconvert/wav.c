@@ -67,6 +67,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
     unsigned long riffSize;
     unsigned long chunkSize;
     char headerOk = 0;
+	char error = 0;
 
     // Clear values for return structure
     if (wavInfo == NULL) { return 0; }
@@ -95,7 +96,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
     }
 
     // Check RIFF header
-    fread(buffer, 1, 4, fp);            // [0-3]
+	error |= 4 != fread(buffer, 1, 4, fp);            // [0-3]
     headerOk = 0;
     if (buffer[0] == 'R' && buffer[1] == 'I' && buffer[2] == 'F' && buffer[3] == 'F') { headerOk = 1; }
 	if (wavInfo->flags & WAV_FLAGS_CUSTOM_HEADER && wavInfo->pointer != NULL)
@@ -114,7 +115,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
     if (riffSize + 8 != trueFileLength) { PRINT("WARNING: RIFF file size not as would be expected from file size.\n"); }
 
     // Check WAVE header
-    fread(buffer, 1, 4, fp);            // [8-11]
+    error |= 4 != fread(buffer, 1, 4, fp);            // [8-11]
     if (buffer[0] != 'W' || buffer[1] != 'A' || buffer[2] != 'V' || buffer[3] != 'E')
     {
         PRINT("ERROR: Not a WAVE RIFF file.\n");
@@ -125,7 +126,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
     while (!feof(fp))
     {
         // Read chunk type and size
-        if (fread(buffer, 1, 4, fp) != 4) { break; }    // [12-15]
+		if (fread(buffer, 1, 4, fp) != 4) { error |= 1; break; }    // [12-15]
         chunkSize = fgetlong(fp);                        // [16-19]
 
         // Check for fmt header (expected as first chunk)
@@ -166,7 +167,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
             {
                 fgetshort(fp);                        // [38] WORD wValidBitsPerSample; (or wSamplesPerBlock if wBitsPerSample==0, or wReserved)
                 fgetlong(fp);                        // [50] DWORD dwChannelMask;
-                fread(buffer, 1, 16, fp);            // [54-69] GUID SubFormat
+				error |= 16 != fread(buffer, 1, 16, fp);            // [54-69] GUID SubFormat
 
                 // Check bytes 2-15 of GUID are bytes 2-15 of _KSDATAFORMAT_SUBTYPE_PCM[16] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 };
                 if (                                            buffer[ 2] != 0x00 || buffer[ 3] != 0x00 || 
@@ -238,7 +239,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
             else
             {
                 // Read LIST type
-                fread(buffer, 1, 4, fp);
+				error |= 4 != fread(buffer, 1, 4, fp);
 
                 if (buffer[0] == 'I' && buffer[1] == 'N' && buffer[2] == 'F' && buffer[3] == 'O')                // 'INFO' LIST type
                 {
@@ -247,7 +248,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
                     {
                         long afterListSubChunk;
 
-                        if (fread(buffer, 1, 4, fp) != 4) { break; }
+						if (fread(buffer, 1, 4, fp) != 4) { error |= 1; break; }
                         chunkSize = fgetlong(fp);
                         afterListSubChunk = ftell(fp) + chunkSize;
 
@@ -257,7 +258,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
                             if (wavInfo->infoName != NULL)
                             {
                                 if (chunkSize > WAV_META_LENGTH - 1) { chunkSize = WAV_META_LENGTH - 1; }
-                                fread(wavInfo->infoName, 1, chunkSize, fp);
+                                error |= chunkSize != fread(wavInfo->infoName, 1, chunkSize, fp);
                                 wavInfo->infoName[chunkSize] = '\0';
                             }
                         }
@@ -267,7 +268,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
                             if (wavInfo->infoArtist != NULL)
                             {
                                 if (chunkSize > WAV_META_LENGTH - 1) { chunkSize = WAV_META_LENGTH - 1; }
-                                fread(wavInfo->infoArtist, 1, chunkSize, fp);
+								error |= chunkSize != fread(wavInfo->infoArtist, 1, chunkSize, fp);
                                 wavInfo->infoArtist[chunkSize] = '\0';
                             }
                         }
@@ -277,7 +278,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
                             if (wavInfo->infoComment != NULL)
                             {
                                 if (chunkSize > WAV_META_LENGTH - 1) { chunkSize = WAV_META_LENGTH - 1; }
-                                fread(wavInfo->infoComment, 1, chunkSize, fp);
+								error |= chunkSize != fread(wavInfo->infoComment, 1, chunkSize, fp);
                                 wavInfo->infoComment[chunkSize] = '\0';
                             }
                         }
@@ -287,7 +288,7 @@ char WavRead(WavInfo *wavInfo, FILE *fp)
                             if (wavInfo->infoDate != NULL)
                             {
                                 if (chunkSize > WAV_META_LENGTH - 1) { chunkSize = WAV_META_LENGTH - 1; }
-                                fread(wavInfo->infoDate, 1, chunkSize, fp);
+								error |= chunkSize != fread(wavInfo->infoDate, 1, chunkSize, fp);
                                 wavInfo->infoDate[chunkSize] = '\0';
                             }
                         }
@@ -361,7 +362,7 @@ static unsigned char wavScratch[WAV_SCRATCH_SIZE];
 // Returns the number of samples filled.
 unsigned int WavFillBuffer16bitMono(short *buffer, unsigned int capacitySamples, WavInfo *wavInfo, FILE *fp)
 {
-    unsigned int totalRead;
+    size_t totalRead;
 
     totalRead = 0;
     if (fp != NULL && wavInfo != NULL)
@@ -370,7 +371,7 @@ unsigned int WavFillBuffer16bitMono(short *buffer, unsigned int capacitySamples,
         {
             if (wavInfo->bytesPerChannel == 1)                          // 8-bit mono -- copy directly to first half of buffer, then iterate backwards expanding to 16-bits
             {
-                unsigned int i;
+                size_t i;
                 unsigned char *src;
                 short *dst;
 
@@ -395,7 +396,7 @@ unsigned int WavFillBuffer16bitMono(short *buffer, unsigned int capacitySamples,
         {
             if (wavInfo->bytesPerChannel == 1)                          // 8-bit stereo -- copy directly to buffer, then convert each pair of 8-bit samples into a single 16-bit sample
             {
-                unsigned int i;
+                size_t i;
                 unsigned char *src;
 
                 // Copy directly to buffer
@@ -415,7 +416,7 @@ unsigned int WavFillBuffer16bitMono(short *buffer, unsigned int capacitySamples,
             }
             else if (wavInfo->bytesPerChannel == 2)                     // 16-bit stereo -- load to scratch area, then write to actual buffer
             {
-                unsigned int read, i;
+				size_t read, i;
                 short *src;
                 while (!feof(fp))
                 {
@@ -444,7 +445,7 @@ unsigned int WavFillBuffer16bitMono(short *buffer, unsigned int capacitySamples,
         memset(buffer + totalRead, 0, (capacitySamples - totalRead) << 1);
     }
 
-    return totalRead;
+    return (unsigned int)totalRead;
 }
 
 
@@ -573,9 +574,9 @@ unsigned long WavWrite(WavInfo *wavInfo, FILE *ofp)
         // Write INAM chunk - Name (Track Title)
         if (wavInfo->infoName != NULL && wavInfo->infoName[0] != '\0')
         {
-            int len = strlen(wavInfo->infoName);
+            size_t len = strlen(wavInfo->infoName);
             fputc('I', ofp); fputc('N', ofp); fputc('A', ofp); fputc('M', ofp); 
-            fputlong(len + 2 - (len & 1), ofp);         // Length of string plus NULL byte and any padding byte to make even
+            fputlong((unsigned long)(len + 2 - (len & 1)), ofp);         // Length of string plus NULL byte and any padding byte to make even
             fwrite(wavInfo->infoName, 1, len + 1, ofp); // Write string plus NULL byte
             if (!(len & 1)) { fputc('\0', ofp); }       // Additional padding byte to make even
         }
@@ -583,9 +584,9 @@ unsigned long WavWrite(WavInfo *wavInfo, FILE *ofp)
         // Write IART chunk - Artist Name
         if (wavInfo->infoArtist != NULL && wavInfo->infoArtist[0] != '\0')
         {
-            int len = strlen(wavInfo->infoArtist);
+			size_t len = strlen(wavInfo->infoArtist);
             fputc('I', ofp); fputc('A', ofp); fputc('R', ofp); fputc('T', ofp); 
-            fputlong(len + 2 - (len & 1), ofp);         // Length of string plus NULL byte and any padding byte to make even
+            fputlong((unsigned long)(len + 2 - (len & 1)), ofp);         // Length of string plus NULL byte and any padding byte to make even
             fwrite(wavInfo->infoArtist, 1, len + 1, ofp); // Write string plus NULL byte
             if (!(len & 1)) { fputc('\0', ofp); }       // Additional padding byte to make even
         }
@@ -593,9 +594,9 @@ unsigned long WavWrite(WavInfo *wavInfo, FILE *ofp)
         // Write ICMT chunk - Comments
         if (wavInfo->infoComment != NULL && wavInfo->infoComment[0] != '\0')
         {
-            int len = strlen(wavInfo->infoComment);
+			size_t len = strlen(wavInfo->infoComment);
             fputc('I', ofp); fputc('C', ofp); fputc('M', ofp); fputc('T', ofp); 
-            fputlong(len + 2 - (len & 1), ofp);         // Length of string plus NULL byte and any padding byte to make even
+            fputlong((unsigned long)(len + 2 - (len & 1)), ofp);         // Length of string plus NULL byte and any padding byte to make even
             fwrite(wavInfo->infoComment, 1, len + 1, ofp); // Write string plus NULL byte
             if (!(len & 1)) { fputc('\0', ofp); }       // Additional padding byte to make even
         }
@@ -603,9 +604,9 @@ unsigned long WavWrite(WavInfo *wavInfo, FILE *ofp)
         // Write ICRD chunk - Creation Date
         if (wavInfo->infoDate != NULL && wavInfo->infoDate[0] != '\0')
         {
-            int len = strlen(wavInfo->infoDate);
+			size_t len = strlen(wavInfo->infoDate);
             fputc('I', ofp); fputc('C', ofp); fputc('R', ofp); fputc('D', ofp); 
-            fputlong(len + 2 - (len & 1), ofp);         // Length of string plus NULL byte and any padding byte to make even
+            fputlong((unsigned long)(len + 2 - (len & 1)), ofp);         // Length of string plus NULL byte and any padding byte to make even
             fwrite(wavInfo->infoDate, 1, len + 1, ofp); // Write string plus NULL byte
             if (!(len & 1)) { fputc('\0', ofp); }       // Additional padding byte to make even
         }

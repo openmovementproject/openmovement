@@ -1,4 +1,4 @@
-
+// DONE: Fixed an issue where the upper band-pass limit for SVM and PAEE (cut point) calculations was greater than the Nyquist limit for input data <= 40Hz -- now switches to a high-pass filter instead.
 // DONE: Occasional x / y / z std values were NaN (should now be 0 instead)
 // DONE: For interrupts, where there are no valid samples in the epoch, NaN can be emitted for the values:  use the parameter "-svm-extended", where 1=current behaviour of zero, 2=empty cell, 3="nan".
 // DONE: temperature field formatted to 2 decimal places
@@ -70,14 +70,16 @@ int main(int argc, char *argv[])
 	omconvert_settings_t settings = { 0 };
 
 #ifdef _WIN32
+#if 0
 	static char stdoutbuf[20];
 	static char stderrbuf[20];
 	setvbuf(stdout, stdoutbuf, _IOFBF, sizeof(2));
 	setvbuf(stderr, stderrbuf, _IOFBF, sizeof(2));
 #endif
+#endif
 
 	// Default settings
-	memset(&settings, 0, sizeof(omconvert_settings_t));
+	memset(&settings, 0, sizeof(settings));
 	settings.sampleRate = -1;
 	settings.interpolate = 3;
 	settings.auxChannel = 1;
@@ -124,7 +126,7 @@ int main(int argc, char *argv[])
 
 			if (tokenCount != sizeof(values) / sizeof(values[0]))
 			{
-				fprintf(stderr, "Cannot use calibration with invalid number of values (%d given but expected %d)\n", tokenCount, sizeof(values) / sizeof(values[0]));
+				fprintf(stderr, "Cannot use calibration with invalid number of values (%d given but expected %d)\n", (int)tokenCount, (int)(sizeof(values) / sizeof(values[0])));
 				help = 1;
 			}
 			else
@@ -170,10 +172,6 @@ int main(int argc, char *argv[])
 			if (positional == 0)
 			{
 				settings.filename = argv[i];
-			}
-			else if (positional == 1)
-			{
-				settings.outFilename = argv[i];
 			}
 			else
 			{

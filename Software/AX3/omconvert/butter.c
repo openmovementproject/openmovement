@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#define _USE_MATH_DEFINES
+//#define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "butter.h"
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 // Calculates the coefficients for a 4th order Butterworth bandpass filter (now extended to low-pass, high-pass, band-stop).
 // Based on http://www.exstrom.com/journal/sigproc/ Copyright (C) 2014 Exstrom Laboratories LLC

@@ -76,10 +76,14 @@
       <AdditionalIncludeDirectories>.</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnablePREfast>false</EnablePREfast>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>
@@ -108,6 +112,7 @@
     <ClInclude Include="calc-svm.h" />
     <ClInclude Include="calc-wtv.h" />
     <ClInclude Include="linearregression.h" />
+    <ClInclude Include="mmap-win32.h" />
     <ClInclude Include="omcalibrate.h" />
     <ClInclude Include="omconvert.h" />
     <ClInclude Include="omdata.h" />

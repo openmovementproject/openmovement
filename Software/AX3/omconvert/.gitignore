@@ -1,0 +1,9 @@
+/Debug
+/Release
+/*.db
+/.vs
+/*.sdf
+/*.user
+/*.suo
+/omconvert
+/*.opendb

@@ -115,7 +115,7 @@ static void SvmPrint(svm_status_t *status)
 {
 	// Resulting mean and StdDev
 	double meanSvm = 0;
-	double resultMean[3] = { 0 };
+//	double resultMean[3] = { 0 };
 	double resultRange[3] = { 0 };
 	double resultStdDev[3] = { 0 };
 	double resultTemperature = 0.0;
@@ -132,7 +132,7 @@ static void SvmPrint(svm_status_t *status)
 			double averageOfSquares = status->intervalSample == 0 ? 0 : (status->axisSumSquared[c] / status->intervalSample);
 			double standardDeviation = sqrt(averageOfSquares - squareOfMean);
 			if (isnan(standardDeviation)) { standardDeviation = 0; }
-			resultMean[c] = mean;
+//			resultMean[c] = mean;
 			resultStdDev[c] = standardDeviation;
 			resultRange[c] = status->axisMax[c] - status->axisMin[c];
 		}

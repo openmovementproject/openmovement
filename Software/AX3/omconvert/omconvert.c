@@ -36,8 +36,11 @@
 // Dan Jackson, 2014
 
 #ifdef _WIN32
-#define _CRT_SECURE_NO_WARNINGS
-#define timegm _mkgmtime
+	#define _CRT_SECURE_NO_WARNINGS
+	#define timegm _mkgmtime
+#else
+	#define _BSD_SOURCE		// Both of these lines
+	#include <features.h>	// ...needed for timegm() in time.h on Linux
 #endif
 
 #include <stdlib.h>
@@ -577,8 +580,16 @@ int OmConvertFindArrangement(om_convert_arrangement_t *arrangement, omconvert_se
 	double limit = 15.000;
 	if (omdata->metadata.recordingStart < omdata->metadata.recordingStop && (omdata->metadata.recordingStop - omdata->metadata.recordingStart) > 2 * limit)
 	{
-		if (fabs(arrangement->startTime - omdata->metadata.recordingStart) < limit) { arrangement->startTime = omdata->metadata.recordingStart; fprintf(stderr, "Clamping session to recording start time (%s)...\n", TimeString(omdata->metadata.recordingStart, NULL)); }
-		if (fabs(arrangement->endTime - omdata->metadata.recordingStop) < limit) { arrangement->endTime = omdata->metadata.recordingStop; fprintf(stderr, "Clamping session to recording stop time (%s)...\n", TimeString(omdata->metadata.recordingStop, NULL)); }
+		if (fabs(arrangement->startTime - omdata->metadata.recordingStart) < limit) 
+		{ 
+			arrangement->startTime = omdata->metadata.recordingStart; 
+			fprintf(stderr, "Clamping session to recording start time (%s)...\n", TimeString(omdata->metadata.recordingStart, NULL)); 
+		}
+		if (fabs(arrangement->endTime - omdata->metadata.recordingStop) < limit)
+		{
+			arrangement->endTime = omdata->metadata.recordingStop; 
+			fprintf(stderr, "Clamping session to recording stop time (%s)...\n", TimeString(omdata->metadata.recordingStop, NULL));
+		}
 	}
 
 	arrangement->duration = arrangement->endTime - arrangement->startTime;
@@ -616,7 +627,7 @@ void OmConvertPlayerInitialize(om_convert_player_t *player, om_convert_arrangeme
 		player->numSamples = (int)(arrangement->duration * player->sampleRate + 0.5);
 	}
 
-	fprintf(stderr, "DEBUG: Session between t0=%f, t1=%f  ==>  %f seconds at %f Hz  ==> %d samples * %d channels\n", session->startTime, session->endTime, arrangement->duration, player->sampleRate, player->numSamples, arrangement->numChannels);
+	fprintf(stderr, "DEBUG: Session between t0=%f, t1=%f  ==>  %f seconds at %f Hz  ==> %d samples * %d channels\n", arrangement->startTime, arrangement->endTime, arrangement->duration, player->sampleRate, player->numSamples, arrangement->numChannels);
 
 	// Start tracking each stream with an omdata_interpolator_t over each segment... (tracks up to four different index-timestamp pairs, advance converts time a fractional index point, then sample each sub-channel at that point)
 	int j;
@@ -659,7 +670,7 @@ int OmConvertPlayerRawIndexWithinSegment(om_convert_player_t *player, char chann
 
 void OmConvertPlayerSeek(om_convert_player_t *player, int sample)
 {
-	double t = player->arrangement->session->startTime + (sample / player->sampleRate);
+	double t = player->arrangement->startTime + (sample / player->sampleRate);
 
 	// Update the interpolator for each stream to the current time
 	int j;
@@ -917,8 +928,8 @@ int OmConvertRunConvert(omconvert_settings_t *settings, calc_t *calc)
 	if (!OmDataLoad(&omdata, settings->filename))
 	{
 		const char *msg = "ERROR: Problem loading file.\n";
-		fprintf(stderr, msg);
-		fprintf(stdout, msg);
+		fprintf(stderr, "%s", msg);
+		fprintf(stdout, "%s", msg);
 		return EXIT_DATAERR;
 	}
 	fprintf(stderr, "Data loaded!\n");
@@ -1121,7 +1132,7 @@ fprintf(stderr, "COMMENT: %s\n", comment);
 //Accelerometer scaling...
 
 		// Create output WAV file
-  		FILE *ofp = NULL;
+		FILE *ofp = NULL;
 		if (settings->outFilename != NULL && strlen(settings->outFilename) > 0)
 		{
 			fprintf(stderr, "Generating WAV file: %s\n", settings->outFilename);
@@ -1374,8 +1385,8 @@ int OmConvertRun(omconvert_settings_t *settings)
 	if (!OmDataCanLoad(settings->filename))
 	{
 		const char *msg = "ERROR: File not supported (not WAV or CWA/OMX).\n";
-		fprintf(stderr, msg);
-		fprintf(stdout, msg);
+		fprintf(stderr, "%s", msg);
+		fprintf(stdout, "%s", msg);
 		return EXIT_DATAERR;
 	}
 

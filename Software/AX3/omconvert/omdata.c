@@ -35,9 +35,12 @@
 
 
 #ifdef _WIN32
-#define _CRT_SECURE_NO_WARNINGS
-#define timegm _mkgmtime
-#include <io.h>
+	#define _CRT_SECURE_NO_WARNINGS
+	#define timegm _mkgmtime
+	#include <io.h>
+#else
+	#define _BSD_SOURCE		// Both of these lines
+	#include <features.h>	// ...needed for timegm() in time.h on Linux
 #endif
 
 #include <stdlib.h>
@@ -55,7 +58,7 @@
 #ifdef USE_MMAP
 	#ifdef _WIN32
 		// Windows implementation
-		#include "mmap-win32.c"
+		#include "mmap-win32.h"
 	#else
 		#include <sys/mman.h>
 	#endif
@@ -1063,6 +1066,145 @@ int OmDataCanLoad(const char *filename)
 }
 
 
+
+char OmDataAnalyzeTimestamps(omdata_t *omdata)
+{
+	if (omdata == NULL) { return -1; }
+
+	int sectorCount = omdata->length / OMDATA_SECTOR_SIZE + 1;
+	omdata->timestampOffset = (double *)calloc(sectorCount + 1, sizeof(double));
+
+	FILE *dfp = NULL;
+#if 0
+	dfp = fopen("/temp/times.csv", "wt");
+	fprintf(stderr, "NOTE: Writing timestamp log file...\n");
+#endif
+	//if (dfp == NULL) { return -1; }
+
+	// Step 1. Determine any oscillator non-uniformity by looking at sample period
+	int streamIndex;
+	double worstDifference = 0.0f;
+	double affectedT = 0;
+	for (streamIndex = 0; streamIndex < OMDATA_MAX_STREAM; streamIndex++)
+	{
+		omdata_stream_t *stream = &omdata->stream[streamIndex];
+		if (!stream->inUse) { continue; }
+		if (streamIndex != 'a') { continue; }	// Only run on one channel of accel
+
+		// Segment info
+		omdata_segment_t *seg;
+		for (seg = stream->segmentFirst; seg != NULL; seg = seg->segmentNext)
+		{
+			// Note seg->startTime and seg->endTime not yet valid
+			//fprintf(stderr, "Sectors: %d\n", seg->sectorCount);
+			//fprintf(stderr, "Samples: %d\n", seg->numSamples);
+//			fprintf(stderr, ">>> %d samples in %d sectors with %d timestamps.\n", seg->numSamples, seg->sectorCount, seg->timestampCount);
+			int i;
+			omdata_segment_timestamp_t *lts = NULL;
+			double startTime = 0;
+			double slidingAverage = 0.0f;
+			double lastPeriod = 0;
+			int stableSamples = 0;
+			for (i = 0; i < seg->timestampCount; i++)
+			{
+				omdata_segment_timestamp_t *ts = &seg->timestamps[i];
+				int sectorIndexOffset = ts->sample / seg->samplesPerSector;
+				if (sectorIndexOffset < 0 || sectorIndexOffset >= seg->sectorCount)
+				{
+					//fprintf(stderr, "WARNING: Sector index offset %d out of range (0-%d) for segment timestamp %d.\n", sectorIndexOffset, seg->sectorCount, i);
+					if (seg->sectorCount <= 0) continue;
+					sectorIndexOffset = seg->sectorCount - 1;
+				}
+
+				if (startTime == 0) { startTime = ts->timestamp; }
+				if (lts != NULL && ts->sample > lts->sample)
+				{
+					double relT = ts->timestamp - startTime;
+					int deltaI = ts->sample - lts->sample;
+					double deltaT = ts->timestamp - lts->timestamp;
+					double period = deltaT / deltaI;
+					double freq = deltaI / deltaT;
+					if (dfp != NULL) { fprintf(dfp, "%d,%f,%d,%f,%f\n", ts->sample, relT, deltaI, deltaT, freq); }
+
+					double allowance = 0.006 * slidingAverage;
+					double fade = 0.05 * deltaT;
+					double diff = slidingAverage - period;
+
+if (diff / slidingAverage > worstDifference) { worstDifference = diff / slidingAverage; }
+
+					if (i <= 1) { slidingAverage = period; }
+					else if (fabs(lastPeriod - period) < allowance) 
+					{
+						stableSamples += deltaI;
+					}
+					else 
+					{ 
+						stableSamples = 0;
+					}
+
+					if (fabs(diff) > allowance && relT > 90.0)
+					{
+						int sector = seg->sectorIndex[sectorIndexOffset];
+						double timeslip = diff * deltaI;
+						omdata->timestampOffset[sector] += timeslip;
+//						printf("%02d:%02d:%02d.%02d,%f,%f,%d,%f\n", (int)relT / 60 / 60, ((int)relT / 60) % 60, (int)relT % 60, (int)((relT - (int)relT) * 100), slidingAverage, period, sector, timeslip);
+						stableSamples = 0;
+						affectedT += deltaT;
+					}
+
+					if (stableSamples > 10 * seg->sampleRate)
+					{
+						slidingAverage = ((1 - fade) * slidingAverage) + (fade * period);
+					}
+
+
+					lastPeriod = period;
+				}
+				lts = ts;
+			}
+		}
+	}
+
+
+	// Step 2. Cumulative sum of any timestamp offsets
+	double cumulativeOffset = 0;
+	for (int i = 0; i < sectorCount; i++)
+	{
+		cumulativeOffset += omdata->timestampOffset[i];
+		omdata->timestampOffset[i] = cumulativeOffset;
+if (i + 1 >= sectorCount && cumulativeOffset > 0.0) { fprintf(stderr, "DEBUG: Cumulative offset %f over %f (worst prop diff %f)\n", cumulativeOffset, affectedT, worstDifference); }
+	}
+
+
+	// Step 3. Apply any offsets to all streams
+	for (streamIndex = 0; streamIndex < OMDATA_MAX_STREAM; streamIndex++)
+	{
+		omdata_stream_t *stream = &omdata->stream[streamIndex];
+		if (!stream->inUse) { continue; }
+		for (omdata_segment_t *seg = stream->segmentFirst; seg != NULL; seg = seg->segmentNext)
+		{
+			for (int i = 0; i < seg->timestampCount; i++)
+			{
+				omdata_segment_timestamp_t *ts = &seg->timestamps[i];
+				int sectorIndexOffset = ts->sample / seg->samplesPerSector;
+				if (sectorIndexOffset < 0 || sectorIndexOffset >= seg->sectorCount)
+				{
+					//fprintf(stderr, "WARNING: Sector index offset %d out of range (0-%d) for segment timestamp %d.\n", sectorIndexOffset, seg->sectorCount, i);
+					if (seg->sectorCount <= 0) continue;
+					sectorIndexOffset = seg->sectorCount - 1;
+				}
+				int sector = seg->sectorIndex[sectorIndexOffset];
+				ts->timestamp += omdata->timestampOffset[sector];
+			}
+		}
+	}
+
+
+	if (dfp != NULL) { fclose(dfp); }
+	return 0;
+}
+
+
 int OmDataLoad(omdata_t *omdata, const char *filename)
 {
 	unsigned char *buffer = NULL;
@@ -1098,6 +1240,9 @@ int OmDataLoad(omdata_t *omdata, const char *filename)
 	fprintf(stderr, "OMDATA: Processing sectors (%d)...\n", sectorCount);
 	OmDataProcessSectors(omdata, 0, sectorCount);
 
+	fprintf(stderr, "OMDATA: Analysing timestamps...\n");
+	OmDataAnalyzeTimestamps(omdata);
+
 	fprintf(stderr, "OMDATA: Processing segments...\n");
 	OmDataProcessSegments(omdata);
 
@@ -1106,66 +1251,6 @@ int OmDataLoad(omdata_t *omdata, const char *filename)
 
 	fprintf(stderr, "OMDATA: Processed.\n");
 	return 1;
-}
-
-
-char OmDataAnalyzeTimestamps(omdata_t *omdata)
-{
-	if (omdata == NULL) { return -1; }
-
-	FILE *dfp = NULL;
-#if 0
-	dfp = fopen("/temp/times.csv", "wt");
-#endif
-	if (dfp == NULL) { return -1; }
-	fprintf(stderr, "NOTE: Writing timestamp log file...\n");
-
-	// For each session
-	int sessionIndex = 0;
-	omdata_session_t *session;
-	for (session = omdata->firstSession; session != NULL; session = session->sessionNext, sessionIndex++)
-	{
-		int streamIndex;
-		for (streamIndex = 0; streamIndex < OMDATA_MAX_STREAM; streamIndex++)
-		{
-			omdata_stream_t *stream = &session->stream[streamIndex];
-			if (!stream->inUse) { continue; }
-if (streamIndex != 'a') { continue; }	// Only accel
-
-			// Segment info
-			omdata_segment_t *seg;
-			for (seg = stream->segmentFirst; seg != NULL; seg = seg->segmentNext)
-			{
-				//fprintf(stderr, "Sectors: %d\n", seg->sectorCount);
-				//fprintf(stderr, "Samples: %d\n", seg->numSamples);
-				//fprintf(stderr, "Start time: %f\n", seg->startTime);
-				//fprintf(stderr, "End time: %f\n", seg->endTime);
-				fprintf(stderr, ">>> %d samples in %d sectors with %d timestamps.\n", seg->numSamples, seg->sectorCount, seg->timestampCount);
-				int i;
-				omdata_segment_timestamp_t lts = { 0 };
-				double startTime = 0;
-				for (i = 0; i < seg->timestampCount; i++)
-				{
-					omdata_segment_timestamp_t ts = seg->timestamps[i];
-					if (startTime == 0) { startTime = ts.timestamp; }
-					if (lts.timestamp != 0)
-					{
-						double relT = ts.timestamp - startTime;
-						int deltaI = ts.sample - lts.sample;
-						double deltaT = ts.timestamp - lts.timestamp;
-						double freq = deltaI / deltaT;
-if (dfp != NULL) { fprintf(dfp, "TS,%d,%f,%d,%f,%f\n", ts.sample, relT, deltaI, deltaT, freq); }
-					}
-					lts = ts;
-				}
-
-			}
-		}
-	}
-
-	if (dfp != NULL) { fclose(dfp); }
-
-	return 0;
 }
 
 
@@ -1207,7 +1292,6 @@ int OmDataDump(omdata_t *omdata)
 		fprintf(stderr, "===\n");
 
 	}
-	OmDataAnalyzeTimestamps(omdata);
 	return 0;
 }
 
@@ -1247,6 +1331,11 @@ int OmDataFree(omdata_t *omdata)
 			omdata->buffer = NULL;
 		}
 		omdata->length = 0;
+
+		if (omdata->timestampOffset != NULL)
+		{
+			free(omdata->timestampOffset);
+		}
 
 		// Clear everything
 		memset(omdata, 0, sizeof(omdata_t));

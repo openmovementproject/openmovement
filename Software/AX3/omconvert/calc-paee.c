@@ -45,6 +45,13 @@ Vigorous	>= 7.0 METS	        	1811	2099	1811	2057
 // Senentary, Light (>= 1.5 METS, < 4 METS), Moderate (>= 4.0 METS, < 7 METS), Vigorous (>= 7.0 METS)
 */
 
+/*
+From Phillips et al ("Calibration of the GENEA accelerometer for assessment of physical activity intensity in children")
+Author, Site (Rate), Sedentary/Light/Moderate/Vigorous (g/s)
+Phillips et al, Left Wrist, 80Hz,  <7, 7-19, 20-60, >60
+Phillips et al, Right Wrist, 80Hz, <6, 6-21, 22-56, >56
+*/
+
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #endif

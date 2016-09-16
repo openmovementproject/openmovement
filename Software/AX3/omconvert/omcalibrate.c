@@ -632,15 +632,15 @@ int OmCalibrateFindAutoCalibration(omcalibrate_config_t *config, omcalibrate_sta
 	if (stationaryPoints->numValues < 4)
 	{
 		const char *msg = "CALIBRATE: Fewer than 4 stationary points for calibration estimation.\n";
-		fprintf(stderr, msg);
-		fprintf(stdout, msg);
+		fprintf(stderr, "%s", msg);
+		fprintf(stdout, "%s", msg);
 		if (calibration->errorCode == 0) { calibration->errorCode = -1; }
 	}
 	else if (stationaryPoints->numValues < 10)
 	{
 		const char *msg = "CALIBRATE: Fewer than 10 stationary points for calibration estimation.\n";
-		fprintf(stderr, msg);
-		fprintf(stdout, msg);
+		fprintf(stderr, "%s", msg);
+		fprintf(stdout, "%s", msg);
 	}
 
 	// Measure per-axis min/max range
@@ -667,9 +667,9 @@ int OmCalibrateFindAutoCalibration(omcalibrate_config_t *config, omcalibrate_sta
 	}
 
 	// Warn if not distributed on either side of each axis (+/- 0.3 g)
-	if (calibration->numAxes <= 0) { const char *msg = "CALIBRATE: Unit sphere - no axis fits criterion.\n"; fprintf(stderr, msg); fprintf(stdout, msg); if (calibration->errorCode == 0) { calibration->errorCode = -2; } }
-	else if (calibration->numAxes <= 1) { const char *msg = "CALIBRATE: Unit sphere - one axis fits criterion.\n"; fprintf(stderr, msg); fprintf(stdout, msg); if (calibration->errorCode == 0) { calibration->errorCode = -3; } }
-	else if (calibration->numAxes <= 2) { const char *msg = "CALIBRATE: Unit sphere - two axes fulfill criterion.\n"; fprintf(stderr, msg); fprintf(stdout, msg); if (calibration->errorCode == 0) { calibration->errorCode = -4; } }
+	if (calibration->numAxes <= 0) { const char *msg = "CALIBRATE: Unit sphere - no axis fits criterion.\n"; fprintf(stderr, "%s", msg); fprintf(stdout, "%s", msg); if (calibration->errorCode == 0) { calibration->errorCode = -2; } }
+	else if (calibration->numAxes <= 1) { const char *msg = "CALIBRATE: Unit sphere - one axis fits criterion.\n"; fprintf(stderr, "%s", msg); fprintf(stdout, "%s", msg); if (calibration->errorCode == 0) { calibration->errorCode = -3; } }
+	else if (calibration->numAxes <= 2) { const char *msg = "CALIBRATE: Unit sphere - two axes fulfill criterion.\n"; fprintf(stderr, "%s", msg); fprintf(stdout, "%s", msg); if (calibration->errorCode == 0) { calibration->errorCode = -4; } }
 
 	// ---------- Auto-calibration ----------
 	int numPoints = stationaryPoints->numValues;
@@ -852,8 +852,8 @@ if (converged) { break; }
 		if (!converged && iter + 1 >= config->maxIter)
 		{
 			const char *msg = "WARNING: Maximum number of iterations reached without convergence.\n";
-			fprintf(stderr, msg);
-			fprintf(stdout, msg);
+			fprintf(stderr, "%s", msg);
+			fprintf(stdout, "%s", msg);
 		}
 
 	}
@@ -883,8 +883,8 @@ if (converged) { break; }
 	{
 		char msg[128];
 		sprintf(msg, "CALIBRATE: Range check on %d axes unmet.\n", axisFailed);
-		fprintf(stderr, msg);
-		fprintf(stdout, msg);
+		fprintf(stderr, "%s", msg);
+		fprintf(stdout, "%s", msg);
 		if (calibration->errorCode == 0) calibration->errorCode = -5;
 	}
 

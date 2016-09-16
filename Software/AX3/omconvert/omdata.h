@@ -209,6 +209,7 @@ typedef struct
 {
 	const unsigned char *buffer;
 	size_t length;
+	double *timestampOffset;
 	omdata_stream_t stream[OMDATA_MAX_STREAM];
 	omdata_session_t *firstSession;
 	omdata_metadata_t metadata;
