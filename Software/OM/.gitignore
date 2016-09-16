@@ -5,3 +5,5 @@
 /test.csv
 /*.sdf
 /.vs
+/*.db
+/*.opensdf

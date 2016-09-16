@@ -3,3 +3,6 @@
 /*.opensdf
 /*.sdf
 /*.suo
+/*.db
+/.vs
+/*.opendb
