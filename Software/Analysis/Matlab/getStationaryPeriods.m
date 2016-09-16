@@ -130,7 +130,7 @@ for t=1:wstep:length(T)-wlen,
     if sum(sd <= actThresh) >= 3,
         % stationary!
         % get temperate (use wider bounds as lower sampling frequency)
-        indT = D.TEMP(:,1)>= T(t)-tBounds & D.TEMP(:,1) <= T(t)+wlen+tBounds;
+		indT = (D.TEMP(:,1)>= T(t)-tBounds) & (D.TEMP(:,1) <= T(t)+(wlen/86400/50)+tBounds); %convert wlen to time again for searching
         % save mean of epoch measurements and mean temperature
         S(sCnt,:) = [t+wlen/2 mean(d(:,2:4)) mean(D.TEMP(indT,2))];
         sCnt = sCnt + 1;
