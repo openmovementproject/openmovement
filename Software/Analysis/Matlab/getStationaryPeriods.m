@@ -103,7 +103,7 @@ sCnt = 1;
 cnt=1;
 
 % interpolate for speed later on at 50Hz
-T = st:0.2/86400:en;
+T = st:0.02/86400:en;
 
 % get rid of bad timestamps
 D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
