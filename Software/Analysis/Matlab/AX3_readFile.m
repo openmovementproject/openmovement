@@ -240,19 +240,19 @@ function data = readFile(filename, options)
             
             if options.modality(2),
                 % get light values
-                fseek(fid,validIds(i)*512+18,-1);
+                fseek(fid,(validIds(i) - 1)*512+18,-1);
                 data.LIGHT(i,2) = fread(fid, 1, 'uint16',0,'ieee-le');
             end
             
             if options.modality(3) == 1,
                 % get temperature values and convert to degree C
-                fseek(fid,validIds(i)*512+20,-1);
+                fseek(fid,(validIds(i) - 1)*512+20,-1);
                 data.TEMP(i,2)  = (fread(fid, 1, 'uint16',0,'ieee-le') * 150 - 20500)/1000;
             end
             
             if options.modality(1) == 1,
                 % read accelerometer values
-                fseek(fid,validIds(i)*512+30,-1);
+                fseek(fid,(validIds(i) - 1)*512+30,-1);
                 % reads 120 unsigned integer (32 bit). Will be decoded
                 % later on.
                 ACC_tmp((i-1)*120+1:i*120) = fread(fid, 120, 'uint32',0,'ieee-le');
