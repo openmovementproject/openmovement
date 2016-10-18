@@ -4,6 +4,10 @@
 // .CWA files start with a single cwa_header_t block and followed by or more cwa_data_t blocks.
 
 
+#ifndef CWA_FORMAT_H
+#define CWA_FORMAT_H
+
+
 // These definitions use the "stdint" C types: [u]int{8|16|32}_t
 #include <stdint.h>
 
@@ -70,21 +74,19 @@ typedef struct
 #pragma pack(pop)
 
 
-/*
+
 // Packed accelerometer value - must sign-extend each component value and adjust for exponent
 //        [byte-3] [byte-2] [byte-1] [byte-0]
 //        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
 //        10987654 32109876 54321098 76543210
 
-uint8_t *buffer;	// byte buffer for the sector (data at offset 30);
-int i;				// index value
-
-// Access the packed 4-byte value in the buffer in an endian-agnostic way:
-uint32_t value = (uint32_t)buffer[30 + i * 4] | ((uint32_t)buffer[31 + i * 4] << 8) | ((uint32_t)buffer[32 + i * 4] << 16) | ((uint32_t)buffer[33 + i * 4] << 24);
+// Access the packed i-th 4-byte value in the buffer in an endian-agnostic way:
+#define PACKED_VALUE(buffer, i) ((uint32_t)((uint8_t *)buffer)[30 + i * 4] | ((uint32_t)((uint8_t *)buffer)[31 + i * 4] << 8) | ((uint32_t)((uint8_t *)buffer)[32 + i * 4] << 16) | ((uint32_t)((uint8_t *)buffer)[33 + i * 4] << 24))
 
 // Split the x/y/z/ values out, using the supplied exponent:
-short x = (short)( (short)((unsigned short)0xffc0 & (unsigned short)(value <<  6)) >> (6 - ((unsigned char)(value >> 30))) );
-short y = (short)( (short)((unsigned short)0xffc0 & (unsigned short)(value >>  4)) >> (6 - ((unsigned char)(value >> 30))) );
-short z = (short)( (short)((unsigned short)0xffc0 & (unsigned short)(value >> 14)) >> (6 - ((unsigned char)(value >> 30))) );
-*/
+#define UNPACK_X(value) ((short)( (short)((unsigned short)0xffc0 & (unsigned short)(value <<  6)) >> (6 - ((unsigned char)(value >> 30))) ))
+#define UNPACK_Y(value) ((short)( (short)((unsigned short)0xffc0 & (unsigned short)(value >>  4)) >> (6 - ((unsigned char)(value >> 30))) ))
+#define UNPACK_Z(value) ((short)( (short)((unsigned short)0xffc0 & (unsigned short)(value >> 14)) >> (6 - ((unsigned char)(value >> 30))) ))
 
+
+#endif
