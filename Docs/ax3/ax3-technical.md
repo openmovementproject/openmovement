@@ -93,8 +93,8 @@ Within the data file, integrity is assured through:
 All timestamps are packed into a 32-bit unsigned value: 
 
 ```c
-	// Timestamps are packed into a 32-bit value: (MSB) YYYYYYMM MMDDDDDh hhhhmmmm mmssssss (LSB)
-	typedef enum uint32_t cwa_timestamp_t;
+// Timestamps are packed into a 32-bit value: (MSB) YYYYYYMM MMDDDDDh hhhhmmmm mmssssss (LSB)
+typedef enum uint32_t cwa_timestamp_t;
 ```
 
 #### Accelerometer values
@@ -111,7 +111,7 @@ typedef struct
 When the 'packing' mode is used, the accelerometer values are stored packed into a single 32-bit integer:
 
 ```c
-// Packed accelerometer value - must sign-extend each component value and adjust for exponent 'e'
+// Packed accelerometer value - must sign-extend each component value and left-shift by exponent 'e', units are 1/256 g.
 //        [byte-3] [byte-2] [byte-1] [byte-0]
 //        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
 //        10987654 32109876 54321098 76543210
