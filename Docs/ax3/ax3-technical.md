@@ -3,7 +3,7 @@
 
 ## Introduction
 
-The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (.CWA continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
+The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor ([ADXL345](http://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)) and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (.CWA continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
 
 The sensor is part of the Open Movement project, which is a collection of hardware and software developed under open source terms with a variety of uses in mind, including: health research, digital interaction, instrumentation, gaming and music. With a global community of users including industry, universities and major health research organizations, Open Movement has fast being positioned as the de-facto standard for open source movement science.
 
@@ -93,8 +93,8 @@ Within the data file, integrity is assured through:
 All timestamps are packed into a 32-bit unsigned value: 
 
 ```c
-	// Timestamps are packed into a 32-bit value: (MSB) YYYYYYMM MMDDDDDh hhhhmmmm mmssssss (LSB)
-	typedef enum uint32_t cwa_timestamp_t;
+// Timestamps are packed into a 32-bit value: (MSB) YYYYYYMM MMDDDDDh hhhhmmmm mmssssss (LSB)
+typedef enum uint32_t cwa_timestamp_t;
 ```
 
 #### Accelerometer values
@@ -111,7 +111,7 @@ typedef struct
 When the 'packing' mode is used, the accelerometer values are stored packed into a single 32-bit integer:
 
 ```c
-// Packed accelerometer value - must sign-extend each component value and adjust for exponent 'e'
+// Packed accelerometer value - must sign-extend each component value and left-shift by exponent 'e', units are 1/256 g.
 //        [byte-3] [byte-2] [byte-1] [byte-0]
 //        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
 //        10987654 32109876 54321098 76543210
