@@ -14,7 +14,25 @@ namespace Wax9Gui
 {
     public partial class MainForm : Form
     {
-        public MainForm()
+        private string Unescape(string s)
+        {
+            s = s.Replace("~a", "&");
+            s = s.Replace("~b", "\\");
+            s = s.Replace("~c", "^");
+            s = s.Replace("~e", "!");
+            s = s.Replace("~g", ">");
+            s = s.Replace("~h", "#");
+            s = s.Replace("~i", "|");
+            s = s.Replace("~l", "<");
+            s = s.Replace("~p", "%");
+            s = s.Replace("~q", "\"");
+            s = s.Replace("~s", "'");
+            s = s.Replace("~t", "@");
+            s = s.Replace("~~", "~");
+            return s;
+        }
+
+        public MainForm(string[] args)
         {
             InitializeComponent();
 
@@ -25,8 +43,18 @@ namespace Wax9Gui
 
             // Command templates
             List<string> commands = new List<string>();
-            commands.Add(@"waxrec.exe %PORT% -log -tee -out log_%LABEL%-%YEAR%-%MONTH%-%DAY%-%HOUR%-%MIN%-%SEC%.csv -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
-            commands.Add(@"IMU-demo\demo.exe -in %PORT% -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
+            if (args.Length > 0)
+            {
+                foreach (string arg in args)
+                {
+                    commands.Add(Unescape(arg));
+                }
+            }
+            else
+            {
+                commands.Add(@"waxrec.exe %PORT% -log -tee -out log_%LABEL%-%YEAR%-%MONTH%-%DAY%-%HOUR%-%MIN%-%SEC%.csv -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
+                commands.Add(@"IMU-demo\demo.exe -in %PORT% -init ""\r\nRATE M 1 80\r\nRATE X 1 100\r\nDATAMODE 1\r\nSTREAM\r\n""");
+            }
             comboBoxTemplate.Items.AddRange(commands.ToArray());
 
             comboBoxTemplate.SelectedIndex = 0;

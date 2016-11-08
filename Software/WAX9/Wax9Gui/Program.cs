@@ -34,6 +34,7 @@ namespace Wax9Gui
                 //string logFile = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + WaxMainForm.DEFAULT_LOG_FILE;
                 //bool oscReceive = false;
 
+                /*
                 int positional = 0;
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -68,8 +69,9 @@ namespace Wax9Gui
                         positional++;
                     }
                 }
+                */
 
-                MainForm mainForm = new MainForm();
+                MainForm mainForm = new MainForm(args);
                 //mainForm.MinimizeToTray = minimizeToTray;
                 //mainForm.AutoConnect = autoConnect;
                 //mainForm.PortName = portName;
