@@ -1,0 +1,35 @@
+WEBVTT
+
+1
+00:00:06,000 --> 00:00:10,000
+The Open Movement AX3 is a tri-axial accelerometer logger,
+
+2
+00:00:10,000 --> 00:00:15,000
+capable of recording raw accelerometry data for 14 days at 100 Hz.
+
+3
+00:00:16,000 --> 00:00:21,000
+At the heart of the device is a 16g MEMS accelerometer,
+
+4
+00:00:21,000 --> 00:00:24,000
+sampled by a low-power, 16-bit microprocessor.
+
+5
+00:00:25,000 --> 00:00:28,000
+The data is recorded to a 512MB NAND flash memory,
+
+6
+00:00:28,000 --> 00:00:31,000
+supplemented by temperature and light measurements.
+
+7
+00:00:32,000 --> 00:00:38,000
+A micro USB connection is used for communication,
+and recharging of the lithium polymer battery.
+
+8
+00:00:39,000 --> 00:00:46,000
+Encapsulated within a polycarbonate puck, the modular design 
+ensures the AX3 is suitable for a variety of mounting options. 
