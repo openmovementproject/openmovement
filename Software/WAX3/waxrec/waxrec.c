@@ -307,6 +307,37 @@ typedef struct
 #endif
 
 
+static void alert(void)
+{
+#ifdef _WIN32
+	char oldTitle[2048];
+	char newTitle[] = "[ALERT]";
+	HWND hWnd = NULL;
+	FLASHWINFO fwi = {0};
+	GetConsoleTitle(oldTitle, sizeof(oldTitle));
+	SetConsoleTitle(newTitle);
+
+	fprintf(stderr, "\a");
+	MessageBeep(0xffffffff);
+	Sleep(40);
+
+	hWnd = FindWindow(NULL, newTitle);
+	SetConsoleTitle(oldTitle);
+	if (hWnd != NULL)
+	{
+		fwi.cbSize = sizeof(fwi);
+		fwi.hwnd = hWnd;
+		fwi.dwFlags = FLASHW_ALL;
+		fwi.uCount = 3;
+		fwi.dwTimeout = 0;
+		FlashWindowEx(&fwi);
+	}
+#else
+	fprintf(stderr, "\a");
+#endif
+}
+
+
 /* Debug hex dumps a buffer */
 static void hexdump(const void *buffer, size_t length)
 {
@@ -1203,7 +1234,16 @@ void waxDump(WaxPacket *waxPacket, FILE *ofp, char tee, int timeformat)
         fprintf(ofp, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
         if (tee & 1) fprintf(stderr, "ACCEL,%s,%u,%u,%f,%f,%f\n", timeString, waxPacket->deviceId, waxPacket->samples[i].sampleIndex, waxPacket->samples[i].x / 256.0f, waxPacket->samples[i].y / 256.0f, waxPacket->samples[i].z / 256.0f);
 		if (tee & 2) fprintf(stderr, ".");
-    }
+		if (tee & 4) 
+		{
+			static long long lastTimestamp = -1;
+			if (waxPacket->samples[i].timestamp - lastTimestamp > 1000)
+			{
+				lastTimestamp = waxPacket->samples[i].timestamp;
+				fprintf(stderr, "\n[%s]", timeString);
+			}
+		}
+	}
     return;
 }
 
@@ -1242,6 +1282,15 @@ void wax9Dump(Wax9Packet *wax9Packet, FILE *ofp, char tee, int timeformat, unsig
     }
 
 	if (tee & 2) fprintf(stderr, ".");
+	if (tee & 4)
+	{
+		static long long lastTimestamp = -1;
+		if (receivedTime - lastTimestamp > 1000)
+		{
+			lastTimestamp = receivedTime;
+			fprintf(stderr, "\n[%s]", timeString);
+		}
+	}
 
     return;
 }
@@ -2207,11 +2256,14 @@ int waxrec(const char *infile, const char *host, const char *initString, const c
 
   
     /* Are we waiting for a specified response */
-	if (waitPrefix != NULL || waitTimeout >= 0)
+	if (waitPrefix == NULL || waitPrefix[0] != '~')
 	{
-		fprintf(stderr, "NOTE: Waiting (timeout %d) for prefix: %s\n", waitTimeout, waitPrefix);
-		waiting = 1; 
-		matched = 0;
+		if (waitPrefix != NULL || waitTimeout >= 0)
+		{
+			fprintf(stderr, "NOTE: Waiting (timeout %d) for prefix: %s\n", waitTimeout, waitPrefix);
+			waiting = 1;
+			matched = 0;
+		}
 	}
 
 
@@ -2630,7 +2682,8 @@ int main(int argc, char *argv[])
     char showHelp = 0;
     int i, argPosition = 0, ret;
     char tee = 0, dump = 0, timetag = 0, sendOnly = 0;
-    const char *infile = NULL;
+	char alertAtEnd = 0;
+	const char *infile = NULL;
     const char *host = NULL;
     const char *initString = NULL;
     char stompHost[128] = ""; /* "localhost"; */
@@ -2649,7 +2702,7 @@ int main(int argc, char *argv[])
 
 
     fprintf(stderr, "WAXREC    WAX Receiver\n");
-    fprintf(stderr, "V1.97     by Daniel Jackson, 2011-2016\n");
+    fprintf(stderr, "V1.98     by Daniel Jackson, 2011-2016\n");
     fprintf(stderr, "\n");
 
     for (i = 1; i < argc; i++)
@@ -2677,6 +2730,10 @@ int main(int argc, char *argv[])
 		else if (strcasecmp(argv[i], "-teedot") == 0)
 		{
 			tee |= 2;
+		}
+		else if (strcasecmp(argv[i], "-progress") == 0) 
+		{ 
+			tee |= 4; 
 		}
 		else if (strcasecmp(argv[i], "-dump") == 0)
         {
@@ -2758,6 +2815,7 @@ int main(int argc, char *argv[])
             argPosition++;
             infile = argv[i];
         }
+		else if (strcasecmp(argv[i], "-alert") == 0) { alertAtEnd = 1; }
         else
         {
             fprintf(stderr, "ERROR: Unknown parameter: %s\n", argv[i]);
@@ -2779,7 +2837,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "        [-udp <hostname>[:<port>]]             Send raw packets over UDP to the specified host/port (cannot be used with -osc)\n");
         fprintf(stderr, "        [-stomphost <hostname>[:<port>] [-stomptopic /topic/Topic] [-stompuser <username>] [-stomppassword <password>]]  Send STOMP to the specified server.\n");
         fprintf(stderr, "        [-init <string> [-exit]]               Send initialzing string; exit (immediately if not waiting for a response).\n");
-        fprintf(stderr, "        [-wait <prefix> [-timeout <msec>]]     Wait for a response line with the specified prefix; timeout waiting.\n");
+        fprintf(stderr, "        [-wait <prefix>|~ [-timeout <msec>]]   Wait for a response line with the specified prefix; timeout waiting.\n");
 #ifdef THREAD_WRITE_FROM_UDP
         //fprintf(stderr, "        [-udpwritefrom <port>]               Write data received from the specified UDP port.\n");
 #endif
@@ -2789,6 +2847,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "        [-format:short]                        Format as short output (TEDDI/WAX9 packets only)\n");
 		fprintf(stderr, "        [-dump]                                Hex-dump raw packets.\n");
 		fprintf(stderr, "        [-scale <accel> <gyro> <mag>]          Scale for accel/gyro/mag\n");
+		fprintf(stderr, "        [-alert]                               Alert at end\n");
+		fprintf(stderr, "        [-progress]                            Periodic progress\n");
 		fprintf(stderr, "\n");
         fprintf(stderr, "Log example: waxrec %s -log -tee -init \"MODE=1\\r\\n\" > log.csv\n", EXAMPLE_DEVICE);
         fprintf(stderr, "OSC example: waxrec %s -osc localhost:1234 -init \"MODE=1\\r\\n\"\n", EXAMPLE_DEVICE);
@@ -2809,11 +2869,18 @@ int main(int argc, char *argv[])
     fprintf(stderr, "INIT: %s\n", initString);
 
     // The function with the most arguments in the world... (I think a configuration structure might help here!)
-    ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid, waitPrefix, waitTimeout, &scale);
+	ret = waxrec(infile, host, initString, logfile, tee, dump, timetag, sendOnly, stompHost, stompAddress, stompUser, stompPassword, writeFromUdp, timeformat, convertToOsc, format, ignoreInvalid, waitPrefix, waitTimeout, &scale);
+
+	if (alertAtEnd)
+	{
+		fprintf(stderr, "[END]\n");
+		alert();
+	}
 
 #if defined(_WIN32) && defined(_DEBUG)
     if (IsDebuggerPresent()) { fprintf(stderr, "Press [enter] to exit..."); getc(stdin); }
 #endif
+
     return ret;
 }
 

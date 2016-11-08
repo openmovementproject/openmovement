@@ -75,7 +75,7 @@
 #define VERIFY_OPTION_OUTPUT_NEW        0x04
 
 /* Error measures */
-#define STUCK_COUNT (12 * 120)
+#define STUCK_COUNT (50 * 120)
 #define AVERAGE_FACTOR 0.00001
 #define AVERAGE_RANGE_MAX 0.400
 #define AVERAGE_RANGE_OFF 0.300
