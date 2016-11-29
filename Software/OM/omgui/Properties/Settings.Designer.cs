@@ -76,14 +76,36 @@ namespace OmGui.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("{DeviceId}_{SessionId}")]
-        public string FilenameTemplate {
-            get {
+        public string FilenameTemplate
+        {
+            get
+            {
                 return ((string)(this["FilenameTemplate"]));
             }
-            set {
+            set
+            {
                 this["FilenameTemplate"] = value;
             }
         }
+
+
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CutPointSettings
+        {
+            get
+            {
+                return ((string)(this["CutPointSettings"]));
+            }
+            set
+            {
+                this["CutPointSettings"] = value;
+            }
+        }
+
+        
 
     }
 }

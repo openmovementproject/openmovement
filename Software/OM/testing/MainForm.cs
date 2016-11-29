@@ -103,8 +103,8 @@ namespace OMTesting
                 if (omdev == null) { return false; }
                 if (canUpdate)
                 {
-                    ret = omdev.Update();
-
+                    ret = omdev.Update(0);
+                    
                     if (batteryInteresting && lastUpdatedBattery == DateTime.MinValue || DateTime.Now - lastUpdatedBattery > TimeSpan.FromSeconds(30))
                     {
                         int batteryLevel = OmApi.OmGetBatteryLevel(Id);
@@ -236,6 +236,7 @@ namespace OMTesting
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            Text += " [" + System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString() + "]";
             Om.Instance.DeviceAttached += Instance_DeviceAttached;
             Om.Instance.DeviceRemoved += Instance_DeviceRemoved;
             Om.Instance.ForAllAttachedDevices(Instance_DeviceAttached);
@@ -466,9 +467,13 @@ namespace OMTesting
 
         private void buttonRemove_Click(object sender, EventArgs e)
         {
+            List<int> ids = new List<int>();
             foreach (int i in listViewDevices.SelectedIndices)
             {
-                int id = (int)listViewDevices.Items[i].Tag;
+                ids.Add((int)listViewDevices.Items[i].Tag);
+            }
+            foreach (int id in ids)
+            {
                 RemoveExpectedDevice(id);
             }
         }

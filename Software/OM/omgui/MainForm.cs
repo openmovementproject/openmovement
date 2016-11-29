@@ -1125,14 +1125,14 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
 
             if (dr == DialogResult.OK)
             {
-                OmGui.Properties.Settings.Default.CurrentPluginFolder = optionsDialog.DefaultPluginName;
+                Properties.Settings.Default.CurrentPluginFolder = optionsDialog.DefaultPluginName;
 
                 Console.WriteLine(Properties.Settings.Default.CurrentPluginFolder);
-                OmGui.Properties.Settings.Default.Save();
+                Properties.Settings.Default.Save();
             }
             else
             {
-                OmGui.Properties.Settings.Default.Reload();
+                Properties.Settings.Default.Reload();
             }
         }
 
@@ -4232,8 +4232,10 @@ Console.WriteLine("backgroundWorkerUpdate - changed " + device.DeviceId);
             string[] inputFiles = GetSelectedFilesForConvert(".cut.csv");
             if (inputFiles == null) { return; }
             ExportPaeeForm optionsForm = new ExportPaeeForm();
+            optionsForm.Settings = Properties.Settings.Default.CutPointSettings;
             DialogResult dr = optionsForm.ShowDialog();
             if (dr != System.Windows.Forms.DialogResult.OK) { return; }
+            Properties.Settings.Default.CutPointSettings = optionsForm.Settings;
             string[] files = CheckWavConversion(inputFiles, regenerateWav);
             if (files == null) { return; }
             List<string> outputList = new List<string>();
