@@ -428,9 +428,9 @@ namespace OMTesting
             {
                 MessageBox.Show(this, "ID cannot be less than 1", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else if (id > 32767)
+            else if (id > 65534)
             {
-                MessageBox.Show(this, "ID cannot be greater than 32767", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, "ID cannot be greater than 65534", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
