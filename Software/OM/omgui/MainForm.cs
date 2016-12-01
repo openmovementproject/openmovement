@@ -4248,7 +4248,7 @@ Console.WriteLine("backgroundWorkerUpdate - changed " + device.DeviceId);
 
                 args.Add("\"" + input + "\"");
                 args.Add("-paee-epoch"); args.Add("" + optionsForm.Epoch);
-                args.Add("-paee-model"); args.Add("" + optionsForm.Model);
+                args.Add("-paee-model"); args.Add("\"" + optionsForm.Model + "\"");
                 args.Add("-paee-file"); args.Add("\"" + output + "\"");
                 ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
                 dr = processingForm.ShowDialog();
