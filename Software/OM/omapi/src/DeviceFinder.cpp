@@ -1093,7 +1093,7 @@ printf("\r\n");
 
     default:
         // Send all other messages on to the default windows handler.
-        lRet = DefWindowProc(hWnd, message, wParam, lParam);
+        lRet = (LPARAM)DefWindowProc(hWnd, message, (WPARAM)wParam, (LPARAM)lParam);
         break;
     }
 
