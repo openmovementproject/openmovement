@@ -137,9 +137,9 @@ extern "C" {
 
 
 // Constants
-#define OM_MAX_SERIAL 0xffff    /**< The maximum serial number allowed (16-bit, unsigned) */
-#define OM_MAX_CDC_PATH 32      /**< The maximum string length of the CDC port.  e.g. "\\.\COM12345" + '\0' on Windows, or "/dev/tty.usbmodem12345" + '\0' */
-#define OM_MAX_MSD_PATH 64      /**< The maximum string length to the root of the MSD volume.  e.g. "\\?\Volume{abc12345-1234-1234-1234-123456789abc}\" + '\0'. */
+#define OM_MAX_SERIAL 0xffff            /**< The maximum serial number allowed (16-bit, unsigned) */
+#define OM_MAX_CDC_PATH OM_MAX_PATH     /**< The maximum string length of the CDC port.  e.g. "\\.\COM12345" + '\0' on Windows, or "/dev/tty.usbmodem12345" + '\0' */
+#define OM_MAX_MSD_PATH OM_MAX_PATH     /**< The maximum string length to the root of the MSD volume.  e.g. "\\?\Volume{abc12345-1234-1234-1234-123456789abc}\" + '\0'. */
 #define OM_DEFAULT_FILENAME "CWA-DATA.CWA"
 
 #define OM_MAX_RESPONSE_SIZE 256

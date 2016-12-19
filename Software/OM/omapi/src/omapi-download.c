@@ -107,7 +107,7 @@ static thread_return_t OmDownloadThread(void *arg)
             position = ftell(deviceState->downloadSource);
 
             // Read a block of data
-            blocksRead = fread(buffer, OM_BLOCK_SIZE, toRead, deviceState->downloadSource);
+            blocksRead = (int)fread(buffer, OM_BLOCK_SIZE, toRead, deviceState->downloadSource);
             if (blocksRead <= 0) { downloadStatus = OM_DOWNLOAD_ERROR; downloadValue = OM_E_ACCESS_DENIED; break; }
 
             // Check for cancellation
@@ -126,7 +126,7 @@ static thread_return_t OmDownloadThread(void *arg)
             }
             else
             {
-                blocksWritten = fwrite(buffer, OM_BLOCK_SIZE, blocksRead, deviceState->downloadDest);
+                blocksWritten = (int)fwrite(buffer, OM_BLOCK_SIZE, blocksRead, deviceState->downloadDest);
                 if (blocksWritten != blocksRead) {  downloadStatus = OM_DOWNLOAD_ERROR; downloadValue = OM_E_ACCESS_DENIED; break; }
             }
 
@@ -170,21 +170,53 @@ int OmGetDataFileSize(int deviceId)
 }
 
 
+int OmGetDevicePort(int deviceId, char *portBuffer)
+{
+	if (portBuffer == NULL) return OM_E_POINTER;
+	portBuffer[0] = '\0';
+	// Check system and device state
+	if (!om.initialized) return OM_E_NOT_VALID_STATE;
+	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(om.devices[deviceId]->port) == 0)
+	{
+		// We don't have a path to the port
+		return OM_E_FAIL;
+	}
+	strcat(portBuffer, om.devices[deviceId]->port);
+	return OM_OK;
+}
+
+
+int OmGetDevicePath(int deviceId, char *pathBuffer)
+{
+	if (pathBuffer == NULL) return OM_E_POINTER;
+	pathBuffer[0] = '\0';
+	// Check system and device state
+	if (!om.initialized) return OM_E_NOT_VALID_STATE;
+	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(om.devices[deviceId]->root) == 0)
+	{
+		// We don't have a path to the root
+		// ??? (Could re-mount the volume to a path here?)
+		return OM_E_FAIL;
+	}
+	strcat(pathBuffer, om.devices[deviceId]->root);
+	return OM_OK;
+}
+
+
 int OmGetDataFilename(int deviceId, char *filenameBuffer)
 {
-    if (filenameBuffer == NULL) return OM_E_POINTER;
-    filenameBuffer[0] = '\0';
-    // Check system and device state
-    if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
-    if (strlen(om.devices[deviceId]->root) == 0)
-    {
-        // We don't have a path to the root
-        // ??? (Could re-mount the volume to a path here?)
-        return OM_E_FAIL;
-    }
-    strcat(filenameBuffer, om.devices[deviceId]->root);
+	int retVal;
+	
+	retVal = OmGetDevicePath(deviceId, filenameBuffer);
+	if (retVal != OM_OK)
+	{
+		return retVal;
+	}
+
 #if !defined(_WIN32)
     strcat(filenameBuffer, "/");
 #endif

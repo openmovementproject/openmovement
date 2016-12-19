@@ -383,7 +383,7 @@ OmLog(4, "- Flush done (%d bytes)", num);
 OmLog(2, "- Overall command timeout (%d)", timeoutMs);
             break;
         }                // Overall timeout supplied by caller
-        len = OmPortReadLine(deviceId, p, bufferSize - offset - 1, timeoutMs - elapsed);  // Timeout (actual value affected by port timeout)
+        len = OmPortReadLine(deviceId, p, (int)(bufferSize - offset - 1), timeoutMs - elapsed);  // Timeout (actual value affected by port timeout)
         if (len > 0 && buffer != NULL)
         {
             p[len] = '\0'; 

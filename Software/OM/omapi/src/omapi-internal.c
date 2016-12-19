@@ -724,7 +724,7 @@ int OmPortWrite(unsigned short deviceId, const char *command)
     if (fd < 0) { return OM_E_FAIL; }
     if (command == NULL) { return OM_E_POINTER; }
 OmLog(3, "OmPortWrite(%d, \"%s\");\n", deviceId, command);
-    if (write(fd, command, strlen(command)) != strlen(command)) { return OM_E_FAIL; }
+    if (write(fd, command, (int)strlen(command)) != (int)strlen(command)) { return OM_E_FAIL; }
     return OM_OK;
 }
 

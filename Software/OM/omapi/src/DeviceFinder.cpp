@@ -192,14 +192,14 @@ std::string DeviceFinder::GetUniquePart(std::string id)
     // Output:
     //   USB\VID_04D8&PID_0057\6&23C68C4E&0
 
-    int miIndex = id.find("&MI_");
+    int miIndex = (int)id.find("&MI_");
     if (miIndex >= 0)
     {
         id = id.erase(miIndex, 6);
     }
 
-    int lastAnd = id.find_last_of('&');
-    int lastSlash = id.find_last_of('\\');
+    int lastAnd = (int)id.find_last_of('&');
+    int lastSlash = (int)id.find_last_of('\\');
     if (lastSlash >= miIndex && lastAnd > lastSlash)
     {
         id = id.substr(0, lastAnd);
@@ -849,7 +849,7 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
             // If this is the composite device we're after, find the serial string
             if (strncmp(usbComposite.c_str(), prefix, strlen(prefix)) == 0)
             {
-                int index = strlen(prefix);
+                int index = (int)strlen(prefix);
                 if (usbComposite[index] == '\\') { index++; }
                 serialString = usbComposite.substr(index);
             }
@@ -861,7 +861,7 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
             // If this is the device we're after
             if (strncmp(usb.c_str(), prefix, strlen(prefix)) == 0)
             {
-                int index = strlen(prefix);
+                int index = (int)strlen(prefix);
                 if (usb[index] == '\\') { index++; }
                 serialString = usb.substr(index);
             }
@@ -872,11 +872,11 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
 //printf("SERIAL: %s\n", serialString.c_str());
         if (serialString.length() > 0)
         {
-            int firstDigit = serialString.find_first_of('&') + 1;
+            int firstDigit = (int)serialString.find_first_of('&') + 1;
             int lastDigit = -1;
             if ((serialString[firstDigit] >= '0' && serialString[firstDigit] <= '9') || (serialString[firstDigit] >= 'A' && serialString[firstDigit] <= 'F'))
             {
-                lastDigit = serialString.find_first_not_of("0123456789ABCDEF", firstDigit) - 1;
+                lastDigit = (int)serialString.find_first_not_of("0123456789ABCDEF", firstDigit) - 1;
             }
 
             // Check whether this is a Windows-generated number for a device without a serial number
@@ -889,10 +889,10 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
             else
             {
                 // Extract the last decimal numeric part of the serial string as a serial number
-                int lastNumber = serialString.find_last_of("0123456789");
+                int lastNumber = (int)serialString.find_last_of("0123456789");
                 if (lastNumber >= 0)
                 {
-                    int firstNumber = serialString.find_last_not_of("0123456789", lastNumber) + 1;
+                    int firstNumber = (int)serialString.find_last_not_of("0123456789", lastNumber) + 1;
                     if (firstNumber >= 0)
                     {
                         serialNumber = atoi(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str());
@@ -960,7 +960,7 @@ static BOOL DoRegisterDeviceInterfaceToHwnd(GUID InterfaceClassGuid, HWND hWnd, 
 
 
 // Static windows callback procedure (jumps to class method)
-static INT_PTR WINAPI WinProcTrampoline(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+static LRESULT WINAPI WinProcTrampoline(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     DeviceFinder* instance;
 
@@ -975,7 +975,7 @@ static INT_PTR WINAPI WinProcTrampoline(HWND hWnd, UINT message, WPARAM wParam, 
     }
 
     if (!instance) { return DefWindowProc(hWnd, message, wParam, lParam); }
-    return instance->WinProc(hWnd, message, wParam, lParam);
+    return (LRESULT)instance->WinProc(hWnd, message, wParam, lParam);
 }
 
 #define TIMER_ID 1
@@ -983,7 +983,7 @@ static INT_PTR WINAPI WinProcTrampoline(HWND hWnd, UINT message, WPARAM wParam, 
 #define TIMER_UPDATE_COUNTDOWN 1000
 
 // Class instance of Windows message handler
-int DeviceFinder::WinProc(void *windowHandle, unsigned int message, unsigned int wParam, long lParam)
+long long DeviceFinder::WinProc(void *windowHandle, unsigned int message, unsigned long long wParam, long long lParam)
 {
     HWND hWnd = (HWND)windowHandle;
     LRESULT lRet = 1;
@@ -992,7 +992,7 @@ int DeviceFinder::WinProc(void *windowHandle, unsigned int message, unsigned int
     {
         case WM_CREATE:
             // Registration at application startup when the window is created.
-            if (!DoRegisterDeviceInterfaceToHwnd(WceusbshGUID, hWnd, &hDeviceNotify))
+            if (!DoRegisterDeviceInterfaceToHwnd(WceusbshGUID, hWnd, (HDEVNOTIFY *)&hDeviceNotify))
             {
                 MessageBoxA(NULL, "Error registering device finder device interface", "Error", 0);
             }

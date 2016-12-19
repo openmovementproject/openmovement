@@ -107,7 +107,7 @@ OmReaderHandle OmReaderOpen(const char *binaryFilename)
 
     // Read header
     fseek(state->fp, 0, SEEK_SET);
-    initialReadSize = fread(state->header, 1, OM_MAX_PACKET_SIZE, state->fp);
+    initialReadSize = (int)fread(state->header, 1, OM_MAX_PACKET_SIZE, state->fp);
 
     // Check header (at least as big as the header packet, actual length is an integer multiple of the size of each data block)
     if (initialReadSize < OM_BLOCK_SIZE) { fclose(state->fp); free(state); return NULL; }
@@ -280,7 +280,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
     len = -1;
     if (!feof(state->fp))
     {
-        len = fread(state->data, 1, OM_BLOCK_SIZE, state->fp);
+        len = (int)fread(state->data, 1, OM_BLOCK_SIZE, state->fp);
     }
 
     if (len != OM_BLOCK_SIZE)

@@ -92,7 +92,7 @@ public:
 
     // (private)
     unsigned int DiscoveryLoop(void);
-    int WinProc(void *windowHandle, unsigned int message, unsigned int wParam, long lParam);
+	long long WinProc(void *windowHandle, unsigned int message, unsigned long long wParam, long long lParam);
 
 private:
 

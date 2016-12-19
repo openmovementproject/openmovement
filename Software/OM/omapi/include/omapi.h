@@ -29,7 +29,7 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.6.0
+ *  @version   1.7.0
  *  @date      2011-2013
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
  *  @details
@@ -47,7 +47,7 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.6.0
+ *  @version   1.7.0
  *  @date      2011-2013
  *  @copyright BSD 2-clause license. Copyright (c) 2009-2013, Newcastle University, UK. All rights reserved.
  *  @details
@@ -225,7 +225,7 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 106
+#define OM_VERSION 107
 
 
 /**
@@ -873,6 +873,26 @@ OM_EXPORT int OmSetDownloadChunkCallback(OmDownloadChunkCallback downloadChunkCa
  * @since 1.4
  */
 OM_EXPORT int OmGetDataFileSize(int deviceId);
+
+
+/**
+* Return the path to specified device's communication port.
+* @param deviceId Identifier of the device.
+* @param[out] portBuffer A buffer to receive the path to the device's communication port (of size OM_MAX_PATH).
+* @see OmGetDevicePath()
+* @since 1.7
+*/
+OM_EXPORT int OmGetDevicePort(int deviceId, char *portBuffer);
+
+
+/**
+* Return the path to specified device's filesystem.
+* @param deviceId Identifier of the device.
+* @param[out] pathBuffer A buffer to receive the path to the device's filsystem (of size OM_MAX_PATH).
+* @see OmGetDataFilename()
+* @since 1.7
+*/
+OM_EXPORT int OmGetDevicePath(int deviceId, char *pathBuffer);
 
 
 /**
