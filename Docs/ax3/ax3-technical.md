@@ -330,7 +330,7 @@ Both of the above return the RTC value:
 
 Query current battery level:
 
-	SAMPLE B
+	SAMPLE 1
 
 Returns:
 
