@@ -104,7 +104,7 @@ In the 'un-packed' mode, the accelerometer values are simply stored as short sig
 ```c
 typedef struct
 {
-	int16_t x, y, z;
+    int16_t x, y, z;
 } accel_t;
 ```
 
@@ -112,9 +112,9 @@ When the 'packing' mode is used, the accelerometer values are stored packed into
 
 ```c
 // Packed accelerometer value - must sign-extend each component value and left-shift by exponent 'e', units are 1/256 g.
-//        [byte-3] [byte-2] [byte-1] [byte-0]
-//        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
-//        10987654 32109876 54321098 76543210
+//   [byte-3] [byte-2] [byte-1] [byte-0]
+//   eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
+//   10987654 32109876 54321098 76543210
 ```
 
 
@@ -175,7 +175,7 @@ typedef struct
 
 ## Communication Protocol
 
-Commands and responses are all in plain (7-bit ASCII) text and delimited with <CR>/<LF> ("\r\n") line endings.  The sections below use the following conventions:
+Commands and responses are all in plain (7-bit ASCII) text and delimited with *CR*/*LF* ("\r\n") line endings.  The sections below use the following conventions:
 
 ```
 TEXT
@@ -186,7 +186,7 @@ TEXT
 
 These commands can also be placed in to a file 'SETTINGS.INI' in the root directory.  This is primarily used for adjusting the .CWA file format directly to use the 'unpacked mode' by using the command 'DATAMODE 4' (2 is the default 'packed mode').
 
-There are additional commands for more technical/diagnostic use.
+There are additional commands to those listed here, for more technical/diagnostic use.
 
 
 ### Settings
@@ -194,9 +194,9 @@ There are additional commands for more technical/diagnostic use.
 
 #### Session identifier
 
-The session id (0 to ~2000000000) is set using:
+The session id (0 to 2^31 approximately 2000000000) is set using:
 
-	SESSION <numeric-id>
+	SESSION <numeric-session-id>
 
 Query only:
 
@@ -204,15 +204,15 @@ Query only:
 
 Both of the above return the value:
 
-	SESSION=<numeric-id>
+	SESSION=<numeric-session-id>
 
 
 #### Measurement start time
 
-Set the date and time to sleep until before starting measuring:
+Set the date and time to "hibernate" before starting the recording:
 
 	HIBERNATE <YYYY-MM-DD,hh:mm:ss>
-	
+
 Set "always begin measuring":
 
 	HIBERNATE 0
@@ -364,7 +364,7 @@ Standard use:
 
 Update the firmware:
 
-1. The desktop client can query the device's firmware, and offer to update if it has a newer version available.
+1. The desktop client can query the device's firmware from the normal run mode then, if it has a newer version available, offer to update.
 
 2. The device can be sent a 'RESET' command (to enter bootloader mode).
 
