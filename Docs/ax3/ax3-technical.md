@@ -3,7 +3,7 @@
 
 ## Introduction
 
-The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor ([ADXL345](http://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)) and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (.CWA continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
+The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor ([ADXL345](http://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)) and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (`.CWA` continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
 
 The sensor is part of the Open Movement project, which is a collection of hardware and software developed under open source terms with a variety of uses in mind, including: health research, digital interaction, instrumentation, gaming and music. With a global community of users including industry, universities and major health research organizations, Open Movement has fast being positioned as the de-facto standard for open source movement science.
 
@@ -11,18 +11,18 @@ The sensor is part of the Open Movement project, which is a collection of hardwa
 
 ## Firmware
 
-The firmware is in the Open Source *Open Movement* project and the compiled result also includes elements from the Microchip C30 compiler standard library (standard C routines), Microchip PIC24F peripheral library (on-chip functionality) and the Microchip *Application Libraries* (USB stack and filesystem), 
+The firmware is in the Open Source *Open Movement* project and the compiled result also includes elements from the *Microchip C30 compiler standard library* (standard C routines), *Microchip PIC24F peripheral library* (on-chip functionality) and the *Microchip Application Libraries* (USB stack and filesystem), 
 
-The firmware is written in the C programming language and is suitable for compilation with the Microchip C30 compiler. Project files are included for MPLAB 8 and MPLAB X development environments. The .HEX output files are suitable for 'bootloading' on to a Microchip PIC24F Microcontroller.
+The firmware is written in the *C* programming language and is suitable for compilation with the *Microchip C30 compiler*. Project files are included for *MPLAB 8* and *MPLAB X* development environments. The `.HEX` output files are suitable for *bootloading* on to a *Microchip PIC24F Microcontroller*.
 
 The device offers two main modes of operation: connected (recharging and USB connectivity) and disconnected (sleeping or logging).  
 
 
 ### Device Connected
 
-The connected state allows the device to recharge and communicate over USB.  Recharging takes place when connected to either a PC USB or a stand-alone 5V supply.  On every connection for a short time before exiting the device will enumerate over USB as a *bootloader* device.
+The connected state allows the device to recharge and communicate over USB.  Recharging takes place when connected to either a PC USB or a stand-alone 5V supply.  On each connection (for a short time before exiting) the device will enumerate over USB as a *bootloader* device.
 
-During normal use, the firmware enumerates as a composite USB device presenting a Mass Storage Device (USB MSD, similar to a *USB drive*) and a Communications Device Class (USB CDC, a *virtual serial port*) interface.  
+During normal use, the firmware enumerates as a composite USB device presenting a *Mass Storage Device* (*USB MSD*, similar to a *USB drive*) and a *Communications Device Class* (*USB CDC*, a *virtual serial port*) interface.  
 
 * MSD interface: presents a drive with one or more data files – see below for more details on the stored data. 
 
