@@ -3,7 +3,7 @@
 
 ## Introduction
 
-The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor ([ADXL345](http://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)) and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (.CWA continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
+The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor ([ADXL345](http://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)) and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (`.CWA` continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
 
 The sensor is part of the Open Movement project, which is a collection of hardware and software developed under open source terms with a variety of uses in mind, including: health research, digital interaction, instrumentation, gaming and music. With a global community of users including industry, universities and major health research organizations, Open Movement has fast being positioned as the de-facto standard for open source movement science.
 
@@ -11,18 +11,18 @@ The sensor is part of the Open Movement project, which is a collection of hardwa
 
 ## Firmware
 
-The firmware is in the Open Source *Open Movement* project and the compiled result also includes elements from the Microchip C30 compiler standard library (standard C routines), Microchip PIC24F peripheral library (on-chip functionality) and the Microchip 'Application Libraries' (USB stack and filesystem), 
+The firmware is in the Open Source *Open Movement* project and the compiled result also includes elements from the *Microchip C30 compiler standard library* (standard C routines), *Microchip PIC24F peripheral library* (on-chip functionality) and the *Microchip Application Libraries* (USB stack and filesystem), 
 
-The firmware is written in the C programming language and is suitable for compilation with the Microchip C30 compiler. Project files are included for MPLAB 8 and MPLAB X development environments. The .HEX output files are suitable for 'bootloading' on to a Microchip PIC24F Microcontroller.
+The firmware is written in the *C* programming language and is suitable for compilation with the *Microchip C30 compiler*. Project files are included for *MPLAB 8* and *MPLAB X* development environments. The `.HEX` output files are suitable for *bootloading* on to a *Microchip PIC24F Microcontroller*.
 
 The device offers two main modes of operation: connected (recharging and USB connectivity) and disconnected (sleeping or logging).  
 
 
 ### Device Connected
 
-The connected state allows the device to recharge and communicate over USB.  Recharging takes place when connected to either a PC USB or a stand-alone 5V supply.  On every connection for a short time before exiting the device will enumerate over USB as a 'bootloader' device.
+The connected state allows the device to recharge and communicate over USB.  Recharging takes place when connected to either a PC USB or a stand-alone 5V supply.  On each connection (for a short time before exiting) the device will enumerate over USB as a *bootloader* device.
 
-During normal use, the firmware enumerates as a composite USB device presenting a Mass Storage Device (USB MSD, similar to a 'USB drive') and a Communications Device Class (USB CDC, a 'virtual serial port') interface.  
+During normal use, the firmware enumerates as a composite USB device presenting a *Mass Storage Device* (*USB MSD*, similar to a *USB drive*) and a *Communications Device Class* (*USB CDC*, a *virtual serial port*) interface.  
 
 * MSD interface: presents a drive with one or more data files – see below for more details on the stored data. 
 
@@ -48,27 +48,25 @@ There are device-specific properties, which will be internally maintained in (re
 
 The current date and time are maintained in a Real-Time Clock (RTC).
 
-The 'firmware version' and 'hardware version' are compiled-in constants.
+The *firmware version* is a compiled-in constant.
 
 
 ### Recording Settings
 
-There are recording-specific settings.  A text configuration file (using the communication protocol) is used to select the data file name, together with settings that will be written to the data file if it does not already exist. 
+There are recording-specific settings stored in the data file `CWA-DATA.CWA` in the root folder:
 
-* File name (an 8.3 non-"long file name")
+* Recording session identifier.
 
-* Recording session identifier
+* Measurement start date/time (0 = *always started*, -1 = *never started*).
 
-* Measurement start date/time (0 = 'always started', -1 = 'never started').
-
-* Measurement stop date/time (0 = 'always stopped', -1 = 'never stopped').
+* Measurement stop date/time (0 = *always stopped*, -1 = *never stopped*).
 
 * Sensor accelerometer configuration (sampling frequency and sensitivity).
 
 
 ### Measurement data
 
-Measurement data is written to a file ('CWA-DATA.CWA') in the root folder, which includes header information and the logged sensor data.  The disk should be formatted at FAT16 or FAT32.
+Measurement data is written to the file `CWA-DATA.CWA` in the root folder, which includes header information and the logged sensor data.  The disk should be formatted at *FAT16* or *FAT32* -- ideally by using the device's own `FORMAT` command which will align the filesystem for maximum efficiency.
 
 The accelerometer sensor's internal sampling frequency is used and the measurements are treated as a stream and recorded in time-stamped blocks so that:
 
@@ -90,7 +88,7 @@ Within the data file, integrity is assured through:
 
 #### CWA File Timestamps
 
-All timestamps are packed into a 32-bit unsigned value: 
+All timestamps are packed into a 32-bit unsigned value, with a year offset of 2000 and months and days beginning at 1: 
 
 ```c
 // Timestamps are packed into a 32-bit value: (MSB) YYYYYYMM MMDDDDDh hhhhmmmm mmssssss (LSB)
@@ -99,28 +97,27 @@ typedef enum uint32_t cwa_timestamp_t;
 
 #### Accelerometer values
 
-In the 'un-packed' mode, the accelerometer values are simply stored as short signed integers:
+In the *un-packed* mode, the accelerometer values are simply stored as short signed integers, units are 1/256 *g*:
 
 ```c
 typedef struct
 {
-	int16_t x, y, z;
+    int16_t x, y, z;
 } accel_t;
 ```
 
-When the 'packing' mode is used, the accelerometer values are stored packed into a single 32-bit integer:
+When the *packing* mode is used, the accelerometer values are stored packed into a single 32-bit integer -- each axis value is a signed integer and must be sign-extended and left-shifted by the exponent 'e', units are 1/256 *g*:
 
 ```c
-// Packed accelerometer value - must sign-extend each component value and left-shift by exponent 'e', units are 1/256 g.
-//        [byte-3] [byte-2] [byte-1] [byte-0]
-//        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
-//        10987654 32109876 54321098 76543210
+//   [byte-3] [byte-2] [byte-1] [byte-0]
+//   eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
+//   10987654 32109876 54321098 76543210
 ```
 
 
 #### CWA File Header
 
-The CWA binary file header block is always located at offset 0 in the file, and always 1024 bytes in length.  The odd alignment of elements is inherited from the original 8-bit version of the firmware, the structure must be considered tightly packed.
+The CWA binary file header block is always located at offset 0 in the file, and always 1024 bytes in length.  **The structure must be considered tightly packed** (the odd alignment of elements is inherited from the original 8-bit version of the firmware).
 
 ```c
 typedef struct
@@ -133,22 +130,22 @@ typedef struct
     uint16_t reserved2;                         ///< @11  +2   (2 bytes reserved)
     cwa_timestamp_t loggingStartTime;           ///< @13  +4   Start time for delayed logging
     cwa_timestamp_t loggingEndTime;             ///< @17  +4   Stop time for delayed logging
-    uint32_t loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)
+    uint32_t loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, should be 0 = unlimited)
     uint8_t  reserved3[11];                     ///< @25  +11  (11 bytes reserved)
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
-    cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change metadata time
+    cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change meta-data time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
     int16_t  timeZone;                          ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
     uint8_t  reserved4[20];                     ///< @44  +20  (20 bytes reserved)
     uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448 Scratch buffer / meta-data (448 characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
-    uint8_t  reserved[512];                     ///< @512 +512 (Unused: originally reserved for post-collection scratch buffer / meta-data) (512 bytes)
+    uint8_t  reserved[512];                     ///< @512 +512 (Reserved for device-specific meta-data in the same format as the user meta-data) (512 bytes)
 } cwa_header_t;
 ```
 
 
 #### CWA File Data Blocks
 
-The CWA binary file data blocks are always 512 bytes in length at a 512-byte-multiple offset, the first at offset 1024 (immediately after the header).  The structure must be considered tightly packed.
+The CWA binary file data blocks are always 512 bytes in length at a 512-byte-multiple offset, the first at offset 1024 (immediately after the header).  **The structure must be considered tightly packed.**
 
 ```c
 typedef struct
@@ -175,18 +172,18 @@ typedef struct
 
 ## Communication Protocol
 
-Commands and responses are all in plain (7-bit ASCII) text and delimited with <CR>/<LF> ("\r\n") line endings.  The sections below use the following conventions:
+Commands and responses are all in plain, 7-bit ASCII text and delimited with *CR*/*LF* (`\r\n`) line endings.  The sections below use the following conventions:
 
 ```
 TEXT
 <value-placeholder>
-[optional]
-{alternative-1 | alternative-2 | ...}
+[optional-text]
+{alternative-text-1 | alternative-text-2 | ...}
 ```
 
-These commands can also be placed in to a file 'SETTINGS.INI' in the root directory.  This is primarily used for adjusting the .CWA file format directly to use the 'unpacked mode' by using the command 'DATAMODE 4' (2 is the default 'packed mode').
+These commands can also be placed in to a file `SETTINGS.INI` in the root directory.  This is primarily used for adjusting the `.CWA` file format directly to use the *unpacked mode* by using the command `DATAMODE 4` (`2` is the default *packed mode*).
 
-There are additional commands for more technical/diagnostic use.
+There are additional commands to those listed here, for more technical/diagnostic use.
 
 
 ### Settings
@@ -194,9 +191,9 @@ There are additional commands for more technical/diagnostic use.
 
 #### Session identifier
 
-The session id (0 to ~2000000000) is set using:
+The session id (0 to 2^31, giving nine numeric digits) is set using:
 
-	SESSION <numeric-id>
+	SESSION <numeric-session-id>
 
 Query only:
 
@@ -204,20 +201,20 @@ Query only:
 
 Both of the above return the value:
 
-	SESSION=<numeric-id>
+	SESSION=<numeric-session-id>
 
 
 #### Measurement start time
 
-Set the date and time to sleep until before starting measuring:
+Set the date and time to "hibernate" before starting the recording:
 
 	HIBERNATE <YYYY-MM-DD,hh:mm:ss>
-	
-Set "always begin measuring":
+
+Set "always begin measuring" (`0`=infinitely in the past):
 
 	HIBERNATE 0
 
-Set "never begin measuring":
+Set "never begin measuring" (`-1`=infinitely in the future):
 
 	HIBERNATE -1
 
@@ -236,11 +233,11 @@ Set the date and time to stop measuring after:
 
 	STOP <YYYY-MM-DD,hh:mm:ss>
 
-Set "always stop measuring":
+Set "always stop measuring" (`0`=infinitely in the past):
 
 	STOP 0
 	
-Set "never stop measuring":
+Set "never stop measuring" (`-1`=infinitely in the future):
 
 	STOP -1
 
@@ -268,8 +265,8 @@ The above return the current status:
 	RATE=<rate-code>,<frequency-hz>
 
 
-The rate code is split into separate parts: the sensitivity/range and sample frequency.  The frequency rate is (3200/(1<<(15-(rate & 0x0f)))) Hz, and the range is (+/-g) (16 >> (rate >> 6)).
-		
+The rate code is split into separate parts: the sensitivity/range and sample frequency.  The frequency rate is `(3200/(1<<(15-(rate & 0x0f))))` Hz, and the range is (+/-g) `(16 >> (rate >> 6))`.
+
 A code can be created by the sum of the parts:
 
 Sensitivity range:
@@ -330,24 +327,26 @@ Both of the above return the RTC value:
 
 Query current battery level:
 
-	SAMPLE B
+	SAMPLE 1
 
 Returns:
 
-	$BATT=<raw-ADC>,<millivolts>,mV,<percentage>,<fully-charged>
+	$BATT=<raw-ADC>,<millivolts>,mV,<percentage>,<charge-termination-flag>
 
 	
 #### Storing settings
 
-This settings file can be written to the data file header by the device for the current RAM-based settings by using the command:
+The current RAM-based settings can be written to the data file header by the device for by using the command:
 
 	COMMIT
 
-The whole drive can be quick formatted with:
+The whole drive can be formatted with:
 
 	FORMAT {Q|W}[C]
 
-Where 'Q' performs a "quick format" (the filesystem is recreated), and 'W' thoroughly clears all of the NAND memory.  The optional 'C' performs a 'COMMIT' command afterwards and rewrites the header of the configuration file.  
+Where `Q` performs a *quick format* (the filesystem is recreated), and `W` thoroughly *wipes* by clearing all of the NAND memory.  The optional `C` performs the 'COMMIT' command afterwards and rewrites the header of the configuration file.  
+
+During a `FORMAT`/`COMMIT` the USB mass storage drive is seen as "ejected" by the operating system while the device writes to the memeory, and then seen as re-inserted afterwards.  
 
 
 
@@ -355,20 +354,20 @@ Where 'Q' performs a "quick format" (the filesystem is recreated), and 'W' thoro
 
 Standard use:
 
-1. The device connects and enumerates as a 'bootloader' device (only for a few seconds).
+1. The device connects and enumerates as a *bootloader* device (only for a few seconds).
 
-2. The desktop client could ignore this (and wait for the timeout); or detect this device and send it a 'run' command to exit the bootloader immediately.
+2. The desktop client could ignore this (and wait for the timeout); or detect this device and send it a *run* command to exit the bootloader immediately.
 
 3. (normal device operations as described above)
 
 
 Update the firmware:
 
-1. The desktop client can query the device's firmware, and offer to update if it has a newer version available.
+1. The desktop client can query the device's firmware from the normal run mode then, if it has a newer version available, offer to update.
 
-2. The device can be sent a 'RESET' command (to enter bootloader mode).
+2. The device can be sent a `RESET` command (to enter bootloader mode).
 
-3. The desktop client detects the bootloader device and sends it a 'query' command (this is enough to prevent it from timing-out of the bootloader mode), followed by program, verify, and then run.
+3. The desktop client detects the bootloader device and sends it a *query* command (this is enough to prevent it from timing-out of the bootloader mode), followed by program, verify, and then run.
 
 4. (normal device operations as described above)
 
