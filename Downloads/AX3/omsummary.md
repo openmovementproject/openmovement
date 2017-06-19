@@ -2,7 +2,7 @@
 
 ## Tool
 
-Download [omsummary.zip](omsummary.zip) and extract the contents to a directory. 
+Download [omsummary.zip](omsummary.zip?raw=true) and extract the contents to a directory. 
 
 
 ## Sleep summary
