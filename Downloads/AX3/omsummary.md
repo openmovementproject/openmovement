@@ -7,17 +7,9 @@ Download [omsummary.zip](omsummary.zip?raw=true) and extract the contents to a d
 
 ## Sleep summary
 
-From a source file `$DATASET.cwa`, you can produce a sleep analysis file `$DATASET.sleep.csv`. 
+From a source file `$DATASET.cwa`, you can produce a sleep analysis file `$DATASET.sleep.csv` with the OMGUI tool.
 
-You must produce a text file `$DATASET.sleep.times.csv` with a particular format.  An easy way is to export a sheet from *Excel* to a *CSV file* (see secton below).  
-
-The file must contain a first line (row) describing the columns (the line may be omitted if the order is unchanged, as this is the default):
-
-	Start,End,Label
-
-...and subsequent lines (rows) where date/times are formatted with the international standard `YYYY-MM-DD hh:mm:ss`, for example (where the label is the day):
-
-	2015-12-05 01:00:00,2015-12-05 11:15:00,2015-12-05
+You must produce a text file `$DATASET.sleep.times.csv` which contains the intervals of sleep, and this file must be in a particular format (described below).  An easy way to produce this file is to use the *Excel* template `_TEMPLATE.sleep.times.xltx` file by copying in the sleep diary data in the first sheet (`Sheet1`), and exporting the second sheet (`csv`) as `.CSV` file format and ensuring the file has the extensions ".sleep.times.csv".
 
 Finally, drag the `$DATASET.sleep.csv` over the `omsummary-sleep.cmd` command script.  This will run `omsummary.exe` with the required parameters, and will generate the output file `$DATASET.sleep.summary.csv`.  This file (which can be opened in *Excel*), contains the headings:
 
@@ -39,12 +31,9 @@ Where the times are all in minutes, and the columns are:
 * SleepEfficiency: The percentage of the total time in bed accounted as part of the total sleep time. 
 
 
-### Exporting sleep times using Excel
+### Detail: Transforming sleep diary times using Excel
 
-This section describes the transformation from a sleep diary to the `sleep.times.csv` file that the summary tool requires. 
-
-This is how the template `_TEMPLATE.sleep.times.xltx` file is configured.  You may use that file by copying in the sleep diary data in the first sheet, and exporting the second sheet as `.CSV` format and ensuring the file has the extensions ".sleep.times.csv".
-
+This section describes the transformation from a sleep diary to the `sleep.times.csv` file that the summary tool requires.  This is how the template `_TEMPLATE.sleep.times.xltx` file is configured.  
 
 Where the source format in `Sheet1` tab is:
 
@@ -70,3 +59,13 @@ Where the Start/End columns are formatted with:
 
 	Format/number/custom/type: yyyy-mm-dd
 
+
+### Detail: .sleep.times.csv file format
+
+The file is a text file, and may contain a first line (row) describing the columns (the line may be omitted if the order is unchanged, as this is the default):
+
+	Start,End,Label
+
+...and subsequent lines (rows) where date/times are formatted with the international standard `YYYY-MM-DD hh:mm:ss`, for example (where the label is the date):
+
+	2015-12-04 23:40:00,2015-12-05 11:15:00,2015-12-05
