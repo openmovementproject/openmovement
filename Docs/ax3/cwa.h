@@ -43,8 +43,8 @@ typedef struct
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
     int16_t  timeZone;                          ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
     uint8_t  reserved4[20];                     ///< @44  +20  (20 bytes reserved)
-    uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448 Scratch buffer / meta-data (448 characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
-    uint8_t  reserved[512];                     ///< @512 +512 (Unused: originally reserved for post-collection scratch buffer / meta-data) (512 bytes)
+    uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448 Scratch buffer / meta-data (448 ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
+    uint8_t  reserved[512];                     ///< @512 +512 Reserved for device-specific meta-data (512 bytes, ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs, leading '&' if present?)
 } cwa_header_t;
 #pragma pack(pop)
 
