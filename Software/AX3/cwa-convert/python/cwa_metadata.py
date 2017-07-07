@@ -92,14 +92,14 @@ def cwa_metadata(filename):
 
 # Test function
 if __name__ == "__main__":
+	import os
 	import sys
-	
-	filename = 'sample.cwa'
-	if len(sys.argv) > 1:
-		filename = sys.argv[1]
-	
-	metadata = cwa_metadata(filename)
-	print(repr(metadata))
-
-#except Exception as e:
-#	print('Exception ' + e.__doc__ + ' -- ' + e.message)
+	for filename in sys.argv[1:]:
+		try:
+			metadata = cwa_metadata(filename)
+			result = {}
+			result['filename'] = os.path.basename(filename)
+			result.update(metadata)
+			print(repr(result))
+		except Exception as e:
+			print('Exception ' + e.__doc__ + ' -- ' + e.message)
