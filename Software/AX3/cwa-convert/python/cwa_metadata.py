@@ -1,3 +1,5 @@
+import sys
+
 def cwa_metadata(filename):
 	"""CWA Metadata Reader by Dan Jackson, 2017."""
 	
@@ -64,7 +66,10 @@ def cwa_metadata(filename):
 		rawbytes = f.read(448)
 	
 	# Remove any trailing spaces, null, or 0xFF bytes
-	encString = str(rawbytes, 'ascii').rstrip('\x20\xff\x00')
+	if sys.version_info[0] < 3:
+		encString = str(rawbytes).rstrip('\x20\xff\x00')
+	else:
+		encString = str(rawbytes, 'ascii').rstrip('\x20\xff\x00')
 	
 	# Name-value pairs separated with ampersand
 	nameValues = encString.split('&')
@@ -92,14 +97,15 @@ def cwa_metadata(filename):
 
 # Test function
 if __name__ == "__main__":
+	import json
 	import os
-	import sys
 	for filename in sys.argv[1:]:
 		try:
 			metadata = cwa_metadata(filename)
 			result = {}
 			result['filename'] = os.path.basename(filename)
 			result.update(metadata)
-			print(repr(result))
+			# print(repr(result))
+			print(json.dumps(result))
 		except Exception as e:
 			print('Exception ' + e.__doc__ + ' -- ' + e.message)
