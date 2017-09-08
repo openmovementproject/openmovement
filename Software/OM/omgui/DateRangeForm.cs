@@ -55,6 +55,9 @@ namespace OmGui
             //Set radio buttons enabled
             radioButtonImmediately.Checked = true;
 
+            // Defaults before load
+            buttonDefault_Click(null, null);
+
             //Try and load in record dialog settings.
             XmlDocument doc;
             SettingsProfileDictionary = loadSettingsProfile(out doc);
@@ -84,8 +87,6 @@ namespace OmGui
             datePickerEnd.Visible = false;
             datePickerStart.Visible = true;
             datePickerEnd.Visible = true;
-
-            buttonDefault_Click(null, null);
 
             updateWarningMessages();
 
@@ -142,6 +143,7 @@ namespace OmGui
 
             // New settings
             settingsDictionary.Add("Frequency", comboBoxSamplingFreq.SelectedItem.ToString());
+            settingsDictionary.Add("LowPower", checkBoxLowPower.Checked ? "True" : "False");
             settingsDictionary.Add("Range", comboBoxRange.SelectedItem.ToString());
             settingsDictionary.Add("DelayDays", DayDelay.ToString());
             settingsDictionary.Add("TimeOfDay", StartDate.TimeOfDay.TotalSeconds.ToString());
@@ -213,6 +215,11 @@ namespace OmGui
                     textBoxSubjectNotes.Text = pair.Value;
                 }
                 */
+                else if (pair.Key.Equals("LowPower"))
+                {
+                    if (pair.Value.Equals("True")) { checkBoxLowPower.Checked = true; }
+                    else if (pair.Value.Equals("False")) { checkBoxLowPower.Checked = false; }
+                }
                 else if (pair.Key.Equals("Frequency"))
                 {
                     comboBoxSamplingFreq.SelectedValue = pair.Value;
@@ -399,6 +406,8 @@ namespace OmGui
         public int Range { get; set; }
         private int[] SamplingRanges = { 2, 4, 8, 16 };
 
+        public bool LowPower { get; set; }
+
         public string metaData = null;
 
         private void buttonOk_Click(object sender, EventArgs e)
@@ -464,6 +473,7 @@ Cursor.Current = Cursors.WaitCursor;
 
             SamplingFrequency = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString());
             Range = (int)float.Parse(comboBoxRange.SelectedItem.ToString());
+            LowPower = checkBoxLowPower.Checked;
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
 
@@ -655,16 +665,18 @@ Cursor.Current = Cursors.WaitCursor;
         #endregion
 
         #region Warning Message Logic
-        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false, false };
-        string[] warningMessages = {"Selected device(s) not fully charged",
-                                    "Selected device(s) not fully cleared",
-                                    "Selected device(s) capacity could limit duration",
-                                    "Selected device(s) current battery charge could limit duration",
-                                    "Delayed start time is more than 14 days in the future",
-                                    "End time is in the past",
-                                    "Start time is in the past",
-                                    "Chosen sampling frequency is not officially supported (use at own risk)",
-                                    "Chosen start and end times do not make an interval (end <= start)"};
+        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false, false, false };
+        string[] warningMessages = {"Selected device(s) not fully charged", // 0
+                                    "Selected device(s) not fully cleared", // 1
+                                    "Selected device(s) capacity could limit duration", // 2
+                                    "Selected device(s) current battery charge could limit duration", // 3
+                                    "Delayed start time is more than 14 days in the future", // 4
+                                    "End time is in the past", // 5
+                                    "Start time is in the past", // 6
+                                    "Chosen sampling frequency is not officially supported (use at own risk)", // 7
+                                    "Chosen start and end times do not make an interval (end <= start)", // 8
+                                    "Low power accelerometer produces nosier data (and does not significantly extend duration)", // 9
+        };
         private void updateWarningMessages()
         {
             //Make date start and end from dates and times;
@@ -675,8 +687,6 @@ Cursor.Current = Cursors.WaitCursor;
             {
                 warningMessagesFlags[i] = false;
             }
-
-
 
             foreach (OmDevice device in Devices)
             {
@@ -721,6 +731,12 @@ Cursor.Current = Cursors.WaitCursor;
             if (radioButtonDuration.Checked && StartDate >= EndDate)
                 warningMessagesFlags[8] = true;
 
+            //Low power mode is being used
+            if (checkBoxLowPower.Checked)
+            {
+                warningMessagesFlags[9] = true;
+            }
+
             //Warning for non-standard rate/range
             int sampRange = comboBoxRange.SelectedItem != null ? int.Parse(comboBoxRange.SelectedItem.ToString()) : 0;
             if (sampFreq == 100 && sampRange == 8)
@@ -747,7 +763,7 @@ Cursor.Current = Cursors.WaitCursor;
             //If we have no warnings then display message
             if (s.ToString().Length == 0)
             {
-                richTextBoxWarning.Text = "WARNINGS\nNo warnings";
+                richTextBoxWarning.Text = "";
                 richTextBoxWarning.Visible = false;
             }
             else
@@ -817,5 +833,9 @@ Cursor.Current = Cursors.WaitCursor;
             updateWarningMessages();
         }
 
+        private void checkBoxLowPower_CheckedChanged(object sender, EventArgs e)
+        {
+            updateWarningMessages();
+        }
     }
 }

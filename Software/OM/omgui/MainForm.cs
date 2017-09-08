@@ -1717,8 +1717,8 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 2) / (devices.Length * 5)), message + "(config)");
 
                                //Sampling Freq and Range
-                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, (int)rangeForm.SamplingFrequency, rangeForm.Range)))
-                                   error = "Accel. config failed";
+                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, (int)rangeForm.SamplingFrequency, rangeForm.Range))) // rangeForm.LowPower
+                                    error = "Accel. config failed";
 
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 3) / (devices.Length * 5)), message + "(time sync)");
 
