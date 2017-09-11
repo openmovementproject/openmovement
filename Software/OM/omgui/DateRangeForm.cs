@@ -837,5 +837,10 @@ Cursor.Current = Cursors.WaitCursor;
         {
             updateWarningMessages();
         }
+
+        private void panelMain_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
