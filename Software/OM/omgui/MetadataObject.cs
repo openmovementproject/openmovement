@@ -13,6 +13,12 @@ namespace OmGui
         public string DeviceId             { get; protected set; }
         [CategoryAttribute("Recording"), DisplayName("Session ID"), DescriptionAttribute("Recording Session ID"), DefaultValueAttribute(""), ReadOnly(true)]
         public string SessionId            { get; protected set; }
+
+        [CategoryAttribute("Recording"), DisplayName("Sampling Rate"), DescriptionAttribute("Sampling Rate (Hz)"), DefaultValueAttribute(""), ReadOnly(true)]
+        public string SamplingRate { get; protected set; }
+        [CategoryAttribute("Recording"), DisplayName("Sampling Range"), DescriptionAttribute("Sampling Range (+/- g)"), DefaultValueAttribute(""), ReadOnly(true)]
+        public string SamplingRange { get; protected set; }
+
         //[CategoryAttribute("Recording"), DisplayName("Start Time"), DescriptionAttribute("Recording Start Time"), DefaultValueAttribute(""), ReadOnly(true)]
         //public string StartTime            { get; protected set; }
         [CategoryAttribute("Recording"), DisplayName("End Time"), DescriptionAttribute("Recording End Time"), DefaultValueAttribute(""), ReadOnly(true)]
@@ -58,7 +64,11 @@ namespace OmGui
 
             s = null; metadata.TryGetValue("DeviceId",          out s); metadataObject.DeviceId = s;
             s = null; metadata.TryGetValue("SessionId",         out s); metadataObject.SessionId = s;
-//            s = null; metadata.TryGetValue("StartTime",         out s); metadataObject.StartTime = s;
+
+            s = null; metadata.TryGetValue("SamplingRate",      out s); metadataObject.SamplingRate = s;
+            s = null; metadata.TryGetValue("SamplingRange",     out s); metadataObject.SamplingRange = s;
+
+            //            s = null; metadata.TryGetValue("StartTime",         out s); metadataObject.StartTime = s;
             s = null; metadata.TryGetValue("EndTime",           out s); metadataObject.EndTime = s;
 
             s = null; metadata.TryGetValue("StudyCentre",       out s); metadataObject.StudyCentre = s;

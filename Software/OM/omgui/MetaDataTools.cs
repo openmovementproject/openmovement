@@ -224,6 +224,9 @@ namespace OmGui
 
         public uint deviceId;
         public uint deviceSessionId;
+        public byte samplingRateCode;
+        public double samplingRate;
+        public int samplingRange;
         public DateTime? startDate = null;
         public DateTime? endDate = null;
         public TimeSpan? duration = null;
@@ -399,6 +402,10 @@ namespace OmGui
 
                     deviceId = BitConverter.ToUInt16(metadataBuffer, 5);
                     deviceSessionId = BitConverter.ToUInt32(metadataBuffer, 7);
+                    samplingRateCode = metadataBuffer[36];
+                    samplingRate = (3200.0 / (1 << (15 - (samplingRateCode & 0x0f))));
+                    samplingRange = (16 >> (samplingRateCode >> 6));
+
                     for (int i = 0; i < ANNOTATION_TOTAL_LENGTH + DATA_SECTOR_SIZE; i++)
                     {
                         char c = (char)metadataBuffer[ANNOTATION_OFFSET + i];
@@ -614,6 +621,8 @@ namespace OmGui
 
             metadataMap.Add("DeviceId", string.Format("{0:00000}", tools.deviceId));
             metadataMap.Add("SessionId", string.Format("{0:0000000000}", tools.deviceSessionId));
+            if (tools.samplingRate != 0) { metadataMap.Add("SamplingRate", string.Format("{0}", tools.samplingRate)); }
+            if (tools.samplingRange != 0) { metadataMap.Add("SamplingRange", string.Format("{0}", tools.samplingRange)); }
             if (tools.startDate.HasValue) { metadataMap.Add("StartTime", string.Format("{0:yyyy-MM-dd HH:mm:ss}", tools.startDate.Value)); metadataMap.Add("StartTimeNumeric", string.Format("{0:yyyyMMddHHmmss}", tools.startDate.Value)); }
             if (tools.endDate.HasValue) { metadataMap.Add("EndTime", string.Format("{0:yyyy-MM-dd HH:mm:ss}", tools.endDate.Value)); metadataMap.Add("EndTimeNumeric", string.Format("{0:yyyyMMddHHmmss}", tools.endDate.Value)); }
 
