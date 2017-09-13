@@ -475,8 +475,35 @@ namespace OmGui
                         }
                     }
 
-                    // Find last date/time with binary search
+                    // Ignore legacy stuff above: first sector is 2, last possible sector is just the last sector in the file
+                    lastSessionOffset = 2 * DATA_SECTOR_SIZE;
+                    lastSessionNumSectors = (fileSize / DATA_SECTOR_SIZE) - (lastSessionOffset / DATA_SECTOR_SIZE);
+                    if (lastSessionNumSectors < 0) { lastSessionNumSectors = 0; }
+
                     byte[] buffer = new byte[DATA_SECTOR_SIZE];
+
+                    // Find start date from first data sector
+                    if (startDate == null)
+                    {
+                        fs.Seek(lastSessionOffset + 0 * DATA_SECTOR_SIZE, SeekOrigin.Begin);
+                        fs.Read(buffer, 0, buffer.Length);
+
+                        ushort sessionInfoHeader = BitConverter.ToUInt16(buffer, 0);
+                        uint sessionInfoSessionId = BitConverter.ToUInt32(buffer, 6);         // @6 [4] (32-bit unique session identifier, 0 = unknown)
+                        uint timeValue = 0;
+                        if (sessionInfoHeader == 0x5841 && sessionInfoSessionId == deviceSessionId)
+                        {
+                            timeValue = BitConverter.ToUInt32(buffer, 14);   // @14 [4] timestamp
+                        }
+
+                        // Binary descent
+                        if (timeValue != 0)
+                        {
+                            startDate = ConvertDateTime(timeValue);
+                        }
+                    }
+
+                    // Find last date/time with binary search
                     endDate = null;
                     uint sectorA = 0;
                     uint sectorB = lastSessionNumSectors - 1;
