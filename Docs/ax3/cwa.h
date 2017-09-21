@@ -62,8 +62,8 @@ typedef struct
     cwa_timestamp_t timestamp;                  ///< @14  +4   Last reported RTC value, 0 = unknown
     uint16_t light;                             ///< @18  +2   Last recorded light sensor value in raw units, 0 = none
     uint16_t temperature;                       ///< @20  +2   Last recorded temperature sensor value in raw units, 0 = none
-    uint8_t  battery;                           ///< @23  +1   Last recorded battery level in raw units, 0 = unknown
     uint8_t  events;                            ///< @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
+    uint8_t  battery;                           ///< @23  +1   Last recorded battery level in raw units, 0 = unknown
     uint8_t  sampleRate;                        ///< @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     uint8_t  numAxesBPS;                        ///< @25  +1   0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
     int16_t  timestampOffset;                   ///< @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
