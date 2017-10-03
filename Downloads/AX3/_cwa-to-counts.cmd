@@ -1,6 +1,12 @@
 @echo off
 setlocal
 
+::: Set epoch size, e.g. to 1, 10, or 60 (seconds)
+set EPOCH=10
+
+::: Set to 1 to output raw files at 30Hz (in a format that can be converted from raw to epoch with ActiLife software)
+set USE_RAW=
+
 :check_req
 set OMCONVERT=%~dp0omconvert.exe
 if exist "%OMCONVERT%" goto check_args
@@ -42,27 +48,13 @@ shift
 goto next
 
 :file_exist
-
-::: Remove existing temporary files
-if exist "%~dpn1.svm.csv.part" del "%~dpn1.svm.csv.part" >nul
-if exist "%~dpn1.wtv.csv.part" del "%~dpn1.wtv.csv.part" >nul
-if exist "%~dpn1.paee.csv.part" del "%~dpn1.paee.csv.part" >nul
-
+set RAW_OPTION=
+if %USE_RAW%!==1! set RAW_OPTION=-csv-file "%~dpn1.raw30ag.csv"
 @echo on
-"%OMCONVERT%" "%~1" -svm-file "%~dpn1.svm.csv.part" -wtv-file "%~dpn1.wtv.csv.part" -paee-file "%~dpn1.paee.csv.part"
+"%OMCONVERT%" "%~1" -resample 30 -csv-format:ag %RAW_OPTION% -counts-epoch %EPOCH% -counts-file "%~dpn1.counts%EPOCH%.csv"
 @echo off
 
 echo ERRORLEVEL=%ERRORLEVEL%
-
-::: Remove existing output files
-: if exist "%~dpn1.svm.csv" del "%~dpn1.svm.csv" >nul
-: if exist "%~dpn1.wtv.csv" del "%~dpn1.wtv.csv" >nul
-: if exist "%~dpn1.paee.csv" del "%~dpn1.paee.csv" >nul
-
-::: Move temporary files to output
-move /y "%~dpn1.svm.csv.part" "%~dpn1.svm.csv" >nul
-move /y "%~dpn1.wtv.csv.part" "%~dpn1.wtv.csv" >nul
-move /y "%~dpn1.paee.csv.part" "%~dpn1.paee.csv" >nul
 echo ======================================================================
 
 shift
