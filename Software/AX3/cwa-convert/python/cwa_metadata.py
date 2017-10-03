@@ -274,12 +274,21 @@ def cwa_info(filename):
 if __name__ == "__main__":
 	import json
 	import os
+	mode = 'json' # '-mode:json', '-mode:ldjson', '-mode:size_rate'
 	for filename in sys.argv[1:]:
 		try:
+			if filename[0:6] == '-mode:':
+				mode = filename[6:]
+				continue
 			info = cwa_info(filename)
-			print(json.dumps(info))
-			# print(json.dumps(info, indent=4, sort_keys=True))
-			# print('%s,%s,%s,%s,%s' % (info['file']['name'],info['file']['size']/1024/1024,info['file']['duration']/60/60/24,info['header']['sampleRate'],info['file']['meanRate']))
+			if mode == 'json':
+				print(json.dumps(info, indent=4, sort_keys=True))
+			elif mode == 'ldjson':
+				print(json.dumps(info))
+			elif mode == 'size_rate':
+				print('%s,%s,%s,%s,%s' % (info['file']['name'],info['file']['size']/1024/1024,info['file']['duration']/60/60/24,info['header']['sampleRate'],info['file']['meanRate']))
+			else:
+				print('ERROR: Unknown output mode: %s' % mode)
 		except Exception as e:
 			print('Exception ' + e.__doc__ + ' -- ' + e.message)
 
