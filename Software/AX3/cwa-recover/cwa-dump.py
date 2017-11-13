@@ -28,8 +28,13 @@ def driveDump(path, outputFile):
           size = len(data)
           if size <= 0:
             break
-          fo.write(data)
-          writtenSize += size
+          written = fo.write(data)
+          fo.flush()
+          if written != size:
+            print("ERROR: Problem writing all of the data, wrote " + str(written) + " of " + str(size) + "")
+            break
+            
+          writtenSize += written
           perc = int(100 * writtenSize / fileSize)
           elapsed = time.time() - startTime
           remaining = 0
@@ -37,7 +42,7 @@ def driveDump(path, outputFile):
             rate = writtenSize / elapsed
             if rate > 0:
               remaining = (fileSize - writtenSize) / rate
-          print("Dump " + str(perc) + "% in " + str(timedelta(seconds=elapsed)) + ", estimated remaining: " + str(timedelta(seconds=remaining)) + "...")
+          print("Dumping " + str(written) + ", approx. " + str(perc) + "% in " + str(timedelta(seconds=int(elapsed))) + ", est. remaining: " + str(timedelta(seconds=int(remaining))) + "...")
         
   except PermissionError:
     print("ERROR: Permission error -- you must run this in an Ctrl+Shift+Esc, Alt+F, N, cmd, 'Create this task with administrative privileges.'")
