@@ -17,7 +17,8 @@ def driveDump(path, outputFile):
   try:
     startTime = time.time()
     with open(path, 'rb') as fi:
-      fileSize = 992161*512 # AX3 drive size
+      # HACK: Fixed AX3 drive size
+      fileSize = 992161*512
       # fi.seek(0, os.SEEK_END) # 2
       # fileSize = fi.tell() # 992161*512
       # fi.seek(0, os.SEEK_SET) # 0
@@ -43,6 +44,9 @@ def driveDump(path, outputFile):
             if rate > 0:
               remaining = (fileSize - writtenSize) / rate
           print("Dumping " + str(written) + ", approx. " + str(perc) + "% in " + str(timedelta(seconds=int(elapsed))) + ", est. remaining: " + str(timedelta(seconds=int(remaining))) + "...")
+          
+          if writtenSize >= fileSize:
+            break
         
   except PermissionError:
     print("ERROR: Permission error -- you must run this in an Ctrl+Shift+Esc, Alt+F, N, cmd, 'Create this task with administrative privileges.'")
