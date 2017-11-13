@@ -98,23 +98,23 @@ def main():
     print("ERROR: Output file already exists, must remove or use another output file:", outputFile)
     return
   
+  print("Autodetect...")
+  prefixDevice = b"AX3 AX3 Mass Storage USB Device"
+  prefixDrive = b"\\\\.\\PHYSICALDRIVE"
+  drivePath = findSingleDrive(prefixDevice, prefixDrive)
+  if drivePath == None:
+    print("ERROR: Cannot continue without drive.")
+    return
+  
   print("Checking admin permissions...")
   if is_admin():
-    # Code of your program here
-    print("Autodetect...")
-    prefixDevice = b"AX3 AX3 Mass Storage USB Device"
-    prefixDrive = b"\\\\.\\PHYSICALDRIVE"
-    drivePath = findSingleDrive(prefixDevice, prefixDrive)
-    if drivePath == None:
-      print("ERROR: Cannot continue without drive.")
-    else:
-      driveDump(drivePath, outputFile)
+    # Run code needing admin rights
+    driveDump(drivePath, outputFile)
   else:
     # Re-run the program with admin rights
     params = " ".join(['"%s"' % (x,) for x in sys.argv[0:]])
     print("Spawning version with admin rights...", sys.executable, params)
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
 
-    
 if __name__ == "__main__":
   main()
