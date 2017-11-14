@@ -15,7 +15,7 @@ omconvert input.cwa -out output.wav -info information.txt
 
 The output `.wav` file uses the standard [.WAV file format](https://en.wikipedia.org/wiki/WAV) is pretty standard for audio files -- and there is plenty of documentation available for that format: [Audio File Format Specifications](http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html), [WAVE PCM soundfile format](http://soundfile.sapp.org/doc/WaveFormat/).
 
-The output file contains four channels: the first three are for the X-/Y-/Z-axes respectively, and the fourth contains auxilliary data which can typically be ignored.  The format uses signed 16-bit values (values from -32768 to +32767) -- this is typically normalized to the -1 to +1 range, and then scaled by the channel scaling (which will be 8 for the +/-2, 4 or 8*g* range; and 16 for the +/-16*g* range -- where 1*g* is 9.81m/s/s).
+The output file contains four channels: the first three are for the X-/Y-/Z-axes respectively, and the fourth contains auxiliary data which can typically be ignored.  The format uses signed 16-bit values (values from -32768 to +32767) -- this is typically normalized to the -1 to +1 range, and then scaled by the channel scaling (which will be 8 for the +/-2, 4 or 8*g* range; and 16 for the +/-16*g* range -- where 1*g* is 9.81m/s/s).
 
 The output file headers are padded so that the underlying data always starts at a fixed 1kB (1024 byte) offset.
 
@@ -73,7 +73,7 @@ The channel mapping can be used to identify the X-/Y-/Z-axes (which are currentl
 
 
 
-### Auxilliary channel data
+### Auxiliary channel data
 
 The 16-bit value is treated as a bit-field:
 
@@ -87,11 +87,11 @@ Where the top two bits describe the validity of the data in this sample row:
 |   `nc` |     01 | Data available, some channels clipped                 |
 |   `nc` |     10 | Data not available                                    |
 
-The next four bits describe whether this row contains additional auxilliary data:
+The next four bits describe whether this row contains additional auxiliary data:
 
 |   Bits | Values | Meaning |
 | -----: | -----: | :---------------------------------------------------- |
-| `tttt` |   0000 | No auxilliary sample data                             |
+| `tttt` |   0000 | No auxiliary sample data                              |
 | `tttt` |   0001 | Battery, 10-bit raw ADC reading in `uu vvvvvvvv`      |
 | `tttt` |   0010 | Light, 10-bit raw ADC reading in `uu vvvvvvvv`        |
 | `tttt` |   0011 | Temperature, 10-bit raw ADC reading in `uu vvvvvvvv`  |
