@@ -6,18 +6,33 @@ import sys
 import os
 from struct import *
 
+def checksum512(data):
+  sum = 0
+  for o in range(256):
+    value = data[2 * o] | (data[2 * o + 1] << 8)
+    sum = (sum + value) & 0xffff
+  return sum
+
+def singleBit(value):
+  if value != 0 and not (value & (value - 1)):
+    return value
+  else:
+    return 0
+
 def recoverCwa(inputFile, outputFile):
   initialOffset = 0 # 0x20000 in drive dumps
   sectorSize = 512
   headerSize = 2 * sectorSize
   paddingMax = 128  # Allow first few bytes to be garbage
   # allowedPadding = [ 0xe0, 0xf0 ] # Allowed garbage bytes
+  globalSessionId = None
+  globalDeviceId = None
   
-  if True:  # If clock not reset, session don't have to be unique, sequence may reset
+  if False:  # If clock not corrupted and not reset, session don't have to be unique, sequence may reset
     idxTimestamp = 0
     idxSession = 1
     idxSequenceId = 2
-  elif True:  # Clock may be reset between different sessions were unique, sequence may reset
+  elif False:  # Clock may be reset between different sessions were unique, sequence may reset
     idxSession = 0
     idxTimestamp = 1
     idxSequenceId = 2
@@ -38,6 +53,9 @@ def recoverCwa(inputFile, outputFile):
   metadata = [] # (offset,size,sessionId)
   data = []     # (offset,size,sessionId,sequenceId,timestamp)
   
+  countCorrectedSession = 0
+  countCorrectedSequence = 0
+  
   numSectors = fileSize // sectorSize
   print("Processing " + str(numSectors) + " sectors...")
   lastPerc = -1
@@ -53,13 +71,52 @@ def recoverCwa(inputFile, outputFile):
       continue
     
     for o in range(paddingMax):
+      ofs = i * sectorSize + o
       # Check if this is a data block
       if block[o] == ord('A') and block[o + 1] == ord('X') and block[o + 2] == 0xfc and block[o+3] == 0x01:
+        completeBlock = (o == 0)
         fileOffset = i * sectorSize + o
         blockLength = sectorSize - o
         sessionId = unpack('<I', block[o+6:o+10])[0]
         timestamp = (unpack('<I', block[o+14:o+18])[0] << 16) + ((unpack('<H', block[o+4:o+6])[0] & 0x8fff) << 1)
         sequenceId = unpack('<I', block[o+10:o+14])[0]
+        
+        # Report on mismatched checksums
+        if False:
+          if completeBlock:
+            checksum = unpack('<H', block[o+510:o+512])[0]
+            actualChecksum = checksum512(block)
+            if actualChecksum != 0:
+              print("Mismatched checksum at " + str(i) + " = " + str(actualChecksum) + " (" + str(checksum) + ")")
+
+        # For an incomplete block
+        if not completeBlock:
+          # Check basic information
+          if sessionId != globalSessionId:
+            x = sessionId ^ globalSessionId
+            bitValue = singleBit(x)
+            if bitValue:
+              # print("Corrected probable corrupted session ID: " + str(sessionId) + " (" + str(globalSessionId) + ") ^" + hex(x))
+              sessionId ^= bitValue
+              countCorrectedSession += 1
+            else:
+              print("Uncorrected mismatched session ID: " + str(sessionId) + " (" + str(globalSessionId) + ") ^" + hex(x))
+              
+          # Check basic information
+          nextSequence = None
+          if len(data) > 0:
+            lastItem = data[len(data) - 1]
+            nextSequence = lastItem[idxSequenceId] + 1
+          if nextSequence != None and sequenceId != nextSequence:
+            x = sequenceId ^ nextSequence
+            bitValue = singleBit(x)
+            if bitValue:
+              # print("Corrected possible corrupted sequence ID: " + str(sequenceId) + " (" + str(nextSequence) + ") ^" + hex(x))
+              sequenceId ^= bitValue
+              countCorrectedSequence += 1
+            else:
+              # print("NOTE: Non-consecutive sequence ID: " + str(sequenceId) + " (" + str(nextSequence) + ") ^" + hex(x))
+              pass
         
         item = [0, 0, 0, fileOffset, blockLength]
         item[idxSession] = sessionId
@@ -73,18 +130,21 @@ def recoverCwa(inputFile, outputFile):
         fileOffset = i * sectorSize + o
         blockLength = headerSize - o
         sessionId = unpack('<I', block[o+7:o+11])[0]
-        print("Found header with session ID: " + str(sessionId))
+        deviceId = unpack('<H', block[5:7])[0]			# @ 5  +2   Device identifier
+        print("Found header with session ID: " + str(sessionId) + " (device=" + str(deviceId) + ")")
+        globalDeviceId = deviceId
+        globalSessionId = sessionId
         metadata.append((fileOffset, blockLength, sessionId))
         break
   
   print("Found: " + str(len(metadata)) + " raw metadata block(s), " + str(len(data)) + " raw data block(s)")
-
+  print("Corrected: " + str(countCorrectedSession) + " session IDs, and " + str(countCorrectedSequence) + " sequences")
+  
   print("Sorting data blocks...")
   data = sorted(data)
   
   print("Writing output: ", outputFile)
   with open(outputFile, 'wb') as fo:
-    globalSessionId = None
     if len(metadata) > 0:
       if len(metadata) > 1:
         print("WARNING: Multiple header blocks found, the first one will be used (some readers may not parse the whole data if the data block session-id does not match the one in the header")
@@ -97,7 +157,7 @@ def recoverCwa(inputFile, outputFile):
         # Pad block with missing bytes
         missingBytes = headerSize - blockLength
         for o in range(missingBytes):
-          block[blockLength + o] = 0
+          block[blockLength + o] = 0xff
       fo.write(block)
     else:
       print("WARNING: No header block found, this utility does not yet create one, so the output file will not be valid")
@@ -137,8 +197,14 @@ def recoverCwa(inputFile, outputFile):
         prevSequenceId = None
         prevFileSector = None
         
+      block = bytearray(fileData[fileOffset:fileOffset + sectorSize]) # blockLength
+      
+      # Patch-in possibly updated values
+      pack_into('<I', block, 6, sessionId)
+      pack_into('<I', block, 10, sequenceId)
+        
       # Trace
-      if True:
+      if False:
         print("#" + str(i) + " session=" + str(sessionId) + " t=" + str(timestamp) +  " sequence=" + str(sequenceId) + " @" + str(fileOffset) + "+" + str(blockLength) + " ")
       
       if prevFileSector != None and fileSector != prevFileSector + 1:
@@ -166,8 +232,6 @@ def recoverCwa(inputFile, outputFile):
       if sessionId != globalSessionId:
         print("WARNING: #" + str(i) + " Mismatched session ID: " + str(sessionId) + " but header is " + str(globalSessionId) + " file offset " + str(fileOffset))
         numOtherSession += 1
-      
-      block = bytearray(fileData[fileOffset:fileOffset + sectorSize]) # blockLength
       
       missingBytes = 0
       if blockLength < sectorSize:
