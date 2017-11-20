@@ -78,7 +78,7 @@ static const char NAND_DEVICE_HY27UF084G2B[6]   = { 0xAD, 0xDC, 0x10, 0x95, 0x54
 static const char NAND_DEVICE_HY27UF084G2M[6]   = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };	// 2 (one matched by "NAND_DEVICE_ALT", the on-board check terminates after the first two bytes as it matches against NAND_DEVICE_HY27UF084G2x)
 static const char NAND_DEVICE_MT29F8G08AAA[6]   = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };	// 3
 static const char NAND_DEVICE_S34ML04G1[6]      = { 0x01, 0xDC, 0x90, 0x95, 0x54, 0x00 };	// 4 "NAND_DEVICE_ALT2"
-static const char NAND_DEVICE_MT29F8G08ABADA[6] = { 0x2C, 0xDC, 0x00, 0x95, 0xD6, 0x00 };	// 5 "NAND_DEVICE_ALT3" (actually 4G NAND_DEVICE_MT29F4G..., and the on-board check terminates after the first two bytes)
+static const char NAND_DEVICE_MT29F8G08ABADA[6] = { 0x2C, 0xDC, 0x90, 0x95, 0x56, 0x00 };	// 5 "NAND_DEVICE_ALT3" (actually 4G NAND_DEVICE_MT29F4G..., the on-board check terminates after the first two bytes)
 
 static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
 {
@@ -98,11 +98,11 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
     if (identified != NULL) 
     {
         *identified = -2;
-        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0)           { *identified = 1; }
-		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0)      { *identified = 2; }
-		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0)      { *identified = 3; }
-		else if (strcmp(NAND_DEVICE_S34ML04G1, (char *)localId) == 0)         { *identified = 4; }
-		else if (memcmp(NAND_DEVICE_MT29F8G08ABADA, (char *)localId, 5) == 0) { *identified = 5; }
+		if (memcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId, 6) == 0)        { *identified = 1; }
+		else if (memcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId, 6) == 0)   { *identified = 2; }
+		else if (memcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId, 6) == 0)   { *identified = 3; }
+		else if (memcmp(NAND_DEVICE_S34ML04G1, (char *)localId, 6) == 0)      { *identified = 4; }
+		else if (memcmp(NAND_DEVICE_MT29F8G08ABADA, (char *)localId, 6) == 0) { *identified = 5; }
 	}
     if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (present != NULL) 
@@ -144,7 +144,7 @@ int record_setup(int deviceId)
 #ifdef ID_NAND
     /* NAND ID */
     {
-        unsigned char nandId[6];
+		unsigned char nandId[6] = { 0 };
         int nandType = -1;
         memset(nandId, 0, sizeof(nandId));
         result = OmGetNandId(deviceId, nandId, NULL, &nandType);
@@ -164,8 +164,8 @@ int record_setup(int deviceId)
 				default: nandDescription = "UNKNOWN!"; break;
 			}
 
-            fprintf(stderr, "RECORD #%d: NAND type =%d %s\n", deviceId, nandType, nandDescription);
-            if (nandType <= 0) { printf("ERROR: OmGetNandId() not known type (try again to be sure).\n"); return 0; }     // ERROR: Not known type
+            fprintf(stderr, "RECORD #%d: NAND type =%d %s [%02x:%02x:%02x:%02x:%02x:%02x]\n", deviceId, nandType, nandDescription, nandId[0], nandId[1], nandId[2], nandId[3], nandId[4], nandId[5]);
+            if (nandType <= 0) { printf("ERROR: OmGetNandId() not known type (try again to be sure) [%02x:%02x:%02x:%02x:%02x:%02x].\n", nandId[0], nandId[1], nandId[2], nandId[3], nandId[4], nandId[5]); return 0; }     // ERROR: Not known type
         }
     }
 #endif
