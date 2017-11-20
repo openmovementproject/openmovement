@@ -71,14 +71,14 @@ int durationDays = 8, endHour = 0;
 
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
-static const char NAND_DEVICE_DONT_CARE[6] = 	 {0x00};
-static const char NAND_DEVICE_HY27UF084G2x[6] = { 0xAD, 0xDC, 0x00 };
+static const char NAND_DEVICE_DONT_CARE[6]      = {0x00};
+static const char NAND_DEVICE_HY27UF084G2x[6]   = { 0xAD, 0xDC, 0x00 };                     // "NAND_DEVICE_ALT"
 //??                                             0xad,0xdc,0x84,0x25,0xad,0x00,
-static const char NAND_DEVICE_HY27UF084G2B[6] = { 0xAD, 0xDC, 0x10, 0x95, 0x54, 0x00 };		// 1
-static const char NAND_DEVICE_HY27UF084G2M[6] = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };		// 2
-static const char NAND_DEVICE_MT29F8G08AAA[6] = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };     // 3
-static const char NAND_DEVICE_S34ML04G1[6]    = { 0x01, 0xDC, 0x90, 0x95, 0x54, 0x00 };     // 4
-
+static const char NAND_DEVICE_HY27UF084G2B[6]   = { 0xAD, 0xDC, 0x10, 0x95, 0x54, 0x00 };	// 1 "NAND_DEVICE"
+static const char NAND_DEVICE_HY27UF084G2M[6]   = { 0xAD, 0xDC, 0x80, 0x95, 0xAD, 0x00 };	// 2 (one matched by "NAND_DEVICE_ALT", the on-board check terminates after the first two bytes as it matches against NAND_DEVICE_HY27UF084G2x)
+static const char NAND_DEVICE_MT29F8G08AAA[6]   = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };	// 3
+static const char NAND_DEVICE_S34ML04G1[6]      = { 0x01, 0xDC, 0x90, 0x95, 0x54, 0x00 };	// 4 "NAND_DEVICE_ALT2"
+static const char NAND_DEVICE_MT29F8G08ABADA[6] = { 0x2C, 0xDC, 0x00, 0x95, 0xD6, 0x00 };	// 5 "NAND_DEVICE_ALT3" (actually 4G NAND_DEVICE_MT29F4G..., and the on-board check terminates after the first two bytes)
 
 static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
 {
@@ -98,11 +98,12 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
     if (identified != NULL) 
     {
         *identified = -2;
-        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0)      { *identified = 1; }
-		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0) { *identified = 2; }
-		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0) { *identified = 3; }
-		else if (strcmp(NAND_DEVICE_S34ML04G1, (char *)localId) == 0)    { *identified = 4; }
-    }
+        if (strcmp(NAND_DEVICE_HY27UF084G2B, (char *)localId) == 0)           { *identified = 1; }
+		else if (strcmp(NAND_DEVICE_HY27UF084G2M, (char *)localId) == 0)      { *identified = 2; }
+		else if (strcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId) == 0)      { *identified = 3; }
+		else if (strcmp(NAND_DEVICE_S34ML04G1, (char *)localId) == 0)         { *identified = 4; }
+		else if (memcmp(NAND_DEVICE_MT29F8G08ABADA, (char *)localId, 5) == 0) { *identified = 5; }
+	}
     if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (present != NULL) 
     {
@@ -159,6 +160,7 @@ int record_setup(int deviceId)
 				case 2: nandDescription = "ALTERNATE (HY27UF084G2M)"; break;   // NAND_DEVICE_HY27UF084G2M
 				case 3: nandDescription = "MICRON (MT29F8G08AAA)"; break;      // NAND_DEVICE_MT29F8G08AAA
 				case 4: nandDescription = "SPANSION (S34ML04G1)"; break;       // NAND_DEVICE_S34ML04G1
+				case 5: nandDescription = "MICRON (MT29F4G08ABADA)"; break;    // id "NAND_DEVICE_MT29F8G08ABADA", but actually 4 Gb model
 				default: nandDescription = "UNKNOWN!"; break;
 			}
 
