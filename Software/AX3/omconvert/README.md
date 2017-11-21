@@ -89,7 +89,7 @@ Where the top two bits describe the validity of the data in this sample row:
 
 The next four bits describe whether this row contains additional auxiliary data:
 
-|   Bits | Values | Meaning |
+|   Bits | Values | Meaning                                               |
 | -----: | -----: | :---------------------------------------------------- |
 | `tttt` |   0000 | No auxiliary sample data                              |
 | `tttt` |   0001 | Battery, 10-bit raw ADC reading in `uu vvvvvvvv`      |
