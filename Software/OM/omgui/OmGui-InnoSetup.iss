@@ -3,8 +3,8 @@
 [Setup]
 AppId={{8CDD410D-4556-4A8A-BF86-D67276A10EA5}
 AppName=OmGui
-AppVersion=1.0.0.36
-;AppVerName=OmGui 1.0.0.36
+AppVersion=1.0.0.37
+;AppVerName=OmGui 1.0.0.37
 AppPublisher=Open Movement
 AppPublisherURL=http://www.openmovement.co.uk
 AppSupportURL=http://www.openmovement.co.uk
@@ -12,7 +12,7 @@ AppUpdatesURL=http://www.openmovement.co.uk
 DefaultDirName={pf}\Open Movement\OM GUI
 DefaultGroupName=OmGui
 AllowNoIcons=yes
-OutputBaseFilename=AX3-GUI-36
+OutputBaseFilename=AX3-GUI-37
 SetupIconFile=Application Icon.ico
 Compression=zip
 SolidCompression=no
@@ -54,7 +54,14 @@ Filename: "{app}\setup-ax3-driver.exe"; WorkingDir: "{app}"; Description: "Insta
 Filename: "{app}\OmGui.exe"; Description: "{cm:LaunchProgram,OmGui}"; Flags: nowait postinstall skipifsilent
 
 [CustomMessages]
-InstallDotNet=Download and install the required runtime for Microsoft .NET 3.5?%n%nIf you get error 0x800f0906:%n1. Windows+R%n2. "gpedit.msc"%n3. 'Computer Configuration' / 'Administrative Templates' / 'System'%n4. 'Specify settings for optional component installation and component repair'%n5. 'Enabled'%n6. 'Contact Windows Update directly to download repair content instead of Windows Server Update Services (WSUS)'%n7. Start, "cmd", right-click, 'Run as Administrator'%n8. gpupdate /force
+InstallDotNet=Your system must have the runtime for Microsoft .NET 3.5 -- download now?%n...or manually from: http://tinyurl.com/dotnet35setup%n%nAlternatively, you can enable the feature:%n1. Press Windows+R, enter "appwiz.cpl"%n2. Click 'Turn Windows features on or off'%n3. Select '.NET Framework 3.5 (includes .NET 2.0 and 3.0)', and 'OK'.%n%nIf you get error 0x800f081f:%n1. Press Ctrl+Shift+Esc, Alt+F, N%n2. Type: DISM.EXE /Online /Add-Capability /CapabilityName:NetFx3~~~~%n3. Click 'Create this task with administrative privileges', and 'OK'.%n%nIf you get error 0x800f0906, you can change your system update source:%n1. Press Windows+R, type "gpedit.msc"%n2. Select 'Computer Configuration' / 'Administrative Templates' / 'System' / 'Specify settings for optional component installation and component repair' / 'Enabled' / 'Contact Windows Update directly to download repair content instead of Windows Server Update Services (WSUS)'%n3. Press Ctrl+Shift+Esc, Alt+F, N%n4. Type: gpupdate /force%n5. Click 'Create this task with administrative privileges', and 'OK'.
+
+; DISM.EXE /Online /Enable-Feature /FeatureName:NetFx3 /source:C:\Features /LimitAccess
+; DISM.EXE /Online /Add-Package /PackagePath:C:\Features\Microsoft-Windows-NetFx3-OnDemand-Package.cab
+
+
+
+
 
 [Code]
 const

@@ -739,21 +739,42 @@ Console.WriteLine("toolStripButtonDownload_Click() STARTED...");
                         }
                     }
 
+                    // Get details
+                    string labelIdString = i.Text.PadLeft(5, '0');
                     string deviceIdString = string.Format("{0:00000}", device.DeviceId);
-                    metadataMap.TryGetValue("DeviceId", out deviceIdString);
-
+                    string fileDeviceIdString = null;
+                    metadataMap.TryGetValue("DeviceId", out fileDeviceIdString);
                     string sessionIdString = string.Format("{0:0000000000}", device.SessionId);
-                    metadataMap.TryGetValue("SessionId", out sessionIdString);
+                    string fileSessionIdString = null;
+                    metadataMap.TryGetValue("SessionId", out fileSessionIdString);
+                    Console.WriteLine("DOWNLOAD-NAME: " + labelIdString +  " Device properties: ID=" + deviceIdString + " (" + fileDeviceIdString + "), session=" + sessionIdString + " (" + fileSessionIdString + "), file=" + device.Filename);
+                    if (labelIdString != deviceIdString || deviceIdString != fileDeviceIdString)
+                    {
+                        Console.WriteLine("DOWNLOAD-NAME: Device ID mismatch for " + labelIdString + ", DeviceId=" + deviceIdString + ", fileDeviceId=" + fileDeviceIdString + "), file=" + device.Filename);
+                    }
+                    if (sessionIdString != fileSessionIdString)
+                    {
+                        Console.WriteLine("DOWNLOAD-NAME: Session ID mismatch for " + labelIdString + ", SessionId=" + sessionIdString + ", fileSessionId=" + fileSessionIdString + "), file=" + device.Filename);
+                    }
 
-                    filename = filename.Replace("{DeviceId}", deviceIdString);
-                    filename = filename.Replace("{SessionId}", sessionIdString);
+                    string usedDeviceId = deviceIdString; // labelIdString; deviceIdString; fileDeviceIdString;
+                    string usedSessionId = (device.SessionId == uint.MaxValue) ? ((fileSessionIdString != null) ? fileSessionIdString : "0000000000") : sessionIdString;
+                    filename = filename.Replace("{DeviceId}", usedDeviceId);
+                    filename = filename.Replace("{SessionId}", usedSessionId);
+
+                    // Built-in values
                     string[] keys = new string[] { "StudyCentre", "StudyCode", "StudyInvestigator",  "StudyExerciseType", "StudyOperator", "StudyNotes", "SubjectSite", "SubjectCode", "SubjectSex", "SubjectHeight", "SubjectWeight", "SubjectHandedness", "SubjectNotes" };
                     foreach (string key in keys)
                     {
                         filename = filename.Replace("{" + key + "}", metadataMap.ContainsKey(key) ? metadataMap[key] : "");
                     }
+                    // Custom values
+                    foreach (string key in metadataMap.Keys)
+                    {
+                        filename = filename.Replace("{" + key + "}", metadataMap[key]);
+                    }
 
-                    // Remove forbidden filename characters
+                    // Remove forbidden filename characters (e.g. from metadata)
                     StringBuilder sb = new StringBuilder();
                     for (int j = 0; j < filename.Length; j++)
                     {

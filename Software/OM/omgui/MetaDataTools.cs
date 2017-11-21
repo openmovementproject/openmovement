@@ -123,8 +123,9 @@ namespace OmGui
                     string[] parts = nvp.Split(new char[] { '=' }, 2);
                     string name, value;
 
+                    if (parts.Length  < 1) { continue; }
                     if (parts.Length >= 2) { name = parts[0]; value = parts[1]; }
-                    else { name = ""; value = parts[0]; }
+                    else { name = parts[0]; value = ""; }
 
                     name = UrlDecode(name);
                     value = UrlDecode(value);
@@ -223,7 +224,7 @@ namespace OmGui
 
 
         public uint deviceId;
-        public uint deviceSessionId;
+        public uint deviceSessionId = uint.MaxValue;
         public byte samplingRateCode;
         public double samplingRate;
         public int samplingRange;
@@ -400,11 +401,11 @@ namespace OmGui
                     dataOffset = BitConverter.ToUInt16(metadataBuffer, 2);
                     if (dataOffset != 0) { dataOffset += 4; }
 
-                    deviceId = BitConverter.ToUInt16(metadataBuffer, 5);
-                    deviceSessionId = BitConverter.ToUInt32(metadataBuffer, 7);
-                    samplingRateCode = metadataBuffer[36];
-                    samplingRate = (3200.0 / (1 << (15 - (samplingRateCode & 0x0f))));
-                    samplingRange = (16 >> (samplingRateCode >> 6));
+                    this.deviceId = BitConverter.ToUInt16(metadataBuffer, 5);
+                    this.deviceSessionId = BitConverter.ToUInt32(metadataBuffer, 7);
+                    this.samplingRateCode = metadataBuffer[36];
+                    this.samplingRate = (3200.0 / (1 << (15 - (this.samplingRateCode & 0x0f))));
+                    this.samplingRange = (16 >> (this.samplingRateCode >> 6));
 
                     for (int i = 0; i < ANNOTATION_TOTAL_LENGTH + DATA_SECTOR_SIZE; i++)
                     {
@@ -443,7 +444,7 @@ namespace OmGui
                         if (sessionInfoHeader == 0x4953)
                         {
                             uint sessionInfoSessionId = BitConverter.ToUInt32(sessioninfoBuffer, i * DATA_SECTOR_SIZE + 4);         // @4 [4] (32-bit unique session identifier, 0 = unknown)
-                            if (sessionInfoSessionId == deviceSessionId)
+                            if (sessionInfoSessionId == this.deviceSessionId)
                             {
                                 ushort sessionInfoType = BitConverter.ToUInt16(sessioninfoBuffer, i * DATA_SECTOR_SIZE + 10);           // @10 [2] (b0: 0 = session continuation, 1 = new session, b1-b15: reserved)
                                 uint sessionInfoSessionOffset = BitConverter.ToUInt32(sessioninfoBuffer, i * DATA_SECTOR_SIZE + 12);    // @12 [4] offset in bytes within file for the first session block
@@ -459,7 +460,7 @@ namespace OmGui
                         else if (sessionInfoHeader == 0x5841)     // AX (old file format)
                         {
                             uint sessionInfoSessionId = BitConverter.ToUInt32(sessioninfoBuffer, i * DATA_SECTOR_SIZE + 6);         // @6 [4] (32-bit unique session identifier, 0 = unknown)
-                            if (sessionInfoSessionId == deviceSessionId)
+                            if (sessionInfoSessionId == this.deviceSessionId)
                             {
                                 //ushort sessionInfoType = 1;
                                 //uint sessionInfoSessionOffset = DATA_SESSIONINFO_OFFSET;
@@ -491,7 +492,7 @@ namespace OmGui
                         ushort sessionInfoHeader = BitConverter.ToUInt16(buffer, 0);
                         uint sessionInfoSessionId = BitConverter.ToUInt32(buffer, 6);         // @6 [4] (32-bit unique session identifier, 0 = unknown)
                         uint timeValue = 0;
-                        if (sessionInfoHeader == 0x5841 && sessionInfoSessionId == deviceSessionId)
+                        if (sessionInfoHeader == 0x5841 && sessionInfoSessionId == this.deviceSessionId)
                         {
                             timeValue = BitConverter.ToUInt32(buffer, 14);   // @14 [4] timestamp
                         }
@@ -516,7 +517,7 @@ namespace OmGui
                         ushort sessionInfoHeader = BitConverter.ToUInt16(buffer, 0);
                         uint sessionInfoSessionId = BitConverter.ToUInt32(buffer, 6);         // @6 [4] (32-bit unique session identifier, 0 = unknown)
                         uint timeValue = 0;
-                        if (sessionInfoHeader == 0x5841 && sessionInfoSessionId == deviceSessionId)
+                        if (sessionInfoHeader == 0x5841 && sessionInfoSessionId == this.deviceSessionId)
                         {
                             timeValue = BitConverter.ToUInt32(buffer, 14);   // @14 [4] timestamp
                         }
@@ -642,7 +643,12 @@ namespace OmGui
             {
                 foreach (KeyValuePair<string, string> kvp in parsed)
                 {
-                    metadataMap.Add(MetaDataTools.metaDataMappingDictionary[kvp.Key], kvp.Value);
+                    string key = kvp.Key;
+                    if (MetaDataTools.metaDataMappingDictionary.ContainsKey(key))
+                    {
+                        key = MetaDataTools.metaDataMappingDictionary[key];
+                    }
+                    metadataMap.Add(key, kvp.Value);
                 }
             }
 
