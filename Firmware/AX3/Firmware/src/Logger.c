@@ -126,7 +126,7 @@ typedef struct DataMeta_t
 
 
 // Output buffer
-unsigned char scratchBuffer[640];       // 1 sector (512) + longest expected CSV line
+__attribute__((aligned(2))) unsigned char scratchBuffer[640];       // 1 sector (512) + longest expected CSV line
 #define loggerBuffer scratchBuffer
 unsigned short bufferOffset = 0;
 

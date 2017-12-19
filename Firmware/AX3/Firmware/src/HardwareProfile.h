@@ -36,7 +36,7 @@
 	#define HARDWARE_SELECT 0x17
     
     // Define firmware version
-    #define SOFTWARE_VERSION 44
+    #define SOFTWARE_VERSION 46
 
 // High-speed capable
 //#define HIGH_SPEED_USES_PLL	// Not fully tested (doesn't appear to be required anyway)
@@ -80,5 +80,10 @@
     #define ENABLE_printhexdump     // Enable hex dump function
     #define RTC_SWWDT               // Enable software WDT
 	#define RTC_SWWDT_TIMEOUT 60
+
+	// Shortcut hack to miss out ECC on reads that are correctly check-summed data sectors
+	// Unfortunately, this has to touch Nand.c (for the low-level sum to be no additional cost), and Ftl.c FtlReadSector() (for the ECC skipping logic).
+	// IMPORTANT: With this enabled, all SectorRead() calls *must* be in to word-aligned buffers.
+	//#define NAND_READ_SECTOR_WORD_SUMMED
 
 #endif

@@ -85,11 +85,12 @@ void SystemPwrSave(unsigned long NapSetting)
 
 	/* Note: The power down bits of some modules actually increases power draw - do not use these (commented) */
 	//PMD1 = 0xF8F9;
-	PMD2 = 0xFFFF;
-	//PMD3 = 0x058e;
-	PMD4bits.USB1MD = 1;//PMD4 = 0x006f;
-	PMD5 = 0x0101;
-	PMD6 = 0x0001;
+// KL: 
+//	PMD2 = 0xFFFF;
+//	//PMD3 = 0x058e;
+//	PMD4bits.USB1MD = 1;//PMD4 = 0x006f;
+//	PMD5 = 0x0101;
+//	PMD6 = 0x0001;
 
 	// Reduce parrallel port leakage
 	TRISE = 0; LATE = 0;

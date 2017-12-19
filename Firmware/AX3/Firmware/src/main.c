@@ -138,6 +138,27 @@ static unsigned char inactive = 0;
 static unsigned short lastTime = 0;
 
 
+
+#if 0
+// Override write handler with non-overlapping version
+#include "Utils/Util.h"
+extern write_handler_t writeHandler;
+
+// write handler (usb_putchar() overflows, this won't)
+static void UsbWrite(const void *buffer, unsigned int len)
+{
+	if (usb_write_length(buffer, len) < len)
+	{
+		// Flash warning
+		LED_SET(LED_OFF); DelayMs(50); 
+		LED_SET(LED_RED); DelayMs(50); 
+		LED_SET(LED_YELLOW); DelayMs(50); 
+		LED_SET(LED_OFF);
+	}
+}
+#endif
+
+
 // Main routine
 int main(void)
 {
@@ -165,6 +186,9 @@ int main(void)
 #ifdef USE_GYRO
     GyroVerifyDeviceId();
 #endif
+
+// Override write handler
+//writeHandler = UsbWrite;
 
 	// Self test check - only actually executes on first run
 	RunTestSequence();

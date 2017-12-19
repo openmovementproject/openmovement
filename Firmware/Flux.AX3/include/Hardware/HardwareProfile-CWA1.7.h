@@ -280,9 +280,10 @@ extern void SystemPwrSave(unsigned long NapSetting);
 								}
 								
     // Flash Memory - Hynix/Micron
-    #define NAND_DEVICE     NAND_DEVICE_HY27UF084G2B
-    #define NAND_DEVICE_ALT NAND_DEVICE_HY27UF084G2x
+    #define NAND_DEVICE     	NAND_DEVICE_HY27UF084G2B
+    #define NAND_DEVICE_ALT 	NAND_DEVICE_HY27UF084G2x
     #define NAND_DEVICE_ALT2 	NAND_DEVICE_S34ML04G1
+	#define NAND_DEVICE_ALT3 	NAND_DEVICE_MT29F8G08ABADA  // (actually 4Gb model)
 
 	// Switches on no-RCB for alternative NAND. Eliminating the read copy back code widens the compatibility of this driver at the expense of slower writes and 1 page of RAM usage on the MCU
 	#define NAND_NO_RCB

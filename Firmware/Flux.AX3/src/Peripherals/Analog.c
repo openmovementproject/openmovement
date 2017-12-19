@@ -35,6 +35,7 @@
 #include "Peripherals/Analog.h"
 //#include "math.h"
 
+#warning "KL: 24-02-2015. The old code uses the compiler library with some suspicious code. New projects should not use this. "
 
 // Globals
 adc_results_t adcResult;

@@ -60,7 +60,7 @@
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
 									
-#define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
+#define USB_MAX_NUM_INT     	3   // [dgj] Was 1. For tracking Alternate Setting
 #define USB_MAX_EP_NUMBER	    3
 
 //Device descriptor - if these two definitions are not defined then
@@ -72,7 +72,7 @@
 //Configuration descriptors - if these two definitions do not exist then
 //  a ROM BYTE *ROM variable named exactly USB_CD_Ptr[] must exist.
 #define USB_USER_CONFIG_DESCRIPTOR USB_CD_Ptr
-#define USB_USER_CONFIG_DESCRIPTOR_INCLUDE extern ROM BYTE *ROM USB_CD_Ptr[]
+#define USB_USER_CONFIG_DESCRIPTOR_INCLUDE extern const unsigned char *const USB_CD_Ptr[]
 
 //Make sure only one of the below "#define USB_PING_PONG_MODE"
 //is uncommented.
@@ -96,6 +96,56 @@
 
 #define USB_SPEED_OPTION USB_FULL_SPEED
 //                       USB_LOW_SPEED (not valid option for PIC24F devices)
+
+
+// Only enable status stage timeouts on USB stacks later than 2.9 (this is to keep the behaviour for SOFTWARE_VERSION <= 44 with mla-2011-12-05)
+#if (USB_MAJOR_VER>2 || (USB_MAJOR_VER==2 && USB_MINOR_VER>9))
+
+//------------------------------------------------------------------------------------------------------------------
+//Option to enable auto-arming of the status stage of control transfers, if no
+//"progress" has been made for the USB_STATUS_STAGE_TIMEOUT value.
+//If progress is made (any successful transactions completing on EP0 IN or OUT)
+//the timeout counter gets reset to the USB_STATUS_STAGE_TIMEOUT value.
+//
+//During normal control transfer processing, the USB stack or the application 
+//firmware will call USBCtrlEPAllowStatusStage() as soon as the firmware is finished
+//processing the control transfer.  Therefore, the status stage completes as 
+//quickly as is physically possible.  The USB_ENABLE_STATUS_STAGE_TIMEOUTS 
+//feature, and the USB_STATUS_STAGE_TIMEOUT value are only relevant, when:
+//1.  The application uses the USBDeferStatusStage() API function, but never calls
+//      USBCtrlEPAllowStatusStage().  Or:
+//2.  The application uses host to device (OUT) control transfers with data stage,
+//      and some abnormal error occurs, where the host might try to abort the control
+//      transfer, before it has sent all of the data it claimed it was going to send.
+//
+//If the application firmware never uses the USBDeferStatusStage() API function,
+//and it never uses host to device control transfers with data stage, then
+//it is not required to enable the USB_ENABLE_STATUS_STAGE_TIMEOUTS feature.
+
+#define USB_ENABLE_STATUS_STAGE_TIMEOUTS    //Comment this out to disable this feature.  
+
+//Section 9.2.6 of the USB 2.0 specifications indicate that:
+//1.  Control transfers with no data stage: Status stage must complete within 
+//      50ms of the start of the control transfer.
+//2.  Control transfers with (IN) data stage: Status stage must complete within 
+//      50ms of sending the last IN data packet in fullfilment of the data stage.
+//3.  Control transfers with (OUT) data stage: No specific status stage timing
+//      requirement.  However, the total time of the entire control transfer (ex:
+//      including the OUT data stage and IN status stage) must not exceed 5 seconds.
+//
+//Therefore, if the USB_ENABLE_STATUS_STAGE_TIMEOUTS feature is used, it is suggested
+//to set the USB_STATUS_STAGE_TIMEOUT value to timeout in less than 50ms.  If the
+//USB_ENABLE_STATUS_STAGE_TIMEOUTS feature is not enabled, then the USB_STATUS_STAGE_TIMEOUT
+//parameter is not relevant.
+
+#define USB_STATUS_STAGE_TIMEOUT     (unsigned char)45   //Approximate timeout in milliseconds, except when
+                                                //USB_POLLING mode is used, and USBDeviceTasks() is called at < 1kHz
+                                                //In this special case, the timeout becomes approximately:
+//Timeout(in milliseconds) = ((1000 * (USB_STATUS_STAGE_TIMEOUT - 1)) / (USBDeviceTasks() polling frequency in Hz))
+//------------------------------------------------------------------------------------------------------------------
+
+#endif
+
 
 #define USB_SUPPORT_DEVICE
 
@@ -133,7 +183,7 @@
 #define MSD_INTF_ID             0x00
 #define MSD_IN_EP_SIZE          64
 #define MSD_OUT_EP_SIZE         64
-#define MAX_LUN 0
+#define MAX_LUN                 0   // 0 == 1 LUN
 #define MSD_DATA_IN_EP          1
 #define MSD_DATA_OUT_EP         1
 #define MSD_BUFFER_ADDRESS      0x600
@@ -141,9 +191,9 @@
 /* CDC */
 #define CDC_COMM_INTF_ID        0x01
 #define CDC_COMM_EP              2
-#define CDC_COMM_IN_EP_SIZE      8
+#define CDC_COMM_IN_EP_SIZE      10			// [dgj] Was 8
 
-#define CDC_DATA_INTF_ID        0x01
+#define CDC_DATA_INTF_ID        0x02		// [dgj] Was 0x01
 #define CDC_DATA_EP             3
 #define CDC_DATA_OUT_EP_SIZE    64
 #define CDC_DATA_IN_EP_SIZE     64

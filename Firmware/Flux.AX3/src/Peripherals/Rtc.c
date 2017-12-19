@@ -145,11 +145,13 @@ void RtcInterruptOn(unsigned short newRate)
 
     // Wait until first RTC second elapses to ensure the sub-second timer is synchronized
     {
+		// KL: 2015, added timeout after observing 'blue led failures'
+		unsigned long timeout = (130000ul*5ul) << ((OSCCONbits.COSC == 0b001)?2:0); // ~20 instructions / 30 cycles in loop @ 4 mips, 1 sec ~ 130000 loops (x4 for 16 MIPS)
         char originalBusSense = USB_BUS_SENSE;
         // Should wake when timer flag elapses (up to 1 second), but will also exit after two seconds with TMR1, or if USB connection is toggled
         IFS0bits.T1IF = 0;
         IFS3bits.RTCIF = 0;
-        while (!IFS3bits.RTCIF && !IFS0bits.T1IF && (USB_BUS_SENSE == originalBusSense))
+        while (!IFS3bits.RTCIF && !IFS0bits.T1IF && (USB_BUS_SENSE == originalBusSense) && (timeout--))
         { 
         	LED_SET(LED_BLUE); LED_SET(LED_OFF);
         }

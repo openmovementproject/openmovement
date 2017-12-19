@@ -31,6 +31,7 @@
 typedef struct
 {
     unsigned short deviceId;            // Device identifier (stored in ROM)
+    
     unsigned long sessionId;            // Session identifier
     unsigned char sampleRate;           // Sample rate code
     unsigned long loggingStartTime;     // Date/time to start logging

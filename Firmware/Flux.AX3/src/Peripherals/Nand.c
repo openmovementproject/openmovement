@@ -299,6 +299,7 @@ const unsigned char NAND_DEVICE_DONT_CARE[6] = 	  {0x00}; 							// KL - ADDED
 const unsigned char NAND_DEVICE_HY27UF084G2B[6] = {0xAD,0xDC,0x10,0x95,0x54,0x00};
 const unsigned char NAND_DEVICE_HY27UF084G2x[6] = {0xAD,0xDC,0x00}; 				// KL - ADDED
 const unsigned char NAND_DEVICE_MT29F8G08AAA[6] = {0x2C,0xD3,0x90,0x2E,0x64,0x00};
+const unsigned char NAND_DEVICE_MT29F8G08ABADA[6] = {0x2C,0xDC,0x00,0x95,0xD6,0x00};	// KL - Replacement 13-09-2017   // [dgj] actually 4Gb model, and full ID: { 0x2C, 0xDC, 0x90, 0x95, 0x56, 0x00 }
 const unsigned char NAND_DEVICE_S34ML04G1[6] 	= {0x01,0xDC,0x90,0x95,0x54,0x00}; // KL - ADDED
 
 // Read chip parameters
@@ -373,6 +374,22 @@ unsigned char NandVerifyDeviceId(void)
 #ifdef NAND_NO_RCB
 			if (nandPresent) { nandNoRCB = 1; }
 #endif
+		}
+#endif
+
+#ifdef NAND_DEVICE_ALT3
+		// KL - Added support for new nand chip
+		if (!nandPresent)
+		{
+			for(i=0;i<6;i++)
+			{
+        // [dgj] NOTE: There is a 0x00 at (i==2) that will terminate the match early, but we should really continue to (i==5)
+				if (NAND_DEVICE_ALT3[i] == '\0') 	{nandPresent = 4; break;}	// Successful end of id string
+				if (id[i] != NAND_DEVICE_ALT3[i]) 	{ break; } 					// Character mismatch
+			}
+//#ifdef NAND_NO_RCB
+//			if (nandPresent) { nandNoRCB = 1; }
+//#endif
 		}
 #endif
 
@@ -470,6 +487,58 @@ char NandReadBuffer(unsigned short offset, unsigned char *buffer, unsigned short
 	FLASH_CE = 1;                                       // Chip deselect
 	return (TRUE);                                      // No errors possible on read
 }
+
+
+#ifdef NAND_READ_SECTOR_WORD_SUMMED
+// Read in from the page buffer 512 bytes to a word-aligned buffer, summing the word-wise values
+char NandReadBuffer512WordSummed(unsigned short offset, unsigned short *wordAlignedBuffer, unsigned short *outSum)
+{
+	unsigned char *p = (unsigned char *)wordAlignedBuffer;
+	unsigned short length = 512;
+	unsigned short sum = 0;
+	unsigned char Dummy;
+	
+	// Fall-back for un-aligned buffers
+	if ((((unsigned short)wordAlignedBuffer)&1) != 0)
+	{
+		if (outSum != NULL) { *outSum = 0xffff; }
+		return NandReadBuffer(offset, (unsigned char *)wordAlignedBuffer, length);
+	}	
+	
+    FLASH_WAIT_RB();                                    // Wait for previously read page to load
+	FLASH_CE = 0;                                   	// Chip select
+	NandWriteCommand(FLASH_RANDOM_DATA_OUTPUT_1);
+	NandWriteAddress2B(offset);                 		// specify offset
+	NandWriteCommand(FLASH_RANDOM_DATA_OUTPUT_2);
+	Dummy = NandReadRaw();                              // dummy read - To do with PSP module not flash
+	
+	for (; length != 0; length -= 16)
+	{
+		// Word reads (2 bytes each)
+		// On optimize-speed (-Os) we need the last NOP, on optimize-level-3 (-O3) we don't need it.
+		*(p +  0) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p +  1) = FLASH_DATA; sum += *((unsigned short *)(p +  0)); __builtin_nop(); 
+		*(p +  2) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p +  3) = FLASH_DATA; sum += *((unsigned short *)(p +  2)); __builtin_nop(); 
+		*(p +  4) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p +  5) = FLASH_DATA; sum += *((unsigned short *)(p +  4)); __builtin_nop(); 
+		*(p +  6) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p +  7) = FLASH_DATA; sum += *((unsigned short *)(p +  6)); __builtin_nop(); 
+		*(p +  8) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p +  9) = FLASH_DATA; sum += *((unsigned short *)(p +  8)); __builtin_nop(); 
+		*(p + 10) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p + 11) = FLASH_DATA; sum += *((unsigned short *)(p + 10)); __builtin_nop(); 
+		*(p + 12) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p + 13) = FLASH_DATA; sum += *((unsigned short *)(p + 12)); __builtin_nop(); 
+		*(p + 14) = FLASH_DATA; __builtin_nop(); __builtin_nop(); *(p + 15) = FLASH_DATA; sum += *((unsigned short *)(p + 14)); __builtin_nop(); 
+		
+		p += 16;
+	}
+	FLASH_CE = 1;                                       // Chip deselect
+	
+	// Out parameter
+	if (outSum != NULL) { *outSum = sum; }
+	
+	return (TRUE);                                      // No errors possible on read
+}
+
+// HACK: Always link the function in...
+volatile void *dontremove_NandReadBuffer512WordSummed = (void *)NandReadBuffer512WordSummed;
+#endif
+
 
 // Write page directly -- KL, ADDED - This is basic functionality and should always be supported
 char NandWritePage(unsigned short srcBlock, unsigned char srcPage, unsigned char *buffer)

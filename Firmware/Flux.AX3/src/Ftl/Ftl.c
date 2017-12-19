@@ -398,10 +398,33 @@ EmuVisualizerUpdate(1, sector, 1, 2);
 	// If block was found and loaded, read from the buffer, otherwise return empty sector (of 0xff)
 	if (ftlContext.currentBlock == logicalBlock && ftlContext.currentPage == logicalPage)
 	{
+		char checkEcc = 1;
+
+#ifdef NAND_READ_SECTOR_WORD_SUMMED
+//#warning "NAND_READ_SECTOR_WORD_SUMMED has not been tested -- it must only be used with word-aligned buffers."
+		// Hack to shortcut out the ECC if the sector is a data sector with a correct checksum
+		// IMPORTANT: When this mode is enabled, the caller must always read in to a word-aligned buffer.
+		unsigned short sum;
+		NandReadBuffer512WordSummed(sectorInPage * FTL_SECTOR_SIZE, (unsigned short *)buffer, &sum);
+
+		// If the sum of the sector was 0 and the sector looks like a data sector (first two bytes printable ASCII, next two bytes the little-endian word value 508)
+		if (sum == 0 && buffer[0] >= 32 && buffer[0] <= 127 && buffer[1] >= 32 && buffer[1] <= 127 && buffer[2] == 0xFC && buffer[3] == 0x01)
+		{
+			// Skip the ECC check as it all looks ok
+Nop();
+Nop();
+Nop();
+Nop();
+			checkEcc = 0;
+		}
+#else
+		// Read sector from NAND buffer
 		NandReadBuffer(sectorInPage * FTL_SECTOR_SIZE, buffer, FTL_SECTOR_SIZE);
+#endif
 
 #ifdef FTL_ECC
-        {
+        if (checkEcc)
+	    {
             char ret;
 
             // Retrieve ecc from flash buffer
@@ -429,9 +452,9 @@ EmuVisualizerUpdate(1, sector, 1, 2);
 				return 1;
             }
 LOG("\t...INFO: Read OK\n");
-			return 1;
         }
 #endif
+		return 1;
 	}
 	else
 	{

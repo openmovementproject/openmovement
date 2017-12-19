@@ -86,6 +86,12 @@ typedef struct
 } NandParameters;
 char NandReadParameters(NandParameters *nandParameters);
 
+
+#ifdef NAND_READ_SECTOR_WORD_SUMMED
+char NandReadBuffer512WordSummed(unsigned short offset, unsigned short *wordAlignedBuffer, unsigned short *outSum);
+#endif
+
+
 // Debug functions for emulated NAND
 #ifdef _WIN32
 void NandDebugRead(unsigned short block, unsigned char page, unsigned short offset, unsigned char *buffer, unsigned short length);
