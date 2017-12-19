@@ -29,9 +29,11 @@
 
 
 // Cross-platform multi-threading and mutex
-#ifdef _WIN32
+#if defined(_WIN32) // || defined(__CYGWIN__)
     // Device Discovery
-    #define _CRT_SECURE_NO_DEPRECATE
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
     #define _WIN32_DCOM
     #include <windows.h>
 
@@ -44,7 +46,7 @@
     #pragma warning( disable : 4996 )    /* allow deprecated POSIX name functions */
 
     // Thread
-	#define thread_t HANDLE
+    #define thread_t HANDLE
     #define thread_create(thread, attr_ignored, start_routine, arg) ((*(thread) = CreateThread(attr_ignored, 0, start_routine, arg, 0, NULL)) == NULL)
     #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((*thread), INFINITE) != WAIT_OBJECT_0)
     #define thread_cancel(thread) (TerminateThread(*(thread), -1) == 0)
@@ -52,7 +54,7 @@
     #define thread_return_value(value) ((unsigned int)(value))
 
     // Mutex
-	#define mutex_t HANDLE
+    #define mutex_t HANDLE
     #define mutex_init(mutex, attr_ignored) ((*(mutex) = CreateMutex(attr_ignored, FALSE, NULL)) == NULL)
 #define OM_DEBUG_MUTEX
 #ifdef OM_DEBUG_MUTEX
@@ -87,10 +89,16 @@
     //#include <sys/types.h>
     #include <termios.h>
     #include <pthread.h>
-    #include <libudev.h>
+	
+    #if defined(__APPLE__)
+        // Applie-specific
+    #elif defined(__linux__)
+        // Linux-specific
+        // #include <libudev.h>
+    #endif
 
     // Thread
-	#define thread_t      pthread_t
+    #define thread_t      pthread_t
     #define thread_create pthread_create
     #define thread_join   pthread_join
     #define thread_cancel pthread_cancel
@@ -98,21 +106,11 @@
     #define thread_return_value(value_ignored) ((value_ignored), NULL)
 
     // Mutex
-	#define mutex_t       pthread_mutex_t
+    #define mutex_t       pthread_mutex_t
     #define mutex_init    pthread_mutex_init
     #define mutex_lock    pthread_mutex_lock
     #define mutex_unlock  pthread_mutex_unlock
     #define mutex_destroy pthread_mutex_destroy
-
-    typedef struct {
-        char serial_device[100];
-        char block_device[100];
-        char mount_path[100];
-        int device_id;
-        struct deviceNode *next;
-    } deviceNode;
-
-    deviceNode *deviceList;
 
 #endif
 
@@ -207,7 +205,7 @@ typedef struct
     void *downloadChunkCallbackReference;   /**< User-supplied reference that will be passed to the download chunk callback. */
 
     // Device discovery
-#ifndef _WIN32
+#ifndef _WIN32 // || defined(__CYGWIN__)
     thread_t discoveryThread;           /**< Discovery thread. */
     volatile char quitDiscoveryThread;  /**< Quit flag for discovery thread. */
 #endif
