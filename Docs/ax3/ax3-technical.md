@@ -344,10 +344,16 @@ The whole drive can be formatted with:
 
 	FORMAT {Q|W}[C]
 
-Where `Q` performs a *quick format* (the filesystem is recreated), and `W` thoroughly *wipes* by clearing all of the NAND memory.  The optional `C` performs the 'COMMIT' command afterwards and rewrites the header of the configuration file.  
+Where `Q` performs a *quick format* (the filesystem is recreated), and `W` thoroughly *wipes* by clearing all of the NAND memory.  The optional `C` performs the 'COMMIT' command afterwards and rewrites the header of the data file.  
 
 During a `FORMAT`/`COMMIT` the USB mass storage drive is seen as "ejected" by the operating system while the device writes to the memeory, and then seen as re-inserted afterwards.  
 
+
+#### Additional configuration file
+
+The standard configuration comes from the header of the data file (`CWA-DATA.CWA`), but settings controlling the data format of the file can be written to an external settings file, `SETTINGS.INI` (containing plain ASCII commands, CR/LF `\r\n` terminated, and stored in the root folder of the device).  The typical use of this would be to signify an *un-packed* setting for data storage, which is set when the configuration file contains the following line:
+
+	DATAMODE=20
 
 
 ## Bootloader
