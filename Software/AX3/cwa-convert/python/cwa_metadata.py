@@ -35,7 +35,8 @@ def timestamp_string(timestamp):
 		return "0"
 	if timestamp < 0:
 		return "-1"
-	return str(datetime.fromtimestamp(timestamp))
+	# return str(datetime.fromtimestamp(timestamp))
+	return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
 
 def cwa_parse_metadata(data):
@@ -171,20 +172,36 @@ def cwa_data(block):
 		packetHeader = block[0:2]										# @ 0  +2   ASCII "AX", little-endian (0x5841)
 		packetLength = unpack('<H', block[2:4])[0]						# @ 2  +2   Packet length (508 bytes, with header (4) = 512 bytes total)
 		if packetHeader[0] == ord('A') and packetHeader[1] == ord('X') and packetLength == 508:
-			# deviceFractional = unpack('<H', block[4:6])[0]			# @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
+			deviceFractional = unpack('<H', block[4:6])[0]			# @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
 			data['sessionId'] = unpack('<I', block[6:10])[0]			# @ 6  +4   Unique session identifier, 0 = unknown
 			data['sequenceId'] = unpack('<I', block[10:14])[0]			# @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
-			data['timestamp'] = read_timestamp(block[14:18])			# @14  +4   Last reported RTC value, 0 = unknown
+			timestamp = read_timestamp(block[14:18])					# @14  +4   Last reported RTC value, 0 = unknown
 			# data['light'] = unpack('<H', block[18:20])[0]				# @18  +2   Last recorded light sensor value in raw units, 0 = none
 			# data['temperature'] = unpack('<H', block[20:22])[0]		# @20  +2   Last recorded temperature sensor value in raw units, 0 = none
 			# data['events'] = unpack('B', block[22:23])[0]				# @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
 			# data['battery'] = unpack('B', block[23:24])[0]			# @23  +1   Last recorded battery level in raw units, 0 = unknown
-			# rateCode = unpack('B', block[24:25])[0]					# @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
+			rateCode = unpack('B', block[24:25])[0]					    # @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
 			numAxesBPS = unpack('B', block[25:26])[0]					# @25  +1   0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
-			data['timestampOffset'] = unpack('<h', block[26:28])[0]		# @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
+			timestampOffset = unpack('<h', block[26:28])[0]				# @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
 			data['sampleCount'] = unpack('<H', block[28:30])[0]			# @28  +2   Number of accelerometer samples (80 or 120 if this sector is full)
 			# rawSampleData[480] = block[30:510]						# @30  +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
 			# checksum = unpack('<H', block[510:512])[0]				# @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
+			
+			# range = 16 >> (rateCode >> 6)
+			frequency = 3200 / (1 << (15 - (rateCode & 0x0f)))
+			
+			timeFractional = 0;
+			# if top-bit set, we have a fractional date
+			if deviceFractional & 0x8000:
+				# Need to undo backwards-compatible shim by calculating how many whole samples the fractional part of timestamp accounts for.
+				timeFractional = (deviceFractional & 0x7fff) << 1     # use original deviceId field bottom 15-bits as 16-bit fractional time
+				timestampOffset += (timeFractional * int(frequency)) >> 16 # undo the backwards-compatible shift (as we have a true fractional)
+			
+			# Add fractional time to timestamp
+			timestamp += timeFractional / 65536
+			
+			data['timestamp'] = timestamp
+			data['timestampOffset'] = timestampOffset
 			
 			data['timestampTime'] = timestamp_string(data['timestamp'])
 			
