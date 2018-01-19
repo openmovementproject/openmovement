@@ -42,7 +42,6 @@ from struct import *
 from math import *
 import time
 from datetime import datetime
-from urllib import unquote_plus
 import sqlite3
 import sys
 import io
@@ -55,6 +54,37 @@ def ushort(value):
 
 def short(value):
     return (value + 2 ** 15) % 2 ** 16 - 2 ** 15
+
+# Local "URL-decode as UTF-8 string" function
+def urldecode(input):
+    output = bytearray()
+    nibbles = 0
+    value = 0
+    # Each input character
+    for char in input:
+        if char == '%':
+            # Begin a percent-encoded hex pair
+            nibbles = 2
+            value = 0
+        elif nibbles > 0:
+            # Parse the percent-encoded hex digits
+            value *= 16
+            if char >= 'a' and char <= 'f':
+                value += ord(char) + 10 - ord('a')
+            elif char >= 'A' and char <= 'F':
+                value += ord(char) + 10 - ord('A')
+            elif char >= '0' and char <= '9':
+                value += ord(char) - ord('0')
+            nibbles -= 1
+            if nibbles == 0:
+                output.append(value)
+        elif char == '+':
+            # Treat plus as space (application/x-www-form-urlencoded)
+            output.append(ord(' '))
+        else:
+            # Preserve character
+            output.append(ord(char))
+    return output.decode('utf-8')
 
 class CWA_Sample:
     pass
@@ -76,18 +106,22 @@ class CWA:
         dbcurs.execute('''DROP TABLE IF EXISTS acc''')
         dbcurs.execute('''CREATE TABLE acc (time REAL, x INTEGER, y INTEGER, z INTEGER)''')
         dbcurs.execute('''CREATE INDEX time_hash ON acc (time)''')
+        
+        lastSequenceId = None
+        lastTimestampOffset = None
+        lastTimestamp = None
 
         try:
             header = self.read(2)
             while len(header) == 2:
                 if header == 'MD':
-                    print 'MD'
+                    print('MD')
                     self.parse_header()
                 elif header == 'UB':
-                    print 'UB'
+                    print('UB')
                     blockSize = unpack('H', self.read(2))[0]
                 elif header == 'SI':
-                    print 'SI'
+                    print('SI')
                 elif header == 'AX':
                     packetLength = unpack('H', self.read(2))[0]               
                     deviceId = unpack('H', self.read(2))[0]
@@ -127,26 +161,51 @@ class CWA:
                         continue
                     
                     if sessionId != self.sessionId:
-                        print "x"
+                        print("x")
                         continue
                     
                     if ((numAxesBPS >> 4) & 15) != 3:
-                        print '[ERROR: num-axes not expected]'
+                        print('[ERROR: num-axes not expected]')
                         
                     if (numAxesBPS & 15) == 2:
                         bps = 6
                     elif (numAxesBPS & 15) == 0:
                         bps = 4
                     
-                    timestamp = time.mktime(sampleTime)
-                    freq = 3200 / (1 << (15 - sampleRate & 15))
+                    freq = float(3200) / (1 << (15 - sampleRate & 15))
                     if freq <= 0:
                         freq = 1
-                    offsetStart = float(-timestampOffset) / float(freq)
                     
-                    time0 = float(timestamp) + offsetStart
+                    # range = 16 >> (rateCode >> 6)
                     
-                    print "*"
+                    timeFractional = 0                    
+                    # if top-bit set, we have a fractional date
+                    if deviceId & 0x8000:
+                        # Need to undo backwards-compatible shim by calculating how many whole samples the fractional part of timestamp accounts for.
+                        timeFractional = (deviceId & 0x7fff) * 2     # use original deviceId field bottom 15-bits as 16-bit fractional time
+                        timestampOffset += (timeFractional * int(freq)) // 65536 # undo the backwards-compatible shift (as we have a true fractional)
+                        timeFractional = float(timeFractional) / 65536
+                    
+                    # Add fractional time to timestamp
+                    timestamp = float(time.mktime(sampleTime)) + timeFractional
+                    
+                    # --- Time interpolation ---
+                    # Reset interpolator if there's a sequence break or there was no previous timestamp
+                    if lastSequenceId == None or (lastSequenceId + 1) & 0xffff != sequenceId or lastTimestampOffset == None or lastTimestamp == None:
+                        # Bootstrapping condition is a sample one second ago (assuming the ideal frequency)
+                        lastTimestampOffset = timestampOffset - freq
+                        lastTimestamp = timestamp - 1
+                        lastSequenceId = sequenceId - 1
+                    
+                    localFreq = float(timestampOffset - lastTimestampOffset) / (timestamp - lastTimestamp)
+                    time0 = timestamp + -timestampOffset / localFreq
+                    
+                    # Update for next loop
+                    lastSequenceId = sequenceId
+                    lastTimestampOffset = timestampOffset - sampleCount
+                    lastTimestamp = timestamp
+                    
+                    sys.stdout.write('*')
                     for x in range(sampleCount):
                         sample = CWA_Sample()
                         if bps == 6:
@@ -160,9 +219,9 @@ class CWA:
                             sample.y = short(short((ushort(65472) & ushort(temp >> 4))) >> temp2)
                             sample.z = short(short((ushort(65472) & ushort(temp >> 14))) >> temp2)
                         
-                        sample.t = float(x) / float(freq) + time0
-                        
-                        dbcurs.execute("INSERT INTO acc VALUES (" + str(sample.t) + ", " + str(sample.x) + ", " + str(sample.y) + ", " + str(sample.z) + ")")
+                        sample.t = time0 + (x / localFreq)
+                        tStr = "{:.5f}".format(sample.t)
+                        dbcurs.execute("INSERT INTO acc VALUES (" + tStr + ", " + str(sample.x) + ", " + str(sample.y) + ", " + str(sample.z) + ")")
                         
                 header = self.read(2)
         except IOError:
@@ -227,8 +286,10 @@ class CWA:
         annotations = dict()
         for element in annotationElements:
             kv = element.split('=', 2)
+            annotationName = urldecode(kv[0])
             if kv[0] in annotationNames:
-                annotations[annotationNames[kv[0]]] = unquote_plus(kv[1])
+                annotationName = annotationNames[kv[0]]
+            annotations[annotationName] = urldecode(kv[1])
 
         for x in ('startTime', 'endTime', 'retrievalTime'):
             if x in annotations:
@@ -260,7 +321,10 @@ class CWA:
         return t
     
 def main():
-    cwa = CWA(sys.argv[1])
+    if len(sys.argv) < 2:
+        print("ERROR: File not specified.");
+    else:
+        cwa = CWA(sys.argv[1])
 
 if __name__ == "__main__":
     main()

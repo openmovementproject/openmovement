@@ -39,38 +39,39 @@ def timestamp_string(timestamp):
 	return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
 
+# Local "URL-decode as UTF-8 string" function
+def urldecode(input):
+	output = bytearray()
+	nibbles = 0
+	value = 0
+	# Each input character
+	for char in input:
+		if char == '%':
+			# Begin a percent-encoded hex pair
+			nibbles = 2
+			value = 0
+		elif nibbles > 0:
+			# Parse the percent-encoded hex digits
+			value *= 16
+			if char >= 'a' and char <= 'f':
+				value += ord(char) + 10 - ord('a')
+			elif char >= 'A' and char <= 'F':
+				value += ord(char) + 10 - ord('A')
+			elif char >= '0' and char <= '9':
+				value += ord(char) - ord('0')
+			nibbles -= 1
+			if nibbles == 0:
+				output.append(value)
+		elif char == '+':
+			# Treat plus as space (application/x-www-form-urlencoded)
+			output.append(ord(' '))
+		else:
+			# Preserve character
+			output.append(ord(char))
+	return output.decode('utf-8')
+
+
 def cwa_parse_metadata(data):
-	# Local "URL-decode as UTF-8 string" function
-	def urldecode(input):
-		output = bytearray()
-		nibbles = 0
-		value = 0
-		# Each input character
-		for char in input:
-			if char == '%':
-				# Begin a percent-encoded hex pair
-				nibbles = 2
-				value = 0
-			elif nibbles > 0:
-				# Parse the percent-encoded hex digits
-				value *= 16
-				if char >= 'a' and char <= 'f':
-					value += ord(char) + 10 - ord('a')
-				elif char >= 'A' and char <= 'F':
-					value += ord(char) + 10 - ord('A')
-				elif char >= '0' and char <= '9':
-					value += ord(char) - ord('0')
-				nibbles -= 1
-				if nibbles == 0:
-					output.append(value)
-			elif char == '+':
-				# Treat plus as space (application/x-www-form-urlencoded)
-				output.append(ord(' '))
-			else:
-				# Preserve character
-				output.append(ord(char))
-		return output.decode('utf-8')
-	
 	# Metadata represented as a dictionary
 	metadata = {}
 	
