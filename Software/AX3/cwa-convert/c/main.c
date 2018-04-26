@@ -655,7 +655,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
                                     {
                                         if (options & OPTIONS_NO_DATA)
                                         {
-                                            if (time != TIME_NONE) { outputSize += fprintf(ofp, timestring); }
+                                            if (time != TIME_NONE) { outputSize += fprintf(ofp, "%s", timestring); }
                                         }
                                         else
                                         {
@@ -667,7 +667,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 								{
                                     if (options & OPTIONS_NO_DATA)
                                     {
-                                        if (time != TIME_NONE) { outputSize += fprintf(ofp, timestring); }
+                                        if (time != TIME_NONE) { outputSize += fprintf(ofp, "%s", timestring); }
                                     }
                                     else
                                     {
