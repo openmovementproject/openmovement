@@ -471,7 +471,7 @@ Cursor.Current = Cursors.WaitCursor;
 
             //mdt.SaveMetaData(metaData);
 
-            SamplingFrequency = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString());
+            SamplingFrequency = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture);
             Range = (int)float.Parse(comboBoxRange.SelectedItem.ToString());
             LowPower = checkBoxLowPower.Checked;
 
@@ -702,7 +702,7 @@ Cursor.Current = Cursors.WaitCursor;
                 //TS - TODO
 
                 //Duration could be limited by battery (on rate)
-                double estimateBatteryInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateBatteryLife(device.BatteryLevel, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString()));
+                double estimateBatteryInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateBatteryLife(device.BatteryLevel, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture));
                 TimeSpan ts = endDate - startDate;
                 if (ts.TotalSeconds > estimateBatteryInSeconds)
                     warningMessagesFlags[3] = true;
@@ -723,7 +723,7 @@ Cursor.Current = Cursors.WaitCursor;
                 warningMessagesFlags[6] = true;
 
             //Warning for sampling frequency
-            int sampFreq = comboBoxSamplingFreq.SelectedItem != null ? (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString()) : 0;
+            int sampFreq = comboBoxSamplingFreq.SelectedItem != null ? (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture) : 0;
             if (sampFreq > 200 || sampFreq < 50)
                 warningMessagesFlags[7] = true;
 

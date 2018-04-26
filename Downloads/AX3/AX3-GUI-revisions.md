@@ -1,5 +1,7 @@
 # AX3 GUI - Revision History
 
+* [AX3-GUI-38](AX3-GUI-38.zip?raw=true) 2018-04-26: (Beta) Fixed configuring devices with sample rates less than 25Hz in cultures using a comma as a decimal separator.
+
 * [AX3-GUI-37](AX3-GUI-37.zip?raw=true) 2017-11-21: Improvements to download file naming from template.
 
 * [AX3-GUI-36](AX3-GUI-36.zip?raw=true) 2017-09-12: Fixed regression for sorting the view of the local files.
