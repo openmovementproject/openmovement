@@ -391,11 +391,11 @@ int OmWaitForDownload(int deviceId, OM_DOWNLOAD_STATUS *downloadStatus, int *dow
     if (OM_FAILED(status)) { return status; }
 
     // If downloading...
-    if (dStatus == OM_DOWNLOAD_PROGRESS && om.devices[deviceId]->downloadThread != NULL)
+    if (dStatus == OM_DOWNLOAD_PROGRESS && (om.devices[deviceId]->downloadThread))
     {
         // Wait for download thread to terminate
         OmLog(3, "OmWaitForDownload() waiting for download thread to terminate...\n");
-        thread_join(&om.devices[deviceId]->downloadThread, NULL);
+        thread_join(om.devices[deviceId]->downloadThread, NULL);
     }
 
     // Check completed download state

@@ -256,7 +256,7 @@ int OmReaderDataBlockSeek(OmReaderHandle reader, int dataBlockNumber)
 
 int OmReaderNextBlock(OmReaderHandle reader)
 {
-    unsigned long long previousBlockStart;
+    // unsigned long long previousBlockStart;
     unsigned long long previousBlockEnd;
     unsigned int sequenceId;
     char bytesPerSample;
@@ -268,7 +268,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
     if (state == NULL) { return OM_E_POINTER; }
 
     // Record previous block's 'blockStart' and 'blockEnd'
-    previousBlockStart = state->blockStart;
+    // previousBlockStart = state->blockStart;
     previousBlockEnd = state->blockEnd;
 
     // No data unless we find a valid block
@@ -405,7 +405,13 @@ int OmReaderNextBlock(OmReaderHandle reader)
         // Calculate the time in ticks
         {
             time_t tSec;                            // Seconds since epoch
-            struct tm tParts = {0};                 // Time elements (YMDHMS)
+			// Time elements (YMDHMS)
+            struct tm tParts =
+			#ifdef _WIN32
+				{0};
+			#else
+				{};
+			#endif
             tParts.tm_year = OM_DATETIME_YEAR(timestamp) - 1900;
             tParts.tm_mon = OM_DATETIME_MONTH(timestamp) - 1;
             tParts.tm_mday = OM_DATETIME_DAY(timestamp);

@@ -29,31 +29,31 @@ libomapi.a : $(OBJECTS)
 	ar rcs libomapi.a $(OBJECTS)
 
 omapi-main.o : omapi-main.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-main.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-main.c
 
 omapi-internal.o : omapi-internal.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-internal.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-internal.c
 
 omapi-download.o : omapi-download.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-download.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-download.c
 
 omapi-status.o : omapi-status.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-status.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-status.c
 
 omapi-reader.o : omapi-reader.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-reader.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-reader.c
 
 omapi-settings.o : omapi-settings.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-settings.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-settings.c
 
 omapi-devicefinder-linux.o : omapi-devicefinder-linux.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-devicefinder-linux.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-devicefinder-linux.c
 
 omapi-devicefinder-mac.o : omapi-devicefinder-mac.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-devicefinder-mac.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-devicefinder-mac.c
 
 omapi-devicefinder-win.o : omapi-devicefinder-win.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-devicefinder-win.cpp $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c omapi-devicefinder-win.cpp
 
 clean:
 	rm -f *.o libomapi.a

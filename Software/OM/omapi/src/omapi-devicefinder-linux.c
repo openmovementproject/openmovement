@@ -35,46 +35,45 @@
 // User must be a member of the 'dialout' group (or sudo chmod 666 /dev/ttyACM0)
 // sudo usermod -a -G dialout $USER
 
-typedef struct {
+typedef struct DeviceNode_t {
     char base_device[256];      // "/dev/sdb"
     char block_device[256];     // "/dev/sdb1"
     char mount_path[256];       // "/media/AX317_?????"
     char serial_device[256];    // "/dev/ttyACM0"
     int device_id;              // 0-65535
-    struct deviceNode *next;    // Linked list
-} deviceNode;
+    struct DeviceNode_t *next;  // Linked list
+} DeviceNode;
 
-static deviceNode *deviceList;
+static DeviceNode *deviceList = NULL;
 
 
 /** Internal, extract device id from serial id **/
-static int GetDeviceId(char *serial_id)
+static int GetDeviceId(const char *serial_id)
 {
     int value = 0;
-    if (serial_id)
+    const char *p;
+    for (p = serial_id; *p != 0; p++)
     {
-        while (*serial_id != '\0' && *serial_id != '_')
+        if (*p >= '0' && *p <= '9')
         {
-            serial_id++;
+            value = 10 * value + (*p - '0');
         }
-        serial_id++;
-        // Convert rest to integer
-        while (*serial_id != '\0' && *serial_id <= '9' && *serial_id >= '0')
+        else
         {
-            value = (value * 10) + (*serial_id - '0');
-            serial_id++;
+            value = 0;
         }
     }
     return value;
 }
 
 /** Internal, method to add a device to the device list **/
-static void AddDevice(char *block_device, char *mount_path, char *serial_device, int id)
+static void AddDevice(const char *block_device, const char *mount_path, const char *serial_device, int id)
 {
-    deviceNode *dev = NULL;
+    DeviceNode *dev = NULL;
+	DeviceNode *current;
 
     // Find existing node
-    for (deviceNode *current = deviceList; current != NULL; current = current->next)
+    for (current = deviceList; current != NULL; current = current->next)
     {
         if (current->device_id == id)
         {
@@ -87,8 +86,8 @@ static void AddDevice(char *block_device, char *mount_path, char *serial_device,
     if (dev == NULL)
     {
 // printf("DEVICENODE: Creating...\n");
-        dev = (deviceNode *)malloc(sizeof(deviceNode));
-        memset(dev, 0, sizeof(deviceNode));
+        dev = (DeviceNode *)malloc(sizeof(DeviceNode));
+        memset(dev, 0, sizeof(DeviceNode));
         dev->next = deviceList;
         deviceList = dev;
 
@@ -100,13 +99,16 @@ static void AddDevice(char *block_device, char *mount_path, char *serial_device,
 
         // Build base device from drive path (not partition) -- remove trailing digits
         strcpy(dev->base_device, block_device);
-        for (char *p = dev->base_device + strlen(dev->base_device) - 1; p >= dev->base_device; p--) {
-            if (*p >= '0' && *p <= '9') {
-                *p = '\0';
-            } else {
-                break;
-            }
-        }
+		{
+			char *p;
+			for (p = dev->base_device + strlen(dev->base_device) - 1; p >= dev->base_device; p--) {
+				if (*p >= '0' && *p <= '9') {
+					*p = '\0';
+				} else {
+					break;
+				}
+			}
+		}
         
         OmDeviceDiscovery(OM_DEVICE_CONNECTED, dev->device_id, dev->serial_device, dev->mount_path);
     }
@@ -118,10 +120,10 @@ static void AddDevice(char *block_device, char *mount_path, char *serial_device,
 }
 
 /** Internal, method to remove a device from the device list **/
-static void RemoveDevice(char *base_device) 
+static void RemoveDevice(const char *base_device) 
 {
-    deviceNode *current;
-    deviceNode *previous = NULL;
+    DeviceNode *current;
+    DeviceNode *previous = NULL;
 
     for (current = deviceList; current != NULL; previous = current, current = current->next)
     {
@@ -144,7 +146,7 @@ static void RemoveDevice(char *base_device)
 }
 
 /** Internal, method for getting serial device by id **/
-static void GetSerialDevice(char *serial_id, char *serial_device)
+static void GetSerialDevice(const char *serial_id, char *serial_device)
 {
     struct udev *udev;
     struct udev_enumerate *enumerate;
@@ -206,25 +208,24 @@ static void InitDeviceFinder()
 
     udev_list_entry_foreach(dev_list_entry, devices)
     {
-        const char *syspath;
-        syspath = udev_list_entry_get_name(dev_list_entry);
+        const char *syspath = udev_list_entry_get_name(dev_list_entry);
         dev = udev_device_new_from_syspath(udev, syspath);
 
-        const path[256];
+        char path[256];
         strcpy(path, udev_device_get_devnode(dev));
 
         // Get mount path
         char mount_path[256];
         strcpy(mount_path, "/media/");
-        char *name = udev_device_get_property_value(dev, "ID_FS_LABEL");
+        const char *name = udev_device_get_property_value(dev, "ID_FS_LABEL");
         if (name != NULL)
         {
             dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
             if (dev)
             {
                 // Get serial device path
-                char serial_device[256];
-                char *serial_id = udev_device_get_sysattr_value(dev, "serial");
+                char serial_device[256] = "";
+                const char *serial_id = udev_device_get_sysattr_value(dev, "serial");
                 GetSerialDevice(serial_id, serial_device);
                 if (strlen(serial_device) > 0)
                 {
@@ -258,8 +259,9 @@ static unsigned int timestamp()
 // ...takes about 3 seconds on Ubuntu 16 with X in a VM
 static char WaitUntilReadable(const char *path)
 {
+	int tries;
 // printf("OPENING: %s: ", path);
-    for (int tries = 0; tries < 10 * 4; tries++)
+    for (tries = 0; tries < 10 * 4; tries++)
     {
 // printf("%d;", tries);
         int fd = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
@@ -271,8 +273,12 @@ static char WaitUntilReadable(const char *path)
             unsigned int start = timestamp();
 // printf("OPEN! %u\n", start);
             // Write an end-of-line
-            unsigned char *wc = "\r\n";
+            char *wc = "\r\n";
             int nw = write(fd, wc, strlen(wc));
+            if (nw != (int)strlen(wc))
+            {
+                printf("WARNING: Problem writing flush command to port.\n");
+            }
 // printf("WROTE: %d %s\n", nw, wc);
             // Read a line (with timeout)
             while (timestamp() < (unsigned int)(start + 2000))
@@ -306,10 +312,9 @@ static char WaitUntilReadable(const char *path)
 }
 
 /** Internal, method for updating a list of seen devices. */
-thread_return_t OmDeviceDiscoveryThread(void *arg)
+static void *OmDeviceDiscoveryThread(void *arg)
 {
     struct udev *udev;
-    struct udev_enumerate *enumerate;
     struct udev_device *dev;
     struct udev_monitor *mon;
 
@@ -336,9 +341,9 @@ thread_return_t OmDeviceDiscoveryThread(void *arg)
         {
             // printf("Path: %s\n", udev_device_get_syspath(dev));
             // Check type of action (remove or add)
-            char *action = udev_device_get_action(dev);
+            const char *action = udev_device_get_action(dev);
             // Get block device name.
-            char *block_device = udev_device_get_devnode(dev);
+            const char *block_device = udev_device_get_devnode(dev);
 
 printf("DEVICE-ACTION: %s %s\n", action, block_device);
 
@@ -357,11 +362,11 @@ printf("DEVICE-ACTION: %s %s\n", action, block_device);
                     // Get mount path.
                     char mount_path[256];
                     strcpy(mount_path, "/media/");
-                    char *name = udev_device_get_property_value(dev, "ID_FS_LABEL");
+                    const char *name = udev_device_get_property_value(dev, "ID_FS_LABEL");
                     if (name != NULL)
                     {
                         char serial_device[256] = "";
-                        char *serial_id = udev_device_get_sysattr_value(usb_dev, "serial");
+                        const char *serial_id = udev_device_get_sysattr_value(usb_dev, "serial");
                         GetSerialDevice(serial_id, &serial_device[0]);
                         
                         if (strlen(serial_device) > 0)
@@ -383,7 +388,7 @@ printf("DEVICE-ACTION: %s %s\n", action, block_device);
     }
  
     udev_unref(udev);
-    return thread_return_value(0);
+    return NULL;
 }
 
 /** Internal method to start device discovery. */
@@ -393,14 +398,14 @@ void OmDeviceDiscoveryStart(void)
     // Perform an initial device discovery and create device discovery thread
     om.quitDiscoveryThread = 0;
     //OmUpdateDevices();
-    thread_create(&om.discoveryThread, NULL, OmDeviceDiscoveryThread, NULL);
+    pthread_create(&om.discoveryThread, NULL, &OmDeviceDiscoveryThread, NULL);
 }
 
 /** Internal method to stop device discovery. */
 void OmDeviceDiscoveryStop(void)
 {
     om.quitDiscoveryThread = 1;
-    thread_cancel(&om.discoveryThread);     // thread_join(&om.discoveryThread, NULL);
+    pthread_cancel(om.discoveryThread);     // thread_join(&om.discoveryThread, NULL);
 }
 
 #endif  // __linux__

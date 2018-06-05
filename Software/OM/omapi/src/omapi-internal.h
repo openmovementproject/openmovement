@@ -48,7 +48,7 @@
     // Thread
     #define thread_t HANDLE
     #define thread_create(thread, attr_ignored, start_routine, arg) ((*(thread) = CreateThread(attr_ignored, 0, start_routine, arg, 0, NULL)) == NULL)
-    #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((*thread), INFINITE) != WAIT_OBJECT_0)
+    #define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((thread), INFINITE) != WAIT_OBJECT_0)
     #define thread_cancel(thread) (TerminateThread(*(thread), -1) == 0)
     #define thread_return_t DWORD WINAPI
     #define thread_return_value(value) ((unsigned int)(value))
@@ -103,7 +103,7 @@
     #define thread_join   pthread_join
     #define thread_cancel pthread_cancel
 	typedef void *        thread_return_t;
-    #define thread_return_value(value_ignored) ((value_ignored), NULL)
+    #define thread_return_value(value_ignored) ((void *)((value_ignored) ^ (value_ignored)))    // return NULL;
 
     // Mutex
     #define mutex_t       pthread_mutex_t
@@ -178,6 +178,8 @@ typedef struct
     thread_t downloadThread;            /**< Download thread */
 
     void *downloadReference;            /**< Download reference to callbacks (if NULL, the reference given when registering the callbacks will be used instead) */
+	
+	int flags;							/**< Special flags: 0x00000001=invalid device */
 } OmDeviceState;
 
 

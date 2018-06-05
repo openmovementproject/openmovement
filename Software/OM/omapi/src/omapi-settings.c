@@ -140,7 +140,7 @@ int OmSetSessionId(int deviceId, unsigned int sessionId)
     if (OM_FAILED(status)) return status;
     // "SESSION=1"
     if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
-    if (atoi(parts[1]) != sessionId) { return OM_E_FAIL; }
+    if ((unsigned int)atoi(parts[1]) != sessionId) { return OM_E_FAIL; }
     return OM_OK;
 }
 

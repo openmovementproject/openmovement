@@ -28,11 +28,36 @@
 
 #ifdef _WIN32 // || defined(__CYGWIN__)
 
+#define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
 
+#define _WIN32_DCOM
+#include <comdef.h>
+#include <wbemidl.h>
+#pragma comment(lib, "wbemuuid.lib")
+
+#include <setupapi.h>
+#include <winioctl.h>
+#include <cfgmgr32.h>
+#pragma comment(lib, "setupapi.lib")
+
+#pragma comment(lib, "advapi32.lib")    // For RegQueryValueEx()
+//#pragma comment(lib, "gdi32.lib")       // For CreateSolidBrush()
+
+#include <dbt.h>
+#include <tchar.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <vector>
+#include <set>
 #include <list>
 #include <string>
 #include <map>
 
+using namespace std;
+
+#define DEBUG_PRINT
 
 class Device
 {
@@ -132,32 +157,6 @@ private:
 //       is quite a mess on Windows.  This file is still a complete mess from getting it working!
 // TODO: The big messy mixture of char strings, wchar_t strings, std::string, etc. needs a lot of tidying up!
 
-#define DEBUG_PRINT
-
-#define _WIN32_DCOM
-#define _CRT_SECURE_NO_WARNINGS
-#include <comdef.h>
-#include <wbemidl.h>
-#include <windows.h>
-#pragma comment(lib, "wbemuuid.lib")
-
-#include <setupapi.h>
-#include <winioctl.h>
-#include <cfgmgr32.h>
-#pragma comment(lib, "setupapi.lib")
-
-#pragma comment(lib, "advapi32.lib")    // For RegQueryValueEx()
-//#pragma comment(lib, "gdi32.lib")       // For CreateSolidBrush()
-
-#include <dbt.h>
-
-#include <tchar.h>
-#include <cstdlib>
-#include <iostream>
-#include <vector>
-#include <set>
-
-using namespace std;
 
 
 #if 1
@@ -1388,11 +1387,91 @@ bool DeviceFinder::RescanDevices(void)
 }
 
 
+// Extract device ID from a .CWA file
+int deviceIdFromFile(const char *filename) {
+	FILE *fp = fopen(filename, "rb");
+	if (fp == NULL) { return -1; }
+	unsigned char buffer[64] = {0};
+	int count = fread(buffer, 1, sizeof(buffer), fp);
+	if (count < sizeof(buffer) || buffer[0] != 'M' || buffer[1] != 'D') { fclose(fp); return -1; }
+	int deviceId = buffer[5] | (buffer[6] << 8);
+	fclose(fp);
+	if (deviceId <= 0 || deviceId >= 0xffff) { return -1; } // 0 and 65535 are reserved IDs
+	return deviceId;
+}
+
+// Extract device ID from CWA-DATA.CWA file in the specified path
+#define DEFAULT_FILENAME "CWA-DATA.CWA"
+int deviceIdFromFilePath(const char *path) {
+	char filename[MAX_PATH];
+#ifdef _WIN32
+	char sep = '\\';
+#else
+	char sep = '/';
+#endif
+	strcpy(filename, path);
+	if (filename[strlen(filename) - 1] != sep) {
+		sprintf(filename + strlen(filename), "%c", sep);
+	}
+	sprintf(filename + strlen(filename), "%s", DEFAULT_FILENAME);
+	return deviceIdFromFile(filename);
+}
 
 
+// true = definitely mismatched, false = couldn't definitely determine a mismatch
+bool CheckVolumeMismatch(const char *path, int id)
+{
+	char volumeName[MAX_PATH + 1] = { 0 };
+	DWORD serialNumber = 0xfffffffful;
 
+	OmLog(1, "VOLUME LABEL FOR: #%d %s\n", id, path);
+	if (!GetVolumeInformationA(path, volumeName, sizeof(volumeName), &serialNumber, NULL, NULL, NULL, 0))
+	{
+		OmLog(1, "- fail\n");
+		return false;
+	}
 
+	int volumeHigh = -1;
+	int volumeLow = -1;
+	// "AX317_"
+	if (volumeName[0] == 'A' && volumeName[1] == 'X' && volumeName[2] == '3' && volumeName[3] >= '0' && volumeName[3] <= '9' && volumeName[4] >= '0' && volumeName[4] <= '9' && volumeName[5] == '_')
+	{
+		volumeHigh = (volumeName[3] - '0') * 10 + (volumeName[4] - '0');
+		volumeLow = atoi(volumeName + 6);
+	}
 
+	int serialNumberHigh = (serialNumber >> 16);
+	int serialNumberLow = (serialNumber & 0xffff);
+	if (serialNumberHigh != 0x0000) {
+		serialNumberHigh = -1;
+		serialNumberLow = -1;
+	}
+
+	int dataNumber = deviceIdFromFilePath(path);
+	
+	OmLog(1, "- VOLUME NAME: %s\n", volumeName);
+	OmLog(1, "- VOLUME = %d / %d\n", volumeHigh, volumeLow);
+	OmLog(1, "- SERIAL NUMBER: 0x%04x=%d 0x%04x=%d\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff);
+	OmLog(1, "- SERIAL = %d / %d\n", serialNumberHigh, serialNumberLow);
+	OmLog(1, "- CWA FILE = %d\n", dataNumber);
+	
+	if (volumeLow >= 0 && volumeLow != id)
+	{
+		return true;
+	}
+
+	if (serialNumberLow >= 0 && serialNumberLow != id)
+	{
+		return true;
+	}
+	
+	if (dataNumber >= 0 && dataNumber != id)
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 
 /****************************************************************************************************/
@@ -1413,6 +1492,12 @@ static void OmWindowsAddedCallback(void *reference, const Device &device)
     // Current (first returned) mount point
     std::string volumePath = device.volumePath;
     
+	if (CheckVolumeMismatch(volumePath.c_str(), device.serialNumber))
+	{
+		OmLog(0, "ERROR: Problem detecting device path for device %d (mismatched volume at %s) -- reconnect.\n", device.deviceNumber, volumePath.c_str());
+		return;
+	}
+
 #ifdef DEBUG_MOUNT
 if (volumePath.length() == 0) OmLog(1, "1: <no-volume>\n");
 else OmLog(1, "1: '%s'\n", volumePath.c_str());

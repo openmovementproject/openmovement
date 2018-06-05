@@ -32,6 +32,7 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
 {
     int status;
     char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
+	int incomingDeviceId;
     status = OM_COMMAND(deviceId, "\r\nID\r\n", response, "ID=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     //"ID=CWA,hardwareId,firmwareId,deviceId,sessionId"
@@ -39,6 +40,15 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
     if (strcmp(parts[1], "CWA") != 0) { return OM_E_FAIL; }
     if (firmwareVersion != NULL) *firmwareVersion = atoi(parts[3]);
     if (hardwareVersion != NULL) *hardwareVersion = atoi(parts[2]);
+	incomingDeviceId = atoi(parts[4]);
+	if (incomingDeviceId != deviceId) {
+		OmLog(0, "ERROR: Problem when identifying device %d (mismatched identity as %d) -- reconnect.\n", deviceId, incomingDeviceId);
+		// Set flag to prevent further access
+		if (om.devices[deviceId]) {
+			om.devices[deviceId]->flags |= 0x00000001;	// invalid device
+		}
+		return OM_E_INVALID_DEVICE;
+	}
     return OM_OK;
 }
 
@@ -329,6 +339,19 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
 
 OmLog(3, "OmCommand(%d, \"%s\", _, _, \"%s\", %d, _, _);\n", deviceId, command, expected, timeoutMs);
 
+	// Check flag that prevents further device access
+	if (om.devices[deviceId] && om.devices[deviceId]->flags & 0x00000001) {
+		int whitelist = 0;
+		if (command != NULL && strlen(command) > 0) {
+			// Allow certain commands (RESET to redo device enumeration)
+			if (strcasecmp(command, "\r\nRESET\r\n") == 0) { whitelist = 1; }
+		}
+		if (!whitelist) {
+			OmLog(0, "ERROR: OmCommand ingored (problem when identifying device).\n");
+			return OM_E_INVALID_DEVICE;
+		}
+	}
+	
     // (Checks the system and device state first, then) acquire the lock and open the port
     status = OmPortAcquire(deviceId);
     if (OM_FAILED(status)) return status; 

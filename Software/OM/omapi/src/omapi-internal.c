@@ -32,7 +32,12 @@
 
 
 /** The state of the API */
-OmState om = {0};
+OmState om = 
+#ifdef _WIN32
+	{0};
+#else
+	{};
+#endif
 
 
 /** Log text to the current log stream. */
@@ -130,7 +135,7 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
             deviceState->fd = -1;
         }
 
-OmLog(0, "DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
+OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
 
         // Update the OmDeviceState structure
         deviceState->id = serialNumber;
@@ -148,6 +153,7 @@ OmLog(0, "DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
         // Call user's device callback
         if (om.deviceCallback != NULL)
         {
+OmLog(0, "DEBUG: callback for OM_DEVICE_CONNECTED...\n");
             om.deviceCallback(om.deviceCallbackReference, serialNumber, OM_DEVICE_CONNECTED);
         }
     }
@@ -159,7 +165,7 @@ OmLog(0, "DEBUG: Device added %d  %s  %s\n", serialNumber, port, volumePath);
         if (inSerialNumber > OM_MAX_SERIAL) { OmLog(0, "WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
-OmLog(0, "DEBUG: Device removed: %d\n", serialNumber);
+OmLog(0, "DEBUG: Device removed: #%d\n", serialNumber);
 
         // Get the current OmDeviceState structure
         deviceState = om.devices[serialNumber];
@@ -180,6 +186,7 @@ OmLog(0, "DEBUG: Device removed: %d\n", serialNumber);
         // Call user's device callback
         if (om.deviceCallback != NULL)
         {
+OmLog(0, "DEBUG: callback for OM_DEVICE_REMOVED...\n");
             om.deviceCallback(om.deviceCallbackReference, serialNumber, OM_DEVICE_REMOVED);
         }
     }
@@ -402,7 +409,7 @@ static int OmPortOpen(const char *infile, char writeable)
 		options.c_cflag = (options.c_cflag | CLOCAL | CREAD | CS8) & ~(PARENB | CSTOPB | CSIZE | CRTSCTS);
 		options.c_lflag &= ~(ICANON | ECHO | ISIG); /* Enable data to be processed as raw input */
 		tcsetattr(fd, TCSANOW, &options);
-		#warning "Must set up serial port timeout values"
+		// #warning "Could we set up serial port timeout values?"
 	}
 
 	return fd;
