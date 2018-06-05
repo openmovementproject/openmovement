@@ -15,12 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\omapi\src\DeviceFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\omapi\src\omapi-devicefinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\omapi\src\omapi-download.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,11 +33,11 @@
     <ClCompile Include="..\omapi\src\omapi-status.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\omapi\src\omapi-devicefinder-win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\omapi\src\DeviceFinder.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\omapi\src\omapi-internal.h">
       <Filter>Source Files</Filter>
     </ClInclude>

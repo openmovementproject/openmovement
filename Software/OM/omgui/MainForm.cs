@@ -216,8 +216,13 @@ namespace OmGui
         }
 
         // /*OmDevice*/ public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
-        public void DownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename)
+        public void DownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename)
         {
+            if (downloadFilename != filename + ".part")
+            {
+                MessageBox.Show(null, "An inconsistency has been identified downloading a file -- please delete and download again:\r\n\r\n" + filename, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+            }
+
             string timeNow, type;
 
             timeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -748,14 +753,6 @@ Console.WriteLine("toolStripButtonDownload_Click() STARTED...");
                     string fileSessionIdString = null;
                     metadataMap.TryGetValue("SessionId", out fileSessionIdString);
                     Console.WriteLine("DOWNLOAD-NAME: " + labelIdString +  " Device properties: ID=" + deviceIdString + " (" + fileDeviceIdString + "), session=" + sessionIdString + " (" + fileSessionIdString + "), file=" + device.Filename);
-                    if (labelIdString != deviceIdString || deviceIdString != fileDeviceIdString)
-                    {
-                        Console.WriteLine("DOWNLOAD-NAME: Device ID mismatch for " + labelIdString + ", DeviceId=" + deviceIdString + ", fileDeviceId=" + fileDeviceIdString + "), file=" + device.Filename);
-                    }
-                    if (sessionIdString != fileSessionIdString)
-                    {
-                        Console.WriteLine("DOWNLOAD-NAME: Session ID mismatch for " + labelIdString + ", SessionId=" + sessionIdString + ", fileSessionId=" + fileSessionIdString + "), file=" + device.Filename);
-                    }
 
                     string usedDeviceId = deviceIdString; // labelIdString; deviceIdString; fileDeviceIdString;
                     string usedSessionId = (device.SessionId == uint.MaxValue) ? ((fileSessionIdString != null) ? fileSessionIdString : "0000000000") : sessionIdString;
@@ -788,9 +785,21 @@ Console.WriteLine("toolStripButtonDownload_Click() STARTED...");
 
                     string prefix = folder + filename;
                     string finalFilename = prefix + ".cwa";
-                    string downloadFilename = finalFilename;
+                    string downloadFilename = finalFilename + ".part";
 
-                    downloadFilename += ".part";
+                    if (deviceError == null && (usedDeviceId != labelIdString || usedDeviceId != deviceIdString || usedDeviceId != fileDeviceIdString))
+                    {
+                        Console.WriteLine("DOWNLOAD-NAME: Device ID mismatch for " + labelIdString + ", DeviceId=" + deviceIdString + ", fileDeviceId=" + fileDeviceIdString + "), file=" + device.Filename);
+                        MessageBox.Show(this, "The correct download file name cannot be established (device identifier not verified) -- you must reconnect the device and try again.", "Download Filename", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                        deviceError = "Download filename (device identifier not verified).";
+                    }
+                    if (deviceError == null && (usedSessionId != sessionIdString || usedSessionId != fileSessionIdString))
+                    {
+                        Console.WriteLine("DOWNLOAD-NAME: Session ID mismatch for " + labelIdString + ", SessionId=" + sessionIdString + ", fileSessionId=" + fileSessionIdString + "), file=" + device.Filename);
+                        MessageBox.Show(this, "The correct download file name cannot be established (session identifier not verified) -- you must reconnect the device and try again.", "Download Filename", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                        deviceError = "Download filename (session identifier not verified).";
+                    }
+
                     if (deviceError == null && System.IO.File.Exists(downloadFilename))
                     {
                         DialogResult dr = MessageBox.Show(this, "Download file already exists:\r\n\r\n    " + downloadFilename + "\r\n\r\nOverwrite existing file?", "Overwrite File?", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
@@ -1672,6 +1681,19 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 // Don't do anything else now (user can press button again)
                 return;
             }
+		
+            foreach (OmDevice device in devices)
+            {
+				if (device.DeviceWarning >= 2) {
+					// Make hard to ignore...
+					while (true) {
+						DialogResult dres = MessageBox.Show(this, "Device " + device.DeviceId + " has a recently restarted clock yet is already appearing fully charged,\r\nwhich is a strong indicator that the device's clock or battery could be damaged.\r\n\r\nPlease label this device and place it aside\r\nuntil you have run some tests to determine its condition.", "Warning: Device Possibly Damaged", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+						if (dres == System.Windows.Forms.DialogResult.Ignore) break;	// user ignoring error
+						if (dres == System.Windows.Forms.DialogResult.Retry) continue;	// ...pointless..
+						return;	// Abort or close
+					}
+				}
+			}
 
             DateRangeForm rangeForm = new DateRangeForm("Recording Settings", devices);
             DialogResult dr = rangeForm.ShowDialog();
@@ -3993,12 +4015,27 @@ Console.WriteLine("backgroundWorkerUpdate - Identify task: " + state);
             else
             {
                 OmDevice device = (OmDevice)e.Argument;
+				int oldWarning = device.DeviceWarning; // 0=none, 1=discharged, 2=damaged?
                 bool changed = device.Update(resetIfUnresponsive);
                 if (changed)
                 {
 Console.WriteLine("backgroundWorkerUpdate - changed " + device.DeviceId);
                     UpdateDeviceId(device.DeviceId);
                 }
+				if (oldWarning != device.DeviceWarning && device.DeviceWarning > 0) {
+Console.WriteLine("backgroundWorkerUpdate - WARNING STATE CHANGED " + device.DeviceId + " => " + device.DeviceWarning);
+					// device.DeviceWarning // 0=none, 1=discharged, 2=damaged?
+					if (device.DeviceWarning >= 2) {
+						this.Invoke((Func<DialogResult>)(() => 
+							MessageBox.Show(this, "Device " + device.DeviceId + " has a recently restarted clock yet is already appearing fully charged,\r\nwhich is a strong indicator that the device's clock or battery could be damaged.\r\n\r\nPlease label this device and place it aside\r\nuntil you have run some tests to determine its condition.", "Warning: Device Possibly Damaged", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
+						));
+					}
+					else if (device.DeviceWarning >= 1) {
+						this.Invoke((Func<DialogResult>)(() => 
+							MessageBox.Show(this, "Device " + device.DeviceId + " has lost track of the time since last configuration, which is\r\nlikely caused by leaving the device in a fully discharged state for a significant time.\r\nThis can adversely affect the long-term battery condition.\r\nThe device batteries should be kept topped-up approximately every 3 months.\r\nAlternatively, this might be an indicator of an affected battery.", "Caution: Device May Have Fully Discharged", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1)
+						));
+					}
+				}
             }
             BackgroundTaskStatus(false);
         }

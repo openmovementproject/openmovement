@@ -1434,7 +1434,7 @@ bool CheckVolumeMismatch(const char *path, int id)
 	int volumeHigh = -1;
 	int volumeLow = -1;
 	// "AX317_"
-	if (volumeName[0] == 'A' && volumeName[1] == 'X' && volumeName[2] == '3' && volumeName[3] >= '0' && volumeName[3] <= '9' && volumeName[4] >= '0' && volumeName[4] <= '9' && volumeName[5] == '_')
+	if (volumeName[0] == 'A' && volumeName[1] == 'X' && volumeName[2] >= '0' && volumeName[2] <= '9' && volumeName[3] >= '0' && volumeName[3] <= '9' && volumeName[4] >= '0' && volumeName[4] <= '9' && volumeName[5] == '_')
 	{
 		volumeHigh = (volumeName[3] - '0') * 10 + (volumeName[4] - '0');
 		volumeLow = atoi(volumeName + 6);

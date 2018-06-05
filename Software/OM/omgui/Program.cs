@@ -17,6 +17,13 @@ namespace OmGui
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
         static void Main(string[] args)
         {
+#if DEBUG
+            // Set omapi.dll debug level in debug builds
+            if (Environment.GetEnvironmentVariable("OMDEBUG") == null)
+            {
+                Environment.SetEnvironmentVariable("OMDEBUG", "1");
+            }
+#endif
             try
             {
                 // Default to only logging UI exceptions

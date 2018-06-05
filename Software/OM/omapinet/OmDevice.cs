@@ -12,8 +12,10 @@ namespace OmApiNet
         public int failedCount = 0;
         private bool hasChanged;
         public DateTime lastUpdate = DateTime.MinValue;
+		private int deviceWarning = 0;	// 0=none, 1=discharged, 2=damaged?
+		public int DeviceWarning { get { return deviceWarning; } }
 
-        public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
+        public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename);
         public OmDeviceDownloadCompleteCallback downloadComplete = null;
 
         public OmDevice(Om om, ushort deviceId)
@@ -260,7 +262,24 @@ category = SourceCategory.Other;
                     uint time;
                     res = OmApi.OmGetTime(deviceId, out time);
                     error |= (OmApi.OM_FAILED(res) ? 0x02 : 0);
-                    timeDifference = (OmApi.OmDateTimeUnpack(time) - now);
+					DateTime deviceTime = OmApi.OmDateTimeUnpack(time);
+                    timeDifference = (deviceTime - now);
+					// DateTime deviceTime = DateTime.Now + omDevice.TimeDifference;
+
+					// Caution the user if the battery was allowed to reset 
+					// (the RTC clock became reset)
+					DateTime cautionDate = new DateTime(2008, 1, 1, 0, 0, 0);
+					if (deviceTime < cautionDate) {
+						deviceWarning = 1;	// Completely flattening battery may damage it
+					}
+						
+					// Warn the user of likely damaged device if RTC reset less than
+					// 15 minutes ago, yet the device reports >= 70% charge
+					DateTime warningDate = new DateTime(2000, 1, 1, 0, 15, 0);
+					int warningPercent = 70;
+					if (deviceTime < warningDate && batteryLevel >= warningPercent) {
+						deviceWarning = 2;	// Device battery or RTC may be damaged
+					}
 
                     uint startTimeValue, stopTimeValue;
                     res = OmApi.OmGetDelays(deviceId, out startTimeValue, out stopTimeValue);
@@ -308,22 +327,53 @@ category = SourceCategory.Other;
             return true;
         }
 
-        public volatile int volatileTemp;
+        public static volatile int volatileTemp = 0;	// Junk to prevent code elimination
 
         public bool SyncTime()
         {
             DateTime time;
             DateTime previous = DateTime.Now;
-            while ((time = DateTime.Now) == previous) { volatileTemp = 0; }  // Spin until the second rollover (up to 1 second)
-            // ...now set the time.
+            while ((time = DateTime.Now).Second == previous.Second) { volatileTemp++; }  // Busy spin until the second rollover (up to 1 second)
 
-            if (OmApi.OM_FAILED(OmApi.OmSetTime(deviceId, OmApi.OmDateTimePack(time))))
+            // ...now set the time (always to the nearest second)
+            DateTime setTime = new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
+            if (OmApi.OM_FAILED(OmApi.OmSetTime(deviceId, OmApi.OmDateTimePack(setTime))))
             {
-                return false;
+                return false;   // Failed to write time
             }
-            timeDifference = TimeSpan.Zero;
+
+            // Verify that the clock was set as expected
+            if (OmApi.OM_FAILED(OmApi.OmGetTime(deviceId, out uint newTime)))
+            {
+                return false;   // Failed to read time
+            }
+            timeDifference = OmApi.OmDateTimeUnpack(newTime) - time;
+            if (Math.Abs(timeDifference.TotalMilliseconds) > 3000)
+            {
+                return false;   // Clock was not set correctly
+            }
+
             hasChanged = true;
             om.OnChanged(new OmDeviceEventArgs(this));
+
+            // Verify that the clock is ticking
+            DateTime checkStart = DateTime.Now;
+            for (; ; )
+            {
+                if (OmApi.OM_FAILED(OmApi.OmGetTime(deviceId, out uint currentTime)))
+                {
+                    return false;   // Failed to read time
+                }
+                if (currentTime != newTime)
+                {
+                    break;          // The clock is ticking
+                }
+                if ((DateTime.Now - checkStart).TotalMilliseconds > 3000)
+                {
+                    return false;   // The clock is not ticking
+                }
+            }
+
             return true;
         }
 
@@ -348,15 +398,16 @@ category = SourceCategory.Other;
         {
             if (downloadFilename != null)
             {
+                string finalFilename = downloadFilename;
                 if (downloadFilenameRename != null && downloadFilename != downloadFilenameRename)
                 {
                     File.Move(downloadFilename, downloadFilenameRename);
+                    finalFilename = downloadFilenameRename;
                 }
 
                 if (downloadComplete != null)
                 {
-                    string fn = ((downloadFilenameRename != null) ? downloadFilenameRename : downloadFilename);
-                    downloadComplete(this.deviceId, OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_COMPLETE, fn);
+                    downloadComplete(this.deviceId, OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_COMPLETE, finalFilename, downloadFilename);
                 }
 
             }

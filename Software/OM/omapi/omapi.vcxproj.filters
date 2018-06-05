@@ -26,9 +26,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DeviceFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\omapi-download.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,7 +44,7 @@
     <ClCompile Include="src\omapi-status.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\omapi-devicefinder.cpp">
+    <ClCompile Include="src\omapi-devicefinder-win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

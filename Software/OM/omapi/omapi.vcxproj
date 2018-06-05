@@ -75,8 +75,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\DeviceFinder.cpp" />
-    <ClCompile Include="src\omapi-devicefinder.cpp" />
+    <ClCompile Include="src\omapi-devicefinder-win.cpp" />
     <ClCompile Include="src\omapi-download.c" />
     <ClCompile Include="src\omapi-internal.c" />
     <ClCompile Include="src\omapi-main.c" />

@@ -27,8 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\omapi\src\DeviceFinder.cpp" />
-    <ClCompile Include="..\omapi\src\omapi-devicefinder.cpp" />
+    <ClCompile Include="..\omapi\src\omapi-devicefinder-win.cpp" />
     <ClCompile Include="..\omapi\src\omapi-download.c" />
     <ClCompile Include="..\omapi\src\omapi-internal.c" />
     <ClCompile Include="..\omapi\src\omapi-main.c" />
@@ -38,7 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\omapi\include\omapi.h" />
-    <ClInclude Include="..\omapi\src\DeviceFinder.h" />
     <ClInclude Include="..\omapi\src\omapi-internal.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
