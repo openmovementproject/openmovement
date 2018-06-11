@@ -181,7 +181,7 @@ TEXT
 {alternative-text-1 | alternative-text-2 | ...}
 ```
 
-These commands can also be placed in to a file `SETTINGS.INI` in the root directory.  This is primarily used for adjusting the `.CWA` file format directly to use the *unpacked mode* by using the command `DATAMODE 4` (`2` is the default *packed mode*).
+These commands can also be placed in to a file `SETTINGS.INI` in the root directory.  This is primarily used for adjusting the `.CWA` file format directly to use the *unpacked mode* by using the command `DATAMODE 20` (`18` is the default *packed mode*).
 
 There are additional commands to those listed here, for more technical/diagnostic use.
 
@@ -274,7 +274,7 @@ Sensitivity range:
 * 0 = +/-16g
 * 64 = +/-8g
 * 128 = +/-4g
-* 256 = +/-2g
+* 192 = +/-2g
 
 Rate:
 
@@ -351,7 +351,7 @@ During a `FORMAT`/`COMMIT` the USB mass storage drive is seen as "ejected" by th
 
 #### Additional configuration file
 
-The standard configuration comes from the header of the data file (`CWA-DATA.CWA`), but settings controlling the data format of the file can be written to an external settings file, `SETTINGS.INI` (containing plain ASCII commands, CR/LF `\r\n` terminated, and stored in the root folder of the device).  The typical use of this would be to signify an *un-packed* setting for data storage, which is set when the configuration file contains the following line:
+The standard configuration comes from the header of the data file (`CWA-DATA.CWA`), but settings controlling the data format of the file can be written to an external settings file, `SETTINGS.INI` (containing plain ASCII commands, CR/LF `\r\n` terminated, and stored in the root folder of the device).  The typical use of this would be to signify an *un-packed* setting for data storage, which is set when the configuration file contains the following line (`18` is the default *packed* mode):
 
 	DATAMODE=20
 
