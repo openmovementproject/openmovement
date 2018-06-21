@@ -70,12 +70,15 @@ typedef struct
     OM_DATETIME lastEndTime;
 
     // Current block information
+    unsigned int numAxes;		// Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM
+	int accelScale;				// Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g)
+	int gyroScale;				// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
     unsigned int numSamples;
     unsigned long long blockStart;
     unsigned long long blockEnd;
     unsigned int sequenceId;
     unsigned char events;
-
+	
     // Output values
     unsigned short deviceId;
     unsigned int sessionId;
@@ -272,10 +275,13 @@ int OmReaderNextBlock(OmReaderHandle reader)
     previousBlockEnd = state->blockEnd;
 
     // No data unless we find a valid block
+	state->numAxes = 0;
+	state->accelScale = 256;
+	state->gyroScale = 0;
     state->numSamples = 0;
     state->blockStart = 0;
     state->blockEnd = 0;
-
+	
     // Read a block (if not EOF)
     len = -1;
     if (!feof(state->fp))
@@ -311,12 +317,24 @@ int OmReaderNextBlock(OmReaderHandle reader)
         if (checksum != 0x0000) { return 0; }
     }
 
-    // Check number of axes
-    if ((state->data[25] >> 4) != 3) { return 0; }                                                          // @0 numAxesBPS:H
+	state->numAxes = (state->data[25] >> 4);
+	
+	// light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
+	unsigned short light = state->data[18] | (state->data[19] << 8);
+	state->accelScale = 1 << (8 + ((light >> 13) & 0x03));
+	state->gyroScale = 8000 / (1 << ((light >> 10) & 0x03));
 
     // Check bytes per sample
-    if ((state->data[25] & 0x0f) == 2)      { bytesPerSample = 6; }    // @0 numAxesBPS:L == 2 -- 3x 16-bit signed
-    else if ((state->data[25] & 0x0f) == 0) { bytesPerSample = 4; }    // @0 numAxesBPS:L == 0 -- 3x 10-bit signed + 2-bit exponent
+    if ((state->data[25] & 0x0f) == 0)
+	{
+		// Check number of axes (must be 3 for packed data)
+		if (state->numAxes != 3) { return 0; }                                                          // @0 numAxesBPS:H
+		bytesPerSample = 4;		// @0 numAxesBPS:L == 0 -- 3x 10-bit signed + 2-bit exponent
+	}
+    else if ((state->data[25] & 0x0f) == 2)
+	{
+		bytesPerSample = state->numAxes * 2;		// @0 numAxesBPS:L == 2 -- 3x 16-bit signed
+	}
     else { return 0; }
 
     // Read sequence number and events
@@ -327,7 +345,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
     if (bytesPerSample == 4)
     {
         unsigned int i;
-
+		
         // Check sample count matches expected number
         state->numSamples = (OM_BLOCK_SIZE - 32) / bytesPerSample;      // 120
         if (state->data[28] != (unsigned char)state->numSamples || state->data[29] != (unsigned char)(state->numSamples >> 8)) { return 0; }    // @28 sampleCount  
@@ -345,23 +363,28 @@ int OmReaderNextBlock(OmReaderHandle reader)
             state->samples[3 * i + 2] = (short)( (short)((unsigned short)0xffc0 & (unsigned short)(value >> 14)) >> (6 - ((unsigned char)(value >> 30))) );
         }
     }
-    else if (bytesPerSample == 6)
+    else	// 16-bit signed values
     {
         unsigned int i;
 
         // Check sample count matches expected number
-        state->numSamples = (OM_BLOCK_SIZE - 32) / bytesPerSample;      // 80
-        if (state->data[28] != (unsigned char)state->numSamples || state->data[29] != (unsigned char)(state->numSamples >> 8)) { return 0; }    // @28 sampleCount  
-
-        // Endian-unsafe version - copy 80 unpacked samples directly
-        //memcpy(state->samples, state->data + 30, state->numSamples * 3 * sizeof(short));
+        int maxSamples = (OM_BLOCK_SIZE - 32) / bytesPerSample;      // 80
+		state->numSamples = state->data[28] | (state->data[29] << 8);	// @28 sampleCount  
+		if (state->numSamples > maxSamples) { state->numSamples = maxSamples; }	// error instead?
+		if (state->numSamples < 0) { state->numSamples = 0; }	// error instead?
 
         // Parse each value's bytes for portability
-        for (i = 0; i < state->numSamples; i++)
+        for (i = 0; i < maxSamples; i++)
         {
-            state->samples[3 * i + 0] = (short)((unsigned short)(state->data[30 + i * 6] | (((unsigned short)state->data[31 + i * 6]) << 8)));
-            state->samples[3 * i + 1] = (short)((unsigned short)(state->data[32 + i * 6] | (((unsigned short)state->data[33 + i * 6]) << 8)));
-            state->samples[3 * i + 2] = (short)((unsigned short)(state->data[34 + i * 6] | (((unsigned short)state->data[35 + i * 6]) << 8)));
+			for (int j  = 0; j < state->numAxes; j++)
+			{
+				int value = 0;
+				if (i < state->numSamples)
+				{
+					value = (short)((unsigned short)(state->data[30 + (i * state->numAxes + j) * 2] | (((unsigned short)state->data[31 + (i * state->numAxes + j) * 2]) << 8)));
+				}
+				state->samples[state->numAxes * i + j] = value;
+			}
         }
     }
 
@@ -540,19 +563,26 @@ int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
 
     switch (valueType)
     {
+		// TODO: WARNING: This is not endian-agnostic.
+		
         // Raw values
         case OM_VALUE_DEVICEID:         if (dataPacket->deviceFractional & 0x8000) { return 0; } else { return dataPacket->deviceFractional; }
         case OM_VALUE_SESSIONID:        return dataPacket->sessionId;
         case OM_VALUE_SEQUENCEID:       return dataPacket->sequenceId;
-        case OM_VALUE_LIGHT:            return dataPacket->light; 
-        case OM_VALUE_TEMPERATURE:      return dataPacket->temperature; 
+        case OM_VALUE_LIGHT:            return dataPacket->light & 0x03ff;  		// Bottom 10 bits are light
+        case OM_VALUE_TEMPERATURE:      return dataPacket->temperature & 0x03ff;	// Bottom 10 bits are temperature
         case OM_VALUE_EVENTS:           return dataPacket->events;
         case OM_VALUE_BATTERY:          return dataPacket->battery;
         case OM_VALUE_SAMPLERATE:       return dataPacket->sampleRate;
+		
+		// Calculated in OmReaderNextBlock() -- could recalculate here
+        case OM_VALUE_AXES:             return state->numAxes;			// Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM
+        case OM_VALUE_SCALE_ACCEL:      return state->accelScale;		// Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g)
+        case OM_VALUE_SCALE_GYRO:       return state->gyroScale;		// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
 
         // Cooked values
-        case OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3: return ((dataPacket->light + 512) * 6000 / 1024); // log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0)
-		case OM_VALUE_TEMPERATURE_MC:   return (int)dataPacket->temperature * 75000 / 256 - 50000; // For MCP9700 // (dataPacket->temperature * 150 - 20500);     // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
+        case OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3: return (((dataPacket->light & 0x03ff) + 512) * 6000 / 1024); // log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0)
+		case OM_VALUE_TEMPERATURE_MC:   return (int)(dataPacket->temperature & 0x03ff) * 75000 / 256 - 50000; // For MCP9700 // ((dataPacket->temperature & 0x03ff) * 150 - 20500);     // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
         case OM_VALUE_BATTERY_MV:       return ((dataPacket->battery + 512) * 6000 / 1024); // Conversion to millivolts:  Vref = 3V, Vbat = 6V * value / 1024
         case OM_VALUE_BATTERY_PERCENT:  return AdcBattToPercent(dataPacket->battery + 512); // Conversion to percentage
 

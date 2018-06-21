@@ -29,9 +29,9 @@
  *  @ingroup   API
  *  @brief     Open Movement API
  *  @author    Dan Jackson
- *  @version   1.7.0
- *  @date      2011-2013
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2012, Newcastle University, UK. All rights reserved.
+ *  @version   1.8.0
+ *  @date      2011-
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-, Newcastle University, UK. All rights reserved.
  *  @details
     Open Movement API header file.
 
@@ -47,9 +47,9 @@
 
 
 /** @mainpage Open Movement API
- *  @version   1.7.0
- *  @date      2011-2013
- *  @copyright BSD 2-clause license. Copyright (c) 2009-2013, Newcastle University, UK. All rights reserved.
+ *  @version   1.8.0
+ *  @date      2011-
+ *  @copyright BSD 2-clause license. Copyright (c) 2009-, Newcastle University, UK. All rights reserved.
  *  @details
         This document describes the Open Movement application programming interface (API).
         The API provides an interface to communicate with AX3 longitudinal movement data loggers and their data files.  
@@ -80,17 +80,17 @@
 
     @section design_goals Design Goals
     The API has been designed to:
-        - be a simple, platform-agnostic, plain C interface.
-        - be statically or dynamically linked to C or C++ code.
+        - be a simple, plain C interface.
+        - be cross-platform (targetting Windows, Mac OS, Linux).
+        - be statically or dyndynamically linked to C or C++ code.
         - be used directly from C++, or a simple object-oriented wrapper class.
-        - be readily used from other languages, e.g. a .NET wrapper class through p/invoke.
+        - be readily used from other languages, e.g. a .NET wrapper class through p/invoke; JNI for Java.
         - be thread-safe, in that it anticipates being called from multiple threads, and internally handles the required mutual exclusion.
         - handle errors via user-checked return values (it is expected that wrapper libraries can choose raise exceptions as suitable for a language).
 
     @section requirements Requirements
-    Although the API is platform-agnostic, parts of the current implementation require some platform-specific functionality
-    (namely device discovery, multi-threading and mutual exclusion) and it currently builds and is tested on Microsoft Windows 7.
-    It is anticipated that these elements will be relatively easily ported to POSIX operating systems, such as Linux and OS X.
+    The API is platform-agnostic, but parts of the current implementation require some platform-specific functionality. 
+    The API currently works on Windows (XP, Vista, 7, 8, 10), Mac OS X, Linux.
 
     The core API is written in plain C, and is easily wrapped by C++ (i.e. by an object-oriented class), or, as it can be built as a DLL with
     undecorated exports, other languages such as .NET (through p/invoke of the DLL).
@@ -193,13 +193,10 @@ extern "C" {
  * @cond _
  * On Windows, if not statically linked, we define the Windows DLL import/export declaration
  */
-#ifdef _WIN32
-    #ifdef _WINDLL
-        #define OM_EXPORT __declspec(dllexport)     /**< Exporting to a DLL (must also ensure setup to be __cdecl). @hideinitializer */
-    #else
-        /*#define OM_EXPORT __declspec(dllimport)*/     /**< Importing from DLL. @hideinitializer */
-        #define OM_EXPORT                           /**< A standard, static link. @hideinitializer */
-    #endif
+#if defined(_WIN32) && defined(_WINDLL)
+	#define OM_EXPORT __declspec(dllexport)         /**< Exporting to a DLL (must also ensure setup to be __cdecl). @hideinitializer */
+#elif defined(_WIN32) && defined(OMAPI_DYNLIB_IMPORT)
+	#define OM_EXPORT __declspec(dllimport)         /**< Importing from DLL. @hideinitializer */
 #else
     #define OM_EXPORT                               /**< A standard, static link. @hideinitializer */
 #endif
@@ -225,7 +222,7 @@ extern "C" {
  * @remark This can be used to detect a DLL version incompatibility in OmStartup().
  * @see OmStartup()
  */
-#define OM_VERSION 107
+#define OM_VERSION 108
 
 
 /**
@@ -368,6 +365,35 @@ typedef unsigned long OM_DATETIME;
  * @return \a OM_OK if successful, an error code otherwise.
  */
 OM_EXPORT int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion);
+
+
+/**
+* Return the full USB serial string identity for the specified device.
+* @param deviceId Identifier of the device.
+* @param[out] serialBuffer A buffer to receive the string of the device'sUSB serial string identity (of size OM_MAX_PATH).
+* @since 1.8
+*/
+OM_EXPORT int OmGetDeviceSerial(int deviceId, char *serialBuffer);
+
+
+/**
+* Return the path to specified device's communication port.
+* @param deviceId Identifier of the device.
+* @param[out] portBuffer A buffer to receive the path to the device's communication port (of size OM_MAX_PATH).
+* @see OmGetDevicePath()
+* @since 1.7
+*/
+OM_EXPORT int OmGetDevicePort(int deviceId, char *portBuffer);
+
+
+/**
+* Return the path to specified device's filesystem.
+* @param deviceId Identifier of the device.
+* @param[out] pathBuffer A buffer to receive the path to the device's filsystem (of size OM_MAX_PATH).
+* @see OmGetDataFilename()
+* @since 1.7
+*/
+OM_EXPORT int OmGetDevicePath(int deviceId, char *pathBuffer);
 
 
 /**
@@ -738,11 +764,11 @@ OM_EXPORT int OmEraseDataAndCommit(int deviceId, OM_ERASE_LEVEL eraseLevel);
 /**
  * Queries the specified device's accelerometer configuration.
  * @param deviceId Identifier of the device.
- * @param[out] rate Pointer to a value to receive the sampling rate in Hz (50, 100, 200)
- * @param[out] range Pointer to a value to receive the sampling range in +/- G (2, 4, 8, 16)
+ * @param[out] rate Pointer to a value to receive the sampling rate in Hz (6 [=6.25], 12 [=12.5], 25, 50, 100, 200, 400, 800, 1600, 3200). Overloaded since 1.8 with negative ranges being "low power" mode.
+ * @param[out] range Pointer to a value to receive the sampling range in +/- G (2, 4, 8, 16). Overloaded since 1.8 with the bits 16-32 being the synchronous gyro range in degrees/sec (125, 250, 500, 1000, 2000) with compatable devices.
  * @return \a OM_OK if successful, an error code otherwise.
  * @see OmSetAccelConfig()
- * @since 1.3
+ * @since 1.3, 1.8 for overloaded low-power and synchronous gyro range.
  */
 OM_EXPORT int OmGetAccelConfig(int deviceId, int *rate, int *range);
 
@@ -751,11 +777,11 @@ OM_EXPORT int OmGetAccelConfig(int deviceId, int *rate, int *range);
  * Sets the specified device's accelerometer configuration to be used at the next recording session.
  * @note This API call does not alter the existing settings, and only takes full effect when OmEraseDataAndCommit() is called.
  * @param deviceId Identifier of the device.
- * @param rate Sampling rate value in Hz (50, 100, 200)
- * @param range Sampling range value in +/- G (2, 4, 8, 16)
+ * @param rate Sampling rate value in Hz (6 [=6.25], 12 [=12.5], 25, 50, 100, 200, 400, 800, 1600, 3200).  Overloaded since 1.8 with negative ranges being "low power" mode.
+ * @param range Sampling range value in +/- G (2, 4, 8, 16). Overloaded since 1.8 with the bits 16-32 being the synchronous gyro range in degrees/sec (125, 250, 500, 1000, 2000) with compatable devices.
  * @return \a OM_OK if successful, an error code otherwise.
  * @see OmGetAccelConfig()
- * @since 1.3
+ * @since 1.3, 1.8 for overloaded low-power and synchronous gyro range.
  */
 OM_EXPORT int OmSetAccelConfig(int deviceId, int rate, int range);
 
@@ -873,26 +899,6 @@ OM_EXPORT int OmSetDownloadChunkCallback(OmDownloadChunkCallback downloadChunkCa
  * @since 1.4
  */
 OM_EXPORT int OmGetDataFileSize(int deviceId);
-
-
-/**
-* Return the path to specified device's communication port.
-* @param deviceId Identifier of the device.
-* @param[out] portBuffer A buffer to receive the path to the device's communication port (of size OM_MAX_PATH).
-* @see OmGetDevicePath()
-* @since 1.7
-*/
-OM_EXPORT int OmGetDevicePort(int deviceId, char *portBuffer);
-
-
-/**
-* Return the path to specified device's filesystem.
-* @param deviceId Identifier of the device.
-* @param[out] pathBuffer A buffer to receive the path to the device's filsystem (of size OM_MAX_PATH).
-* @see OmGetDataFilename()
-* @since 1.7
-*/
-OM_EXPORT int OmGetDevicePath(int deviceId, char *pathBuffer);
 
 
 /**
@@ -1256,6 +1262,9 @@ typedef enum
     OM_VALUE_BATTERY_MV = 110,
     OM_VALUE_BATTERY_PERCENT = 210,
 /** \endcond */
+	OM_VALUE_AXES = 12,                 /**< Number of axes per sample.  Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM */
+	OM_VALUE_SCALE_ACCEL = 13,          /**< Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g) */
+	OM_VALUE_SCALE_GYRO = 14,           /**< Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off. */
 } OM_READER_VALUE_TYPE;
 
 

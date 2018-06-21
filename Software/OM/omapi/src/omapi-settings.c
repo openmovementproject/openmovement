@@ -270,10 +270,30 @@ int OmGetAccelConfig(int deviceId, int *rate, int *range)
     // "RATE=74,100"
     if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     value = atoi(parts[1]);
+    int currentRate = OM_ACCEL_RATE_FROM_CONFIG(value);
+    int currentRange = OM_ACCEL_RANGE_FROM_CONFIG(value);
+    int gyroRange = -1;
+    if (parts[2] != NULL && atoi(parts[2]) != currentRate) { return OM_E_UNEXPECTED_RESPONSE; }    
+    if (parts[3] != NULL)
+    {
+        gyroRange = atoi(parts[3]);
+    }
 
-    // Calculate return values from configuration value
-    if (rate != NULL) { *rate = OM_ACCEL_RATE_FROM_CONFIG(value); }
-    if (range != NULL) { *range = OM_ACCEL_RANGE_FROM_CONFIG(value); }
+    // Overloaded rate: negative to indicate low-power mode
+    if (value & OM_ACCEL_RATE_LOW_POWER)
+    {
+        currentRate = -currentRate;
+    }
+
+    // Overloaded range: high word indicates synchronous gyro range
+    if (gyroRange >= 0)
+    {
+        currentRange |= gyroRange << 16;
+    }
+
+    // Return values
+    if (rate != NULL) { *rate = currentRate; }
+    if (range != NULL) { *range = currentRange; }
 
     if (!OM_ACCEL_IS_VALID_RATE(value)) { return OM_E_FAIL; }       // Not a valid configuration
     return OM_OK;
@@ -285,10 +305,17 @@ int OmSetAccelConfig(int deviceId, int rate, int range)
     char command[32];
     int status;
     char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
-    int value;
+    int value = 0;
+    int gyroRange = -1; // unspecified
 
-    // Calculate configuration value from parameters
-    value = 0;
+    // Overloaded rate: negative to indicate low-power mode
+    if (rate < 0)
+    {
+        rate = -rate;
+        value |= OM_ACCEL_RATE_LOW_POWER;
+    }
+
+    // Rate code
     switch (rate)
     {
         case 3200: value |= OM_ACCEL_RATE_3200; break;
@@ -303,6 +330,30 @@ int OmSetAccelConfig(int deviceId, int rate, int range)
         case    6: value |= OM_ACCEL_RATE_6_25; break;
         default: return OM_E_INVALID_ARG;
     }
+
+    // Overloaded range code: high word is synchronous gyro enable and range
+    if (range & ~0xffff)
+    {
+        gyroRange = range >> 16;
+        switch (gyroRange)
+        {
+            case 2000:
+            case 1000:
+            case 500:
+            case 250:
+                break;
+            case 1:
+                // 1 is the special case of specifying the gyro is explicitly disabled
+                // (the firmware would disable the gyro if not specified on the RATE command anyway)
+                gyroRange = 0;
+                break;
+            default:
+                return OM_E_INVALID_ARG;
+        }
+        range &= 0xffff;
+    }
+
+    // Range code
     switch (range)
     {
         case 16:   value |= OM_ACCEL_RANGE_16G; break;
@@ -312,12 +363,25 @@ int OmSetAccelConfig(int deviceId, int rate, int range)
         default: return OM_E_INVALID_ARG;
     }
 
-    sprintf(command, "\r\nRATE %u\r\n", value);
+    if (gyroRange >= 0)
+    {
+        sprintf(command, "\r\nRATE %u,%u\r\n", value, gyroRange);
+    }
+    else
+    {
+        sprintf(command, "\r\nRATE %u\r\n", value);
+    }
     status = OM_COMMAND(deviceId, command, response, "RATE=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     // "RATE=74,100"
     if (parts[1] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (atoi(parts[1]) != value) { return OM_E_FAIL; }
+    if (parts[2] != NULL && atoi(parts[2]) != rate) { return OM_E_FAIL; }
+    if (gyroRange >= 0)
+    {
+        // "RATE=74,100,<gyroRange>"
+        if (parts[3] == NULL || atoi(parts[3]) != gyroRange) { return OM_E_FAIL; }
+    }
     return OM_OK;
 }
 

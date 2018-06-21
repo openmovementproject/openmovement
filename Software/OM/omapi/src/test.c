@@ -1,4 +1,4 @@
-// gcc -o test -I../include -Dtest_main=main test.c -ludev -lpthread -L. -lomapi
+// gcc -o test -I../include -Dtest_main=main test.c -L. -lomapi -ludev -lpthread
 //
 /* 
  * Copyright (c) 2009-2012, Newcastle University, UK.

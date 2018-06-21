@@ -45,9 +45,25 @@ link /dll /out:libomapi.dll omapi-download omapi-internal omapi-main omapi-reade
 IF ERRORLEVEL 1 GOTO ERROR
 
 :DEF
-ECHO Creating .lib...
-dumpbin /exports libomapi.dll > libomapi.def
+ECHO Creating an import library .lib...
+rem --- Parse the exports to create a .DEF file ---
+ECHO.LIBRARY LIBOMAPI>libomapi.def
+ECHO.EXPORTS>>libomapi.def
+FOR /F "usebackq tokens=1,4 delims= " %%F IN (`dumpbin /exports libomapi.dll ^| FINDSTR /X /R /C:"^  *[0-9][0-9]*  *[0-9A-F][0-9A-F]*  *[0-9A-F][0-9A-F]*  *[A-Za-z_][A-Za-z_0-9]*$"`) DO (
+  rem ECHO.  %%G  @%%F>>libomapi.def
+  ECHO.  %%G>>libomapi.def
+)
 lib /def:libomapi.def /out:libomapi.lib /machine:%ARCH%
+rem dumpbin /EXPORTS libomapi.lib
+rem dumpbin /LINKERMEMBER libomapi.lib
+IF ERRORLEVEL 1 GOTO ERROR
+
+:TEST
+ECHO Building test program...
+cl /EHsc /DOMAPI_DYNLIB_IMPORT /Dtest_main=main /I"..\include" /Tc"test.c"
+IF ERRORLEVEL 1 GOTO ERROR
+link /out:test.exe test libomapi.lib
+IF ERRORLEVEL 1 GOTO ERROR
 GOTO END
 
 :ERROR

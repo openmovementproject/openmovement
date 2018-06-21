@@ -40,34 +40,31 @@ typedef struct DeviceNode_t {
     char block_device[256];     // "/dev/sdb1"
     char mount_path[256];       // "/media/AX317_?????"
     char serial_device[256];    // "/dev/ttyACM0"
+    char serial_id[256];        // "CWA17_00123"
     int device_id;              // 0-65535
     struct DeviceNode_t *next;  // Linked list
 } DeviceNode;
 
 static DeviceNode *deviceList = NULL;
+static char isWsl;
 
 
 /** Internal, extract device id from serial id **/
-static int GetDeviceId(const char *serial_id)
+static int GetDeviceId(const char *serialNumber)
 {
-    int value = 0;
+	// Return the number found at the end of the string (-1 if none)
+    int value = -1;
     const char *p;
-    for (p = serial_id; *p != 0; p++)
+    for (p = serialNumber; *p != 0; p++)
     {
-        if (*p >= '0' && *p <= '9')
-        {
-            value = 10 * value + (*p - '0');
-        }
-        else
-        {
-            value = 0;
-        }
+        if (*p >= '0' && *p <= '9') value = 10 * (value == -1 ? 0 : value) + (*p - '0');
+        else value = -1;
     }
     return value;
 }
 
 /** Internal, method to add a device to the device list **/
-static void AddDevice(const char *block_device, const char *mount_path, const char *serial_device, int id)
+static void AddDevice(const char *block_device, const char *mount_path, const char *serial_device, int id, const char *serial_id)
 {
     DeviceNode *dev = NULL;
 	DeviceNode *current;
@@ -95,6 +92,7 @@ static void AddDevice(const char *block_device, const char *mount_path, const ch
         strcpy(dev->block_device, block_device);
         strcpy(dev->mount_path, mount_path);
         strcpy(dev->serial_device, serial_device);
+        strcpy(dev->serial_id, serial_id);
         dev->device_id = id;
 
         // Build base device from drive path (not partition) -- remove trailing digits
@@ -110,7 +108,7 @@ static void AddDevice(const char *block_device, const char *mount_path, const ch
 			}
 		}
         
-        OmDeviceDiscovery(OM_DEVICE_CONNECTED, dev->device_id, dev->serial_device, dev->mount_path);
+        OmDeviceDiscovery(OM_DEVICE_CONNECTED, dev->device_id, dev->serial_id, dev->serial_device, dev->mount_path);
     }
     else
     {
@@ -130,7 +128,7 @@ static void RemoveDevice(const char *base_device)
         // Found device
         if (strcmp(current->base_device, base_device) == 0)
         {
-            OmDeviceDiscovery(OM_DEVICE_REMOVED, current->device_id, current->serial_device, current->mount_path);
+            OmDeviceDiscovery(OM_DEVICE_REMOVED, current->device_id, current->serial_id, current->serial_device, current->mount_path);
             if (previous == NULL)
             {
                 deviceList = current->next;
@@ -188,8 +186,36 @@ static void InitDeviceFinder()
     struct udev_list_entry *devices, *dev_list_entry;
     struct udev_device *dev;
 
+    // WSL detection
+    isWsl = 0;
+    FILE *fpVersion = fopen("/proc/version", "r");
+    if (fpVersion != NULL)
+    {
+        char line[256];
+        if (fgets(line, sizeof(line), fpVersion) != NULL)
+        {
+            if (strstr(line, "-Microsoft") != 0)
+            {
+                isWsl = 1;
+            }
+        }
+        fclose(fpVersion);
+    }
+
     deviceList = NULL;
-    
+
+    if (isWsl)
+    {
+        // On WSL, the device could be accessed, but is not discoverable.
+        // A Windows device at COM51 and E: is accessed (as root) after:
+        //   mkdir /mnt/e ; mount -t drvfs e: /mnt/e
+        // ...as: /mnt/e/CWA-DATA.CWA and /dev/ttyS54
+        // e.g.:
+        //   ls -l /mnt/e/CWA-DATA.CWA
+        //   echo -e "LED 1\r\n">>/dev/ttyS51
+        fprintf(stderr, "WARNING: Running under WSL -- device discovery will not work.\n");
+    }
+
     udev = udev_new();
     if (!udev)
     {
@@ -237,7 +263,7 @@ static void InitDeviceFinder()
 // printf("SERIAL: %s\n", serial_device);
 // printf("ID: %d\n", id);
                     // Save device info
-                    AddDevice(path, mount_path, serial_device, id);
+                    AddDevice(path, mount_path, serial_device, id, serial_id);
                 }
             }
         }
@@ -368,13 +394,12 @@ printf("DEVICE-ACTION: %s %s\n", action, block_device);
                         char serial_device[256] = "";
                         const char *serial_id = udev_device_get_sysattr_value(usb_dev, "serial");
                         GetSerialDevice(serial_id, &serial_device[0]);
-                        
                         if (strlen(serial_device) > 0)
                         {
                             int id = GetDeviceId(serial_id);
                             strcat(mount_path, name);
                             WaitUntilReadable(serial_device);
-                            AddDevice(block_device, mount_path, serial_device, id);
+                            AddDevice(block_device, mount_path, serial_device, id, serial_id);
                         }
                     }
                 }

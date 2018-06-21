@@ -37,9 +37,21 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
     if (OM_FAILED(status)) return status;
     //"ID=CWA,hardwareId,firmwareId,deviceId,sessionId"
     if (parts[5] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
-    if (strcmp(parts[1], "CWA") != 0) { return OM_E_FAIL; }
-    if (firmwareVersion != NULL) *firmwareVersion = atoi(parts[3]);
-    if (hardwareVersion != NULL) *hardwareVersion = atoi(parts[2]);
+    int fwVer = atoi(parts[3]);
+    int hwVer = atoi(parts[2]);
+    if (strcmp(parts[1], "CWA") == 0)
+    {
+        ; // Original "AX3" device
+    }
+    else if (parts[1][0] == 'A' && parts[1][1] == 'X' && parts[1][2] >= '0' && parts[1][2] <= '9')
+    {
+        // "AX#" device
+        hwVer |= (parts[1][2] - '0') << 16;     // Mask onto the hardware version
+    }
+    else { return OM_E_FAIL; }
+
+    if (firmwareVersion != NULL) *firmwareVersion = fwVer;
+    if (hardwareVersion != NULL) *hardwareVersion = hwVer;
 	incomingDeviceId = atoi(parts[4]);
 	if (incomingDeviceId != deviceId) {
 		OmLog(0, "ERROR: Problem when identifying device %d (mismatched identity as %d) -- reconnect.\n", deviceId, incomingDeviceId);
@@ -50,6 +62,61 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
 		return OM_E_INVALID_DEVICE;
 	}
     return OM_OK;
+}
+
+
+int OmGetDeviceSerial(int deviceId, char *serialBuffer)
+{
+	if (serialBuffer == NULL) return OM_E_POINTER;
+	serialBuffer[0] = '\0';
+	// Check system and device state
+	if (!om.initialized) return OM_E_NOT_VALID_STATE;
+	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(om.devices[deviceId]->serialId) == 0)
+	{
+		// We don't have a serial id string
+		return OM_E_FAIL;
+	}
+	strcat(serialBuffer, om.devices[deviceId]->serialId);
+	return OM_OK;
+}
+
+
+int OmGetDevicePort(int deviceId, char *portBuffer)
+{
+	if (portBuffer == NULL) return OM_E_POINTER;
+	portBuffer[0] = '\0';
+	// Check system and device state
+	if (!om.initialized) return OM_E_NOT_VALID_STATE;
+	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(om.devices[deviceId]->port) == 0)
+	{
+		// We don't have a path to the port
+		return OM_E_FAIL;
+	}
+	strcat(portBuffer, om.devices[deviceId]->port);
+	return OM_OK;
+}
+
+
+int OmGetDevicePath(int deviceId, char *pathBuffer)
+{
+	if (pathBuffer == NULL) return OM_E_POINTER;
+	pathBuffer[0] = '\0';
+	// Check system and device state
+	if (!om.initialized) return OM_E_NOT_VALID_STATE;
+	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(om.devices[deviceId]->root) == 0)
+	{
+		// We don't have a path to the root
+		// ??? (Could re-mount the volume to a path here?)
+		return OM_E_FAIL;
+	}
+	strcat(pathBuffer, om.devices[deviceId]->root);
+	return OM_OK;
 }
 
 

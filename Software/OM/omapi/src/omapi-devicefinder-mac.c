@@ -326,12 +326,15 @@ const char *findSerial(const char *usbSerial)
 
 static int DeviceIdFromSerialNumber(const char *serialNumber)
 {
-	int deviceId = -1;
-	if (serialNumber[5] == '_')
-	{
-		deviceId = atoi(serialNumber + 6);
-	}
-	return deviceId;
+	// Return the number found at the end of the string (-1 if none)
+    int value = -1;
+    const char *p;
+    for (p = serialNumber; *p != 0; p++)
+    {
+        if (*p >= '0' && *p <= '9') value = 10 * (value == -1 ? 0 : value) + (*p - '0');
+        else value = -1;
+    }
+    return value;
 }
 
 
@@ -348,7 +351,7 @@ static void DeviceNotification(void *refCon, io_service_t service, natural_t mes
 		// fprintf(stderr, "->deviceId: 0x%lx.\n", deviceData->deviceId);
 
 		// Call device removed
-		OmDeviceDiscovery(OM_DEVICE_REMOVED, deviceData->deviceId, deviceData->serialDevice, deviceData->mountPath);
+		OmDeviceDiscovery(OM_DEVICE_REMOVED, deviceData->deviceId, deviceData->serialNumber, deviceData->serialDevice, deviceData->mountPath);
 
 		CFRelease(deviceData->deviceName);
 		if (deviceData->deviceInterface)
@@ -474,7 +477,7 @@ static void DeviceAdded(void *refCon, io_iterator_t iterator)
 
 		// Call device connected
 		printf("DEVICE: ... %s (#%d) port=%s path=%s\n", deviceData->serialNumber, deviceData->deviceId, deviceData->serialDevice, deviceData->mountPath);
-		OmDeviceDiscovery(OM_DEVICE_CONNECTED, deviceData->deviceId, deviceData->serialDevice, deviceData->mountPath);
+		OmDeviceDiscovery(OM_DEVICE_CONNECTED, deviceData->deviceId, deviceData->serialNumber, deviceData->serialDevice, deviceData->mountPath);
 		
 		// Release IOIteratorNext reference
 		kr = IOObjectRelease(usbDevice);

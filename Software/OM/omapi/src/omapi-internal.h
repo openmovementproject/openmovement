@@ -138,6 +138,7 @@ extern "C" {
 #define OM_MAX_SERIAL 0xffff            /**< The maximum serial number allowed (16-bit, unsigned) */
 #define OM_MAX_CDC_PATH OM_MAX_PATH     /**< The maximum string length of the CDC port.  e.g. "\\.\COM12345" + '\0' on Windows, or "/dev/tty.usbmodem12345" + '\0' */
 #define OM_MAX_MSD_PATH OM_MAX_PATH     /**< The maximum string length to the root of the MSD volume.  e.g. "\\?\Volume{abc12345-1234-1234-1234-123456789abc}\" + '\0'. */
+#define OM_MAX_SERIALID_LEN OM_MAX_PATH/**< The maximum string length of the USB serial number identity string.  e.g. "CWA17_00123" + '\0'. */
 #define OM_DEFAULT_FILENAME "CWA-DATA.CWA"
 
 #define OM_MAX_RESPONSE_SIZE 256
@@ -180,6 +181,7 @@ typedef struct
     void *downloadReference;            /**< Download reference to callbacks (if NULL, the reference given when registering the callbacks will be used instead) */
 	
 	int flags;							/**< Special flags: 0x00000001=invalid device */
+    char serialId[OM_MAX_SERIALID_LEN]; /**< USB serial number identity string, e.g. "CWA17_00123" */
 } OmDeviceState;
 
 
@@ -237,7 +239,7 @@ void OmDeviceDiscoveryStart(void);
 void OmDeviceDiscoveryStop(void);
 
 /** Device discovery handler */
-void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, const char *port, const char *volumePath);
+void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, const char *serialId, const char *port, const char *volumePath);
 
 
 /** Number of milliseconds since the epoch */

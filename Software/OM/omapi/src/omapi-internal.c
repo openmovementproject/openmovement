@@ -109,7 +109,7 @@ int OmDebugMutexUnlock(mutex_t *mutex, const char *mutexName, const char *source
 #endif
 
 /** Internal, method for handling device discovery. */
-void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, const char *port, const char *volumePath)
+void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, const char *serialId, const char *port, const char *volumePath)
 {
     if (status == OM_DEVICE_CONNECTED)
     {
@@ -141,6 +141,7 @@ OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
         deviceState->id = serialNumber;
         snprintf(deviceState->port, OM_MAX_CDC_PATH, "%s", port);
         snprintf(deviceState->root, OM_MAX_MSD_PATH, "%s", volumePath);
+        snprintf(deviceState->serialId, OM_MAX_SERIALID_LEN, "%s", serialId);
 
         // Download status
         //deviceState->downloadStatus = OM_DOWNLOAD_NONE;

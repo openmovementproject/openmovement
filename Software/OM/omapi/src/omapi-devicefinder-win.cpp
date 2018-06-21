@@ -1663,13 +1663,13 @@ else OmLog(1, "7a: Failed to set mount point... %08x\n", err);
     }
 
     // Call the device discovery using the found volume
-    OmDeviceDiscovery(OM_DEVICE_CONNECTED, device.serialNumber, device.port.c_str(), volumePath.c_str());
+    OmDeviceDiscovery(OM_DEVICE_CONNECTED, device.serialNumber, device.serialString.c_str(), device.port.c_str(), volumePath.c_str());
 }
 
 /** Internal callback handler from DeviceFinder for device removal. */
 static void OmWindowsRemovedCallback(void *reference, const Device &device)
 {
-    OmDeviceDiscovery(OM_DEVICE_REMOVED, device.serialNumber, device.port.c_str(), device.volumePath.c_str());
+    OmDeviceDiscovery(OM_DEVICE_REMOVED, device.serialNumber, device.serialString.c_str(), device.port.c_str(), device.volumePath.c_str());
 }
 
 
