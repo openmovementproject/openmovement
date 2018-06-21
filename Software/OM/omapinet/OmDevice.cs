@@ -25,12 +25,26 @@ namespace OmApiNet
             validData = false;
 
             filename = null;
+            port = null;
+            serialId = null;
             try
             {
                 StringBuilder filenamesb = new StringBuilder(256);
                 if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
                 {
                     filename = filenamesb.ToString();
+                }
+
+                StringBuilder portsb = new StringBuilder(256);
+                if (OmApi.OmGetDevicePort(deviceId, portsb) == OmApi.OM_OK)
+                {
+                    port = portsb.ToString();
+                }
+
+                StringBuilder serialIdsb = new StringBuilder(256);
+                if (OmApi.OmGetDeviceSerial(deviceId, serialIdsb) == OmApi.OM_OK)
+                {
+                    serialId = serialIdsb.ToString();
                 }
             }
             catch (Exception) { Console.Error.WriteLine("ERROR: Problem getting data filename for device " + deviceId + "."); }
@@ -131,6 +145,12 @@ category = SourceCategory.Other;
 
         protected string filename;
         public string Filename { get { return filename; } }
+
+        protected string port;
+        public string Port { get { return port; } }
+
+        protected string serialId;
+        public string SerialId { get { return serialId; } } // Full device serial id
 
         //public bool HasData { get { if (Filename == null) { return false; }  return File.Exists(Filename); } }
 
@@ -269,17 +289,19 @@ category = SourceCategory.Other;
 					// Caution the user if the battery was allowed to reset 
 					// (the RTC clock became reset)
 					DateTime cautionDate = new DateTime(2008, 1, 1, 0, 0, 0);
-					if (deviceTime < cautionDate) {
-						deviceWarning = 1;	// Completely flattening battery may damage it
-					}
-						
-					// Warn the user of likely damaged device if RTC reset less than
-					// 15 minutes ago, yet the device reports >= 70% charge
-					DateTime warningDate = new DateTime(2000, 1, 1, 0, 15, 0);
+					if (deviceWarning < 1 && deviceTime < cautionDate) {
+						deviceWarning = 1;  // Completely flattening battery may damage it
+                        changed = true;
+                    }
+
+                    // Warn the user of likely damaged device if RTC reset less than
+                    // 15 minutes ago, yet the device reports >= 70% charge
+                    DateTime warningDate = new DateTime(2000, 1, 1, 0, 15, 0);
 					int warningPercent = 70;
-					if (deviceTime < warningDate && batteryLevel >= warningPercent) {
-						deviceWarning = 2;	// Device battery or RTC may be damaged
-					}
+					if (deviceWarning < 2 && deviceTime < warningDate && batteryLevel >= warningPercent) {
+						deviceWarning = 2;  // Device battery or RTC may be damaged
+                        changed = true;
+                    }
 
                     uint startTimeValue, stopTimeValue;
                     res = OmApi.OmGetDelays(deviceId, out startTimeValue, out stopTimeValue);

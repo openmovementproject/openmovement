@@ -368,7 +368,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
         unsigned int i;
 
         // Check sample count matches expected number
-        int maxSamples = (OM_BLOCK_SIZE - 32) / bytesPerSample;      // 80
+        unsigned int maxSamples = (OM_BLOCK_SIZE - 32) / bytesPerSample;      // 80
 		state->numSamples = state->data[28] | (state->data[29] << 8);	// @28 sampleCount  
 		if (state->numSamples > maxSamples) { state->numSamples = maxSamples; }	// error instead?
 		if (state->numSamples < 0) { state->numSamples = 0; }	// error instead?
@@ -376,7 +376,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
         // Parse each value's bytes for portability
         for (i = 0; i < maxSamples; i++)
         {
-			for (int j  = 0; j < state->numAxes; j++)
+			for (unsigned int j  = 0; j < state->numAxes; j++)
 			{
 				int value = 0;
 				if (i < state->numSamples)

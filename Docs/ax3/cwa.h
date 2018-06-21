@@ -30,19 +30,22 @@ typedef struct
 {
     uint16_t packetHeader;                      ///< @ 0  +2   ASCII "MD", little-endian (0x444D)
     uint16_t packetLength;                      ///< @ 2  +2   Packet length (1020 bytes, with header (4) = 1024 bytes total)
-    uint8_t  reserved1;                         ///< @ 4  +1   (1 byte reserved)
+    uint8_t  hardwareType;                      ///< @ 4  +1 * Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
     uint16_t deviceId;                          ///< @ 5  +2   Device identifier
     uint32_t sessionId;                         ///< @ 7  +4   Unique session identifier
-    uint16_t reserved2;                         ///< @11  +2   (2 bytes reserved)
+    uint16_t majorDeviceId;                     ///< @11  +2 * Reserved for upper device id (0x0000/0xffff=17?)
     cwa_timestamp_t loggingStartTime;           ///< @13  +4   Start time for delayed logging
     cwa_timestamp_t loggingEndTime;             ///< @17  +4   Stop time for delayed logging
     uint32_t loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)
-    uint8_t  reserved3[11];                     ///< @25  +11  (11 bytes reserved)
+    uint8_t  reserved1[1];                      ///< @25  +1   (1 byte reserved)
+    uint8_t  flashLed;                          ///< @26  +1   Flash LED during recording
+    uint8_t  reserved2[7];                      ///< @27  +7   (7 bytes reserved)
+    uint8_t  sensorConfig;                      ///< @35  +1 * Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range: 1=2000, 2=1000, 3=500, 4=250, 5=125, top nibble non-zero is magnetometer enabled.
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change metadata time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
     int16_t  timeZone;                          ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
-    uint8_t  reserved4[20];                     ///< @44  +20  (20 bytes reserved)
+    uint8_t  reserved3[20];                     ///< @44  +20  (20 bytes reserved)
     uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448 Scratch buffer / meta-data (448 ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
     uint8_t  reserved[512];                     ///< @512 +512 Reserved for device-specific meta-data (512 bytes, ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs, leading '&' if present?)
 } cwa_header_t;
@@ -60,12 +63,12 @@ typedef struct
     uint32_t sessionId;                         ///< @ 6  +4   Unique session identifier, 0 = unknown
     uint32_t sequenceId;                        ///< @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
     cwa_timestamp_t timestamp;                  ///< @14  +4   Last reported RTC value, 0 = unknown
-    uint16_t light;                             ///< @18  +2   Last recorded light sensor value in raw units, 0 = none
+    uint16_t lightScale;                        ///< @18  +2   AAAGGGLLLLLLLLLL Bottom 10 bits is last recorded light sensor value in raw units, 0 = none; top three bits are unpacked accel scale (1/2^(8+n) g); next three bits are gyro scale	(8000/2^n dps)
     uint16_t temperature;                       ///< @20  +2   Last recorded temperature sensor value in raw units, 0 = none
     uint8_t  events;                            ///< @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
     uint8_t  battery;                           ///< @23  +1   Last recorded battery level in raw units, 0 = unknown
     uint8_t  sampleRate;                        ///< @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
-    uint8_t  numAxesBPS;                        ///< @25  +1   0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
+    uint8_t  numAxesBPS;                        ///< @25  +1   0x32 (top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
     int16_t  timestampOffset;                   ///< @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
     uint16_t sampleCount;                       ///< @28  +2   Number of accelerometer samples (80 or 120 if this sector is full)
     uint8_t  rawSampleData[480];                ///< @30  +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
@@ -73,6 +76,21 @@ typedef struct
 } OM_READER_DATA_PACKET;
 #pragma pack(pop)
 
+
+// Light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: 
+// Accel scaling for 16-bit unpacked values: 1/2^(8+n) g
+// 0: AX3   1/256   (2^8,  8+0)
+// 3: +-16g 1/2048  (2^11, 8+3)
+// 4: +-8g  1/4096  (2^12, 8+4)
+// 5: +-4g  1/8192  (2^13, 8+5)
+// 6: +-2g  1/16384 (2^14, 8+6)
+
+// Gyro scaling for 16-bit unpacked values: 4000/2^n dps 
+// 1: 2000 dps
+// 2: 1000 dps
+// 3:  500 dps
+// 4:  250 dps
+// 5:  125 dps
 
 
 // Packed accelerometer value - must sign-extend each component value and adjust for exponent

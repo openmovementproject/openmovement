@@ -444,6 +444,15 @@ namespace OmGui
 
             item.ImageIndex = img;
 
+            if (device.DeviceWarning >= 2)
+            {
+                battery = "DAMAGED? (" + battery + ") - indications of damaged device battery or clock, check carefully.";
+            }
+            else if (device.DeviceWarning >= 1)
+            {
+                battery = "DISCHARGED? (" + battery + ") - allowing full discharge can damage battery.";
+            }
+
             string deviceText = string.Format("{0:00000}", source.DeviceId);
             string deviceSessionID = (source.SessionId == uint.MaxValue) ? "-" : source.SessionId.ToString();
             string deviceBattery = battery;
@@ -451,7 +460,6 @@ namespace OmGui
             string deviceRecording = recording;
 
             item.UseItemStyleForSubItems = false;
-
 
             item.Text = deviceText;
             item.SubItems.Add(deviceSessionID, Color.Black, Color.White, DefaultFont);

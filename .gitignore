@@ -1,3 +1,6 @@
 /Software/WAX9/Wax9Gui/*.user
 /Software/OM/omapi/src/*.obj
 /Software/OM/omapi/src/*.dll
+/Software/OM/omapi/src/*.lib
+/Software/OM/omapi/src/*.exp
+/Software/OM/omapi/src/*.def
