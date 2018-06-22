@@ -1407,9 +1407,10 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         bool CheckFirmware(OmDevice[] devices)
         {
             // Read bootload information from file
-            string bootloadExecutable = null;
-            string latestVersion = "";
-            IDictionary<string, string> blacklist = new Dictionary<string, string>(); // Black-list of version numbers
+            IDictionary<string, string> bootloadExecutable = new Dictionary<string, string>();  // executables for each section
+            IDictionary<string, string> latestVersion = new Dictionary<string, string>();       // latest version for each section
+            IDictionary<string, string> blacklistMessage = new Dictionary<string, string>();    // List of version numbers to update message
+            IDictionary<string, string> blacklistSection = new Dictionary<string, string>();    // List of version numbers to section
 
             // Find bootload information file
             string bootloadInformation = @"firmware\bootload.ini";
@@ -1449,15 +1450,15 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 string name = parts[0].Trim();
                 string value = (parts.Length > 1) ? parts[1].Trim() : null;
 
-                if (section == "upgrade")
+                if (name.StartsWith("_"))
                 {
-                    blacklist.Add(name, value);
+                    if (name == "_executable") { bootloadExecutable[section] = value; }       // @"firmware\CWA17_44.cmd"
+                    else if (name == "_version") { latestVersion[section] = value; }          // @"CWA17_44"
                 }
-                else if (section == "bootload")
+                else
                 {
-                    if (name == "executable") { bootloadExecutable = value; }       // @"firmware\CWA17_44.cmd"
-                    else if (name == "version") { latestVersion = value; }          // @"CWA17_44"
-                    
+                    blacklistMessage.Add(name, value);
+                    blacklistSection.Add(name, section);
                 }
             }
 
@@ -1514,12 +1515,28 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                     Console.WriteLine("FIRMWARE: Warning, device " + device.DeviceId + " firmware version unknown (comms problem?).");
                 }
 
-                string currentFirmware = "CWA17_" + firmwareVersion + "";
-                if (blacklist.ContainsKey(currentFirmware))
+                string prefix = "XXX00_";
+                if (device.SerialId != null)
                 {
-                    string reason = blacklist[currentFirmware];
-                    DialogResult drUpdate = MessageBox.Show(this, "Device " + device.DeviceId + " is running firmware version " + currentFirmware + ".\r\n\r\n" + reason + "\r\n\r\nUpdate the device firmware to " + latestVersion + " now?", "Firmware Update Receommended", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                    Console.WriteLine("FIRMWARE: Device " + device.DeviceId + " is running firmware version " + currentFirmware + " - update to version " + latestVersion + " (Reason: " + reason + ").");
+                    int underscore = device.SerialId.IndexOf("_");
+                    if (underscore >= 0)
+                    {
+                        prefix = device.SerialId.Substring(0, underscore + 1);
+                    }
+                }
+                string currentFirmware = prefix + firmwareVersion;
+                if (blacklistSection.ContainsKey(currentFirmware))
+                {
+                    string sect = blacklistSection[currentFirmware];
+                    string reason = blacklistMessage[currentFirmware];
+
+                    if (reason == null || reason.Trim().Length == 0)
+                    {
+                        reason = "The current version of the firmware is marked as needing an update.";
+                    }
+
+                    DialogResult drUpdate = MessageBox.Show(this, "Device " + device.DeviceId + " is running firmware version " + currentFirmware + ".\r\n\r\n" + reason + "\r\n\r\nUpdate the device firmware to " + latestVersion[sect] + " now?", "Firmware Update Receommended", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    Console.WriteLine("FIRMWARE: Device " + device.DeviceId + " is running firmware version " + currentFirmware + " - update to version " + latestVersion[sect] + " (Reason: " + reason + ").");
                     if (drUpdate == System.Windows.Forms.DialogResult.Yes)
                     {
                         DialogResult okUpdate = MessageBox.Show(this, "Important:\r\n\r\n* Do not disconnect device " + device.DeviceId + ".\r\n\r\n* Do not connect any new devices.\r\n\r\n* Check no devices are currently flashing red.\r\n\r\nContinue?", "Firmware Update Warnings", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
@@ -1546,7 +1563,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                 // Convert the file
                                 ProcessStartInfo processInformation = new ProcessStartInfo();
 
-                                processInformation.FileName = bootloadExecutable;
+                                processInformation.FileName = bootloadExecutable[sect];
 
                                 List<string> args = new List<string>();
                                 //args.Add("\"" + param + "\"");
@@ -1638,7 +1655,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                 }
                 else
                 {
-                    Console.WriteLine("FIRMWARE: Device " + device.DeviceId + " is running firmware version " + currentFirmware + " (not required to update to version " + latestVersion + ").");
+                    Console.WriteLine("FIRMWARE: Device " + device.DeviceId + " is running firmware version " + currentFirmware + " (not required to update).");
                 }
             }
             return false;
