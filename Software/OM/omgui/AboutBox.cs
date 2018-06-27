@@ -18,6 +18,8 @@ namespace OmGui
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
             this.labelDescription.Text = AssemblyDescription;
+
+            this.textBoxCopyright.Text = this.textBoxCopyright.Text.Replace("${Copyright}", AssemblyCopyright);
         }
 
         #region Assembly Attribute Accessors
@@ -114,6 +116,11 @@ namespace OmGui
         {
             DialogResult = System.Windows.Forms.DialogResult.OK;
             Close();
+        }
+
+        private void textBoxCopyright_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

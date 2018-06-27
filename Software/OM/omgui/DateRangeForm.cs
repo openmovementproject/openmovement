@@ -26,12 +26,15 @@ namespace OmGui
         //private OmDevice Device { get; set; }
         private OmDevice[] Devices { get; set; }
 
+        private bool hasSyncGyro = false;
+
         public DateRangeForm(string title, OmDevice[] devices)
         {
-            //TODO - Warnings currently only work for one device.
-            //if (devices.Length > 1)
+            // Gyro enabled
+            hasSyncGyro = devices.Length > 0 ? true : false;
+            foreach (var device in devices)
             {
-            //    warningsOn = false;
+                hasSyncGyro &= device.HasSyncGyro;
             }
 
             Devices = devices;
@@ -88,6 +91,21 @@ namespace OmGui
             datePickerStart.Visible = true;
             datePickerEnd.Visible = true;
 
+            // Gyro
+            comboBoxGyroRange.SelectedIndex = 0;
+            if (hasSyncGyro)
+            {
+                // No low-power option
+                checkBoxLowPower.Visible = false;
+                checkBoxLowPower.Checked = false;
+                // Always unpacked data
+                checkBoxUnpacked.Visible = false;
+                checkBoxUnpacked.Checked = false;
+                // Gyro range
+                label17.Visible = true;
+                comboBoxGyroRange.Visible = true;
+            }
+
             updateWarningMessages();
 
         }
@@ -143,14 +161,22 @@ namespace OmGui
 
             // New settings
             settingsDictionary.Add("Frequency", comboBoxSamplingFreq.SelectedItem.ToString());
-            settingsDictionary.Add("LowPower", checkBoxLowPower.Checked ? "True" : "False");
+            if (!this.hasSyncGyro)
+            {
+                settingsDictionary.Add("LowPower", checkBoxLowPower.Checked ? "True" : "False");
+                settingsDictionary.Add("Unpacked", checkBoxUnpacked.Checked ? "True" : "False");
+            }
             settingsDictionary.Add("Range", comboBoxRange.SelectedItem.ToString());
+            if (this.hasSyncGyro)
+            {
+                int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int gyroRange);
+                settingsDictionary.Add("GyroRange", gyroRange.ToString());
+            }
             settingsDictionary.Add("DelayDays", DayDelay.ToString());
             settingsDictionary.Add("TimeOfDay", StartDate.TimeOfDay.TotalSeconds.ToString());
             settingsDictionary.Add("Duration", Duration.TotalSeconds.ToString());
             settingsDictionary.Add("RecordingTime", radioButtonImmediately.Checked ? "Immediately" : (radioButtonDuration.Checked ? "Duration" : ""));
             settingsDictionary.Add("Flash", checkBoxFlash.Checked ? "True" : "False");
-            settingsDictionary.Add("Unpacked", checkBoxUnpacked.Checked ? "True" : "False");
         }
         
         private void resetFieldsToDictionary(Dictionary<string, string> settingsDictionary)
@@ -215,7 +241,7 @@ namespace OmGui
                     textBoxSubjectNotes.Text = pair.Value;
                 }
                 */
-                else if (pair.Key.Equals("LowPower"))
+                else if (pair.Key.Equals("LowPower") && !this.hasSyncGyro)
                 {
                     if (pair.Value.Equals("True")) { checkBoxLowPower.Checked = true; }
                     else if (pair.Value.Equals("False")) { checkBoxLowPower.Checked = false; }
@@ -234,6 +260,22 @@ namespace OmGui
                     foreach (object o in comboBoxRange.Items)
                     {
                         if (o.ToString().Equals(pair.Value)) { comboBoxRange.SelectedItem = o; break; }
+                    }
+                }
+                else if (pair.Key.Equals("GyroRange") && this.hasSyncGyro)
+                {
+                    int.TryParse(pair.Value, out int value);
+                    if (value == 0)
+                    {
+                        comboBoxGyroRange.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        comboBoxGyroRange.SelectedValue = "" + value;
+                    }
+                    foreach (object o in comboBoxGyroRange.Items)
+                    {
+                        if (o.ToString().Equals(pair.Value)) { comboBoxGyroRange.SelectedItem = o; break; }
                     }
                 }
                 else if (pair.Key.Equals("DelayDays"))
@@ -259,7 +301,7 @@ namespace OmGui
                     if (pair.Value.Equals("True")) { checkBoxFlash.Checked = true; }
                     else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = false; }
                 }
-                else if (pair.Key.Equals("Unpacked"))
+                else if (pair.Key.Equals("Unpacked") && !this.hasSyncGyro)
                 {
                     if (pair.Value.Equals("True")) { checkBoxUnpacked.Checked = true; }
                     else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = false; }
@@ -406,6 +448,9 @@ namespace OmGui
         public int Range { get; set; }
         private int[] SamplingRanges = { 2, 4, 8, 16 };
 
+        public int GyroRange { get; set; }
+        private int[] GyroRanges = { 0, 2000, 1000, 500, 250, 125 };
+
         public bool LowPower { get; set; }
 
         public string metaData = null;
@@ -473,10 +518,11 @@ Cursor.Current = Cursors.WaitCursor;
 
             SamplingFrequency = (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture);
             Range = (int)float.Parse(comboBoxRange.SelectedItem.ToString());
+            int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int gyroRange);
+            GyroRange = gyroRange;
             LowPower = checkBoxLowPower.Checked;
 
             DialogResult = System.Windows.Forms.DialogResult.OK;
-
         }
 
         public bool Flash
@@ -665,7 +711,7 @@ Cursor.Current = Cursors.WaitCursor;
         #endregion
 
         #region Warning Message Logic
-        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false, false, false };
+        bool[] warningMessagesFlags = { false, false, false, false, false, false, false, false, false, false, false };
         string[] warningMessages = {"Selected device(s) not fully charged", // 0
                                     "Selected device(s) not fully cleared", // 1
                                     "Selected device(s) capacity could limit duration", // 2
@@ -675,7 +721,8 @@ Cursor.Current = Cursors.WaitCursor;
                                     "Start time is in the past", // 6
                                     "Chosen sampling frequency is not officially supported (use at own risk)", // 7
                                     "Chosen start and end times do not make an interval (end <= start)", // 8
-                                    "Low power accelerometer produces nosier data (and does not significantly extend duration)", // 9
+                                    "Low power accelerometer produces noisier data (and does not significantly extend duration)", // 9
+                                    "A gyro-enabled device is being configured for accelerometer data only (no gyro data).", // 10
         };
         private void updateWarningMessages()
         {
@@ -735,6 +782,13 @@ Cursor.Current = Cursors.WaitCursor;
             if (checkBoxLowPower.Checked)
             {
                 warningMessagesFlags[9] = true;
+            }
+
+            //Gyro device in accelerometer-only mode
+            int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int gyroRange);
+            if (hasSyncGyro && gyroRange == 0)
+            {
+                warningMessagesFlags[10] = true;
             }
 
             //Warning for non-standard rate/range
@@ -842,5 +896,6 @@ Cursor.Current = Cursors.WaitCursor;
         {
 
         }
+
     }
 }

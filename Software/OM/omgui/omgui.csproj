@@ -259,6 +259,12 @@
       <DependentUpon>RunPluginForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ShellContextMenu.cs" />
+    <Compile Include="Splash.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Splash.Designer.cs">
+      <DependentUpon>Splash.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextBoxStreamWriter.cs" />
     <Compile Include="ToolStripDirectoryChooser.cs">
       <SubType>Component</SubType>
@@ -340,6 +346,9 @@
     </Compile>
     <EmbeddedResource Include="RunPluginForm.resx">
       <DependentUpon>RunPluginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Splash.resx">
+      <DependentUpon>Splash.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Resources\app.manifest">

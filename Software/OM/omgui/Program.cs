@@ -79,10 +79,29 @@ namespace OmGui
                     }
                 }
 
-                MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile, noUpdateCheck, startupPath, resetIfUnresponsive);
-                //mainForm.LogFile = logFile;
+                Splash splashScreen = new Splash();
+                splashScreen.Started += (s, e) =>
+                {
+                    Console.WriteLine("Splash: ...shown...");
+                    MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile, noUpdateCheck, startupPath, resetIfUnresponsive);
+                    //mainForm.LogFile = logFile;
+                    mainForm.Started += (sender, e2) =>
+                    {
+                        Console.WriteLine("Splash: ...main app started...");
+                        splashScreen.Invoke(new Action(() => splashScreen.Hide()));
+                    };
+                    mainForm.FormClosed += (sender, e2) =>
+                    {
+                        splashScreen.Close();
+                        //Application.ExitThread();
+                    };
+                    mainForm.Show();
+                };
+                Console.WriteLine("Splash: showing...");
+                //splashScreen.Show();
 
-                Application.Run(mainForm);
+                ApplicationContext ac = new ApplicationContext(splashScreen);
+                Application.Run(ac);
             }
             catch (Exception ex)
             {
@@ -94,8 +113,6 @@ namespace OmGui
                 Environment.Exit(-1);
             }
         }
-
-
 
         // Unhandled UI exceptions (can ignore and resume)
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs t)

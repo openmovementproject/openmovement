@@ -51,6 +51,9 @@ namespace OmGui
         Om om;
         DeviceManager deviceManager;
 
+        public event EventHandler Started;
+        private bool hasStarted = false;
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern uint RegisterWindowMessage(string lpString);
 
@@ -1785,8 +1788,22 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 2) / (devices.Length * 5)), message + "(config)");
 
                                //Sampling Freq and Range
-                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, (int)rangeForm.SamplingFrequency, rangeForm.Range))) // rangeForm.LowPower
-                                    error = "Accel. config failed";
+                               int freq = (int)rangeForm.SamplingFrequency;
+                               int range = rangeForm.Range;
+                               if (rangeForm.LowPower) { freq = -freq; }
+                               if (rangeForm.GyroRange > 0)
+                               {
+                                   if (device.HasSyncGyro)
+                                   {
+                                       range |= (int)rangeForm.GyroRange << 16;
+                                   }
+                                   else
+                                   {
+                                       error = "Sync. Gyro. config specified on non-gyro device.";
+                                   }
+                                }
+                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, freq, range)))
+                                    error = "Sensor config failed";
 
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 3) / (devices.Length * 5)), message + "(time sync)");
 
@@ -3959,6 +3976,13 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
         private void refreshTimer_Tick(object sender, EventArgs e)
         {
             refreshCounter++;
+
+            if (!hasStarted)
+            {
+                Console.WriteLine("Splash: main app. started");
+                hasStarted = true;
+                Started?.BeginInvoke(this, null, null, null);
+            }
 
             if ((refreshCounter % 5) == 0) { doIdentifyTask = true; } // Latch state at 2 Hz
 
