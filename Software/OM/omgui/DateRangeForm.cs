@@ -553,13 +553,13 @@ Cursor.Current = Cursors.WaitCursor;
             return (percent - percentReserved) / dischargeRate * 60 * 60;
         }
 
-        static double EstimateCapacityFromBytesFree(long bytesFree, int rate, bool unpacked)
+        static double EstimateCapacityFromBytesFree(long bytesFree, int rate, bool unpacked, int axes)
         {
             long clustersFree = (bytesFree / 32768);
             if (clustersFree <= 0) { return 0; }
-            int samplesPerSector = unpacked ? 80 : 120;
+            int samplesPerSector = (!unpacked && axes == 3) ? 120 : 480 / 2 / axes;
             long numSamples = (clustersFree * (32768 / 512) - 2) * samplesPerSector;    // assume 32kB clusters, 120 samples per sector, reserve two sectors for header
-            return (numSamples / (1.06 * rate));      // assume actual sampling rate could be up to 6% over
+            return (numSamples / (1.0598 * rate));      // assume actual sampling rate could be up to 6% over (this specific number warns on anything over 13 days at 100Hz packed)
         }
 
         private void DateRangeForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -745,12 +745,18 @@ Cursor.Current = Cursors.WaitCursor;
                 if (device.HasData)
                     warningMessagesFlags[1] = true;
 
+                // Required duration
+                TimeSpan ts = endDate - startDate;
+
                 //Duration could be limited by device capacity
-                //TS - TODO
+                int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int capacityGyroRange);
+                int axes = capacityGyroRange > 0 ? 6 : 3;
+                double estimateCapacityInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateCapacityFromBytesFree(device.DeviceCapacity, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture), checkBoxUnpacked.Checked, axes);
+                if (ts.TotalSeconds > estimateCapacityInSeconds)
+                    warningMessagesFlags[2] = true;
 
                 //Duration could be limited by battery (on rate)
                 double estimateBatteryInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateBatteryLife(device.BatteryLevel, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture));
-                TimeSpan ts = endDate - startDate;
                 if (ts.TotalSeconds > estimateBatteryInSeconds)
                     warningMessagesFlags[3] = true;
             }

@@ -181,6 +181,12 @@ namespace OmGui
             // Cancel Windows auto-play
             queryCancelAutoPlayID = RegisterWindowMessage("QueryCancelAutoPlay");
 
+            // Can't directly set non-public double-buffer flag
+            // listViewDevices.DoubleBuffered = true;
+            typeof(System.Windows.Forms.Control)
+                .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .SetValue(devicesListView, true, null);
+
             // Update status bar
             toolStripStatusLabelMain.Text = "";
 

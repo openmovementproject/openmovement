@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace OmApiNet
@@ -18,6 +19,14 @@ namespace OmApiNet
         public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename);
         public OmDeviceDownloadCompleteCallback downloadComplete = null;
 
+        public bool HasSyncGyro
+        {
+            get
+            {
+                return serialId != null && (serialId.StartsWith("AX6") || serialId.StartsWith("CWA64"));    // "CWA64" is prototype AX6 firmware
+            }
+        }
+
         public OmDevice(Om om, ushort deviceId)
         {
             this.om = om;
@@ -33,6 +42,13 @@ namespace OmApiNet
                 if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
                 {
                     filename = filenamesb.ToString();
+                    path = Path.GetDirectoryName(filename);
+                }
+
+                StringBuilder pathsb = new StringBuilder(256);
+                if (OmApi.OmGetDevicePath(deviceId, pathsb) == OmApi.OM_OK)
+                {
+                    path = pathsb.ToString();
                 }
 
                 StringBuilder portsb = new StringBuilder(256);
@@ -146,6 +162,9 @@ category = SourceCategory.Other;
         protected string filename;
         public string Filename { get { return filename; } }
 
+        protected string path;
+        public string DevicePath { get { return path; } }
+
         protected string port;
         public string Port { get { return port; } }
 
@@ -153,6 +172,63 @@ category = SourceCategory.Other;
         public string SerialId { get { return serialId; } } // Full device serial id
 
         //public bool HasData { get { if (Filename == null) { return false; }  return File.Exists(Filename); } }
+
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetDiskFreeSpaceEx(string lpDirectoryName, out ulong lpFreeBytesAvailable, out ulong lpTotalNumberOfBytes, out ulong lpTotalNumberOfFreeBytes);
+
+        private static long GetTotalSpace(string path)
+        {
+            if (path != null && !path.EndsWith("\\")) { path += '\\'; }
+            if (!GetDiskFreeSpaceEx(path, out ulong _freeBytesAvailable, out ulong totalNumberOfBytes, out ulong _totalNumberOfFreeBytes))
+            {
+                string root = Path.GetPathRoot(path);
+                if (root != null && root.Length >= 3 && root[1] == ':' && root[2] == '\\')
+                {
+                    DriveInfo info = new DriveInfo("" + root[0]);
+                    return info.TotalSize;
+                }
+                return -1;
+            }
+            return (long)totalNumberOfBytes;
+        }
+
+        private static long GetFreeSpace(string path)
+        {
+            if (path != null && !path.EndsWith("\\")) { path += '\\'; }
+            if (!GetDiskFreeSpaceEx(path, out ulong freeBytesAvailable, out ulong _totalNumberOfBytes, out ulong _totalNumberOfFreeBytes))
+            {
+                string root = Path.GetPathRoot(path);
+                if (root != null && root.Length >= 3 && root[1] == ':' && root[2] == '\\')
+                {
+                    DriveInfo info = new DriveInfo("" + root[0]);
+                    return info.AvailableFreeSpace;
+                }
+                return -1;
+            }
+            return (long)freeBytesAvailable;
+        }
+
+
+        private static long STANDARD_CAPACITY_AX3 = 507904000;
+        public long deviceCapacity = -1;
+        public long DeviceCapacity
+        {
+            get
+            {
+                if (deviceCapacity < 0)
+                {
+                    deviceCapacity = GetTotalSpace(DevicePath);
+                }
+                if (deviceCapacity < 0 && serialId.StartsWith("CWA"))
+                {
+                    deviceCapacity = STANDARD_CAPACITY_AX3;
+                }
+                return deviceCapacity;
+            }
+        }
+
 
         public bool HasData
         {
@@ -369,7 +445,9 @@ category = SourceCategory.Other;
             {
                 return false;   // Failed to read time
             }
-            timeDifference = OmApi.OmDateTimeUnpack(newTime) - time;
+            DateTime newDateTime = OmApi.OmDateTimeUnpack(newTime);
+            timeDifference = newDateTime - setTime;
+//            Console.WriteLine("Setting time to: " + setTime + " -- received: " + newDateTime + " (delta " + timeDifference + "ms).");
             if (Math.Abs(timeDifference.TotalMilliseconds) > 3000)
             {
                 return false;   // Clock was not set correctly
@@ -386,9 +464,9 @@ category = SourceCategory.Other;
                 {
                     return false;   // Failed to read time
                 }
-                if (currentTime != newTime)
+                if (currentTime > newTime && ((DateTime.Now - OmApi.OmDateTimeUnpack(currentTime)).TotalMilliseconds < 5000))
                 {
-                    break;          // The clock is ticking
+                    break;          // The clock is ticking and within a few seconds of now
                 }
                 if ((DateTime.Now - checkStart).TotalMilliseconds > 3000)
                 {
