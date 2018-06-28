@@ -310,7 +310,23 @@ Console.Error.WriteLine("NOTE: Using filename: " + filename);
         [DllImport(DLL_FILENAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern uint OmReaderTimestamp(IntPtr reader, int index, out ushort fractional);
 
-        public enum OM_READER_VALUE_TYPE { OM_VALUE_DEVICEID = 3, OM_VALUE_SESSIONID = 4, OM_VALUE_SEQUENCEID = 5, OM_VALUE_LIGHT = 7, OM_VALUE_TEMPERATURE = 8, OM_VALUE_EVENTS = 9, OM_VALUE_BATTERY = 10, OM_VALUE_SAMPLERATE = 11, OM_VALUE_TEMPERATURE_MC = 108, OM_VALUE_BATTERY_MV = 110, OM_VALUE_BATTERY_PERCENT = 210 };
+        public enum OM_READER_VALUE_TYPE
+        {
+            OM_VALUE_DEVICEID = 3,
+            OM_VALUE_SESSIONID = 4,
+            OM_VALUE_SEQUENCEID = 5,
+            OM_VALUE_LIGHT = 7,
+            OM_VALUE_TEMPERATURE = 8,
+            OM_VALUE_EVENTS = 9,
+            OM_VALUE_BATTERY = 10,
+            OM_VALUE_SAMPLERATE = 11,
+            OM_VALUE_TEMPERATURE_MC = 108,
+            OM_VALUE_BATTERY_MV = 110,
+            OM_VALUE_BATTERY_PERCENT = 210,
+            OM_VALUE_AXES = 12,                 /* Number of axes per sample.  Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM */
+            OM_VALUE_SCALE_ACCEL = 13,          /* Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g) */
+            OM_VALUE_SCALE_GYRO = 14,           /* Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, */
+        };
 
         [DllImport(DLL_FILENAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int OmReaderGetValue(IntPtr reader, OM_READER_VALUE_TYPE valueType);
@@ -366,7 +382,7 @@ Console.Error.WriteLine("NOTE: Using filename: " + filename);
         public static extern OM_READER_DATA_PACKET OmReaderRawDataPacket(IntPtr reader);
 */
 
-        [DllImport(DLL_FILENAME, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DLL_FILENAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void OmReaderClose(IntPtr reader);
 
     }

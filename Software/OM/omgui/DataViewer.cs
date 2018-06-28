@@ -20,6 +20,7 @@ namespace OmGui
             //this.MouseWheel += DataViewer_MouseWheel;
             Close();
             Mode = ModeType.Zoom;
+            checkBoxGyro.Visible = false;
         }
 
         public enum ModeType { Selection, Zoom };
@@ -140,6 +141,13 @@ namespace OmGui
 
         public new void Refresh()
         {
+            if (checkBoxGyro.Visible != dataBlockCache.HasGyro)
+            {
+                Invoke(new Action(() =>
+                {
+                    checkBoxGyro.Visible = dataBlockCache.HasGyro;
+                }));
+            }
             bitmapDirty = true;
             if (endBlock == beginBlock)
             {
@@ -159,6 +167,7 @@ namespace OmGui
                 if (bitmapDirty)
                 {
                     bool displayX = checkBoxX.Checked, displayY = checkBoxY.Checked, displayZ = checkBoxZ.Checked;
+                    bool displayGX = checkBoxGyro.Checked, displayGY = checkBoxGyro.Checked, displayGZ = checkBoxGyro.Checked;
                     bool displayOneG = checkBoxOneG.Checked;
                     bool displayAccel = false;
                     bool displayLight = checkBoxLight.Checked, displayTemp = checkBoxTemp.Checked, displayBattPercent = checkBoxBattPercent.Checked, displayBattRaw = checkBoxBattRaw.Checked;
@@ -178,6 +187,9 @@ namespace OmGui
                     Pen penDataX = new Pen(Color.FromArgb(96, Color.Red));
                     Pen penDataY = new Pen(Color.FromArgb(96, Color.Green));
                     Pen penDataZ = new Pen(Color.FromArgb(96, Color.Blue));
+                    Pen penDataGX = new Pen(Color.FromArgb(96, Color.Cyan));
+                    Pen penDataGY = new Pen(Color.FromArgb(96, Color.Magenta));
+                    Pen penDataGZ = new Pen(Color.FromArgb(96, Color.Yellow));
                     Pen penDataAccel = new Pen(Color.FromArgb(96, Color.Black));
                     Pen penDataLight = new Pen(Color.FromArgb(96, Color.Brown));
                     Pen penDataTemp = new Pen(Color.FromArgb(96, Color.DarkMagenta));
@@ -276,6 +288,7 @@ namespace OmGui
 
                                 float center = 0.5f;
                                 float scale = 0.10f;
+                                float gyroScale = 0.001f;    // TODO: Choose a good gyro scale
 
                                 // Axis
                                 if ((x & 3) < 2) g.DrawRectangle(penMissing2, x, (center + scale * 0.0f) * myBitmap.Height, 1, 1);
@@ -285,6 +298,13 @@ namespace OmGui
                                 if (displayX) g.DrawRectangle(penDataX, x, (center - scale * aggregate.Max.X) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.X - aggregate.Min.X))) * myBitmap.Height);
                                 if (displayY) g.DrawRectangle(penDataY, x, (center - scale * aggregate.Max.Y) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Y - aggregate.Min.Y))) * myBitmap.Height);
                                 if (displayZ) g.DrawRectangle(penDataZ, x, (center - scale * aggregate.Max.Z) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Z - aggregate.Min.Z))) * myBitmap.Height);
+
+                                if (aggregate.Avg.HasGyro)
+                                {
+                                    if (displayGX) g.DrawRectangle(penDataGX, x, (center - gyroScale * aggregate.Max.GX) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.GX - aggregate.Min.GX))) * myBitmap.Height);
+                                    if (displayGY) g.DrawRectangle(penDataGY, x, (center - gyroScale * aggregate.Max.GY) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.GY - aggregate.Min.GY))) * myBitmap.Height);
+                                    if (displayGZ) g.DrawRectangle(penDataGZ, x, (center - gyroScale * aggregate.Max.GZ) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.GZ - aggregate.Min.GZ))) * myBitmap.Height);
+                                }
 
                                 if (displayAccel) g.DrawRectangle(penDataAccel, x, (center - scale * aggregate.Max.Amplitude) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Amplitude - aggregate.Min.Amplitude))) * myBitmap.Height);
 
@@ -814,11 +834,6 @@ namespace OmGui
             if (bitmapDirty) { Refresh(); }
         }
 
-        private void checkBoxTime_CheckedChanged(object sender, EventArgs e)
-        {
-            Refresh();
-        }
-
         private void hScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
 
@@ -916,11 +931,21 @@ namespace OmGui
 
     public struct Sample
     {
-        public Sample(DateTime t, float x, float y, float z, float light, float temp, float battpercent, float battraw, int id, int blockNumber) : this() { T = t; X = x; Y = y; Z = z; Light = light; Temp = temp; BattPercent = battpercent; BattRaw = battraw; Id = id; BlockNumber = blockNumber; }
+        public Sample(DateTime t, float x, float y, float z, float gx, float gy, float gz, bool hasGyro, float light, float temp, float battpercent, float battraw, int id, int blockNumber) : this()
+        {
+            T = t;
+            X = x; Y = y; Z = z;
+            GX = gx; GY = gy; GZ = gz; HasGyro = hasGyro;
+            Light = light; Temp = temp; BattPercent = battpercent; BattRaw = battraw;
+            Id = id; BlockNumber = blockNumber;
+        }
         public DateTime T { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
+        public float GX { get; set; }
+        public float GY { get; set; }
+        public float GZ { get; set; }
         public float Light { get; set; }
         public float Temp { get; set; }
         public float BattPercent { get; set; }
@@ -928,7 +953,8 @@ namespace OmGui
         public float Amplitude { get { return (float)Math.Sqrt(X * X + Y * Y + Z * Z); } }
         public int Id { get; set; }
         public int BlockNumber { get; set; }
-        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0);
+        public bool HasGyro { get; set; }
+        public static Sample Zero = new Sample(DateTime.MinValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0);
         /*
         public static Sample Minimum(Sample a, Sample b)
         {
@@ -949,13 +975,16 @@ namespace OmGui
             float x = (1.0f - p) * a.X + p * b.X;
             float y = (1.0f - p) * a.Y + p * b.Y;
             float z = (1.0f - p) * a.Z + p * b.Z;
+            float gx = (1.0f - p) * a.GX + p * b.GX;
+            float gy = (1.0f - p) * a.GY + p * b.GY;
+            float gz = (1.0f - p) * a.GZ + p * b.GZ;
             float light = (1.0f - p) * a.Light + p * b.Light;
             float temp = (1.0f - p) * a.Temp + p * b.Temp;
             float battpercent = (1.0f - p) * a.BattPercent + p * b.BattPercent;
             float battraw = (1.0f - p) * a.BattRaw + p * b.BattRaw;
             int id = a.Id;              // Use lower bound
             int blockNumber = a.BlockNumber;      // Use lower bound
-            return new Sample(t, x, y, z, light, temp, battpercent, battraw, id, blockNumber);
+            return new Sample(t, x, y, z, gx, gy, gz, a.HasGyro || b.HasGyro, light, temp, battpercent, battraw, id, blockNumber);
         }
     }
 
@@ -999,12 +1028,16 @@ namespace OmGui
             if (sample.X < Min.X) { Min.X = sample.X; } if (sample.X > Max.X) { Max.X = sample.X; }
             if (sample.Y < Min.Y) { Min.Y = sample.Y; } if (sample.Y > Max.Y) { Max.Y = sample.Y; }
             if (sample.Z < Min.Z) { Min.Z = sample.Z; } if (sample.Z > Max.Z) { Max.Z = sample.Z; }
+            if (sample.GX < Min.GX) { Min.GX = sample.GX; } if (sample.GX > Max.GX) { Max.GX = sample.GX; }
+            if (sample.GY < Min.GY) { Min.GY = sample.GY; } if (sample.GY > Max.GY) { Max.GY = sample.GY; }
+            if (sample.GZ < Min.GZ) { Min.GZ = sample.GZ; } if (sample.GZ > Max.GZ) { Max.GZ = sample.GZ; }
             if (sample.Light < Min.Light) { Min.Light = sample.Light; } if (sample.Light > Max.Light) { Max.Light = sample.Light; }
             if (sample.Temp < Min.Temp) { Min.Temp = sample.Temp; } if (sample.Temp > Max.Temp) { Max.Temp = sample.Temp; }
             if (sample.BattPercent < Min.BattPercent) { Min.BattPercent = sample.BattPercent; } if (sample.BattPercent > Max.BattPercent) { Max.BattPercent = sample.BattPercent; }
             if (sample.BattRaw < Min.BattRaw) { Min.BattRaw = sample.BattRaw; } if (sample.BattRaw > Max.BattRaw) { Max.BattRaw = sample.BattRaw; }
             if (sample.Id < Min.Id) { Min.Id = sample.Id; } if (sample.Id > Max.Id) { Max.Id = sample.Id; }
             if (sample.BlockNumber > Min.BlockNumber) { Min.BlockNumber = sample.BlockNumber; } if (sample.BlockNumber > Max.BlockNumber) { Max.BlockNumber = sample.BlockNumber; }
+            Min.HasGyro |= sample.HasGyro; Max.HasGyro |= sample.HasGyro;
             //Min = Sample.Minimum(Min, sample);
             //Max = Sample.Maximum(Max, sample);
         }
@@ -1028,25 +1061,35 @@ namespace OmGui
 
     public class DataBlock
     {
+        public bool HasGyro { get; set; }
         public short[] RawValues { get; protected set; }
         public Sample[] Values { get; protected set; }
         private Aggregate aggregate;
         public Aggregate Aggregate { get { return aggregate; } }
 
-        public DataBlock(int id, int blockNumber, DateTime firstTime, DateTime lastTime, float light, float temp, float battpercent, float battraw, short[] raw)
+        public DataBlock(int id, int blockNumber, DateTime firstTime, DateTime lastTime, float light, float temp, float battpercent, float battraw, short[] raw, int channels, int accelOneG, int gyroRange)
         {
             RawValues = raw;
-            Values = new Sample[raw.Length / 3];
+            Values = new Sample[raw.Length / channels];
             double spanMilliseconds = (lastTime - firstTime).TotalMilliseconds;
             for (int i = 0; i < Values.Length; i++)
             {
                 DateTime t;
                 if (Values.Length <= 1) { t = firstTime; }
                 else { t = firstTime.AddMilliseconds(spanMilliseconds * i / (Values.Length - 1)); }
-                float x = raw[3 * i + 0] / 256.0f;
-                float y = raw[3 * i + 1] / 256.0f;
-                float z = raw[3 * i + 2] / 256.0f;
-                Values[i] = new Sample(t, x, y, z, light, temp, battpercent, battraw, id, blockNumber);
+                float gx = 0, gy = 0, gz = 0;
+                HasGyro = false;
+                if (channels > 3)
+                {
+                    HasGyro = true;
+                    gy = (float)raw[3 * i + 0] * gyroRange / 32768;
+                    gx = (float)raw[3 * i + 1] * gyroRange / 32768;
+                    gz = (float)raw[3 * i + 2] * gyroRange / 32768;
+                }
+                float x = (float)raw[3 * i + channels - 3] / accelOneG;
+                float y = (float)raw[3 * i + channels - 2] / accelOneG;
+                float z = (float)raw[3 * i + channels - 1] / accelOneG;
+                Values[i] = new Sample(t, x, y, z, gx, gy, gz, HasGyro, light, temp, battpercent, battraw, id, blockNumber);
             }
             aggregate.Add(Values);
         }
@@ -1072,7 +1115,11 @@ namespace OmGui
 
                 int id = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SEQUENCEID); // DWORD @10 offset in block
 
-                return new DataBlock(id, blockNumber, firstTime, lastTime, light, temp, battpercent, battraw, values);
+                int channels = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_AXES);
+                int accelOneG = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SCALE_ACCEL);
+                int gyroRange = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SCALE_GYRO);
+
+                return new DataBlock(id, blockNumber, firstTime, lastTime, light, temp, battpercent, battraw, values, channels, accelOneG, gyroRange);
             }
             catch (Exception)
             {
@@ -1103,6 +1150,8 @@ namespace OmGui
         //int levels;
         //Aggregate[] aggregates;
 
+        public bool HasGyro { get; set; }
+
         public DataBlockCache()
         {
             Set(0);
@@ -1112,6 +1161,7 @@ namespace OmGui
         {
             lock (this)
             {
+                if (numBlocks == 0) { HasGyro = false; }
                 lru.Clear();
                 lruNodes.Clear();
                 cache.Clear();
@@ -1219,6 +1269,11 @@ namespace OmGui
             {
                 // Add to cache
                 cache[blockNumber] = dataBlock;
+                if (dataBlock != null)
+                {
+                    this.HasGyro |= dataBlock.HasGyro;
+                }
+
                 LinkedListNode<int> node = new LinkedListNode<int>(blockNumber);
                 lruNodes[blockNumber] = node;
                 lru.AddLast(node);

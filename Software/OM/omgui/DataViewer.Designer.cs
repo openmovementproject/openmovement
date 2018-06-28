@@ -47,6 +47,7 @@
             this.timerAnimate = new System.Windows.Forms.Timer(this.components);
             this.graphPanel = new OmGui.GraphPanel();
             this.hScrollBar = new System.Windows.Forms.HScrollBar();
+            this.checkBoxGyro = new System.Windows.Forms.CheckBox();
             this.groupBoxOptions.SuspendLayout();
             this.toolStripData.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -73,7 +74,7 @@
             this.toolStripData.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonZoom,
             this.toolStripButtonSelection});
-            this.toolStripData.Location = new System.Drawing.Point(2, 17);
+            this.toolStripData.Location = new System.Drawing.Point(2, 15);
             this.toolStripData.Name = "toolStripData";
             this.toolStripData.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStripData.Size = new System.Drawing.Size(76, 25);
@@ -116,10 +117,11 @@
             this.tableLayoutPanel1.Controls.Add(this.checkBoxBattPercent, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxBattRaw, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxTime, 0, 8);
+            this.tableLayoutPanel1.Controls.Add(this.checkBoxGyro, 0, 9);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 41);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 9;
+            this.tableLayoutPanel1.RowCount = 10;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -129,6 +131,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(76, 225);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -140,7 +143,7 @@
             this.checkBoxX.Location = new System.Drawing.Point(2, 2);
             this.checkBoxX.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxX.Name = "checkBoxX";
-            this.checkBoxX.Size = new System.Drawing.Size(69, 21);
+            this.checkBoxX.Size = new System.Drawing.Size(55, 17);
             this.checkBoxX.TabIndex = 0;
             this.checkBoxX.Text = "X-Axis";
             this.checkBoxX.UseVisualStyleBackColor = true;
@@ -151,10 +154,10 @@
             this.checkBoxY.AutoSize = true;
             this.checkBoxY.Checked = true;
             this.checkBoxY.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxY.Location = new System.Drawing.Point(2, 27);
+            this.checkBoxY.Location = new System.Drawing.Point(2, 23);
             this.checkBoxY.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxY.Name = "checkBoxY";
-            this.checkBoxY.Size = new System.Drawing.Size(69, 21);
+            this.checkBoxY.Size = new System.Drawing.Size(55, 17);
             this.checkBoxY.TabIndex = 0;
             this.checkBoxY.Text = "Y-Axis";
             this.checkBoxY.UseVisualStyleBackColor = true;
@@ -165,10 +168,10 @@
             this.checkBoxZ.AutoSize = true;
             this.checkBoxZ.Checked = true;
             this.checkBoxZ.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxZ.Location = new System.Drawing.Point(2, 52);
+            this.checkBoxZ.Location = new System.Drawing.Point(2, 44);
             this.checkBoxZ.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxZ.Name = "checkBoxZ";
-            this.checkBoxZ.Size = new System.Drawing.Size(69, 21);
+            this.checkBoxZ.Size = new System.Drawing.Size(55, 17);
             this.checkBoxZ.TabIndex = 0;
             this.checkBoxZ.Text = "Z-Axis";
             this.checkBoxZ.UseVisualStyleBackColor = true;
@@ -179,10 +182,10 @@
             this.checkBoxOneG.AutoSize = true;
             this.checkBoxOneG.Checked = true;
             this.checkBoxOneG.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxOneG.Location = new System.Drawing.Point(2, 77);
+            this.checkBoxOneG.Location = new System.Drawing.Point(2, 65);
             this.checkBoxOneG.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxOneG.Name = "checkBoxOneG";
-            this.checkBoxOneG.Size = new System.Drawing.Size(54, 21);
+            this.checkBoxOneG.Size = new System.Drawing.Size(44, 17);
             this.checkBoxOneG.TabIndex = 0;
             this.checkBoxOneG.Text = "±1g";
             this.checkBoxOneG.UseVisualStyleBackColor = true;
@@ -191,10 +194,10 @@
             // checkBoxLight
             // 
             this.checkBoxLight.AutoSize = true;
-            this.checkBoxLight.Location = new System.Drawing.Point(2, 102);
+            this.checkBoxLight.Location = new System.Drawing.Point(2, 86);
             this.checkBoxLight.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxLight.Name = "checkBoxLight";
-            this.checkBoxLight.Size = new System.Drawing.Size(61, 21);
+            this.checkBoxLight.Size = new System.Drawing.Size(49, 17);
             this.checkBoxLight.TabIndex = 0;
             this.checkBoxLight.Text = "Light";
             this.checkBoxLight.UseVisualStyleBackColor = true;
@@ -203,10 +206,10 @@
             // checkBoxTemp
             // 
             this.checkBoxTemp.AutoSize = true;
-            this.checkBoxTemp.Location = new System.Drawing.Point(2, 127);
+            this.checkBoxTemp.Location = new System.Drawing.Point(2, 107);
             this.checkBoxTemp.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxTemp.Name = "checkBoxTemp";
-            this.checkBoxTemp.Size = new System.Drawing.Size(70, 21);
+            this.checkBoxTemp.Size = new System.Drawing.Size(56, 17);
             this.checkBoxTemp.TabIndex = 0;
             this.checkBoxTemp.Text = "Temp.";
             this.checkBoxTemp.UseVisualStyleBackColor = true;
@@ -215,10 +218,10 @@
             // checkBoxBattPercent
             // 
             this.checkBoxBattPercent.AutoSize = true;
-            this.checkBoxBattPercent.Location = new System.Drawing.Point(2, 152);
+            this.checkBoxBattPercent.Location = new System.Drawing.Point(2, 128);
             this.checkBoxBattPercent.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxBattPercent.Name = "checkBoxBattPercent";
-            this.checkBoxBattPercent.Size = new System.Drawing.Size(71, 21);
+            this.checkBoxBattPercent.Size = new System.Drawing.Size(56, 17);
             this.checkBoxBattPercent.TabIndex = 0;
             this.checkBoxBattPercent.Text = "Batt.%";
             this.checkBoxBattPercent.UseVisualStyleBackColor = true;
@@ -227,10 +230,10 @@
             // checkBoxBattRaw
             // 
             this.checkBoxBattRaw.AutoSize = true;
-            this.checkBoxBattRaw.Location = new System.Drawing.Point(2, 177);
+            this.checkBoxBattRaw.Location = new System.Drawing.Point(2, 149);
             this.checkBoxBattRaw.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxBattRaw.Name = "checkBoxBattRaw";
-            this.checkBoxBattRaw.Size = new System.Drawing.Size(68, 21);
+            this.checkBoxBattRaw.Size = new System.Drawing.Size(55, 17);
             this.checkBoxBattRaw.TabIndex = 0;
             this.checkBoxBattRaw.Text = "Batt.V";
             this.checkBoxBattRaw.UseVisualStyleBackColor = true;
@@ -241,14 +244,14 @@
             this.checkBoxTime.AutoSize = true;
             this.checkBoxTime.Checked = true;
             this.checkBoxTime.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxTime.Location = new System.Drawing.Point(2, 202);
+            this.checkBoxTime.Location = new System.Drawing.Point(2, 170);
             this.checkBoxTime.Margin = new System.Windows.Forms.Padding(2);
             this.checkBoxTime.Name = "checkBoxTime";
-            this.checkBoxTime.Size = new System.Drawing.Size(61, 21);
+            this.checkBoxTime.Size = new System.Drawing.Size(49, 17);
             this.checkBoxTime.TabIndex = 1;
             this.checkBoxTime.Text = "Time";
             this.checkBoxTime.UseVisualStyleBackColor = true;
-            this.checkBoxTime.CheckedChanged += new System.EventHandler(this.checkBoxTime_CheckedChanged);
+            this.checkBoxTime.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
             // timerAnimate
             // 
@@ -290,6 +293,20 @@
             this.hScrollBar.Visible = false;
             this.hScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar_Scroll);
             // 
+            // checkBoxGyro
+            // 
+            this.checkBoxGyro.AutoSize = true;
+            this.checkBoxGyro.Checked = true;
+            this.checkBoxGyro.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxGyro.Location = new System.Drawing.Point(2, 191);
+            this.checkBoxGyro.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBoxGyro.Name = "checkBoxGyro";
+            this.checkBoxGyro.Size = new System.Drawing.Size(72, 17);
+            this.checkBoxGyro.TabIndex = 1;
+            this.checkBoxGyro.Text = "Gyro (X/Y/Z)";
+            this.checkBoxGyro.UseVisualStyleBackColor = true;
+            this.checkBoxGyro.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
+            // 
             // DataViewer
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -328,5 +345,6 @@
         private System.Windows.Forms.CheckBox checkBoxBattRaw;
         private System.Windows.Forms.CheckBox checkBoxTime;
         private System.Windows.Forms.HScrollBar hScrollBar;
+        private System.Windows.Forms.CheckBox checkBoxGyro;
     }
 }
