@@ -42,6 +42,10 @@ namespace OmApiNet
 
         public string MetaData { get { EnsureMetadataRead(); return metadata; } protected set { metadata = value; } }
 
+        public int Channels { get; protected set; }
+        public uint SequenceId { get; set; }
+        public int AccelOneG { get; set; }  // 256
+        public int GyroRange { get; set; }  // 0, 2000, 1000, 500, 250, 125
         public float Light { get; protected set; }
         public float Temp { get; protected set; }
         public float Batt { get; protected set; }
@@ -124,14 +128,23 @@ namespace OmApiNet
             if (Handle == IntPtr.Zero) { return new short[0]; }
             int sampleCount = OmApi.OmReaderNextBlock(Handle);
             if (sampleCount <= 0) { return null; }
-            short[] samples = new short[sampleCount * 3];
-            IntPtr buffer = OmApi.OmReaderBuffer(Handle);
-            System.Runtime.InteropServices.Marshal.Copy(buffer, samples, 0, sampleCount * 3);
 
+            Channels = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_AXES);
+            SequenceId = (uint)OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SEQUENCEID); // DWORD @10 offset in block
+            AccelOneG = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SCALE_ACCEL);
+            GyroRange = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SCALE_GYRO);
             Light = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_LIGHT);
             Temp = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_TEMPERATURE_MC);
             Batt = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY_PERCENT);
             BattRaw = OmApi.OmReaderGetValue(Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_BATTERY_MV);
+
+            int numValues = sampleCount * Channels;
+            if (numValues > 360) { numValues = 360; } // packed triaxials
+            if (numValues < 0) { numValues = 0; }
+
+            short[] samples = new short[numValues];
+            IntPtr buffer = OmApi.OmReaderBuffer(Handle);
+            System.Runtime.InteropServices.Marshal.Copy(buffer, samples, 0, numValues);
 
             return samples;
         }

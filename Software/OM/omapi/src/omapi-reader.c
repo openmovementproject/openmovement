@@ -321,8 +321,8 @@ int OmReaderNextBlock(OmReaderHandle reader)
 	
 	// light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
 	unsigned short light = state->data[18] | (state->data[19] << 8);
-	state->accelScale = 1 << (8 + ((light >> 13) & 0x03));
-	state->gyroScale = 8000 / (1 << ((light >> 10) & 0x03));
+	state->accelScale = 1 << (8 + ((light >> 13) & 0x07));
+	state->gyroScale = 8000 / (1 << ((light >> 10) & 0x07));
 
     // Check bytes per sample
     if ((state->data[25] & 0x0f) == 0)

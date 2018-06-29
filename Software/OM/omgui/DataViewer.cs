@@ -20,7 +20,7 @@ namespace OmGui
             //this.MouseWheel += DataViewer_MouseWheel;
             Close();
             Mode = ModeType.Zoom;
-            checkBoxGyro.Visible = false;
+            checkBoxGyroX.Visible = checkBoxGyroY.Visible = checkBoxGyroZ.Visible = false;
         }
 
         public enum ModeType { Selection, Zoom };
@@ -141,11 +141,11 @@ namespace OmGui
 
         public new void Refresh()
         {
-            if (checkBoxGyro.Visible != dataBlockCache.HasGyro)
+            if (checkBoxGyroX.Visible != dataBlockCache.HasGyro || checkBoxGyroY.Visible != dataBlockCache.HasGyro || checkBoxGyroZ.Visible != dataBlockCache.HasGyro)
             {
                 Invoke(new Action(() =>
                 {
-                    checkBoxGyro.Visible = dataBlockCache.HasGyro;
+                    checkBoxGyroX.Visible = checkBoxGyroY.Visible = checkBoxGyroZ.Visible = dataBlockCache.HasGyro;
                 }));
             }
             bitmapDirty = true;
@@ -167,7 +167,7 @@ namespace OmGui
                 if (bitmapDirty)
                 {
                     bool displayX = checkBoxX.Checked, displayY = checkBoxY.Checked, displayZ = checkBoxZ.Checked;
-                    bool displayGX = checkBoxGyro.Checked, displayGY = checkBoxGyro.Checked, displayGZ = checkBoxGyro.Checked;
+                    bool displayGX = checkBoxGyroX.Checked, displayGY = checkBoxGyroY.Checked, displayGZ = checkBoxGyroZ.Checked;
                     bool displayOneG = checkBoxOneG.Checked;
                     bool displayAccel = false;
                     bool displayLight = checkBoxLight.Checked, displayTemp = checkBoxTemp.Checked, displayBattPercent = checkBoxBattPercent.Checked, displayBattRaw = checkBoxBattRaw.Checked;
@@ -301,9 +301,9 @@ namespace OmGui
 
                                 if (aggregate.Avg.HasGyro)
                                 {
-                                    if (displayGX) g.DrawRectangle(penDataGX, x, (center - gyroScale * aggregate.Max.GX) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.GX - aggregate.Min.GX))) * myBitmap.Height);
-                                    if (displayGY) g.DrawRectangle(penDataGY, x, (center - gyroScale * aggregate.Max.GY) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.GY - aggregate.Min.GY))) * myBitmap.Height);
-                                    if (displayGZ) g.DrawRectangle(penDataGZ, x, (center - gyroScale * aggregate.Max.GZ) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.GZ - aggregate.Min.GZ))) * myBitmap.Height);
+                                    if (displayGX) g.DrawRectangle(penDataGX, x, (center - gyroScale * aggregate.Max.GX) * myBitmap.Height, 1, 1 + ((gyroScale * (aggregate.Max.GX - aggregate.Min.GX))) * myBitmap.Height);
+                                    if (displayGY) g.DrawRectangle(penDataGY, x, (center - gyroScale * aggregate.Max.GY) * myBitmap.Height, 1, 1 + ((gyroScale * (aggregate.Max.GY - aggregate.Min.GY))) * myBitmap.Height);
+                                    if (displayGZ) g.DrawRectangle(penDataGZ, x, (center - gyroScale * aggregate.Max.GZ) * myBitmap.Height, 1, 1 + ((gyroScale * (aggregate.Max.GZ - aggregate.Min.GZ))) * myBitmap.Height);
                                 }
 
                                 if (displayAccel) g.DrawRectangle(penDataAccel, x, (center - scale * aggregate.Max.Amplitude) * myBitmap.Height, 1, 1 + ((scale * (aggregate.Max.Amplitude - aggregate.Min.Amplitude))) * myBitmap.Height);
@@ -501,8 +501,8 @@ namespace OmGui
         public DateTime TimeForBlock(float block)
         {
             Aggregate aggregate = AggregateForBlock(block);
-            //return new DateTime((aggregate.Min.T.Ticks + aggregate.Max.T.Ticks) / 2);
-            return aggregate.Min.T; 
+            return new DateTime((aggregate.Min.T.Ticks + aggregate.Max.T.Ticks) / 2);
+            //return aggregate.Min.T; 
         }
 
         public string TimeString(DateTime time)
@@ -631,22 +631,35 @@ namespace OmGui
 
                     String label = "";
                     label += TimeString(TimeForBlock(blockAtCursor));
+                    var aggregate = AggregateForBlock(blockAtCursor);
 
-                    //if (checkBoxX.Checked) { label = label + "\r\nX: " + AggregateForBlock(blockAtCursor).Avg.X.ToString("+0.00;-0.00") + " g"; }
-                    //if (checkBoxY.Checked) { label = label + "\r\nY: " + AggregateForBlock(blockAtCursor).Avg.Y.ToString("+0.00;-0.00") + " g"; }
-                    //if (checkBoxZ.Checked) { label = label + "\r\nZ: " + AggregateForBlock(blockAtCursor).Avg.Z.ToString("+0.00;-0.00") + " g"; }
-                    //if (checkBoxAccel.Checked) { label = label + "\r\nAccel: " + AggregateForBlock(blockAtCursor).Avg.Amplitude.ToString("+0.00;-0.00") + " g"; }
-                    if (checkBoxLight.Checked) { label = label + "\r\nLight: " + AggregateForBlock(blockAtCursor).Avg.Light + ""; }
-                    if (checkBoxTemp.Checked) { label = label + "\r\nTemp: " + (AggregateForBlock(blockAtCursor).Avg.Temp / 1000).ToString("0.00") + " ^C"; }
-                    if (checkBoxBattPercent.Checked) { label = label + "\r\nBatt: " + AggregateForBlock(blockAtCursor).Avg.BattPercent + " %"; }
-                    if (checkBoxBattRaw.Checked) { label = label + "\r\nBatt: " + (AggregateForBlock(blockAtCursor).Avg.BattRaw / 1000).ToString("0.000") + " V"; }
+                    bool values = (Control.ModifierKeys & Keys.Control) != 0;
+                    bool additional = (Control.ModifierKeys & Keys.Shift) != 0;
 
-                    if ((Control.ModifierKeys & Keys.Shift) != 0)
+                    if (values)
                     {
-                        int sequenceId = AggregateForBlock(blockAtCursor).Avg.Id;
-                        int block = AggregateForBlock(blockAtCursor).Avg.BlockNumber;
+                        if (checkBoxX.Checked) { label = label + "\r\nX: " + aggregate.Avg.X.ToString("+0.00;-0.00") + " g"; }
+                        if (checkBoxY.Checked) { label = label + "\r\nY: " + aggregate.Avg.Y.ToString("+0.00;-0.00") + " g"; }
+                        if (checkBoxZ.Checked) { label = label + "\r\nZ: " + aggregate.Avg.Z.ToString("+0.00;-0.00") + " g"; }
+                        //if (checkBoxAccel.Checked) { label = label + "\r\nAccel: " + aggregate.Avg.Amplitude.ToString("+0.00;-0.00") + " g"; }
+                        if (checkBoxGyroX.Checked) { label = label + "\r\nGX: " + aggregate.Avg.X.ToString("+0.00;-0.00") + " dps"; }
+                        if (checkBoxGyroY.Checked) { label = label + "\r\nGY: " + aggregate.Avg.Y.ToString("+0.00;-0.00") + " dps"; }
+                        if (checkBoxGyroZ.Checked) { label = label + "\r\nGZ: " + aggregate.Avg.Z.ToString("+0.00;-0.00") + " dps"; }
+                    }
+
+                    if (checkBoxLight.Checked) { label = label + "\r\nLight: " + aggregate.Avg.Light + ""; }
+                    if (checkBoxTemp.Checked) { label = label + "\r\nTemp: " + (aggregate.Avg.Temp / 1000).ToString("0.00") + " ^C"; }
+                    if (checkBoxBattPercent.Checked) { label = label + "\r\nBatt: " + aggregate.Avg.BattPercent + " %"; }
+                    if (checkBoxBattRaw.Checked) { label = label + "\r\nBatt: " + (aggregate.Avg.BattRaw / 1000).ToString("0.000") + " V"; }
+
+                    if (additional)
+                    {
+                        int sequenceId = aggregate.Avg.Id;
+                        int block = aggregate.Avg.BlockNumber;
                         label = label + "\r\nSequence: " + sequenceId;
                         label = label + "\r\nBlock: " + block + " / " + reader.DataNumBlocks + " => @" + (reader.DataOffsetBlocks + block) * reader.DataBlockSize;
+                        label = label + "\r\nBlockPos: " + blockAtCursor.ToString("0.00");
+                        label = label + "\r\nCount: " + aggregate.Count;
                     }
 
                     graphPanel.SetCursor(e.X, label);
@@ -991,6 +1004,7 @@ namespace OmGui
     public struct Aggregate
     {
         public bool present;
+        public int Count { get; set; }
         public Sample Min;
         public Sample Max;
         public Sample Avg
@@ -1040,6 +1054,7 @@ namespace OmGui
             Min.HasGyro |= sample.HasGyro; Max.HasGyro |= sample.HasGyro;
             //Min = Sample.Minimum(Min, sample);
             //Max = Sample.Maximum(Max, sample);
+            Count++;
         }
 
         public void Add(Sample[] samples)
@@ -1082,13 +1097,13 @@ namespace OmGui
                 if (channels > 3)
                 {
                     HasGyro = true;
-                    gy = (float)raw[3 * i + 0] * gyroRange / 32768;
-                    gx = (float)raw[3 * i + 1] * gyroRange / 32768;
-                    gz = (float)raw[3 * i + 2] * gyroRange / 32768;
+                    gy = (float)raw[channels * i + 0] * gyroRange / 32768;
+                    gx = (float)raw[channels * i + 1] * gyroRange / 32768;
+                    gz = (float)raw[channels * i + 2] * gyroRange / 32768;
                 }
-                float x = (float)raw[3 * i + channels - 3] / accelOneG;
-                float y = (float)raw[3 * i + channels - 2] / accelOneG;
-                float z = (float)raw[3 * i + channels - 1] / accelOneG;
+                float x = (float)raw[channels * i + channels - 3] / accelOneG;
+                float y = (float)raw[channels * i + channels - 2] / accelOneG;
+                float z = (float)raw[channels * i + channels - 1] / accelOneG;
                 Values[i] = new Sample(t, x, y, z, gx, gy, gz, HasGyro, light, temp, battpercent, battraw, id, blockNumber);
             }
             aggregate.Add(Values);
@@ -1113,13 +1128,7 @@ namespace OmGui
                 if (values.Length == 0) { lastTime = firstTime; }
                 else { lastTime = reader.TimeForSample(values.Length - 1); }
 
-                int id = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SEQUENCEID); // DWORD @10 offset in block
-
-                int channels = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_AXES);
-                int accelOneG = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SCALE_ACCEL);
-                int gyroRange = OmApi.OmReaderGetValue(reader.Handle, OmApi.OM_READER_VALUE_TYPE.OM_VALUE_SCALE_GYRO);
-
-                return new DataBlock(id, blockNumber, firstTime, lastTime, light, temp, battpercent, battraw, values, channels, accelOneG, gyroRange);
+                return new DataBlock((int)reader.SequenceId, blockNumber, firstTime, lastTime, light, temp, battpercent, battraw, values, reader.Channels, reader.AccelOneG, reader.GyroRange);
             }
             catch (Exception)
             {
@@ -1129,19 +1138,20 @@ namespace OmGui
 
         public Sample InterpolatedValue(float index)
         {
-            int i = (int)index;
-            float p = index - i;
-            if (i < 0) { i = 0; p = 0.0f; }
-            if (i >= Values.Length - 1) { i = Values.Length - 1; p = 0.0f; }
-            if (Values.Length == 0) { return Sample.Zero; }
-            if (p == 0.0f) { return Values[i]; }
-            return Sample.Interpolate(Values[i], Values[i + 1], p);
+            int ai = (int)index;
+            float p = index - ai;
+            int bi = ai + 1;
+            if (ai > Values.Length - 1) { ai = Values.Length - 1; }
+            if (bi > Values.Length - 1) { bi = Values.Length - 1; }
+            if (ai < 0 || bi < 0) { return Sample.Zero; }
+            // if (p == 0.0f) { return Values[i]; }
+            return Sample.Interpolate(Values[ai], Values[bi], p);
         }
     }
 
     public class DataBlockCache
     {
-        private int cacheSize = 10 * 2 * 1024;
+        private int cacheSize = 5 * 10 * 2 * 1024;
 
         LinkedList<int> lru = new LinkedList<int>();
         IDictionary<int, LinkedListNode<int>> lruNodes = new Dictionary<int, LinkedListNode<int>>();
