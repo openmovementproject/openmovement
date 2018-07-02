@@ -1,4 +1,4 @@
-Copyright (c) 2009-2014, Newcastle University, UK.
+Copyright (c) 2009-2018, Newcastle University, UK.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without 
