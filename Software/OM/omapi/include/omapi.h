@@ -1265,6 +1265,10 @@ typedef enum
 	OM_VALUE_AXES = 12,                 /**< Number of axes per sample.  Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM */
 	OM_VALUE_SCALE_ACCEL = 13,          /**< Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g) */
 	OM_VALUE_SCALE_GYRO = 14,           /**< Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off. */
+	OM_VALUE_SCALE_MAG = 15,			/**< Scaling: number of units for 1uT: AX6=16 */
+	OM_VALUE_ACCEL_AXIS = 16,			/**< Axis index for Accel-X (-Y and -Z follow), AX3=0, AX6(A)=0, AX6(GA/GAM)=3, not-present=-1 */
+	OM_VALUE_GYRO_AXIS = 17,			/**< Axis index for Gyro-X (-Y and -Z follow), AX6(GA/GAM)=0, not-present=-1 */
+	OM_VALUE_MAG_AXIS = 18,				/**< Axis index for Mag-X (-Y and -Z follow), AX6(GAM)=6, not-present=-1 */
 } OM_READER_VALUE_TYPE;
 
 

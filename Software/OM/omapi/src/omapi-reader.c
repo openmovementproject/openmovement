@@ -73,6 +73,7 @@ typedef struct
     unsigned int numAxes;		// Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM
 	int accelScale;				// Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g)
 	int gyroScale;				// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
+	int magScale;				// Scaling: divisor for units of uT
     unsigned int numSamples;
     unsigned long long blockStart;
     unsigned long long blockEnd;
@@ -278,6 +279,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
 	state->numAxes = 0;
 	state->accelScale = 256;
 	state->gyroScale = 0;
+	state->magScale = 16;
     state->numSamples = 0;
     state->blockStart = 0;
     state->blockEnd = 0;
@@ -579,7 +581,12 @@ int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
         case OM_VALUE_AXES:             return state->numAxes;			// Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM
         case OM_VALUE_SCALE_ACCEL:      return state->accelScale;		// Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g)
         case OM_VALUE_SCALE_GYRO:       return state->gyroScale;		// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
+        case OM_VALUE_SCALE_MAG:        return state->magScale;		    // Scaling: divisor to uT
 
+        case OM_VALUE_ACCEL_AXIS:       return (state->numAxis >= 6) ? 3 : ((state->numAxis >= 3) ? 0 : -1);
+        case OM_VALUE_GYRO_AXIS:        return (state->numAxis >= 6) ? 0 : -1;
+        case OM_VALUE_MAG_AXIS:         return (state->numAxis >= 9) ? 6 : -1;
+		
         // Cooked values
         case OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3: return (((dataPacket->light & 0x03ff) + 512) * 6000 / 1024); // log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0)
 		case OM_VALUE_TEMPERATURE_MC:   return (int)(dataPacket->temperature & 0x03ff) * 75000 / 256 - 50000; // For MCP9700 // ((dataPacket->temperature & 0x03ff) * 150 - 20500);     // Scaled to millicentigrade from the 0.1 dC conversion for MCP9701 in Analog.c: (value * 3 / 2) - 205
