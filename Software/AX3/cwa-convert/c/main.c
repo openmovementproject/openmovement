@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <time.h>
 #include <math.h>
 #include <limits.h>
@@ -39,7 +40,19 @@ typedef enum
 } Format;
 typedef enum { VALUES_DEFAULT, VALUES_INT, VALUES_FLOAT } Values;
 typedef enum { TIME_DEFAULT, TIME_NONE, TIME_SEQUENCE, TIME_SECONDS, TIME_DAYS, TIME_SERIAL, TIME_EXCEL, TIME_MATLAB, TIME_BLOCK, TIME_TIMESTAMP } Time;
-typedef enum { OPTIONS_NONE = 0x00, OPTIONS_LIGHT = 0x01, OPTIONS_TEMP = 0x02, OPTIONS_BATT = 0x04, OPTIONS_EVENTS = 0x08, OPTIONS_NO_DATA = 0x10, OPTIONS_BATT_VOLTAGE = 0x20, OPTIONS_BATT_PERCENT = 0x40, OPTIONS_BATT_RELATIVE = 0x80 } Options;
+typedef enum { 
+	OPTIONS_NONE = 0x0000, 
+	OPTIONS_LIGHT = 0x0001, 
+	OPTIONS_TEMP = 0x0002, 
+	OPTIONS_BATT = 0x0004, 
+	OPTIONS_EVENTS = 0x0008, 
+	OPTIONS_NO_ACCEL = 0x0010, 
+	OPTIONS_BATT_VOLTAGE = 0x0020, 
+	OPTIONS_BATT_PERCENT = 0x0040, 
+	OPTIONS_BATT_RELATIVE = 0x0080,
+	OPTIONS_NO_GYRO = 0x0100,
+	OPTIONS_NO_MAG = 0x0200,
+} Options;
 
 //#define DEFAULT_SAMPLE_RATE 100.0f      // HACK: Remove this, use value from file.
 
@@ -151,6 +164,8 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
     int floatBufferSize = 0;
 	unsigned char events = 0x00;
 	unsigned long deviceSessionId = 0;
+	int wavChannels = 0;
+
     FILE *fp;
     FILE *ofp;
 #ifdef SQLITE
@@ -181,6 +196,11 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
         values = VALUES_INT;
     }
 #endif
+
+	if (amplify != 1.0f && format != FORMAT_WAV && format != FORMAT_RAW)
+	{
+		printf("WARNING: Amplify only works with .WAV or .RAW files -- ignoring amplification.\n");
+	}
 
     fp = fopen(filename, "rb");
     if (fp == NULL) { return 1; }
@@ -246,58 +266,6 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
     lengthBytes = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     lengthSectors = lengthBytes / SECTOR_SIZE;
-
-    if (format == FORMAT_WAV)
-    {
-        unsigned long  nSamplesPerSec = 100;
-        unsigned short nChannels = 3;
-        unsigned short wBitsPerSample = (values == VALUES_FLOAT) ? 32 : 16;
-        unsigned short wSubFormatTag = (values == VALUES_FLOAT) ? 3 : 1;     // From KSDATAFORMAT_SUBTYPE_IEEE_FLOAT or KSDATAFORMAT_SUBTYPE_PCM
-        unsigned short nBlockAlign = nChannels * ((wBitsPerSample + 7) / 8);
-        unsigned long  nAvgBytesPerSec = nSamplesPerSec * nBlockAlign;
-
-        // Write 3-channel 'WAVE_FORMAT_EXTENSIBLE' .WAV header
-        unsigned long expectedLength = (lengthSectors > 256) ? ((lengthSectors - 256) * 480) * (wBitsPerSample / 16) : 0;
-
-        //  0, 1, 2, 3 = 'RIFF'
-        fputc('R', ofp); fputc('I', ofp); fputc('F', ofp); fputc('F', ofp); 
-
-        //  4, 5, 6, 7 = (file size - 8 bytes header) = (data size + 68 - 8)
-        fputlong(expectedLength + 68 - 8, ofp);
-
-        //  8, 9,10,11 = 'WAVE'
-        fputc('W', ofp); fputc('A', ofp); fputc('V', ofp); fputc('E', ofp); 
-
-        // 12,13,14,15 = 'fmt '
-        fputc('f', ofp); fputc('m', ofp); fputc('t', ofp); fputc(' ', ofp); 
-
-        // 16,17,18,19 = format size
-        fputlong(40, ofp);          // For WAVE_FORMAT_EXTENSIBLE format
-
-        // WAVEFORMATEX
-        fputshort(0xFFFE, ofp);         // 20 WORD  wFormatTag = 0xFFFE; (WAVE_FORMAT_EXTENSIBLE)
-        fputshort(nChannels, ofp);      // 22 WORD  nChannels; 
-        fputlong(nSamplesPerSec, ofp);  // 24 DWORD nSamplesPerSec; 
-        fputlong(nAvgBytesPerSec, ofp); // 28 DWORD nAvgBytesPerSec = nSamplesPerSec * nBlockAlign; 
-        fputshort(nBlockAlign, ofp);    // 32 WORD  nBlockAlign = nChannels * ((wBitsPerSample + 7) / 8);
-        fputshort(wBitsPerSample, ofp); // 34 WORD  wBitsPerSample; 
-        fputshort(22, ofp);             // 36 WORD  cbSize = formatSize - 18;
-        fputshort(wBitsPerSample, ofp); // 38 WORD  wValidBitsPerSample; (or wSamplesPerBlock if wBitsPerSample==0, or wReserved
-        fputlong(0, ofp);               // 40 DWORD dwChannelMask;
-
-        // 44 GUID SubFormat = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 }; (KSDATAFORMAT_SUBTYPE_PCM)
-        // 44 GUID SubFormat = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 }; (KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
-        fputc((wSubFormatTag & 0xff), ofp); fputc(((wSubFormatTag >> 8) & 0xff), ofp); fputc(0x00, ofp); fputc(0x00, ofp); 
-        fputc(0x00, ofp); fputc(0x00, ofp); fputc(0x10, ofp); fputc(0x00, ofp); 
-        fputc(0x80, ofp); fputc(0x00, ofp); fputc(0x00, ofp); fputc(0xAA, ofp); 
-        fputc(0x00, ofp); fputc(0x38, ofp); fputc(0x9B, ofp); fputc(0x71, ofp); 
-
-        // 60,61,62,63 = 'data'
-        fputc('d', ofp); fputc('a', ofp); fputc('t', ofp); fputc('a', ofp); 
-
-        // 64,65,66,67 = data size
-        fputlong(expectedLength, ofp);
-    }
 
     numSectors = lengthSectors - blockStart;
     if (blockCount >= 0 && numSectors > blockCount) { numSectors = blockCount; }
@@ -383,24 +351,108 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 				{
 					unsigned short sampleCount = dataPacket->sampleCount;
 					char bps = 0;
+					const int numAxes = ((dataPacket->numAxesBPS >> 4) & 0x0f);
+
+					int accelAxis = (numAxes >= 6) ? 3 : ((numAxes >= 3) ? 0 : -1);
+					int gyroAxis  = (numAxes >= 6) ? 0 : -1;
+					int magAxis   = (numAxes >= 9) ? 6 : -1;
+
+					int accelScale = 256;	// 1g = 256
+					int gyroScale = 2000;	// 32768 = 2000dps
+					int magScale = 16;		// 1uT = 16
+
+					// light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
+					unsigned short light = dataPacket->light;
+					accelScale = 1 << (8 + ((light >> 13) & 0x07));
+					if (((light >> 10) & 0x07) != 0) gyroScale = 8000 / (1 << ((light >> 10) & 0x07));
+
+					// Backwards compat. with dual-stream (non-synchronous) gyro packets
+					if (stream == STREAM_GYRO)
+					{
+						gyroScale = 2000;
+						accelAxis = -1;
+						gyroAxis = (numAxes >= 3) ? 0 : -1;
+						magAxis = -1;
+						if (numAxes != 3) { fprintf(stderr, "[ERROR: gyro num-axes not expected]"); }
+					}
 
 					// fprintf(stderr, "[%f V, %d, %d, %f ]\n", dataPacket->battery / 256.0 * 6.0, dataPacket->events, dataPacket->light, dataPacket->temperature * 19.0 / 64.0 - 50.0);
-					if (((dataPacket->numAxesBPS >> 4) & 0x0f) != 3) { fprintf(stderr, "[ERROR: num-axes not expected]"); }
-					if ((dataPacket->numAxesBPS & 0x0f) == 2) { bps = 6; }
-					else if ((dataPacket->numAxesBPS & 0x0f) == 0) { bps = 4; }
+					if (numAxes != 3 && numAxes != 6 && numAxes != 9) { fprintf(stderr, "[ERROR: num-axes not expected]"); }
+					if ((dataPacket->numAxesBPS & 0x0f) == 2) { bps = 2 * numAxes; }
+					else if ((dataPacket->numAxesBPS & 0x0f) == 0 && numAxes == 3) { bps = 4; }
 
 					if (bps == 0) { fprintf(stderr, "[ERROR: format not expected]"); }
 					else if (format == FORMAT_RAW || format == FORMAT_WAV)
 					{
-						if (bps != 6)
+						if (bps == 4)
 						{
-							fprintf(stderr, "[ERROR: RAW/WAV output does not yet support new 32-bit packed accelerometer format]");
+							fprintf(stderr, "[ERROR: RAW/WAV output does support packed data]");
 						}
 						else 
 						{
+							signed short *data = (signed short *)dataPacket->sampleData;
 							totalSamples += sampleCount;
 
                             if (dataPacket->sessionId != deviceSessionId) { fprintf(stderr, "!"); } else { fprintf(stderr, "*"); }
+
+							if (wavChannels == 0 && numAxes > 0)
+							{
+								wavChannels = numAxes;
+
+								unsigned long  nSamplesPerSec = 100;
+								unsigned short nChannels = wavChannels;
+								unsigned short wBitsPerSample = (values == VALUES_FLOAT) ? 32 : 16;
+								unsigned short wSubFormatTag = (values == VALUES_FLOAT) ? 3 : 1;     // From KSDATAFORMAT_SUBTYPE_IEEE_FLOAT or KSDATAFORMAT_SUBTYPE_PCM
+								unsigned short nBlockAlign = nChannels * ((wBitsPerSample + 7) / 8);
+								unsigned long  nAvgBytesPerSec = nSamplesPerSec * nBlockAlign;
+
+								// Write 3-channel 'WAVE_FORMAT_EXTENSIBLE' .WAV header
+								unsigned long expectedLength = (lengthSectors > 256) ? ((lengthSectors - 256) * 480) * (wBitsPerSample / 16) : 0;
+
+								//  0, 1, 2, 3 = 'RIFF'
+								fputc('R', ofp); fputc('I', ofp); fputc('F', ofp); fputc('F', ofp);
+
+								//  4, 5, 6, 7 = (file size - 8 bytes header) = (data size + 68 - 8)
+								fputlong(expectedLength + 68 - 8, ofp);
+
+								//  8, 9,10,11 = 'WAVE'
+								fputc('W', ofp); fputc('A', ofp); fputc('V', ofp); fputc('E', ofp);
+
+								// 12,13,14,15 = 'fmt '
+								fputc('f', ofp); fputc('m', ofp); fputc('t', ofp); fputc(' ', ofp);
+
+								// 16,17,18,19 = format size
+								fputlong(40, ofp);          // For WAVE_FORMAT_EXTENSIBLE format
+
+															// WAVEFORMATEX
+								fputshort(0xFFFE, ofp);         // 20 WORD  wFormatTag = 0xFFFE; (WAVE_FORMAT_EXTENSIBLE)
+								fputshort(nChannels, ofp);      // 22 WORD  nChannels; 
+								fputlong(nSamplesPerSec, ofp);  // 24 DWORD nSamplesPerSec; 
+								fputlong(nAvgBytesPerSec, ofp); // 28 DWORD nAvgBytesPerSec = nSamplesPerSec * nBlockAlign; 
+								fputshort(nBlockAlign, ofp);    // 32 WORD  nBlockAlign = nChannels * ((wBitsPerSample + 7) / 8);
+								fputshort(wBitsPerSample, ofp); // 34 WORD  wBitsPerSample; 
+								fputshort(22, ofp);             // 36 WORD  cbSize = formatSize - 18;
+								fputshort(wBitsPerSample, ofp); // 38 WORD  wValidBitsPerSample; (or wSamplesPerBlock if wBitsPerSample==0, or wReserved
+								fputlong(0, ofp);               // 40 DWORD dwChannelMask;
+
+																// 44 GUID SubFormat = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 }; (KSDATAFORMAT_SUBTYPE_PCM)
+																// 44 GUID SubFormat = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 }; (KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
+								fputc((wSubFormatTag & 0xff), ofp); fputc(((wSubFormatTag >> 8) & 0xff), ofp); fputc(0x00, ofp); fputc(0x00, ofp);
+								fputc(0x00, ofp); fputc(0x00, ofp); fputc(0x10, ofp); fputc(0x00, ofp);
+								fputc(0x80, ofp); fputc(0x00, ofp); fputc(0x00, ofp); fputc(0xAA, ofp);
+								fputc(0x00, ofp); fputc(0x38, ofp); fputc(0x9B, ofp); fputc(0x71, ofp);
+
+								// 60,61,62,63 = 'data'
+								fputc('d', ofp); fputc('a', ofp); fputc('t', ofp); fputc('a', ofp);
+
+								// 64,65,66,67 = data size
+								fputlong(expectedLength, ofp);
+							}
+
+							if (numAxes != wavChannels)
+							{
+								fprintf(stderr, "[ERROR: RAW/WAV output does not support changes to the number of axes]");
+							}
 							
 							if (values == VALUES_FLOAT)
 							{
@@ -409,23 +461,29 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 								// Ensure float buffer exists
 								if (dataPacket->sampleCount > floatBufferSize)
 								{
-									floatBuffer = (float *)realloc(floatBuffer, 3 * dataPacket->sampleCount * sizeof(float));
+									floatBuffer = (float *)realloc(floatBuffer, numAxes * dataPacket->sampleCount * sizeof(float));
 									floatBufferSize = dataPacket->sampleCount;
 								}
 
 								// Convert to floating point and amplify
 								divide = 1.0f;                                          // Original data in (1/256) g
-								if (format == FORMAT_RAW) { divide = 256.0f; }          // In 'g'
-								else if (format == FORMAT_WAV) { divide = 32768.0f; }   // Range-scaled for .WAV (-1 to 1 range)
+								if (format == FORMAT_WAV) { divide = 32768.0f; }   // Range-scaled for .WAV (-1 to 1 range)
 
 								for (i = 0; i < dataPacket->sampleCount; i++)
 								{
-									for (z = 0; z < 3; z++)
+									for (z = 0; z < numAxes; z++)
 									{
-										floatBuffer[3 * i + z] = amplify * (float)dataPacket->sampleData[i].accel[z] / divide;
+										if (format == FORMAT_RAW)
+										{
+											if (accelAxis >= 0 && z >= accelAxis && z < accelAxis + 3) { divide = (float)accelScale; }
+											else if (gyroAxis >= 0 && z >= gyroAxis && z < gyroAxis + 3) { divide = (float)gyroScale / 32768.0f; }
+											else if (magAxis >= 0 && z >= magAxis && z < magAxis + 3) { divide = (float)magScale; }
+											else { divide = 1.0f; }
+										}
+										floatBuffer[numAxes * i + z] = amplify * (float)data[numAxes * i + z] / divide;
 									}
 								}
-								outputSize += 3 * sizeof(float) * fwrite(floatBuffer, 3 * sizeof(float), dataPacket->sampleCount, ofp);
+								outputSize += numAxes * sizeof(float) * fwrite(floatBuffer, numAxes * sizeof(float), dataPacket->sampleCount, ofp);
 							}
 							else
 							{
@@ -434,16 +492,16 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 								{
 									for (i = 0; i < dataPacket->sampleCount; i++)
 									{
-										for (z = 0; z < 3; z++)
+										for (z = 0; z < numAxes; z++)
 										{
-											float v = amplify * dataPacket->sampleData[i].accel[z];
+											float v = amplify * data[numAxes * i + z];
 											if (v < -32768.0f) { v = -32768.0f; }
 											if (v >  32767.0f) { v =  32767.0f; }
-											dataPacket->sampleData[i].accel[z] = (unsigned short)v;
+											data[numAxes * i + z] = (unsigned short)v;
 										}
 									}
 								}
-								outputSize += 3 * sizeof(unsigned short) * fwrite(&(dataPacket->sampleData[0]), 3 * sizeof(unsigned short), dataPacket->sampleCount, ofp);
+								outputSize += numAxes * sizeof(unsigned short) * fwrite(&(dataPacket->sampleData[0]), numAxes * sizeof(unsigned short), dataPacket->sampleCount, ofp);
 							}
 						}
 					}
@@ -451,15 +509,11 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 					{
 						float freq;
 						float offsetStart;
-                        float divide = 1.0f;
 
 						// Block start and end time
 						struct tm tm0;
 						time_t time0;
 						double t0, t1;
-
-                        if (stream == STREAM_GYRO) { divide = 32768.0f / 2000.0f; }
-                        else if (stream == STREAM_ACCELEROMETER) { divide = 256.0f; }
 
 						fprintf(stderr, "*");
 						totalSamples += sampleCount;
@@ -530,8 +584,11 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 						{
 							if (sequence >= iStart && sequence - iStart < iLength && ((sequence - iStart) % iStep) == 0)
 							{
+								bool commaNeeded = false;
 								double t = t0 + (double)i * (t1 - t0) / dataPacket->sampleCount;
 								short x, y, z;
+								short gx, gy, gz;
+								short mx, my, mz;
 
 								if (time == TIME_SEQUENCE) { sprintf(timestring, "%u", (unsigned int)sequence); }
 								else if (time == TIME_SECONDS && ver == 0) { sprintf(timestring, "%0.2f", (double)sequence / freq); }
@@ -572,7 +629,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 									timestring[0] = '\0';
 								}
 
-								if (bps == 4)
+								if (bps == 4)	// packed accel
 								{
 									unsigned int *values = (unsigned int *)dataPacket->sampleData;
 									unsigned int value = values[i];
@@ -596,83 +653,125 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 									y = (signed short)((unsigned short)(value >>  4) & (unsigned short)0xffc0) >> (6 - (unsigned char)(value >> 30));		// Sign-extend 10-bit value, adjust for exponent
 									z = (signed short)((unsigned short)(value >> 14) & (unsigned short)0xffc0) >> (6 - (unsigned char)(value >> 30));		// Sign-extend 10-bit value, adjust for exponent
 								}
-								else if (bps == 6)
+								else  // unpacked accel (optional synchronous gyro or gyro+mag)
 								{
-									x = dataPacket->sampleData[i].accelX;
-									y = dataPacket->sampleData[i].accelY;
-									z = dataPacket->sampleData[i].accelZ;
-								}
-								else
-								{
-									x = y = z = 0;
+									signed short *data = (signed short *)dataPacket->sampleData;
+									if (accelAxis >= 0)
+									{
+										x = data[i * bps / 2 + accelAxis + 0];
+										y = data[i * bps / 2 + accelAxis + 1];
+										z = data[i * bps / 2 + accelAxis + 2];
+									}
+									else { x = y = z = 0; }
+									if (gyroAxis >= 0)
+									{
+										gx = data[i * bps / 2 + gyroAxis + 0];
+										gy = data[i * bps / 2 + gyroAxis + 1];
+										gz = data[i * bps / 2 + gyroAxis + 2];
+									}
+									else { gx = gy = gz = 0; }
+									if (magAxis >= 0)
+									{
+										mx = data[i * bps / 2 + magAxis + 0];
+										my = data[i * bps / 2 + magAxis + 1];
+										mz = data[i * bps / 2 + magAxis + 2];
+									}
+									else { mx = my = mz = 0; }
 								}
 
-								if (values == VALUES_INT)
-								{
 #ifdef SQLITE
-                                    if (format == FORMAT_SQLITE)
-                                    {
-                                        if (sqlite3_bind_double(stmt, 1, (double)(t - 3600.0))) {
-                                            fprintf(stderr, "ERROR: sqlite bind double (time).\n");
-                                        }
-                                        if (sqlite3_bind_int(stmt, 2, (int)(amplify * x))) {
-                                            fprintf(stderr, "ERROR: sqlite bind int (x).\n");
-                                        }
-                                        if (sqlite3_bind_int(stmt, 3, (int)(amplify * y))) {
-                                            fprintf(stderr, "ERROR: sqlite bind int (y).\n");
-                                        }
-                                        if (sqlite3_bind_int(stmt, 4, (int)(amplify * z))) {
-                                            fprintf(stderr, "ERROR: sqlite bind int (z).\n");
-                                        }
+                                if (values == VALUES_INT && format == FORMAT_SQLITE)
+                                {
+                                    if (sqlite3_bind_double(stmt, 1, (double)(t - 3600.0))) {
+                                        fprintf(stderr, "ERROR: sqlite bind double (time).\n");
+                                    }
+                                    if (sqlite3_bind_int(stmt, 2, x)) {
+                                        fprintf(stderr, "ERROR: sqlite bind int (x).\n");
+                                    }
+                                    if (sqlite3_bind_int(stmt, 3, y)) {
+                                        fprintf(stderr, "ERROR: sqlite bind int (y).\n");
+                                    }
+                                    if (sqlite3_bind_int(stmt, 4, z)) {
+                                        fprintf(stderr, "ERROR: sqlite bind int (z).\n");
+                                    }
                                         
-                                        j = 5;
-                            			if (options & OPTIONS_LIGHT)
+                                    j = 5;
+                            		if (options & OPTIONS_LIGHT)
+                            		{
+                            			if (sqlite3_bind_int(stmt, j, light))
                             			{
-                            				if (sqlite3_bind_int(stmt, j, dataPacket->light))
-                            				{
-												fprintf(stderr, "ERROR: sqlite bind int (light).\n");
-											}
-                            				j++;
-                            			}
-                            			if (options & OPTIONS_TEMP)
+											fprintf(stderr, "ERROR: sqlite bind int (light).\n");
+										}
+                            			j++;
+                            		}
+                            		if (options & OPTIONS_TEMP)
+                            		{
+                            			if (sqlite3_bind_double(stmt, j, (double)(dataPacket->temperature * 19.0 / 64.0 - 50.0)))
                             			{
-                            				if (sqlite3_bind_double(stmt, j, (double)(dataPacket->temperature * 19.0 / 64.0 - 50.0)))
-                            				{
-												fprintf(stderr, "ERROR: sqlite bind double (temperature).\n");
-											}
-                            				j++;
-                            			}
-                            			if (options & OPTIONS_BATT) 
-                            			{ 
-                            				if (sqlite3_bind_double(stmt, j, (double)(dataPacket->battery / divide * 6.0)))
-                            				{
-												fprintf(stderr, "ERROR: sqlite bind double (battery).\n");
-											}
-                            			}
-                                    }                                        
-                                    else
+											fprintf(stderr, "ERROR: sqlite bind double (temperature).\n");
+										}
+                            			j++;
+                            		}
+                            		if (options & OPTIONS_BATT) 
+                            		{ 
+                            			if (sqlite3_bind_double(stmt, j, (double)(dataPacket->battery / divide * 6.0)))
+                            			{
+											fprintf(stderr, "ERROR: sqlite bind double (battery).\n");
+										}
+                            		}
+                                }                                        
+                                else
 #endif
-                                    {
-                                        if (options & OPTIONS_NO_DATA)
-                                        {
-                                            if (time != TIME_NONE) { outputSize += fprintf(ofp, "%s", timestring); }
-                                        }
-                                        else
-                                        {
-    									    outputSize += fprintf(ofp, "%s%s%d,%d,%d", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",", (int)(amplify * x), (int)(amplify * y), (int)(amplify * z));
-                                        }
-                                    }
-								}
-								else if (values == VALUES_FLOAT)
 								{
-                                    if (options & OPTIONS_NO_DATA)
-                                    {
-                                        if (time != TIME_NONE) { outputSize += fprintf(ofp, "%s", timestring); }
-                                    }
-                                    else
-                                    {
-    									outputSize += fprintf(ofp, "%s%s%f,%f,%f", (time == TIME_NONE) ? "" : timestring, (time == TIME_NONE) ? "" : ",", amplify * x / divide, amplify * y / divide, amplify * z / divide);
-                                    }
+									// Time
+									if (time != TIME_NONE)
+									{
+										outputSize += fprintf(ofp, "%s", timestring);
+										commaNeeded = true;
+									}
+
+									// Accel
+									if (!(options & OPTIONS_NO_ACCEL) && accelAxis >= 0)
+									{
+										if (values == VALUES_INT)
+										{
+											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", x, y, z);
+										}
+										else
+										{
+											outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)x / accelScale, (float)y / accelScale, (float)z / accelScale);
+										}
+										commaNeeded = true;
+									}
+
+									// Gyro
+									if (!(options & OPTIONS_NO_GYRO) && gyroAxis >= 0)
+									{
+										float scale = gyroScale / 32768.0f;
+										if (values == VALUES_INT)
+										{
+											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", gx, gy, gz);
+										}
+										else
+										{
+											outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)gx / scale, (float)gy / scale, (float)gz / scale);
+										}
+										commaNeeded = true;
+									}
+
+									// Mag
+									if (!(options & OPTIONS_NO_MAG) && magAxis >= 0)
+									{
+										if (values == VALUES_INT)
+										{
+											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", mx, my, mz);
+										}
+										else
+										{
+											outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)mx / magScale, (float)my / magScale, (float)mz / magScale);
+										}
+										commaNeeded = true;
+									}
 								}
 
 #ifdef SQLITE
@@ -688,7 +787,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
                                 else
 #endif
                                 {
-    								if (options & OPTIONS_LIGHT)  { fprintf(ofp, ",%u", dataPacket->light); }
+    								if (options & OPTIONS_LIGHT)  { fprintf(ofp, ",%u", light); }
     								if (options & OPTIONS_TEMP)   { fprintf(ofp, ",%u", dataPacket->temperature); }
                                     if (options & OPTIONS_BATT)
                                     {
@@ -744,7 +843,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
     }
 
     // Patch up WAV header with actual number of samples
-    if (format == FORMAT_WAV && ofp != stdout)
+    if (format == FORMAT_WAV && ofp != stdout && wavChannels != 0)
     {
         fseek(ofp, 4, SEEK_SET);  fputlong(outputSize + 68 - 8, ofp);
         fseek(ofp, 64, SEEK_SET); fputlong(outputSize, ofp);
@@ -825,7 +924,10 @@ atexit(_getch);
             else if (strcasecmp(argv[i], "-t:matlab") == 0)    { time = TIME_MATLAB; }
             else if (strcasecmp(argv[i], "-t:block") == 0)     { time = TIME_BLOCK; }
             else if (strcasecmp(argv[i], "-t:timestamp") == 0) { time = TIME_TIMESTAMP; }
-			else if (strcasecmp(argv[i], "-nodata") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_DATA); }
+			else if (strcasecmp(argv[i], "-nodata") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL | OPTIONS_NO_GYRO | OPTIONS_NO_MAG); }
+			else if (strcasecmp(argv[i], "-noaccel") == 0)     { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL); }
+			else if (strcasecmp(argv[i], "-nogyro") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL); }
+			else if (strcasecmp(argv[i], "-nomag") == 0)       { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL); }
 			else if (strcasecmp(argv[i], "-light") == 0)       { options = (Options)((unsigned int)options | OPTIONS_LIGHT); }
 			else if (strcasecmp(argv[i], "-temp") == 0)        { options = (Options)((unsigned int)options | OPTIONS_TEMP); }
 			else if (strcasecmp(argv[i], "-batt") == 0)        { options = (Options)((unsigned int)options | OPTIONS_BATT); }
@@ -892,7 +994,7 @@ atexit(_getch);
 #ifdef SQLITE
             "|-f:sqlite"
 #endif
-            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-nodata] [-light] [-temp] [-batt[v|p|r]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
+            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-no<data|accel|gyro|mag>] [-light] [-temp] [-batt[v|p|r]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
         return 1;
     }
     

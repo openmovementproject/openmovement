@@ -4,3 +4,7 @@
 /Software/OM/omapi/src/*.lib
 /Software/OM/omapi/src/*.exp
 /Software/OM/omapi/src/*.def
+/Software/AX3/cwa-convert/c/.vs
+/Software/AX3/cwa-convert/c/Debug
+/Software/AX3/cwa-convert/c/Release
+*.user
