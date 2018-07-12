@@ -165,7 +165,10 @@ class CWA:
                         continue
                     
                     if ((numAxesBPS >> 4) & 15) != 3:
-                        print('[ERROR: num-axes not expected]')
+                        print('[ERROR: Axes!=3 not supported yet -- this will not work properly]')
+
+                    if (light & 0xfc00) != 0:
+                        print('[ERROR: Scale not supported yet -- this will not work properly]')
                         
                     if (numAxesBPS & 15) == 2:
                         bps = 6

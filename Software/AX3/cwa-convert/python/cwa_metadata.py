@@ -27,7 +27,8 @@ def read_timestamp(data):
 		# return str(datetime.fromtimestamp(timestamp))
 		# return time.strptime(t, '%Y-%m-%d %H:%M:%S')
 	except ValueError:
-		return None
+		print("WARNING: Invalid date:", year, month, day, hours, mins, secs)
+		return -1
 
 
 def timestamp_string(timestamp):
@@ -162,7 +163,7 @@ def cwa_header(block):
 			
 			# Parse rateCode
 			header['sampleRate'] = (3200/(1<<(15-(rateCode & 0x0f))))
-			header['sampleRange'] = (16 >> (rateCode >> 6))
+			header['accelRange'] = (16 >> (rateCode >> 6))
 		
 	return header
 
@@ -177,7 +178,7 @@ def cwa_data(block):
 			data['sessionId'] = unpack('<I', block[6:10])[0]			# @ 6  +4   Unique session identifier, 0 = unknown
 			data['sequenceId'] = unpack('<I', block[10:14])[0]			# @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
 			timestamp = read_timestamp(block[14:18])					# @14  +4   Last reported RTC value, 0 = unknown
-			# data['light'] = unpack('<H', block[18:20])[0]				# @18  +2   Last recorded light sensor value in raw units, 0 = none
+			light = unpack('<H', block[18:20])[0]				# @18  +2   Last recorded light sensor value in raw units, 0 = none
 			# data['temperature'] = unpack('<H', block[20:22])[0]		# @20  +2   Last recorded temperature sensor value in raw units, 0 = none
 			# data['events'] = unpack('B', block[22:23])[0]				# @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
 			# data['battery'] = unpack('B', block[23:24])[0]			# @23  +1   Last recorded battery level in raw units, 0 = unknown
@@ -200,16 +201,75 @@ def cwa_data(block):
 			
 			# Add fractional time to timestamp
 			timestamp += timeFractional / 65536
-			
+
 			data['timestamp'] = timestamp
 			data['timestampOffset'] = timestampOffset
 			
 			data['timestampTime'] = timestamp_string(data['timestamp'])
 			
-			if numAxesBPS & 0x0f == 0x00:
-				data['samplesPerSector'] = 120
-			elif numAxesBPS & 0x0f == 0x02:
-				data['samplesPerSector'] = 80
+			# Maximum samples per sector
+			channels = (numAxesBPS >> 4) & 0x0f
+			bytesPerAxis = numAxesBPS & 0x0f
+			bytesPerSample = 4
+			if bytesPerAxis == 0 and channels == 3:
+				bytesPerSample = 4
+			elif bytesPerAxis > 0 and channels > 0:
+				bytesPerSample = bytesPerAxis * channels
+			samplesPerSector = 480 // bytesPerSample
+			data['channels'] = channels
+			data['bytesPerAxis'] = bytesPerAxis			# 0 for DWORD packing
+			data['bytesPerSample'] = bytesPerSample
+			data['samplesPerSector'] = samplesPerSector
+
+			# Axes
+			accelAxis = -1
+			gyroAxis = -1
+			magAxis = -1
+			if channels >= 6:
+				gyroAxis = 0
+				accelAxis = 3
+				if channels >= 9:
+					magAxis = 6
+			elif channels >= 3:
+				accelAxis = 0
+			
+			# Default units/scaling/range
+			accelUnit = 256		# 1g = 256
+			gyroRange = 2000	# 32768 = 2000dps
+			magUnit = 16		# 1uT = 16
+			# light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
+			accelScale = 1 << (8 + ((light >> 13) & 0x07))
+			if ((light >> 10) & 0x07) != 0:
+				gyroRange = 8000 // (1 << ((light >> 10) & 0x07))
+			
+			# Scale
+			#accelScale = 1.0 / accelUnit
+			#gyroScale = float(gyroRange) / 32768
+			#magScale = 1.0 / magUnit
+
+			# Range
+			accelRange = 16
+			if rateCode != 0:
+				accelRange = 16 >> (rateCode >> 6)
+			#magRange = 32768 / magUnit
+			
+			# Unit
+			#gyroUnit = 32768.0 / gyroRange
+
+			if accelAxis >= 0:
+				data['accelAxis'] = accelAxis
+				data['accelRange'] = accelRange
+				data['accelUnit'] = accelUnit
+			if gyroAxis >= 0:
+				data['gyroAxis'] = gyroAxis
+				data['gyroRange'] = gyroRange
+			if magAxis >= 0:
+				data['magAxis'] = magAxis
+				data['magUnit'] = magUnit
+					
+			# Light
+			light &= 0x3ff		# actual light value is least significant 10 bits
+
 	return data
 
 
