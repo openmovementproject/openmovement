@@ -583,9 +583,9 @@ int OmReaderGetValue(OmReaderHandle reader, OM_READER_VALUE_TYPE valueType)
         case OM_VALUE_SCALE_GYRO:       return state->gyroScale;		// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
         case OM_VALUE_SCALE_MAG:        return state->magScale;		    // Scaling: divisor to uT
 
-        case OM_VALUE_ACCEL_AXIS:       return (state->numAxis >= 6) ? 3 : ((state->numAxis >= 3) ? 0 : -1);
-        case OM_VALUE_GYRO_AXIS:        return (state->numAxis >= 6) ? 0 : -1;
-        case OM_VALUE_MAG_AXIS:         return (state->numAxis >= 9) ? 6 : -1;
+        case OM_VALUE_ACCEL_AXIS:       return (state->numAxes >= 6) ? 3 : ((state->numAxes >= 3) ? 0 : -1);
+        case OM_VALUE_GYRO_AXIS:        return (state->numAxes >= 6) ? 0 : -1;
+        case OM_VALUE_MAG_AXIS:         return (state->numAxes >= 9) ? 6 : -1;
 		
         // Cooked values
         case OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3: return (((dataPacket->light & 0x03ff) + 512) * 6000 / 1024); // log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0)
