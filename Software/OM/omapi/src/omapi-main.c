@@ -89,7 +89,7 @@ int OmStartup(int version)
     // Ensure device state table is clear
     for (i = 0; i < OM_MAX_SERIAL; i++)
     {
-        om.devices[i] = NULL;
+        om.deviceList[i] = NULL;
     }
 
     // Mutex
@@ -127,17 +127,17 @@ int OmShutdown(void)
     // Clear device state table
     for (i = 0; i < OM_MAX_SERIAL; i++)
     {
-        if (om.devices[i] != NULL)
+        if (om.deviceList[i] != NULL)
         {
             // Cancel any pending downloads
-            if (om.devices[i]->deviceStatus == OM_DEVICE_CONNECTED)
+            if (om.deviceList[i]->deviceStatus == OM_DEVICE_CONNECTED)
             {
                 OmLog(3, "OmCancelDownload(%d)...\n", i);
                 OmCancelDownload(i);
             }
 
-            free(om.devices[i]);
-            om.devices[i] = NULL;
+            free(om.deviceList[i]);
+            om.deviceList[i] = NULL;
         }
     }
 
@@ -190,7 +190,7 @@ int OmGetDeviceIds(int *deviceIds, int maxDevices)
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
     for (i = 0; i < OM_MAX_SERIAL; i++)
     {
-        OmDeviceState *deviceState = om.devices[i];
+        OmDeviceState *deviceState = om.deviceList[i];
         if (deviceState != NULL && deviceState->deviceStatus == OM_DEVICE_CONNECTED)
         {
             if (maxDevices > 0 && deviceIds != NULL)

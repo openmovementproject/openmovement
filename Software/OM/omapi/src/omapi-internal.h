@@ -219,7 +219,7 @@ typedef struct
     mutex_t downloadMutex;              /**< downloadMutex must be held to start/update/stop a download. */
 
     // Device table
-    OmDeviceState *devices[OM_MAX_SERIAL];  /**< Array of pointers to connected device states for each device identifier. */    // (Consider replacing with a hash table or balanced tree, as this implementation requires a fixed 256KB of memory). 
+    OmDeviceState *deviceList[OM_MAX_SERIAL];  /**< Array of pointers to connected device states for each device identifier. */    // (Consider replacing with a hash table or balanced tree, as this implementation requires a fixed 256KB of memory). 
 } OmState;
 
 
@@ -260,7 +260,8 @@ int OmPortAcquire(unsigned int deviceId);
 /** Release a port */
 int OmPortRelease(unsigned int deviceId);
 
-
+/** Get the device state for the given device id */
+OmDeviceState *OmDevice(int serial);
 
 #ifdef __cplusplus
 }

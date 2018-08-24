@@ -56,8 +56,9 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
 	if (incomingDeviceId != deviceId) {
 		OmLog(0, "ERROR: Problem when identifying device %d (mismatched identity as %d) -- reconnect.\n", deviceId, incomingDeviceId);
 		// Set flag to prevent further access
-		if (om.devices[deviceId]) {
-			om.devices[deviceId]->flags |= 0x00000001;	// invalid device
+		OmDeviceState *device = OmDevice(deviceId);
+		if (device) {
+			device->flags |= 0x00000001;	// invalid device
 		}
 		return OM_E_INVALID_DEVICE;
 	}
@@ -71,14 +72,15 @@ int OmGetDeviceSerial(int deviceId, char *serialBuffer)
 	serialBuffer[0] = '\0';
 	// Check system and device state
 	if (!om.initialized) return OM_E_NOT_VALID_STATE;
-	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
-	if (strlen(om.devices[deviceId]->serialId) == 0)
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (device->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(device->serialId) == 0)
 	{
 		// We don't have a serial id string
 		return OM_E_FAIL;
 	}
-	strcat(serialBuffer, om.devices[deviceId]->serialId);
+	strcat(serialBuffer, device->serialId);
 	return OM_OK;
 }
 
@@ -89,14 +91,15 @@ int OmGetDevicePort(int deviceId, char *portBuffer)
 	portBuffer[0] = '\0';
 	// Check system and device state
 	if (!om.initialized) return OM_E_NOT_VALID_STATE;
-	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
-	if (strlen(om.devices[deviceId]->port) == 0)
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (device->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(device->port) == 0)
 	{
 		// We don't have a path to the port
 		return OM_E_FAIL;
 	}
-	strcat(portBuffer, om.devices[deviceId]->port);
+	strcat(portBuffer, device->port);
 	return OM_OK;
 }
 
@@ -107,15 +110,16 @@ int OmGetDevicePath(int deviceId, char *pathBuffer)
 	pathBuffer[0] = '\0';
 	// Check system and device state
 	if (!om.initialized) return OM_E_NOT_VALID_STATE;
-	if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-	if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
-	if (strlen(om.devices[deviceId]->root) == 0)
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	if (device->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	if (strlen(device->root) == 0)
 	{
 		// We don't have a path to the root
 		// ??? (Could re-mount the volume to a path here?)
 		return OM_E_FAIL;
 	}
-	strcat(pathBuffer, om.devices[deviceId]->root);
+	strcat(pathBuffer, device->root);
 	return OM_OK;
 }
 
@@ -407,7 +411,8 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
 OmLog(3, "OmCommand(%d, \"%s\", _, _, \"%s\", %d, _, _);\n", deviceId, command, expected, timeoutMs);
 
 	// Check flag that prevents further device access
-	if (om.devices[deviceId] && om.devices[deviceId]->flags & 0x00000001) {
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device && device->flags & 0x00000001) {
 		int whitelist = 0;
 		if (command != NULL && strlen(command) > 0) {
 			// Allow certain commands (RESET to redo device enumeration)
@@ -435,7 +440,7 @@ OmLog(4, "- Flush start");
             for(;;)
             {
                 unsigned long ret = -1;
-                ret = read(om.devices[deviceId]->fd, &c, 1);
+                ret = read(device->fd, &c, 1);
                 if (ret != 1) { break; }
                 num++;
                 if (OmMilliseconds() - start > 5000) { OmPortRelease(deviceId); return OM_E_UNEXPECTED_RESPONSE; }   // e.g. if in streaming mode, will not stop producing data

@@ -67,6 +67,13 @@ int OmLog(int level, const char *format, ...)
 }
 
 
+OmDeviceState *OmDevice(int serial)
+{
+	return om.deviceList[serial];
+}
+
+
+
 #ifdef _WIN32
 #ifdef OM_DEBUG_MUTEX
 int OmDebugMutexLock(mutex_t *mutex, const char *mutexName, const char *source, int line, const char *caller, int deviceId)
@@ -116,12 +123,12 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
         unsigned short serialNumber;
         OmDeviceState *deviceState;
 
-        if (inSerialNumber > OM_MAX_SERIAL) { OmLog(0, "WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
+        if (inSerialNumber >= 0xffff0000) { OmLog(0, "WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
         if (volumePath == NULL || volumePath[0] == '\0') { OmLog(0, "WARNING: Ignoring added device with no mount point (%u)\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
         // Get the current OmDeviceState structure, or make one if it doesn't exist
-        deviceState = om.devices[serialNumber];
+        deviceState = om.deviceList[serialNumber];
         if (deviceState == NULL)
         {
             // Create and initialize the structure
@@ -149,7 +156,7 @@ OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
 
         // Finally, set the connected flag and the entry in devices
         deviceState->deviceStatus = OM_DEVICE_CONNECTED;
-        om.devices[serialNumber] = deviceState;
+        om.deviceList[serialNumber] = deviceState;
 
         // Call user's device callback
         if (om.deviceCallback != NULL)
@@ -163,13 +170,13 @@ OmLog(0, "DEBUG: callback for OM_DEVICE_CONNECTED...\n");
         unsigned short serialNumber;
         OmDeviceState *deviceState;
 
-        if (inSerialNumber > OM_MAX_SERIAL) { OmLog(0, "WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
-        serialNumber = (unsigned short)inSerialNumber;
+		if (inSerialNumber >= 0xffff0000) { OmLog(0, "WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
+		serialNumber = (unsigned short)inSerialNumber;
 
 OmLog(0, "DEBUG: Device removed: #%d\n", serialNumber);
 
         // Get the current OmDeviceState structure
-        deviceState = om.devices[serialNumber];
+        deviceState = om.deviceList[serialNumber];
         if (deviceState == NULL) { return; }        // Removal called for a never-seen device (should not be possible from the DeviceFinder)
 
         // Set the removed status
@@ -432,8 +439,9 @@ int OmPortReadLine(unsigned int deviceId, char *inBuffer, int len, unsigned long
 
     OmLog(3, "OmPortReadLine(%d, _,%d, %d);", deviceId, len, timeout);
 
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    fd = om.devices[deviceId]->fd;
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+    fd = device->fd;
     if (fd < 0) { return -1; }
     if (inBuffer != NULL) { inBuffer[0] = '\0'; }
     for (;;)
@@ -491,8 +499,9 @@ OmLog(5, "[%c]", c);    // For extreme logging
 int OmPortWrite(unsigned int deviceId, const char *command)
 {
     int fd;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    fd = om.devices[deviceId]->fd;
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+    fd = device->fd;
     if (fd < 0) { return OM_E_FAIL; }
     if (command == NULL) { return OM_E_POINTER; }
 OmLog(3, "OmPortWrite(%d, \"%s\");\n", deviceId, command);
@@ -508,21 +517,22 @@ int OmPortAcquire(unsigned int deviceId)
 
     // Check system and device state
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+    if (device->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
 
     // Open port
     mutex_lock(&om.portMutex);              // Lock port mutex to open the port
     do          // This is only a 'do' to allow a single code path to hit the mutex unlock with any exceptional 'break's
     {
         // Check if already open
-        if (om.devices[deviceId]->fd >= 0) { status = OM_E_ACCESS_DENIED; break; }
+        if (device->fd >= 0) { status = OM_E_ACCESS_DENIED; break; }
 
         // Open the port
-        om.devices[deviceId]->fd = OmPortOpen(om.devices[deviceId]->port, 1);
+        device->fd = OmPortOpen(device->port, 1);
 
         // Check if opened successfully
-        if (om.devices[deviceId]->fd < 0) { status = OM_E_ACCESS_DENIED; break; }
+        if (device->fd < 0) { status = OM_E_ACCESS_DENIED; break; }
 
         status = OM_OK;
     } while (0);
@@ -536,14 +546,15 @@ int OmPortAcquire(unsigned int deviceId)
 int OmPortRelease(unsigned int deviceId)
 {
     // Check device state
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
 
     // Close port
     mutex_lock(&om.portMutex);              // Lock port mutex to close the port
-    if (om.devices[deviceId]->fd >= 0)
+    if (device->fd >= 0)
     { 
-        close(om.devices[deviceId]->fd);
-        om.devices[deviceId]->fd = -1;
+        close(device->fd);
+        device->fd = -1;
     }
     mutex_unlock(&om.portMutex);            // Release port mutex after closing the port
     return OM_OK;

@@ -37,12 +37,10 @@
 /** Internal method to update the download progress. */
 static int OmDoDownloadUpdate(unsigned short deviceId, OM_DOWNLOAD_STATUS downloadStatus, int downloadValue)
 {
-    OmDeviceState *device;
- 
     // Check system and device state
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    device = om.devices[deviceId];
+	OmDeviceState *device = OmDevice(deviceId);
+    if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
 
     // Acquire download mutex here (otherwise there is a small window here in which the state will become unknown if accessed from another thread)
     mutex_lock(&om.downloadMutex);          // Lock download mutex to update device state structure
@@ -234,13 +232,12 @@ int OmBeginDownloadingReference(int deviceId, int dataOffsetBlocks, int dataLeng
 {
     int status;
     char filename[OM_MAX_PATH];
-    OmDeviceState *device;
  
     // Check system and device state
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
-    device = om.devices[deviceId];
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+    if (device->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
 
     // Check parameters
     if (dataOffsetBlocks < 0) return OM_E_INVALID_ARG;
@@ -316,15 +313,14 @@ int OmBeginDownloadingReference(int deviceId, int dataOffsetBlocks, int dataLeng
 
 int OmQueryDownload(int deviceId, OM_DOWNLOAD_STATUS *downloadStatus, int *downloadValue)
 {
-    OmDeviceState *device;
     OM_DOWNLOAD_STATUS dStatus;
     int value;
 
     // Check system and device state
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
-    if (om.devices[deviceId]->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
-    device = om.devices[deviceId];
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+    if (device->deviceStatus != OM_DEVICE_CONNECTED) return OM_E_INVALID_DEVICE;   // Device lost
 
     // Acquire download mutex here (otherwise there's a small chance the status and value may be inconsistent and invalidated by a download start/update/stop).
     mutex_lock(&om.downloadMutex);          // Lock download mutex to query device state structure
@@ -354,11 +350,12 @@ int OmWaitForDownload(int deviceId, OM_DOWNLOAD_STATUS *downloadStatus, int *dow
     if (OM_FAILED(status)) { return status; }
 
     // If downloading...
-    if (dStatus == OM_DOWNLOAD_PROGRESS && (om.devices[deviceId]->downloadThread))
+	OmDeviceState *device = OmDevice(deviceId);
+	if (dStatus == OM_DOWNLOAD_PROGRESS && (device->downloadThread))
     {
         // Wait for download thread to terminate
         OmLog(3, "OmWaitForDownload() waiting for download thread to terminate...\n");
-        thread_join(om.devices[deviceId]->downloadThread, NULL);
+        thread_join(device->downloadThread, NULL);
     }
 
     // Check completed download state
@@ -378,10 +375,11 @@ int OmCancelDownload(int deviceId)
 {
     // Check system and device state
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
+	OmDeviceState *device = OmDevice(deviceId);
+	if (device == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
 
     // Set signal for download to cancel
-    om.devices[deviceId]->downloadCancel = 1;
+    device->downloadCancel = 1;
 
     // Wait for the download to stop (or return immediately if not in progress)
     return OmWaitForDownload(deviceId, NULL, NULL);

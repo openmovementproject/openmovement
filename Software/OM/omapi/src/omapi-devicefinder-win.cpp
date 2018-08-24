@@ -979,7 +979,7 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
             {
                 // Extract the part after the first ampersand as a hexadecimal serial number
                 serialNumber = strtol(serialString.substr(firstDigit, lastDigit - firstDigit + 1).c_str(), NULL, 16);
-                if (serialNumber <= 0xffff) { serialNumber |= 0x80000000; } // ensure it's not an actual (16-bit) serial number
+                serialNumber |= 0xffff0000; // ensure it's not a valid serial number (the high word is fully set)
             }
             else
             {
