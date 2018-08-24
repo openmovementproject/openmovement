@@ -135,7 +135,6 @@ extern "C" {
 
 
 // Constants
-#define OM_MAX_SERIAL 99999 // 0xffff            /**< The maximum serial number allowed */
 #define OM_MAX_CDC_PATH OM_MAX_PATH     /**< The maximum string length of the CDC port.  e.g. "\\.\COM12345" + '\0' on Windows, or "/dev/tty.usbmodem12345" + '\0' */
 #define OM_MAX_MSD_PATH OM_MAX_PATH     /**< The maximum string length to the root of the MSD volume.  e.g. "\\?\Volume{abc12345-1234-1234-1234-123456789abc}\" + '\0'. */
 #define OM_MAX_SERIALID_LEN OM_MAX_PATH/**< The maximum string length of the USB serial number identity string.  e.g. "CWA17_00123" + '\0'. */
@@ -185,6 +184,13 @@ typedef struct
 } OmDeviceState;
 
 
+struct OmDeviceRecord_tag;
+typedef struct OmDeviceRecord_tag {
+	unsigned int id;					/**< The device identifier */
+	OmDeviceState *state;				/**< The state of the device */
+	struct OmDeviceRecord_tag *next;	/**< The next device entry */
+} OmDeviceRecord;
+
 
 /**
  * Internal status structure
@@ -219,7 +225,7 @@ typedef struct
     mutex_t downloadMutex;              /**< downloadMutex must be held to start/update/stop a download. */
 
     // Device table
-    OmDeviceState *deviceList[OM_MAX_SERIAL];  /**< Array of pointers to connected device states for each device identifier. */    // (Consider replacing with a hash table or balanced tree, as this implementation requires a fixed 256KB of memory). 
+    OmDeviceRecord *deviceRecords;		/**< Linked list of pointers to devices that have been seen and their states */    // (Consider replacing with a hash table or balanced tree for efficiency). 
 } OmState;
 
 

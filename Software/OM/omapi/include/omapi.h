@@ -1257,7 +1257,7 @@ typedef enum
     OM_VALUE_SAMPLERATE = 11,
     OM_VALUE_LIGHT_LOG10LUXTIMES10POWER3 = 107, /**< log10(lux) * 10^3   therefore   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0) */
 /** \endcond */
-    OM_VALUE_TEMPERATURE_MC = 108,      /**< Temperature sensor reading in millicentigrade */
+    OM_VALUE_TEMPERATURE_MC = 108,      /**< Temperature sensor reading in milli-centigrade */
 /** \cond */
     OM_VALUE_BATTERY_MV = 110,
     OM_VALUE_BATTERY_PERCENT = 210,

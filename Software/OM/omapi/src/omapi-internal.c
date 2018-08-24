@@ -69,7 +69,14 @@ int OmLog(int level, const char *format, ...)
 
 OmDeviceState *OmDevice(int serial)
 {
-	return om.deviceList[serial];
+	for (OmDeviceRecord *record = om.deviceRecords; record != NULL; record = record->next)
+	{
+		if (record->id == serial)
+		{
+			return record->state;
+		}
+	}
+	return NULL;
 }
 
 
@@ -121,14 +128,13 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
     if (status == OM_DEVICE_CONNECTED)
     {
         unsigned short serialNumber;
-        OmDeviceState *deviceState;
 
         if (inSerialNumber >= 0xffff0000) { OmLog(0, "WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
         if (volumePath == NULL || volumePath[0] == '\0') { OmLog(0, "WARNING: Ignoring added device with no mount point (%u)\n", inSerialNumber); return; }
         serialNumber = (unsigned short)inSerialNumber;
 
         // Get the current OmDeviceState structure, or make one if it doesn't exist
-        deviceState = om.deviceList[serialNumber];
+		OmDeviceState *deviceState = OmDevice(inSerialNumber);
         if (deviceState == NULL)
         {
             // Create and initialize the structure
@@ -141,6 +147,35 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
             memset(deviceState, 0, sizeof(OmDeviceState));
             deviceState->fd = -1;
         }
+
+		// Update device state table
+		char written = 0;
+		for (OmDeviceRecord *record = om.deviceRecords; record != NULL; record = record->next)
+		{
+			if (record->id == inSerialNumber)
+			{
+				record->state = deviceState;
+				written = 1;
+				break;
+			}
+		}
+		if (!written)
+		{
+			// Create new record
+			OmDeviceRecord *newRecord = (OmDeviceRecord *)malloc(sizeof(OmDeviceRecord));
+			if (newRecord == NULL)
+			{
+				OmLog(0, "ERROR: Cannot add new device %u - out of memory.\n", inSerialNumber);
+				return;
+			}
+			memset(newRecord, 0, sizeof(OmDeviceRecord));
+			newRecord->id = inSerialNumber;
+			newRecord->state = deviceState;
+			newRecord->next = om.deviceRecords;
+			// Prepend at start of records
+			om.deviceRecords = newRecord;
+		}
+
 
 OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
 
@@ -156,7 +191,6 @@ OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
 
         // Finally, set the connected flag and the entry in devices
         deviceState->deviceStatus = OM_DEVICE_CONNECTED;
-        om.deviceList[serialNumber] = deviceState;
 
         // Call user's device callback
         if (om.deviceCallback != NULL)
@@ -176,7 +210,7 @@ OmLog(0, "DEBUG: callback for OM_DEVICE_CONNECTED...\n");
 OmLog(0, "DEBUG: Device removed: #%d\n", serialNumber);
 
         // Get the current OmDeviceState structure
-        deviceState = om.deviceList[serialNumber];
+        deviceState = OmDevice(serialNumber);
         if (deviceState == NULL) { return; }        // Removal called for a never-seen device (should not be possible from the DeviceFinder)
 
         // Set the removed status

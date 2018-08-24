@@ -57,8 +57,6 @@ const char *OmErrorString(int status)
 
 int OmStartup(int version)
 {
-    int i;
-
     // Debug environment variable
     {
         char *omdebug;
@@ -87,10 +85,10 @@ int OmStartup(int version)
     }
 
     // Ensure device state table is clear
-    for (i = 0; i < OM_MAX_SERIAL; i++)
-    {
-        om.deviceList[i] = NULL;
-    }
+	for (OmDeviceRecord *record = om.deviceRecords; record != NULL; record = record->next)
+	{
+		record->state = NULL;
+	}
 
     // Mutex
     mutex_init(&om.portMutex, NULL);
@@ -115,7 +113,6 @@ int OmStartup(int version)
 
 int OmShutdown(void)
 {
-    int i;
     OmLog(3, "OmShutdown() started.\n");
 
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
@@ -125,19 +122,18 @@ int OmShutdown(void)
     OmDeviceDiscoveryStop();
     
     // Clear device state table
-    for (i = 0; i < OM_MAX_SERIAL; i++)
-    {
-        if (om.deviceList[i] != NULL)
+	for (OmDeviceRecord *record = om.deviceRecords; record != NULL; record = record->next)
+	{
+        if (record->state != NULL)
         {
             // Cancel any pending downloads
-            if (om.deviceList[i]->deviceStatus == OM_DEVICE_CONNECTED)
+            if (record->state->deviceStatus == OM_DEVICE_CONNECTED)
             {
-                OmLog(3, "OmCancelDownload(%d)...\n", i);
-                OmCancelDownload(i);
+                OmLog(3, "OmCancelDownload(%d)...\n", record->id);
+                OmCancelDownload(record->id);
             }
-
-            free(om.deviceList[i]);
-            om.deviceList[i] = NULL;
+            free(record->state);
+            record->state = NULL;
         }
     }
 
@@ -186,16 +182,16 @@ int OmSetLogCallback(OmLogCallback logCallback, void *reference)
 
 int OmGetDeviceIds(int *deviceIds, int maxDevices)
 {
-    int i, total = 0;
+    int total = 0;
     if (!om.initialized) return OM_E_NOT_VALID_STATE;
-    for (i = 0; i < OM_MAX_SERIAL; i++)
-    {
-        OmDeviceState *deviceState = om.deviceList[i];
-        if (deviceState != NULL && deviceState->deviceStatus == OM_DEVICE_CONNECTED)
+	// Ensure device state table is clear
+	for (OmDeviceRecord *record = om.deviceRecords; record != NULL; record = record->next)
+	{
+        if (record->state != NULL && record->state->deviceStatus == OM_DEVICE_CONNECTED)
         {
             if (maxDevices > 0 && deviceIds != NULL)
             {
-                *deviceIds++ = i;   //deviceState->id;
+                *deviceIds++ = record->id;   //deviceState->id;
                 maxDevices--;
             }
             total++;
