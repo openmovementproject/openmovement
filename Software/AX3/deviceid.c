@@ -9,8 +9,10 @@ int deviceIdFromFile(const char *filename) {
 	int count = fread(buffer, 1, sizeof(buffer), fp);
 	if (count < sizeof(buffer) || buffer[0] != 'M' || buffer[1] != 'D') { fclose(fp); return -1; }
 	int deviceId = buffer[5] | (buffer[6] << 8);
+	int upperDeviceId = buffer[11] | (buffer[12] << 8);
+	if (upperDeviceId != 0xffff) { deviceId |= upperDeviceId << 16; }
 	fclose(fp);
-	if (deviceId <= 0 || deviceId >= 0xffff) { return -1; } // 0 and 65535 are reserved IDs
+	if (deviceId == 0 || deviceId == 0xffff) { return -1; } // 0 and 65535 are reserved IDs for "unidentified"
 	return deviceId;
 }
 

@@ -41,7 +41,7 @@ typedef struct DeviceNode_t {
     char mount_path[256];       // "/media/AX317_?????"
     char serial_device[256];    // "/dev/ttyACM0"
     char serial_id[256];        // "CWA17_00123"
-    int device_id;              // 0-65535
+    int device_id;              //
     struct DeviceNode_t *next;  // Linked list
 } DeviceNode;
 

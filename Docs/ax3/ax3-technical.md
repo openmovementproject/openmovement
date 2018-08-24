@@ -124,19 +124,22 @@ typedef struct
 {
     uint16_t packetHeader;                      ///< @ 0  +2   ASCII "MD", little-endian (0x444D)
     uint16_t packetLength;                      ///< @ 2  +2   Packet length (1020 bytes, with header (4) = 1024 bytes total)
-    uint8_t  reserved1;                         ///< @ 4  +1   (1 byte reserved)
+    uint8_t  hardwareType;                      ///< @ 4  +1   Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
     uint16_t deviceId;                          ///< @ 5  +2   Device identifier
     uint32_t sessionId;                         ///< @ 7  +4   Unique session identifier
-    uint16_t reserved2;                         ///< @11  +2   (2 bytes reserved)
+    uint16_t upperDeviceId;                     ///< @11  +2   Upper word of device id (if 0xffff is read, treat as 0x0000)
     cwa_timestamp_t loggingStartTime;           ///< @13  +4   Start time for delayed logging
     cwa_timestamp_t loggingEndTime;             ///< @17  +4   Stop time for delayed logging
     uint32_t loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, should be 0 = unlimited)
-    uint8_t  reserved3[11];                     ///< @25  +11  (11 bytes reserved)
+    uint8_t  reserved1[1];                      ///< @25  +1   (1 byte reserved)
+    uint8_t  flashLed;                          ///< @26  +1   Flash LED during recording
+    uint8_t  reserved2[7];                      ///< @27  +7   (7 bytes reserved)
+    uint8_t  sensorConfig;                      ///< @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range: 1=2000, 2=1000, 3=500, 4=250, 5=125, top nibble non-zero is magnetometer enabled.
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change meta-data time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
     int16_t  timeZone;                          ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
-    uint8_t  reserved4[20];                     ///< @44  +20  (20 bytes reserved)
+    uint8_t  reserved3[20];                     ///< @44  +20  (20 bytes reserved)
     uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448 Scratch buffer / meta-data (448 characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
     uint8_t  reserved[512];                     ///< @512 +512 (Reserved for device-specific meta-data in the same format as the user meta-data) (512 bytes)
 } cwa_header_t;

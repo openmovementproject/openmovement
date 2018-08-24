@@ -50,6 +50,21 @@ typedef struct
 } omdata_segment_timestamp_t;
 
 
+// Data description
+typedef struct omdata_description_tag_t
+{
+	int offset;				// Offset of data within sector (depends on format)
+	int pitch;				// The number of bytes to advance to the next sample
+	int packing;			// The type of data and the way the data is packed
+	int channels;			// The number of channels
+	double scaling;			// The required conversion into units
+	int range;				// Next largest integer for 1/scaling
+	int samplesPerSector;	// The number of samples in every sector (the last sector in a segment is permitted to have fewer)
+	int numSamples;			// Total number of samples
+	double sampleRate;		// Sample rate (as configured)
+} omdata_description_t;
+
+
 // Data 'segment' (contiguous sectors) for a stream, forms a chain of segments
 struct omdata_segment_tag_t;
 typedef struct omdata_segment_tag_t
@@ -68,17 +83,12 @@ typedef struct omdata_segment_tag_t
 	int timestampCapacity;
 	int timestampCount;
 
-	// Configuration (this will be constant along an entire segment)
-	int offset;				// Offset of data within sector (depends on format)
-	int packing;			// The type of data and the way the data is packed
-	int channels;			// The number of channels
-	double scaling;			// The required conversion into units
-	int samplesPerSector;	// The number of samples in every sector (the last sector in a segment is permitted to have fewer)
 	char lastPacketShort;	// Whether the last packet is short
-	int numSamples;			// Total number of samples
-	double sampleRate;		// Sample rate (as configured)
 
+	// Data description (this will be constant along an entire segment)
+	omdata_description_t description;
 } omdata_segment_t;
+
 
 // Data stream information
 typedef struct
@@ -184,7 +194,7 @@ typedef struct
 	char deviceTypeString[32];
 	unsigned short deviceType;				// OMX@132 Device type/sub-type
 	unsigned short deviceVersion;			// OMX@134 Device version
-	unsigned short deviceId;				// OMX@136/CWA@5 Device id
+	unsigned int deviceId;					// OMX@136 & @_ / CWA@5 & @11 Device id
 	unsigned short firmwareVer;				// OMX@152 Firmware version (CWA@41 uint8_t)
 	unsigned long sessionId;				// OMX@158/CWA@7 Session identifier
 	unsigned long recordingStart;			// OMX@162/CWA@13 Recording start time
@@ -192,8 +202,8 @@ typedef struct
 	unsigned short stopReason;				// OMX@170 Recording stop reason flags (0x00 = none, 0x01 = end of interval, 0x02 = commanded to stop, 0x04 = interrupted by connection, 0x08 = battery low, 0x10 = write error, 0x20 = measurement error)
 	unsigned char debuggingInfo;			// OMX@172/CWA@26 Debugging mode
 	unsigned char aux[16];					// OMX@180 (auxiliary data, write as zero)
-	//unsigned long clearTime;				// CWA@32 "last clear time" (CWA only)
-	//unsigned long changeTime;				// CWA@37 "last change metadata time" (CWA only)
+	unsigned long clearTime;				// CWA@32 "last clear time" (CWA only)
+	unsigned long changeTime;				// CWA@37 "last change metadata time" (CWA only)
 	omdata_sensor_config_t configAccel;		// OMX@196 Accelerometer configuration (CWA@36 uint8_t sample rate code)
 	omdata_sensor_config_t configGyro;		// OMX@204 Gyroscope configuration
 	omdata_sensor_config_t configMag;		// OMX@212 Magnetometer configuration
@@ -233,7 +243,7 @@ int OmDataDump(omdata_t *omdata);
 char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int16_t *values);
 
 // Get the timestamp and sample offset for a specific sector
-double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIndexOffset);
+double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, char streamIndex, int *sampleIndexOffset);
 
 // Free data resources
 int OmDataFree(omdata_t *omdata);

@@ -143,7 +143,9 @@ def cwa_header(block):
 			# header['reserved1'] = unpack('B', block[4:5])[0]			# @ 4  +1   (1 byte reserved)		
 			header['deviceId'] = unpack('<H', block[5:7])[0]			# @ 5  +2   Device identifier
 			header['sessionId'] = unpack('<I', block[7:11])[0]			# @ 7  +4   Unique session identifier
-			# header['reserved2'] = unpack('<H', block[11:13])[0]		# @11  +2   (2 bytes reserved)
+			deviceIdUpper = unpack('<H', block[11:13])[0]				# @11  +2   (2 bytes reserved)
+			if deviceIdUpper != 0xffff:
+				header['deviceId'] |= deviceIdUpper << 16
 			header['loggingStart'] = read_timestamp(block[13:17])		# @13  +4   Start time for delayed logging
 			header['loggingEnd'] = read_timestamp(block[17:21])			# @17  +4   Stop time for delayed logging		
 			# header['loggingCapacity'] = unpack('<I', block[21:25])[0]	# @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)

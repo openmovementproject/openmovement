@@ -1395,8 +1395,10 @@ int deviceIdFromFile(const char *filename) {
 	int count = fread(buffer, 1, sizeof(buffer), fp);
 	if (count < sizeof(buffer) || buffer[0] != 'M' || buffer[1] != 'D') { fclose(fp); return -1; }
 	int deviceId = buffer[5] | (buffer[6] << 8);
+	int upperDeviceId = buffer[11] | (buffer[12] << 8);
+	if (upperDeviceId != 0xffff) { deviceId |= upperDeviceId << 16; }
 	fclose(fp);
-	if (deviceId <= 0 || deviceId >= 0xffff) { return -1; } // 0 and 65535 are reserved IDs
+	if (deviceId == 0 || deviceId == 0xffff) { return -1; } // 0 and 65535 are reserved IDs for "unidentified"
 	return deviceId;
 }
 
@@ -1417,6 +1419,18 @@ int deviceIdFromFilePath(const char *path) {
 	return deviceIdFromFile(filename);
 }
 
+static int DeviceIdFromSerialNumber(const char *serialNumber)
+{
+	// Return the number found at the end of the string (-1 if none)
+    int value = -1;
+    const char *p;
+    for (p = serialNumber; *p != 0; p++)
+    {
+        if (*p >= '0' && *p <= '9') value = 10 * (value == -1 ? 0 : value) + (*p - '0');
+        else value = -1;
+    }
+    return value;
+}
 
 // true = definitely mismatched, false = couldn't definitely determine a mismatch
 bool CheckVolumeMismatch(const char *path, int id)
@@ -1431,36 +1445,26 @@ bool CheckVolumeMismatch(const char *path, int id)
 		return false;
 	}
 
-	int volumeHigh = -1;
-	int volumeLow = -1;
-	// "AX317_"
-	if (volumeName[0] == 'A' && volumeName[1] == 'X' && volumeName[2] >= '0' && volumeName[2] <= '9' && volumeName[3] >= '0' && volumeName[3] <= '9' && volumeName[4] >= '0' && volumeName[4] <= '9' && volumeName[5] == '_')
+	int volume = -1;
+	// "AX317_#####" or "AX3_#######"
+	if (volumeName[0] == 'A' && volumeName[1] == 'X' && volumeName[2] >= '0' && volumeName[2] <= '9')
 	{
-		volumeHigh = (volumeName[3] - '0') * 10 + (volumeName[4] - '0');
-		volumeLow = atoi(volumeName + 6);
-	}
-
-	int serialNumberHigh = (serialNumber >> 16);
-	int serialNumberLow = (serialNumber & 0xffff);
-	if (serialNumberHigh != 0x0000) {
-		serialNumberHigh = -1;
-		serialNumberLow = -1;
+		volume = DeviceIdFromSerialNumber(volumeName);
 	}
 
 	int dataNumber = deviceIdFromFilePath(path);
 	
 	OmLog(1, "- VOLUME NAME: %s\n", volumeName);
-	OmLog(1, "- VOLUME = %d / %d\n", volumeHigh, volumeLow);
+	OmLog(1, "- VOLUME = %d\n", volume);
 	OmLog(1, "- SERIAL NUMBER: 0x%04x=%d 0x%04x=%d\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff);
-	OmLog(1, "- SERIAL = %d / %d\n", serialNumberHigh, serialNumberLow);
 	OmLog(1, "- CWA FILE = %d\n", dataNumber);
 	
-	if (volumeLow >= 0 && volumeLow != id)
+	if (volume >= 0 && volume != id)
 	{
 		return true;
 	}
 
-	if (serialNumberLow >= 0 && serialNumberLow != id)
+	if (serialNumber >= 0 && serialNumber != id)
 	{
 		return true;
 	}

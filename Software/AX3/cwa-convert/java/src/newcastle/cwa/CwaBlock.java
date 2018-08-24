@@ -292,6 +292,8 @@ public class CwaBlock implements Cloneable {
 				
 			} else if (getBlockType() == BLOCK_HEADER) {
 				deviceId = byteBuffer.getShort(5);
+				int deviceIdUpper = byteBuffer.getShort(11);
+				if (deviceIdUpper != 0xffff) { deviceId |= deviceIdUpper << 16; }
 				sessionId = byteBuffer.getInt(7);
 			}
 			

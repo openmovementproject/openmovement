@@ -158,7 +158,27 @@ function data = readFile(filename, options)
         data.validPackets = options.validPackets;
     end
     
-    
+	% Check packet number of axes and packing format
+	samplesPerPacket = 0
+	numAxesBPS = -1
+    for i=1:length(validIds),
+		if i == 1
+			numAxesBPS = data.validPackets(i,4)
+		end
+		if numAxesBPS ~= data.validPackets(i,4)
+            fprintf('WARNING: Not all packets are the same format -- this process will not work correctly.\n');
+		end
+    end
+	if numAxesBPS == 3*16 + 0
+		samplesPerPacket = 120
+	elseif numAxesBPS == 3*16 + 2
+		samplesPerPacket = 80
+		fprintf('WARNING: Unpacked format is not supported\n')
+	else
+		fprintf('Unsupported number of axes or packing format (supports 3-axis, packed)\n');
+	end
+	
+
     % get relevant parts of data if sliced reading enabled
     %
     
@@ -201,9 +221,9 @@ function data = readFile(filename, options)
     packetIds = find(data.validPackets(:,3) > 0);
     
     % now, use timestamp offset to get (sample) position on which timestamp
-    % occurred (120 samples per packet). TIME will be used for
+    % occurred. TIME will be used for
     % interpolation of other timestamps
-    TIME = [(packetIds*120)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
+    TIME = [(packetIds*samplesPerPacket)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
     % TIME_full just contains integer packet numbers for LIGHT and TEMP.
     TIME_full = [packetIds data.validPackets(packetIds,2)];
     
@@ -213,8 +233,8 @@ function data = readFile(filename, options)
     % see what modalities to extract...
     if options.modality(1),
         % initialize variables
-        data.ACC     = zeros(size(validIds,1)*120,4);
-        ACC_tmp = zeros(size(validIds,1)*120,1,'uint32');
+        data.ACC     = zeros(size(validIds,1)*samplesPerPacket,4);
+        ACC_tmp = zeros(size(validIds,1)*samplesPerPacket,1,'uint32');
     end
     
     if options.modality(2),
@@ -253,9 +273,8 @@ function data = readFile(filename, options)
             if options.modality(1) == 1,
                 % read accelerometer values
                 fseek(fid,(validIds(i) - 1)*512+30,-1);
-                % reads 120 unsigned integer (32 bit). Will be decoded
-                % later on.
-                ACC_tmp((i-1)*120+1:i*120) = fread(fid, 120, 'uint32',0,'ieee-le');
+                % reads packed unsigned integer (32 bit). Will be decoded later on.
+                ACC_tmp((i-1)*samplesPerPacket+1:i*samplesPerPacket) = fread(fid, samplesPerPacket, 'uint32',0,'ieee-le');
             end
             
             cnt = cnt + 1;
@@ -287,7 +306,7 @@ function data = readFile(filename, options)
     
     if options.modality(1),
         % Interpolate the timestamps
-        data.ACC = data.ACC(1:(cnt-2)*120,:); % drop last two packets
+        data.ACC = data.ACC(1:(cnt-2)*samplesPerPacket,:); % drop last two packets
         % interpolate using TIME, linearly between known sample-based
         % timestamp locations.
         
@@ -356,6 +375,13 @@ function validPackets = getValidPackets(fid, options)
     fseek(fid,6,-1);
     packetSessionIds = fread(fid, numPackets, 'uint32=>uint32',508,'ieee-le');
     
+	% get numAxesBPS (top nibble is number of axes; bottom nibble packing format 2 = 16-bit signed, 0 = packed 3x10-bit+2-bit-exponent)
+    if options.verbose
+        fprintf('reading num-axes and bytes-per-sample\n');
+    end
+    fseek(fid,25,-1);
+    numAxesBPS = fread(fid, numPackets, 'uint8=>uint8',511,'ieee-le');
+	
     % find valid packets
     validIds = find(sum(packetHeaders,1)==153);     % corresponds to specific string
     % all have to have the same (first) session id
@@ -365,7 +391,7 @@ function validPackets = getValidPackets(fid, options)
     if options.verbose
         fprintf('parsing timestamps\n');
     end
- 	validPackets = zeros(length(validIds),3);
+ 	validPackets = zeros(length(validIds),4);
 	validPackets(:,1) = validIds;
     
     for i=1:length(validIds),
@@ -376,6 +402,7 @@ function validPackets = getValidPackets(fid, options)
         end
         
         validPackets(i,3) = packetOffsets(validIds(i));
+        validPackets(i,4) = numAxesBPS(validIds(i));
     end
     
 end
@@ -402,6 +429,12 @@ function data = readFileInfo(filename, options)
     % get sessionId from first packet
     fseek(fid, data.validPackets(1,1)*512+6,-1);
     data.sessionId = fread(fid, 1, 'uint32', 0, 'ieee-le');
+
+    % get upper deviceId from first packet
+	deviceIdUpper = fread(fid, 1, 'uint16', 0, 'ieee-le');
+	if deviceIdUpper ~= 65535
+		data.deviceId = deviceIdUpper * 65536 + data.deviceId
+	end
     
     % close the file
     fclose(fid);

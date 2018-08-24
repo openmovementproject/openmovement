@@ -55,10 +55,11 @@ class CWA
 			$blockSize = CWA::fread_word($fp);				// [2] 0xFFFC = Packet size (2^16 - 2 - 2)
 
 			// Stored data
-			$performClear = CWA::fread_byte($fp);			// [4]
+			$hardwareType = CWA::fread_byte($fp);			// [4]
 			$deviceId = CWA::fread_word($fp);				// [5]
 			$sessionId = CWA::fread_dword($fp);				// [7]
-			$shippingMinLightLevel = CWA::fread_word($fp);	// [11]
+			$upperDeviceId = CWA::fread_word($fp);				// [11]
+			if ($upperDeviceId != 0xffff) { $deviceId |= $upperDeviceId << 16; }
 			$loggingStartTime = CWA::fread_dword($fp);		// [13]
 			$loggingEndTime = CWA::fread_dword($fp);			// [17]
 			$loggingCapacity = CWA::fread_dword($fp);		// [21]

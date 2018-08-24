@@ -38,7 +38,7 @@
 	#define _CRT_SECURE_NO_WARNINGS
 	#define timegm _mkgmtime
 	#include <io.h>
-#else
+#elif !defined(__APPLE__)
 	#define _BSD_SOURCE		// Both of these lines
 	#include <features.h>	// ...needed for timegm() in time.h on Linux
 #endif
@@ -52,8 +52,9 @@
 #include <fcntl.h>
 
 
-
+#ifndef NO_MMAP
 #define USE_MMAP
+#endif
 
 #ifdef USE_MMAP
 	#ifdef _WIN32
@@ -71,6 +72,7 @@
 	#define _read read
 	#define _stat stat
 	#define _fstat fstat
+	#define _lseek lseek
 	#define _O_RDONLY O_RDONLY
 	#define _O_BINARY 0
 #endif
@@ -148,7 +150,7 @@
 
 
 // scale: convert to real units, range: limit of sensor
-static double OmDataSampleRate(const void *buffer, double *outScale, double *outRange)
+static double OmDataSampleRate(const void *buffer, char streamIndex, double *outScale, int *outRange)
 {
 	const unsigned char *p = (const unsigned char *)buffer;
 	if (p[1] == 'X') // CWA file
@@ -160,17 +162,43 @@ static double OmDataSampleRate(const void *buffer, double *outScale, double *out
 			// Old format, frequency stored directly in (currently) 'timestampOffset' field
 			int16_t timestampOffset = ((int16_t)p[27] << 8) | p[26];
 			freq = (double)(unsigned short)timestampOffset;
-			if (outRange != NULL) { *outRange = 16.0; }
 		}
 		else
 		{
 			// New format - rate is coded
 			freq = 3200.0 / (1 << (15 - (sampleRate & 0x0f)));
 			if (freq <= 0.0) { freq = 1.0; }
-			if (outRange != NULL) { *outRange = (double)(16 >> (sampleRate >> 6)); }
 		}
 
-		if (outScale != NULL) { *outScale = 1.0 / 256; }	// CWA scaling is always 1/256
+		// CWA original scaling is always 1/256
+		int accelScale = 256;	// 1g = 256
+		int gyroScale = 2000;	// 32768 = 2000dps
+		int magScale = 16;		// 1uT = 16
+
+		// light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
+		int light = p[18] | ((int16_t)p[19] << 8);
+		accelScale = 1 << (8 + ((light >> 13) & 0x07));
+		if (((light >> 10) & 0x07) != 0) gyroScale = 8000 / (1 << ((light >> 10) & 0x07));
+
+		if (outScale != NULL)
+		{
+			if (streamIndex == 'a') { *outScale = 1.0 / accelScale; }
+			else if (streamIndex == 'g') { *outScale = (double)gyroScale / 32768; }
+			else if (streamIndex == 'm') { *outScale = 1.0 / magScale; }
+			else { *outRange = 0; }
+		}
+
+		if (outRange != NULL)
+		{
+			if (streamIndex == 'a')
+			{
+				if (sampleRate == 0) { *outRange = 16; }
+				else { *outRange = (16 >> (sampleRate >> 6)); }
+			}
+			else if (streamIndex == 'g') { *outRange = gyroScale; }
+			else if (streamIndex == 'm') { *outRange = 32768 / magScale; }
+			else { *outRange = 0; }
+		}
 
 		return freq;
 	}
@@ -254,7 +282,7 @@ static double OmDataSampleRate(const void *buffer, double *outScale, double *out
 			//fileStream->channelPacking = (FILESTREAM_PACKING_9_CHANNEL|FILESTREAM_PACKING_SINT16);      		// [1] Packing type (0x32 = 3-channel 2-bytes-per-sample (16-bit); 0x12 = single-channel 16-bit; 0x30 = DWORD packing of 3-axis 10-bit 0-3 binary shifted)
 		//}
 
-		if (outRange != NULL) { *outRange = range; }
+		if (outRange != NULL) { *outRange = (int)range; }
 		if (outScale != NULL) { *outScale = scale; }
 
 		return sampleRate;
@@ -296,7 +324,7 @@ static uint32_t OmDataTimestamp(uint32_t timestamp)
 }
 
 
-double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIndexOffset)
+double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, char streamIndex, int *sampleIndexOffset)
 {
 	const unsigned char *p = (const unsigned char *)omdata->buffer + (OMDATA_SECTOR_SIZE * sectorIndex);
 	uint32_t timestamp = 0;
@@ -308,7 +336,11 @@ double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIn
 		timestamp = ((int32_t)p[17] << 24) | ((int32_t)p[16] << 16) | ((int32_t)p[15] << 8) | p[14];
 		timestampOffset = ((int16_t)p[27] << 8) | p[26];
 
-		if (p[24] == 0)		// sampleRate 0 indicates old format
+		if (streamIndex == 'l')		// Fake stream for ADC values
+		{
+			sampleIndexOffset = 0;		// TODO: Need to represent underlying sample offset at aux channel rate (measured in actual, high-speed sample rate)
+		}
+		else if (p[24] == 0)		// sampleRate 0 indicates old format
 		{
 			// Timestamp offset in very old files is actually the frequency -- don't use it...
 			timestampOffset = 0;
@@ -319,7 +351,7 @@ double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIn
 			uint16_t deviceId = ((int16_t)p[5] << 8) | p[4];
 			if (deviceId & 0x8000)
 			{
-				double freq = OmDataSampleRate(p, NULL, NULL);
+				double freq = OmDataSampleRate(p, streamIndex, NULL, NULL);
 
 				// Need to undo backwards-compatible shim: Take into account how many whole samples the fractional part of timestamp accounts for:  relativeOffset = fifoLength - (short)(((unsigned long)timeFractional * AccelFrequency()) >> 16);
 				// relativeOffset = fifoLength - (short)(((unsigned long)timeFractional * AccelFrequency()) >> 16);
@@ -397,9 +429,148 @@ double OmDataTimestampForSector(omdata_t *omdata, int sectorIndex, int *sampleIn
 @510 WORD  checksum;            // @510 [2] 16-bit word-wise checksum of packet
 */
 
-static int OmDataAddSector(omdata_t *omdata, int sectorIndex, bool extractSideChannelsAsStream)
+
+static int OmDataAddSubSector(omdata_t *omdata, int sectorIndex, char streamIndex, uint32_t sequenceId, omdata_description_t *description)
+{
+	bool startNewSegment = false;
+
+	//fprintf(stderr, "OMDATA: Stream %c\n", streamIndex);
+	omdata_stream_t *stream = &omdata->stream[(int)streamIndex];
+	if (!stream->inUse)
+	{
+		stream->inUse = true;
+		stream->lastSequenceId = (uint32_t)-1; // = 0xffffffff;
+		stream->segmentFirst = NULL;
+		stream->segmentLast = NULL;
+	}
+
+	omdata_segment_t *seg = stream->segmentLast;
+
+	// If we don't have a previous segment, start a new one
+	if (stream->segmentLast == NULL)
+	{
+		fprintf(stderr, "OMDATA: Stream %c creating a new segment.\n", streamIndex);
+		startNewSegment = true;
+	}
+	else
+	{
+		// If this was already marked as having read a short (final) packet, or if any of the parameters have changed (allow the samples-per-sector to be less) -- change format
+		if (seg->lastPacketShort || description->offset != seg->description.offset || description->packing != seg->description.packing || description->channels != seg->description.channels || description->scaling != seg->description.scaling || description->samplesPerSector > seg->description.samplesPerSector || description->sampleRate != seg->description.sampleRate)
+		{
+			fprintf(stderr, "OMDATA: Stream %c config changed or after last short packet.\n", streamIndex);
+			startNewSegment = true;
+		}
+
+		// If we're not changing the format now, if the samples-per-sector is less, mark this as a final packet
+		if (!startNewSegment && description->samplesPerSector < seg->description.samplesPerSector)
+		{
+			fprintf(stderr, "OMDATA: Stream %c last packet short (%d of %d).\n", streamIndex, description->samplesPerSector, seg->description.samplesPerSector);
+			seg->lastPacketShort = true;
+		}
+
+	}
+
+	// Check the delta
+	unsigned int delta = (uint32_t)(sequenceId - stream->lastSequenceId);
+	if (delta != 1)
+	{
+		fprintf(stderr, "OMDATA: Stream %c delta %d != 1 (%d -> %d)\n", streamIndex, delta, stream->lastSequenceId, sequenceId);
+		startNewSegment = true;
+	}
+
+	// See if we need to start a new segment
+	//omdata_segment_t *seg;
+	if (startNewSegment)
+	{
+		if (stream->segmentLast != NULL)
+		{
+			fprintf(stderr, "OMDATA: Break in stream %c (sequence id %d -> %d)\n", streamIndex, stream->lastSequenceId, sequenceId);
+		}
+
+#if DEBUG_OMDATA >= 1
+		fprintf(stderr, "OMDATA: OmDataAddSector: Creating new segment...\n");
+#endif			
+
+		seg = (omdata_segment_t *)malloc(sizeof(omdata_segment_t));
+		memset(seg, 0, sizeof(omdata_segment_t));
+		if (stream->segmentFirst == NULL) { stream->segmentFirst = seg; }
+		if (stream->segmentLast != NULL) { stream->segmentLast->segmentNext = seg; }
+		stream->segmentLast = seg;
+
+		seg->description.offset = description->offset;						// Offset of data within sector (depends on format)
+		seg->description.pitch = description->pitch;
+		seg->description.packing = description->packing;					// The type of data and the way the data is packed
+		seg->description.channels = description->channels;					// The number of channels
+		seg->description.scaling = description->scaling;					// The required conversion into units
+		seg->description.range = description->range;						// Integer range
+		seg->description.samplesPerSector = description->samplesPerSector;	// The number of samples in every sector (the last sector in a segment is permitted to have fewer)
+		seg->description.sampleRate = description->sampleRate;
+
+		seg->lastPacketShort = 0;
+	}
+	else
+	{
+		seg = stream->segmentLast;
+	}
+
+	// Timestamps (monotonically increasing index)
+	int sampleIndexOffset = 0;
+	double timestampValue = OmDataTimestampForSector(omdata, sectorIndex, streamIndex, &sampleIndexOffset);
+	int segmentSampleIndex = seg->sectorCount * seg->description.samplesPerSector + sampleIndexOffset;
+	// If it's the first value or it's a different timestamp index, add it...
+	if (seg->timestampCount <= 0 || seg->timestamps[seg->timestampCount - 1].sample != segmentSampleIndex)
+	{
+		// Continue the current segment - grow buffer if needed
+		if (seg->timestamps == NULL || seg->timestampCount >= seg->timestampCapacity)
+		{
+			seg->timestampCapacity = (15 * seg->timestampCapacity / 10 + 1);
+#if DEBUG_OMDATA >= 1
+			fprintf(stderr, "OMDATA: OmDataAddSector: Extending timestamp capacity: %d, @%p\n", seg->timestampCapacity, seg->timestamps);
+#endif			
+			seg->timestamps = (omdata_segment_timestamp_t *)realloc(seg->timestamps, seg->timestampCapacity * sizeof(omdata_segment_timestamp_t));
+		}
+		// Add element
+		seg->timestamps[seg->timestampCount].sample = segmentSampleIndex;
+		seg->timestamps[seg->timestampCount].timestamp = timestampValue;
+		//printf("TIME,%d,%d,%f\n", seg->timestampCount, segmentSampleIndex, timestampValue);
+		seg->timestampCount++;
+	}
+
+	// Add the number of samples in this sector
+	seg->description.numSamples += description->samplesPerSector;
+
+	// Continue the current segment - grow buffer if needed
+	if (seg->sectorIndex == NULL || seg->sectorCount >= seg->sectorCapacity)
+	{
+		seg->sectorCapacity = (15 * seg->sectorCapacity / 10 + 1);
+#if DEBUG_OMDATA >= 1
+		fprintf(stderr, "OMDATA: OmDataAddSector: Extending sector capacity: %d, @%p\n", seg->sectorCapacity, seg->sectorIndex);
+#endif			
+		seg->sectorIndex = (unsigned int *)realloc(seg->sectorIndex, seg->sectorCapacity * sizeof(unsigned int));
+	}
+	// Add element
+	seg->sectorIndex[seg->sectorCount] = sectorIndex;
+	seg->sectorCount++;
+
+	// Update last sequence id
+	stream->lastSequenceId = sequenceId;
+	return 0;
+}
+
+
+static int OmDataAddSector(omdata_t *omdata, int sectorIndex)
 {
 	const unsigned char *p = (const unsigned char *)omdata->buffer + (OMDATA_SECTOR_SIZE * sectorIndex);
+	omdata_description_t description = { 0 };
+// description.offset;
+// description.pitch;
+// description.packing;
+// description.channels;
+// description.scaling;
+// description.range;
+// description.samplesPerSector;
+// description.numSamples;
+// description.sampleRate;
 
 	// Data
 	char format = -1;
@@ -424,184 +595,132 @@ static int OmDataAddSector(omdata_t *omdata, int sectorIndex, bool extractSideCh
 	// * Each recording is a list of streams, each stream has a list of segments.
 
 	// Check if there's a configuration change mid-stream (num-axes, format, etc.)  Non-full sectors set a flag as 'last sector in stream'.
-	int offset = 0, packing = 0, channels = 0, samplesPerSector = 0;
-	double scaling = 0;
-	double range = 0;
-	double sampleRate = OmDataSampleRate(p, &scaling, &range);
 	int maxValues = -1;
 
 	// Configuration (this will be constant along an entire segment)
 	if (format == 0)	// CWA
 	{
-		offset = 30;
+		description.offset = 30;
 
-		packing = p[25];
-		channels = ((packing >> 4) & 0x0f);
-		if (!channels) channels = 1;
+		description.packing = p[25];
+		description.channels = ((description.packing >> 4) & 0x0f);
+		if (!description.channels) description.channels = 1;
 
-		if ((packing & 0x0f) == 0 && channels == 3) { packing = FILESTREAM_PACKING_SPECIAL_DWORD3_10_2; maxValues = 360; }
-		else if ((packing & 0x0f) == 1) { packing = FILESTREAM_PACKING_SINT8; maxValues = 480; }
-		else if ((packing & 0x0f) == 2) { packing = FILESTREAM_PACKING_SINT16; maxValues = 480 / 2; }
+		if ((description.packing & 0x0f) == 0 && description.channels == 3) { description.packing = FILESTREAM_PACKING_SPECIAL_DWORD3_10_2; maxValues = 360; }
+		else if ((description.packing & 0x0f) == 1) { description.packing = FILESTREAM_PACKING_SINT8; maxValues = 480; }
+		else if ((description.packing & 0x0f) == 2) { description.packing = FILESTREAM_PACKING_SINT16; maxValues = 480 / 2; }
 		//else if ((packing & 0x0f) == 4) { packing = FILESTREAM_PACKING_SINT32; maxValues = 480 / 4; }
 
-		samplesPerSector = (unsigned short)p[28] | ((unsigned short)p[29] << 8);
-		if (maxValues <= 0 || samplesPerSector * channels > maxValues) { return -1; }
+		description.samplesPerSector = (unsigned short)p[28] | ((unsigned short)p[29] << 8);
+		if (maxValues <= 0 || description.samplesPerSector * description.channels > maxValues) { return -1; }
 	}
 	else if (format == 1)
 	{
-		offset = 24;
+		description.offset = 24;
 
-		packing = p[21];
-		channels = (packing >> 4);
-		if (!channels) channels = 1;
+		description.packing = p[21];
+		description.channels = (description.packing >> 4);
+		if (!description.channels) description.channels = 1;
 
-		if (packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2) { channels = 3; maxValues = 360; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT32) { packing = FILESTREAM_PACKING_SINT32; maxValues = 480 / 4; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT32) { packing = FILESTREAM_PACKING_UINT32; maxValues = 480 / 4; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16) { packing = FILESTREAM_PACKING_SINT16; maxValues = 480 / 2; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16) { packing = FILESTREAM_PACKING_UINT16; maxValues = 480 / 2; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT8)  { packing = FILESTREAM_PACKING_SINT8; maxValues = 480; }
-		else if ((packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT8)  { packing = FILESTREAM_PACKING_UINT8; maxValues = 480; }
+		if (description.packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2) { description.channels = 3; maxValues = 360; }
+		else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT32) { description.packing = FILESTREAM_PACKING_SINT32; maxValues = 480 / 4; }
+		else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT32) { description.packing = FILESTREAM_PACKING_UINT32; maxValues = 480 / 4; }
+		else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16) { description.packing = FILESTREAM_PACKING_SINT16; maxValues = 480 / 2; }
+		else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16) { description.packing = FILESTREAM_PACKING_UINT16; maxValues = 480 / 2; }
+		else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT8)  { description.packing = FILESTREAM_PACKING_SINT8;  maxValues = 480; }
+		else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT8)  { description.packing = FILESTREAM_PACKING_UINT8;  maxValues = 480; }
 
 		//dataType = p[19];         // @19 [1] Data type [NOT FINALIZED!] (top-bit set indicates "non-standard" conversion; bottom 7-bits: 0x00 = reserved,  0x10-0x13 = accelerometer (g, at +-2,4,8,16g sensitivity), 0x20 = gyroscope (dps), 0x30 = magnetometer (uT/raw?), 0x40 = light (CWA-raw), 0x50 = temperature (CWA-raw), 0x60 = battery (CWA-raw), 0x70 = pressure (raw?))
 		//state->dataConversion = p[20];   // @20 [1] Conversion of raw values to units (-24 to 24 = * 2^n; < -24 divide -(n+24); > 24 multiply (n-24))
 
-		samplesPerSector = (unsigned short)p[22] | ((unsigned short)p[23] << 8);
-		if (maxValues <= 0 || samplesPerSector * channels > maxValues) { return -2; }
+		description.samplesPerSector = (unsigned short)p[22] | ((unsigned short)p[23] << 8);
+		if (maxValues <= 0 || description.samplesPerSector * description.channels > maxValues) { return -2; }
 	}
 	else
 	{
 		return -3;
 	}
 
+	// Calculate pitch
+	int bytesPerSample = 0, numAxes = description.channels;
+	if (description.packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2 && description.channels == 3)
+	{
+		bytesPerSample = 4; 
+		numAxes = 1;
+	}
+	else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT8 || (description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT8)
+	{
+		bytesPerSample = 1;
+	}
+	else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16 || (description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16)
+	{
+		bytesPerSample = 2;
+	}
+	else if ((description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT32 || (description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT32)
+	{
+		bytesPerSample = 4;
+	}
+	description.pitch = bytesPerSample * numAxes;
 
-	bool startNewSegment = false;
+	// Slight hack for synchronous multi-axis ("a", "ga", "gam")
+	if (format == 0 && streamIndex == 'a' && bytesPerSample != 4)
+	{
+		int baseOffset = description.offset;
+		description.channels = 3;
 
-	// If asked to, fake an ADC stream for the data embedded in a CWA sector
-	if (extractSideChannelsAsStream)
+		int accelAxis = (numAxes >= 6) ? 3 : ((numAxes >= 3) ? 0 : -1);
+		int gyroAxis = (numAxes >= 6) ? 0 : -1;
+		int magAxis = (numAxes >= 9) ? 6 : -1;
+
+		// Gyro
+		if (gyroAxis >= 0)
+		{
+			description.offset = baseOffset + gyroAxis * bytesPerSample;
+			description.sampleRate = OmDataSampleRate(p, 'g', &description.scaling, &description.range);
+			OmDataAddSubSector(omdata, sectorIndex, 'g', sequenceId, &description);
+		}
+
+		// Accel
+		if (accelAxis >= 0)
+		{
+			description.offset = baseOffset + accelAxis * bytesPerSample;
+			description.sampleRate = OmDataSampleRate(p, 'a', &description.scaling, &description.range);
+			OmDataAddSubSector(omdata, sectorIndex, 'a', sequenceId, &description);
+		}
+
+		// Mag
+		if (magAxis >= 0)
+		{
+			description.offset = baseOffset + magAxis * bytesPerSample;
+			description.sampleRate = OmDataSampleRate(p, 'm', &description.scaling, &description.range);
+			OmDataAddSubSector(omdata, sectorIndex, 'm', sequenceId, &description);
+		}
+	}
+	else
+	{
+		description.sampleRate = OmDataSampleRate(p, streamIndex, &description.scaling, &description.range);
+		OmDataAddSubSector(omdata, sectorIndex, streamIndex, sequenceId, &description);
+	}
+
+	// Fake an ADC stream for the data embedded in a CWA sector
+	if (format == 0 && (streamIndex == 'a' || streamIndex == 'g'))
 	{
 		// Create virtual segments for CWA temperature, battery, light (embedded in normal accelerometer sectors)
+#if DEBUG_OMDATA >= 2
+		fprintf(stderr, "OMDATA: Adding virtual sector for side-channel #%d\n", i);
+#endif
 		//unsigned short values[3];  // [0]-batt, [1]-LDR, [2]-Temp
-		streamIndex = 'l';		// Fake an ADC stream)
-		offset = 0;
-		packing = 0;
-		channels = 3;
-		scaling = 1;
-		sampleRate = (sampleRate != 0) ? maxValues / sampleRate : 1;		// One sample per sector // samplesPerSector
-		samplesPerSector = 1;
+		streamIndex = 'l';		// Fake a stream for ADC values
+		description.offset = 0;
+		description.pitch = 0;
+		description.packing = 0;
+		description.channels = 3;
+		description.scaling = 1;
+		description.sampleRate = (description.sampleRate != 0) ? maxValues / (int)description.sampleRate : 1;		// One sample per sector // samplesPerSector
+		description.samplesPerSector = 1;
+		OmDataAddSubSector(omdata, sectorIndex, streamIndex, sequenceId, &description);
 	}
 
-	//fprintf(stderr, "OMDATA: Stream %c\n", streamIndex);
-	omdata_stream_t *stream = &omdata->stream[(int)streamIndex];
-	if (!stream->inUse)
-	{
-		stream->inUse = true;
-		stream->lastSequenceId = (uint32_t)-1; // = 0xffffffff;
-		stream->segmentFirst = NULL;
-		stream->segmentLast = NULL;
-	}
-
-	omdata_segment_t *seg = stream->segmentLast;
-
-	// If we don't have a previous segment, start a new one
-	if (stream->segmentLast == NULL)
-	{
-		fprintf(stderr, "OMDATA: Stream %c creating a new segment.\n", streamIndex);
-		startNewSegment = true;
-	}
-	else
-	{
-		// If this was already marked as having read a short (final) packet, or if any of the parameters have changed (allow the samples-per-sector to be less) -- change format
-		if (seg->lastPacketShort || offset != seg->offset || packing != seg->packing || channels != seg->channels || scaling != seg->scaling || samplesPerSector > seg->samplesPerSector || sampleRate != seg->sampleRate)
-		{
-			fprintf(stderr, "OMDATA: Stream %c config changed or after last short packet.\n", streamIndex);
-			startNewSegment = true;
-		}
-
-		// If we're not changing the format now, if the samples-per-sector is less, mark this as a final packet
-		if (!startNewSegment && samplesPerSector < seg->samplesPerSector)
-		{
-			fprintf(stderr, "OMDATA: Stream %c last packet short (%d of %d).\n", streamIndex, samplesPerSector, seg->samplesPerSector);
-			seg->lastPacketShort = true;
-		}
-
-	}
-
-	// Check the delta
-	unsigned int delta = (uint32_t)(sequenceId - stream->lastSequenceId);
-	if (delta != 1)
-	{
-		fprintf(stderr, "OMDATA: Stream %c delta %d != 1 (%d -> %d)\n", streamIndex, delta, stream->lastSequenceId, sequenceId);
-		startNewSegment = true;
-	}
-
-	// See if we need to start a new segment
-	//omdata_segment_t *seg;
-	if (startNewSegment)
-	{
-		if (stream->segmentLast != NULL)
-		{
-			fprintf(stderr, "OMDATA: Break in stream %c (sequence id %d -> %d)\n", streamIndex, stream->lastSequenceId, sequenceId);
-		}
-
-		seg = (omdata_segment_t *)malloc(sizeof(omdata_segment_t));
-		memset(seg, 0, sizeof(omdata_segment_t));
-		if (stream->segmentFirst == NULL) { stream->segmentFirst = seg; }
-		if (stream->segmentLast != NULL) { stream->segmentLast->segmentNext = seg; }
-		stream->segmentLast = seg;
-
-		seg->offset = offset;						// Offset of data within sector (depends on format)
-		seg->packing = packing;						// The type of data and the way the data is packed
-		seg->channels = channels;					// The number of channels
-		seg->scaling = scaling;						// The required conversion into units
-		seg->samplesPerSector = samplesPerSector;	// The number of samples in every sector (the last sector in a segment is permitted to have fewer)
-		seg->sampleRate = sampleRate;
-		seg->lastPacketShort = 0;
-	}
-	else
-	{
-		seg = stream->segmentLast;
-	}
-
-	// Timestamps (monotonically increasing index)
-	int sampleIndexOffset = 0;
-	double timestampValue = OmDataTimestampForSector(omdata, sectorIndex, &sampleIndexOffset);
-	if (extractSideChannelsAsStream)
-	{
-		sampleIndexOffset = 0;		// TODO: Need to represent underlying sample offset at aux channel rate (measured in actual, high-speed sample rate)
-	}
-	int segmentSampleIndex = seg->sectorCount * seg->samplesPerSector + sampleIndexOffset;
-	// If it's the first value or it's a different timestamp index, add it...
-	if (seg->timestampCount <= 0 || seg->timestamps[seg->timestampCount - 1].sample != segmentSampleIndex)
-	{
-		// Continue the current segment - grow buffer if needed
-		if (seg->timestamps == NULL || seg->timestampCount >= seg->timestampCapacity)
-		{
-			seg->timestampCapacity = (15 * seg->timestampCapacity / 10 + 1);
-			seg->timestamps = (omdata_segment_timestamp_t *)realloc(seg->timestamps, seg->timestampCapacity * sizeof(omdata_segment_timestamp_t));
-		}
-		// Add element
-		seg->timestamps[seg->timestampCount].sample = segmentSampleIndex;
-		seg->timestamps[seg->timestampCount].timestamp = timestampValue;
-		//printf("TIME,%d,%d,%f\n", seg->timestampCount, segmentSampleIndex, timestampValue);
-		seg->timestampCount++;
-	}
-
-	// Add the number of samples in this sector
-	seg->numSamples += samplesPerSector;
-
-	// Continue the current segment - grow buffer if needed
-	if (seg->sectorIndex == NULL || seg->sectorCount >= seg->sectorCapacity)
-	{
-		seg->sectorCapacity = (15 * seg->sectorCapacity / 10 + 1);
-		seg->sectorIndex = (unsigned int *)realloc(seg->sectorIndex, seg->sectorCapacity * sizeof(unsigned int));
-	}
-	// Add element
-	seg->sectorIndex[seg->sectorCount] = sectorIndex;
-	seg->sectorCount++;
-
-	// Update last sequence id
-	stream->lastSequenceId = sequenceId;
 	return 0;
 }
 
@@ -614,12 +733,22 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 	const unsigned char *buffer = omdata->buffer;
 	int i;
 
+#if DEBUG_OMDATA >= 1
+fprintf(stderr, "OMDATA: Load @%d, %d\n", sectorStartIndex, sectorCount);
+#endif
+	
 	// Go through each sector
 	for (i = sectorStartIndex; i < sectorStartIndex + sectorCount; i++)
 	{
 		const unsigned char *p = (const unsigned char *)buffer + (OMDATA_SECTOR_SIZE * i);
 		int j;
-
+#if DEBUG_OMDATA >= 1
+if (i == 0 || i % 50 == 0 || i + 1 == sectorStartIndex + sectorCount) {
+	fprintf(stderr, "OMDATA: Sector #%d / %d...\n", i - sectorStartIndex, sectorCount);
+}
+#elif DEBUG_OMDATA >= 2
+fprintf(stderr, "OMDATA: Sector #%d...\n", i);
+#endif
 		omdata->statsTotalSectors++;
 
 		// Check header flag
@@ -649,12 +778,17 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 
 			md->deviceId = READ_UINT16(p + 5);			// CWA@5	unsigned short deviceId;
 			md->sessionId = READ_UINT32(p + 7);			// CWA@7	unsigned long sessionId;		
+			int upperDeviceId = READ_UINT16(p + 11);	// CWA@11	unsigned short upperDeviceId;
+			if (upperDeviceId != 0xffff)
+			{
+				md->deviceId |= upperDeviceId << 16;
+			}
 			md->recordingStart = OmDataTimestamp(READ_UINT32(p + 13));	// CWA@13	unsigned long loggingStartTime;
 			md->recordingStop = OmDataTimestamp(READ_UINT32(p + 17));	// CWA@17	unsigned long loggingEndTime
 			md->debuggingInfo = READ_UINT8(p + 26);		// CWA@26	char debuggingInfo;
-			//md->clearTime = OmDataTimestamp(READ_UINT32(p + 32));		// CWA@32	unsigned long lastClearTime;
+			md->clearTime = OmDataTimestamp(READ_UINT32(p + 32));		// CWA@32	unsigned long lastClearTime;
 			sampleCode = READ_UINT8(p + 36);			// CWA@36	unsigned char samplingRate;
-			//md->changeTime = OmDataTimestamp(READ_UINT32(p + 37));		// CWA@37	unsigned long lastChangeTime;
+			md->changeTime = OmDataTimestamp(READ_UINT32(p + 37));		// CWA@37	unsigned long lastChangeTime;
 			md->firmwareVer = READ_UINT8(p + 41);		// CWA@41	unsigned char firmwareRevision;
 			memset(md->metadata, 0, sizeof(md->metadata));
 			memcpy(md->metadata, p + 64, 448);			// CWA@64	unsigned char annotation[448];
@@ -675,6 +809,9 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 			md->configAccel.sensitivity = (16 >> (sampleCode >> 6));
 			md->configAccel.options = (sampleCode & 0x10) ? 1 : 0;		// 1 = low power mode
 
+#if DEBUG_OMDATA >= 1
+			fprintf(stderr, "OMDATA: ...Header (CWA)\n");
+#endif
 			continue;
 		}
 
@@ -760,6 +897,10 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 			continue;
 		}
 
+#if DEBUG_OMDATA >= 2
+fprintf(stderr, "OMDATA: Checksum...\n");
+#endif
+		
 		// Check checksum
 		unsigned int d;
 		unsigned short s = 0;
@@ -774,6 +915,9 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 			continue; 
 		}
 
+#if DEBUG_OMDATA >= 2
+fprintf(stderr, "OMDATA: ...OK (%d)\n", s);
+#endif
 
 		// Data
 		char format = -1;
@@ -789,7 +933,11 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 			streamIndex = p[1];
 		}
 
-		if (streamIndex < 0 || streamIndex >= OMDATA_MAX_STREAM)
+#if DEBUG_OMDATA >= 2
+fprintf(stderr, "OMDATA: Data stream #%d\n", streamIndex);
+#endif
+
+		if (streamIndex < 0 || (int)streamIndex >= OMDATA_MAX_STREAM)
 		{
 			if (p[0] == 's')
 			{
@@ -802,8 +950,12 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 			continue;
 		}
 
+#if DEBUG_OMDATA >= 2
+fprintf(stderr, "OMDATA: Adding sector #%d\n", i);
+#endif
+
 		// Add sector
-		if (OmDataAddSector(omdata, i, false) == 0)
+		if (OmDataAddSector(omdata, i) == 0)
 		{
 			omdata->statsDataSectors++;
 		}
@@ -814,15 +966,16 @@ static int OmDataProcessSectors(omdata_t *omdata, int sectorStartIndex, int sect
 			continue;
 		}
 
-		if (format == 0 && (streamIndex == 'a' || streamIndex == 'g'))
-		{
-			// Create virtual segments for CWA temperature, battery, light (embedded in normal accelerometer sectors) -- create a function to encapsulate below...
-			//unsigned short values[3];  // [0]-batt, [1]-LDR, [2]-Temp
-			OmDataAddSector(omdata, i, true);
-		}
-
+#if DEBUG_OMDATA >= 2
+fprintf(stderr, "OMDATA: ...loop\n");
+#endif
+		
 	}
 
+#if DEBUG_OMDATA >= 1
+fprintf(stderr, "OMDATA: Done (%d)\n", omdata->statsDataSectors);
+#endif
+	
 	return 0;
 }
 
@@ -844,7 +997,7 @@ static int OmDataProcessSegments(omdata_t *omdata)
 		omdata_segment_t *seg;
 		for (seg = stream->segmentFirst; seg != NULL; seg = seg->segmentNext)
 		{
-			if (seg->sectorCount > 0 && seg->timestampCount > 0 && seg->sampleRate > 0)
+			if (seg->sectorCount > 0 && seg->timestampCount > 0 && seg->description.sampleRate > 0)
 			{
 				// Estimate segment start/stop time
 				// TODO: This estimate is from the configured sample rate (not observed rate)
@@ -853,14 +1006,14 @@ static int OmDataProcessSegments(omdata_t *omdata)
 				{
 					int index = seg->timestamps[0].sample;				// seg->timestampCount
 					double timestamp = seg->timestamps[0].timestamp;	// seg->timestampCount
-					seg->startTime = timestamp - (index / seg->sampleRate);
+					seg->startTime = timestamp - (index / seg->description.sampleRate);
 				}
 
 				// End time
 				{
 					int index = seg->timestamps[seg->timestampCount - 1].sample;
 					double timestamp = seg->timestamps[seg->timestampCount - 1].timestamp;
-					seg->endTime = timestamp + ((seg->numSamples - index) / seg->sampleRate);
+					seg->endTime = timestamp + ((seg->description.numSamples - index) / seg->description.sampleRate);
 				}
 
 			}
@@ -1108,7 +1261,7 @@ char OmDataAnalyzeTimestamps(omdata_t *omdata)
 			for (i = 0; i < seg->timestampCount; i++)
 			{
 				omdata_segment_timestamp_t *ts = &seg->timestamps[i];
-				int sectorIndexOffset = ts->sample / seg->samplesPerSector;
+				int sectorIndexOffset = ts->sample / seg->description.samplesPerSector;
 				if (sectorIndexOffset < 0 || sectorIndexOffset >= seg->sectorCount)
 				{
 					//fprintf(stderr, "WARNING: Sector index offset %d out of range (0-%d) for segment timestamp %d.\n", sectorIndexOffset, seg->sectorCount, i);
@@ -1152,7 +1305,7 @@ if (diff / slidingAverage > worstDifference) { worstDifference = diff / slidingA
 						affectedT += deltaT;
 					}
 
-					if (stableSamples > 10 * seg->sampleRate)
+					if (stableSamples > 10 * seg->description.sampleRate)
 					{
 						slidingAverage = ((1 - fade) * slidingAverage) + (fade * period);
 					}
@@ -1186,7 +1339,7 @@ if (i + 1 >= sectorCount && cumulativeOffset > 0.0) { fprintf(stderr, "DEBUG: Cu
 			for (int i = 0; i < seg->timestampCount; i++)
 			{
 				omdata_segment_timestamp_t *ts = &seg->timestamps[i];
-				int sectorIndexOffset = ts->sample / seg->samplesPerSector;
+				int sectorIndexOffset = ts->sample / seg->description.samplesPerSector;
 				if (sectorIndexOffset < 0 || sectorIndexOffset >= seg->sectorCount)
 				{
 					//fprintf(stderr, "WARNING: Sector index offset %d out of range (0-%d) for segment timestamp %d.\n", sectorIndexOffset, seg->sectorCount, i);
@@ -1216,9 +1369,14 @@ int OmDataLoad(omdata_t *omdata, const char *filename)
 
 	// Open the file
 	int fd = _open(filename, _O_RDONLY | _O_BINARY);
-	struct _stat sb;
+	struct _stat sb = { 0 };
 	if (fd == -1) { fprintf(stderr, "ERROR: Problem opening file for reading.\n"); return 0; }
-	if (_fstat(fd, &sb) == -1) { fprintf(stderr, "ERROR: Problem fstat-ing file.\n"); return 0; }
+	if (_fstat(fd, &sb) == -1) 
+	{ 
+		// Fix for Windows XP with newer run time library
+		sb.st_size = _lseek(fd, 0, SEEK_END);
+		_lseek(fd, 0, SEEK_SET);
+	}
 	long length = sb.st_size;
 
 #ifdef USE_MMAP
@@ -1227,10 +1385,10 @@ int OmDataLoad(omdata_t *omdata, const char *filename)
 	if (buffer == MAP_FAILED || buffer == NULL) { fprintf(stderr, "ERROR: Problem mapping %d bytes.\n", (int)length); _close(fd); return 0; }
 	_close(fd);	// We can close the underlying file here
 #else
-	fprintf(stderr, "OMDATA: Allocating and reading %d bytes...\n", length);
+	fprintf(stderr, "OMDATA: Allocating and reading %d bytes...\n", (int)length);
 	buffer = (unsigned char *)malloc(length);
-	if (buffer == NULL) { _close(fd); fprintf(stderr, "ERROR: Problem allocating %d bytes.\n", length); return 0; }
-	if (_read(fd, buffer, length) != length) { fprintf(stderr, "ERROR: Problem reading %d bytes.\n", length); free(buffer); _close(fd); return 0; }
+	if (buffer == NULL) { _close(fd); fprintf(stderr, "ERROR: Problem allocating %d bytes.\n", (int)length); return 0; }
+	if (_read(fd, buffer, length) != length) { fprintf(stderr, "ERROR: Problem reading %d bytes.\n", (int)length); free(buffer); _close(fd); return 0; }
 	_close(fd);
 #endif
 		
@@ -1282,7 +1440,7 @@ int OmDataDump(omdata_t *omdata)
 				{
 					fprintf(stderr, "--- SEGMENT %d ---\n", segmentIndex);
 					fprintf(stderr, "Sectors: %d\n", seg->sectorCount);
-					fprintf(stderr, "Samples: %d\n", seg->numSamples);
+					fprintf(stderr, "Samples: %d\n", seg->description.numSamples);
 					fprintf(stderr, "Start time: %f\n", seg->startTime);
 					fprintf(stderr, "End time: %f\n", seg->endTime);
 				}
@@ -1346,31 +1504,31 @@ int OmDataFree(omdata_t *omdata)
 
 char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int16_t *values)
 {
-	if (seg->samplesPerSector > 0 && seg->channels > 0)
+	if (seg->description.samplesPerSector > 0 && seg->description.channels > 0)
 	{
-		int sectorWithinSegmentIndex = (sampleIndex / seg->samplesPerSector);
+		int sectorWithinSegmentIndex = (sampleIndex / seg->description.samplesPerSector);
 
-		if (sampleIndex >= 0 && sampleIndex < seg->numSamples && sectorWithinSegmentIndex < seg->sectorCount)
+		if (sampleIndex >= 0 && sampleIndex < seg->description.numSamples && sectorWithinSegmentIndex < seg->sectorCount)
 		{
 			int sectorIndex = seg->sectorIndex[sectorWithinSegmentIndex];
 			const unsigned char *p = (const unsigned char *)data->buffer + (OMDATA_SECTOR_SIZE * sectorIndex);
 
-			int sampleWithinSector = (sampleIndex % seg->samplesPerSector);
+			int sampleWithinSector = (sampleIndex % seg->description.samplesPerSector);
 
-			if (seg->packing == 0)	// Side-channel samples in CWA sectors (battery, light, temperature)
+			if (seg->description.packing == 0 && seg->description.channels == 3)	// Side-channel samples in CWA sectors (battery, light, temperature)
 			{
 				// Create virtual segments for CWA temperature, battery, light (embedded in normal accelerometer sectors) -- create a function to encapsulate below...
 				//unsigned short values[3];  // [0]-batt, [1]-LDR, [2]-Temp
 				values[0] = ((int16_t)p[23] << 1) + 512;		// @23 BYTE Battery - expand compressed byte into range
-				values[1] = p[18] | ((int16_t)p[19] << 8);		// @18 WORD Light
+				values[1] = 0x03ff & (p[18] | ((int16_t)p[19] << 8));		// @18 WORD Light
 				values[2] = p[20] | ((int16_t)p[21] << 8);		// @20 WORD Temperature
 				//values[3] = p[22];								// @22 BYTE eventsFlag
 				return 0;
 			}
-			else if (seg->packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2)
+			else if (seg->description.packing == FILESTREAM_PACKING_SPECIAL_DWORD3_10_2 && seg->description.channels == 3)
 			{
 				int bytesPerSample = 4;
-				const uint32_t *pp = (const uint32_t *)(p + seg->offset + (bytesPerSample * sampleWithinSector));
+				const uint32_t *pp = (const uint32_t *)(p + seg->description.offset + (seg->description.pitch * sampleWithinSector));
 				uint32_t value = *pp;
 				unsigned char e = (unsigned char)(value >> 30);		// 3=16g, 2=8g, 1=4g, 0=2g
 
@@ -1387,10 +1545,10 @@ char OmDataGetValues(omdata_t *data, omdata_segment_t *seg, int sampleIndex, int
 
 				return (values[0] <= clipMin || values[0] >= clipMax || values[1] <= clipMin || values[1] >= clipMax || values[2] <= clipMin || values[2] >= clipMax);
 			}
-			else if ((seg->packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16 || (seg->packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16)
+			else if ((seg->description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_SINT16 || (seg->description.packing & FILESTREAM_PACKING_FORMAT_MASK) == FILESTREAM_PACKING_UINT16)
 			{
-				int bytesPerSample = 2 * seg->channels;
-				const int16_t *pp = (const int16_t *)(p + seg->offset + (bytesPerSample * sampleWithinSector));
+				int bytesPerSample = 2 * seg->description.channels;
+				const int16_t *pp = (const int16_t *)(p + seg->description.offset + (seg->description.pitch * sampleWithinSector));
 				memcpy(values, pp, bytesPerSample);
 
 				// TODO: Correct limits need to come from segment format/type

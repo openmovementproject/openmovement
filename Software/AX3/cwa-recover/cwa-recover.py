@@ -129,10 +129,13 @@ def recoverCwa(inputFile, outputFile):
       if block[o] == ord('M') and block[o + 1] == ord('D') and block[o + 2] == 0xfc and block[o+3] == 0x03:
         fileOffset = i * sectorSize + o
         blockLength = headerSize - o
+        deviceId = unpack('<H', block[o+5:o+7])[0]			# @ 5  +2   Device identifier
         sessionId = unpack('<I', block[o+7:o+11])[0]
-        deviceId = unpack('<H', block[5:7])[0]			# @ 5  +2   Device identifier
+        deviceIdUpper = unpack('<H', block[o+11:o+13])[0]		# @ 11  +2   Upper device identifier
+		if deviceIdUpper == 0xffff:
+			deviceIdUpper = 0x0000
         print("Found header with session ID: " + str(sessionId) + " (device=" + str(deviceId) + ")")
-        globalDeviceId = deviceId
+        globalDeviceId = (deviceIdUpper << 16) + deviceId
         globalSessionId = sessionId
         metadata.append((fileOffset, blockLength, sessionId))
         break

@@ -240,7 +240,9 @@ class CWA:
         performClear = unpack('B', self.read(1))[0]
         deviceId = unpack('H', self.read(2))[0]
         sessionId = unpack('I', self.read(4))[0]
-        shippingMinLightLevel = unpack('H', self.read(2))[0]
+        deviceIdUpper = unpack('H', self.read(2))[0]
+		if deviceIdUpper != 0xffff:
+			deviceId |= deviceIdUpper << 16
         loggingStartTime = self.read(4)
         loggingEndTime = self.read(4)
         loggingCapacity = unpack('I', self.read(4))[0]

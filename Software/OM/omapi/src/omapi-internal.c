@@ -421,7 +421,7 @@ static int OmPortOpen(const char *infile, char writeable)
 
 
 /** Internal method to read a line from the device */
-int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned long timeout)
+int OmPortReadLine(unsigned int deviceId, char *inBuffer, int len, unsigned long timeout)
 {
     unsigned long start = OmMilliseconds();
     int received = 0;
@@ -488,7 +488,7 @@ OmLog(5, "[%c]", c);    // For extreme logging
 
 
 /** Internal method to write to the device */
-int OmPortWrite(unsigned short deviceId, const char *command)
+int OmPortWrite(unsigned int deviceId, const char *command)
 {
     int fd;
     if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen
@@ -502,7 +502,7 @@ OmLog(3, "OmPortWrite(%d, \"%s\");\n", deviceId, command);
 
 
 /** Internal method to safely acquire an open serial port for a device. */
-int OmPortAcquire(unsigned short deviceId)
+int OmPortAcquire(unsigned int deviceId)
 {
     int status;
 
@@ -533,7 +533,7 @@ int OmPortAcquire(unsigned short deviceId)
 
 
 /** Internal method to safely release a serial port for a device. */
-int OmPortRelease(unsigned short deviceId)
+int OmPortRelease(unsigned int deviceId)
 {
     // Check device state
     if (om.devices[deviceId] == NULL) return OM_E_INVALID_DEVICE;   // Device never seen

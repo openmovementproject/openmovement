@@ -81,7 +81,7 @@ typedef struct
     unsigned char events;
 	
     // Output values
-    unsigned short deviceId;
+    unsigned int deviceId;
     unsigned int sessionId;
     unsigned char metaData[OM_METADATA_SIZE + 1];
 
@@ -124,6 +124,12 @@ OmReaderHandle OmReaderOpen(const char *binaryFilename)
     // Extract the metadata from the header
     state->deviceId = (unsigned short)(state->header[5]) | ((unsigned short)state->header[6] << 8);
     state->sessionId = (unsigned int)(state->header[7]) | ((unsigned int)state->header[8] << 8) | ((unsigned int)state->header[9] << 16) | ((unsigned int)state->header[10] << 24);
+	int upperDeviceId = (unsigned short)(state->header[11]) | ((unsigned short)state->header[12] << 8);
+	if (upperDeviceId != 0xffff)
+	{
+		state->deviceId |= upperDeviceId << 16;
+	}
+	
     memcpy(state->metaData, &(state->header[64]), OM_METADATA_SIZE);
     state->metaData[OM_METADATA_SIZE] = '\0';
 

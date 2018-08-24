@@ -31,9 +31,9 @@ typedef struct
     uint16_t packetHeader;                      ///< @ 0  +2   ASCII "MD", little-endian (0x444D)
     uint16_t packetLength;                      ///< @ 2  +2   Packet length (1020 bytes, with header (4) = 1024 bytes total)
     uint8_t  hardwareType;                      ///< @ 4  +1 * Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
-    uint16_t deviceId;                          ///< @ 5  +2   Device identifier
+    uint16_t deviceId;                          ///< @ 5  +2   Device identifier (lower 16-bits)
     uint32_t sessionId;                         ///< @ 7  +4   Unique session identifier
-    uint16_t majorDeviceId;                     ///< @11  +2 * Reserved for upper device id (0x0000/0xffff=17?)
+    uint16_t upperDeviceId;                     ///< @11  +2 * Upper word of device id (if 0xffff is read, treat as 0x0000)
     cwa_timestamp_t loggingStartTime;           ///< @13  +4   Start time for delayed logging
     cwa_timestamp_t loggingEndTime;             ///< @17  +4   Stop time for delayed logging
     uint32_t loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)

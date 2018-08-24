@@ -135,7 +135,7 @@ extern "C" {
 
 
 // Constants
-#define OM_MAX_SERIAL 0xffff            /**< The maximum serial number allowed (16-bit, unsigned) */
+#define OM_MAX_SERIAL 99999 // 0xffff            /**< The maximum serial number allowed */
 #define OM_MAX_CDC_PATH OM_MAX_PATH     /**< The maximum string length of the CDC port.  e.g. "\\.\COM12345" + '\0' on Windows, or "/dev/tty.usbmodem12345" + '\0' */
 #define OM_MAX_MSD_PATH OM_MAX_PATH     /**< The maximum string length to the root of the MSD volume.  e.g. "\\?\Volume{abc12345-1234-1234-1234-123456789abc}\" + '\0'. */
 #define OM_MAX_SERIALID_LEN OM_MAX_PATH/**< The maximum string length of the USB serial number identity string.  e.g. "CWA17_00123" + '\0'. */
@@ -159,7 +159,7 @@ extern "C" {
 typedef struct
 {
     // Device properties
-    unsigned short id;                  /**< Device serial number */
+    unsigned int id;                    /**< Device serial number */
     OM_DEVICE_STATUS deviceStatus;      /**< Current connection status for this device. */
     char port[OM_MAX_CDC_PATH];         /**< Address to access the serial port. */
     char root[OM_MAX_MSD_PATH];         /**< Mounted root of the file system. */
@@ -249,16 +249,16 @@ unsigned long long OmMillisecondsEpoch(void);
 unsigned long OmMilliseconds(void);
 
 /** Read a line from the device */
-int OmPortReadLine(unsigned short deviceId, char *inBuffer, int len, unsigned long timeout);
+int OmPortReadLine(unsigned int deviceId, char *inBuffer, int len, unsigned long timeout);
 
 /** Write to the device */
-int OmPortWrite(unsigned short deviceId, const char *command);
+int OmPortWrite(unsigned int deviceId, const char *command);
 
 /** Acquire a port */
-int OmPortAcquire(unsigned short deviceId);
+int OmPortAcquire(unsigned int deviceId);
 
 /** Release a port */
-int OmPortRelease(unsigned short deviceId);
+int OmPortRelease(unsigned int deviceId);
 
 
 
