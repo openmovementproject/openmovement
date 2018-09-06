@@ -44,7 +44,7 @@ namespace OMTesting
         public string Executable { get; protected set; }
         public int ExitCode { get; protected set; }
         public IDictionary<string, string> Results { get; protected set; }
-        public int Id { get; protected set; }
+        public uint Id { get; protected set; }
         public string Args { get; protected set; }
         //public string OutputFile { get; protected set; }
 
@@ -125,7 +125,7 @@ namespace OMTesting
             return;
         }
 
-        public bool ConfigureSync(int id, int startDays, int startHour, int durationDays, int endHour)
+        public bool ConfigureSync(uint id, int startDays, int startHour, int durationDays, int endHour)
         {
             ErrorMessages = null;
             try
@@ -243,7 +243,7 @@ namespace OMTesting
         }
 
 
-        public void ConfigureAsync(int id, int startDays, int startHour, int durationDays, int endHour)
+        public void ConfigureAsync(uint id, int startDays, int startHour, int durationDays, int endHour)
         {
             Thread thread = new Thread(() => {
                 try

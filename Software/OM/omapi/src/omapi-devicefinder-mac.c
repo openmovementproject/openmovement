@@ -81,7 +81,7 @@ typedef struct DeviceData
 	CFStringRef deviceName;
 	UInt32 locationID;
 	const char *serialNumber;
-	int deviceId;
+	unsigned int deviceId;
 	const char *mountPath;
 	const char *serialDevice;
 } DeviceData;
@@ -324,15 +324,20 @@ const char *findSerial(const char *usbSerial)
 }
 
 
-static int DeviceIdFromSerialNumber(const char *serialNumber)
+static unsigned int DeviceIdFromSerialNumber(const char *serialNumber)
 {
-	// Return the number found at the end of the string (-1 if none)
-    int value = -1;
+	// Return the number found at the end of the string (0 if none)
+	bool inNumber = false;
+    unsigned int value = (unsigned int)-1;
     const char *p;
     for (p = serialNumber; *p != 0; p++)
     {
-        if (*p >= '0' && *p <= '9') value = 10 * (value == -1 ? 0 : value) + (*p - '0');
-        else value = -1;
+		if (*p >= '0' && *p <= '9')
+		{
+			if (!inNumber) { inNumber = true; value = 0; }
+			value = (10 * value) + (*p - '0');
+		}
+		else inNumber = false;
     }
     return value;
 }
@@ -345,10 +350,10 @@ static void DeviceNotification(void *refCon, io_service_t service, natural_t mes
 	DeviceData *deviceData = (DeviceData *)refCon;
 	if (messageType == kIOMessageServiceIsTerminated)
 	{		
-		fprintf(stderr, "DEVICE: Removed %d\n", deviceData->deviceId);
+		fprintf(stderr, "DEVICE: Removed %u\n", deviceData->deviceId);
 		// fprintf(stderr, "->deviceName: "); CFShow(deviceData->deviceName);
 		// fprintf(stderr, "->locationID: 0x%lx.\n", deviceData->locationID);
-		// fprintf(stderr, "->deviceId: 0x%lx.\n", deviceData->deviceId);
+		// fprintf(stderr, "->deviceId: 0x%x.\n", deviceData->deviceId);
 
 		// Call device removed
 		OmDeviceDiscovery(OM_DEVICE_REMOVED, deviceData->deviceId, deviceData->serialNumber, deviceData->serialDevice, deviceData->mountPath);
@@ -450,12 +455,12 @@ static void DeviceAdded(void *refCon, io_iterator_t iterator)
 		// printf("DEVICE: ...%s\n", deviceData->serialNumber);
 
 		deviceData->deviceId = DeviceIdFromSerialNumber(deviceData->serialNumber);
-		if (deviceData->deviceId < 0)
+		if (deviceData->deviceId <= 0)
 		{
 			fprintf(stderr, "ERROR: Couldn't find device ID from USB serial number.\n");
 			continue;
 		}
-		// printf("DEVICE: ...%d\n", deviceData->deviceId);
+		// printf("DEVICE: ...%u\n", deviceData->deviceId);
 		
 		// printf("DEVICE: Find mount...\n");
 		deviceData->mountPath = findMount(usbDevice);
@@ -476,7 +481,7 @@ static void DeviceAdded(void *refCon, io_iterator_t iterator)
 		// printf("DEVICE: ...%s\n", deviceData->serialDevice);
 
 		// Call device connected
-		printf("DEVICE: ... %s (#%d) port=%s path=%s\n", deviceData->serialNumber, deviceData->deviceId, deviceData->serialDevice, deviceData->mountPath);
+		printf("DEVICE: ... %s (#%u) port=%s path=%s\n", deviceData->serialNumber, deviceData->deviceId, deviceData->serialDevice, deviceData->mountPath);
 		OmDeviceDiscovery(OM_DEVICE_CONNECTED, deviceData->deviceId, deviceData->serialNumber, deviceData->serialDevice, deviceData->mountPath);
 		
 		// Release IOIteratorNext reference

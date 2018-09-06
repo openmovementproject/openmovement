@@ -963,8 +963,9 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
         }
 
         // Find the serial number from the serial string
-        int serialNumber = -1;
-//printf("SERIAL: %s\n", serialString.c_str());
+        unsigned int serialNumber = 0;
+//printf("SERIAL: [%s]\n", serialString.c_str());
+OmLog(1, "SERIAL: [%s]\n", serialString.c_str());
         if (serialString.length() > 0)
         {
             int firstDigit = (int)serialString.find_first_of('&') + 1;
@@ -979,7 +980,7 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
             {
                 // Extract the part after the first ampersand as a hexadecimal serial number
                 serialNumber = strtol(serialString.substr(firstDigit, lastDigit - firstDigit + 1).c_str(), NULL, 16);
-                serialNumber |= 0xffff0000; // ensure it's not a valid serial number (the high word is fully set)
+                serialNumber |= 0xffff0000; // ensure it's not a valid serial number from the device (the high word is fully set)
             }
             else
             {
@@ -990,8 +991,10 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
                     int firstNumber = (int)serialString.find_last_not_of("0123456789", lastNumber) + 1;
                     if (firstNumber >= 0)
                     {
-                        serialNumber = atoi(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str());
-                    }
+OmLog(1, "SERIAL: numeric [%s]\n", serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str());
+						serialNumber = (unsigned int)strtoul(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str(), NULL, 10);
+OmLog(1, "SERIAL: =%u %u 0x%08x\n", serialNumber, strtol(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str(), NULL, 10), serialNumber);
+					}
                 }
             }
         }
@@ -1388,17 +1391,17 @@ bool DeviceFinder::RescanDevices(void)
 
 
 // Extract device ID from a .CWA file
-int deviceIdFromFile(const char *filename) {
+unsigned int deviceIdFromFile(const char *filename) {
 	FILE *fp = fopen(filename, "rb");
 	if (fp == NULL) { return -1; }
 	unsigned char buffer[64] = {0};
 	int count = fread(buffer, 1, sizeof(buffer), fp);
 	if (count < sizeof(buffer) || buffer[0] != 'M' || buffer[1] != 'D') { fclose(fp); return -1; }
-	int deviceId = buffer[5] | (buffer[6] << 8);
-	int upperDeviceId = buffer[11] | (buffer[12] << 8);
+	unsigned int deviceId = buffer[5] | (buffer[6] << 8);
+	unsigned int upperDeviceId = buffer[11] | (buffer[12] << 8);
 	if (upperDeviceId != 0xffff) { deviceId |= upperDeviceId << 16; }
 	fclose(fp);
-	if (deviceId == 0 || deviceId == 0xffff) { return -1; } // 0 and 65535 are reserved IDs for "unidentified"
+	if (deviceId == 0 || deviceId == 0xffff) { return 0; } // 0 and 65535 are reserved IDs for "unidentified"
 	return deviceId;
 }
 
@@ -1419,58 +1422,71 @@ int deviceIdFromFilePath(const char *path) {
 	return deviceIdFromFile(filename);
 }
 
-static int DeviceIdFromSerialNumber(const char *serialNumber)
+static unsigned int DeviceIdFromSerialNumber(const char *serialNumber)
 {
-	// Return the number found at the end of the string (-1 if none)
-    int value = -1;
+	// Return the number found at the end of the string (0 if none)
+	bool inNumber = false;
+    unsigned int value = (unsigned int)-1;
     const char *p;
     for (p = serialNumber; *p != 0; p++)
     {
-        if (*p >= '0' && *p <= '9') value = 10 * (value == -1 ? 0 : value) + (*p - '0');
-        else value = -1;
+		if (*p >= '0' && *p <= '9')
+		{
+			if (!inNumber) { inNumber = true; value = 0; }
+			value = (10 * value) + (*p - '0');
+		}
+		else inNumber = false;
     }
     return value;
 }
 
 // true = definitely mismatched, false = couldn't definitely determine a mismatch
-bool CheckVolumeMismatch(const char *path, int id)
+bool CheckVolumeMismatch(const char *path, unsigned int id)
 {
 	char volumeName[MAX_PATH + 1] = { 0 };
-	DWORD serialNumber = 0xfffffffful;
+	DWORD serialNumber = 0;
 
-	OmLog(1, "VOLUME LABEL FOR: #%d %s\n", id, path);
+	// Have to check against the mangled serial number that Microchip's FSIO.c generates
+	int sid = (int)id;
+	unsigned char b[4];
+	b[0] = (unsigned char)(sid & 0xFF); b[1] = (unsigned char)((sid / 0x100) & 0xFF); b[2] = (unsigned char)((sid / 0x10000) & 0xFF); b[3] = (unsigned char)((sid / 0x1000000) & 0xFF);
+	unsigned int fsioSerial = b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
+
+	OmLog(1, "VOLUME LABEL FOR: #%u %s\n", id, path);
 	if (!GetVolumeInformationA(path, volumeName, sizeof(volumeName), &serialNumber, NULL, NULL, NULL, 0))
 	{
 		OmLog(1, "- fail\n");
 		return false;
 	}
 
-	int volume = -1;
+	unsigned int volume = 0;
 	// "AX317_#####" or "AX3_#######"
 	if (volumeName[0] == 'A' && volumeName[1] == 'X' && volumeName[2] >= '0' && volumeName[2] <= '9')
 	{
 		volume = DeviceIdFromSerialNumber(volumeName);
 	}
 
-	int dataNumber = deviceIdFromFilePath(path);
+	unsigned int dataNumber = deviceIdFromFilePath(path);
 	
-	OmLog(1, "- VOLUME NAME: %s\n", volumeName);
-	OmLog(1, "- VOLUME = %d\n", volume);
-	OmLog(1, "- SERIAL NUMBER: 0x%04x=%d 0x%04x=%d\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff);
-	OmLog(1, "- CWA FILE = %d\n", dataNumber);
+	OmLog(1, "- VOLUME NAME: %s = %u (last-7: %u)\n", volumeName, volume, id % 10000000);
+	OmLog(1, "- DISK SERIAL: [0x%04x=%d 0x%04x=%d] %u // FSIO-SERIAL: [0x%04x=%d 0x%04x=%d] %u\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff, serialNumber, fsioSerial >> 16, fsioSerial >> 16, fsioSerial & 0xffff, fsioSerial & 0xffff, fsioSerial);
+	OmLog(1, "- CWA FILE = %u\n", dataNumber);
 	
-	if (volume >= 0 && volume != id)
+	if (volume > 0 && volume != id % 10000000)	// Volume label limited to least significant 7 digits
 	{
+		OmLog(1, "- MISMATCH: Volume\n");
 		return true;
 	}
 
-	if (serialNumber >= 0 && serialNumber != id)
+	if (serialNumber > 0 && serialNumber != id && serialNumber != fsioSerial)	// Check against true serial number (in case FSIO.c is fixed in the future)
 	{
+		OmLog(1, "- MISMATCH: Disk serial\n");
 		return true;
 	}
 	
-	if (dataNumber >= 0 && dataNumber != id)
+	if (dataNumber > 0 && dataNumber != id)
 	{
+		OmLog(1, "- MISMATCH: Data file\n");
 		return true;
 	}
 	
@@ -1524,8 +1540,19 @@ OmLog(1, "1a: Not attempting mount as device has an unknown volume path.\n");
         // Desired mount point
         if (root != NULL && root[0] != '\0')
         {
-            sprintf(desiredVolumePath, "%s\\AX3_%05u\\", root, device.serialNumber);
-            //sprintf(desiredVolumePath, "%s\\%s\\", root, device.serialString);
+			if (device.serialNumber <= 99999)	// backwards-compatibility
+			{
+				sprintf(desiredVolumePath, "%s\\AX3_%05u\\", root, device.serialNumber);
+			}
+			else if (device.serialNumber <= 9999999)	// 7-digits to match volume label
+			{
+				sprintf(desiredVolumePath, "%s\\AX3_%07u\\", root, device.serialNumber);
+			}
+			else  // full device id
+			{
+				sprintf(desiredVolumePath, "%s\\AX3_%010u\\", root, device.serialNumber);
+			}
+			//sprintf(desiredVolumePath, "%s\\%s\\", root, device.serialString);
         }
 
 #ifdef DEBUG_MOUNT

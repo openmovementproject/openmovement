@@ -574,7 +574,7 @@ namespace OmGui
         public static Dictionary<string, string> MetadataFromReader(string filename)
         {
             // Read meta-data
-            ushort? deviceId = null;
+            uint? deviceId = null;
             uint? sessionId = null;
             DateTime? startTime = null;
             DateTime? endTime = null;

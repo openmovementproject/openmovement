@@ -30,8 +30,8 @@ namespace OmApiNet
         [Browsable(false)]
         public abstract SourceCategory Category { get; }
 
-        [CategoryAttribute("Device"), DisplayName("Device"), DescriptionAttribute("Unique device ID."), DefaultValueAttribute(0xffff), ReadOnly(true)]
-        public abstract ushort DeviceId { get; }
+        [CategoryAttribute("Device"), DisplayName("Device"), DescriptionAttribute("Unique device ID."), DefaultValueAttribute(0), ReadOnly(true)]
+        public abstract uint DeviceId { get; }
 
         [CategoryAttribute("Session"), DisplayName("Session ID"), DescriptionAttribute("Session ID."), DefaultValueAttribute(0), ReadOnly(true)]
         public abstract uint SessionId { get; }

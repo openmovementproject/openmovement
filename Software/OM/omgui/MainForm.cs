@@ -225,7 +225,7 @@ namespace OmGui
         }
 
         // /*OmDevice*/ public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename);
-        public void DownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename)
+        public void DownloadCompleteCallback(uint id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename)
         {
             if (downloadFilename != filename + ".part")
             {
@@ -348,7 +348,7 @@ namespace OmGui
 
         #endregion
 
-        IDictionary<ushort, ListViewItem> listViewDevices = new Dictionary<ushort, ListViewItem>();
+        IDictionary<uint, ListViewItem> listViewDevices = new Dictionary<uint, ListViewItem>();
         IDictionary<string, ListViewItem> listViewFiles = new Dictionary<string, ListViewItem>();
         IDictionary<string, ListViewItem> listViewOutputFiles = new Dictionary<string, ListViewItem>();
 
@@ -530,7 +530,7 @@ namespace OmGui
 Console.WriteLine("START: deviceManager_DeviceUpdate()...");
 
             // Values
-            ushort deviceId = e.Device.DeviceId;
+            uint deviceId = e.Device.DeviceId;
             //bool connected = e.Device.Connected;
 
             ListViewItem item;
@@ -607,7 +607,7 @@ Console.WriteLine("END: deviceManager_DeviceUpdate()...");
         }
 
         // Update the device from its ID
-        private void UpdateDeviceId(int deviceId)
+        private void UpdateDeviceId(uint deviceId)
         {
             if (InvokeRequired)
             {
@@ -1784,12 +1784,12 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                // Safe to do this as metadata cleared when device cleared
                                if (error == null && rangeForm.metaData.Length > 0)
                                {
-                                   if (OmApi.OM_FAILED(OmApi.OmSetMetadata(device.DeviceId, rangeForm.metaData, rangeForm.metaData.Length)))
+                                   if (OmApi.OM_FAILED(OmApi.OmSetMetadata((int)device.DeviceId, rangeForm.metaData, rangeForm.metaData.Length)))
                                        error = "Metadata set failed";
                                }
 
                                // Check 'max samples' is always zero
-                               OmApi.OmSetMaxSamples(device.DeviceId, 0);
+                               OmApi.OmSetMaxSamples((int)device.DeviceId, 0);
 
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 2) / (devices.Length * 5)), message + "(config)");
 
@@ -1808,7 +1808,7 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                        error = "Sync. Gyro. config specified on non-gyro device.";
                                    }
                                 }
-                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig(device.DeviceId, freq, range)))
+                               if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig((int)device.DeviceId, freq, range)))
                                     error = "Sensor config failed";
 
                                recordBackgroundWorker.ReportProgress((100 * (5 * i + 3) / (devices.Length * 5)), message + "(time sync)");

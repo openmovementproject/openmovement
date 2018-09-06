@@ -94,7 +94,7 @@ namespace OmGui
             bitmapDirty = true;
         }
 
-        public void Open(ushort deviceId)
+        public void Open(uint deviceId)
         {
             try
             {

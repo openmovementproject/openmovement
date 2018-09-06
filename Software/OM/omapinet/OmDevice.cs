@@ -16,7 +16,7 @@ namespace OmApiNet
 		private int deviceWarning = 0;	// 0=none, 1=discharged, 2=damaged?
 		public int DeviceWarning { get { return deviceWarning; } }
 
-        public delegate void OmDeviceDownloadCompleteCallback(ushort id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename);
+        public delegate void OmDeviceDownloadCompleteCallback(uint id, OmApi.OM_DOWNLOAD_STATUS status, string filename, string downloadFilename);
         public OmDeviceDownloadCompleteCallback downloadComplete = null;
 
         public bool HasSyncGyro
@@ -27,7 +27,7 @@ namespace OmApiNet
             }
         }
 
-        public OmDevice(Om om, ushort deviceId)
+        public OmDevice(Om om, uint deviceId)
         {
             this.om = om;
             this.deviceId = deviceId;
@@ -39,26 +39,26 @@ namespace OmApiNet
             try
             {
                 StringBuilder filenamesb = new StringBuilder(256);
-                if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
+                if (OmApi.OmGetDataFilename((int)deviceId, filenamesb) == OmApi.OM_OK)
                 {
                     filename = filenamesb.ToString();
                     path = Path.GetDirectoryName(filename);
                 }
 
                 StringBuilder pathsb = new StringBuilder(256);
-                if (OmApi.OmGetDevicePath(deviceId, pathsb) == OmApi.OM_OK)
+                if (OmApi.OmGetDevicePath((int)deviceId, pathsb) == OmApi.OM_OK)
                 {
                     path = pathsb.ToString();
                 }
 
                 StringBuilder portsb = new StringBuilder(256);
-                if (OmApi.OmGetDevicePort(deviceId, portsb) == OmApi.OM_OK)
+                if (OmApi.OmGetDevicePort((int)deviceId, portsb) == OmApi.OM_OK)
                 {
                     port = portsb.ToString();
                 }
 
                 StringBuilder serialIdsb = new StringBuilder(256);
-                if (OmApi.OmGetDeviceSerial(deviceId, serialIdsb) == OmApi.OM_OK)
+                if (OmApi.OmGetDeviceSerial((int)deviceId, serialIdsb) == OmApi.OM_OK)
                 {
                     serialId = serialIdsb.ToString();
                 }
@@ -124,8 +124,8 @@ category = SourceCategory.Other;
             } 
         }
 
-        protected ushort deviceId;
-        public override ushort DeviceId { get { return deviceId; } }
+        protected uint deviceId;
+        public override uint DeviceId { get { return deviceId; } }
 
         protected uint sessionId = uint.MaxValue;
         public override uint SessionId { get { return sessionId; } }
@@ -238,7 +238,7 @@ category = SourceCategory.Other;
 
                 string fName = "";
                 StringBuilder filenamesb = new StringBuilder(256);
-                if (OmApi.OmGetDataFilename(deviceId, filenamesb) == OmApi.OM_OK)
+                if (OmApi.OmGetDataFilename((int)deviceId, filenamesb) == OmApi.OM_OK)
                 {
                     fName = filenamesb.ToString();
                 }
@@ -335,7 +335,7 @@ category = SourceCategory.Other;
                 int error = 0;
 
 //Console.WriteLine("backgroundWorkerUpdate - checking battery for " + this.deviceId + "...");
-                int newBatteryLevel = OmApi.OmGetBatteryLevel(deviceId);
+                int newBatteryLevel = OmApi.OmGetBatteryLevel((int)deviceId);
                 lastUpdate = now;
                 if (OmApi.OM_FAILED(newBatteryLevel)) { error |= 0x10; }
 
@@ -352,11 +352,11 @@ category = SourceCategory.Other;
                     int res;
 
                     // TODO: Error checking
-                    res = OmApi.OmGetVersion(deviceId, out firmwareVersion, out hardwareVersion);
+                    res = OmApi.OmGetVersion((int)deviceId, out firmwareVersion, out hardwareVersion);
                     error |= (OmApi.OM_FAILED(res) ? 0x01 : 0);
 
                     uint time;
-                    res = OmApi.OmGetTime(deviceId, out time);
+                    res = OmApi.OmGetTime((int)deviceId, out time);
                     error |= (OmApi.OM_FAILED(res) ? 0x02 : 0);
 					DateTime deviceTime = OmApi.OmDateTimeUnpack(time);
                     timeDifference = (deviceTime - now);
@@ -380,12 +380,12 @@ category = SourceCategory.Other;
                     }
 
                     uint startTimeValue, stopTimeValue;
-                    res = OmApi.OmGetDelays(deviceId, out startTimeValue, out stopTimeValue);
+                    res = OmApi.OmGetDelays((int)deviceId, out startTimeValue, out stopTimeValue);
                     error |= (OmApi.OM_FAILED(res) ? 0x04 : 0);
                     startTime = OmApi.OmDateTimeUnpack(startTimeValue);
                     stopTime = OmApi.OmDateTimeUnpack(stopTimeValue);
 
-                    res = OmApi.OmGetSessionId(deviceId, out sessionId);
+                    res = OmApi.OmGetSessionId((int)deviceId, out sessionId);
                     error |= (OmApi.OM_FAILED(res) ? 0x08 : 0);
 
                     changed = true;
@@ -416,7 +416,7 @@ category = SourceCategory.Other;
         public bool SetLed(OmApi.OM_LED_STATE state)
         {
             ledColor = state;
-            if (OmApi.OM_FAILED(OmApi.OmSetLed(deviceId, (int)ledColor)))
+            if (OmApi.OM_FAILED(OmApi.OmSetLed((int)deviceId, (int)ledColor)))
             {
                 return false;
             }
@@ -435,13 +435,13 @@ category = SourceCategory.Other;
 
             // ...now set the time (always to the nearest second)
             DateTime setTime = new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
-            if (OmApi.OM_FAILED(OmApi.OmSetTime(deviceId, OmApi.OmDateTimePack(setTime))))
+            if (OmApi.OM_FAILED(OmApi.OmSetTime((int)deviceId, OmApi.OmDateTimePack(setTime))))
             {
                 return false;   // Failed to write time
             }
 
             // Verify that the clock was set as expected
-            if (OmApi.OM_FAILED(OmApi.OmGetTime(deviceId, out uint newTime)))
+            if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out uint newTime)))
             {
                 return false;   // Failed to read time
             }
@@ -460,7 +460,7 @@ category = SourceCategory.Other;
             DateTime checkStart = DateTime.Now;
             for (; ; )
             {
-                if (OmApi.OM_FAILED(OmApi.OmGetTime(deviceId, out uint currentTime)))
+                if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out uint currentTime)))
                 {
                     return false;   // Failed to read time
                 }
@@ -491,7 +491,7 @@ category = SourceCategory.Other;
         {
             downloadFilename = filename;
             downloadFilenameRename = renameFilename;
-            OmApi.OmBeginDownloading(deviceId, 0, -1, filename);
+            OmApi.OmBeginDownloading((int)deviceId, 0, -1, filename);
         }
 
         public void FinishedDownloading()
@@ -515,17 +515,17 @@ category = SourceCategory.Other;
 
         public void CancelDownload()
         {
-            OmApi.OmCancelDownload(deviceId);
+            OmApi.OmCancelDownload((int)deviceId);
         }
 
         public bool SetInterval(DateTime start, DateTime stop)
         {
             bool failed = false;
 
-            failed |= OmApi.OM_FAILED(OmApi.OmSetDelays(deviceId, OmApi.OmDateTimePack(start), OmApi.OmDateTimePack(stop)));
+            failed |= OmApi.OM_FAILED(OmApi.OmSetDelays((int)deviceId, OmApi.OmDateTimePack(start), OmApi.OmDateTimePack(stop)));
             if (!failed)
             {
-                failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
+                failed |= OmApi.OM_FAILED(OmApi.OmCommit((int)deviceId));
             }
 
 //validData = false;
@@ -554,10 +554,10 @@ category = SourceCategory.Other;
         {
             bool failed = false;
 
-            failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId(deviceId, sessionId));
+            failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId((int)deviceId, sessionId));
             if (commit)
             {
-                failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
+                failed |= OmApi.OM_FAILED(OmApi.OmCommit((int)deviceId));
             }
 
 //validData = false;
@@ -573,7 +573,7 @@ category = SourceCategory.Other;
 
         public bool SetDebug(int debugCode)
         {
-            int status = OmApi.OmCommand(deviceId, "\r\nDEBUG " + debugCode + "\r\n", null, 0, "DEBUG=", 2000, IntPtr.Zero, 0);
+            int status = OmApi.OmCommand((int)deviceId, "\r\nDEBUG " + debugCode + "\r\n", null, 0, "DEBUG=", 2000, IntPtr.Zero, 0);
             return (status >= 0);
         }
 
@@ -584,11 +584,11 @@ category = SourceCategory.Other;
             // ???
             //failed |= OmApi.OM_FAILED(OmApi.OmCommit(deviceId));
 
-            failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId(deviceId, 0));                                                      // Clear the session id
-            failed |= OmApi.OM_FAILED(OmApi.OmSetMetadata(deviceId, "", 0));                                                   // No metadata
-            failed |= OmApi.OM_FAILED(OmApi.OmSetDelays(deviceId, OmApi.OM_DATETIME_INFINITE, OmApi.OM_DATETIME_INFINITE));    // Never log
-            failed |= OmApi.OM_FAILED(OmApi.OmSetAccelConfig(deviceId, OmApi.OM_ACCEL_DEFAULT_RATE, OmApi.OM_ACCEL_DEFAULT_RANGE));    // Default configuration
-            failed |= OmApi.OM_FAILED(OmApi.OmEraseDataAndCommit(deviceId, wipe ? OmApi.OM_ERASE_LEVEL.OM_ERASE_WIPE : OmApi.OM_ERASE_LEVEL.OM_ERASE_QUICKFORMAT)); // Erase data and commit
+            failed |= OmApi.OM_FAILED(OmApi.OmSetSessionId((int)deviceId, 0));                                                      // Clear the session id
+            failed |= OmApi.OM_FAILED(OmApi.OmSetMetadata((int)deviceId, "", 0));                                                   // No metadata
+            failed |= OmApi.OM_FAILED(OmApi.OmSetDelays((int)deviceId, OmApi.OM_DATETIME_INFINITE, OmApi.OM_DATETIME_INFINITE));    // Never log
+            failed |= OmApi.OM_FAILED(OmApi.OmSetAccelConfig((int)deviceId, OmApi.OM_ACCEL_DEFAULT_RATE, OmApi.OM_ACCEL_DEFAULT_RANGE));    // Default configuration
+            failed |= OmApi.OM_FAILED(OmApi.OmEraseDataAndCommit((int)deviceId, wipe ? OmApi.OM_ERASE_LEVEL.OM_ERASE_WIPE : OmApi.OM_ERASE_LEVEL.OM_ERASE_QUICKFORMAT)); // Erase data and commit
             //failed |= OmApi.OM_FAILED(OmApi.OmClearDataAndCommit(deviceId));                                                   // Clear data and commit
 
 //validData = false;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-namespace RedFlash
+namespace OMTesting
 {
     public class FormattedNumericUpDown : NumericUpDown
     {

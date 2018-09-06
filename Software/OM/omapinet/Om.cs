@@ -135,7 +135,7 @@ namespace OmApiNet
             return;
         }
 
-        protected IDictionary<ushort, OmDevice> devices = new Dictionary<ushort, OmDevice>();
+        protected IDictionary<uint, OmDevice> devices = new Dictionary<uint, OmDevice>();
 
         /** Calls an event handler for any attached devices. Useful for discovering devices attached at startup. */
         public void ForAllAttachedDevices(OmDeviceEventHandler deviceEventHandler)
@@ -152,22 +152,22 @@ namespace OmApiNet
             }
         }
 
-        public OmDevice GetDevice(int deviceId)
+        public OmDevice GetDevice(uint deviceId)
         {
             OmDevice device = null;
-            if (deviceId >= 0 && deviceId < ushort.MaxValue)
+            if (deviceId != 0)
             {
                 // Obtain a reference to the device object, or create one if new
-                if (devices.ContainsKey((ushort)deviceId))
+                if (devices.ContainsKey(deviceId))
                 {
-                    device = devices[(ushort)deviceId];
+                    device = devices[deviceId];
                 }
                 else
                 {
-                    device = new OmDevice(this, (ushort)deviceId);
+                    device = new OmDevice(this, deviceId);
                     lock (devices)
                     {
-                        devices[(ushort)deviceId] = device;
+                        devices[deviceId] = device;
                     }
                 }
             }
@@ -181,8 +181,8 @@ namespace OmApiNet
 
         protected void DeviceCallback(IntPtr reference, int deviceId, OmApi.OM_DEVICE_STATUS status)
         {
-            //Console.WriteLine("" + status + " - " + deviceId);
-            OmDevice device = GetDevice(deviceId);
+Console.WriteLine("" + status + " - " + (uint)deviceId);
+            OmDevice device = GetDevice((uint)deviceId);
             if (device == null) { return; }
 
             if (status == OmApi.OM_DEVICE_STATUS.OM_DEVICE_CONNECTED)
@@ -232,7 +232,7 @@ namespace OmApiNet
             }
 
             //Console.WriteLine("" + status + " - " + deviceId);
-            OmDevice device = GetDevice(deviceId);
+            OmDevice device = GetDevice((uint)deviceId);
             if (device == null) { return; }
 
             device.UpdateDownloadStatus(status, value);

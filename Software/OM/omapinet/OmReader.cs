@@ -12,13 +12,13 @@ namespace OmApiNet
         // Properties
         public override SourceCategory Category { get { return SourceCategory.File; } }
 
-        private ushort deviceId;
-        public override ushort DeviceId { get { EnsureMetadataRead(); return deviceId; } }
+        private uint deviceId;
+        public override uint DeviceId { get { EnsureMetadataRead(); return deviceId; } }
 
         private uint sessionId;
         public override uint SessionId { get { return sessionId; } }
 
-        public ushort OpenDeviceId { get; protected set; }
+        public uint OpenDeviceId { get; protected set; }
         public string Filename { get; protected set; }
         public IntPtr Handle { get; protected set; }
         public DateTime StartTime { get; protected set; }
@@ -75,7 +75,7 @@ namespace OmApiNet
         }
 
         // Constructor for a reader of a device file
-        protected OmReader(Om om, ushort deviceId, IntPtr handle) : this(om, handle)
+        protected OmReader(Om om, uint deviceId, IntPtr handle) : this(om, handle)
         {
             OpenDeviceId = deviceId;
         }
@@ -101,9 +101,9 @@ namespace OmApiNet
         }
 
         // Factory method to open a device data stream
-        public static OmReader Open(ushort deviceId)
+        public static OmReader Open(uint deviceId)
         {
-            IntPtr handle = OmApi.OmReaderOpenDeviceData(deviceId);
+            IntPtr handle = OmApi.OmReaderOpenDeviceData((int)deviceId);
             if (handle == null) { return null; }
             return new OmReader(Om.Instance, deviceId, handle);
         }

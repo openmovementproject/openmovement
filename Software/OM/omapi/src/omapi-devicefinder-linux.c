@@ -41,7 +41,7 @@ typedef struct DeviceNode_t {
     char mount_path[256];       // "/media/AX317_?????"
     char serial_device[256];    // "/dev/ttyACM0"
     char serial_id[256];        // "CWA17_00123"
-    int device_id;              //
+    unsigned int device_id;     //
     struct DeviceNode_t *next;  // Linked list
 } DeviceNode;
 
@@ -50,21 +50,26 @@ static char isWsl;
 
 
 /** Internal, extract device id from serial id **/
-static int GetDeviceId(const char *serialNumber)
+static unsigned int DeviceIdFromSerialNumber(const char *serialNumber)
 {
-	// Return the number found at the end of the string (-1 if none)
-    int value = -1;
+	// Return the number found at the end of the string (0 if none)
+	bool inNumber = false;
+    unsigned int value = (unsigned int)-1;
     const char *p;
     for (p = serialNumber; *p != 0; p++)
     {
-        if (*p >= '0' && *p <= '9') value = 10 * (value == -1 ? 0 : value) + (*p - '0');
-        else value = -1;
+		if (*p >= '0' && *p <= '9')
+		{
+			if (!inNumber) { inNumber = true; value = 0; }
+			value = (10 * value) + (*p - '0');
+		}
+		else inNumber = false;
     }
     return value;
 }
 
 /** Internal, method to add a device to the device list **/
-static void AddDevice(const char *block_device, const char *mount_path, const char *serial_device, int id, const char *serial_id)
+static void AddDevice(const char *block_device, const char *mount_path, const char *serial_device, unsigned int id, const char *serial_id)
 {
     DeviceNode *dev = NULL;
 	DeviceNode *current;
@@ -255,13 +260,13 @@ static void InitDeviceFinder()
                 GetSerialDevice(serial_id, serial_device);
                 if (strlen(serial_device) > 0)
                 {
-                    int id = GetDeviceId(serial_id);
+                    unsigned int id = DeviceIdFromSerialNumber(serial_id);
                     strcat(mount_path, name);
 // printf("SYSPATH: %s\n", syspath);
 // printf("DEVNODE: %s\n", path);
 // printf("MOUNT: %s\n", mount_path);
 // printf("SERIAL: %s\n", serial_device);
-// printf("ID: %d\n", id);
+// printf("ID: %u\n", id);
                     // Save device info
                     AddDevice(path, mount_path, serial_device, id, serial_id);
                 }
@@ -396,7 +401,7 @@ printf("DEVICE-ACTION: %s %s\n", action, block_device);
                         GetSerialDevice(serial_id, &serial_device[0]);
                         if (strlen(serial_device) > 0)
                         {
-                            int id = GetDeviceId(serial_id);
+                            unsigned int id = DeviceIdFromSerialNumber(serial_id);
                             strcat(mount_path, name);
                             WaitUntilReadable(serial_device);
                             AddDevice(block_device, mount_path, serial_device, id, serial_id);

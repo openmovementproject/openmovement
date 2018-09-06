@@ -32,7 +32,7 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
 {
     int status;
     char response[OM_MAX_RESPONSE_SIZE], *parts[OM_MAX_PARSE_PARTS] = {0};
-	int incomingDeviceId;
+	unsigned int incomingDeviceId;
     status = OM_COMMAND(deviceId, "\r\nID\r\n", response, "ID=", OM_DEFAULT_TIMEOUT, parts);
     if (OM_FAILED(status)) return status;
     //"ID=CWA,hardwareId,firmwareId,deviceId,sessionId"
@@ -52,12 +52,15 @@ int OmGetVersion(int deviceId, int *firmwareVersion, int *hardwareVersion)
 
     if (firmwareVersion != NULL) *firmwareVersion = fwVer;
     if (hardwareVersion != NULL) *hardwareVersion = hwVer;
-	incomingDeviceId = atoi(parts[4]);
-	if (incomingDeviceId != deviceId) {
-		OmLog(0, "ERROR: Problem when identifying device %d (mismatched identity as %d) -- reconnect.\n", deviceId, incomingDeviceId);
+	
+	incomingDeviceId = (unsigned int)strtoul(parts[4], NULL, 10);
+	if (incomingDeviceId != (unsigned int)deviceId)
+	{
+		OmLog(0, "ERROR: Problem when identifying device %u (mismatched identity as %u) -- reconnect.\n", (unsigned int)deviceId, incomingDeviceId);
 		// Set flag to prevent further access
 		OmDeviceState *device = OmDevice(deviceId);
-		if (device) {
+		if (device)
+		{
 			device->flags |= 0x00000001;	// invalid device
 		}
 		return OM_E_INVALID_DEVICE;
@@ -408,18 +411,21 @@ int OmCommand(int deviceId, const char *command, char *buffer, size_t bufferSize
         for (i = 0; i < parseMax; i++) { parseParts[i] = NULL; }
     }
 
-OmLog(3, "OmCommand(%d, \"%s\", _, _, \"%s\", %d, _, _);\n", deviceId, command, expected, timeoutMs);
+OmLog(3, "OmCommand(%u, \"%s\", _, _, \"%s\", %d, _, _);\n", deviceId, command, expected, timeoutMs);
 
 	// Check flag that prevents further device access
 	OmDeviceState *device = OmDevice(deviceId);
-	if (device && device->flags & 0x00000001) {
+	if (device && device->flags & 0x00000001)
+	{
 		int whitelist = 0;
-		if (command != NULL && strlen(command) > 0) {
+		if (command != NULL && strlen(command) > 0)
+		{
 			// Allow certain commands (RESET to redo device enumeration)
 			if (strcasecmp(command, "\r\nRESET\r\n") == 0) { whitelist = 1; }
 		}
-		if (!whitelist) {
-			OmLog(0, "ERROR: OmCommand ingored (problem when identifying device).\n");
+		if (!whitelist)
+		{
+			OmLog(0, "ERROR: OmCommand ignored (problem when identifying device).\n");
 			return OM_E_INVALID_DEVICE;
 		}
 	}

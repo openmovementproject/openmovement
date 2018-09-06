@@ -127,11 +127,11 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
 {
     if (status == OM_DEVICE_CONNECTED)
     {
-        unsigned short serialNumber;
+        unsigned int serialNumber;
 
         if (inSerialNumber >= 0xffff0000) { OmLog(0, "WARNING: Ignoring added device with invalid serial number %u\n", inSerialNumber); return; }
         if (volumePath == NULL || volumePath[0] == '\0') { OmLog(0, "WARNING: Ignoring added device with no mount point (%u)\n", inSerialNumber); return; }
-        serialNumber = (unsigned short)inSerialNumber;
+        serialNumber = (unsigned int)inSerialNumber;
 
         // Get the current OmDeviceState structure, or make one if it doesn't exist
 		OmDeviceState *deviceState = OmDevice(inSerialNumber);
@@ -177,7 +177,7 @@ void OmDeviceDiscovery(OM_DEVICE_STATUS status, unsigned int inSerialNumber, con
 		}
 
 
-OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
+OmLog(0, "DEBUG: Device added #%u  %s  %s\n", serialNumber, port, volumePath);
 
         // Update the OmDeviceState structure
         deviceState->id = serialNumber;
@@ -196,18 +196,18 @@ OmLog(0, "DEBUG: Device added #%d  %s  %s\n", serialNumber, port, volumePath);
         if (om.deviceCallback != NULL)
         {
 OmLog(0, "DEBUG: callback for OM_DEVICE_CONNECTED...\n");
-            om.deviceCallback(om.deviceCallbackReference, serialNumber, OM_DEVICE_CONNECTED);
+            om.deviceCallback(om.deviceCallbackReference, (int)serialNumber, OM_DEVICE_CONNECTED);
         }
     }
     else if (status == OM_DEVICE_REMOVED)
     {
-        unsigned short serialNumber;
+        unsigned int serialNumber;
         OmDeviceState *deviceState;
 
 		if (inSerialNumber >= 0xffff0000) { OmLog(0, "WARNING: Ignoring removed device with invalid serial number %u\n", inSerialNumber); return; }
-		serialNumber = (unsigned short)inSerialNumber;
+		serialNumber = inSerialNumber;
 
-OmLog(0, "DEBUG: Device removed: #%d\n", serialNumber);
+OmLog(0, "DEBUG: Device removed: #%u\n", serialNumber);
 
         // Get the current OmDeviceState structure
         deviceState = OmDevice(serialNumber);
@@ -229,7 +229,7 @@ OmLog(0, "DEBUG: Device removed: #%d\n", serialNumber);
         if (om.deviceCallback != NULL)
         {
 OmLog(0, "DEBUG: callback for OM_DEVICE_REMOVED...\n");
-            om.deviceCallback(om.deviceCallbackReference, serialNumber, OM_DEVICE_REMOVED);
+            om.deviceCallback(om.deviceCallbackReference, (int)serialNumber, OM_DEVICE_REMOVED);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace OMTesting
         class DeviceStatus
         {
             public enum DeviceMode { Unknown = -2, Unexpected = -1, Waiting = 0, Charging = 1, Configuring = 2, Complete = 3, Failed = 4, Error = 5 };
-            public DeviceStatus(int id) 
+            public DeviceStatus(uint id) 
             { 
                 BatteryLevel = -1;
 
@@ -34,7 +34,7 @@ namespace OMTesting
                 this.Info = "";
             }
 
-            public int Id { get; protected set; }
+            public uint Id { get; protected set; }
             public DeviceMode Mode { get; set; }
             public string Info { get; set; }
             public int BatteryLevel { get; protected set; }
@@ -107,7 +107,7 @@ namespace OMTesting
                     
                     if (batteryInteresting && lastUpdatedBattery == DateTime.MinValue || DateTime.Now - lastUpdatedBattery > TimeSpan.FromSeconds(30))
                     {
-                        int batteryLevel = OmApi.OmGetBatteryLevel(Id);
+                        int batteryLevel = OmApi.OmGetBatteryLevel((int)Id);
                         if (batteryLevel != this.BatteryLevel)
                         {
                             this.BatteryLevel = batteryLevel;
@@ -197,7 +197,7 @@ namespace OMTesting
         }
 
         // Keep device status for each device
-        IDictionary<int, DeviceStatus> devices = new Dictionary<int, DeviceStatus>();
+        IDictionary<uint, DeviceStatus> devices = new Dictionary<uint, DeviceStatus>();
 
         // Log file
         protected static string LOG_FILE = "log.csv";
@@ -311,7 +311,7 @@ namespace OMTesting
 
 
 
-        private void AddExpectedDevice(int id)
+        private void AddExpectedDevice(uint id)
         {
             // Add to list if not present, get from list
             DeviceStatus device;
@@ -335,7 +335,7 @@ namespace OMTesting
             UpdateDevices();
         }
 
-        private void RemoveExpectedDevice(int id)
+        private void RemoveExpectedDevice(uint id)
         {
             // Remove a device only if it's not connected
             if (devices.ContainsKey(id) && !devices[id].Connected)
@@ -347,7 +347,7 @@ namespace OMTesting
 
         private void AddDevice(object sender, OmApiNet.OmDeviceEventArgs e)
         {
-            int id = e.Device.DeviceId;
+            uint id = e.Device.DeviceId;
             DeviceStatus device;
 
             if (!devices.ContainsKey(id))
@@ -369,7 +369,7 @@ namespace OMTesting
 
         private void RemoveDevice(object sender, OmApiNet.OmDeviceEventArgs e)
         {
-            int id = e.Device.DeviceId;
+            uint id = e.Device.DeviceId;
             if (devices.ContainsKey(id))
             {
                 // Always remove device
@@ -388,7 +388,7 @@ namespace OMTesting
             listViewDevices.Items.CopyTo(currentItems, 0);
             foreach (ListViewItem item in currentItems)
             {
-                if (!devices.ContainsKey((int)item.Tag))
+                if (!devices.ContainsKey((uint)item.Tag))
                 {
                     listViewDevices.Items.RemoveByKey(item.Name);
                 }
@@ -424,14 +424,14 @@ namespace OMTesting
         {
             buttonAdd.Enabled = false;
             formattedNumericUpDownId.WasSubmitted();
-            int id = (int)formattedNumericUpDownId.Value;
+            uint id = (uint)formattedNumericUpDownId.Value;
             if (id < 1)
             {
                 MessageBox.Show(this, "ID cannot be less than 1", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else if (id > 65534)
+            else if (id > 9999999)
             {
-                MessageBox.Show(this, "ID cannot be greater than 65534", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, "ID cannot be greater than 9999999", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
@@ -450,7 +450,7 @@ namespace OMTesting
 
             foreach (int i in listViewDevices.SelectedIndices)
             {
-                int id = (int)listViewDevices.Items[i].Tag;
+                uint id = (uint)listViewDevices.Items[i].Tag;
                 if (devices.ContainsKey(id) && devices[id].Connected) { allUserAdded = false; }
                 if (devices.ContainsKey(id) && !devices[id].Connected) { allConnected = false; }
 
@@ -472,7 +472,7 @@ namespace OMTesting
             {
                 ids.Add((int)listViewDevices.Items[i].Tag);
             }
-            foreach (int id in ids)
+            foreach (uint id in ids)
             {
                 RemoveExpectedDevice(id);
             }
@@ -494,7 +494,7 @@ namespace OMTesting
             bool configuring = false;
             for (int i = 0; i < count; i++)
             {
-                int testId = (int)listViewDevices.Items[i].Tag;
+                uint testId = (uint)listViewDevices.Items[i].Tag;
                 DeviceStatus device = devices[testId];
                 if (device.Mode == DeviceStatus.DeviceMode.Configuring) { configuring = true; break; }
             }
@@ -502,7 +502,7 @@ namespace OMTesting
             // Update next element
             for (int i = 0; i < count; i++)
             {
-                int testId = (int)listViewDevices.Items[(checkIndex + i) % count].Tag;
+                uint testId = (uint)listViewDevices.Items[(checkIndex + i) % count].Tag;
                 DeviceStatus device = devices[testId];
 
                 // See if a charging device should be configured
@@ -541,7 +541,7 @@ namespace OMTesting
         {
             for (int i = 0; i < listViewDevices.Items.Count; i++)
             {
-                int id = (int)listViewDevices.Items[i].Tag;
+                uint id = (uint)listViewDevices.Items[i].Tag;
                 DeviceStatus device = devices[id];
 
                 if (identify.ContainsKey(id))
@@ -575,14 +575,14 @@ namespace OMTesting
         }
 
 
-        IDictionary<int, int> identify = new Dictionary<int, int>();
+        IDictionary<uint, int> identify = new Dictionary<uint, int>();
         const int IDENTIFY_COUNT = 12;
 
         private void buttonIdentify_Click(object sender, EventArgs e)
         {
             foreach (ListViewItem item in listViewDevices.SelectedItems)
             {
-                int id = (int)item.Tag;
+                uint id = (uint)item.Tag;
                 if (identify.ContainsKey(id)) { identify[id] = IDENTIFY_COUNT; }
                 else { identify.Add(id, IDENTIFY_COUNT); }
             }
@@ -592,7 +592,7 @@ namespace OMTesting
         {
             foreach (ListViewItem item in listViewDevices.SelectedItems)
             {
-                int id = (int)item.Tag;
+                uint id = (uint)item.Tag;
                 if (devices.ContainsKey(id))
                 {
                     if (devices[id].Mode == DeviceStatus.DeviceMode.Error || devices[id].Mode == DeviceStatus.DeviceMode.Failed)

@@ -211,7 +211,7 @@ const char *OmReaderMetadata(OmReaderHandle reader, int *deviceId, unsigned int 
     if (state == NULL) { return NULL; }
 
     // Output values
-    if (deviceId != NULL) { *deviceId = state->deviceId; }
+	if (deviceId != NULL) { *deviceId = (int)state->deviceId; }
     if (sessionId != NULL) { *sessionId = state->sessionId; }
 
     return (const char *)state->metaData; 

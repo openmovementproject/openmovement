@@ -1,5 +1,7 @@
 # AX3 GUI - Revision History
 
+* [AX3-GUI-40](AX3-GUI-40.zip?raw=true) 2018-09-06: (Beta) Support for large serial numbers (32- rather than 16-bit).
+
 * [AX3-GUI-39](AX3-GUI-39.zip?raw=true) 2018-06-21: (Beta) Using OMAPI 1.8 (future support for device variants), battery health messages, RTC check on configuration, download filename verification.
 
 * [AX3-GUI-38](AX3-GUI-38.zip?raw=true) 2018-04-26: (Beta) Fixed configuring devices with sample rates less than 25Hz in cultures using a comma as a decimal separator.
