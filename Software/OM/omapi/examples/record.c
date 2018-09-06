@@ -59,7 +59,36 @@
 
 static FILE *ofp = NULL;
 typedef enum { DEVICE_DISCONNECTED = 0, DEVICE_CONNECTED, DEVICE_ERROR, DEVICE_DONE } devicestatus_t;
-devicestatus_t deviceStatus[65536] = {DEVICE_DISCONNECTED};
+
+struct deviceInfo_tag;
+typedef struct deviceInfo_tag
+{
+	int deviceId;
+	devicestatus_t status;
+	struct deviceInfo_tag *next;
+} deviceInfo_t;
+deviceInfo_t *deviceInfo = NULL;
+
+static devicestatus_t *getDeviceStatus(int deviceId)
+{
+	// Find existing
+	for (deviceInfo_t *di = deviceInfo; di != NULL; di = di->next)
+	{
+		if (di->deviceId == deviceId)
+		{
+			return &di->status;
+		}
+	}
+	// Insert
+	deviceInfo_t *newDeviceInfo = (deviceInfo_t *)malloc(sizeof(deviceInfo_t));
+	memset(newDeviceInfo, 0, sizeof(deviceInfo_t));
+	newDeviceInfo->deviceId = deviceId;
+	newDeviceInfo->status = DEVICE_DISCONNECTED;
+	newDeviceInfo->next = deviceInfo;	// chain to existing
+	deviceInfo = newDeviceInfo;	// new head of chain
+	return &newDeviceInfo->status;
+}
+
 
 // Start time
 int startDays = 1, startHour = 0;
@@ -275,13 +304,13 @@ static void record_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
     if (status == OM_DEVICE_CONNECTED)
     {
         fprintf(stderr, "RECORD #%d: Device CONNECTED\n", deviceId);
-        deviceStatus[deviceId] = DEVICE_CONNECTED;
+		*getDeviceStatus(deviceId) = DEVICE_CONNECTED;
         if (onlySingleId <= 0) OmSetLed(deviceId, OM_LED_YELLOW);
     }
     else if (status == OM_DEVICE_REMOVED)
     {
         fprintf(stderr, "RECORD #%d: Device REMOVED\n", deviceId);
-        deviceStatus[deviceId] = DEVICE_DISCONNECTED;
+		*getDeviceStatus(deviceId) = DEVICE_DISCONNECTED;
     }
     else
     {
@@ -329,11 +358,11 @@ int record(const char *outfile)
 
             if (onlySingleId > 0 && deviceId != onlySingleId) { continue; }
 
-            if (deviceStatus[deviceId] == DEVICE_CONNECTED)
+            if (*getDeviceStatus(deviceId) == DEVICE_CONNECTED)
             {
                 // Check battery...
                 int battery = OmGetBatteryLevel(deviceId);
-                if (OM_FAILED(battery)) { printf("ERROR: OmGetBatteryLevel(%d) %s\n", deviceId, OmErrorString(battery)); deviceStatus[deviceId] = DEVICE_ERROR; }
+                if (OM_FAILED(battery)) { printf("ERROR: OmGetBatteryLevel(%d) %s\n", deviceId, OmErrorString(battery)); *getDeviceStatus(deviceId) = DEVICE_ERROR; }
                 else
                 {
                     fprintf(stderr, "[%d@%d%%];", deviceId, battery);
@@ -346,13 +375,13 @@ int record(const char *outfile)
                         ret = record_setup(deviceId);
                         if (ret == 1)
                         {
-                            deviceStatus[deviceId] = DEVICE_DONE;
+							*getDeviceStatus(deviceId) = DEVICE_DONE;
                             if (onlySingleId <= 0) OmSetLed(deviceId, OM_LED_MAGENTA);
 onlySingleIdReturn = 0;
                         }
                         else
                         {
-                            deviceStatus[deviceId] = DEVICE_ERROR;
+							*getDeviceStatus(deviceId) = DEVICE_ERROR;
                             if (onlySingleId <= 0) OmSetLed(deviceId, OM_LED_RED);
 onlySingleIdReturn = 1;
                         }
@@ -394,7 +423,7 @@ int record_main(int argc, char *argv[])
 		{
 			if (strcmp(argv[i], "-id") == 0)
 			{
-				onlySingleId = atoi(argv[++i]);
+				onlySingleId = (int)strtoul(argv[++i], NULL, 10);
 				printf("*** SINGLE ID MODE FOR %d ***\n", onlySingleId);
 			}
 			else if (strcmp(argv[i], "-startdays") == 0) { startDays = atoi(argv[++i]); printf("PARAM: startDays=%d\n", startDays); }
