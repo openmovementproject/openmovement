@@ -642,9 +642,9 @@ namespace OmGui
                         if (checkBoxY.Checked) { label = label + "\r\nY: " + aggregate.Avg.Y.ToString("+0.00;-0.00") + " g"; }
                         if (checkBoxZ.Checked) { label = label + "\r\nZ: " + aggregate.Avg.Z.ToString("+0.00;-0.00") + " g"; }
                         //if (checkBoxAccel.Checked) { label = label + "\r\nAccel: " + aggregate.Avg.Amplitude.ToString("+0.00;-0.00") + " g"; }
-                        if (checkBoxGyroX.Checked) { label = label + "\r\nGX: " + aggregate.Avg.X.ToString("+0.00;-0.00") + " dps"; }
-                        if (checkBoxGyroY.Checked) { label = label + "\r\nGY: " + aggregate.Avg.Y.ToString("+0.00;-0.00") + " dps"; }
-                        if (checkBoxGyroZ.Checked) { label = label + "\r\nGZ: " + aggregate.Avg.Z.ToString("+0.00;-0.00") + " dps"; }
+                        if (checkBoxGyroX.Checked) { label = label + "\r\nGX: " + aggregate.Avg.GX.ToString("+0.00;-0.00") + " dps"; }
+                        if (checkBoxGyroY.Checked) { label = label + "\r\nGY: " + aggregate.Avg.GY.ToString("+0.00;-0.00") + " dps"; }
+                        if (checkBoxGyroZ.Checked) { label = label + "\r\nGZ: " + aggregate.Avg.GZ.ToString("+0.00;-0.00") + " dps"; }
                     }
 
                     if (checkBoxLight.Checked) { label = label + "\r\nLight: " + aggregate.Avg.Light + ""; }
