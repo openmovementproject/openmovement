@@ -30,6 +30,16 @@ def read_timestamp(data):
 		print("WARNING: Invalid date:", year, month, day, hours, mins, secs)
 		return -1
 
+# 16-bit checksum (should sum to zero)
+def checksum(data):
+	sum = 0
+	for i in range(0, len(data), 2):
+		value = data[i] | (data[i + 1] << 8)
+		sum = (sum + value) & 0xffff
+	return sum
+
+def short_sign_extend(value):
+    return ((value + 0x8000) & 0xffff) - 0x8000
 
 def timestamp_string(timestamp):
 	if timestamp == 0:
@@ -170,17 +180,19 @@ def cwa_header(block):
 	return header
 
 
-def cwa_data(block):
+def cwa_data(block, extractData=False):
 	data = {}
 	if len(block) >= 512:
 		packetHeader = block[0:2]										# @ 0  +2   ASCII "AX", little-endian (0x5841)
 		packetLength = unpack('<H', block[2:4])[0]						# @ 2  +2   Packet length (508 bytes, with header (4) = 512 bytes total)
-		if packetHeader[0] == ord('A') and packetHeader[1] == ord('X') and packetLength == 508:
-			deviceFractional = unpack('<H', block[4:6])[0]			# @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
+		if packetHeader[0] == ord('A') and packetHeader[1] == ord('X') and packetLength == 508 and checksum(block) == 0:
+			#checksum = unpack('<H', block[510:512])[0]					# @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
+			
+			deviceFractional = unpack('<H', block[4:6])[0]				# @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
 			data['sessionId'] = unpack('<I', block[6:10])[0]			# @ 6  +4   Unique session identifier, 0 = unknown
 			data['sequenceId'] = unpack('<I', block[10:14])[0]			# @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
 			timestamp = read_timestamp(block[14:18])					# @14  +4   Last reported RTC value, 0 = unknown
-			light = unpack('<H', block[18:20])[0]				# @18  +2   Last recorded light sensor value in raw units, 0 = none
+			light = unpack('<H', block[18:20])[0]						# @18  +2   Last recorded light sensor value in raw units, 0 = none
 			# data['temperature'] = unpack('<H', block[20:22])[0]		# @20  +2   Last recorded temperature sensor value in raw units, 0 = none
 			# data['events'] = unpack('B', block[22:23])[0]				# @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
 			# data['battery'] = unpack('B', block[23:24])[0]			# @23  +1   Last recorded battery level in raw units, 0 = unknown
@@ -189,7 +201,6 @@ def cwa_data(block):
 			timestampOffset = unpack('<h', block[26:28])[0]				# @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
 			data['sampleCount'] = unpack('<H', block[28:30])[0]			# @28  +2   Number of accelerometer samples (80 or 120 if this sector is full)
 			# rawSampleData[480] = block[30:510]						# @30  +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
-			# checksum = unpack('<H', block[510:512])[0]				# @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
 			
 			# range = 16 >> (rateCode >> 6)
 			frequency = 3200 / (1 << (15 - (rateCode & 0x0f)))
@@ -256,7 +267,7 @@ def cwa_data(block):
 			#magRange = 32768 / magUnit
 			
 			# Unit
-			#gyroUnit = 32768.0 / gyroRange
+			gyroUnit = 32768.0 / gyroRange
 
 			if accelAxis >= 0:
 				data['accelAxis'] = accelAxis
@@ -265,10 +276,52 @@ def cwa_data(block):
 			if gyroAxis >= 0:
 				data['gyroAxis'] = gyroAxis
 				data['gyroRange'] = gyroRange
+				data['gyroUnit'] = gyroUnit
 			if magAxis >= 0:
 				data['magAxis'] = magAxis
+				data['magRange'] = magRange
 				data['magUnit'] = magUnit
-					
+			
+			# Read sample values
+			if extractData:
+				if accelAxis >= 0:
+					accelSamples = [[0, 0, 0]] * data['sampleCount']
+					if bytesPerAxis == 0 and channels == 3:
+						for i in range(data['sampleCount']):
+							ofs = 30 + i * 4
+							#val =  block[i] | (block[i + 1] << 8) | (block[i + 2] << 8) | (block[i + 3] << 24)
+							val = unpack('<I', block[ofs:ofs + 4])[0]
+							ex = (6 - ((val >> 30) & 3))
+							print(val, ex)
+							accelSamples[i][0] = (short_sign_extend((0xffc0 & (val <<  6))) >> ex) / accelUnit
+							accelSamples[i][1] = (short_sign_extend((0xffc0 & (val >>  4))) >> ex) / accelUnit
+							accelSamples[i][2] = (short_sign_extend((0xffc0 & (val >> 14))) >> ex) / accelUnit
+					elif bytesPerSample == 2:
+						for i in range(data['sampleCount']):
+							ofs = 30 + (i * 2 * channels) + 2 * accelAxis
+							accelSamples[i][0] = (block[ofs + 0] | (block[ofs + 1] << 8)) / accelUnit
+							accelSamples[i][1] = (block[ofs + 2] | (block[ofs + 3] << 8)) / accelUnit
+							accelSamples[i][2] = (block[ofs + 4] | (block[ofs + 5] << 8)) / accelUnit
+					data['samplesAccel'] = accelSamples
+				
+				if gyroAxis >= 0 and bytesPerSample == 2:
+					gyroSamples = [[0, 0, 0]] * data['sampleCount']
+					for i in range(data['sampleCount']):
+						ofs = 30 + (i * 2 * channels) + 2 * gyroAxis
+						gyroSamples[i][0] = (block[ofs + 0] | (block[ofs + 1] << 8)) / gyroUnit
+						gyroSamples[i][1] = (block[ofs + 2] | (block[ofs + 3] << 8)) / gyroUnit
+						gyroSamples[i][2] = (block[ofs + 4] | (block[ofs + 5] << 8)) / gyroUnit
+					data['samplesGyro'] = gyroSamples
+				
+				if magAxis >= 0 and bytesPerSample == 2:
+					magSamples = [[0, 0, 0]] * data['sampleCount']
+					for i in range(data['sampleCount']):
+						ofs = 30 + (i * 2 * channels) + 2 * magAxis
+						magSamples[i][0] = (block[ofs + 0] | (block[ofs + 1] << 8)) / magUnit
+						magSamples[i][1] = (block[ofs + 2] | (block[ofs + 3] << 8)) / magUnit
+						magSamples[i][2] = (block[ofs + 4] | (block[ofs + 5] << 8)) / magUnit
+					data['samplesMag'] = magSamples
+			
 			# Light
 			light &= 0x3ff		# actual light value is least significant 10 bits
 
@@ -370,5 +423,5 @@ if __name__ == "__main__":
 			else:
 				print('ERROR: Unknown output mode: %s' % mode)
 		except Exception as e:
-			print('Exception ' + e.__doc__ + ' -- ' + e.message)
+			print('Exception ' + e.__doc__ + ' -- ' + str(e))
 
