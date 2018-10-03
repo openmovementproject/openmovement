@@ -423,7 +423,7 @@ function data = readFileInfo(filename, options)
     data.stop.str    = datestr(data.validPackets(end,2));
     
     % get deviceId from first packet
-    fseek(fid, data.validPackets(1,1)*512+4,-1);
+    fseek(fid, 5,-1);
     data.deviceId = fread(fid, 1, 'uint16', 0, 'ieee-le');
     
     % get sessionId from first packet
