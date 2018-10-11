@@ -1441,12 +1441,12 @@ static unsigned int DeviceIdFromSerialNumber(const char *serialNumber)
 }
 
 // true = definitely mismatched, false = couldn't definitely determine a mismatch
-bool CheckVolumeMismatch(const char *path, unsigned int id)
+int CheckVolumeMismatch(const char *path, unsigned int id)
 {
 	char volumeName[MAX_PATH + 1] = { 0 };
 	DWORD serialNumber = 0;
 
-	// Have to check against the mangled serial number that Microchip's FSIO.c generates
+	// Have to check against the serial number that Microchip's FSIO.c generates
 	int sid = (int)id;
 	unsigned char b[4];
 	b[0] = (unsigned char)(sid & 0xFF); b[1] = (unsigned char)((sid / 0x100) & 0xFF); b[2] = (unsigned char)((sid / 0x10000) & 0xFF); b[3] = (unsigned char)((sid / 0x1000000) & 0xFF);
@@ -1470,24 +1470,25 @@ bool CheckVolumeMismatch(const char *path, unsigned int id)
 	
 	OmLog(1, "- VOLUME NAME: %s = %u (last-7: %u)\n", volumeName, volume, id % 10000000);
 	OmLog(1, "- DISK SERIAL: [0x%04x=%d 0x%04x=%d] %u // FSIO-SERIAL: [0x%04x=%d 0x%04x=%d] %u\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff, serialNumber, fsioSerial >> 16, fsioSerial >> 16, fsioSerial & 0xffff, fsioSerial & 0xffff, fsioSerial);
-	OmLog(1, "- CWA FILE = %u\n", dataNumber);
+	OmLog(1, "- CWA FILE = %u%s\n", dataNumber, dataNumber >= 0xffffffff ? " (none)" : "");
 	
+	int mismatch = 0x00;
 	if (volume > 0 && volume != id % 10000000)	// Volume label limited to least significant 7 digits
 	{
 		OmLog(1, "- MISMATCH: Volume\n");
-		return true;
+		mismatch |= 0x01;
 	}
 
-	if (serialNumber > 0 && serialNumber != id && serialNumber != fsioSerial)	// Check against true serial number (in case FSIO.c is fixed in the future)
+	if (serialNumber > 0 && serialNumber != id && serialNumber != fsioSerial)	// Check against true serial number (in case FSIO.c is changed in the future)
 	{
 		OmLog(1, "- MISMATCH: Disk serial\n");
-		return true;
+		mismatch |= 0x02;
 	}
 	
-	if (dataNumber > 0 && dataNumber != id)
+	if (dataNumber > 0 && dataNumber < 0xffffffff && dataNumber != id)
 	{
 		OmLog(1, "- MISMATCH: Data file\n");
-		return true;
+		mismatch |= 0x04;
 	}
 	
 	return false;
@@ -1512,9 +1513,10 @@ static void OmWindowsAddedCallback(void *reference, const Device &device)
     // Current (first returned) mount point
     std::string volumePath = device.volumePath;
     
-	if (CheckVolumeMismatch(volumePath.c_str(), device.serialNumber))
+	int mismatch = CheckVolumeMismatch(volumePath.c_str(), device.serialNumber);
+	if (mismatch)
 	{
-		OmLog(0, "ERROR: Problem detecting device path for device %d (mismatched volume at %s) -- reconnect.\n", device.deviceNumber, volumePath.c_str());
+		OmLog(0, "ERROR: Problem detecting device path for device %d (mismatched volume at %s:%s%s%s) -- reconnect.\n", device.serialNumber, volumePath.c_str(), mismatch & 1 ? " VOLUME-LABEL" : "", mismatch & 2 ? " DISK-SERIAL" : "", mismatch & 4 ? " DATA-FILE" : "");
 		return;
 	}
 

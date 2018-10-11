@@ -43,6 +43,7 @@ namespace OmGui
             //    Device = devices[0];
 
             InitializeComponent();
+            comboBoxGyroRange.SelectedIndex = 0;
 
             Text = title;
             //labelPrompt.Text = prompt;
@@ -78,9 +79,9 @@ namespace OmGui
             //checkBoxWeight.Checked = true;
 
             //Set default recording times
-            if (delayDaysPicker.Value == 0)
+            if (delayDaysPicker.Value == 0 && StartDate.TimeOfDay < now.TimeOfDay)
             {
-                // If no day delay specified, reset the time-of-day to now
+                // If no day delay specified, and last set earlier than now, reset the time-of-day to now
                 StartDate = StartDate.Date + now.TimeOfDay;
             }
             EndDate = StartDate + Duration;
@@ -92,7 +93,6 @@ namespace OmGui
             datePickerEnd.Visible = true;
 
             // Gyro
-            comboBoxGyroRange.SelectedIndex = 0;
             if (hasSyncGyro)
             {
                 // No low-power option
@@ -161,17 +161,11 @@ namespace OmGui
 
             // New settings
             settingsDictionary.Add("Frequency", comboBoxSamplingFreq.SelectedItem.ToString());
-            if (!this.hasSyncGyro)
-            {
-                settingsDictionary.Add("LowPower", checkBoxLowPower.Checked ? "True" : "False");
-                settingsDictionary.Add("Unpacked", checkBoxUnpacked.Checked ? "True" : "False");
-            }
+            settingsDictionary.Add("LowPower", checkBoxLowPower.Checked ? "True" : "False");
+            settingsDictionary.Add("Unpacked", checkBoxUnpacked.Checked ? "True" : "False");
             settingsDictionary.Add("Range", comboBoxRange.SelectedItem.ToString());
-            if (this.hasSyncGyro)
-            {
-                int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int gyroRange);
-                settingsDictionary.Add("GyroRange", gyroRange.ToString());
-            }
+            int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int gyroRange);
+            settingsDictionary.Add("GyroRange", gyroRange.ToString());
             settingsDictionary.Add("DelayDays", DayDelay.ToString());
             settingsDictionary.Add("TimeOfDay", StartDate.TimeOfDay.TotalSeconds.ToString());
             settingsDictionary.Add("Duration", Duration.TotalSeconds.ToString());
@@ -262,7 +256,7 @@ namespace OmGui
                         if (o.ToString().Equals(pair.Value)) { comboBoxRange.SelectedItem = o; break; }
                     }
                 }
-                else if (pair.Key.Equals("GyroRange") && this.hasSyncGyro)
+                else if (pair.Key.Equals("GyroRange"))
                 {
                     int.TryParse(pair.Value, out int value);
                     if (value == 0)
@@ -301,7 +295,7 @@ namespace OmGui
                     if (pair.Value.Equals("True")) { checkBoxFlash.Checked = true; }
                     else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = false; }
                 }
-                else if (pair.Key.Equals("Unpacked") && !this.hasSyncGyro)
+                else if (pair.Key.Equals("Unpacked"))
                 {
                     if (pair.Value.Equals("True")) { checkBoxUnpacked.Checked = true; }
                     else if (pair.Value.Equals("False")) { checkBoxFlash.Checked = false; }
@@ -751,7 +745,8 @@ Cursor.Current = Cursors.WaitCursor;
                 //Duration could be limited by device capacity
                 int.TryParse(comboBoxGyroRange.SelectedItem == null ? "" : comboBoxGyroRange.SelectedItem.ToString(), out int capacityGyroRange);
                 int axes = capacityGyroRange > 0 ? 6 : 3;
-                double estimateCapacityInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateCapacityFromBytesFree(device.DeviceCapacity, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture), checkBoxUnpacked.Checked, axes);
+                bool unpacked = this.hasSyncGyro || checkBoxUnpacked.Checked; // gyro device always unpacked
+                double estimateCapacityInSeconds = comboBoxSamplingFreq.SelectedItem == null ? 0 : EstimateCapacityFromBytesFree(device.DeviceCapacity, (int)float.Parse(comboBoxSamplingFreq.SelectedItem.ToString(), System.Globalization.CultureInfo.InvariantCulture), unpacked, axes);
                 if (ts.TotalSeconds > estimateCapacityInSeconds)
                     warningMessagesFlags[2] = true;
 

@@ -1856,8 +1856,8 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                }
 
 
-                               // Check unpacked
-                               if (rangeForm.Unpacked)
+                               // Check unpacked (gyro devices default to unpacked)
+                               if (rangeForm.Unpacked && !device.HasSyncGyro)
                                {
                                    recordBackgroundWorker.ReportProgress((100 * (5 * i + 4) / (devices.Length * 5)), message + "(unpacked setting)");
                                    if (devicePath != null && devicePath.Length > 0)
@@ -4087,7 +4087,7 @@ Console.WriteLine("backgroundWorkerUpdate - WARNING STATE CHANGED " + device.Dev
 					}
 					else if (device.DeviceWarning >= 1) {
 						this.Invoke((Func<DialogResult>)(() => 
-							MessageBox.Show(this, "Device " + device.DeviceId + " has lost track of the time since last configuration, which is\r\nlikely caused by leaving the device in a fully discharged state for a significant time.\r\nThis can adversely affect the long-term battery condition.\r\nThe device batteries should be kept topped-up approximately every 3 months.\r\nAlternatively, this might be an indicator of an affected battery.", "Caution: Device May Have Fully Discharged", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1)
+							MessageBox.Show(this, "Device " + device.DeviceId + " has lost track of the time since last configuration,\r\nwhich is likely caused by leaving the device in a fully discharged state for a significant time.\r\nThis can adversely affect the long-term battery condition.\r\nThe device batteries should be kept topped-up approximately every 3 months.\r\nAlternatively, this might be an indicator of an affected battery.", "Caution: Device May Have Fully Discharged", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1)
 						));
 					}
 				}

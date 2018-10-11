@@ -437,12 +437,14 @@ category = SourceCategory.Other;
             DateTime setTime = new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
             if (OmApi.OM_FAILED(OmApi.OmSetTime((int)deviceId, OmApi.OmDateTimePack(setTime))))
             {
+                Console.WriteLine("TIMESYNC: Failed to write time.");
                 return false;   // Failed to write time
             }
 
             // Verify that the clock was set as expected
             if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out uint newTime)))
             {
+                Console.WriteLine("TIMESYNC: Failed to read time.");
                 return false;   // Failed to read time
             }
             DateTime newDateTime = OmApi.OmDateTimeUnpack(newTime);
@@ -450,6 +452,7 @@ category = SourceCategory.Other;
 //            Console.WriteLine("Setting time to: " + setTime + " -- received: " + newDateTime + " (delta " + timeDifference + "ms).");
             if (Math.Abs(timeDifference.TotalMilliseconds) > 3000)
             {
+                Console.WriteLine("TIMESYNC: Time was not within range: " + (int)timeDifference.TotalSeconds);
                 return false;   // Clock was not set correctly
             }
 
@@ -462,14 +465,17 @@ category = SourceCategory.Other;
             {
                 if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out uint currentTime)))
                 {
+                    Console.WriteLine("TIMESYNC: Failed to read time while checking change.");
                     return false;   // Failed to read time
                 }
                 if (currentTime > newTime && ((DateTime.Now - OmApi.OmDateTimeUnpack(currentTime)).TotalMilliseconds < 5000))
                 {
                     break;          // The clock is ticking and within a few seconds of now
                 }
-                if ((DateTime.Now - checkStart).TotalMilliseconds > 3000)
+                var td = DateTime.Now - checkStart;
+                if (td.TotalMilliseconds > 4000)
                 {
+                    Console.WriteLine("TIMESYNC: Time was not within range while checking change: " + (int)td.TotalSeconds);
                     return false;   // The clock is not ticking
                 }
             }
