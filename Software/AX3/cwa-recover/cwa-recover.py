@@ -82,7 +82,7 @@ def recoverCwa(inputFile, outputFile):
         sequenceId = unpack('<I', block[o+10:o+14])[0]
         
         # Report on mismatched checksums
-        if False:
+        if True:
           if completeBlock:
             checksum = unpack('<H', block[o+510:o+512])[0]
             actualChecksum = checksum512(block)
@@ -132,8 +132,8 @@ def recoverCwa(inputFile, outputFile):
         deviceId = unpack('<H', block[o+5:o+7])[0]			# @ 5  +2   Device identifier
         sessionId = unpack('<I', block[o+7:o+11])[0]
         deviceIdUpper = unpack('<H', block[o+11:o+13])[0]		# @ 11  +2   Upper device identifier
-		if deviceIdUpper == 0xffff:
-			deviceIdUpper = 0x0000
+        if deviceIdUpper == 0xffff:
+            deviceIdUpper = 0x0000
         print("Found header with session ID: " + str(sessionId) + " (device=" + str(deviceId) + ")")
         globalDeviceId = (deviceIdUpper << 16) + deviceId
         globalSessionId = sessionId
