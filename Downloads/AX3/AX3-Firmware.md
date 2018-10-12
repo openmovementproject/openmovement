@@ -12,7 +12,7 @@ You should never need to update the firmware yourself.
 
 * [AX3 Firmware V45](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/CWA17_45.hex) (.hex only) - Additional NAND white-list
 
-* [AX3 Firmware V44](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-44.zip) - Fixed occasional power consumption in V42
+* [AX3 Firmware V44](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-44.zip) - Fixed occasional high power consumption in V42 (language optimizer setting/bug)
 
 * AX3 Firmware V42 - Additional NAND white-list; working with higher sample rates.
 
