@@ -429,31 +429,46 @@ category = SourceCategory.Other;
 
         public bool SyncTime()
         {
-            DateTime time;
-            DateTime previous = DateTime.Now;
-            while ((time = DateTime.Now).Second == previous.Second) { volatileTemp++; }  // Busy spin until the second rollover (up to 1 second)
+            uint newTime = 0;       // last received timestamp (packed)
+            int retries = 12;
 
-            // ...now set the time (always to the nearest second)
-            DateTime setTime = new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
-            if (OmApi.OM_FAILED(OmApi.OmSetTime((int)deviceId, OmApi.OmDateTimePack(setTime))))
+            do
             {
-                Console.WriteLine("TIMESYNC: Failed to write time.");
-                return false;   // Failed to write time
-            }
+                DateTime previous = DateTime.Now;
+                DateTime time;
+                Console.WriteLine("TIMESYNC-DEBUG: Waiting for roll-over from: " + previous);
+                while ((time = DateTime.Now).Second == previous.Second) { volatileTemp++; }  // Busy spin until the second rollover (up to 1 second)
 
-            // Verify that the clock was set as expected
-            if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out uint newTime)))
+                // ...now set the time (always to the nearest second)
+                DateTime setTime = new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
+Console.WriteLine("TIMESYNC-DEBUG: Setting time: " + setTime);
+                if (OmApi.OM_FAILED(OmApi.OmSetTime((int)deviceId, OmApi.OmDateTimePack(setTime))))
+                {
+                    Console.WriteLine("TIMESYNC: Failed to write time.");
+                    continue;
+                }
+
+                // Verify that the clock was set as expected
+                if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out newTime)))
+                {
+                    Console.WriteLine("TIMESYNC: Failed to read time.");
+                    continue;
+                }
+                DateTime newDateTime = OmApi.OmDateTimeUnpack(newTime);
+                timeDifference = newDateTime - setTime;
+Console.WriteLine("TIMESYNC-DEBUG: Received time: " + newDateTime + ", delta: " + timeDifference.TotalMilliseconds + " ms");
+                if (Math.Abs(timeDifference.TotalMilliseconds) > 3000)
+                {
+                    Console.WriteLine("TIMESYNC: Time was not within range: " + (int)timeDifference.TotalSeconds);
+                    continue;
+                }
+Console.WriteLine("TIMESYNC-DEBUG: Set time ok, checking for ticks...");
+                break;  // everything ok
+            } while (--retries > 0);
+            if (retries <= 0)
             {
-                Console.WriteLine("TIMESYNC: Failed to read time.");
-                return false;   // Failed to read time
-            }
-            DateTime newDateTime = OmApi.OmDateTimeUnpack(newTime);
-            timeDifference = newDateTime - setTime;
-//            Console.WriteLine("Setting time to: " + setTime + " -- received: " + newDateTime + " (delta " + timeDifference + "ms).");
-            if (Math.Abs(timeDifference.TotalMilliseconds) > 3000)
-            {
-                Console.WriteLine("TIMESYNC: Time was not within range: " + (int)timeDifference.TotalSeconds);
-                return false;   // Clock was not set correctly
+                Console.WriteLine("TIMESYNC: Failed to set time successfully");
+                return false;
             }
 
             hasChanged = true;
@@ -473,9 +488,9 @@ category = SourceCategory.Other;
                     break;          // The clock is ticking and within a few seconds of now
                 }
                 var td = DateTime.Now - checkStart;
-                if (td.TotalMilliseconds > 4000)
+                if (Math.Abs(td.TotalMilliseconds) > 4000)
                 {
-                    Console.WriteLine("TIMESYNC: Time was not within range while checking change: " + (int)td.TotalSeconds);
+                    Console.WriteLine("TIMESYNC: Time is not ticking on device after " + (int)td.TotalSeconds + " sec.");
                     return false;   // The clock is not ticking
                 }
             }

@@ -965,7 +965,7 @@ bool DeviceFinder::FindDevices(std::list<Device>& devices)
         // Find the serial number from the serial string
         unsigned int serialNumber = 0;
 //printf("SERIAL: [%s]\n", serialString.c_str());
-OmLog(1, "SERIAL: [%s]\n", serialString.c_str());
+OmLog(2, "SERIAL: [%s]\n", serialString.c_str());
         if (serialString.length() > 0)
         {
             int firstDigit = (int)serialString.find_first_of('&') + 1;
@@ -991,9 +991,9 @@ OmLog(1, "SERIAL: [%s]\n", serialString.c_str());
                     int firstNumber = (int)serialString.find_last_not_of("0123456789", lastNumber) + 1;
                     if (firstNumber >= 0)
                     {
-OmLog(1, "SERIAL: numeric [%s]\n", serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str());
+OmLog(2, "SERIAL: numeric [%s]\n", serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str());
 						serialNumber = (unsigned int)strtoul(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str(), NULL, 10);
-OmLog(1, "SERIAL: =%u %u 0x%08x\n", serialNumber, strtol(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str(), NULL, 10), serialNumber);
+OmLog(2, "SERIAL: =%u %u 0x%08x\n", serialNumber, strtol(serialString.substr(firstNumber, lastNumber - firstNumber + 1).c_str(), NULL, 10), serialNumber);
 					}
                 }
             }
@@ -1452,10 +1452,10 @@ int CheckVolumeMismatch(const char *path, unsigned int id)
 	b[0] = (unsigned char)(sid & 0xFF); b[1] = (unsigned char)((sid / 0x100) & 0xFF); b[2] = (unsigned char)((sid / 0x10000) & 0xFF); b[3] = (unsigned char)((sid / 0x1000000) & 0xFF);
 	unsigned int fsioSerial = b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
 
-	OmLog(1, "VOLUME LABEL FOR: #%u %s\n", id, path);
+	OmLog(2, "VOLUME LABEL FOR: #%u %s\n", id, path);
 	if (!GetVolumeInformationA(path, volumeName, sizeof(volumeName), &serialNumber, NULL, NULL, NULL, 0))
 	{
-		OmLog(1, "- fail\n");
+		OmLog(2, "- fail\n");
 		return false;
 	}
 
@@ -1468,26 +1468,26 @@ int CheckVolumeMismatch(const char *path, unsigned int id)
 
 	unsigned int dataNumber = deviceIdFromFilePath(path);
 	
-	OmLog(1, "- VOLUME NAME: %s = %u (last-7: %u)\n", volumeName, volume, id % 10000000);
-	OmLog(1, "- DISK SERIAL: [0x%04x=%d 0x%04x=%d] %u // FSIO-SERIAL: [0x%04x=%d 0x%04x=%d] %u\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff, serialNumber, fsioSerial >> 16, fsioSerial >> 16, fsioSerial & 0xffff, fsioSerial & 0xffff, fsioSerial);
-	OmLog(1, "- CWA FILE = %u%s\n", dataNumber, dataNumber >= 0xffffffff ? " (none)" : "");
+	OmLog(2, "- VOLUME NAME: %s = %u (last-7: %u)\n", volumeName, volume, id % 10000000);
+	OmLog(2, "- DISK SERIAL: [0x%04x=%d 0x%04x=%d] %u // FSIO-SERIAL: [0x%04x=%d 0x%04x=%d] %u\n", serialNumber >> 16, serialNumber >> 16, serialNumber & 0xffff, serialNumber & 0xffff, serialNumber, fsioSerial >> 16, fsioSerial >> 16, fsioSerial & 0xffff, fsioSerial & 0xffff, fsioSerial);
+	OmLog(2, "- CWA FILE = %u%s\n", dataNumber, dataNumber >= 0xffffffff ? " (none)" : "");
 	
 	int mismatch = 0x00;
 	if (volume > 0 && volume != id % 10000000)	// Volume label limited to least significant 7 digits
 	{
-		OmLog(1, "- MISMATCH: Volume\n");
+		OmLog(2, "- MISMATCH: Volume\n");
 		mismatch |= 0x01;
 	}
 
 	if (serialNumber > 0 && serialNumber != id && serialNumber != fsioSerial)	// Check against true serial number (in case FSIO.c is changed in the future)
 	{
-		OmLog(1, "- MISMATCH: Disk serial\n");
+		OmLog(2, "- MISMATCH: Disk serial\n");
 		mismatch |= 0x02;
 	}
 	
 	if (dataNumber > 0 && dataNumber < 0xffffffff && dataNumber != id)
 	{
-		OmLog(1, "- MISMATCH: Data file\n");
+		OmLog(2, "- MISMATCH: Data file\n");
 		mismatch |= 0x04;
 	}
 	
@@ -1500,7 +1500,7 @@ int CheckVolumeMismatch(const char *path, unsigned int id)
 #include "omapi-internal.h"
 
 
-#define DEBUG_MOUNT
+//#define DEBUG_MOUNT
 
 
 /** Windows-specific device finder instance */

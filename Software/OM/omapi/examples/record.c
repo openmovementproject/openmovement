@@ -108,6 +108,8 @@ static const char NAND_DEVICE_HY27UF084G2M[6]   = { 0xAD, 0xDC, 0x80, 0x95, 0xAD
 static const char NAND_DEVICE_MT29F8G08AAA[6]   = { 0x2C, 0xD3, 0x90, 0x2E, 0x64, 0x00 };	// 3
 static const char NAND_DEVICE_S34ML04G1[6]      = { 0x01, 0xDC, 0x90, 0x95, 0x54, 0x00 };	// 4 "NAND_DEVICE_ALT2"
 static const char NAND_DEVICE_MT29F8G08ABADA[6] = { 0x2C, 0xDC, 0x90, 0x95, 0x56, 0x00 };	// 5 "NAND_DEVICE_ALT3" (actually 4G NAND_DEVICE_MT29F4G..., the on-board check terminates after the first two bytes)
+static const char NAND_DEVICE_AX6[6]            = { 0xC2, 0xDC, 0x90, 0x95, 0x56, 0x00 };	// 6 AX6
+
 
 static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *identified)
 {
@@ -132,6 +134,7 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
 		else if (memcmp(NAND_DEVICE_MT29F8G08AAA, (char *)localId, 6) == 0)   { *identified = 3; }
 		else if (memcmp(NAND_DEVICE_S34ML04G1, (char *)localId, 6) == 0)      { *identified = 4; }
 		else if (memcmp(NAND_DEVICE_MT29F8G08ABADA, (char *)localId, 6) == 0) { *identified = 5; }
+		else if (memcmp(NAND_DEVICE_AX6, (char *)localId, 6) == 0)            { *identified = 6; }
 	}
     if (parts[2] == NULL) { return OM_E_UNEXPECTED_RESPONSE; }
     if (present != NULL) 
@@ -190,6 +193,7 @@ int record_setup(int deviceId)
 				case 3: nandDescription = "MICRON (MT29F8G08AAA)"; break;      // NAND_DEVICE_MT29F8G08AAA
 				case 4: nandDescription = "SPANSION (S34ML04G1)"; break;       // NAND_DEVICE_S34ML04G1
 				case 5: nandDescription = "MICRON (MT29F4G08ABADA)"; break;    // id "NAND_DEVICE_MT29F8G08ABADA", but actually 4 Gb model
+				case 6: nandDescription = "AX6"; break;                        // AX6
 				default: nandDescription = "UNKNOWN!"; break;
 			}
 
@@ -221,9 +225,9 @@ int record_setup(int deviceId)
     result = OmSetTime(deviceId, nowTime);
     if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetTime() %s\n", OmErrorString(result)); return 0; }
 
-    /* Set the accelerometer configuration */
-    result = OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, OM_ACCEL_DEFAULT_RANGE);
-    fprintf(stderr, "RECORD #%d: Setting accelerometer configuration...\n", deviceId);
+    /* Set the accelerometer (+gyro) configuration */
+    result = OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, OM_ACCEL_DEFAULT_RANGE | (2000 << 16));
+    fprintf(stderr, "RECORD #%d: Setting accelerometer (+gyro) configuration...\n", deviceId);
     if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetAccelConfig() %s\n", OmErrorString(result)); return 0; }
 
     /* Set the session id (use the deviceId) */

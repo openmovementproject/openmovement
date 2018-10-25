@@ -1,5 +1,7 @@
 # AX3 GUI - Revision History
 
+* [AX3-GUI-41](AX3-GUI-41.zip?raw=true) 2018-10-25: (Beta) Support for AX6 configuration.
+
 * [AX3-GUI-40](AX3-GUI-40.zip?raw=true) 2018-09-06: (Beta) Support for large serial numbers (32- rather than 16-bit).
 
 * [AX3-GUI-39](AX3-GUI-39.zip?raw=true) 2018-06-21: (Beta) Using OMAPI 1.8 (future support for device variants), battery health messages, RTC check on configuration, download filename verification.
