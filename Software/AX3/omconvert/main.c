@@ -1,3 +1,5 @@
+// Fix for some PCs: C/C++; Code Generation; Enable Enhanced Instruction Set; Streaming SIMD Extensions (/arch:SSE)
+
 // DONE: Fixed an issue where the upper band-pass limit for SVM and PAEE (cut point) calculations was greater than the Nyquist limit for input data <= 40Hz -- now switches to a high-pass filter instead.
 // DONE: Occasional x / y / z std values were NaN (should now be 0 instead)
 // DONE: For interrupts, where there are no valid samples in the epoch, NaN can be emitted for the values:  use the parameter "-svm-extended", where 1=current behaviour of zero, 2=empty cell, 3="nan".
@@ -5,10 +7,9 @@
 // DONE: calibration parameters can be specified (combine with "-calibrate 0" to forcefully use them, otherwise will be used only if auto-calibration fails); the format is:  -calibration "scaleX,scaleY,scaleZ,offsetX,offsetY,offsetZ,tempX,tempY,tempZ,referenceTemp" (comma-, space- or semicolon- separated values, must use quotes if space-separated)
 // DONE: Fixed that clipped input/output values were overestimated (limits assumed 2G data)
 // DONE: SVM additional column to report the number of raw accelerometer samples (before interpolation).
+// DONE: Check other output range scaling other than +/- 8g (for CWA & OMX)
 
 // CONSIDER: Re-arranging to perform calibration accross all sessions and at native sampling rate (not interpolated)
-
-// TODO: Check other output range scaling other than +/- 8g (for CWA & OMX)
 
 // LATER: Sleep analysis algorithm (te Lindert et al 2013 in the journal SLEEP, volume 36, issue 5, page 781)
 // LATER: Check what output we want with multiple 'sessions' - how to override for normal 7-day data (up to 1 week missing)?
@@ -94,6 +95,9 @@ int main(int argc, char *argv[])
 	settings.wtvEpoch = 1;	// measured in 30 minute windows
 	settings.paeeEpoch = 1;	// measured in 1 minute windows
 	settings.paeeFilter = -1;
+	settings.paeeModel = "";	// default
+	settings.agfilterEpoch = 1;
+	settings.stepEpoch = 60;
 
 	for (i = 1; i < argc; i++)
 	{
@@ -107,6 +111,7 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-stationary") == 0) { settings.stationaryFilename = argv[++i]; }
 		else if (strcmp(argv[i], "-header-csv") == 0) { settings.headerCsv = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-time") == 0) { settings.timeCsv = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-forceaccept") == 0) { settings.forceAccept = true; }
 
 		else if (strcmp(argv[i], "-calibrate") == 0) { settings.calibrate = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-calibrate-repeated") == 0) { settings.repeatedStationary = atoi(argv[++i]); }
@@ -145,6 +150,11 @@ int main(int argc, char *argv[])
 		}
 
 		else if (strcmp(argv[i], "-csv-file") == 0) { settings.csvFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-csv-format") == 0) { settings.csvFormat = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-csv-format:accel") == 0) { settings.csvFormat = CSV_FORMAT_ACCEL; }
+		else if (strcmp(argv[i], "-csv-format:ag") == 0) { settings.csvFormat = CSV_FORMAT_AG; }
+		else if (strcmp(argv[i], "-csv-format:ga") == 0) { settings.csvFormat = CSV_FORMAT_GA; }
+		else if (strcmp(argv[i], "-csv-format:agdt") == 0) { settings.csvFormat = CSV_FORMAT_AGDT; }
 
 		else if (strcmp(argv[i], "-svm-file") == 0) { settings.svmFilename = argv[++i]; }
 		else if (strcmp(argv[i], "-svm-epoch") == 0) { settings.svmEpoch = atof(argv[++i]); }
@@ -156,11 +166,17 @@ int main(int argc, char *argv[])
 		else if (strcmp(argv[i], "-wtv-epoch") == 0) { settings.wtvEpoch = atoi(argv[++i]); }
 
 		else if (strcmp(argv[i], "-paee-file") == 0) { settings.paeeFilename = argv[++i]; }
-		else if (strcmp(argv[i], "-paee-model") == 0) { settings.paeeCutPoints = atoi(argv[++i]); }
+		else if (strcmp(argv[i], "-paee-model") == 0) { settings.paeeModel = argv[++i]; }
 		else if (strcmp(argv[i], "-paee-epoch") == 0) { settings.paeeEpoch = atoi(argv[++i]); }
 		else if (strcmp(argv[i], "-paee-filter") == 0) { settings.paeeFilter = atoi(argv[++i]); }
 
 		else if (strcmp(argv[i], "-sleep-file") == 0) { settings.sleepFilename = argv[++i]; }
+
+		else if (strcmp(argv[i], "-counts-file") == 0) { settings.agfilterFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-counts-epoch") == 0) { settings.agfilterEpoch = atoi(argv[++i]); }
+
+		else if (strcmp(argv[i], "-step-file") == 0) { settings.stepFilename = argv[++i]; }
+		else if (strcmp(argv[i], "-step-epoch") == 0) { settings.stepEpoch = atoi(argv[++i]); }
 
 		else if (argv[i][0] == '-')
 		{
@@ -188,6 +204,9 @@ int main(int argc, char *argv[])
 
 	if (help)
 	{
+		fprintf(stderr, "OMCONVERT\n");
+		fprintf(stderr, "V1.22\n");
+		fprintf(stderr, "\n");
 		fprintf(stderr, "Usage: omconvert <filename.cwa> [<options>...]\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "Where <options> are:\n");
@@ -200,6 +219,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-stationary <filename.csv>\n");
 		fprintf(stderr, "\t-header-csv <0=none, 1=header in first row (default)>\n");
 		fprintf(stderr, "\t-time <0=absolute (default), 1=UNIX epoch>\n");
+		fprintf(stderr, "\t-forceaccept");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-calibrate <0=off, 1=auto (default)>\n");	// 2=auto (force interpolator)
 		fprintf(stderr, "\t-calibrate-repeated <0=include (default), 1=ignore>\n");
@@ -221,6 +241,12 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "\t-paee-filter <0=off, 1=BP 0.5-20 Hz (default)>\n");
 		fprintf(stderr, "\n");
 		fprintf(stderr, "\t-sleep-file <filename.sleep.csv>\n");
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-counts-file <filename.counts.csv>\n");
+		fprintf(stderr, "\t-counts-epoch <seconds (default 1)>\n");		
+		fprintf(stderr, "\n");
+		fprintf(stderr, "\t-step-file <filename.step.csv>\n");
+		fprintf(stderr, "\t-step-epoch <seconds (default 60)>\n");		
 		fprintf(stderr, "\n");
 
 		ret = EXIT_USAGE;

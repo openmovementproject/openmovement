@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Newcastle University, UK.
+* Copyright (c) Newcastle University, UK.
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -23,76 +23,75 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-// Open Movement Physical Activity Intensity Classification
-// Dan Jackson, 2014
+// "AG aggregation method and band-pass filter"
+// Dan Jackson
 
-#ifndef PAEE_H
-#define PAEE_H
-
+#ifndef AGFILTER_H
+#define AGFILTER_H
 
 //#include <stdint.h>
 #include <stdbool.h>
 //#include <stdlib.h>
 #include <stdio.h>
 
-
-// PAEE configuration
+// AG-filter configuration
 typedef struct
 {
 	char headerCsv;
+	char timeCsv;
+	char formatCsv;			// 0=own, 1=AG
 	double sampleRate;
 	const char *filename;
-	char filter;
-	//char mode;
-	const double *cutPoints;
-	int minuteEpochs;		// Number of minute epochs to summarize over
+	int secondEpochs;		// Number of second epochs to summarize over
 	double startTime;
-} paee_configuration_t;
+} agfilter_configuration_t;
 
-#include "butter.h"
+#define AG_AXES 3
+#define AG_MAX_COEFFICIENTS 30
+//#define AG_VM_FLOAT
 
-#define PAEE_MAX_CUT_POINTS 3
-
-// PAEE status
+// AG-filter status
 typedef struct
 {
-	paee_configuration_t *configuration;
+	agfilter_configuration_t *configuration;
 
-	// Standard PAEE
 	FILE *file;
+	double decimateAccumulator;						// Input decimation accumulator
 	double epochStartTime;		// Start time of current epoch
+	int intervalSample;			// Valid seconds within this larger epoch
 	int sample;					// Sample number
-	int intervalSample;			// Valid samples within this minute
-	int minute;					// Minute number
-	double minutesAtLevel[PAEE_MAX_CUT_POINTS + 1];	// Minutes at each cut level
+	int epoch;					// Epoch number
 
-	// Standard SVM Filter values
-	double B[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];
-	double A[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];
-	double z[BUTTERWORTH_MAX_COEFFICIENTS(BUTTERWORTH_MAX_ORDER)];		// Final/initial condition tracking
+	int integCount;				// Integration count
+
+	// Standard filter values
+	double B[AG_MAX_COEFFICIENTS];
+	double A[AG_MAX_COEFFICIENTS];
+	double z[AG_AXES][AG_MAX_COEFFICIENTS];		// Final/initial condition tracking (per-axis)
 	int numCoefficients;
 
-	double sumSvm;
-	int numCutPoints;	// Each is < cutPoints[i], and N+1 elements to catch remaining values
+	int axisSum[AG_AXES];	// per-axis second-epoch sum
+	int axisTotal[AG_AXES];	// per-axis larger-epoch sum
 
-} paee_status_t;
+#ifdef AG_VM_FLOAT
+	double vmSum;			// VM second-epoch sum
+	double vmTotal;			// VM larger-epoch sum
+#else
+	int vmSum;				// VM second-epoch sum
+	int vmTotal;			// VM larger-epoch sum
+#endif
 
-
-// Available points
-extern const double paeeCutPointWrist[];
-extern const double paeeCutPointWristR[];
-extern const double paeeCutPointWristL[];
-extern const double paeeCutPointWaist[];
+	int written;			// number of written lines
+} agfilter_status_t;
 
 
 // Load data
-char PaeeInit(paee_status_t *status, paee_configuration_t *configuration);
+char AgFilterInit(agfilter_status_t *status, agfilter_configuration_t *configuration);
 
 // Processes the specified value
-bool PaeeAddValue(paee_status_t *status, double *value, double temp, bool valid);
+bool AgFilterAddValue(agfilter_status_t *status, double *value, double temp, bool valid);
 
 // Free data resources
-int PaeeClose(paee_status_t *status);
+int AgFilterClose(agfilter_status_t *status);
 
 #endif
-

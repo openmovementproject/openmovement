@@ -2,7 +2,8 @@
 
 BIN_NAME = omconvert
 CC = gcc
-CFLAGS = -O3 -Wall -ffast-math -march=native
+# CFLAGS = -O3 -Wall -ffast-math -march=native
+CFLAGS = -O3 -Wall -ffast-math -mtune=generic -DNO_MMAP=1
 LIBS = -lm -lpthread
 
 SRC = $(wildcard *.c)

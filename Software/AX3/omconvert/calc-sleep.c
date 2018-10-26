@@ -40,7 +40,7 @@ Algorithm:
   
 * Using just the Z axis which, from the hardware specification, is "out" of the wrist.
 * Standard deviation over each 1 second epoch window:  STD = sqrt(1/N * SUM( (z[i] - MEAN(z))^2 ))
-* A segment is extended by one 1 second epoch where:  STD < delta,  delta = 6.  The paper doesn't specify units, but from the data, and the way it is used by the code, this appears to be in untis of 1/32 G
+* A segment is extended by one 1 second epoch where:  STD < delta,  delta = 6.  The paper doesn't specify units, but from the data, and the way it is used by the code, this appears to be in units of 1/32 G
 * Segments must be of a minimum length to count: 600 epochs => 600 seconds.
 
 */
@@ -60,9 +60,9 @@ Algorithm:
 
 
 // Sleep parameters
-#define AXIS 2						// Z-axis
-#define EPOCH 1						// 1 second epoch
-#define DELTA (6 / 32.0)			// 6 (apparently in units of 1/32 G)
+#define AXIS 2										// Z-axis
+#define EPOCH 1										// 1 second epoch
+#define DELTA (6 / 32.0)					// 6 (apparently in units of 1/32 G)
 #define MIN_LENGTH (600 / EPOCH)	// Minimum length in epochs (600 * 1-second epochs)
 
 

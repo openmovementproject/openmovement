@@ -36,10 +36,18 @@
 #include <stdio.h>
 
 
+// CSV file header options
+#define CSV_FORMAT_ACCEL  0		// CSV export format is just time and acceleration in each axis
+#define CSV_FORMAT_AG     1		// CSV export format matches that of "ActiGraph(tm) ActiLife" software
+#define CSV_FORMAT_GA     2		// CSV export format matches that of "GENEActiv(tm) Software"
+#define CSV_FORMAT_AGDT   3		// CSV export format matches that of "ActiGraph(tm) ActiLife" Data Table format (counts only)
+
+
 // SVM configuration
 typedef struct
 {
 	char headerCsv;
+	int format;				// CSV_FORMAT_*
 	double sampleRate;
 	const char *filename;
 	double startTime;
@@ -54,12 +62,13 @@ typedef struct
 	// 
 	FILE *file;
 	int sample;				// Sample number
+	int numChannels;
 
 } csv_status_t;
 
 
 // Load data
-char CsvInit(csv_status_t *status, csv_configuration_t *configuration);
+char CsvInit(csv_status_t *status, csv_configuration_t *configuration, int numChannels);
 
 // Processes the specified value
 bool CsvAddValue(csv_status_t *status, double *value, double temp, bool valid);

@@ -33,12 +33,16 @@
 
 #include "omdata.h"
 
+#include "calc-csv.h"	// For CSV header settings
+#include "calc-paee.h"	// For cut-point settings
+
 struct omcalibrate_calibration_tag;
 
 
 typedef struct
 {
 	const char *filename;
+	bool forceAccept;
 
 	// Re-sample
 	const char *outFilename;
@@ -60,7 +64,7 @@ typedef struct
 
 	// CSV
 	const char *csvFilename;
-	//int csvFormat;
+	int csvFormat;				// CSV_FORMAT_*
 
 	// SVM
 	const char *svmFilename;
@@ -75,12 +79,21 @@ typedef struct
 
 	// PAEE
 	const char *paeeFilename;
-	int paeeCutPoints;
+	const char *paeeModel;
 	int paeeEpoch;			// in minutes
 	char paeeFilter;		// 0=off, 1=band-pass (0.2-50 Hz)
+	double customCutPoints[PAEE_MAX_CUT_POINTS + 1];
 
 	// Sleep
 	const char *sleepFilename;
+
+	// AG-Filter
+	const char *agfilterFilename;
+	int agfilterEpoch;		// in seconds
+
+	// Steps
+	const char *stepFilename;
+	int stepEpoch;
 
 } omconvert_settings_t;
 
@@ -127,7 +140,8 @@ typedef struct
 	int16_t values[4][OMDATA_MAX_CHANNELS];	// Cache seeked values, for each channel, at indices (-1, 0, 1, 2) -- enough for cubic interpolation
 	bool clipped;
 	bool valid;
-	double scale;
+	double scale;			// segment with the smallest scale will be ~1/range (range will be next largest integer)
+	int maxRange;			// segment with the largest range ~1/scale (will be next largest integer)
 } interpolator_t;
 
 
@@ -142,6 +156,7 @@ typedef struct om_convert_player_tag
 	interpolator_t adcInterpolator;
 	double values[OMDATA_MAX_CHANNELS + 1];
 	double scale[OMDATA_MAX_CHANNELS + 1];
+	int maxAccelRange;
 	short aux[3];
 	double temp;
 	char valid;

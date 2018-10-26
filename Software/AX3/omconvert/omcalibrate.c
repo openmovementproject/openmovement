@@ -73,7 +73,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 		}
 		dataSegment = stream->segmentFirst;
 
-		sampleRate = dataSegment->sampleRate;
+		sampleRate = dataSegment->description.sampleRate;
 		startTime = dataSegment->startTime;
 
 		// Determine total number of samples
@@ -81,7 +81,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 		omdata_segment_t *seg;
 		for (seg = dataSegment; seg != NULL; seg = seg->segmentNext)
 		{
-			numSamples += seg->numSamples;
+			numSamples += seg->description.numSamples;
 		}
 	}
 	else
@@ -154,7 +154,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 				break;
 			}
 
-			int sectorWithinSegment = sampleWithinSegment / dataSegment->samplesPerSector;
+			int sectorWithinSegment = sampleWithinSegment / dataSegment->description.samplesPerSector;
 			if (sectorWithinSegment >= dataSegment->sectorCount)
 			{
 				fprintf(stderr, "WARNING: Invalid sector within segment.\n");
@@ -162,7 +162,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 			}
 
 			// Advance to next segment?
-			if (sampleWithinSegment >= dataSegment->numSamples)
+			if (sampleWithinSegment >= dataSegment->description.numSamples)
 			{
 				dataSegment = dataSegment->segmentNext;
 				samplesInPreviousSegments = sample;
@@ -171,7 +171,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 				// Update rates/times
 				if (dataSegment != NULL)
 				{
-					sampleRate = dataSegment->sampleRate;
+					sampleRate = dataSegment->description.sampleRate;
 					startTime = dataSegment->startTime;
 				}
 
@@ -195,7 +195,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 
 				// Get current sector time
 				int sampleIndexOffset = 0;
-				double newTimestampValue = OmDataTimestampForSector(data, sectorIndex, &sampleIndexOffset);
+				double newTimestampValue = OmDataTimestampForSector(data, sectorIndex, 'a', &sampleIndexOffset);
 				int newTimestampSample = sample + sampleIndexOffset;
 
 				// Replace 'next' timestamp if different
@@ -244,7 +244,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 
 			// Get temperature
 			temp = 0;
-			if (dataSegment->offset == 30)
+			if (dataSegment->description.offset == 30)
 			{
 				const unsigned char *p = (const unsigned char *)data->buffer + (OMDATA_SECTOR_SIZE * sectorIndex);
 				int16_t inttemp = p[20] | ((int16_t)p[21] << 8);		// @20 WORD Temperature
@@ -256,7 +256,7 @@ static omcalibrate_stationary_points_t *OmCalibrateFindStationaryPoints(omcalibr
 			// Scale values
 			for (c = 0; c < OMCALIBRATE_AXES; c++)
 			{
-				values[c] = intvalues[c] * dataSegment->scaling;
+				values[c] = intvalues[c] * dataSegment->description.scaling;
 			}
 
 			// Check whether a window is filled

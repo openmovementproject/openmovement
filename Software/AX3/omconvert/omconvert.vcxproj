@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -14,18 +14,19 @@
     <ProjectGuid>{C7DCEA7D-4CF2-4B77-B625-8057944F86AB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>omconvert</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -78,7 +79,7 @@
       <EnablePREfast>false</EnablePREfast>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
@@ -91,10 +92,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="agfilter.c" />
     <ClCompile Include="butter.c" />
     <ClCompile Include="calc-csv.c" />
     <ClCompile Include="calc-paee.c" />
     <ClCompile Include="calc-sleep.c" />
+    <ClCompile Include="calc-step.c" />
     <ClCompile Include="calc-svm.c" />
     <ClCompile Include="calc-wtv.c" />
     <ClCompile Include="linearregression.c" />
@@ -105,10 +108,13 @@
     <ClCompile Include="wav.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="agcoefficients.h" />
+    <ClInclude Include="agfilter.h" />
     <ClInclude Include="butter.h" />
     <ClInclude Include="calc-csv.h" />
     <ClInclude Include="calc-paee.h" />
     <ClInclude Include="calc-sleep.h" />
+    <ClInclude Include="calc-step.h" />
     <ClInclude Include="calc-svm.h" />
     <ClInclude Include="calc-wtv.h" />
     <ClInclude Include="linearregression.h" />

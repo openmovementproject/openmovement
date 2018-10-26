@@ -33,7 +33,7 @@ Cut-point calculation
 
   SVMgs = SUM(abs(sqrt(x^2 + y^2 + z^2) – 1))
 
-Where sum is for 60 seconds at 80Hz, so divide all cut-points below by 4800 to work with any average SVM (???)
+Where sum is for 60 seconds at 80Hz, so divide all cut-points below by 4800 to work on mean SVM-1
 
 									GENEA	R/Dom	L/N-D	Waist	
 Sedentary	 < 1.5 METS										
@@ -41,16 +41,30 @@ Light   	>= 1.5 METS	< 4 METS	 386	 386	 217	  77
 Moderate	>= 4.0 METS	< 7 METS	 542	 440	 645	 220	
 Vigorous	>= 7.0 METS	        	1811	2099	1811	2057	
 
-// Original SVMgs = SUM(abs(sqrt(x ^ 2 + y ^ 2 + z ^ 2) – 1)) at 80Hz (from "Validation of the GENEA Accelerometer" by Esliger et al.) so these cut-points * 1/(60*80) for average SVM?
-// Senentary, Light (>= 1.5 METS, < 4 METS), Moderate (>= 4.0 METS, < 7 METS), Vigorous (>= 7.0 METS)
+// Original SVMgs = SUM(abs(sqrt(x ^ 2 + y ^ 2 + z ^ 2) – 1)) at 80Hz (from "Validation of the GENEA Accelerometer" by Esliger et al.) so these cut-points * 1/(60*80) for average SVM
+// Sedentary, Light (>= 1.5 METS, < 4 METS), Moderate (>= 4 METS, < 7 METS), Vigorous (>= 7 METS)
+*/
+
+/*
+From Schaefer et al ("Establishing and Evaluating Wrist Cutpoints for the GENEActiv Accelerometer in Youth")
+(6-11 years)
+-- 75 Hz data, band-pass filtered 0.2-15Hz, average SVM-1 values, already normalized:
+0.190
+0.314
+0.998
+Sedentary, Light (>= 1.5 METS, < 3 METS), Moderate (>= 3 METS, < 6 METS), Vigorous (>= 6 METS)
 */
 
 /*
 From Phillips et al ("Calibration of the GENEA accelerometer for assessment of physical activity intensity in children")
-Author, Site (Rate), Sedentary/Light/Moderate/Vigorous (g/s)
-Phillips et al, Left Wrist, 80Hz,  <7, 7-19, 20-60, >60
-Phillips et al, Right Wrist, 80Hz, <6, 6-21, 22-56, >56
+(8-14 years old)
+Author, Site, Rate, Sedentary/Light/Moderate/Vigorous (g/s) - normalized by *(1/80)
+Phillips et al, Right Wrist, 80Hz, <6, <22, <56 (>=56)
+Phillips et al, Left Wrist, 80Hz,  <7, <20, <60 (>=60)
+Phillips et al, Hip, 80Hz,         <3, <17, <51 (>=51)
+Sedentary, Light (>= 1.5 METS, < 3 METS), Moderate (>= 3 METS, < 6 METS), Vigorous (>= 6 METS)
 */
+
 
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
@@ -65,11 +79,11 @@ Phillips et al, Right Wrist, 80Hz, <6, 6-21, 22-56, >56
 #include "calc-paee.h"
 
 
-#define PAEE_NORMALIZE (1.0 / (60.0 * 80.0))		// Normalize as figures in paper were direct sum of abs(SVM-1) for 60 seconds at 80Hz
-const double paeeCutPointWrist[PAEE_CUT_POINTS]  = { 386.0 * PAEE_NORMALIZE, 542.0 * PAEE_NORMALIZE, 1811.0 * PAEE_NORMALIZE };	// In GENEA analysis
-const double paeeCutPointWristR[PAEE_CUT_POINTS] = { 386.0 * PAEE_NORMALIZE, 440.0 * PAEE_NORMALIZE, 2099.0 * PAEE_NORMALIZE };
-const double paeeCutPointWristL[PAEE_CUT_POINTS] = { 217.0 * PAEE_NORMALIZE, 645.0 * PAEE_NORMALIZE, 1811.0 * PAEE_NORMALIZE };
-const double paeeCutPointWaist[PAEE_CUT_POINTS]  = {  77.0 * PAEE_NORMALIZE, 220.0 * PAEE_NORMALIZE, 2057.0 * PAEE_NORMALIZE };
+#define PAEE_NORMALIZE_80Hz (1.0 / (60.0 * 80.0))		// Normalize as figures in paper were direct sum of abs(SVM-1) for 60 seconds at 80Hz
+const double paeeCutPointWrist[]  = { 386.0 * PAEE_NORMALIZE_80Hz, 542.0 * PAEE_NORMALIZE_80Hz, 1811.0 * PAEE_NORMALIZE_80Hz, 0 };	// In GENEA analysis
+const double paeeCutPointWristR[] = { 386.0 * PAEE_NORMALIZE_80Hz, 440.0 * PAEE_NORMALIZE_80Hz, 2099.0 * PAEE_NORMALIZE_80Hz, 0 };
+const double paeeCutPointWristL[] = { 217.0 * PAEE_NORMALIZE_80Hz, 645.0 * PAEE_NORMALIZE_80Hz, 1811.0 * PAEE_NORMALIZE_80Hz, 0 };
+const double paeeCutPointWaist[]  = {  77.0 * PAEE_NORMALIZE_80Hz, 220.0 * PAEE_NORMALIZE_80Hz, 2057.0 * PAEE_NORMALIZE_80Hz, 0 };
 
 #define AXES 3
 
@@ -90,8 +104,21 @@ char PaeeInit(paee_status_t *status, paee_configuration_t *configuration)
 
 	if (status->configuration->cutPoints == NULL)
 	{
-		fprintf(stderr, "ERROR: PAEE cut points rate not specified.\n");
+		fprintf(stderr, "ERROR: PAEE cut point values not specified.\n");
 		return 0;
+	}
+
+	// Calculate number of cut-point levels
+	status->numCutPoints = 0;
+	for (int i = 0; i < PAEE_MAX_CUT_POINTS; i++)
+	{
+		//fprintf(stderr, "DEBUG: custom cut point %d = %f\n", status->numCutPoints, status->configuration->cutPoints[i]);
+		// Sentinal last value
+		if (status->configuration->cutPoints[i] <= 0.0)
+		{
+			break;
+		}
+		status->numCutPoints++;
 	}
 
 	status->file = NULL;
@@ -157,7 +184,7 @@ void PaeePrint(paee_status_t *status)
 		sprintf(timestring, "%04d-%02d-%02d %02d:%02d:%02d", 1900 + tmn->tm_year, tmn->tm_mon + 1, tmn->tm_mday, tmn->tm_hour, tmn->tm_min, (int)sec);	// (int)((sec - (int)sec) * 1000)
 
 		fprintf(status->file, "%s", timestring);
-		for (c = 0; c < PAEE_CUT_POINTS + 1; c++)
+		for (c = 0; c < status->numCutPoints + 1; c++)
 		{
 			fprintf(status->file, ",%u", (int)(status->minutesAtLevel[c] + 0.5));
 		}
@@ -229,7 +256,7 @@ bool PaeeAddValue(paee_status_t *status, double* accel, double temp, bool valid)
 		if (status->intervalSample > 0) { meanSvm = status->sumSvm / status->intervalSample; }
 
 		// Add to the correct cut points
-		for (c = PAEE_CUT_POINTS; c >= 0; c--)
+		for (c = status->numCutPoints; c >= 0; c--)
 		{
 			if (c == 0 || meanSvm >= status->configuration->cutPoints[c - 1])
 			{
@@ -245,7 +272,7 @@ bool PaeeAddValue(paee_status_t *status, double* accel, double temp, bool valid)
 			PaeePrint(status);
 
 			status->minute = 0;
-			for (c = 0; c < PAEE_CUT_POINTS + 1; c++) { status->minutesAtLevel[c] = 0; }
+			for (c = 0; c < status->numCutPoints + 1; c++) { status->minutesAtLevel[c] = 0; }
 			status->epochStartTime = 0;
 		}
 
