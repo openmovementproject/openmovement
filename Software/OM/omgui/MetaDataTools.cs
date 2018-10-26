@@ -403,6 +403,12 @@ namespace OmGui
 
                     this.deviceId = BitConverter.ToUInt16(metadataBuffer, 5);
                     this.deviceSessionId = BitConverter.ToUInt32(metadataBuffer, 7);
+                    uint majorDeviceId = BitConverter.ToUInt16(metadataBuffer, 11);
+                    if (majorDeviceId > 0x0000 && majorDeviceId < 0xffff)
+                    {
+                        this.deviceId |= majorDeviceId << 16;
+                    }
+
                     this.samplingRateCode = metadataBuffer[36];
                     this.samplingRate = (3200.0 / (1 << (15 - (this.samplingRateCode & 0x0f))));
                     this.samplingRange = (16 >> (this.samplingRateCode >> 6));
