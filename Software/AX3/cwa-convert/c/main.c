@@ -476,7 +476,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 										if (format == FORMAT_RAW)
 										{
 											if (accelAxis >= 0 && z >= accelAxis && z < accelAxis + 3) { divide = (float)accelScale; }
-											else if (gyroAxis >= 0 && z >= gyroAxis && z < gyroAxis + 3) { divide = (float)gyroScale / 32768.0f; }
+											else if (gyroAxis >= 0 && z >= gyroAxis && z < gyroAxis + 3) { divide = 32768.0f / (float)gyroScale; }
 											else if (magAxis >= 0 && z >= magAxis && z < magAxis + 3) { divide = (float)magScale; }
 											else { divide = 1.0f; }
 										}
@@ -747,7 +747,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 									// Gyro
 									if (!(options & OPTIONS_NO_GYRO) && gyroAxis >= 0)
 									{
-										float scale = gyroScale / 32768.0f;
+										float scale = 32768.0f / gyroScale;
 										if (values == VALUES_INT)
 										{
 											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", gx, gy, gz);
