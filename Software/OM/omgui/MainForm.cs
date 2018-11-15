@@ -1805,7 +1805,8 @@ Console.WriteLine("toolStripButtonDownload_Click() ENDED...");
                                    }
                                    else
                                    {
-                                       error = "Sync. Gyro. config specified on non-gyro device.";
+                                       // Ignore gyro config for non-gyro devices
+                                       //error = "Sync. Gyro. config specified on non-gyro device.";
                                    }
                                 }
                                if (error == null && OmApi.OM_FAILED(OmApi.OmSetAccelConfig((int)device.DeviceId, freq, range)))

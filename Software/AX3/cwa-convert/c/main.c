@@ -540,7 +540,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 							freq = 3200.0f / (1 << (15 - (dataPacket->sampleRate & 0x0f)));
 							if (freq <= 0.0f) { freq = 1.0f; }
 							offsetStart = -dataPacket->timestampOffset / freq;
-
+//if ((numAxes >= 6)) { offsetStart *= 2; } // temporary fix to beta FW issue
 #if 0
                             // If we have a fractional offset
                             if (dataPacket->deviceId & 0x8000)

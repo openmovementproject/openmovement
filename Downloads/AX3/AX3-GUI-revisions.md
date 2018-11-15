@@ -1,5 +1,7 @@
 # AX3 GUI - Revision History
 
+* [AX3-GUI-42](AX3-GUI-42.zip?raw=true) 2018-11-15: (Beta) Fix for issue configuring AX3 after an AX6 with synchronous gyro configured.
+
 * [AX3-GUI-41](AX3-GUI-41.zip?raw=true) 2018-10-25: (Beta) Support for AX6 configuration.
 
 * [AX3-GUI-40](AX3-GUI-40.zip?raw=true) 2018-09-06: (Beta) Support for large serial numbers (32- rather than 16-bit).
