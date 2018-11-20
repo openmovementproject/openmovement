@@ -9,6 +9,7 @@ Open Movement devices are miniature, embeddable, open source sensors developed b
   * [AX3 Infant Fabric Band](https://github.com/digitalinteraction/openmovement/tree/master/Mechanical/AX3/AX3%20Fabric%20Band)
 * [WAX3 Wireless accelerometers](http://github.com/digitalinteraction/openmovement/wiki/WAX3)
 * [WAX9 Wireless IMU](http://github.com/digitalinteraction/openmovement/wiki/WAX9)
+* [WAM Wearable Acoustic Monitor](http://github.com/digitalinteraction/openmovement/wiki/WAM)
 * [BuildAX Building monitoring](http://github.com/digitalinteraction/openmovement/wiki/BuildAX)
 * [WeighAX Weight monitoring](http://github.com/digitalinteraction/openmovement/wiki/WeighAX)
 
