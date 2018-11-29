@@ -51,6 +51,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 
@@ -93,6 +94,7 @@ static devicestatus_t *getDeviceStatus(int deviceId)
 // Start time
 int startDays = 1, startHour = 0;
 int durationDays = 8, endHour = 0;
+int minBatt = 85;
 
 
 // Experimental: Check NAND id
@@ -148,7 +150,12 @@ static int OmGetNandId(int deviceId, unsigned char *id, int *present, int *ident
 static int onlySingleId = -1;
 static int onlySingleIdReturn = -1;
 
-
+static bool hasGyro(int deviceId)
+{
+	char serialBuffer[OM_MAX_PATH];
+	if (OM_FAILED(OmGetDeviceSerial(deviceId, serialBuffer))) return false;
+	return memcmp(serialBuffer, "AX6", 3) == 0;
+}
 
 int record_setup(int deviceId)
 {
@@ -226,7 +233,14 @@ int record_setup(int deviceId)
     if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetTime() %s\n", OmErrorString(result)); return 0; }
 
     /* Set the accelerometer (+gyro) configuration */
-    result = OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, OM_ACCEL_DEFAULT_RANGE | (2000 << 16));
+	int range = OM_ACCEL_DEFAULT_RANGE;
+	bool gyro = hasGyro(deviceId);
+	fprintf(stderr, "RECORD #%d: Device has gyro: %s\n", deviceId, gyro ? "true" : "false");
+	if (gyro)
+	{
+		range |= 2000 << 16;
+	}
+    result = OmSetAccelConfig(deviceId, OM_ACCEL_DEFAULT_RATE, range);
     fprintf(stderr, "RECORD #%d: Setting accelerometer (+gyro) configuration...\n", deviceId);
     if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetAccelConfig() %s\n", OmErrorString(result)); return 0; }
 
@@ -371,8 +385,8 @@ int record(const char *outfile)
                 {
                     fprintf(stderr, "[%d@%d%%];", deviceId, battery);
 
-                    // If sufficient, set-up to record
-                    if (battery >= 85)
+                    // If sufficient battery (or setting a specific device), set-up to record
+                    if (onlySingleId > 0 || battery >= minBatt)
                     {
                         int ret;
                         fprintf(stderr, "\n");
@@ -434,6 +448,7 @@ int record_main(int argc, char *argv[])
 			else if (strcmp(argv[i], "-starthour") == 0) { startHour = atoi(argv[++i]); printf("PARAM: startHour=%d\n", startHour); }
 			else if (strcmp(argv[i], "-durationdays") == 0) { durationDays = atoi(argv[++i]); printf("PARAM: durationDays=%d\n", durationDays); }
 			else if (strcmp(argv[i], "-endhour") == 0) { endHour = atoi(argv[++i]); printf("PARAM: endHour=%d\n", endHour); }
+			else if (strcmp(argv[i], "-minbatt") == 0) { minBatt = atoi(argv[++i]); printf("PARAM: minBatt=%d\n", minBatt); }
 			else if (argv[i][0] == '-') { printf("WARNING: Ignoring parameter: %s\n", argv[i]); }
 			else
 			{
