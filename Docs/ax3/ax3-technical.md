@@ -133,7 +133,7 @@ typedef struct
     uint32_t loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, should be 0 = unlimited)
     uint8_t  reserved1[1];                      ///< @25  +1   (1 byte reserved)
     uint8_t  flashLed;                          ///< @26  +1   Flash LED during recording
-    uint8_t  reserved2[7];                      ///< @27  +7   (7 bytes reserved)
+    uint8_t  reserved2[8];                      ///< @27  +8   (8 bytes reserved)
     uint8_t  sensorConfig;                      ///< @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range: 1=2000, 2=1000, 3=500, 4=250, 5=125, top nibble non-zero is magnetometer enabled.
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change meta-data time
@@ -145,6 +145,8 @@ typedef struct
 } cwa_header_t;
 ```
 
+**NOTE:** For `.CWA` files produced by an *AX3*, `sensorConfig` can be ignored.
+
 
 #### CWA File Data Blocks
 
@@ -153,24 +155,28 @@ The CWA binary file data blocks are always 512 bytes in length at a 512-byte-mul
 ```c
 typedef struct
 {
-    uint16_t packetHeader;                      ///< @ 0  +2   ASCII "AX", little-endian (0x5841)
+    uint16_t packetHeader;                      ///< @ 0  +2   ASCII "AX", little-endian (0x5841)	
     uint16_t packetLength;                      ///< @ 2  +2   Packet length (508 bytes, with header (4) = 512 bytes total)
     uint16_t deviceFractional;                  ///< @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
     uint32_t sessionId;                         ///< @ 6  +4   Unique session identifier, 0 = unknown
     uint32_t sequenceId;                        ///< @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
     cwa_timestamp_t timestamp;                  ///< @14  +4   Last reported RTC value, 0 = unknown
-    uint16_t light;                             ///< @18  +2   Last recorded light sensor value in raw units, 0 = none
+    uint16_t lightScale;                        ///< @18  +2   AAAGGGLLLLLLLLLL Bottom 10 bits is last recorded light sensor value in raw units, 0 = none; top three bits are unpacked accel scale (1/2^(8+n) g); next three bits are gyro scale	(8000/2^n dps)
     uint16_t temperature;                       ///< @20  +2   Last recorded temperature sensor value in raw units, 0 = none
     uint8_t  events;                            ///< @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
-    uint8_t  battery;                           ///< @23  +1   Last recorded battery level in raw units, 0 = unknown
+    uint8_t  battery;                           ///< @23  +1   Last recorded battery level in scaled/cropped raw units (double and add 512 for 10-bit ADC value), 0 = unknown
     uint8_t  sampleRate;                        ///< @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
-    uint8_t  numAxesBPS;                        ///< @25  +1   0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
+    uint8_t  numAxesBPS;                        ///< @25  +1   0x32 (top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
     int16_t  timestampOffset;                   ///< @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
-    uint16_t sampleCount;                       ///< @28  +2   Number of accelerometer samples (80 or 120 if this sector is full)
-    uint8_t  rawSampleData[480];                ///< @30  +480 Raw sample data.  Each sample is either 3x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
+    uint16_t sampleCount;                       ///< @28  +2   Number of sensor samples (if this sector is full -- Axyz: 80 or 120 samples, Gxyz/Axyz: 40 samples)
+    uint8_t  rawSampleData[480];                ///< @30  +480 Raw sample data.  Each sample is either 3x/6x/9x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
     uint16_t checksum;                          ///< @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
 } OM_READER_DATA_PACKET;
 ```
+
+**NOTE:** For `.CWA` files produced by an *AX3*: `lightScale` top 6 bits will be zero and can be ignored; `numAxesBPS` top nibble will always be `3`.
+
+The complexity of the way the timestamp is stored is for historical/backwards-compatibility reasons. Early 8-bit prototype devices didn't have the ability to track the real-time clock to a resolution less than one second, yet did know when the second changed.  To maximize the effective timer resolution (to be the same order as the sampling rate), the relative index of the sample just before the roll-over was recorded (`timestampOffset`). Before any AX3 devices were generally available, back in December 2011 (Firmware V23) one of the device's timers to the RTC's clock crystal to take a precise (sub-second) measurement whenever the underlying accelerometer's buffer fills up (for standard rates: every 25 samples, when it wakes the main processor): recording the index of the sample, and the full timestamp (with fractional part).  This most recent measurement is only actually stored when a whole sector is written. To allow existing file readers to maintain a high timer resolution, the best way to record this additional precision was to make new use of an existing field (`deviceFractional`, indicated by the top bit set) and adjust the `timestampOffset` to be the nearest sample to the whole-second roll-over (assuming the sample rate is exactly as configured).  If the high-precision timer is detected, this adjustment can be undone by newer readers, and the fractional time used instead.  In summary: the original format timestamp has no fractional part and the timestamp-offset is the relative sample index where that time is correct; newer readers can spot that the timestamp now includes the fractional part and the timestamp-offset can be adjusted to point to the sample the fractional timestamp was actually for (the backwards-compatible adjustment is undone).
 
 
 ## Communication Protocol
