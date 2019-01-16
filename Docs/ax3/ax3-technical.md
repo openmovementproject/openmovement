@@ -134,7 +134,7 @@ typedef struct
     uint8_t  reserved1[1];                      ///< @25  +1   (1 byte reserved)
     uint8_t  flashLed;                          ///< @26  +1   Flash LED during recording
     uint8_t  reserved2[8];                      ///< @27  +8   (8 bytes reserved)
-    uint8_t  sensorConfig;                      ///< @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range: 1=2000, 2=1000, 3=500, 4=250, 5=125, top nibble non-zero is magnetometer enabled.
+    uint8_t  sensorConfig;                      ///< @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change meta-data time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
@@ -161,7 +161,7 @@ typedef struct
     uint32_t sessionId;                         ///< @ 6  +4   Unique session identifier, 0 = unknown
     uint32_t sequenceId;                        ///< @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
     cwa_timestamp_t timestamp;                  ///< @14  +4   Last reported RTC value, 0 = unknown
-    uint16_t lightScale;                        ///< @18  +2   AAAGGGLLLLLLLLLL Bottom 10 bits is last recorded light sensor value in raw units, 0 = none; top three bits are unpacked accel scale (1/2^(8+n) g); next three bits are gyro scale	(8000/2^n dps)
+    uint16_t lightScale;                        ///< @18  +2   AAAGGGLLLLLLLLLL Bottom 10 bits is last recorded light sensor value in raw units, 0 = none; top three bits are unpacked accel scale (1/2^(8+n) g); next three bits are gyro scale (8000/2^n dps)
     uint16_t temperature;                       ///< @20  +2   Last recorded temperature sensor value in raw units, 0 = none
     uint8_t  events;                            ///< @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
     uint8_t  battery;                           ///< @23  +1   Last recorded battery level in scaled/cropped raw units (double and add 512 for 10-bit ADC value), 0 = unknown

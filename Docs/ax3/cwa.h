@@ -40,7 +40,7 @@ typedef struct
     uint8_t  reserved1[1];                      ///< @25  +1   (1 byte reserved)
     uint8_t  flashLed;                          ///< @26  +1   Flash LED during recording
     uint8_t  reserved2[8];                      ///< @27  +8   (8 bytes reserved)
-    uint8_t  sensorConfig;                      ///< @35  +1 * Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range: 1=2000, 2=1000, 3=500, 4=250, 5=125, top nibble non-zero is magnetometer enabled.
+    uint8_t  sensorConfig;                      ///< @35  +1 * Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change metadata time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
