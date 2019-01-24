@@ -199,13 +199,6 @@ function data = readFile(filename, options)
     % clocked flicked over to current time)
     packetIds = find(data.validPackets(:,3) > 0);
     
-    % now, use timestamp offset to get (sample) position on which timestamp
-    % occurred. TIME will be used for
-    % interpolation of other timestamps
-    TIME = [(packetIds*samplesPerPacket)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
-    % TIME_full just contains integer packet numbers for LIGHT and TEMP.
-    TIME_full = [packetIds data.validPackets(packetIds,2)];
-    
     % read data
     validIds = data.validPackets(:,1);
     
@@ -228,6 +221,13 @@ function data = readFile(filename, options)
     else
         fprintf('Unsupported number of axes or packing format (supports 3-axis, packed)\n');
     end
+    
+    % now, use timestamp offset to get (sample) position on which timestamp
+    % occurred. TIME will be used for
+    % interpolation of other timestamps
+    TIME = [(packetIds*samplesPerPacket)+double(data.validPackets(packetIds,3)) data.validPackets(packetIds,2)];
+    % TIME_full just contains integer packet numbers for LIGHT and TEMP.
+    TIME_full = [packetIds data.validPackets(packetIds,2)];
     
     % see what modalities to extract...
     if options.modality(1),

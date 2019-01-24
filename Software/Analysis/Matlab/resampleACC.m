@@ -24,7 +24,7 @@ function D = resampleACC(data, interpRate)
 		
 		D(:,1) = t;
 		for a=2:4,
-			D(:,a) = interp1(data.ACC(:,1),(data.ACC(:,a)),t,'cubic',0);
+			D(:,a) = interp1(data.ACC(:,1),(data.ACC(:,a)),t,'pchip',0);
 		end
 		
 		% D is now the interpolated signal with time-stamps @interpRate
