@@ -157,27 +157,6 @@ function data = readFile(filename, options)
         % get the valid packet position from the given matrix
         data.validPackets = options.validPackets;
     end
-    
-	% Check packet number of axes and packing format
-	samplesPerPacket = 0
-	numAxesBPS = -1
-    for i=1:length(validIds),
-		if i == 1
-			numAxesBPS = data.validPackets(i,4)
-		end
-		if numAxesBPS ~= data.validPackets(i,4)
-            fprintf('WARNING: Not all packets are the same format -- this process will not work correctly.\n');
-		end
-    end
-	if numAxesBPS == 3*16 + 0
-		samplesPerPacket = 120
-	elseif numAxesBPS == 3*16 + 2
-		samplesPerPacket = 80
-		fprintf('WARNING: Unpacked format is not supported\n')
-	else
-		fprintf('Unsupported number of axes or packing format (supports 3-axis, packed)\n');
-	end
-	
 
     % get relevant parts of data if sliced reading enabled
     %
@@ -229,6 +208,26 @@ function data = readFile(filename, options)
     
     % read data
     validIds = data.validPackets(:,1);
+    
+    % Check packet number of axes and packing format
+    samplesPerPacket = 0
+    numAxesBPS = -1
+    for i=1:length(validIds),
+        if i == 1
+            numAxesBPS = data.validPackets(i,4)
+        end
+        if numAxesBPS ~= data.validPackets(i,4)
+            fprintf('WARNING: Not all packets are the same format -- this process will not work correctly.\n');
+        end
+    end
+    if numAxesBPS == 3*16 + 0
+        samplesPerPacket = 120
+    elseif numAxesBPS == 3*16 + 2
+        samplesPerPacket = 80
+        fprintf('WARNING: Unpacked format is not supported\n')
+    else
+        fprintf('Unsupported number of axes or packing format (supports 3-axis, packed)\n');
+    end
     
     % see what modalities to extract...
     if options.modality(1),
