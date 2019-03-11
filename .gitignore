@@ -8,3 +8,4 @@
 /Software/AX3/cwa-convert/c/Debug
 /Software/AX3/cwa-convert/c/Release
 *.user
+/scan.cmd
