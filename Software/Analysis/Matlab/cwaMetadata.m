@@ -1,13 +1,49 @@
 function metadata = cwaMetadata(file)
 % Load CWA Metadata
-%
-% metadata = cwaMetadata(cwaFilename)
-% for k = metadata.keys()
-%   metadata(k{1}))
-% end
-%
 % - Dan Jackson, 2019.
-
+%
+% To load the metadata for a .CWA file:
+%
+%  metadata = cwaMetadata(cwaFilename);
+%
+% To list the metadata keys (fields) and their values:
+%
+%  for k = metadata.keys()
+%    disp(struct('key', k, 'value', metadata(k{1})))
+%  end
+%
+% The possible keys for the study are:
+%
+% _c  Study Centre
+% _s  Study Code
+% _i  Study Investigator
+% _x  Exercise Type
+% _so Operator
+% _n  Notes
+%
+% The possible keys for the subject are:
+%
+% _sc Subject Code
+% _se Sex (- / male / female)
+% _h  Height
+% _w  Weight
+% _ha Handedness (- / left / right)
+% _p  Site (- / left wrist / right wrist / waist / left ankle / right ankle / left thigh / right thigh / left hip / right hip / left upper-arm / right upper-arm / chest / sacrum / neck / head
+% _co Comments
+%
+% You can check if a given key is present, e.g. for 'Height':
+%
+%  metadata.isKey('_h')
+%
+% And you can look up a given value, e.g. for 'Height':
+%
+%  metadata('_h')
+%
+% As the metadata is always a string, you may sometimes want the numerical value instead, e.g.:
+%
+%  str2num(metadata('_h'))
+%
+%
     function ret = urldecode(str)
         function hex = isHex(char)
             %hexChars = ['0':'9' 'A':'F' 'a':'f']
@@ -30,7 +66,7 @@ function metadata = cwaMetadata(file)
                 ofs = ofs + 1;
             end
         end
-        ret = native2unicode(ret);
+        ret = native2unicode(ret, 'UTF-8');
     end
 
     function params = decodeParams(str)
