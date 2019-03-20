@@ -1,1 +1,1 @@
-# OpenMovement docs branch (do not merge)
+# Open Movement static website branch (do not merge)
