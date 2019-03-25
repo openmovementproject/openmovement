@@ -17,11 +17,11 @@ Open Movement devices are miniature, embeddable, open source sensors developed b
 
 [Downloads](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/README.md)
 
-[Documentation Wiki](http://github.com/digitalinteraction/openmovement/wiki/Documentation)
+<!-- [Documentation Wiki](http://github.com/digitalinteraction/openmovement/wiki/Documentation) -->
 
-[Support & Issues](http://github.com/digitalinteraction/openmovement/wiki/Support) 
+<!-- [Support & Issues](http://github.com/digitalinteraction/openmovement/wiki/Support) -->
 
-[Source](http://github.com/digitalinteraction/openmovement/wiki/Source) 
+<!-- [Source](http://github.com/digitalinteraction/openmovement/wiki/Source) -->
 
 ## See Also ##
 
