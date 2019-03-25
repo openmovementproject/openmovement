@@ -20,6 +20,7 @@ namespace OMTesting
         public int StartHour;
         public int DurationDays;
         public int EndHour;
+        public int DebugMode;
 
         // Device status tracker
         class DeviceStatus
@@ -129,7 +130,7 @@ namespace OMTesting
             }
 
 
-            public bool StartConfigure(int startDays, int startHour, int durationDays, int endHour)
+            public bool StartConfigure(int startDays, int startHour, int durationDays, int endHour, int debugMode)
             {
                 // See if a charging device should be configured
                 if (Mode != DeviceStatus.DeviceMode.Charging) { return false; }
@@ -139,7 +140,7 @@ namespace OMTesting
                 // Create the command-line-interface wrapper
                 Configure configure;
                 string configCommand = @"omapi-examples.exe";
-                string args = "record -id $id -startdays $startdays -starthour $starthour -durationdays $durationdays -endhour $endhour";
+                string args = "record -id $id -startdays $startdays -starthour $starthour -durationdays $durationdays -endhour $endhour -debugmode $debugmode";
                 string basePath;
 
                 //basePath = AppDomain.CurrentDomain.BaseDirectory;
@@ -150,7 +151,7 @@ namespace OMTesting
                 configure.Completed += configure_Completed;
 
                 // Begin background configure
-                configure.ConfigureAsync(Id, startDays, startHour, durationDays, endHour);
+                configure.ConfigureAsync(Id, startDays, startHour, durationDays, endHour, debugMode);
 
                 return true;
             }
@@ -219,7 +220,7 @@ namespace OMTesting
 
 
 
-        public MainForm(string loadFile, bool autoAdd, int minBattery, int startDays, int startHour, int durationDays, int endHour)
+        public MainForm(string loadFile, bool autoAdd, int minBattery, int startDays, int startHour, int durationDays, int endHour, int debugMode)
         {
             InitializeComponent();
 
@@ -230,6 +231,7 @@ namespace OMTesting
             this.StartHour = startHour;
             this.DurationDays = durationDays;
             this.EndHour = endHour;
+            this.DebugMode = debugMode;
 
             Console.WriteLine("Started.");
         }
@@ -508,7 +510,7 @@ namespace OMTesting
                 // See if a charging device should be configured
                 if (!configuring && device.Mode == DeviceStatus.DeviceMode.Charging && device.CanConfigure(MinBattery))
                 {
-                    device.StartConfigure(StartDays, StartHour, DurationDays, EndHour);
+                    device.StartConfigure(StartDays, StartHour, DurationDays, EndHour, DebugMode);
                     changed = true;
                 }
                 else

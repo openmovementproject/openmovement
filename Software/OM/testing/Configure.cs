@@ -125,7 +125,7 @@ namespace OMTesting
             return;
         }
 
-        public bool ConfigureSync(uint id, int startDays, int startHour, int durationDays, int endHour)
+        public bool ConfigureSync(uint id, int startDays, int startHour, int durationDays, int endHour, int debugMode)
         {
             ErrorMessages = null;
             try
@@ -154,6 +154,7 @@ namespace OMTesting
                 args = args.Replace("$starthour", startHour.ToString());
                 args = args.Replace("$durationdays", durationDays.ToString());
                 args = args.Replace("$endhour", endHour.ToString());
+                args = args.Replace("$debugmode", debugMode.ToString());
 
                 // Create the process structure
                 ProcessStartInfo processInformation = new ProcessStartInfo();
@@ -243,12 +244,12 @@ namespace OMTesting
         }
 
 
-        public void ConfigureAsync(uint id, int startDays, int startHour, int durationDays, int endHour)
+        public void ConfigureAsync(uint id, int startDays, int startHour, int durationDays, int endHour, int debugMode)
         {
             Thread thread = new Thread(() => {
                 try
                 {
-                    ConfigureSync(id, startDays, startHour, durationDays, endHour);
+                    ConfigureSync(id, startDays, startHour, durationDays, endHour, debugMode);
                 }
                 catch { ; }     // Swallow any re-thrown (ConvertSync will have called 'Completed' call-back with exception)
             });

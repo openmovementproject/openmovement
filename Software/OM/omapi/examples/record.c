@@ -95,6 +95,7 @@ static devicestatus_t *getDeviceStatus(int deviceId)
 int startDays = 1, startHour = 0;
 int durationDays = 8, endHour = 0;
 int minBatt = 85;
+int debugMode = 0;
 
 
 // Experimental: Check NAND id
@@ -255,8 +256,10 @@ int record_setup(int deviceId)
 	/* Clear the metadata */
 	OmSetMetadata(deviceId, NULL, 0);
 	
-	/* Zero the debug setting*/
-	OmCommand(deviceId, "\r\nDEBUG 0\r\n", NULL, 0, "DEBUG=", 2000, NULL, 0);
+	/* Set the debug setting*/
+	char debugCommand[128];
+	sprintf(debugCommand, "\r\nDEBUG %d\r\n", debugMode);
+	OmCommand(deviceId, debugCommand, NULL, 0, "DEBUG=", 2000, NULL, 0);
 	
 #if 1
     {
@@ -449,6 +452,7 @@ int record_main(int argc, char *argv[])
 			else if (strcmp(argv[i], "-durationdays") == 0) { durationDays = atoi(argv[++i]); printf("PARAM: durationDays=%d\n", durationDays); }
 			else if (strcmp(argv[i], "-endhour") == 0) { endHour = atoi(argv[++i]); printf("PARAM: endHour=%d\n", endHour); }
 			else if (strcmp(argv[i], "-minbatt") == 0) { minBatt = atoi(argv[++i]); printf("PARAM: minBatt=%d\n", minBatt); }
+			else if (strcmp(argv[i], "-debugmode") == 0) { debugMode = atoi(argv[++i]); printf("PARAM: debugmode=%d\n", debugMode); }
 			else if (argv[i][0] == '-') { printf("WARNING: Ignoring parameter: %s\n", argv[i]); }
 			else
 			{

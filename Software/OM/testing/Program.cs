@@ -47,6 +47,7 @@ namespace OMTesting
                 int startHour = 0;
                 int durationDays = 8;
                 int endHour = 0;
+                int debugMode = 0;
 
                 int positional = 0;
                 string loadFile = null;
@@ -59,9 +60,10 @@ namespace OMTesting
                     else if (args[i].ToLower() == "-starthour") { startHour = int.Parse(args[++i]); }
                     else if (args[i].ToLower() == "-durationdays") { durationDays = int.Parse(args[++i]); }
                     else if (args[i].ToLower() == "-endhour") { endHour = int.Parse(args[++i]); }
+                    else if (args[i].ToLower() == "-debugmode") { debugMode = int.Parse(args[++i]); }
                     else if (args[i][0] == '-' || args[i][0] == '/')
                     {
-                        string error = "ERROR: Ignoring unknown option: " + args[i] + "\r\n(-minbattery / -startdays / -starthour / -durationdays / -endhour)";
+                        string error = "ERROR: Ignoring unknown option: " + args[i] + "\r\n(-minbattery / -startdays / -starthour / -durationdays / -endhour / -debugmode)";
                         Console.Error.WriteLine(error);
                         MessageBox.Show(null, error, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
@@ -78,7 +80,7 @@ namespace OMTesting
                     }
                 }
 
-                MainForm mainForm = new MainForm(loadFile, autoAdd, minBattery, startDays, startHour, durationDays, endHour);
+                MainForm mainForm = new MainForm(loadFile, autoAdd, minBattery, startDays, startHour, durationDays, endHour, debugMode);
                 //mainForm.LogFile = logFile;
 
                 Application.Run(mainForm);
