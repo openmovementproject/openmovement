@@ -79,12 +79,12 @@ namespace OmGui
             { "_x",   "StudyExerciseType" },
             { "_so",  "StudyOperator" },
             { "_n",   "StudyNotes" },
-            { "_p",   "SubjectSite" },
+            { "_p",   "SubjectSite" }, // - / left wrist / right wrist / waist / left ankle / right ankle / left thigh / right thigh / left hip / right hip / left upper-arm / right upper-arm / chest / sacrum / neck / head
             { "_sc",  "SubjectCode" },
-            { "_se",  "SubjectSex" },
+            { "_se",  "SubjectSex" },  // - / male / female
             { "_h",   "SubjectHeight" },
             { "_w",   "SubjectWeight" },
-            { "_ha",  "SubjectHandedness" },
+            { "_ha",  "SubjectHandedness" }, // - / left / right
             { "_sn",  "SubjectNotes" },
         };
         // "DeviceId"
