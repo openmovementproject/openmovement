@@ -45,6 +45,7 @@ Transform: (identity).
 ```
 
 Transform: *x'* = -*x*, *z'* = -*z*.
+Gyro: *gx'* = -*gx*, *gz'* = -*gz*.
 
 
 ## Rotated 180 degrees around X-axis: "flipped on long side"
@@ -60,7 +61,7 @@ Transform: *x'* = -*x*, *z'* = -*z*.
 ```
 
 Transform: *y'* = -*y*, *z'* = -*z*.
-
+Gyro: *gy'* = -*gy*, *gz'* = -*gz*.
 
 
 ## Rotated 180 degrees around both X-axis and Y-axis: "rotated 180 degrees rotate Z-axis", "flipped on long and short sides"
@@ -76,6 +77,7 @@ Transform: *y'* = -*y*, *z'* = -*z*.
 ```
 
 Transform: *x'* = -*x*, *y'* = -*y*.
+Gyro: *gx'* = -*gx*, *gy'* = -*gy*.
 
 
 ## Making the transform on .WAV files
