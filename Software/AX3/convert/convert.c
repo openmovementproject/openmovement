@@ -36,6 +36,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include <time.h>
+#include <sys/timeb.h>
+
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#define timegm _mkgmtime
+#elif __APPLE__				// Fix for Mac build by Alberto Corbi Bellot
+#else
+#define _BSD_SOURCE		// Both of these lines
+#include <features.h>	// ...needed for timegm() in time.h on Linux
+#endif
 
 /* API header */
 #include "StreamParser.h"
@@ -44,6 +56,72 @@
 
 
 typedef enum { TIME_TIMESTAMP, TIME_SERIAL, TIME_SECONDS, TIME_EXCEL, TIME_MATLAB } TimeMode;
+
+
+// Parse a string date/time representation ("YYYY-MM-DD hh:mm:ss.fff") in to seconds since the epoch (also supports time-only portion)
+#define TIME_MAX_STRING 26
+double parseTimestamp(const char *timeString)
+{
+	int index = 0;
+	char *token = NULL;
+	char *p;
+	char end = 0;
+	struct tm tm0 = { 0 };
+	double fraction = 0;
+	char tstr[TIME_MAX_STRING];
+	char err = 0;
+	char timeOnly = 0;
+
+	//strcpy_s(tstr, sizeof(tstr), timeString);
+	{
+		size_t len = strlen(timeString);
+		if (len >= TIME_MAX_STRING - 1) { len = TIME_MAX_STRING - 1; }
+		memcpy(tstr, timeString, len);
+		tstr[len] = '\0';
+	}
+
+	if (strlen(tstr) >= 8 && tstr[2] == tstr[5] == ':')
+	{
+		timeOnly = 1;
+		index = 3;
+	}
+
+	for (p = tstr; !end; p++)
+	{
+		end = (*p == '\0');
+		if (token == NULL && *p >= '0' && *p <= '9')
+		{
+			token = p;
+		}
+		if (token != NULL && (*p < '0' || *p > '9'))
+		{
+			*p = '\0';
+			int value = atoi(token);
+			int digits = (int)strlen(token);
+			token = NULL;
+			if (index == 0) { if (value < 1900 || value > 2100) { err = 1; } tm0.tm_year = value - 1900; }		// since 1900
+			else if (index == 1) { if (value < 1 || value > 12) { err = 1; } tm0.tm_mon = value - 1; }	// 0-11
+			else if (index == 2) { if (value < 1 || value > 31) { err = 1; } tm0.tm_mday = value; }		// 1-31
+			else if (index == 3) { if (value < 0 || value > 23) { err = 1; } tm0.tm_hour = value; }		// 
+			else if (index == 4) { if (value < 0 || value > 59) { err = 1; } tm0.tm_min = value; }		// 
+			else if (index == 5) { if (value < 0 || value > 59) { err = 1; } tm0.tm_sec = value; }		// 
+			else if (index == 6) { fraction = value / pow(10.0, (double)digits); }				// 
+			index++;
+		}
+	}
+	if (index < 5) { err = 1; }
+	if (err != 0) { return 0; }
+	double t;
+	if (timeOnly)
+	{
+		t = ((double)tm0.tm_hour * 60 * 60) + (tm0.tm_min * 60) + tm0.tm_sec + fraction;
+	}
+	else
+	{
+		t = (double)timegm(&tm0) + fraction;
+	}
+	return t;
+}
 
 
 double parseTime(const char *value, double firstTimestamp, double relativeTimestamp)
@@ -67,7 +145,15 @@ double parseTime(const char *value, double firstTimestamp, double relativeTimest
             t = relativeTimestamp;
             p++;
         }
-        t += atof(p);
+
+		if (*p == '@')
+		{
+			t = parseTimestamp(p + 1);
+		}
+		else
+		{
+			t += atof(p);
+		}
     }
     return t;
 }
@@ -186,11 +272,8 @@ int convert(const char *infile, const char **outfiles, char tee, TimeMode timeMo
 				t = ReaderTimeSerial(reader, i);
 
                 // Skip out-of-range samples
-                if (startTime != -1.0 || stopTime != -1.0)
-                {
-                    if (startTime > 0.0 && t < startTime) { continue; }
-                    if (stopTime > 0.0 && t > stopTime) { continue; }
-                }
+                if (startTime > 0.0 && t < startTime) { continue; }
+                if (stopTime > 0.0 && t > stopTime) { continue; }
 
                 // Time step
                 if (firstTime == 0) { firstTime = t; }
@@ -205,9 +288,6 @@ int convert(const char *infile, const char **outfiles, char tee, TimeMode timeMo
                         continue;
                     }
                 }
-
-                if (startTime > 0 && t < startTime) { continue; }
-                if (stopTime > 0 && t >= stopTime) { continue; }
 
 #if 0
                 tfprintf(tee, ofp[thisStream], "%c,", stream);
