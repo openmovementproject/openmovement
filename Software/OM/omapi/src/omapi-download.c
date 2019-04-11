@@ -35,7 +35,7 @@
 
 
 /** Internal method to update the download progress. */
-static int OmDoDownloadUpdate(unsigned short deviceId, OM_DOWNLOAD_STATUS downloadStatus, int downloadValue)
+static int OmDoDownloadUpdate(unsigned int deviceId, OM_DOWNLOAD_STATUS downloadStatus, int downloadValue)
 {
     // Check system and device state
     if (!om.initialized) return OM_E_NOT_VALID_STATE;

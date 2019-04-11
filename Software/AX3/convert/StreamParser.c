@@ -392,7 +392,11 @@ int ReaderNextBlock(ReaderHandle reader)
     if (feof(state->fp)) { return -1; }                                                                     // End of file
 
     // Read a block, error on incomplete read
-    if (fread(state->data, 1, BLOCK_SIZE, state->fp) != BLOCK_SIZE) { return -1; }       // Read error
+    if (fread(state->data, 1, BLOCK_SIZE, state->fp) != BLOCK_SIZE)
+	{
+printf("EOF!");
+		return -1; 
+	}       // Read error
 
     // Check header and size
     state->packetType = state->data[0];
@@ -424,6 +428,13 @@ int ReaderNextBlock(ReaderHandle reader)
 
     // Get sample count
     state->numSamples = (unsigned short)state->data[22] | ((unsigned short)state->data[23] << 8);
+
+// DEBUG: Temporary
+if (state->data[0] == 'd' && state->data[1] == 'a' && state->numSamples < 80)
+{
+	printf("NOTE: Samples / block %d", state->numSamples);
+	printf("\n");
+}
 
     // Frequency
     sampleRate = getSampleRate(state->data);

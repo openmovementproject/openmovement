@@ -1294,7 +1294,7 @@ typedef struct
 	unsigned short packetHeader;	    /**< @ 0 +2 ASCII "MD", little-endian (0x444D) */
 	unsigned short packetLength;	    /**< @ 2 +2 Packet length (1020 bytes, with header (4) = 1024 bytes total) */
 	unsigned char reserved1;            /**< @ 4 +1 (1 byte reserved) */
-	unsigned short deviceId;            /**< @ 5 +2 Device identifier */
+	unsigned short deviceId;            /**< @ 5 +2 Device identifier (low 16-bits) */
 	unsigned int sessionId;             /**< @ 7 +4 Unique session identifier */
 	unsigned short reserved2;           /**< @11 +2 (2 bytes reserved) */
 	OM_DATETIME loggingStartTime;       /**< @13 +4 Start time for delayed logging */
