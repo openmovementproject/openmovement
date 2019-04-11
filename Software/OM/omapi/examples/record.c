@@ -218,8 +218,8 @@ int record_setup(int deviceId)
         if (OM_FAILED(memoryHealth)) { fprintf(stderr, "ERROR: OmGetMemoryHealth() %s\n", OmErrorString(result)); return 0; }
         // Spare blocks
         fprintf(stderr, "RECORD #%d: Memory health =%d\n", deviceId, memoryHealth);
-        if (memoryHealth == 0) { printf("ERROR: OmGetMemoryHealth() no spare planes.\n"); return 0; }
-        else if (memoryHealth < OM_MEMORY_HEALTH_ERROR) { printf("ERROR: OmGetMemoryHealth() in error region.\n"); return 0; }
+		if (memoryHealth == 0) { printf("ERROR: OmGetMemoryHealth() no spare planes.\n"); return 0; }
+		else if (memoryHealth < OM_MEMORY_HEALTH_ERROR) { printf("ERROR: OmGetMemoryHealth() in error region.\n"); return 0; }
         else if (memoryHealth < OM_MEMORY_HEALTH_WARNING) { printf("ERROR: OmGetMemoryHealth() in warning region.\n"); return 0; }
     }
 

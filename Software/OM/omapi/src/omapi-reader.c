@@ -273,11 +273,15 @@ int OmReaderNextBlock(OmReaderHandle reader)
     int sampleRate;
     int len;
 
-    // Check parameter
-    OmReaderState *state = (OmReaderState *)reader;
-    if (state == NULL) { return OM_E_POINTER; }
+//{ static int callCount = 0; printf(" #%d", ++callCount); }
 
-    // Record previous block's 'blockStart' and 'blockEnd'
+	// Check parameter
+    OmReaderState *state = (OmReaderState *)reader;
+	if (state == NULL) { return OM_E_POINTER; }
+
+//{ printf(" @%d/%d", (int)ftell(state->fp), (int)ftell(state->fp) / 512); }
+
+	// Record previous block's 'blockStart' and 'blockEnd'
     // previousBlockStart = state->blockStart;
     previousBlockEnd = state->blockEnd;
 
@@ -322,6 +326,9 @@ int OmReaderNextBlock(OmReaderHandle reader)
         unsigned short checksum = 0x0000;
 	    size_t len;
         for (len = OM_BLOCK_SIZE / 2; len; --len) { checksum += *p++; }
+#ifdef _DEBUG
+if (checksum != 0x0000) { fprintf(stderr, "WARNING: Checksum failed @%d (sector %d): was %u\n", (int)ftell(state->fp), (int)ftell(state->fp) / 512, checksum); }
+#endif
         if (checksum != 0x0000) { return 0; }
     }
 
@@ -347,6 +354,7 @@ int OmReaderNextBlock(OmReaderHandle reader)
 
     // Read sequence number and events
     sequenceId = ((unsigned int)state->data[10] << 0) | ((unsigned int)state->data[11] << 8) | ((unsigned int)state->data[12] << 16) | ((unsigned int)state->data[13] << 24);
+//{ printf("=%d ", sequenceId); }
     state->events = state->data[22];
 
     // Extract data values

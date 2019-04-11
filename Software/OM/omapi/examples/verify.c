@@ -42,12 +42,17 @@
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
+#include <io.h>
+#define access _access
+#else
+#include <unistd.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <stdbool.h>
 #include <sys/timeb.h>
 
 #ifdef _WIN32
@@ -94,6 +99,7 @@ typedef struct
     int nandType;
 #endif
     char *filename;
+	bool hasGyro;
     // ???!!!
 } download_t;
 
@@ -192,7 +198,13 @@ const char *formattedtime(unsigned long long milliseconds)
     return output;
 }
 
-
+// Device has gyro?
+static bool hasGyro(int deviceId)
+{
+	char serialBuffer[OM_MAX_PATH];
+	if (OM_FAILED(OmGetDeviceSerial(deviceId, serialBuffer))) return false;
+	return memcmp(serialBuffer, "AX6", 3) == 0;
+}
 
 /* Conversion function */
 int verify_process(int id, const char *infile, download_t *download, int globalOptions)
@@ -227,8 +239,9 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
     int retval;
     float percentPerHour = 0;
     // old statics
-    short lx = 0, ly = 0, lz = 0, stuck = 0;
-    char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
+	short lx = 0, ly = 0, lz = 0, stuck = 0;
+	short lgx = 0, lgy = 0, lgz = 0, gstuck = 0;
+	char timeString[25];  /* "YYYY-MM-DD hh:mm:ss.000"; */
     int seconds, packetCount = 0;
     double av = 0.0;
     int lastHour = -1;
@@ -264,7 +277,14 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
         int i;
 
         /* Report progress: minute */
-        if (block != 0 && block %    50 == 0) { fprintf(stderr, "."); }						/* Approx. 1 minute */
+		if (download->hasGyro)
+		{
+			if (block != 0 && block % 150 == 0) { fprintf(stderr, ":"); }						/* Approx. 1 minute of unpacked accel+gyro */
+		}
+		else
+		{
+			if (block != 0 && block % 50 == 0) { fprintf(stderr, "."); }						/* Approx. 1 minute of packed accel */
+		}
         //if (block != 0 && block %  3000 == 0) { fprintf(stderr, "|\n"); }					/* Approx. 1 hour */
         //if (block != 0 && block % 72000 == 0) { fprintf(stderr, "===\n"); }				/* Approx. 1 day */
 
@@ -282,16 +302,18 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
             break;
         }
 
-        /* Block has no valid data */
+		/* Get the raw packet handle */
+		dp = OmReaderRawDataPacket(reader);
+	
+		/* Block has no valid data */
         if (numSamples == 0)
         {
-            fprintf(stderr, "[WARNING: Missing packet -- probably checksum failed?]\n"); 
+            fprintf(stderr, "[WARNING: Missing packet -- probably checksum failed? At block %d, sector %d?]\n", block, block+3); 
             errorFile++;
             continue;
         }
 
-        /* Get the raw packet handle */
-        dp = OmReaderRawDataPacket(reader);
+        /* Check the raw packet handle */
         if (dp == NULL)
         {
             fprintf(stderr, "[ERROR: Cannot get raw data packet]\n"); 
@@ -400,6 +422,12 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
 
         lastBlockStart = blockStart;
 
+		int numAxes = OmReaderGetValue(reader, OM_VALUE_AXES);				// Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM
+		int scaleAccel = OmReaderGetValue(reader, OM_VALUE_SCALE_ACCEL);	// Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g)
+		int scaleGyro = OmReaderGetValue(reader, OM_VALUE_SCALE_GYRO);		// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
+		int axisAccel = OmReaderGetValue(reader, OM_VALUE_ACCEL_AXIS);
+		int axisGyro = OmReaderGetValue(reader, OM_VALUE_GYRO_AXIS);
+
 		unsigned int rateCode = OmReaderGetValue(reader, OM_VALUE_SAMPLERATE);
 		unsigned int rate = (3200 / (1 << (15 - (rateCode & 0x0f))));
 		int minPacketCount = rate - (12 * rate / 100);	// -12%
@@ -422,33 +450,67 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
                     OM_DATETIME_HOURS(dateTime), OM_DATETIME_MINUTES(dateTime), OM_DATETIME_SECONDS(dateTime), 
                     (int)fractional * 1000 / 0xffff);
 
-            /* Get the x/y/z/ values */
-            x = buffer[3 * i + 0];
-            y = buffer[3 * i + 1];
-            z = buffer[3 * i + 2];
+			/* Get the accel x/y/z/ values */
+			x = buffer[numAxes * i + axisAccel + 0];
+			y = buffer[numAxes * i + axisAccel + 1];
+			z = buffer[numAxes * i + axisAccel + 2];
 
-            /* Detect stuck values */
-            if (x == lx && y == ly && z == lz)
-            { 
-                stuck++;
-                if (stuck == STUCK_COUNT)
-                {
-                    fprintf(stderr, "\nERROR: Readings could be stuck at (%d, %d, %d); has been for %d consecutive readings. ", lx, ly, lz, stuck);
-                    errorStuck++;
-                }
-            }
-            else
-            {
-                if (stuck >= STUCK_COUNT)
-                {
-                    fprintf(stderr, "\nNOTE: Readings now changed -- were at (%d, %d, %d) for total of %d consecutive readings. ", lx, ly, lz, stuck);
-                }
-                lx = x; ly = y; lz = z;
-                stuck = 0;
-            }
+			/* Get the accel x/y/z/ values */
+			short gx = 0, gy = 0, gz = 0;
+			bool hasGyro = (axisGyro >= 0);
+			if (hasGyro)
+			{
+				gx = buffer[numAxes * i + axisGyro + 0];
+				gy = buffer[numAxes * i + axisGyro + 1];
+				gz = buffer[numAxes * i + axisGyro + 2];
+				download->hasGyro = true;
+			}
 
-            /* Get the SVM - 1 */
-            v = sqrt((x / 256.0) * (x / 256.0) + (y / 256.0) * (y / 256.0) + (z / 256.0) * (z / 256.0)) - 1.0;
+			/* Detect stuck values */
+			if (x == lx && y == ly && z == lz)
+			{
+				stuck++;
+				if (stuck == STUCK_COUNT)
+				{
+					fprintf(stderr, "\nERROR: Readings could be stuck at (%d, %d, %d); has been for %d consecutive readings. ", lx, ly, lz, stuck);
+					errorStuck++;
+				}
+			}
+			else
+			{
+				if (stuck >= STUCK_COUNT)
+				{
+					fprintf(stderr, "\nNOTE: Readings now changed -- were at (%d, %d, %d) for total of %d consecutive readings. ", lx, ly, lz, stuck);
+				}
+				lx = x; ly = y; lz = z;
+				stuck = 0;
+			}
+
+			/* Detect gyro stuck values */
+			if (hasGyro)
+			{
+				if (gx == lgx && gy == lgy && gz == lgz)
+				{
+					gstuck++;
+					if (gstuck == STUCK_COUNT)
+					{
+						fprintf(stderr, "\nERROR: Gyro readings could be stuck at (%d, %d, %d); has been for %d consecutive readings. ", lgx, lgy, lgz, gstuck);
+						errorStuck++;
+					}
+				}
+				else
+				{
+					if (stuck >= STUCK_COUNT)
+					{
+						fprintf(stderr, "\nNOTE: Gyro readings now changed -- were at (%d, %d, %d) for total of %d consecutive readings. ", lgx, lgy, lgz, gstuck);
+					}
+					lgx = gx; lgy = gy; lgz = gz;
+					gstuck = 0;
+				}
+			}
+
+			/* Get the SVM - 1 */
+            v = sqrt((x / (double)scaleAccel) * (x / (double)scaleAccel) + (y / (double)scaleAccel) * (y / (double)scaleAccel) + (z / (double)scaleAccel) * (z / (double)scaleAccel)) - 1.0;
             av = ((1.0 - AVERAGE_FACTOR) * av) + (AVERAGE_FACTOR * v);
             if (fabs(av) > peakAv) { peakAv = fabs(av); }
             if (fabs(av) > maxAv) { maxAv = fabs(av); }
@@ -652,14 +714,26 @@ if (errorRange  > 0)  { retval |= CODE_ERROR_RANGE; }    else if (errorRange > 0
 if (errorRate   > 0)  { retval |= CODE_ERROR_RATE; }     else if (errorRate > 0)   { retval |= CODE_WARNING_RATE; }
 if (errorBreaks > 0)  { retval |= CODE_ERROR_BREAKS; }   else if (errorBreaks > 0) { retval |= CODE_WARNING_BREAKS; }
 if (restarts    > globalAllowedRestarts) { retval |= CODE_ERROR_RESTARTS; } else if (restarts > 0) { retval |= CODE_WARNING_RESTARTS; }
-if (minLight    < 90) { retval |= CODE_ERROR_LIGHT; }    else if (minLight < 140)  { retval |= CODE_WARNING_LIGHT; }
+if (!download->hasGyro)
+{
+	// Only use light level on original AX3
+	if (minLight < 90) { retval |= CODE_ERROR_LIGHT; } else if (minLight < 140) { retval |= CODE_WARNING_LIGHT; }
+}
 // Discharge
 {
     float hours = ((totalDuration >> 16) / 60.0f / 60.0f);
     float percentLoss = (float)batteryMaxPercent - batteryMinPercent;
     percentPerHour = 0;
     if (hours > 0) { percentPerHour = percentLoss / hours; } else { percentPerHour = 0; }
-    if (percentPerHour >= 0.29f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.25f)  { retval |= CODE_WARNING_BATT; }
+	if (download->hasGyro)
+	{
+		// at least 7-days: 0.595%; at least 8-days: 0.521%
+		if (percentPerHour >= 0.595f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.521f) { retval |= CODE_WARNING_BATT; } // Gyro levels
+	}
+	else
+	{
+		if (percentPerHour >= 0.29f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.25f) { retval |= CODE_WARNING_BATT; } // Accel-only levels
+	}
 }
 // Start/stop
 if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; } 
@@ -674,12 +748,13 @@ if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; }
 if (download != NULL)
 {
     // Spare blocks
-    if (download->memoryHealth < OM_MEMORY_HEALTH_ERROR)        { retval |= CODE_ERROR_NANDHEALTH; }    // ERROR: No spare blocks
+	if (download->memoryHealth < 0) { ; }
+	else if (download->memoryHealth < OM_MEMORY_HEALTH_ERROR)        { retval |= CODE_ERROR_NANDHEALTH; }    // ERROR: No spare blocks
     else if (download->memoryHealth < OM_MEMORY_HEALTH_WARNING) { retval |= CODE_WARNING_NANDHEALTH; }  // WARNING: Very few spare blocks
 
 #ifdef ID_NAND
     // NAND ID
-    if (download->nandType == -1) { ; }                                                 // Firmware doesn't support nand Id
+    if (download->nandType < 0) { ; }                                                 // Firmware doesn't support nand Id
     else if (download->nandType < 1) { retval |= CODE_ERROR_NANDID; }   // ERROR: Not primary or secondary type
     //else if (download->nandType != 1) { retval |= CODE_WARNING_NANDID; }                            // WARNING: Not primary type
 
@@ -748,8 +823,6 @@ if (download != NULL)
     OmReaderClose(reader);
     return retval;
 }
-
-
 
 
 
@@ -898,47 +971,66 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
             printf("VERIFY #%d: ... %s --> %s\n", deviceId, startString, endString);
         }
 
-        /* Check if there's any data blocks stored (not just the headers) */
-        if (dataNumBlocks - dataOffsetBlocks <= 0)
-        {
-            printf("VERIFY #%d: Ignoring - no data stored.\n", deviceId);
-            OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
-        }
-        else
-        {
-            const char *downloadPath = ".";
-            /* Create reference handle */
-            download_t *download = (download_t *)malloc(sizeof(download_t));
+		/* Create reference handle */
+		download_t* download = (download_t*)malloc(sizeof(download_t));
+		memset(download, 0, sizeof(download_t));
+		const char* downloadPath = ".";
 
-            /* Get NAND information */
-            download->memoryHealth = OmGetMemoryHealth(deviceId);
+		/* Get NAND information */
+		download->memoryHealth = OmGetMemoryHealth(deviceId);
 #ifdef ID_NAND
-            download->nandType = -1;
-            memset(download->nandId, 0, sizeof(download->nandId));
-            result = OmGetNandId(deviceId, download->nandId, NULL, &download->nandType);
-            if (result == OM_E_NOT_IMPLEMENTED) { fprintf(stderr, "NOTE: This firmware doesn't support NANDID command\n"); }
-            else if (result == OM_E_UNEXPECTED_RESPONSE) { fprintf(stderr, "NOTE: Unexpected NANDID response (firmware probably doesn't support NANDID command)\n"); }
+		download->nandType = -1;
+		memset(download->nandId, 0, sizeof(download->nandId));
+		result = OmGetNandId(deviceId, download->nandId, NULL, &download->nandType);
+		if (result == OM_E_NOT_IMPLEMENTED) { fprintf(stderr, "NOTE: This firmware doesn't support NANDID command\n"); }
+		else if (result == OM_E_UNEXPECTED_RESPONSE) { fprintf(stderr, "NOTE: Unexpected NANDID response (firmware probably doesn't support NANDID command)\n"); }
 #endif
 
-            /* Allocate filename string */
-            download->filename = (char *)malloc(strlen(downloadPath) + 32);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
+		/* Allocate filename string */
+		download->filename = (char*)malloc(strlen(downloadPath) + 64);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
+		/* Copy path, and platform-specific path separator char */
+		strcpy(download->filename, downloadPath);
+#ifdef _WIN32
+		if (download->filename[strlen(download->filename) - 1] != '\\') strcat(download->filename, "\\");
+#else
+		if (download->filename[strlen(download->filename) - 1] != '/') strcat(download->filename, "/");
+#endif
 
-            /* Copy path, and platform-specific path separator char */
-            strcpy(download->filename, downloadPath);
-            #ifdef _WIN32
-                if (download->filename[strlen(download->filename) - 1] != '\\') strcat(download->filename, "\\");
-            #else
-                if (download->filename[strlen(download->filename) - 1] != '/') strcat(download->filename, "/");
-            #endif
+		/* Append session-id and device-id as part of the filename */
+		if (deviceId >= 0 && deviceId <= 9999)
+		{
+			sprintf(download->filename + strlen(download->filename), "CWA-%04u.CWA", deviceId);
+		}
+		else if (deviceId >= 0 && deviceId <= 9999999)
+		{
+			sprintf(download->filename + strlen(download->filename), "CWA-%07u.CWA", deviceId);
+		}
+		else
+		{
+			sprintf(download->filename + strlen(download->filename), "CWA-%u.CWA", deviceId);
+		}
 
-            /* Append session-id and device-id as part of the filename */
-            sprintf(download->filename + strlen(download->filename), "CWA-%04u.CWA", deviceId);
-
-            /* Setup */
-            OmSetLed(deviceId, LED_PROCESSING);
-
-            /* Begin download */
-            printf("VERIFY #%d: Starting download to file: %s\n", deviceId, download->filename);
+		/* Check if there's any data blocks stored (not just the headers) */
+        if (dataNumBlocks - dataOffsetBlocks <= 0)
+        {
+			// TODO: fstat for date/time difference?
+			if (access(download->filename, 0))
+			{
+				printf("VERIFY #%d: Ignoring - no data stored, but local file already downloaded (manually check recent log): %s\n", deviceId, download->filename);
+				//OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
+			}
+			else
+			{
+				printf("VERIFY #%d: Ignoring - no data stored (no file already downloaded)\n", deviceId);
+				OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
+			}
+			free(download); // TODO: If download->filename exists, call verify_DownloadCallback(OM_DOWNLOAD_COMPLETE, deviceId, OM_DOWNLOAD_COMPLETE, -1); // would need to do this in another thread though!
+		}
+        else
+        {
+			/* Begin download */
+			OmSetLed(deviceId, LED_PROCESSING);
+			printf("VERIFY #%d: Starting download to file: %s\n", deviceId, download->filename);
             {
                 result = OmBeginDownloadingReference(deviceId, 0, -1, download->filename, download);
             }
@@ -1050,7 +1142,10 @@ int verify_main(int argc, char *argv[])
         //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
         if ((globalOptions & VERIFY_OPTION_ALL) == 0)
         {
-            ret = verify_process(-1, infile, NULL, globalOptions);
+			download_t download = { 0 };
+			download.nandType = -1;		// NAND ID not supported from data files
+			download.memoryHealth = -1;	// memory health not supported from data files
+            ret = verify_process(-1, infile, &download, globalOptions);
         }
         else
         {
