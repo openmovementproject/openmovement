@@ -1,6 +1,8 @@
 # AX3 GUI - Revision History
 
-* [AX3-GUI-42](AX3-GUI-42.zip?raw=true) 2018-11-15: (Beta) Fix for issue configuring AX3 after an AX6 with synchronous gyro configured.
+* [AX3-GUI-42](AX3-GUI-42.zip?raw=true) 2018-11-15: (Beta) Fix for issue configuring AX3 after an AX6 with synchronous gyro configured. 
+
+  * For advanced users, there is also a [no installer version](AX3-GUI-42-no-install.zip) - you will need [.NET 3.5](https://www.microsoft.com/en-gb/download/details.aspx?id=21) and the [AX3 Driver](AX3-Driver-Win-5.zip).
 
 * [AX3-GUI-41](AX3-GUI-41.zip?raw=true) 2018-10-25: (Beta) Support for AX6 configuration.
 
