@@ -1,4 +1,4 @@
-# AX3 Fabric Infant Band 
+# AX Fabric Infant Band 
 
 * [Cover Page](Cover%20Page.pdf)
 * [3-6 Months](3-6%20Months%20Technical%20Drawing.pdf)
