@@ -68,17 +68,21 @@ addOptional(p,'tBounds',      3, @isnumeric); % bounds for mean temp.
 addOptional(p,'progress',     0, @isnumeric); % show progress bar
 addOptional(p,'startTime',    0, @isnumeric); % start time (matlab)           
 addOptional(p,'stopTime',     0, @isnumeric); % stop time (matlab)           
+addOptional(p,'resampleRate',50, @isnumeric); % resample rate
+addOptional(p,'resampleMethod','pchip'); % resample method
 
 % parse varargin
 parse(p,varargin{:});
 p = p.Results;
 
 % parse again 
-actThresh =  p.actThresh;  
-wlen = p.wlen/86400;     
-wstep = p.wstep/86400;    
-tBounds = p.tBounds/86400; 
-progress = p.progress;     
+actThresh =  p.actThresh;
+wlen = p.wlen/86400;
+wstep = p.wstep/86400;
+tBounds = p.tBounds/86400;
+progress = p.progress;
+resampleRate = p.resampleRate;
+resampleMethod = p.resampleMethod;
 
 % initialise return variable
 S = zeros(1000,5);
@@ -95,15 +99,15 @@ en = D.ACC(end,1)-wlen;
 if p.startTime > 0,
     st = p.startTime;
 end
-if p.stopTime >0 && p.stopTime > st,
+if p.stopTime >0 && p.stopTime > st && p.stopTime < en,
     en = p.stopTime;
 end
     
 sCnt = 1;
 cnt=1;
 
-% interpolate for speed later on at 50Hz
-T = st:0.02/86400:en;
+% interpolate for speed later on
+T = st:(1/resampleRate)/86400:en;
 
 % get rid of bad timestamps
 D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
@@ -111,13 +115,13 @@ D.ACC = D.ACC(find(diff(D.ACC(:,1))>0),:);
 
 % interpolate each axis
 R = zeros(length(T),4); R(:,1) = T;
-for j=2:4,
-    R(:,j) = interp1(D.ACC(:,1),D.ACC(:,j),T,'pchip',0);
+for j=2:4
+    R(:,j) = interp1(D.ACC(:,1),D.ACC(:,j),T,resampleMethod,0);
 end
 
 % turn from fraction of days to sample numbers
-wlen = wlen * 86400 * 50;
-wstep = wstep * 86400 * 50;
+wlen = wlen * 86400 * resampleRate;
+wstep = wstep * 86400 * resampleRate;
 
 for t=1:wstep:length(T)-wlen,
     
@@ -130,7 +134,7 @@ for t=1:wstep:length(T)-wlen,
     if sum(sd <= actThresh) >= 3,
         % stationary!
         % get temperate (use wider bounds as lower sampling frequency)
-		indT = (D.TEMP(:,1)>= T(t)-tBounds) & (D.TEMP(:,1) <= T(t)+(wlen/86400/50)+tBounds); %convert wlen to time again for searching
+		indT = (D.TEMP(:,1)>= T(t)-tBounds) & (D.TEMP(:,1) <= T(t)+(wlen/86400/resampleRate)+tBounds); %convert wlen to time again for searching
         % save mean of epoch measurements and mean temperature
         S(sCnt,:) = [t+wlen/2 mean(d(:,2:4)) mean(D.TEMP(indT,2))];
         sCnt = sCnt + 1;
@@ -138,7 +142,7 @@ for t=1:wstep:length(T)-wlen,
     
     % update progress bar if necessary
     if progress
-        if mod(cnt,100) == 0,
+        if mod(cnt,100) == 0
             waitbar(t/length(T),h);
         end
         cnt = cnt + 1;        

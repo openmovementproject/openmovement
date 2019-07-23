@@ -156,6 +156,7 @@ for i=1:p.maxIter,
     % do linear regression per input axis to estimate scale offset
     % (and tempOffset)
     for j=1:size(D,2),
+        % IMPORTANT: Requires 'Statistics and Machine Learning Toolbox'
         if p.useTemp,
             mdl = LinearModel.fit([D(:,j) D(:,j).*temp], target(:,j), 'linear', 'Weights', weights);
         else
