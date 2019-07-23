@@ -1,34 +1,58 @@
 @echo off
 setlocal
-echo CWA-to-Cut-Points (edit batch file to change settings)
+echo CWA-to-Cut-Points (edit batch file to change default settings)
 echo ~~~~~~~~~~~~~~~~~
 echo.
 
-::: Set epoch size (minutes)
-set EPOCH=1
-::: Filename suffix
-set TAG=
-::: Calibration (0=off, 1=on)
-set CALIBRATE=1
-::: Interpolate mode (1=nearest, 2=linear, 3=cubic)
-set INTERPOLATE=3
-::: Filter mode (for cut-points: 0=None, 1=Band-pass 0.5-20Hz)
-set FILTER=1
-::: Cut-point model
-set MODEL=Esliger(40-63)-waist: 77/80/60 220/80/60 2057/80/60
-::: Pause (0=no pause, 1=pause)
-set PAUSE=1
+::
+::  Usage:
+::
+::  cwa-to-cutpoints [-calibrate {0,1}] [-interpolate {1,2,3}] [-filter {0,1}] [-model "label: c1 c2 c3"] [-pause {0,1}] [-tag "label"] [-epoch 1] [CWA-DATA.CWA]...
+::
+::  -calibrate {0,1}       Calibration (0=off, 1=on/default)
+::  -interpolate {1,2,3}   Interpolation mode (1=nearest, 2=linear, 3=cubic/default)
+::  -filter {0,1}          Band-pass filter (0=off, 1=on/default)
+::  -model "label: x y z"  Cut-point levels (mean-SVM, default: Esliger-waist)
+::  -pause {0,1}           Pause after execution (0=off, 1=on/default)
+::  -tag "label"           Add tag to output filename
+::  -epoch mins            Epoch size (minutes, 1=default)
+::
 
+rem Defaults
+set CALIBRATE=1
+set INTERPOLATE=3
+set FILTER=1
+set MODEL=Esliger(40-63)-waist: 77/80/60 220/80/60 2057/80/60
+set PAUSE=1
+set TAG=
+set EPOCH=1
+
+set SELF=%~0
 :check_param
 set param=%1
 if %1!==! goto params_done
 if not %param:~0,1%!==-! goto params_done
-set %param:~1%=%2
-echo PARAMETER '%param:~1%': %2
+if /i %param:~1%==CALIBRATE goto param_ok
+if /i %param:~1%==INTERPOLATE goto param_ok
+if /i %param:~1%==FILTER goto param_ok
+if /i %param:~1%==MODEL goto param_ok
+if /i %param:~1%==PAUSE goto param_ok
+if /i %param:~1%==TAG goto param_ok
+if /i %param:~1%==EPOCH goto param_ok
+goto help
+:param_ok
+set %param:~1%=%~2
+echo PARAMETER "%param:~1%": "%~2"
 shift
 shift
 goto check_param
 :params_done
+goto check_req
+
+:help
+echo ERROR: Incorrect parameter.
+type "%SELF%" | findstr /B ::
+goto end
 
 :check_req
 set OMCONVERT=%~dp0omconvert.exe
