@@ -2,7 +2,7 @@ var struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t =
 [
     [ "battery", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#ab60186c8e4a2fbf7fbb3cf84e2c81e94", null ],
     [ "checksum", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a4b964731ebafd0c435d479b631f754ff", null ],
-    [ "deviceId", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#adcdb37e12db97e6ffe00b23321b5181a", null ],
+    [ "deviceFractional", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a411b7e031ee280df93b60faf0db4d4b7", null ],
     [ "events", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a6afb9ac2ccc07c1c5c4adb0ba40fe303", null ],
     [ "light", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a657002e84a5644e867c4992daed95f72", null ],
     [ "numAxesBPS", "struct_o_m___r_e_a_d_e_r___d_a_t_a___p_a_c_k_e_t.html#a93196071449708df41ef701e0e6846df", null ],

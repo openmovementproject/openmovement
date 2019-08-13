@@ -12,7 +12,5 @@ var group__datetime =
     [ "OM_DATETIME_SECONDS", "group__datetime.html#gaf89fa3e164311c43b62cf12297a38dbd", null ],
     [ "OM_DATETIME_YEAR", "group__datetime.html#ga3889bada708d70fdae157d910771230b", null ],
     [ "OM_DATETIME_ZERO", "group__datetime.html#gac48644f126458f1060a276c0cc64fd8e", null ],
-    [ "OM_DATETIME", "group__datetime.html#ga5ae96407571b49c6086be47907389dfc", null ],
-    [ "OmDateTimeFromString", "group__datetime.html#ga7a138825a8c3288999a8a45d83ee4f7a", null ],
-    [ "OmDateTimeToString", "group__datetime.html#ga167ca13dc8c4e1c1726499c293d0d8a9", null ]
+    [ "OM_DATETIME", "group__datetime.html#ga5ae96407571b49c6086be47907389dfc", null ]
 ];

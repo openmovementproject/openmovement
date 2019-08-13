@@ -1,8 +1,8 @@
 var download_8c =
 [
+    [ "printf", "download_8c.html#ad2eb277496af160238e7306fff780ad2", null ],
     [ "download", "download_8c.html#a3da4d31c012bf1d4417b9257a9af7389", null ],
-    [ "download_DeviceCallback", "download_8c.html#a0e206e734c01b7299a86c9f2120725ac", null ],
-    [ "download_DownloadCallback", "download_8c.html#ad05d2f9866815134bb5159a4a833f3b3", null ],
     [ "download_main", "download_8c.html#af20e4a348fe763ccfdd605226953c05a", null ],
-    [ "downloadPath", "download_8c.html#a22020aa0469456ac6b32e59f6c332206", null ]
+    [ "logCallback", "download_8c.html#ab10beefaf10c00601254e2ac16b454bb", null ],
+    [ "tee", "download_8c.html#a1f629a0937d7a1e978e46bc530254f1d", null ]
 ];
