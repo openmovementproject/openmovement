@@ -81,19 +81,19 @@
     @section design_goals Design Goals
     The API has been designed to:
         - be a simple, plain C interface.
-        - be cross-platform (targetting Windows, Mac OS, Linux).
-        - be statically or dyndynamically linked to C or C++ code.
+        - be cross-platform (targeting Windows, Mac OS, Linux).
+        - be statically or dynamically linked to C or C++ code.
         - be used directly from C++, or a simple object-oriented wrapper class.
         - be readily used from other languages, e.g. a .NET wrapper class through p/invoke; JNI for Java.
         - be thread-safe, in that it anticipates being called from multiple threads, and internally handles the required mutual exclusion.
         - handle errors via user-checked return values (it is expected that wrapper libraries can choose raise exceptions as suitable for a language).
 
     @section requirements Requirements
-    The API is platform-agnostic, but parts of the current implementation require some platform-specific functionality. 
+    The API is platform-agnostic, but parts of the implementation require some platform-specific functionality. 
     The API currently works on Windows (XP, Vista, 7, 8, 10), Mac OS X, Linux.
 
     The core API is written in plain C, and is easily wrapped by C++ (i.e. by an object-oriented class), or, as it can be built as a DLL with
-    undecorated exports, other languages such as .NET (through p/invoke of the DLL).
+    undecorated exports, other languages such as .NET (through p/invoke of the DLL).  Wrappers also exist for Java and Node.js.
 
     @see \ref getting_started
 
