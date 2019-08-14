@@ -61,6 +61,23 @@
 #define tzset _tzset
 #endif
 
+// Cross-platform multi-threading
+#if defined(_WIN32)
+//#define _WIN32_DCOM
+#include <windows.h>
+#define thread_t HANDLE
+#define thread_create(thread, attr_ignored, start_routine, arg) ((*(thread) = CreateThread(attr_ignored, 0, start_routine, arg, 0, NULL)) == NULL)
+#define thread_join(thread, value_ptr_ignored) ((value_ptr_ignored), WaitForSingleObject((thread), INFINITE) != WAIT_OBJECT_0)
+#define thread_return_t DWORD WINAPI
+#define thread_return_value(value) ((unsigned int)(value))
+#else
+#include <pthread.h>
+#define thread_t      pthread_t
+#define thread_create pthread_create
+#define thread_join   pthread_join
+typedef void* thread_return_t;
+#define thread_return_value(value_ignored) ((void *)((value_ignored) ^ (value_ignored)))    // return NULL;
+#endif
 
 
 /* API header */
@@ -78,6 +95,8 @@
 #define VERIFY_OPTION_ALL               0x01
 #define VERIFY_OPTION_NO_CHECK_STOP     0x02
 #define VERIFY_OPTION_OUTPUT_NEW        0x04
+#define VERIFY_OPTION_CHECK_ON_DEVICE   0x08
+#define VERIFY_OPTION_NO_CONFIGURE      0x10
 
 /* Error measures */
 #define STUCK_COUNT (50 * 120)
@@ -93,18 +112,37 @@
 
 typedef struct
 {
+	int deviceId;
+	int options;
     int memoryHealth;
 #ifdef ID_NAND
     unsigned char nandId[6];
     int nandType;
 #endif
-    char *filename;
+    const char *filename;
 	bool hasGyro;
-    // ???!!!
+
+	int verifyResult;
 } download_t;
+
+download_t *createDownload(int deviceId, const char *filename, int options)
+{
+	download_t *download = malloc(sizeof(download_t));
+	memset(download, 0, sizeof(download_t));
+	download->memoryHealth = -1;	// memory health not supported from data files
+	memset(download->nandId, 0, sizeof(download->nandId));
+	download->nandType = -1;		// NAND ID not supported from data files
+	download->deviceId = deviceId;
+	download->filename = filename;
+	download->options = options;
+	download->hasGyro = false;
+	return download;
+}
 
 static int globalOptions = 0;
 static int globalAllowedRestarts = 0;
+static int globalTest = 0;
+static int globalSkip = 0;
 
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
@@ -207,7 +245,7 @@ static bool hasGyro(int deviceId)
 }
 
 /* Conversion function */
-int verify_process(int id, const char *infile, download_t *download, int globalOptions)
+int verify_process(download_t *download)
 {
     char output = 0;
     OmReaderHandle reader;
@@ -247,23 +285,28 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
     int lastHour = -1;
     char description[1024] = "";
 
-    if (infile == NULL || infile[0] == '\0')
+    if (download->filename == NULL || download->filename[0] == '\0')
     {
         fprintf(stderr, "ERROR: File not specified\n");
+		download->verifyResult = -2;
         return -2;
     }
 
-    fprintf(stderr, "FILE: %s\n", infile);
-    sprintf(label, infile);
-    if (id >= 0) { sprintf(label, "%d", id); }
+    fprintf(stderr, "FILE: %s\n", download->filename);
+    sprintf(label, download->filename);
+    if (download->deviceId >= 0) { sprintf(label, "%d", download->deviceId); }
 
     /* Open the binary file reader on the input file */
-    reader = OmReaderOpen(infile);
+    reader = OmReaderOpen(download->filename);
     if (reader == NULL)
     {
-        fprintf(stderr, "ERROR: Problem opening file: %s\n", infile);
-        return -1;
+        fprintf(stderr, "ERROR: Problem opening file: %s\n", download->filename);
+		download->verifyResult = -1;
+		return -1;
     }
+
+	int dataNumBlocks = 0;
+	OmReaderDataRange(reader, NULL, NULL, &dataNumBlocks, NULL, NULL);
 
     /* Iterate over all of the blocks of the file */
     firstPacket = 1;
@@ -275,6 +318,29 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
         int numSamples;
         short *buffer;
         int i;
+
+		int skipped = 0;
+		if (globalTest > 0 && globalSkip > 0 && block % globalTest == globalTest - 1)
+		{
+			int currentBlock = OmReaderDataBlockPosition(reader);
+			int skipLimit = dataNumBlocks - globalTest;
+			if (currentBlock >= skipLimit)
+			{
+				;	// no skip in last section
+			}
+			else
+			{
+				int dataBlockNumber = currentBlock + globalSkip;
+				if (dataBlockNumber > skipLimit) dataBlockNumber = skipLimit;
+				if (dataBlockNumber > currentBlock)
+				{
+					totalDuration += (long long)(lastTime - firstTime);		// Add current interval (will add skipped interval once read)
+					fprintf(stderr, "+");
+					OmReaderDataBlockSeek(reader, dataBlockNumber);
+					skipped = dataBlockNumber - currentBlock;
+				}
+			}
+		}
 
         /* Report progress: minute */
 		if (download->hasGyro)
@@ -349,16 +415,18 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
             */
 
         // If we read a block out-of-sequence
-        if (previousSequenceId != (unsigned int)-1 && previousSequenceId + 1 != dp->sequenceId)
+		int expectedInterval = skipped ? skipped : 1;
+        if ((previousSequenceId != (unsigned int)-1 && previousSequenceId + expectedInterval != dp->sequenceId))
         {
-            if (dp->sequenceId != 0)
+            if (!skipped && dp->sequenceId != 0)
             {
-                fprintf(stderr, "WARNING: Sequence break %u -> %u\n", previousSequenceId, dp->sequenceId);
+                fprintf(stderr, "WARNING: Sequence break %u -> %u (not %d)\n", previousSequenceId, dp->sequenceId, expectedInterval);
             }
             else
             {
-                long long recordingLength = (long long)(lastTime - firstTime);
+				long long recordingLength = (long long)(lastTime - firstTime);
                 long long diff = (long long)(blockStart - previousBlockEnd);
+if (skipped) { recordingLength = blockStart - previousBlockEnd; }
 
 #ifdef IGNORE_RECENT_RESTARTS
                 time_t allowed = time(NULL) - IGNORE_RECENT_RESTARTS;
@@ -373,7 +441,8 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
                 }
                 else
 #endif
-                {
+                if (!skipped)
+				{
                     fprintf(stderr, "NOTE: Recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
                     restarts++;
                     breakTime += (float)diff / 65536.0f;
@@ -424,7 +493,7 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
 
 		int numAxes = OmReaderGetValue(reader, OM_VALUE_AXES);				// Synchronous axes are [GxGyGz]AxAyAz[[MxMyMz]], 3=A, 6=GA, 9=GAM
 		int scaleAccel = OmReaderGetValue(reader, OM_VALUE_SCALE_ACCEL);	// Scaling: number of units for 1g: CWA=256, AX6=2048 (+/-16g), 4096 (+/-8g), 8192 (+/-4g), 16384 (+/-2g)
-		int scaleGyro = OmReaderGetValue(reader, OM_VALUE_SCALE_GYRO);		// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
+		//int scaleGyro = OmReaderGetValue(reader, OM_VALUE_SCALE_GYRO);		// Scaling: number of degrees per second that (2^15=)32768 represents: AX6= 2000, 1000, 500, 250, 125, 0=off.
 		int axisAccel = OmReaderGetValue(reader, OM_VALUE_ACCEL_AXIS);
 		int axisGyro = OmReaderGetValue(reader, OM_VALUE_GYRO_AXIS);
 
@@ -633,7 +702,7 @@ int verify_process(int id, const char *infile, download_t *download, int globalO
                 unsigned long fEnd = (unsigned long)TimeSerial(hp->loggingEndTime);
                 unsigned long aEnd = (unsigned long)(lastTime >> 16);
                 int stopDiff = (int)(aEnd - fEnd);
-                if (globalOptions & VERIFY_OPTION_NO_CHECK_STOP)
+                if (download->options & VERIFY_OPTION_NO_CHECK_STOP)
                 {
                     fprintf(stderr, "NOTE: Ignoring whether data stopped near recording stop time (difference was %ds).\n", stopDiff);
                 }
@@ -739,7 +808,7 @@ if (!download->hasGyro)
 if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; } 
 
         fprintf(stderr, "---\n");
-        fprintf(stderr, "Input file,%d,\"%s\",%d\n", id, infile, retval);
+        fprintf(stderr, "Input file,%d,\"%s\",%d\n", download->deviceId, download->filename, retval);
         fprintf(stderr, "Summary errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, breaks=%d\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks);
         fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
         fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f));
@@ -821,9 +890,84 @@ if (download != NULL)
 
     /* Close the files */
     OmReaderClose(reader);
+	download->verifyResult = retval;
     return retval;
 }
 
+
+static bool setDeviceResult(download_t* download)
+{
+	int deviceId = download->deviceId;
+	int verifyResult = download->verifyResult;
+	bool ret = false;
+	int result;
+
+	if (verifyResult < 0)
+	{
+		char line[128];
+		sprintf(line, "#ERROR,%s,%d,Verify failed (%d)\n", formattedtime(now()), deviceId, verifyResult);
+		fprintf(stderr, line);
+		fprintf(stdout, line);
+		if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
+		OmSetLed(deviceId, LED_ERROR_COMMS);
+		ret = false;
+	}
+	else if (verifyResult & CODE_ERROR_MASK)
+	{
+		OmSetLed(deviceId, LED_FAILED);					// Looks like a problem
+		ret = false;
+	}
+	else
+	{
+		if (download->options & VERIFY_OPTION_NO_CONFIGURE)
+		{
+			fprintf(stderr, "VERIFY #%d: (not reconfiguring)\n", deviceId);
+		}
+		else
+		{
+			/* Set the session id */
+			result = OmSetSessionId(deviceId, 0);
+			fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, 0);
+			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); }
+
+			/* Set the delayed start/stop times */
+			fprintf(stderr, "VERIFY #%d: Setting start/stop: INFINITY/ZERO\n", deviceId);
+			result = OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_ZERO);
+			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); }
+
+			/* Commit the new settings */
+			fprintf(stderr, "VERIFY #%d: Committing new settings...\n", deviceId);
+			result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
+			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
+		}
+
+		// Set LEDs
+		if (verifyResult & CODE_WARNING_MASK) { OmSetLed(deviceId, LED_WARNING); }            // Warning
+		else { OmSetLed(deviceId, LED_OK); }                                           // Everything ok
+		fprintf(stderr, "VERIFY #%d: Done.\n", deviceId);
+		ret = true;
+	}
+	return ret;
+}
+
+static thread_return_t verifyThread(void *arg)
+{
+	download_t *download = (download_t *)arg;
+	printf("VERIFY #%d: Verify starting... (options 0x%04x)\n", download->deviceId, download->options);
+	download->verifyResult = verify_process(download);
+	if (download->deviceId >= 0)
+	{
+		setDeviceResult(download);
+	}
+	return thread_return_value(0);
+}
+
+static thread_t *startVerifyThread(download_t *download)
+{
+	thread_t *thread = (thread_t *)malloc(sizeof(thread_t));
+	thread_create(thread, NULL, verifyThread, download);
+	return thread;
+}
 
 
 /* Download updated */
@@ -838,50 +982,9 @@ static void verify_DownloadCallback(void *reference, int deviceId, OM_DOWNLOAD_S
     }
     else if (status == OM_DOWNLOAD_COMPLETE)
     { 
-        const char *file = download->filename;
-        int verifyResult;
-        int result;
-
-        printf("VERIFY #%d: Download complete, verify starting... (options 0x%04x)\n", deviceId, globalOptions);
-
-        verifyResult = verify_process(deviceId, file, download, globalOptions);
-
-        if (verifyResult < 0)								
-		{ 
-			char line[128];
-			sprintf(line, "#ERROR,%s,%d,Verify failed (%d)\n", formattedtime(now()), deviceId, verifyResult);
-			fprintf(stderr, line);
-			fprintf(stdout, line);
-			if (outfile != NULL) { fprintf(outfile, line); fflush(outfile); }
-			OmSetLed(deviceId, LED_ERROR_COMMS);
-		}
-        else if (verifyResult & CODE_ERROR_MASK)
-		{ 
-			OmSetLed(deviceId, LED_FAILED);					// Looks like a problem
-		}
-        else 
-		{
-			/* Set the session id (use the deviceId) */
-			result = OmSetSessionId(deviceId, 0);
-			fprintf(stderr, "VERIFY #%d: Setting session id: %u\n", deviceId, 0);
-			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetSessionId() %s\n", OmErrorString(result)); }
-
-			/* Set the delayed start/stop times */
-			fprintf(stderr, "VERIFY #%d: Setting start/stop: INFINITY/ZERO\n", deviceId);
-			result = OmSetDelays(deviceId, OM_DATETIME_INFINITE, OM_DATETIME_ZERO);
-			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmSetDelays() %s\n", OmErrorString(result)); }
-
-			/* Commit the new settings */
-			fprintf(stderr, "VERIFY #%d: Committing new settings...\n", deviceId);
-			result = OmEraseDataAndCommit(deviceId, OM_ERASE_QUICKFORMAT);
-			if (OM_FAILED(result)) { fprintf(stderr, "ERROR: OmEraseDataAndCommit() %s\n", OmErrorString(result)); }
-
-			// Set LEDs
-			if (verifyResult & CODE_WARNING_MASK) { OmSetLed(deviceId, LED_WARNING); }            // Warning
-			else { OmSetLed(deviceId, LED_OK); }                                           // Everything ok
-		}
-
-    }
+		printf("VERIFY #%d: Download complete...\n", download->deviceId);
+		startVerifyThread(download);
+	}
     else if (status == OM_DOWNLOAD_CANCELLED)
     { 
 		char line[128];
@@ -971,10 +1074,38 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
             printf("VERIFY #%d: ... %s --> %s\n", deviceId, startString, endString);
         }
 
+		/* On-device filename */
+		char *deviceFilename = (char *)malloc(256);
+		result = OmGetDataFilename(deviceId, deviceFilename);
+		if (OM_FAILED(result)) { printf("ERROR: OmGetDataFilename() %s\n", OmErrorString(result)); return; }
+
+		/* Allocate download filename string */
+		const char *downloadPath = ".";
+		char *filename = (char *)malloc(strlen(downloadPath) + 64 + 256);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
+		/* Copy path, and platform-specific path separator char */
+		strcpy(filename, downloadPath);
+#ifdef _WIN32
+		if (filename[strlen(filename) - 1] != '\\') strcat(filename, "\\");
+#else
+		if (filename[strlen(filename) - 1] != '/') strcat(filename, "/");
+#endif
+
+		/* Append session-id and device-id as part of the filename */
+		if (deviceId >= 0 && deviceId <= 9999)
+		{
+			sprintf(filename + strlen(filename), "CWA-%04u.CWA", deviceId);
+		}
+		else if (deviceId >= 0 && deviceId <= 9999999)
+		{
+			sprintf(filename + strlen(filename), "CWA-%07u.CWA", deviceId);
+		}
+		else
+		{
+			sprintf(filename + strlen(filename), "CWA-%u.CWA", deviceId);
+		}
+
 		/* Create reference handle */
-		download_t* download = (download_t*)malloc(sizeof(download_t));
-		memset(download, 0, sizeof(download_t));
-		const char* downloadPath = ".";
+		download_t *download = createDownload(deviceId, filename, globalOptions);
 
 		/* Get NAND information */
 		download->memoryHealth = OmGetMemoryHealth(deviceId);
@@ -986,48 +1117,31 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
 		else if (result == OM_E_UNEXPECTED_RESPONSE) { fprintf(stderr, "NOTE: Unexpected NANDID response (firmware probably doesn't support NANDID command)\n"); }
 #endif
 
-		/* Allocate filename string */
-		download->filename = (char*)malloc(strlen(downloadPath) + 64);  /* downloadPath + "/4294967295-65535.cwa" + 1 (NULL-terminated) */
-		/* Copy path, and platform-specific path separator char */
-		strcpy(download->filename, downloadPath);
-#ifdef _WIN32
-		if (download->filename[strlen(download->filename) - 1] != '\\') strcat(download->filename, "\\");
-#else
-		if (download->filename[strlen(download->filename) - 1] != '/') strcat(download->filename, "/");
-#endif
-
-		/* Append session-id and device-id as part of the filename */
-		if (deviceId >= 0 && deviceId <= 9999)
-		{
-			sprintf(download->filename + strlen(download->filename), "CWA-%04u.CWA", deviceId);
-		}
-		else if (deviceId >= 0 && deviceId <= 9999999)
-		{
-			sprintf(download->filename + strlen(download->filename), "CWA-%07u.CWA", deviceId);
-		}
-		else
-		{
-			sprintf(download->filename + strlen(download->filename), "CWA-%u.CWA", deviceId);
-		}
-
-		/* Check if there's any data blocks stored (not just the headers) */
+		/* Check if there's any data blocks stored on device (not empty or just headers) */
         if (dataNumBlocks - dataOffsetBlocks <= 0)
         {
 			// TODO: fstat for date/time difference?
-			if (access(download->filename, 0))
+			if (access(download->filename, 0) == 0)
 			{
-				printf("VERIFY #%d: Ignoring - no data stored, but local file already downloaded (manually check recent log): %s\n", deviceId, download->filename);
-				//OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
+				printf("VERIFY #%d: Note: no data on device, but local file already downloaded, will restart verify (but you can manually check recent log): %s\n", deviceId, download->filename);
+				startVerifyThread(download);
 			}
 			else
 			{
-				printf("VERIFY #%d: Ignoring - no data stored (no file already downloaded)\n", deviceId);
+				printf("VERIFY #%d: Ignoring - no data stored (and no matching file already downloaded)\n", deviceId);
 				OmSetLed(deviceId, LED_ERROR_COMMS);                   // Error accessing data
 			}
-			free(download); // TODO: If download->filename exists, call verify_DownloadCallback(OM_DOWNLOAD_COMPLETE, deviceId, OM_DOWNLOAD_COMPLETE, -1); // would need to do this in another thread though!
 		}
-        else
-        {
+		else if (globalOptions & VERIFY_OPTION_CHECK_ON_DEVICE)
+		{
+			/* Start verification on device */
+			OmSetLed(deviceId, LED_PROCESSING);
+			download->filename = deviceFilename;
+			printf("VERIFY #%d: Starting verify on device, file: %s\n", deviceId, download->filename);
+			startVerifyThread(download);
+		}
+		else
+		{
 			/* Begin download */
 			OmSetLed(deviceId, LED_PROCESSING);
 			printf("VERIFY #%d: Starting download to file: %s\n", deviceId, download->filename);
@@ -1035,8 +1149,6 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
                 result = OmBeginDownloadingReference(deviceId, 0, -1, download->filename, download);
             }
             if (OM_FAILED(result)) { printf("ERROR: OmBeginDownloading() %s\n", OmErrorString(result)); }
-
-            /* Leave filename string for download complete to free... */
         }
     }
     else if (status == OM_DEVICE_REMOVED)
@@ -1108,11 +1220,14 @@ int verify_main(int argc, char *argv[])
                 fprintf(stdout, HEADER);
                 return -2;
             }
-            else if (!strcmp(argv[i], "-stop-clear-all")) { fprintf(stderr, "VERIFY: Option -stop-clear-all\n");    globalOptions |= VERIFY_OPTION_ALL; }
-            else if (!strcmp(argv[i], "-no-check-stop"))  { fprintf(stderr, "VERIFY: Option -no-check-stop\n");     globalOptions |= VERIFY_OPTION_NO_CHECK_STOP; }
-            else if (!strcmp(argv[i], "-output:new"))     { fprintf(stderr, "VERIFY: Option -output:new\n");        globalOptions |= VERIFY_OPTION_OUTPUT_NEW; }
-            else if (!strcmp(argv[i], "-output:old"))     { fprintf(stderr, "VERIFY: Option -output:old\n");        globalOptions &= ~VERIFY_OPTION_OUTPUT_NEW; }
-            else if (!strcmp(argv[i], "-allow-restarts")) { globalAllowedRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-restarts %d\n", globalAllowedRestarts); }
+            else if (!strcmp(argv[i], "-stop-clear-all"))  { fprintf(stderr, "VERIFY: Option -stop-clear-all\n");    globalOptions |= VERIFY_OPTION_ALL; }
+            else if (!strcmp(argv[i], "-no-check-stop"))   { fprintf(stderr, "VERIFY: Option -no-check-stop\n");     globalOptions |= VERIFY_OPTION_NO_CHECK_STOP; }
+            else if (!strcmp(argv[i], "-output:new"))      { fprintf(stderr, "VERIFY: Option -output:new\n");        globalOptions |= VERIFY_OPTION_OUTPUT_NEW; }
+            else if (!strcmp(argv[i], "-output:old"))      { fprintf(stderr, "VERIFY: Option -output:old\n");        globalOptions &= ~VERIFY_OPTION_OUTPUT_NEW; }
+			else if (!strcmp(argv[i], "-allow-restarts"))  { globalAllowedRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-restarts %d\n", globalAllowedRestarts); }
+			else if (!strcmp(argv[i], "-no-configure"))    { fprintf(stderr, "VERIFY: Option -no-configure\n");      globalOptions |= VERIFY_OPTION_NO_CONFIGURE; }
+			else if (!strcmp(argv[i], "-check-on-device")) { fprintf(stderr, "VERIFY: Option -check-on-device\n");   globalOptions |= VERIFY_OPTION_CHECK_ON_DEVICE; }
+			else if (!strcmp(argv[i], "-test-skip"))       { globalTest = atoi(argv[++i]); globalSkip = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -test-skip %d %d\n", globalTest, globalSkip); }
             else if (argv[i][0] == '-')
             {
                 fprintf(stdout, "ERROR: Unrecognized option %s\n", argv[i]);
@@ -1142,10 +1257,12 @@ int verify_main(int argc, char *argv[])
         //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
         if ((globalOptions & VERIFY_OPTION_ALL) == 0)
         {
-			download_t download = { 0 };
-			download.nandType = -1;		// NAND ID not supported from data files
-			download.memoryHealth = -1;	// memory health not supported from data files
-            ret = verify_process(-1, infile, &download, globalOptions);
+			download_t *download = createDownload(-1, infile, globalOptions);
+			//ret = verify_process(download);
+			thread_t *thread = startVerifyThread(download);
+			thread_join(thread, NULL);
+			ret = download->verifyResult;
+			free(download);
         }
         else
         {
@@ -1156,7 +1273,7 @@ int verify_main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop] [-allow-restarts <n>]\n");
+        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop] [-allow-restarts <n>] [-no-configure] [-check-on-device] [-test-skip <test-sectors> <skip-sectors>]\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
         fprintf(stderr, "\n");
