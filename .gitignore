@@ -9,3 +9,5 @@
 /Software/AX3/cwa-convert/c/Release
 *.user
 /scan.cmd
+/Software/OM/omapi/docs/html
+/Software/OM/omapi/docs/latex

@@ -317,6 +317,8 @@ category = SourceCategory.Other;
                 ledColor = OmApi.OM_LED_STATE.OM_LED_UNKNOWN;
                 downloadStatus = OmApi.OM_DOWNLOAD_STATUS.OM_DOWNLOAD_NONE;
                 downloadValue = 0;
+                deviceWarning = 0;      // reset
+                lastUpdate = DateTime.MinValue;
             } 
         }
 
@@ -432,6 +434,8 @@ category = SourceCategory.Other;
             uint newTime = 0;       // last received timestamp (packed)
             int retries = 12;
 
+            deviceWarning = 0;      // reset warning (as it was time-based anyway)
+
             do
             {
                 DateTime previous = DateTime.Now;
@@ -448,6 +452,10 @@ Console.WriteLine("TIMESYNC-DEBUG: Setting time: " + setTime);
                     continue;
                 }
 
+                // Wait before checking the time
+                Console.WriteLine("TIMESYNC: Waiting to check time.");
+                System.Threading.Thread.Sleep(1200);
+
                 // Verify that the clock was set as expected
                 if (OmApi.OM_FAILED(OmApi.OmGetTime((int)deviceId, out newTime)))
                 {
@@ -457,7 +465,7 @@ Console.WriteLine("TIMESYNC-DEBUG: Setting time: " + setTime);
                 DateTime newDateTime = OmApi.OmDateTimeUnpack(newTime);
                 timeDifference = newDateTime - setTime;
 Console.WriteLine("TIMESYNC-DEBUG: Received time: " + newDateTime + ", delta: " + timeDifference.TotalMilliseconds + " ms");
-                if (Math.Abs(timeDifference.TotalMilliseconds) > 3000)
+                if (Math.Abs(timeDifference.TotalMilliseconds) > 5000)
                 {
                     Console.WriteLine("TIMESYNC: Time was not within range: " + (int)timeDifference.TotalSeconds);
                     continue;
@@ -618,6 +626,11 @@ Console.WriteLine("TIMESYNC-DEBUG: Set time ok, checking for ticks...");
                 this.sessionId = 0;
                 this.startTime = OmApi.OmDateTimeUnpack(OmApi.OM_DATETIME_INFINITE);
                 this.stopTime = OmApi.OmDateTimeUnpack(OmApi.OM_DATETIME_INFINITE);
+                // If this device has a time-based warning, sync the device on clear (usually only on configure)
+                if (deviceWarning != 0)
+                {
+                    SyncTime();
+                }
             }
 
             hasChanged = true;

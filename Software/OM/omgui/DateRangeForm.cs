@@ -27,6 +27,8 @@ namespace OmGui
         private OmDevice[] Devices { get; set; }
 
         private bool hasSyncGyro = false;
+        private int minAx6Firmware = int.MaxValue;
+        private int minAx3Firmware = int.MaxValue;
 
         public DateRangeForm(string title, OmDevice[] devices)
         {
@@ -35,6 +37,8 @@ namespace OmGui
             foreach (var device in devices)
             {
                 hasSyncGyro &= device.HasSyncGyro;
+                if (hasSyncGyro && device.FirmwareVersion > 0 && device.FirmwareVersion < minAx6Firmware) minAx6Firmware = device.FirmwareVersion;
+                if (!hasSyncGyro && device.FirmwareVersion > 0 && device.FirmwareVersion < minAx3Firmware) minAx3Firmware = device.FirmwareVersion;
             }
 
             Devices = devices;
@@ -124,6 +128,7 @@ namespace OmGui
                 StreamReader recordProfile = new StreamReader(Properties.Settings.Default.CurrentWorkingFolder +
                     "\\" + "recordSetup.xml");
                 String profileAsString = recordProfile.ReadToEnd();
+                recordProfile.Close();
                 xmlDocument.LoadXml(profileAsString);
 
                 XmlNode rootNode = xmlDocument.DocumentElement;
@@ -324,9 +329,9 @@ namespace OmGui
             {
                 Console.WriteLine("Xml Error: Could not save recordProfile.xml - " + e.Message);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // TODO: Never silently eat errors!
+                Console.WriteLine("Error: Could not save recordProfile.xml - " + e.Message);
             }
         }
 
@@ -723,6 +728,7 @@ Cursor.Current = Cursors.WaitCursor;
             //Make date start and end from dates and times;
             DateTime startDate = StartDate;
             DateTime endDate = EndDate;
+            bool invalid = false;
 
             for (int i = 0; i < warningMessagesFlags.Length; i++)
             {
@@ -764,7 +770,10 @@ Cursor.Current = Cursors.WaitCursor;
             //End time is in the past.
             DateTime d = DateTime.Now;
             if (radioButtonDuration.Checked && (endDate < d) && endDate != startDate)
+            {
                 warningMessagesFlags[5] = true;
+                invalid = true;
+            }
 
             //Start date is more than a day in the past
             if ((startDate < DateTime.Now.Subtract(new TimeSpan(1, 0, 0, 0))) && radioButtonDuration.Checked)
@@ -777,7 +786,10 @@ Cursor.Current = Cursors.WaitCursor;
 
             //Start date is after end date
             if (radioButtonDuration.Checked && StartDate >= EndDate)
+            {
                 warningMessagesFlags[8] = true;
+                invalid = true;
+            }
 
             //Low power mode is being used
             if (checkBoxLowPower.Checked)
@@ -798,6 +810,26 @@ Cursor.Current = Cursors.WaitCursor;
             {
                 labelRateRangeSetting.Text = "";
             }
+            else if (hasSyncGyro && minAx6Firmware <= 53 && sampFreq >= 800 && sampFreq <= 1600)
+            {
+                labelRateRangeSetting.Text = "not supported by firmware";
+                invalid = true;
+            }
+            else if (hasSyncGyro && sampFreq > 1600)
+            {
+                labelRateRangeSetting.Text = "not supported by device";
+                invalid = true;
+            }
+            else if (hasSyncGyro && gyroRange > 0 && sampFreq < 25)
+            {
+                labelRateRangeSetting.Text = "not supported with gyro";
+                invalid = true;
+            }
+            else if (!hasSyncGyro && sampFreq < 12 && !Unpacked)
+            {
+                labelRateRangeSetting.Text = "not supported by firmware in packed mode";
+                invalid = true;
+            }
             else if (sampFreq > 200 || sampFreq < 50)
             {
                 labelRateRangeSetting.Text = "not guaranteed";
@@ -809,6 +841,10 @@ Cursor.Current = Cursors.WaitCursor;
 
             //Now that we have the flags, we can build the string.
             StringBuilder s = new StringBuilder();
+            if (invalid)
+            {
+                s.AppendLine("\u2022 Invalid configuration");
+            }
             for (int i = 0; i < warningMessagesFlags.Length; i++)
             {
                 if (warningMessagesFlags[i])
@@ -827,6 +863,7 @@ Cursor.Current = Cursors.WaitCursor;
                 richTextBoxWarning.Visible = true;
             }
 
+            buttonOk.Enabled = !invalid;
         }
         #endregion
 

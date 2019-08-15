@@ -96,7 +96,7 @@
             this.comboBoxFilter.FormattingEnabled = true;
             this.comboBoxFilter.Items.AddRange(new object[] {
             "none",
-            "BP 0.5-20Hz"});
+            "BP 0.5-20Hz (compatible with V42 and earlier)"});
             this.comboBoxFilter.Location = new System.Drawing.Point(74, 80);
             this.comboBoxFilter.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.comboBoxFilter.Name = "comboBoxFilter";

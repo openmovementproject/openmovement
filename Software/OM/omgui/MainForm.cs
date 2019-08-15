@@ -455,7 +455,7 @@ namespace OmGui
 
             if (device.DeviceWarning >= 2)
             {
-                battery = "DAMAGED? (" + battery + ") - indications of damaged device battery or clock, check carefully.";
+                battery = "DAMAGED? (" + battery + ") - indications of possibly damaged device battery or clock, check carefully.";
             }
             else if (device.DeviceWarning >= 1)
             {
@@ -4363,6 +4363,7 @@ Console.WriteLine("backgroundWorkerUpdate - WARNING STATE CHANGED " + device.Dev
                 args.Add("\"" + input + "\"");
                 args.Add("-paee-epoch"); args.Add("" + optionsForm.Epoch);
                 args.Add("-paee-model"); args.Add("\"" + optionsForm.Model + "\"");
+                args.Add("-paee-filter"); args.Add("" + optionsForm.Filter);
                 args.Add("-paee-file"); args.Add("\"" + output + "\"");
                 ProcessingForm processingForm = new ProcessingForm(OMCONVERT_EXE, args, output, final);
                 dr = processingForm.ShowDialog();
