@@ -123,6 +123,10 @@ typedef struct
 	bool hasGyro;
 
 	int verifyResult;
+
+	long long downloadStarted;
+	long long verifyStarted;
+	long long verifyEnded;
 } download_t;
 
 download_t *createDownload(int deviceId, const char *filename, int options)
@@ -136,12 +140,15 @@ download_t *createDownload(int deviceId, const char *filename, int options)
 	download->filename = filename;
 	download->options = options;
 	download->hasGyro = false;
+	download->downloadStarted = 0;
+	download->verifyStarted = 0;
+	download->verifyEnded = 0;
 	return download;
 }
 
 static int globalOptions = 0;
 static int globalAllowedRestarts = 0;
-static int globalTest = 0;
+static int globalTest = 0;		// test/skip example -test-skip 2327 12123
 static int globalSkip = 0;
 
 #ifdef ID_NAND
@@ -284,6 +291,8 @@ int verify_process(download_t *download)
     double av = 0.0;
     int lastHour = -1;
     char description[1024] = "";
+
+	download->verifyStarted = now();
 
     if (download->filename == NULL || download->filename[0] == '\0')
     {
@@ -722,6 +731,8 @@ if (skipped) { recordingLength = blockStart - previousBlockEnd; }
             }
         }
 
+		download->verifyEnded = now();
+
 // Error mask
 #define CODE_ERROR_MASK         0xfffff000
 #define CODE_WARNING_MASK       0x00000fff
@@ -809,6 +820,7 @@ if (startStopFail) { retval |= CODE_ERROR_STARTSTOP; }
 
         fprintf(stderr, "---\n");
         fprintf(stderr, "Input file,%d,\"%s\",%d\n", download->deviceId, download->filename, retval);
+		fprintf(stderr, "Duration: download=%d verify=%d\n", (int)((download->downloadStarted ? download->verifyStarted - download->downloadStarted : 0) / 1000), (int)((download->verifyEnded - download->verifyStarted) / 1000));
         fprintf(stderr, "Summary errors: file=%d, event=%d, stuck=%d, range=%d, rate=%d, breaks=%d\n", errorFile, errorEvent, errorStuck, errorRange, errorRate, errorBreaks);
         fprintf(stderr, "Summary info-1: restart=%d, breakTime=%0.1fs, maxAv=%f\n", restarts, breakTime, maxAv);
         fprintf(stderr, "Summary info-2: minInterval=%0.3f, maxInterval=%0.3f, duration=%0.4fh\n", minInterval / 65536.0f, maxInterval / 65536.0f, ((totalDuration >> 16) / 60.0f / 60.0f));
@@ -1106,6 +1118,7 @@ static void verify_DeviceCallback(void *reference, int deviceId, OM_DEVICE_STATU
 
 		/* Create reference handle */
 		download_t *download = createDownload(deviceId, filename, globalOptions);
+		download->downloadStarted = now();
 
 		/* Get NAND information */
 		download->memoryHealth = OmGetMemoryHealth(deviceId);
