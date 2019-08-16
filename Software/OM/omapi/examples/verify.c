@@ -104,9 +104,6 @@ typedef void* thread_return_t;
 #define AVERAGE_RANGE_MAX 0.400
 #define AVERAGE_RANGE_OFF 0.300
 
-#define IGNORE_RECENT_RESTARTS (6*60*60)        // Enable this if the devices have been connected/disconnected recently (causing a break in the data)
-
-
 
 #define ID_NAND
 
@@ -148,7 +145,8 @@ download_t *createDownload(int deviceId, const char *filename, int options)
 
 static int globalOptions = 0;
 static int globalAllowedRestarts = 0;
-static int globalTest = 0;		// test/skip example -test-skip 2327 12123
+static int globalAllowRecentRestarts = 0;	// e.g. 6 hours = (6*60*60) = 21600
+static int globalTest = 0;					// AX3 3000 sectors/hour; AX6 9000 sectors/hour; test/skip example: -test-skip 2309 252533
 static int globalSkip = 0;
 
 #ifdef ID_NAND
@@ -437,20 +435,17 @@ int verify_process(download_t *download)
                 long long diff = (long long)(blockStart - previousBlockEnd);
 if (skipped) { recordingLength = blockStart - previousBlockEnd; }
 
-#ifdef IGNORE_RECENT_RESTARTS
-                time_t allowed = time(NULL) - IGNORE_RECENT_RESTARTS;
+                time_t allowed = time(NULL) - globalAllowRecentRestarts;
                 struct tm *tm = localtime(&allowed);
                 OM_DATETIME allowedRestartTime = OM_DATETIME_FROM_YMDHMS(tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-                if (dp->timestamp >= allowedRestartTime)
+                if (!skipped && globalAllowRecentRestarts > 0 && dp->timestamp >= allowedRestartTime)
                 {
                     // Recalculate allowed restart time
 
                     fprintf(stderr, "NOTE: Permitted recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
                 }
-                else
-#endif
-                if (!skipped)
+                else if (!skipped)
 				{
                     fprintf(stderr, "NOTE: Recording sequence restarted @%u, length of %+.2fs (gap of %+.2fs)\n", previousSequenceId, (float)recordingLength / 65536.0f, (float)diff / 65536.0f);
                     restarts++;
@@ -1237,7 +1232,8 @@ int verify_main(int argc, char *argv[])
             else if (!strcmp(argv[i], "-no-check-stop"))   { fprintf(stderr, "VERIFY: Option -no-check-stop\n");     globalOptions |= VERIFY_OPTION_NO_CHECK_STOP; }
             else if (!strcmp(argv[i], "-output:new"))      { fprintf(stderr, "VERIFY: Option -output:new\n");        globalOptions |= VERIFY_OPTION_OUTPUT_NEW; }
             else if (!strcmp(argv[i], "-output:old"))      { fprintf(stderr, "VERIFY: Option -output:old\n");        globalOptions &= ~VERIFY_OPTION_OUTPUT_NEW; }
-			else if (!strcmp(argv[i], "-allow-restarts"))  { globalAllowedRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-restarts %d\n", globalAllowedRestarts); }
+			else if (!strcmp(argv[i], "-allow-restarts")) { globalAllowedRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-restarts %d\n", globalAllowedRestarts); }
+			else if (!strcmp(argv[i], "-allow-recent-restarts")) { globalAllowRecentRestarts = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -allow-recent-restarts %d\n", globalAllowRecentRestarts); }
 			else if (!strcmp(argv[i], "-no-configure"))    { fprintf(stderr, "VERIFY: Option -no-configure\n");      globalOptions |= VERIFY_OPTION_NO_CONFIGURE; }
 			else if (!strcmp(argv[i], "-check-on-device")) { fprintf(stderr, "VERIFY: Option -check-on-device\n");   globalOptions |= VERIFY_OPTION_CHECK_ON_DEVICE; }
 			else if (!strcmp(argv[i], "-test-skip"))       { globalTest = atoi(argv[++i]); globalSkip = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -test-skip %d %d\n", globalTest, globalSkip); }
@@ -1286,7 +1282,7 @@ int verify_main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop] [-allow-restarts <n>] [-no-configure] [-check-on-device] [-test-skip <test-sectors> <skip-sectors>]\n");
+        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop] [-allow-recent-restarts <s>] [-allow-restarts <n>] [-no-configure] [-check-on-device] [-test-skip <test-sectors> <skip-sectors>]\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
         fprintf(stderr, "\n");
