@@ -1,6 +1,6 @@
 # AX3 GUI - Revision History
 
-* [AX3-GUI-43](AX3-GUI-43.zip?raw=true) 2019-08-15: (Beta) Fixed saving subsequent recording settings. Prevent invalid configurations (AX6, AX3 6.25 packed). Correctly clear battery warnings.
+* [AX3-GUI-43](AX3-GUI-43.zip?raw=true) 2019-08-15: Fixed saving subsequent recording settings. Prevent invalid configurations (AX6, AX3 6.25 packed). Correctly clear battery warnings.
 
   * For advanced users, there is also a [no installer version](AX3-GUI-43-no-install.zip) - you will need [.NET 3.5](https://www.microsoft.com/en-gb/download/details.aspx?id=21) and the [AX3 Driver](AX3-Driver-Win-5.zip).
 
