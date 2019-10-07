@@ -128,7 +128,7 @@ typedef struct
 
 download_t *createDownload(int deviceId, const char *filename, int options)
 {
-	download_t *download = malloc(sizeof(download_t));
+	download_t *download = (download_t *)malloc(sizeof(download_t));
 	memset(download, 0, sizeof(download_t));
 	download->memoryHealth = -1;	// memory health not supported from data files
 	memset(download->nandId, 0, sizeof(download->nandId));
@@ -140,6 +140,7 @@ download_t *createDownload(int deviceId, const char *filename, int options)
 	download->downloadStarted = 0;
 	download->verifyStarted = 0;
 	download->verifyEnded = 0;
+	printf("VERIFY #%d: ...download data: %s (options 0x%08x)\n", download->deviceId, download->filename, download->options);
 	return download;
 }
 
@@ -290,7 +291,9 @@ int verify_process(download_t *download)
     int lastHour = -1;
     char description[1024] = "";
 
+	printf("VERIFY #%d: Verify: %s (options 0x%08x)\n", download->deviceId, download->filename, download->options);
 	download->verifyStarted = now();
+	printf("VERIFY #%d: Starting at %d\n", download->deviceId, (int)download->verifyStarted);
 
     if (download->filename == NULL || download->filename[0] == '\0')
     {
@@ -960,8 +963,9 @@ static bool setDeviceResult(download_t* download)
 static thread_return_t verifyThread(void *arg)
 {
 	download_t *download = (download_t *)arg;
-	printf("VERIFY #%d: Verify starting... (options 0x%04x)\n", download->deviceId, download->options);
+	printf("VERIFY #%d: Verify starting... %s (options 0x%08x)\n", download->deviceId, download->filename, download->options);
 	download->verifyResult = verify_process(download);
+	printf("VERIFY #%d: Verify finished =%d\n", download->deviceId, download->verifyResult);
 	if (download->deviceId >= 0)
 	{
 		setDeviceResult(download);
@@ -971,6 +975,7 @@ static thread_return_t verifyThread(void *arg)
 
 static thread_t *startVerifyThread(download_t *download)
 {
+	printf("VERIFY: ...starting thread: #%d %s (0x%08x)\n", download->deviceId, download->filename, download->options);
 	thread_t *thread = (thread_t *)malloc(sizeof(thread_t));
 	thread_create(thread, NULL, verifyThread, download);
 	return thread;
@@ -1266,11 +1271,14 @@ int verify_main(int argc, char *argv[])
         //if (argc > 2 && !strcmp(argv[2], "-output")) { output = 1; }
         if ((globalOptions & VERIFY_OPTION_ALL) == 0)
         {
+			printf("VERIFY: Starting verify on file: %s\n", infile);
 			download_t *download = createDownload(-1, infile, globalOptions);
 			//ret = verify_process(download);
 			thread_t *thread = startVerifyThread(download);
-			thread_join(thread, NULL);
+			printf("VERIFY: [Main thread] Waiting for end\n");
+			thread_join(*thread, NULL);
 			ret = download->verifyResult;
+			printf("VERIFY: [Main thread] Ended =%d\n", ret);
 			free(download);
         }
         else
