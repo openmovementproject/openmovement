@@ -1,0 +1,80 @@
+// FlexHEX Structure Definition for .CWA files
+
+struct cwa_header_t
+{
+    //align address[0];
+    //align offset[0];
+    char packetHeader[2];                      ///< @ 0  +2   ASCII "MD", little-endian (0x444D)
+    unsigned word packetLength;                      ///< @ 2  +2   Packet length (1020 bytes, with header (4) = 1024 bytes total)
+    byte enum { HARDWARE_TYPE_AX3_00 = 0x00, HARDWARE_TYPE_AX3_17 = 0x17, HARDWARE_TYPE_AX3_ff = 0xff, HARDWARE_TYPE_AX6 = 0x64 } hardwareType; ///< @ 4  +1   Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
+    unsigned word deviceId;                          ///< @ 5  +2   Device identifier
+    unsigned dword sessionId;                         ///< @ 7  +4   Unique session identifier
+    unsigned word upperDeviceId;                     ///< @11  +2   Upper word of device id (if 0xffff is read, treat as 0x0000)
+    dword bitstruct { start_second[6]; start_minute[6]; start_hour[5]; start_day[5]; start_month[4]; start_year[6]; } loggingStartTime;           ///< @13  +4   Start time for delayed logging
+    dword bitstruct { stop_second[6]; stop_minute[6]; stop_hour[5]; stop_day[5]; stop_month[4]; stop_year[6]; } loggingEndTime;             ///< @17  +4   Stop time for delayed logging
+    unsigned dword loggingCapacity;                   ///< @21  +4   (Deprecated: preset maximum number of samples to collect, should be 0 = unlimited)
+    unused[1];                      ///< @25  +1   (1 byte reserved)
+    unsigned byte   flashLed;                          ///< @26  +1   Flash LED during recording
+    unused[8];                      ///< @27  +8   (8 bytes reserved)
+    byte enum { ACCEL_ONLY_00 = 0x00, GYRO_RANGE_2000 = 0x02, GYRO_RANGE_1000 = 0x03, GYRO_RANGE_500 = 0x04, GYRO_RANGE_250 = 0x05, GYRO_RANGE_125 = 0x06, ACCEL_ONLY_FF = 0xFF } sensorConfig;    ///< @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
+    unsigned byte   samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
+    dword bitstruct { config_second[6]; config_minute[6]; config_hour[5]; config_day[5]; config_month[4]; config_year[6]; } lastChangeTime;             ///< @37  +4   Last change meta-data time
+    unsigned byte   firmwareRevision;                  ///< @41  +1   Firmware revision number
+    signed word  timeZone;                          ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
+    unused[20];                     ///< @44  +20  (20 bytes reserved)
+    char annotation[];      ///< @64  +448 Scratch buffer / meta-data (448 characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
+    align offset[512];
+    unused[512];                     ///< @512 +512 (Reserved for device-specific meta-data in the same format as the user meta-data) (512 bytes)
+};
+
+struct cwa_data_t
+{
+    align address[512];
+    char packetHeader[2];                      ///< @ 0  +2   ASCII "AX", little-endian (0x5841)    
+    unsigned word packetLength;                      ///< @ 2  +2   Packet length (508 bytes, with header (4) = 512 bytes total)
+    word bitstruct { fraction32768ths[15]; hasFractionalTime[1]; } deviceFractional;   ///< @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
+    unsigned dword sessionId;                         ///< @ 6  +4   Unique session identifier, 0 = unknown
+    unsigned dword sequenceId;                        ///< @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
+    dword bitstruct { second[6]; minute[6]; hour[5]; day[5]; month[4]; year[6]; } timestamp;                  ///< @14  +4   Last reported RTC value, 0 = unknown
+    word bitstruct { light[10]; gyroScale[3]; accelScale[3]; } lightScale;   ///< @18  +2   AAAGGGLLLLLLLLLL Bottom 10 bits is last recorded light sensor value in raw units, 0 = none; top three bits are unpacked accel scale (1/2^(8+n) g); next three bits are gyro scale (8000/2^n dps)
+    word bitstruct { temp[10]; temperature_reserved[6]; } temperature;     ///< @20  +2   Last recorded temperature sensor value in raw units, 0 = none
+    byte bitstruct { resume[1]; single_tap[1]; double_tap[1]; status_reserved[1]; hardware_fifo[1]; software_fifo[1]; flag[1]; error_reserved[1]; } events;  ///< @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
+    unsigned byte   battery;                           ///< @23  +1   Last recorded battery level in scaled/cropped raw units (double and add 512 for 10-bit ADC value), 0 = unknown
+    
+    byte enum {
+        RATE_6_RANGE_16    = 0x06, RATE_6_RANGE_16_LP    = 0x16, RATE_6_RANGE_8    = 0x46, RATE_6_RANGE_8_LP    = 0x56, RATE_6_RANGE_4    = 0x86, RATE_6_RANGE_4_LP    = 0x96, RATE_6_RANGE_2    = 0xC6, RATE_6_RANGE_2_LP    = 0xD6, 
+        RATE_12_RANGE_16   = 0x07, RATE_12_RANGE_16_LP   = 0x17, RATE_12_RANGE_8   = 0x47, RATE_12_RANGE_8_LP   = 0x57, RATE_12_RANGE_4   = 0x87, RATE_12_RANGE_4_LP   = 0x97, RATE_12_RANGE_2   = 0xC7, RATE_12_RANGE_2_LP   = 0xD7, 
+        RATE_25_RANGE_16   = 0x08, RATE_25_RANGE_16_LP   = 0x18, RATE_25_RANGE_8   = 0x48, RATE_25_RANGE_8_LP   = 0x58, RATE_25_RANGE_4   = 0x88, RATE_25_RANGE_4_LP   = 0x98, RATE_25_RANGE_2   = 0xC8, RATE_25_RANGE_2_LP   = 0xD8, 
+        RATE_50_RANGE_16   = 0x09, RATE_50_RANGE_16_LP   = 0x19, RATE_50_RANGE_8   = 0x49, RATE_50_RANGE_8_LP   = 0x59, RATE_50_RANGE_4   = 0x89, RATE_50_RANGE_4_LP   = 0x99, RATE_50_RANGE_2   = 0xC9, RATE_50_RANGE_2_LP   = 0xD9, 
+        RATE_100_RANGE_16  = 0x0A, RATE_100_RANGE_16_LP  = 0x1A, RATE_100_RANGE_8  = 0x4A, RATE_100_RANGE_8_LP  = 0x5A, RATE_100_RANGE_4  = 0x8A, RATE_100_RANGE_4_LP  = 0x9A, RATE_100_RANGE_2  = 0xCA, RATE_100_RANGE_2_LP  = 0xDA, 
+        RATE_200_RANGE_16  = 0x0B, RATE_200_RANGE_16_LP  = 0x1B, RATE_200_RANGE_8  = 0x4B, RATE_200_RANGE_8_LP  = 0x5B, RATE_200_RANGE_4  = 0x8B, RATE_200_RANGE_4_LP  = 0x9B, RATE_200_RANGE_2  = 0xCB, RATE_200_RANGE_2_LP  = 0xDB, 
+        RATE_400_RANGE_16  = 0x0C, RATE_400_RANGE_16_LP  = 0x1C, RATE_400_RANGE_8  = 0x4C, RATE_400_RANGE_8_LP  = 0x5C, RATE_400_RANGE_4  = 0x8C, RATE_400_RANGE_4_LP  = 0x9C, RATE_400_RANGE_2  = 0xCC, RATE_400_RANGE_2_LP  = 0xDC, 
+        RATE_800_RANGE_16  = 0x0D, RATE_800_RANGE_16_LP  = 0x1D, RATE_800_RANGE_8  = 0x4D, RATE_800_RANGE_8_LP  = 0x5D, RATE_800_RANGE_4  = 0x8D, RATE_800_RANGE_4_LP  = 0x9D, RATE_800_RANGE_2  = 0xCD, RATE_800_RANGE_2_LP  = 0xDD, 
+        RATE_1600_RANGE_16 = 0x0E, RATE_1600_RANGE_16_LP = 0x1E, RATE_1600_RANGE_8 = 0x4E, RATE_1600_RANGE_8_LP = 0x5E, RATE_1600_RANGE_4 = 0x8E, RATE_1600_RANGE_4_LP = 0x9E, RATE_1600_RANGE_2 = 0xCE, RATE_1600_RANGE_2_LP = 0xDE, 
+        RATE_3200_RANGE_16 = 0x0F, RATE_3200_RANGE_16_LP = 0x1F, RATE_3200_RANGE_8 = 0x4F, RATE_3200_RANGE_8_LP = 0x5F, RATE_3200_RANGE_4 = 0x8F, RATE_3200_RANGE_4_LP = 0x9F, RATE_3200_RANGE_2 = 0xCF, RATE_3200_RANGE_2_LP = 0xDF
+    } sampleRate; ///< @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
+    
+    byte enum { PACKED_3AXIS = 0x30, UNPACKED_3AXIS = 0x32, UNPACKED_6AXIS = 0x62 } numAxesBPS;  ///< @25  +1   0x32 (top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
+    signed word  timestampOffset;                   ///< @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
+    unsigned word sampleCount;                       ///< @28  +2   Number of sensor samples (if this sector is full -- Axyz: 80 or 120 samples, Gxyz/Axyz: 40 samples)
+
+    union {
+        dword bitstruct { px[10]; py[10]; pz[10]; pe[2]; } packed[120];
+        struct {
+          signed word x;
+          signed word y;
+          signed word z;
+        } unpacked3axis[80];
+        struct {
+          signed word gx;
+          signed word gy;
+          signed word gz;
+          signed word ax;
+          signed word ay;
+          signed word az;
+        } unpacked6axis[40];
+    } rawSampleData;                 ///< @30  +480 Raw sample data.  Each sample is either 3x/6x/9x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
+
+    //align offset[510];
+    hex word checksum;                          ///< @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
+};
