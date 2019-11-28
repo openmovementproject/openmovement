@@ -64,7 +64,7 @@ Transform: *y'* = -*y*, *z'* = -*z*.
 Gyro: *gy'* = -*gy*, *gz'* = -*gz*.
 
 
-## Rotated 180 degrees around both X-axis and Y-axis: "rotated 180 degrees rotate Z-axis", "flipped on long and short sides"
+## Rotated 180 degrees around both X-axis and Y-axis: "rotated 180 degrees around Z-axis", "flipped on long and short sides"
 
 ```
 +-----------------------+---+
