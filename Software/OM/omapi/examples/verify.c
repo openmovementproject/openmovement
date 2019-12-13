@@ -150,6 +150,11 @@ static int globalAllowRecentRestarts = 0;	// e.g. 6 hours = (6*60*60) = 21600
 static int globalTest = 0;					// AX3 3000 sectors/hour; AX6 9000 sectors/hour; test/skip example: -test-skip 2309 252533
 static int globalSkip = 0;
 
+static float batteryAccelWarn = 0.25f;
+static float batteryAccelError = 0.29f;
+static float batteryAccelGyroWarn = 0.521f;
+static float batteryAccelGyroError = 0.595f;  // at least 7-days: 0.595%; at least 8-days: 0.521%
+
 #ifdef ID_NAND
 // "NANDID=%02x:%02x:%02x:%02x:%02x:%02x,%d\r\n", id[0], id[1], id[2], id[3], id[4], id[5], nandPresent
 static const char NAND_DEVICE_DONT_CARE[6] = { 0x00 };
@@ -805,12 +810,11 @@ if (!download->hasGyro)
     if (hours > 0) { percentPerHour = percentLoss / hours; } else { percentPerHour = 0; }
 	if (download->hasGyro)
 	{
-		// at least 7-days: 0.595%; at least 8-days: 0.521%
-		if (percentPerHour >= 0.595f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.521f) { retval |= CODE_WARNING_BATT; } // Gyro levels
+		if (percentPerHour >= batteryAccelGyroError) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= batteryAccelGyroWarn) { retval |= CODE_WARNING_BATT; } // Gyro levels
 	}
 	else
 	{
-		if (percentPerHour >= 0.29f) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= 0.25f) { retval |= CODE_WARNING_BATT; } // Accel-only levels
+		if (percentPerHour >= batteryAccelError) { retval |= CODE_ERROR_BATT; } else if (percentPerHour >= batteryAccelWarn) { retval |= CODE_WARNING_BATT; } // Accel-only levels
 	}
 }
 // Start/stop
@@ -855,7 +859,7 @@ if (download != NULL)
             if (retval & CODE_WARNING_BREAKS    ) { strcat(description, "W:Breaks;"); }
             if (retval & CODE_WARNING_RESTARTS  ) { strcat(description, "W:Restarts;"); }
             if (retval & CODE_WARNING_LIGHT     ) { char temp[32]; sprintf(temp, "W:Light(%d);", minLight); strcat(description, temp); }
-            if (retval & CODE_WARNING_BATT      ) { char temp[32]; sprintf(temp, "W:Batt(%2.2f);", percentPerHour); strcat(description, temp); }
+            if (retval & CODE_WARNING_BATT      ) { char temp[32]; sprintf(temp, "W:Batt(%2.3f);", percentPerHour); strcat(description, temp); }
             if (retval & CODE_WARNING_STARTSTOP ) { strcat(description, "W:StartStop;"); }
             if (retval & CODE_WARNING_NANDHEALTH) { strcat(description, "W:NandHealth;"); }
             if (retval & CODE_WARNING_NANDID    ) { strcat(description, "W:NandId;"); }
@@ -867,7 +871,7 @@ if (download != NULL)
             if (retval & CODE_ERROR_BREAKS      ) { strcat(description, "E:Breaks;"); }
             if (retval & CODE_ERROR_RESTARTS    ) { strcat(description, "E:Restarts;"); }
             if (retval & CODE_ERROR_LIGHT       ) { char temp[32]; sprintf(temp, "E:Light(%d);", minLight); strcat(description, temp); }
-            if (retval & CODE_ERROR_BATT        ) { char temp[32]; sprintf(temp, "E:Batt(%2.2f);", percentPerHour); strcat(description, temp); }
+            if (retval & CODE_ERROR_BATT        ) { char temp[32]; sprintf(temp, "E:Batt(%2.3f);", percentPerHour); strcat(description, temp); }
             if (retval & CODE_ERROR_STARTSTOP   ) { strcat(description, "E:StartStop;"); }
             if (retval & CODE_ERROR_NANDHEALTH  ) { strcat(description, "E:NandHealth;"); }
             if (retval & CODE_ERROR_NANDID      ) { strcat(description, "E:NandId;"); }
@@ -1242,6 +1246,10 @@ int verify_main(int argc, char *argv[])
 			else if (!strcmp(argv[i], "-no-configure"))    { fprintf(stderr, "VERIFY: Option -no-configure\n");      globalOptions |= VERIFY_OPTION_NO_CONFIGURE; }
 			else if (!strcmp(argv[i], "-check-on-device")) { fprintf(stderr, "VERIFY: Option -check-on-device\n");   globalOptions |= VERIFY_OPTION_CHECK_ON_DEVICE; }
 			else if (!strcmp(argv[i], "-test-skip"))       { globalTest = atoi(argv[++i]); globalSkip = atoi(argv[++i]); fprintf(stderr, "VERIFY: Option -test-skip %d %d\n", globalTest, globalSkip); }
+			else if (!strcmp(argv[i], "-batt-accel-warn")) { batteryAccelWarn = (float)atof(argv[++i]); fprintf(stderr, "VERIFY: Option -battery-accel-warn %f\n", batteryAccelWarn); }
+			else if (!strcmp(argv[i], "-batt-accel-error")) { batteryAccelError = (float)atof(argv[++i]); fprintf(stderr, "VERIFY: Option -battery-gyro-error %f\n", batteryAccelError); }
+			else if (!strcmp(argv[i], "-batt-accelgyro-warn")) { batteryAccelGyroWarn = (float)atof(argv[++i]); fprintf(stderr, "VERIFY: Option -battery-accelgyro-warn %f\n", batteryAccelGyroWarn); }
+			else if (!strcmp(argv[i], "-batt-accelgyro-error")) { batteryAccelGyroError = (float)atof(argv[++i]); fprintf(stderr, "VERIFY: Option -battery-accelgyro-error %f\n", batteryAccelGyroError); }
             else if (argv[i][0] == '-')
             {
                 fprintf(stdout, "ERROR: Unrecognized option %s\n", argv[i]);
@@ -1290,7 +1298,11 @@ int verify_main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>> [-no-check-stop] [-allow-recent-restarts <s>] [-allow-restarts <n>] [-no-configure] [-check-on-device] [-test-skip <test-sectors> <skip-sectors>]\n");
+		fprintf(stderr, "Usage: verify <<binary-input-file> | <-stop-clear-all> [outfile.csv] | <-headeronly>>");
+		fprintf(stderr, " [-no-check-stop] [-allow-recent-restarts <s>] [-allow-restarts <n>]");
+		fprintf(stderr, " [-no-configure] [-check-on-device] [-test-skip <test-sectors> <skip-sectors>]");
+		fprintf(stderr, " [-batt-accel-warn 0.25] [-batt-accel-error 0.29] [-batt-accelgyro-warn 0.521] [-batt-accelgyro-error 0.595]");
+		fprintf(stderr, "\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Where: binary-input-file: the name of the binary file to verify.\n");
         fprintf(stderr, "\n");
