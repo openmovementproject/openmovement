@@ -76,27 +76,47 @@ typedef struct
 } OM_READER_DATA_PACKET;
 #pragma pack(pop)
 
+// Light field packed AAAGGGLLLLLLLLLL -- light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits.
+//
+// The light sensor is only suitable for a general, relative, indicator of light (the sensor is not placed with a light pipe, the case absorbs a lot of light, etc.)
+// That said, you can use the following formula:
+//   log10LuxTimes10Power3 = ((light + 512.0) * 6000 / 1024);
+//   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0);
+//
+//   Accelerometer sample values are in units of (where g = 9.81 m/s/s) and need to have a scaling factor applied.
+//   Accel scaling for 16-bit unpacked values: 1/2^(8+n) [g] -- expected values:
+//     0: AX3   1/256   (2^8,  8+0)
+//     3: +-16g 1/2048  (2^11, 8+3)
+//     4: +-8g  1/4096  (2^12, 8+4)
+//     5: +-4g  1/8192  (2^13, 8+5)
+//     6: +-2g  1/16384 (2^14, 8+6)
+//
+//   Gyro scaling for 16-bit unpacked values: 4000/2^n [dps] -- expected values:
+//     1: 2000 dps
+//     2: 1000 dps
+//     3:  500 dps
+//     4:  250 dps
+//     5:  125 dps
+//
+// The temperature conversion (which comes from the ADC units measuring 3/1024 V, the sensor giving 0.5 V at 0 C, and 10 mV/C):
+//   centigrade = (temperature * 75.0 / 256 - 50)
+//
+// The battery value is packed into a single byte, and the conversion is:
+//   volts = (battery + 512.0) * 6000 / 1024 / 1000.0;
+// 
 
-// Light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: 
-// Accel scaling for 16-bit unpacked values: 1/2^(8+n) g
-// 0: AX3   1/256   (2^8,  8+0)
-// 3: +-16g 1/2048  (2^11, 8+3)
-// 4: +-8g  1/4096  (2^12, 8+4)
-// 5: +-4g  1/8192  (2^13, 8+5)
-// 6: +-2g  1/16384 (2^14, 8+6)
 
-// Gyro scaling for 16-bit unpacked values: 4000/2^n dps 
-// 1: 2000 dps
-// 2: 1000 dps
-// 3:  500 dps
-// 4:  250 dps
-// 5:  125 dps
-
-
-// Packed accelerometer value - must sign-extend each component value and adjust for exponent
+// There are two possible packing formats for the triaxial accelerometer data:
+//
+// * Packing format 2, 16-bit signed integers (3-axes: Ax, Ay, Az; 6-axis: Gx, Gy, Gz, Ax, Ay, Az) stored little endian.
+//
+// * Packing format 0 (3-axis, 120 samples/packet): One 32-bit little-endian packed value, where the bits in the bytes ordered [3][2][1][0] are:
 //        [byte-3] [byte-2] [byte-1] [byte-0]
 //        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
 //        10987654 32109876 54321098 76543210
+//    x/y/z represents the three 10-bit axis values.
+//    The left-most bit of each value is the sign bit, and must be sign-extended to fill the word to produce a signed value (-512 to 511).
+//    The 'e' represents the binary exponent value (0-3) -- the number of bits to left-shift all the axis values.
 
 // Access the packed i-th 4-byte value in the buffer in an endian-agnostic way:
 #define PACKED_VALUE(buffer, i) ((uint32_t)((uint8_t *)buffer)[30 + i * 4] | ((uint32_t)((uint8_t *)buffer)[31 + i * 4] << 8) | ((uint32_t)((uint8_t *)buffer)[32 + i * 4] << 16) | ((uint32_t)((uint8_t *)buffer)[33 + i * 4] << 24))
