@@ -21,3 +21,23 @@ You should never need to update the firmware yourself.
 * AX3 Firmware V42 - Additional NAND white-list; working with higher sample rates.
 
 * [AX3 Firmware V36](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-36.zip) - Original
+
+---
+
+# AX6 Firmware
+
+* [AX6 Firmware V56](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX6-6.4-Firmware-56.zip) - 2019-12-09 Correct initial axes swap for A+G <!-- (V54/55: 1024x 6-axis samples, V<=53: 128x 6-axis samples) -->
+
+<!-- V55 Internal: Charge termination timeout -->
+
+* [AX6 Firmware V54](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX6-6.4-Firmware-54.zip) - 2019-08-15 Fixes for higher frequency logging.
+
+* AX6 Firmware V51 - 2018-11-15 Initial release.
+
+<!--
+V51 Internal: Fix for timestamp offset
+V50 Internal: Delay start bug
+V49 Internal: Long device ID
+V48 Internal: Gyro stream sample and corrected range bits
+V47 Internal: Accel only.
+-->
