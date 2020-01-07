@@ -79,7 +79,7 @@ typedef struct
 // Light field packed AAAGGGLLLLLLLLLL -- light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits.
 //
 // The light sensor is only suitable for a general, relative, indicator of light (the sensor is not placed with a light pipe, the case absorbs a lot of light, etc.)
-// That said, you can use the following formula:
+// That said, you can use the following formula for the AX3:
 //   log10LuxTimes10Power3 = ((light + 512.0) * 6000 / 1024);
 //   lux = pow(10.0, log10LuxTimes10Power3 / 1000.0);
 //
