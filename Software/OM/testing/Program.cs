@@ -6,8 +6,15 @@ using System.IO;
 
 namespace OMTesting
 {
-    static class Program
+    public static class Program
     {
+        public enum Mode
+        {
+            Setup,
+            Recharge,
+            RechargeClear,
+        }
+
         static private bool logUiExceptionsOnly = false;
 
         /// <summary>
@@ -42,6 +49,7 @@ namespace OMTesting
                 // Command-line options
                 string logFile = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar + "log.txt";
                 bool autoAdd = false;
+                Mode programMode = Mode.Setup;
                 int minBattery = 85;
                 int startDays = 1;
                 int startHour = 0;
@@ -54,6 +62,9 @@ namespace OMTesting
                 for (int i = 0; i < args.Length; i++)
                 {
                     if (args[i].ToLower() == "-log") { logFile = args[++i]; }
+                    else if (args[i].ToLower() == "-mode:setup") { programMode = Mode.Setup; }
+                    else if (args[i].ToLower() == "-mode:recharge") { programMode = Mode.Recharge; }
+                    else if (args[i].ToLower() == "-mode:rechargeclear") { programMode = Mode.RechargeClear; }
                     else if (args[i].ToLower() == "-auto") { autoAdd = true; }
                     else if (args[i].ToLower() == "-minbattery") { minBattery = int.Parse(args[++i]); }
                     else if (args[i].ToLower() == "-startdays") { startDays = int.Parse(args[++i]); }
@@ -80,7 +91,7 @@ namespace OMTesting
                     }
                 }
 
-                MainForm mainForm = new MainForm(loadFile, autoAdd, minBattery, startDays, startHour, durationDays, endHour, debugMode);
+                MainForm mainForm = new MainForm(loadFile, programMode, autoAdd, minBattery, startDays, startHour, durationDays, endHour, debugMode);
                 //mainForm.LogFile = logFile;
 
                 Application.Run(mainForm);

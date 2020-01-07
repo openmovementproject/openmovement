@@ -13,7 +13,7 @@ namespace OMTesting
 {
     public partial class MainForm : Form
     {
-
+        Program.Mode ProgramMode;
         bool autoAdd;
         public int MinBattery;
         public int StartDays;
@@ -130,7 +130,7 @@ namespace OMTesting
             }
 
 
-            public bool StartConfigure(int startDays, int startHour, int durationDays, int endHour, int debugMode)
+            public bool StartConfigure(Program.Mode programMode, int startDays, int startHour, int durationDays, int endHour, int debugMode)
             {
                 // See if a charging device should be configured
                 if (Mode != DeviceStatus.DeviceMode.Charging) { return false; }
@@ -140,9 +140,28 @@ namespace OMTesting
                 // Create the command-line-interface wrapper
                 Configure configure;
                 string configCommand = @"omapi-examples.exe";
-                string args = "record -id $id -startdays $startdays -starthour $starthour -durationdays $durationdays -endhour $endhour -debugmode $debugmode";
-                string basePath;
+                string args = null;
 
+                if (programMode == Program.Mode.Setup)
+                {
+                    args = "record -id $id -startdays $startdays -starthour $starthour -durationdays $durationdays -endhour $endhour -debugmode $debugmode";
+                }
+                else if (programMode == Program.Mode.RechargeClear)
+                {
+                    args = "clear -checkversion -timesync $id";
+                }
+                else if (programMode == Program.Mode.Recharge)
+                {
+                    args = "clear -noclear $id";
+                }
+
+                if (args == null)
+                {
+                    Console.WriteLine("ERROR: No command arguments.");
+                    return false;
+                }
+
+                string basePath;
                 //basePath = AppDomain.CurrentDomain.BaseDirectory;
                 basePath = Path.GetDirectoryName(Application.ExecutablePath);
                 configCommand = Path.Combine(basePath, configCommand);
@@ -171,6 +190,14 @@ namespace OMTesting
                     label = "ERROR";
                     info = "" + e.ExitCode + " " + (e.ErrorMessages == null ? "" : e.ErrorMessages);
                     Mode = DeviceStatus.DeviceMode.Error;
+                }
+                else if (e.ExitCode == 42)   // 
+                {
+                    label = "FLAGGED";
+                    info = "" + e.Error + " [FLAGGED] " + (e.ErrorMessages == null ? "" : e.ErrorMessages);
+                    OmDevice omdev = GetDevice();
+                    if (omdev != null) { omdev.SetLed(OmApi.OM_LED_STATE.OM_LED_CYAN); }
+                    Mode = DeviceStatus.DeviceMode.Failed;
                 }
                 else if (e.ExitCode > 0)   // 
                 {
@@ -220,11 +247,12 @@ namespace OMTesting
 
 
 
-        public MainForm(string loadFile, bool autoAdd, int minBattery, int startDays, int startHour, int durationDays, int endHour, int debugMode)
+        public MainForm(string loadFile, Program.Mode programMode, bool autoAdd, int minBattery, int startDays, int startHour, int durationDays, int endHour, int debugMode)
         {
             InitializeComponent();
 
             (new TextBoxStreamWriter(textBoxLog)).SetConsoleOut();
+            this.ProgramMode = programMode;
             this.autoAdd = autoAdd;
             this.MinBattery = minBattery;
             this.StartDays = startDays;
@@ -232,6 +260,8 @@ namespace OMTesting
             this.DurationDays = durationDays;
             this.EndHour = endHour;
             this.DebugMode = debugMode;
+
+            this.Text = this.Text + " [" + this.ProgramMode + "]";
 
             Console.WriteLine("Started.");
         }
@@ -510,7 +540,7 @@ namespace OMTesting
                 // See if a charging device should be configured
                 if (!configuring && device.Mode == DeviceStatus.DeviceMode.Charging && device.CanConfigure(MinBattery))
                 {
-                    device.StartConfigure(StartDays, StartHour, DurationDays, EndHour, DebugMode);
+                    device.StartConfigure(ProgramMode, StartDays, StartHour, DurationDays, EndHour, DebugMode);
                     changed = true;
                 }
                 else
