@@ -59,7 +59,7 @@ function metadata = cwaMetadata(file)
                 ofs = ofs + 3;
             elseif double(str(ofs)) == double('+')
                 ret = [ret 32]; %#ok<AGROW>
-                ofs = ofs + 1
+                ofs = ofs + 1;
             else % not matched as hex
                 %ret = sprintf('%s%c', ret, str(ofs));
                 ret = [ret str(ofs)]; %#ok<AGROW>
@@ -76,7 +76,7 @@ function metadata = cwaMetadata(file)
         
         %disp(urldecode(str));
         
-        if str(1) == double('?')   % Skip initial '?'
+        if ~isempty(str) && str(1) == double('?')   % Skip initial '?'
             str = str(2:end);
         end
         
@@ -122,7 +122,7 @@ function metadata = cwaMetadata(file)
     end
     bytes = bytes(65:512);    
     % Trim end (0x00, 0xFF, or ' ')
-    while double(bytes(end)) == 32 || double(bytes(end)) == 0 || double(bytes(end)) == 255
+    while ~isempty(metadataBytes) && (double(bytes(end)) == 32 || double(bytes(end)) == 0 || double(bytes(end)) == 255)
         bytes = bytes(1:end-1);
     end
     
