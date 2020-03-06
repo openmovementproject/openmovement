@@ -1,3 +1,6 @@
+%% IMPORTANT: We now recommend CWA_readFile.m instead: http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/CWA_readFile.m
+%% ...as that version will work with unpacked data and accelerometer+gyroscope data.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Basic sum(SVM-1) computation with the AX3.
 %
