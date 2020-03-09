@@ -334,21 +334,25 @@ function data = readData(fid, packetInfo, options)
         fprintf('scaling\n');
     end
 
-    if packing == 0, % Packed format
+    if axes == 3 && packing == 0, % Packed format
         % calls external c-code to unpack values (for speed pass on full block instead of loop)
         if options.useC
         	data(:,2:4) = parseValueBlock(dataRaw)' .* accScale;
         else
+            % Stored accel packed into DWORD
             data(:,2:4) = double(parseValueBlockML(dataRaw)) .* accScale;
         end
     else
-        data(:,2:4) = double(dataRaw(:,1:3)) * accScale;
+        if axes == 6,
+            % Stored Gx,Gy,Gz,Ax,Ay,Az
+            data(:,5:7) = double(dataRaw(:,1:3)) * gyrScale;
+            data(:,2:4) = double(dataRaw(:,4:6)) * accScale;
+        elseif axes == 3,
+            % Stored Ax,Ay,Az
+            data(:,2:4) = double(dataRaw(:,1:3)) * accScale;
+        end
     end
     
-    if axes >= 6,
-        data(:,5:7) = double(dataRaw(:,4:6)) * gyrScale;
-    end
-
     clear dataRaw; % clear some memory
     
     if options.verbose,
