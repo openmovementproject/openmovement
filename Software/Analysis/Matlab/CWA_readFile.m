@@ -39,8 +39,6 @@ function data = CWA_readFile(filename, varargin)
     %                               indicates which sensor modalities to
     %                               extract. Order is:
     %                               [ AXES (time+accel+gyro), LIGHT, TEMP ]
-    %                               e.g. [1, 0, 0]
-    %                               (LIGHT/TEMP NOT CURRENTLY SUPPORTED)
     %
     %           'verbose'           Print out debug messages about
     %                               progress.
@@ -89,6 +87,8 @@ function data = CWA_readFile(filename, varargin)
     %       derived from AX3 loader by Nils Hammerla, 2012 <nils.hammerla@ncl.ac.uk>
     %
     
+    % t = datetime(data.AXES(:,1), 'ConvertFrom', 'datenum'); clear plot; hold on; yyaxis left; plot(t, data.AXES(:,2),'r'); plot(t, data.AXES(:,3),'g'); plot(t, data.AXES(:,4),'b'); yyaxis right; plot(t, data.AXES(:,5),'c'); plot(t, data.AXES(:,6),'m'); plot(t, data.AXES(:,7),'y'); hold off;
+    
     % 
     % Copyright (c) 2012-2020, Newcastle University, UK.
     % All rights reserved.
@@ -124,7 +124,7 @@ function data = CWA_readFile(filename, varargin)
     addOptional(p,'stopTime',-1,@isnumeric);        % stop time  (matlab)
     addOptional(p,'verbose',0,@isnumeric);          % print out progress
     addOptional(p,'useC',0,@isnumeric);             % use external c-code for date conversion
-    addOptional(p,'modality',[1 0 0], @isnumeric);  % specify modality [AXES LIGHT TEMP]
+    addOptional(p,'modality',[1 0 1], @isnumeric);  % specify modality [AXES LIGHT TEMP]
     addOptional(p,'step',1, @isnumeric);            % specify step size (default 1), this is inefficient for small numbers other than 1
     
     % parse varargin
@@ -228,19 +228,7 @@ function data = readData(fid, packetInfo, options)
     if options.verbose,
         fprintf('preparing to read data\n');
     end
-       
-    % Get all 'AX' packet ids
-    seekType = hex2dec('5841');
-    %packetIds = (1:length(packetInfo))';
-    packetHeaders = packetInfo(:,5);
-    packetIds = find(packetHeaders==seekType);
-    if isempty(packetIds)
-        fprintf('no data packets found.\n');
-        data = [];
-        return;
-    end
-    packetInfo = packetInfo(packetIds,:);
-    
+        
     % get the timestamps for each sample for interpolation later
     % ... with positive timestamp offset (packet where clock flicked over to current time)
     %packetIds = find(packetInfo(:,3) > 0);
@@ -252,7 +240,7 @@ function data = readData(fid, packetInfo, options)
     % TIME will be used for interpolation of other timestamps (offset, timestamp)
     TIME = [packetSampleOffset+double(packetInfo(:,3)) packetInfo(:,2)];
     % TIME_full just contains integer packet numbers for LIGHT and TEMP.
-    %TIME_full = [packetIds packetInfo(packetIds,2)];
+    %TIME_full = [packetIds packetInfo(:,2)];
     
     % Number of samples
     numActualSamples = packetSampleOffset(end) + packetSampleCount(end);
@@ -287,7 +275,7 @@ function data = readData(fid, packetInfo, options)
     % AAAGGGxxxxxxxxxx top three bits are unpacked accel scale (1/2^(8+n) g); next three bits are gyro scale (8000/2^n dps)
     accScale = 1 / pow2(8 + bitshift(scaleCode, -13));
     gyrScale = (8000 / pow2(bitand(bitshift(scaleCode, -10), 7))) / 32768;
-
+    
     % see what modalities to extract...
     data = zeros(numSamples, axes + 1);
     if packing == 0,  % Packed format
@@ -421,22 +409,49 @@ function data = readFile(filename, options)
     
     % check if any packets are left...
     if isempty(data.packetInfo),
-        fprintf('no data after filtering for start and stop dates given.\n');
-        fclose(fid);
-        return
+        fprintf('Warning: no data after filtering for start and stop dates given.\n');
+        %fclose(fid);
+        %return
     end
+    
+    % Get all 'AX' packet ids
+    seekType = hex2dec('5841');
+    %packetIds = (1:length(packetInfo))';
+    packetHeaders = data.packetInfo(:,5);
+    packetIds = find(packetHeaders==seekType);
+    if isempty(packetIds)
+        fprintf('Warning: no data packets found.\n');
+        %fclose(fid);
+        %return
+    end
+    packetInfo = data.packetInfo(packetIds,:);
+    
     
     % see what modalities to extract...
     if options.modality(1),
-        data.AXES = readData(fid, data.packetInfo, options);
+        data.AXES = readData(fid, packetInfo, options);
     end
     if options.modality(2),
-        disp 'Warning: Light reading not currently supported.';
-        data.LIGHT = [];
+        if options.verbose,
+            fprintf('processing light data\n');
+        end
+        lightRaw = [ packetInfo(:,2) packetInfo(:,7) ];
+        lightRaw(:,2) = bitand(lightRaw(:,2), 1023);
+        % TODO: AX6 and AX3 have different raw scales
+        data.LIGHT = lightRaw;
     end
     if options.modality(3),
-        disp 'Warning: Temperature reading not currently supported.';
-        data.TEMP = [];
+        if options.verbose,
+            fprintf('processing temperature data\n');
+        end
+        % Read timestamped data
+        tempRaw = [ packetInfo(:,2) packetInfo(:,8) ];
+        % Mask bottom 10 bits
+        tempRaw(:,2) = bitand(tempRaw(:,2), 1023);
+        % Scale from raw
+        tempRaw(:,2) = tempRaw(:,2) .* (75.0 / 256) - 50;
+        % Assign to output
+        data.TEMP = tempRaw;
     end
    
     % close the file, done.
@@ -549,6 +564,12 @@ function data = readFileInfo(filename, options)
     elseif bytes(1) ~= double('M') || bytes(2) ~= double('D')
         disp('Warning: File header is not valid');
     else
+        % Read device type (23=AX3, 100=AX6)
+        data.hardwareType = bytes(5);
+        if data.hardwareType == 0 || data.hardwareType == 255,
+            data.hardwareType = 23;  % 0x17/23 = AX3 (or if 0x00/0xFF), 0x64/100 = AX6
+        end
+        
         data.deviceId = (bytes(7) * 256) + bytes(6);
         if bytes(12) ~= 255 || bytes(13) ~= 255,
             data.deviceId = data.deviceId + (bytes(13) * 256 * 256 * 256) + (bytes(12) * 256 * 256);
