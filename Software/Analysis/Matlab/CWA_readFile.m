@@ -600,11 +600,24 @@ function data = readFileInfo(filename, options)
     % read valid packet positions 
     data.packetInfo = getPacketInfo(fid, options);
     
-    % get time (first and last valid packets)
-    data.start.mtime = data.packetInfo(1,2);
-    data.start.str   = datestr(data.packetInfo(1,2));
-    data.stop.mtime  = data.packetInfo(end,2);
-    data.stop.str    = datestr(data.packetInfo(end,2));
+    % Only 'AX' packet ids are valid
+    seekType = hex2dec('5841');
+    
+    % get time of first valid packet
+    firstId = find(data.packetInfo(:,5) == seekType, 1, 'first');
+    if not(isempty(firstId))
+        data.start.mtime = data.packetInfo(firstId, 2);
+        data.start.str = datestr(data.start.mtime);
+        data.start.datetime = datetime(data.start.mtime, 'ConvertFrom', 'datenum');
+    end
+    
+    % get time of last valid packet
+    lastId = find(data.packetInfo(:,5) == seekType, 1, 'last');
+    if not(isempty(lastId))
+        data.stop.mtime = data.packetInfo(lastId, 2);
+        data.stop.str = datestr(data.stop.mtime);
+        data.stop.datetime = datetime(data.stop.mtime, 'ConvertFrom', 'datenum');
+    end
     
     % close the file
     fclose(fid);
