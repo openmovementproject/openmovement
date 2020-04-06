@@ -83,10 +83,11 @@ function data = CWA_readFile(filename, varargin)
     %                  or [time Ax Ay Az Gx Gy Gz] for accel + gyro.
     %
     %   v0.1
-    %       Dan Jackson, 2019
+    %       Dan Jackson, 2019-2020
     %       derived from AX3 loader by Nils Hammerla, 2012 <nils.hammerla@ncl.ac.uk>
     %
     
+    % data = CWA_readFile('CWA-DATA.CWA');
     % t = datetime(data.AXES(:,1), 'ConvertFrom', 'datenum'); clear plot; hold on; yyaxis left; plot(t, data.AXES(:,2),'r'); plot(t, data.AXES(:,3),'g'); plot(t, data.AXES(:,4),'b'); yyaxis right; plot(t, data.AXES(:,5),'c'); plot(t, data.AXES(:,6),'m'); plot(t, data.AXES(:,7),'y'); hold off;
     
     % 
@@ -131,7 +132,7 @@ function data = CWA_readFile(filename, varargin)
     parse(p,varargin{:});
     
     % dispatch
-    if p.Results.info > 0,
+    if p.Results.info > 0
         data = readFileInfo(filename, p.Results);
     else
         data = readFile(filename, p.Results);
@@ -215,8 +216,8 @@ function metadata = cwaMetadata(metadataBytes)
     keySet = {}; % zeros(1, length(params));
     valueSet = {}; % zeros(1, length(params));
     for i = 1:length(params)
-        keySet{i} = params{i}.key;
-        valueSet{i} = params{i}.value;
+        keySet{i} = params{i}.key; %#ok<AGROW>
+        valueSet{i} = params{i}.value; %#ok<AGROW>
     end
     
     metadata = containers.Map(keySet,valueSet,'UniformValues',false); % num2cell(valueSet)
@@ -225,7 +226,7 @@ end
 
 function data = readData(fid, packetInfo, options)
     
-    if options.verbose,
+    if options.verbose
         fprintf('preparing to read data\n');
     end
         
@@ -255,20 +256,20 @@ function data = readData(fid, packetInfo, options)
     % 0x32 (top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
     axes = bitshift(numAxisBps, -4);
     packing = bitand(numAxisBps, 15);
-    if packing ~= 2 && (packing ~= 0 || (packing == 0 && axes ~= 3)),
+    if packing ~= 2 && (packing ~= 0 || (packing == 0 && axes ~= 3))
         fprintf('Error: Unknown packing format %f.\n', numAxisBps);
         data = [];
         return;
     end
-    if axes ~= 3 && axes ~= 6,
+    if axes ~= 3 && axes ~= 6
         fprintf('Warning: Not fully supported number of axes %f.\n', axes);
     end
     
     % Which IDs to read
     validIds = packetInfo(:,1);
-    validIds = validIds(find(packetNumAxesBps==numAxisBps));
-    validIds = validIds(find(packetLightScale==scaleCode));
-    if length(validIds) < length(packetInfo(:,1)),
+    validIds = validIds(packetNumAxesBps==numAxisBps);
+    validIds = validIds(packetLightScale==scaleCode);
+    if length(validIds) < length(packetInfo(:,1))
         fprintf('Warning: Only reading %f of %f sector(s) as the other %f was/were of another format.\n', length(validIds), length(packetInfo(:,1)), length(packetInfo(:,1)) - length(validIds));
     end
     
@@ -278,20 +279,20 @@ function data = readData(fid, packetInfo, options)
     
     % see what modalities to extract...
     data = zeros(numSamples, axes + 1);
-    if packing == 0,  % Packed format
+    if packing == 0  % Packed format
         fprintf('Warning: Packed format not yet tested (use AX3_readFile).\n');
         dataRaw = zeros(numSamples, 1, 'uint32');
     else
         dataRaw = zeros(numSamples, axes, 'int16');
     end
     
-    if options.verbose,
+    if options.verbose
         fprintf('reading data\n');
     end
     
-    if options.step == 1,
+    if options.step == 1
         % for each packet in valid packets, read samples
-        for i=1:length(validIds),
+        for i=1:length(validIds)
             try
                 % read values
                 fseek(fid,(validIds(i)-1)*512+30,-1);
@@ -299,7 +300,7 @@ function data = readData(fid, packetInfo, options)
                 dataOffset = packetSampleOffset(i) + 1;  % dataOffset = (i-1)*dataCount+1;
                 dataCount = packetSampleCount(i);        % dataCount = 40|80|120;
 
-                if packing == 0, % Packed format
+                if packing == 0 % Packed format
                     dataRaw(dataOffset:(dataOffset+dataCount-1),1) = fread(fid, dataCount, 'uint32',0,'ieee-le');
                 else
                     % reads shorts (16 bit). 
@@ -318,11 +319,11 @@ function data = readData(fid, packetInfo, options)
         return;
     end
 
-    if options.verbose > 0,
+    if options.verbose > 0
         fprintf('scaling\n');
     end
 
-    if axes == 3 && packing == 0, % Packed format
+    if axes == 3 && packing == 0 % Packed format
         % calls external c-code to unpack values (for speed pass on full block instead of loop)
         if options.useC
         	data(:,2:4) = parseValueBlock(dataRaw)' .* accScale;
@@ -331,11 +332,11 @@ function data = readData(fid, packetInfo, options)
             data(:,2:4) = double(parseValueBlockML(dataRaw)) .* accScale;
         end
     else
-        if axes == 6,
+        if axes == 6
             % Stored Gx,Gy,Gz,Ax,Ay,Az
             data(:,5:7) = double(dataRaw(:,1:3)) * gyrScale;
             data(:,2:4) = double(dataRaw(:,4:6)) * accScale;
-        elseif axes == 3,
+        elseif axes == 3
             % Stored Ax,Ay,Az
             data(:,2:4) = double(dataRaw(:,1:3)) * accScale;
         end
@@ -343,7 +344,7 @@ function data = readData(fid, packetInfo, options)
     
     clear dataRaw; % clear some memory
     
-    if options.verbose,
+    if options.verbose
         fprintf('Calculating timestamps.\n');
     end
     
@@ -363,13 +364,13 @@ function data = readFile(filename, options)
     % open file
     fid = fopen(filename);
     
-    if options.verbose,
+    if options.verbose
         fprintf('reading file: %s\n', filename);
     end
 
 
     % check if we have pre-read packet information...
-    if length(options.packetInfo) == 1,
+    if length(options.packetInfo) == 1
         % we don't, so read information
         data.packetInfo = getPacketInfo(fid, options);
     else
@@ -386,15 +387,15 @@ function data = readFile(filename, options)
     last  = size(data.packetInfo,1);
     
     % if startTime & stopTime given, get slice of data
-    if options.startTime > 0 && options.stopTime > 0,
-        if options.verbose > 0,
+    if options.startTime > 0 && options.stopTime > 0
+        if options.verbose > 0
             fprintf('Finding relevant packets from %s to %s.\n',datestr(options.startTime),datestr(options.stopTime));
         end
 
         % find relevant parts of valid packets (second column = matlab-timestamp)
         timeList = find(data.packetInfo(:,2) >= options.startTime & data.packetInfo(:,2) <= options.stopTime);
 
-        if isempty(timeList),
+        if isempty(timeList)
             fprintf('No packets found in desired time-range! Aborting.\n');
         end
 
@@ -408,7 +409,7 @@ function data = readFile(filename, options)
     data.packetInfo = data.packetInfo(first:last,:);
     
     % check if any packets are left...
-    if isempty(data.packetInfo),
+    if isempty(data.packetInfo)
         fprintf('Warning: no data after filtering for start and stop dates given.\n');
         %fclose(fid);
         %return
@@ -428,11 +429,11 @@ function data = readFile(filename, options)
     
     
     % see what modalities to extract...
-    if options.modality(1),
+    if options.modality(1)
         data.AXES = readData(fid, packetInfo, options);
     end
-    if options.modality(2),
-        if options.verbose,
+    if options.modality(2)
+        if options.verbose
             fprintf('processing light data\n');
         end
         lightRaw = [ packetInfo(:,2) packetInfo(:,7) ];
@@ -440,8 +441,8 @@ function data = readFile(filename, options)
         % TODO: AX6 and AX3 have different raw scales
         data.LIGHT = lightRaw;
     end
-    if options.modality(3),
-        if options.verbose,
+    if options.modality(3)
+        if options.verbose
             fprintf('processing temperature data\n');
         end
         % Read timestamped data
@@ -482,7 +483,6 @@ function packetInfo = getPacketInfo(fid, options)
     end
 	fseek(fid,4,-1);
 	packetTimestampFractional = fread(fid, numPackets, 'uint16=>uint16',510,'ieee-le');	
-    packetTimestampFractional = bitand(packetTimestampFractional, 32767);
     if options.verbose
         fprintf('reading timestamps\n');
     end
@@ -513,7 +513,13 @@ function packetInfo = getPacketInfo(fid, options)
     end
     fseek(fid,28,-1);
     packetSampleCount = fread(fid,numPackets,'uint16=>uint16',510,'ieee-le');
-	    
+	
+    if options.verbose
+        fprintf('reading rate code\n');
+    end
+    fseek(fid,24,-1);
+    sampleRateCode = fread(fid, numPackets, 'uint8=>uint8',511);
+    
     % find valid packets
     if options.verbose
         fprintf('finding valid packets\n');
@@ -529,9 +535,20 @@ function packetInfo = getPacketInfo(fid, options)
  	packetInfo = zeros(length(validIds),8);
 	packetInfo(:,1) = validIds;
     
-    tsf = double(packetTimestampFractional(validIds)) * (1 / (65536 * 24 * 60 * 60));
+    % Use original deviceId field bottom 15-bits as 16-bit fractional time
+    packetTimestampFractional = bitand(packetTimestampFractional, 32767) .* 2; 
+    
+    % Undo backwards-compatible shift, as we have a true fractional, by calculating how many whole samples the fractional part of timestamp accounts for.
+    freq = floor(3200 ./ bitshift(1, 15 - bitand(sampleRateCode, 15)));  % frequency (3200/(1<<(15-(rate & 0x0f)))) Hz
+    shift = floor((double(packetTimestampFractional) .* freq) / 65536);
+    packetOffsets = double(packetOffsets) + shift;
+    %timestampOffset += (packetTimestampFractional * freq) // 65536 # undo the backwards-compatible shift 
+     
+    % Convert 1/65536ths of a second to fractional MATLAB timestamps                   
+    tsf = double(packetTimestampFractional(validIds)) ./ (65536 * 24 * 60 * 60);
 
-    for i=1:length(validIds),
+    % Parse packed timestamps
+    for i=1:length(validIds)
 		ts = packetTimestamps(validIds(i));
         if options.useC
             date = datenum(parseDate(ts));
@@ -566,12 +583,12 @@ function data = readFileInfo(filename, options)
     else
         % Read device type (23=AX3, 100=AX6)
         data.hardwareType = bytes(5);
-        if data.hardwareType == 0 || data.hardwareType == 255,
+        if data.hardwareType == 0 || data.hardwareType == 255
             data.hardwareType = 23;  % 0x17/23 = AX3 (or if 0x00/0xFF), 0x64/100 = AX6
         end
         
         data.deviceId = (bytes(7) * 256) + bytes(6);
-        if bytes(12) ~= 255 || bytes(13) ~= 255,
+        if bytes(12) ~= 255 || bytes(13) ~= 255
             data.deviceId = data.deviceId + (bytes(13) * 256 * 256 * 256) + (bytes(12) * 256 * 256);
         end
         data.sessionId = (bytes(11) * 256 * 256 * 256) + (bytes(10) * 256 * 256) + (bytes(9) * 256) + bytes(8);
