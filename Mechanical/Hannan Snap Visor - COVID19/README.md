@@ -4,7 +4,7 @@
 
 **Last Updated: 14/04/2020**
 
-**Share Link : https://tinyurl.com/Hannan-Snap-Visor**
+**Share Link : https://tinyurl.com/hannan-visor
 
 As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of 6 days was the Hannan Snap Visor.
 
