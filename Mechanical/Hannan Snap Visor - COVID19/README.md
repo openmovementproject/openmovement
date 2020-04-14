@@ -99,5 +99,6 @@ This design has been open sourced under the [Open Movement](https://openmovement
 ## Contact  
 
 For more information of help with the Hannan Visor please contact:
+
 Thomas Nappey - Thomas.Nappey@newcastle.ac.uk
 Simon Scott-harden - simon.scott-harden@northumbria.ac.uk
