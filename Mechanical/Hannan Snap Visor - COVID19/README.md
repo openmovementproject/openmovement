@@ -66,7 +66,7 @@ The is made from one of two types of material:
 
 The visors can be shipped flatpacked and assembled via the end user using a series of "IKEA style" textless instructions for assembly as seen below. When distributing this design or visor, ensure that the end user has a copy of both the data sheet and the instructions.
 
-![Instructions Grid](Instructions Grid.jpg)
+![Instructions Grid](Instructions%20Grid.jpg)
 
 
 ## Usage
