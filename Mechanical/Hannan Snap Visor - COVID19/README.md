@@ -46,7 +46,7 @@ NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CO
 | Material                      | PVC / Polypropylene                    |                                        |
 | Usage                         | Multiple or Single Session             | Must be resterilised                   |
 | Assembly Time                 | Approx 1-2 mins                        |                                        |
-| Visor: Material               | 400 Micron PVC RIGID PENTAPRINT CLEAR  | [Pentaprint(R) PR M180/23-71/9400-100_0](https://static.gop.se/wp-content/uploads/pentaprint_pvc_datasheet.pdf)  |
+| Visor: Material               | 400 Micron PVC- Clear                  |                                        |
 | Visor: Impact strength, min.  | 550 kJ/m/s                             | DIN EN ISO 8256 measured lengthwise    |
 | Head Band/Strap: Material     | 450 Micron Polypropylene - Black       |                                        |
 | Head Band/Strap: Head Sizing  | Approx 53.5cm - 73.8cm (21" - 29")     | Barbed locking mechanism & hook        |
