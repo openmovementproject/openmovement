@@ -28,6 +28,15 @@ The design has been through a series of iterations and testing with NHS healthca
 
 The design of this product conforms with relevant essential health and safety regulations under the PPE Regulations  and with requirements of **BS EN 166:2002** (Personal Eye Protection).
 
+For visors this would include requirements for:
+* an adjustable head band arrangement.
+* Safety visors need to be fog free.
+* All products need to be latex free.
+* Any product that contains phthalates must be indicated on the packaging in accordance with: Medical
+Devices Regulation 2017/745. Personal Protective Equipment
+* All products must have their CE marking clearly evident on the product and/or packaging and must
+conform to the relevant directive: Medical Devices Regulation 2017/745
+
 In light of the COVID-19 outbreak, the UK Government has taken steps to ease regulatory requirements for a limited time to speed up the supply of essential COVID-19 related Personal Protective Equipment (PPE) products into the UK market: 
 
 Where the product will be manufactured for supply to NHS bodies for protection use by healthcare workers, it will not be necessary to carry out a conformity assessment or declaration and the product may be supplied without CE marking. 
