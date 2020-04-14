@@ -71,6 +71,6 @@ This design has been open sourced under the [Open Movement](https://openmovement
 
 ## Documents
 
-* [Hannan Open source Visor - Datasheet](Hannan Open source Visor v1.3.pdf)
+* [Hannan Open source Visor - Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
 * [Hannan Open source Visor - Instruction Manual](Instructions.pdf)
 
