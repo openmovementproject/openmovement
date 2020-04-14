@@ -7,7 +7,7 @@ Open Movement devices are miniature, embeddable, open source sensors developed b
 * [AX3/AX6 Movement logging](https://github.com/digitalinteraction/openmovement/wiki/AX3)
   * [OMGUI Configuration and Analysis Tool](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
   * [AX Infant Fabric Band](https://github.com/digitalinteraction/openmovement/tree/master/Mechanical/AX3/AX3%20Fabric%20Band)
-* [Hannan Snap Visor](https://github.com/digitalinteraction/openmovement/blob/master/Mechanical/Hannan%20Snap%20Visor%20-%20COVID19/README.md) - *Open source flatpack full face visor for COVID 19*
+* [Hannan Snap Visor](https://github.com/digitalinteraction/openmovement/blob/master/Mechanical/Hannan%20Snap%20Visor%20-%20COVID19) - *Open source flatpack full face visor for COVID 19*
 * [WAX3 Wireless accelerometers](https://github.com/digitalinteraction/openmovement/wiki/WAX3)
 * [WAX9 Wireless IMU](https://github.com/digitalinteraction/openmovement/wiki/WAX9)
 * [WAM Wearable Acoustic Monitor](https://github.com/digitalinteraction/openmovement/wiki/WAM)
