@@ -96,3 +96,8 @@ This design has been open sourced under the [Open Movement](https://openmovement
 * Data Sheet:[Hannan Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
 * Instructions:[A4 Instruction Manual](Instructions.pdf)
 
+## Contact  
+
+For more information of help with the Hannan Visor please contact:
+Thomas Nappey - Thomas.Nappey@newcastle.ac.uk
+Simon Scott-harden - simon.scott-harden@northumbria.ac.uk
