@@ -1,4 +1,4 @@
-Copyright (c) 2009-2018, Newcastle University, UK.
+Copyright (c) 2009-2020, Newcastle University, UK.
 All rights reserved.
 Licensed under Creative Commons 3.0 Attribution License (BY), http://creativecommons.org/licenses/by/3.0/
 
