@@ -96,6 +96,10 @@ This design has been open sourced under the [Open Movement](https://openmovement
 * Data Sheet:[Hannan Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
 * Instructions:[A4 Instruction Manual](Instructions.pdf)
 
+## Technical Drawings
+* Polypropelene Headstrap [Die cut DXF](HANNAN-SNAP-VISOR-STRAP-115.pdf)
+* PVC / PET  Visor [DIE CUT DXF](HANNAN-SNAP-VISOR-SCREEN-115.pdf)
+
 ## Contact  
 
 For more information of help with the Hannan Visor please contact:
