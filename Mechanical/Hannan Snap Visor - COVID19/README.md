@@ -64,6 +64,10 @@ The is made from one of two types of material:
 * PVC - The clear visor area
 * PP - The adjustable head strap and mount for the clear visor.
 
+The visors can be shipped flatpacked and assembled via the end user using a series of "IKEA style" textless instructions for assembly as seen below. When distributing this design or visor, ensure that the end user has a copy of both the data sheet and the instructions.
+
+![Instructions Grid](Instructions Grid.jpg)
+
 
 ## Usage
 
