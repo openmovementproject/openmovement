@@ -3,6 +3,7 @@
 *Open source flatpack full face visor.*
 
 **Last Updated: 14/04/2020**
+**Share Link : https://tinyurl.com/Hannan-Snap-Visor**
 
 As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of 6 days was the Hannan Snap Visor.
 
@@ -75,7 +76,6 @@ This design has been open sourced under the [Open Movement](https://openmovement
 
 ## Documents
 
-* Share link [Hannan Snap Visor](https://tinyurl.com/Hannan-Snap-Visor)
-* Data Sheet:[Hannan Open source Visor - Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
-* Instructions:[Hannan Open source Visor - Instruction Manual](Instructions.pdf)
+* Data Sheet:[Hannan Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
+* Instructions:[A4 Instruction Manual](Instructions.pdf)
 
