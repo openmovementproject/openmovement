@@ -55,8 +55,8 @@ The following design has been intended for manufacture through die-cutting. The 
 
 The is made from one of two types of material:
 
-PVC - The clear visor area.
-PP - The adjustable head strap and mount for the clear visor.
+*PVC - The clear visor area
+*PP - The adjustable head strap and mount for the clear visor.
 
 
 ## Usage
