@@ -2,7 +2,7 @@
 
 *Open source flatpack full face visor.*
 
-As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of 6 days was the Hanna Snap Visor.
+As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of 6 days was the Hannan Snap Visor.
 
 ![Visor Render](visor.8.png)
 
