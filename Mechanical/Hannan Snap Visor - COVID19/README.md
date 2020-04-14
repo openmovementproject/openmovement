@@ -6,7 +6,7 @@
 
 **Share Link** : https://tinyurl.com/hannan-visor
 
-As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of 6 days was the Hannan Snap Visor.
+As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of a 6 day design sprint was the Hannan Snap Visor.
 
 ![Visor Render](visor.8.png)
 
@@ -55,6 +55,7 @@ NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CO
 | Material                      | PVC / Polypropylene                    |                                        |
 | Usage                         | Multiple or Single Session             | Must be resterilised                   |
 | Assembly Time                 | Approx 1-2 mins                        |                                        |
+| **Visor**                     |                                        |                                        |
 | Visor: Material               | 400 Micron PVC- Clear                  |                                        |
 | Visor: Impact strength, min.  | 550 kJ/m/s                             | DIN EN ISO 8256 measured lengthwise    |
 | Head Band/Strap: Material     | 450 Micron Polypropylene - Black       |                                        |
