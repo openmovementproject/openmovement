@@ -2,7 +2,7 @@
 
 *Open source flatpack full face visor.*
 
-**Last Updated: 14/04/2020**
+**Last Updated: 16/04/2020**
 
 **Share Link** : https://tinyurl.com/hannan-visor
 
@@ -21,7 +21,7 @@ The design originated from a laser cut version concept by [Smoke N Mirrors](http
 
 The design has been through a series of iterations and testing with NHS healthcare workers at NHS trusts as well as with GP’s in the local area. Design modifications include new visor to cover face including the upper forehead preventing any aerosol or spatter to access from above. A redesigned adjustable "barbed" headband allowing the user to pull tightly with one hand, locking the visor in place. 
 
-| Version                        | Date                                  | Release Notes                                  |
+| Version                       | Date                                   | Release Notes                          |
 |:------------------------------|:---------------------------------------|:---------------------------------------|
 | v1.1                          | 12/04/2020                             | Open Source files released             |
 | v1.2                          | 14/04/2020                             | Updated Legal Compliance               |
@@ -69,7 +69,7 @@ NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CO
 |  Material                     | 450 Micron Polypropylene - Black       |                                        |
 |  Head Sizing                  | Approx 53.5cm - 73.8cm (21" - 29")     | Barbed locking mechanism & hook        |
 | **Addtional**                 |                                        |                                        |
-| STERILISATION REQUIRED*       | Method: Isopropyl alcohol 70%          | * All visors are shipped unsterilised  |
+| STERILISATION REQUIRED*       | Method: Clinell Wipes or Isopropyl alcohol 70%          | * All visors are shipped unsterilised  |
 
 
 ## Manufacture
