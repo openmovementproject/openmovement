@@ -25,7 +25,7 @@ The design has been through a series of iterations and testing with NHS healthca
 |:------------------------------|:---------------------------------------|:---------------------------------------|
 | v1.1                          | 12/04/2020                             | Open Source files released             |
 | v1.2                          | 14/04/2020                             | Updated Legal Compliance               |
-| v1.3                          | 16/04/2020                             | Added modified Die-cut Designs with part numbers + removable CE mark dependent on certification   |
+| v1.3                          | 16/04/2020                             | Added modified Die-cut Tools with part numbers + removable CE mark  |
 
 
 ![Full Face Visor](visor.png)
