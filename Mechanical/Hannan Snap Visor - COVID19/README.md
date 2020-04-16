@@ -87,6 +87,11 @@ The visors can be shipped flatpacked and assembled via the end user using a seri
 
 ![Instructions Grid](Instructions%20Grid.jpg)
 
+## Sterilisation
+
+YOU MUST STERILISE THESE VISORS PRIOR TO USE. They are designed to be shipped straight from manufacture and it is the recipients responsibility to sterilise the visor. While this process is likely to be specific to each organisation, there are a few ways you can achieve this. The primary method for the NHS currently uses Clinell Wipes. Clinell Wipes are a mixture of chlorhexidine gluconate and  isopropyl alcohol 70% and have a usage time of 60s before needing to be dicarded. 
+
+While Polypropylene and PET can be technically autoclaved. This method has NOT been tested with this design. 
 
 ## Usage
 
@@ -106,6 +111,14 @@ This design has been open sourced under the [Open Movement](https://openmovement
 ## Technical Drawings
 * Polypropelene Headstrap [Die cut DXF](HANNAN-SNAP-VISOR-STRAP-115.pdf)
 * PVC / PET  Visor [DIE CUT DXF](HANNAN-SNAP-VISOR-SCREEN-115.pdf)
+
+## Die-Cut Tooling
+
+The following documents are designed to show possible die cut layouts for manufacture. These files include a removable CE mark embossing as we are currently exploring the possibility to CE Mark the visor and it allows flexibilty in the tool. It must therfore be repeated that this deisgn is NOT CE MARKED and you should remove this feature should you choose to manufacture this design yourself. 
+
+* PET Visor: 380mm x 650mm sheet [Tool Design](HANNAN-SNAP-VISOR-116-CV.pdf)
+* Polypropelene Headstrap: 500mm x 510mm sheet [Tool Design](HANNAN-SNAP-VISOR-116-S.pdf)
+
 
 ## Contact  
 
