@@ -116,6 +116,8 @@ This design has been open sourced under the [Open Movement](https://openmovement
 
 The following documents are designed to show possible die cut layouts for manufacture. These files include a removable CE mark embossing as we are currently exploring the possibility to CE Mark the visor and it allows flexibilty in the tool. It must therfore be repeated that this deisgn is NOT CE MARKED and you should remove this feature should you choose to manufacture this design yourself. 
 
+Part number and batch number "A-88" are to be embossed on the visor. The "88" allows for blades to be removed to create monospace numbers ranging from 0-9 similar to that on an analogue clock. 
+
 * PET Visor: 380mm x 650mm sheet [Tool Design](HANNAN-SNAP-VISOR-116-CV.pdf)
 * Polypropelene Headstrap: 500mm x 510mm sheet [Tool Design](HANNAN-SNAP-VISOR-116-S.pdf)
 
