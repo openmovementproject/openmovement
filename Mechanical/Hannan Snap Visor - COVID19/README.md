@@ -21,6 +21,13 @@ The design originated from a laser cut version concept by [Smoke N Mirrors](http
 
 The design has been through a series of iterations and testing with NHS healthcare workers at NHS trusts as well as with GP’s in the local area. Design modifications include new visor to cover face including the upper forehead preventing any aerosol or spatter to access from above. A redesigned adjustable "barbed" headband allowing the user to pull tightly with one hand, locking the visor in place. 
 
+| Version                        | Date                                  | Release Notes                                  |
+|:------------------------------|:---------------------------------------|:---------------------------------------|
+| v1.1                          | 12/04/2020                             | Open Source files released             |
+| v1.2                          | 14/04/2020                             | Updated Legal Compliance               |
+| v1.3                          | 16/04/2020                             | Added modified Die-cut Designs with part numbers + removable CE mark dependent on certification   |
+
+
 ![Full Face Visor](visor.png)
 
 
