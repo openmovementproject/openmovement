@@ -89,9 +89,17 @@ The visors can be shipped flatpacked and assembled via the end user using a seri
 
 ## Sterilisation
 
-YOU MUST STERILISE THESE VISORS PRIOR TO USE. They are designed to be shipped straight from manufacture and it is the recipients responsibility to sterilise the visor. While this process is likely to be specific to each organisation, there are a few ways you can achieve this. The primary method for the NHS currently uses Clinell Wipes. Clinell Wipes are a mixture of chlorhexidine gluconate and  isopropyl alcohol 70% and have a usage time of 60s before needing to be dicarded. 
+YOU MUST STERILISE THESE VISORS PRIOR TO USE. They are designed to be shipped straight from manufacture and it is the recipients responsibility to sterilise the visor. 
 
-While Polypropylene and PET can be technically autoclaved. This method has NOT been tested with this design. 
+The standard method of cleaning is to use a detergent product either combined/ sequentially with a decontamination product as agreed by the local infection prevention and control (IPC) specialists.
+
+They should be rinsed thoroughly to remove any residual detergent or cleaning product and left to dry.
+ 
+While this process is likely to be specific to each organisation, there are a few ways you can achieve this. The primary method for the NHS currently uses Clinell Wipes. Clinell Wipes are a mixture of chlorhexidine gluconate and  isopropyl alcohol 70% and have a usage time of 60s before needing to be dicarded. 
+
+While Polypropylene and PET can be technically autoclaved. This method has NOT been tested with this design.
+
+
 
 ## Usage
 
