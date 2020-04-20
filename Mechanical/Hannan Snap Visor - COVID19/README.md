@@ -63,7 +63,7 @@ NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CO
 | Usage                         | Multiple or Single Session             | Must be resterilised                   |
 | Assembly Time                 | Approx 1-2 mins                        |                                        |
 | **Visor**                     |                                        |                                        |
-| Material                      | 400 Micron PVC- Clear                  |                                        |
+| Material                      | 400 Micron PVC or 400 Micron PET       |                                        |
 | Impact strength, min.         | 550 kJ/m/s                             | DIN EN ISO 8256 measured lengthwise    |
 | **Head Band / strap**         |                                        |                                        |
 |  Material                     | 450 Micron Polypropylene - Black       |                                        |
