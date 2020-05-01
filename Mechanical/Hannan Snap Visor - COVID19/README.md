@@ -33,7 +33,8 @@ The design has been through a series of iterations and testing with NHS healthca
 
 ## Compliance 
 
-The design of this product conforms with relevant essential health and safety regulations under the PPE Regulations  and with requirements of **BS EN 166:2002** (Personal Eye Protection).
+
+The design of this product conforms with relevant essential health and safety regulations under the PPE Regulations and with requirements of **BS EN 166:2002** (Personal eye protection).
 
 For visors this would include requirements for:
 * an adjustable head band arrangement.
@@ -44,13 +45,10 @@ Devices Regulation 2017/745. Personal Protective Equipment
 * All products must have their CE marking clearly evident on the product and/or packaging and must
 conform to the relevant directive: Medical Devices Regulation 2017/745
 
-In light of the COVID-19 outbreak, the UK Government has taken steps to ease regulatory requirements for a limited time to speed up the supply of essential COVID-19 related Personal Protective Equipment (PPE) products into the UK market: 
-
-Where the product will be manufactured for supply to NHS bodies for protection use by healthcare workers, it will not be necessary to carry out a conformity assessment or declaration and the product may be supplied without CE marking. 
-
-This product may not be supplied to other parties or for any other uses without first contacting a Notified Body  and beginning conformity assessment procedures.
+The manufacturer assumes responsibility for all compliance requirements including conformity assessment and CE certification and marking. No assurance is given or implied by publication of the design (whether by way of representation, warranty, undertaking or otherwise), and the designers shall have no liability, in respect of the operation, quality, functionality, fitness for purpose or performance of the product.
 
 NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CONCERNING THE SUITABILITY OF THESE FACE SHIELDS FOR ANY MEDICAL OR PERSONAL PROTECTION USE INCLUDING, WITHOUT LIMITATION, THEIR EFFECTIVENESS TO FILTER, BLOCK OR PROTECT AGAINST ANY PATHOGEN OR PARTICLE INCLUDING SARS-COV-2 OR ANY OTHER RELATED TO COVID-19.
+
 
 
 ## Specification
