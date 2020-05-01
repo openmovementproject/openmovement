@@ -36,6 +36,12 @@ The design has been through a series of iterations and testing with NHS healthca
 
 The design of this product conforms with relevant essential health and safety regulations under the PPE Regulations and with requirements of **BS EN 166:2002** (Personal eye protection).
 
+The manufacturer assumes responsibility for all compliance requirements including conformity assessment and CE certification and marking. No assurance is given or implied by publication of the design (whether by way of representation, warranty, undertaking or otherwise), and the designers shall have no liability, in respect of the operation, quality, functionality, fitness for purpose or performance of the product.
+
+NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CONCERNING THE SUITABILITY OF THESE FACE SHIELDS FOR ANY MEDICAL OR PERSONAL PROTECTION USE INCLUDING, WITHOUT LIMITATION, THEIR EFFECTIVENESS TO FILTER, BLOCK OR PROTECT AGAINST ANY PATHOGEN OR PARTICLE INCLUDING SARS-COV-2 OR ANY OTHER RELATED TO COVID-19.
+
+**BS EN 166:2002**
+
 For visors this would include requirements for:
 * an adjustable head band arrangement.
 * Safety visors need to be fog free.
@@ -44,11 +50,6 @@ For visors this would include requirements for:
 Devices Regulation 2017/745. Personal Protective Equipment
 * All products must have their CE marking clearly evident on the product and/or packaging and must
 conform to the relevant directive: Medical Devices Regulation 2017/745
-
-The manufacturer assumes responsibility for all compliance requirements including conformity assessment and CE certification and marking. No assurance is given or implied by publication of the design (whether by way of representation, warranty, undertaking or otherwise), and the designers shall have no liability, in respect of the operation, quality, functionality, fitness for purpose or performance of the product.
-
-NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CONCERNING THE SUITABILITY OF THESE FACE SHIELDS FOR ANY MEDICAL OR PERSONAL PROTECTION USE INCLUDING, WITHOUT LIMITATION, THEIR EFFECTIVENESS TO FILTER, BLOCK OR PROTECT AGAINST ANY PATHOGEN OR PARTICLE INCLUDING SARS-COV-2 OR ANY OTHER RELATED TO COVID-19.
-
 
 
 ## Specification
