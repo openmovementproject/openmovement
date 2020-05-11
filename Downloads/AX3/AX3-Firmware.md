@@ -1,14 +1,12 @@
 # AX3 Firmware
 
-You should never need to update the firmware yourself.
+You should not need to update the firmware yourself.
 
 <!--
-* CWA17_50.hex - Internal experimental NoRCB.
-
-* CWA17_49.hex - Internal experimental WinUSB / generic interface support
+* [AX3 Firmware V50 WinUSB/Generic](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-50-winusb-generic.zip] - Experimental WinUSB and alternative generic interface support.
+-->
 
 * [AX3 Firmware V48](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-48.zip] - Wide (32-bit) device IDs
--->
 
 * [AX3 Firmware V47](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-47.zip) - Allows USB start without battery
 
