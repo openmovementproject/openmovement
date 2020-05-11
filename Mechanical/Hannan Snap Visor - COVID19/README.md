@@ -2,11 +2,11 @@
 
 *Open source flatpack full face visor.*
 
-**Last Updated: 14/04/2020**
+**Last Updated: 16/04/2020**
 
 **Share Link** : https://tinyurl.com/hannan-visor
 
-As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of 6 days was the Hannan Snap Visor.
+As part of a national response to help the NHS during the Coronavirus pandemic. Open Lab, Newcastle University and Northumbria University partnered with AMAP, Sunderland University to design and develop a low cost, flatpack full face visor. The final output of this over the course of a 6 day design sprint was the Hannan Snap Visor.
 
 ![Visor Render](visor.8.png)
 
@@ -21,20 +21,35 @@ The design originated from a laser cut version concept by [Smoke N Mirrors](http
 
 The design has been through a series of iterations and testing with NHS healthcare workers at NHS trusts as well as with GP’s in the local area. Design modifications include new visor to cover face including the upper forehead preventing any aerosol or spatter to access from above. A redesigned adjustable "barbed" headband allowing the user to pull tightly with one hand, locking the visor in place. 
 
+| Version                       | Date                                   | Release Notes                          |
+|:------------------------------|:---------------------------------------|:---------------------------------------|
+| v1.1                          | 12/04/2020                             | Open Source files released             |
+| v1.2                          | 14/04/2020                             | Updated Legal Compliance               |
+| v1.3                          | 16/04/2020                             | Added modified Die-cut Tools with part numbers + removable CE mark  |
+
+
 ![Full Face Visor](visor.png)
 
 
 ## Compliance 
 
-The design of this product conforms with relevant essential health and safety regulations under the PPE Regulations  and with requirements of **BS EN 166:2002** (Personal Eye Protection).
 
-In light of the COVID-19 outbreak, the UK Government has taken steps to ease regulatory requirements for a limited time to speed up the supply of essential COVID-19 related Personal Protective Equipment (PPE) products into the UK market: 
+The design of this product conforms with relevant essential health and safety regulations under the PPE Regulations and with requirements of **BS EN 166:2002** (Personal eye protection).
 
-Where the product will be manufactured for supply to NHS bodies for protection use by healthcare workers, it will not be necessary to carry out a conformity assessment or declaration and the product may be supplied without CE marking. 
-
-This product may not be supplied to other parties or for any other uses without first contacting a Notified Body  and beginning conformity assessment procedures.
+The manufacturer assumes responsibility for all compliance requirements including conformity assessment and CE certification and marking. No assurance is given or implied by publication of the design (whether by way of representation, warranty, undertaking or otherwise), and the designers shall have no liability, in respect of the operation, quality, functionality, fitness for purpose or performance of the product.
 
 NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CONCERNING THE SUITABILITY OF THESE FACE SHIELDS FOR ANY MEDICAL OR PERSONAL PROTECTION USE INCLUDING, WITHOUT LIMITATION, THEIR EFFECTIVENESS TO FILTER, BLOCK OR PROTECT AGAINST ANY PATHOGEN OR PARTICLE INCLUDING SARS-COV-2 OR ANY OTHER RELATED TO COVID-19.
+
+**BS EN 166:2002**
+
+For visors this would include requirements for:
+* an adjustable head band arrangement.
+* Safety visors need to be fog free.
+* All products need to be latex free.
+* Any product that contains phthalates must be indicated on the packaging in accordance with: Medical
+Devices Regulation 2017/745. Personal Protective Equipment
+* All products must have their CE marking clearly evident on the product and/or packaging and must
+conform to the relevant directive: Medical Devices Regulation 2017/745
 
 
 ## Specification
@@ -46,11 +61,14 @@ NO REPRESENTATION, PROMISE OR WARRANTIES, EITHER EXPRESS OR IMPLIED, IS GIVEN CO
 | Material                      | PVC / Polypropylene                    |                                        |
 | Usage                         | Multiple or Single Session             | Must be resterilised                   |
 | Assembly Time                 | Approx 1-2 mins                        |                                        |
-| Visor: Material               | 400 Micron PVC RIGID PENTAPRINT CLEAR  | [Pentaprint(R) PR M180/23-71/9400-100_0](https://static.gop.se/wp-content/uploads/pentaprint_pvc_datasheet.pdf)  |
-| Visor: Impact strength, min.  | 550 kJ/m/s                             | DIN EN ISO 8256 measured lengthwise    |
-| Head Band/Strap: Material     | 450 Micron Polypropylene - Black       |                                        |
-| Head Band/Strap: Head Sizing  | Approx 53.5cm - 73.8cm (21" - 29")     | Barbed locking mechanism & hook        |
-| STERILISATION REQUIRED*       | Method: Isopropyl alcohol 70%          | * All visors are shipped unsterilised  |
+| **Visor**                     |                                        |                                        |
+| Material                      | 400 Micron PET     400 Micron PVC      | REACH Certified                        |
+| Impact strength, min.         | 550 kJ/m/s                             | DIN EN ISO 8256 measured lengthwise    |
+| **Head Band / strap**         |                                        |                                        |
+|  Material                     | 450 Micron Polypropylene - Black       |                                        |
+|  Head Sizing                  | Approx 53.5cm - 73.8cm (21" - 29")     | Barbed locking mechanism & hook        |
+| **Addtional**                 |                                        |                                        |
+| STERILISATION REQUIRED*       | Method: Clinell Wipes or Isopropyl alcohol 70%          | * All visors are shipped unsterilised  |
 
 
 ## Manufacture
@@ -63,6 +81,23 @@ The is made from one of two types of material:
 
 * PVC - The clear visor area
 * PP - The adjustable head strap and mount for the clear visor.
+
+The visors can be shipped flatpacked and assembled via the end user using a series of "IKEA style" textless instructions for assembly as seen below. When distributing this design or visor, ensure that the end user has a copy of both the data sheet and the instructions.
+
+![Instructions Grid](Instructions%20Grid.jpg)
+
+## Sterilisation
+
+YOU MUST STERILISE THESE VISORS PRIOR TO USE. They are designed to be shipped straight from manufacture and it is the recipients responsibility to sterilise the visor. 
+
+The standard method of cleaning is to use a detergent product either combined/ sequentially with a decontamination product as agreed by the local infection prevention and control (IPC) specialists.
+
+They should be rinsed thoroughly to remove any residual detergent or cleaning product and left to dry.
+ 
+While this process is likely to be specific to each organisation, there are a few ways you can achieve this. The primary method for the NHS currently uses Clinell Wipes. Clinell Wipes are a mixture of chlorhexidine gluconate and  isopropyl alcohol 70% and have a usage time of 60s before needing to be dicarded. 
+
+While Polypropylene and PET can be technically autoclaved. This method has NOT been tested with this design.
+
 
 
 ## Usage
@@ -80,3 +115,24 @@ This design has been open sourced under the [Open Movement](https://openmovement
 * Data Sheet:[Hannan Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
 * Instructions:[A4 Instruction Manual](Instructions.pdf)
 
+## Technical Drawings
+* Polypropelene Headstrap [Die cut DXF](HANNAN-SNAP-VISOR-STRAP-115.pdf)
+* PVC / PET  Visor [DIE CUT DXF](HANNAN-SNAP-VISOR-SCREEN-115.pdf)
+
+## Die-Cut Tooling
+
+The following documents are designed to show possible die cut layouts for manufacture. These files include a removable CE mark embossing as we are currently exploring the possibility to CE Mark the visor and it allows flexibilty in the tool. It must therfore be repeated that this deisgn is NOT CE MARKED and you should remove this feature should you choose to manufacture this design yourself. 
+
+Part number and batch number "A-88" are to be embossed on the visor. The "88" allows for blades to be removed to create monospace numbers ranging from 0-9 similar to that on an analogue clock. 
+
+* PET Visor: 380mm x 650mm sheet [Tool Design](HANNAN-SNAP-VISOR-116-CV.pdf)
+* Polypropelene Headstrap: 500mm x 510mm sheet [Tool Design](HANNAN-SNAP-VISOR-116-S.pdf)
+
+
+## Contact  
+
+For more information of help with the Hannan Visor please contact:
+
+Thomas Nappey - Thomas.Nappey@newcastle.ac.uk
+
+Simon Scott-harden - simon.scott-harden@northumbria.ac.uk
