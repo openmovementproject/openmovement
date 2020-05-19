@@ -3,7 +3,8 @@
 You should not need to update the firmware yourself.
 
 <!--
-* [AX3 Firmware V50 WinUSB/Generic](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-50-winusb-generic.zip] - Experimental WinUSB and alternative generic interface support.
+* [AX3 Firmware V50 WinUSB/Generic](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-50-winusb-generic.zip] -
+Experimental alternative generic (and WinUSB) interface support.
 -->
 
 * [AX3 Firmware V48](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-48.zip] - Wide (32-bit) device IDs
