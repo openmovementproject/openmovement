@@ -262,7 +262,7 @@ function data = readData(fid, packetInfo, options)
         return;
     end
     if axes ~= 3 && axes ~= 6
-        fprintf('Warning: Not fully supported number of axes %f.\n', axes);
+        fprintf('Warning: Unexpected number of axes may not be fully supported: %f.\n', axes);
     end
     
     % Which IDs to read
@@ -280,7 +280,6 @@ function data = readData(fid, packetInfo, options)
     % see what modalities to extract...
     data = zeros(numSamples, axes + 1);
     if packing == 0  % Packed format
-        fprintf('Warning: Packed format not yet tested (use AX3_readFile).\n');
         dataRaw = zeros(numSamples, 1, 'uint32');
     else
         dataRaw = zeros(numSamples, axes, 'int16');
@@ -332,11 +331,11 @@ function data = readData(fid, packetInfo, options)
             data(:,2:4) = double(parseValueBlockML(dataRaw)) .* accScale;
         end
     else
-        if axes == 6
+        if axes >= 6
             % Stored Gx,Gy,Gz,Ax,Ay,Az
             data(:,5:7) = double(dataRaw(:,1:3)) * gyrScale;
             data(:,2:4) = double(dataRaw(:,4:6)) * accScale;
-        elseif axes == 3
+        elseif axes >= 3
             % Stored Ax,Ay,Az
             data(:,2:4) = double(dataRaw(:,1:3)) * accScale;
         end
