@@ -34,7 +34,8 @@ def read_timestamp(data):
 def checksum(data):
 	sum = 0
 	for i in range(0, len(data), 2):
-		value = data[i] | (data[i + 1] << 8)
+		#value = data[i] | (data[i + 1] << 8)
+		value = unpack('<H', data[i:i+2])[0]
 		sum = (sum + value) & 0xffff
 	return sum
 
@@ -145,26 +146,44 @@ def cwa_parse_metadata(data):
 def cwa_header(block):
 	header = {}
 	if len(block) >= 512:
-		packetHeader = block[0:2]										# @ 0  +2   ASCII "MD", little-endian (0x444D)
+		packetHeader = unpack('BB', block[0:2])							# @ 0  +2   ASCII "MD", little-endian (0x444D)
 		packetLength = unpack('<H', block[2:4])[0]						# @ 2  +2   Packet length (1020 bytes, with header (4) = 1024 bytes total)
 		if packetHeader[0] == ord('M') and packetHeader[1] == ord('D') and packetLength >= 508:
 			header['packetLength'] = packetLength
 			# unpack() <=little-endian, bB=s/u 8-bit, hH=s/u 16-bit, iI=s/u 32-bit		
-			# header['reserved1'] = unpack('B', block[4:5])[0]			# @ 4  +1   (1 byte reserved)		
+			hardwareType = unpack('B', block[4:5])[0]					# @ 4  +1   Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
+			header['hardwareType'] = hardwareType
+			if hardwareType == 0x00 or hardwareType == 0xff:
+				hardwareType = 0x17
+			if hardwareType == 0x17:
+				header['deviceType'] = 'AX3'
+			elif hardwareType == 0x64:
+				header['deviceType'] = 'AX6'
+			else:
+				header['deviceType'] = hex(hardwareType)[2:] # BCD
 			header['deviceId'] = unpack('<H', block[5:7])[0]			# @ 5  +2   Device identifier
 			header['sessionId'] = unpack('<I', block[7:11])[0]			# @ 7  +4   Unique session identifier
-			deviceIdUpper = unpack('<H', block[11:13])[0]				# @11  +2   (2 bytes reserved)
+			deviceIdUpper = unpack('<H', block[11:13])[0]				# @11  +2   Upper word of device id (if 0xffff is read, treat as 0x0000)
 			if deviceIdUpper != 0xffff:
 				header['deviceId'] |= deviceIdUpper << 16
 			header['loggingStart'] = read_timestamp(block[13:17])		# @13  +4   Start time for delayed logging
 			header['loggingEnd'] = read_timestamp(block[17:21])			# @17  +4   Stop time for delayed logging		
-			# header['loggingCapacity'] = unpack('<I', block[21:25])[0]	# @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)
-			# header['reserved3'] = block[25:36]						# @25  +11  (11 bytes reserved)
-			rateCode = unpack('B', block[36:37])[0]	# @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
+			header['loggingCapacity'] = unpack('<I', block[21:25])[0]	# @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)
+			# header['reserved3'] = block[25:26]						# @25  +1   (1 byte reserved)
+			header['flashLed'] = unpack('B', block[35:36])[0]			# @26  +1   Flash LED during recording
+			if header['flashLed'] == 0xff:
+				header['flashLed'] = 0
+			# header['reserved4'] = block[27:35]						# @25  +8   (8 bytes reserved)
+			sensorConfig = unpack('B', block[35:36])[0]					# @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
+			if sensorConfig != 0x00 and sensorConfig != 0xff:
+				header['gyroRange'] = 8000 / 2 ** (sensorConfig & 0x0f)
+			else:
+				header['gyroRange'] = 0
+			rateCode = unpack('B', block[36:37])[0]						# @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
 			header['lastChange'] = read_timestamp(block[37:41])			# @37  +4   Last change metadata time
 			header['firmwareRevision'] = unpack('B', block[41:42])[0]	# @41  +1   Firmware revision number
 			# header['timeZone'] = unpack('<H', block[42:44])[0]		# @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
-			# header['reserved4'] = block[44:64]						# @44  +20  (20 bytes reserved)
+			# header['reserved5'] = block[44:64]						# @44  +20  (20 bytes reserved)
 			header['metadata'] = cwa_parse_metadata(block[64:512])		# @64  +448 "Annotation" meta-data (448 ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
 			# header['reserved'] = block[512:1024]						# @512 +512 Reserved for device-specific meta-data (512 bytes, ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs, leading '&' if present?)
 			
@@ -183,9 +202,9 @@ def cwa_header(block):
 def cwa_data(block, extractData=False):
 	data = {}
 	if len(block) >= 512:
-		packetHeader = block[0:2]										# @ 0  +2   ASCII "AX", little-endian (0x5841)
+		packetHeader = unpack('BB', block[0:2])							# @ 0  +2   ASCII "AX", little-endian (0x5841)
 		packetLength = unpack('<H', block[2:4])[0]						# @ 2  +2   Packet length (508 bytes, with header (4) = 512 bytes total)
-		if packetHeader[0] == ord('A') and packetHeader[1] == ord('X') and packetLength == 508 and checksum(block) == 0:
+		if packetHeader[0] == ord('A') and packetHeader[1] == ord('X') and packetLength == 508 and checksum(block[0:512]) == 0:
 			#checksum = unpack('<H', block[510:512])[0]					# @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
 			
 			deviceFractional = unpack('<H', block[4:6])[0]				# @ 4  +2   Top bit set: 15-bit fraction of a second for the time stamp, the timestampOffset was already adjusted to minimize this assuming ideal sample rate; Top bit clear: 15-bit device identifier, 0 = unknown;
@@ -292,7 +311,6 @@ def cwa_data(block, extractData=False):
 							#val =  block[i] | (block[i + 1] << 8) | (block[i + 2] << 8) | (block[i + 3] << 24)
 							val = unpack('<I', block[ofs:ofs + 4])[0]
 							ex = (6 - ((val >> 30) & 3))
-							print(val, ex)
 							accelSamples[i][0] = (short_sign_extend((0xffc0 & (val <<  6))) >> ex) / accelUnit
 							accelSamples[i][1] = (short_sign_extend((0xffc0 & (val >>  4))) >> ex) / accelUnit
 							accelSamples[i][2] = (short_sign_extend((0xffc0 & (val >> 14))) >> ex) / accelUnit
@@ -349,6 +367,8 @@ def cwa_info(filename):
 		f.seek(0)
 		headerBytes = f.read(headerSize)
 		header = cwa_header(headerBytes)
+		if 'packetLength' not in header:
+			raise Exception('Header invalid')
 		headerSize = header['packetLength'] + 4
 		
 		# Read first data sector
@@ -423,5 +443,6 @@ if __name__ == "__main__":
 			else:
 				print('ERROR: Unknown output mode: %s' % mode)
 		except Exception as e:
-			print('Exception ' + e.__doc__ + ' -- ' + str(e))
+			#print('Exception ' + e.__doc__ + ' -- ' + str(e))
+			raise
 
