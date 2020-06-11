@@ -48,7 +48,7 @@ def timestamp_string(timestamp):
 	if timestamp < 0:
 		return "-1"
 	# return str(datetime.fromtimestamp(timestamp))
-	return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
+	return datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
 
 # Local "URL-decode as UTF-8 string" function
