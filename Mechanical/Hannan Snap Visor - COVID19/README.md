@@ -111,13 +111,13 @@ This design has been open sourced under the [Open Movement](https://openmovement
 ## Documents
 
 * Data Sheet: [Hannan Datasheet](Hannan%20Open%20source%20Visor%20v1.3.pdf)
-* Instructions: [A4 Instruction Manual](Instructions.pdf)
+* Instructions: [Instruction Manual](Instructions.pdf) (A4)
 
 
 ## Technical Drawings
 
-* Polypropelene Headstrap [Die Cut DXF](HANNAN-SNAP-VISOR-STRAP-115.pdf)
-* PVC / PET  Visor [Die Cut DXF](HANNAN-SNAP-VISOR-SCREEN-115.pdf)
+* Polypropelene Headstrap: [Die Cut DXF](HANNAN-SNAP-VISOR-STRAP-115.pdf)
+* PVC / PET Visor: [Die Cut DXF](HANNAN-SNAP-VISOR-SCREEN-115.pdf)
 
 
 ## Die-Cut Tooling
@@ -126,14 +126,14 @@ The following documents are designed to show possible die cut layouts for manufa
 
 Part number and batch number "A-88" are to be embossed on the visor. The "88" allows for blades to be removed to create monospace numbers ranging from 0-9 similar to that on a digital clock. 
 
-* PET Visor: 380mm x 650mm sheet, [Tool Design](HANNAN-SNAP-VISOR-116-CV.pdf)
-* Polypropelene Headstrap: 500mm x 510mm sheet, [Tool Design](HANNAN-SNAP-VISOR-116-S.pdf)
+* PET Visor: [Tool Design](HANNAN-SNAP-VISOR-116-CV.pdf) (380mm x 650mm sheet)
+* Polypropelene Headstrap: [Tool Design](HANNAN-SNAP-VISOR-116-S.pdf) (500mm x 510mm sheet)
 
 
 ## Contact  
 
 For more information or help with the Hannan Visor please contact:
 
-Thomas Nappey - Thomas.Nappey@newcastle.ac.uk
+* Thomas Nappey: Thomas.Nappey@newcastle.ac.uk
 
-Simon Scott-Harden - Simon.Scott-Harden@northumbria.ac.uk
+* Simon Scott-Harden: Simon.Scott-Harden@northumbria.ac.uk
