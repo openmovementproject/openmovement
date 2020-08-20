@@ -17,3 +17,17 @@ Approximate maximum recording duration from a single full battery charge.
 * `?` an unknown value, or uncertainty in the figure where given. 
 * `()` where a recording is likely to be battery-limited, times in brackets are the storage capacity (which could only be reached if recharged). 
 * `*` where the storage- and battery-limits are similar, which is reached first may be device-dependent. 
+
+
+## Sensor Data Characteristics
+
+| Characteristic             | AX3                                             | AX6                                           |
+|----------------------------|-------------------------------------------------|-----------------------------------------------|
+| Sample Rate                | 6.25`*`/12.5/25/50/100/200/400/800/1600/3200 Hz | 6.25`*`/12.5`*`/25/50/100/200/400/800/1600 Hz |
+| Accelerometer Range        | &plusmn;2/4/8/16 _g_                            | &plusmn;2/4/8/16 _g_                          |
+| Gyroscope Range            | _none_                                           | 125/250/500/1000/2000 &deg;/s                 |
+| Underlying sensing device  | [Analog Devices ADXL345](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf) | [Bosch BMI160](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi160-ds000.pdf) |
+| Notes                      | `*` 'Unpacked' recording mode only.             | `*` With gyroscope off.                       |
+
+<!-- | Samples per 512 byte storage block | Packed (10-bit mode): 120; Unpacked (full resolution): 80. | Accelerometer-only: 80; Accelerometer+Gyroscope: 40. | -->
+
