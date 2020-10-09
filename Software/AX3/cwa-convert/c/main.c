@@ -926,8 +926,8 @@ atexit(_getch);
             else if (strcasecmp(argv[i], "-t:timestamp") == 0) { time = TIME_TIMESTAMP; }
 			else if (strcasecmp(argv[i], "-nodata") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL | OPTIONS_NO_GYRO | OPTIONS_NO_MAG); }
 			else if (strcasecmp(argv[i], "-noaccel") == 0)     { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL); }
-			else if (strcasecmp(argv[i], "-nogyro") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL); }
-			else if (strcasecmp(argv[i], "-nomag") == 0)       { options = (Options)((unsigned int)options | OPTIONS_NO_ACCEL); }
+			else if (strcasecmp(argv[i], "-nogyro") == 0)      { options = (Options)((unsigned int)options | OPTIONS_NO_GYRO); }
+			else if (strcasecmp(argv[i], "-nomag") == 0)       { options = (Options)((unsigned int)options | OPTIONS_NO_MAG); }
 			else if (strcasecmp(argv[i], "-light") == 0)       { options = (Options)((unsigned int)options | OPTIONS_LIGHT); }
 			else if (strcasecmp(argv[i], "-temp") == 0)        { options = (Options)((unsigned int)options | OPTIONS_TEMP); }
 			else if (strcasecmp(argv[i], "-batt") == 0)        { options = (Options)((unsigned int)options | OPTIONS_BATT); }
