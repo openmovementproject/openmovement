@@ -12,7 +12,7 @@ Approximate maximum recording duration from a single full battery charge.
 | AX6     | accel. + gyro. |  79357440 samples |        - |          - | 9d (36.7d) | 9d (18d) |     9d* |   4.5d |   2.3d |  27.5h |   13.7h |       - |
 
 * `d` days (<= 400 Hz)
-* `h` hours (> 800 Hz)
+* `h` hours (>= 800 Hz)
 * `-` an unsupported configuration. 
 * `?` an unknown value, or uncertainty in the figure where given. 
 * `()` where a recording is likely to be battery-limited, times in brackets are the storage capacity (which could only be reached if recharged). 
