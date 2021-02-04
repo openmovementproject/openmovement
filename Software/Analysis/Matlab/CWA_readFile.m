@@ -4,8 +4,7 @@ function data = CWA_readFile(filename, varargin)
     %   * .AXES returns [time Ax Ay Az] or [time Ax Ay Az Gx Gy Gz].
     %   * The accelerometer values are scaled to units of 'g' (9.81 m/s/s).
     %   * The gyro values are scaled to units of degrees/sec.
-    %   * Light and temperature are not (yet) supported.
-    %   * This Matlab importer does not (yet) check the per-sector checksum.
+    %   * This Matlab importer does not (yet) verify the per-sector checksum.
 	%
     %   DATA = CWA_readFile(FILENAME, [OPTIONS])
     %
