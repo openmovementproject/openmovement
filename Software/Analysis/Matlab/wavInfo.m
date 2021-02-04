@@ -2,7 +2,8 @@ function info = wavInfo(file)
 % Load movement WAV file information
 % - Dan Jackson, 2019.
 %
-%  info = wavInfo('CWA-DATA.CWA');
+%  info = wavInfo('CWA-DATA.wav');
+%  data = audioread('CWA-DATA.wav');
 %
 % First sample is at the timestamp:
 %
