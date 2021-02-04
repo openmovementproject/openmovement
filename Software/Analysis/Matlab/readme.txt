@@ -1,4 +1,5 @@
-%% IMPORTANT: We now recommend CWA_readFile.m instead: http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/CWA_readFile.m
+%% NOTE: We now recommend CWA_readFile.m instead of the AX3_readFile.m mentioned below: 
+%%   https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/CWA_readFile.m
 %% ...as that version will work with unpacked data and accelerometer+gyroscope data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -6,10 +7,10 @@
 %
 % You will need the following four files:
 %
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/AX3_readFile.m
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/resampleCWA.m
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/SVM.m
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/epochs.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/AX3_readFile.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/resampleCWA.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/SVM.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/epochs.m
 %
 
 % Load CWA file re-sampled at 100Hz
@@ -30,10 +31,10 @@ epochSVM = epochs(abs(svm), 60 * Fs);
 %
 % You will need the following four files:
 %
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/AX3_readFile.m
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/getStationaryPeriods.m
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/estimateCalibration.m
-%   - http://openmovement.googlecode.com/svn/trunk/Software/Analysis/Matlab/rescaleData.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/AX3_readFile.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/getStationaryPeriods.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/estimateCalibration.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/rescaleData.m
 %
 %   this script demonstrates the use of the calibration routines for
 %   OpenMovement AX3 devices (even though it should work with other accelerometers as
