@@ -4,6 +4,8 @@ Where `*` denotes the thinner, slightly tapered end of the puck.
 
 ## AX6 Accel Axes and Gyro Rotation
 
+![AX6 Axes](axes.svg)
+
 ```
 +---+-----------------------+
 |   |                  y    |
