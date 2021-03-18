@@ -1,5 +1,6 @@
 # AX3/AX6 FAQ
 
+
 ## Maximum recording duration
 
 Approximate maximum recording duration from a single full battery charge.
@@ -21,6 +22,7 @@ Approximate maximum recording duration from a single full battery charge.
 
 <!-- AX6 12.5Hz Accelerometer-only 149 days 100%-39% battery -->
 
+
 ## Sensor Data Characteristics
 
 | Characteristic             | AX3                                             | AX6                                           |
@@ -33,3 +35,15 @@ Approximate maximum recording duration from a single full battery charge.
 
 <!-- | Samples per 512 byte storage block | Packed (10-bit mode): 120; Unpacked (full resolution): 80. | Accelerometer-only: 80; Accelerometer+Gyroscope: 40. | -->
 
+
+## Synchronizing data between devices, or with other devices
+
+The AX devices have an internal real-time clock to keep track of time.  When the device is configured, the internal clock is set to the system time of the configuring computer.  This time is set to the nearest second, and the operation itself may be subject to some jitter (e.g. from the operating system performing other actions).  Afterwards, as with any clock, it will be subject to clock drift, potentially of the order of around ±2 seconds per day.  
+ 
+There is no external communication while the AX devices are recording, so they cannot directly have their clocks set or read during normal use.  However, depending on your application, you may have some options, including:
+ 
+* For a single sensor over, say, a week or so, this clock drift rate may be acceptable to directly combine with some external sensors, such as GPS or a mobile phone (assuming the configuring computer had a similar time when configuring).
+ 
+* If you are placing multiple accelerometers on a single moving body over a long period of time (e.g. a person), then there is some software that synchronizes the signal from devices that are likely to see a similar movement: [timesync](https://github.com/digitalinteraction/timesync/).
+ 
+* Where the setup/access allows (e.g. a lab-based recording, or one with frequent points of contact), you can introduce a "marker" -- a specific movement signal at one or more points (e.g. vigorous shaking before and after a session) that has its time externally recorded.  For a lab-based session, it might be appropriate to video record the session in a way that captures the shaking times directly.  It might be useful to introduce an external clock on a screen, e.g. this page: [Time Sync Clock](https://config.openmovement.dev/timesync/) -- on some supported phones/browsers (e.g. Chrome browser on Android), you can hold the phone against the device and tap-and-hold the screen to introduce an optical and vibration marker/pattern for the time.
