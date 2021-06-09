@@ -97,7 +97,7 @@ All timestamps are packed into a 32-bit unsigned value, with a year offset of 20
 typedef enum uint32_t cwa_timestamp_t;
 ```
 
-#### Accelerometer values
+#### Sensor values
 
 In the *un-packed* mode, 3-axis (accelerometer-only) values are simply stored as short signed integers.
 
@@ -275,9 +275,9 @@ All of the above return the current status:
 	STOP={-1|0|<YYYY-MM-DD,hh:mm:ss>}
 
 
-#### Accelerometer configuration
+#### Sensor configuration
 
-To set the accelerometer sensors `rate-code`:
+To set the accelerometer sensor's `rate-code`:
 
 	RATE <rate-code>
 
