@@ -1,9 +1,9 @@
-# Open Movement AX3 Sensor - Technical Documentation
+# Open Movement AX Device - Technical Documentation
 
 
 ## Introduction
 
-The AX3 is a miniature logging accelerometer. It has on-board memory, a microcontroller, a MEMS sensor ([ADXL345](http://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)) and a Real Time Clock (RTC). The AX3 was designed for a range of applications ranging from clinical and health research to human movement science and is now globally adopted for these applications. The AX3 also includes a temperature and light sensor.  The AX3 sensor is based on a 16-bit architecture using a PIC microcontroller. The firmware supports a serial based API (over USB port) and logs its data to an open format file (`.CWA` continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
+The AX3 is a miniature logging accelerometer, and the AX6 is a miniature logging accelerometer+gyroscope. The devices have on-board memory, a microcontroller, a MEMS sensor and a Real Time Clock (RTC). The AX devices were designed for a range of applications, from clinical and health research to human movement science, and are now globally adopted for these applications. The AX devices also include a temperature and light sensor.  The firmware supports a serial based API (over USB port) and logs its data to an open format file (`.CWA` continuous wave accelerometry). Each file supports the ability to add metadata, record device configurations as well as error detection and correction. 
 
 The sensor is part of the Open Movement project, which is a collection of hardware and software developed under open source terms with a variety of uses in mind, including: health research, digital interaction, instrumentation, gaming and music. With a global community of users including industry, universities and major health research organizations, Open Movement has fast being positioned as the de-facto standard for open source movement science.
 
@@ -27,6 +27,8 @@ During normal use, the firmware enumerates as a composite USB device presenting 
 * MSD interface: presents a drive with one or more data files – see below for more details on the stored data. 
 
 * CDC interface: allows the device to be queried and configured (time, battery status, settings, etc.) -- see below for more details on the communication protocol.
+
+The USB serial number will begin with "CWA" for an AX3 device, and "AX6" for an AX6 device.
 
 
 ### Device Disconnected
@@ -95,9 +97,9 @@ All timestamps are packed into a 32-bit unsigned value, with a year offset of 20
 typedef enum uint32_t cwa_timestamp_t;
 ```
 
-#### Accelerometer values
+#### Sensor values
 
-In the *un-packed* mode, the accelerometer values are simply stored as short signed integers, units are 1/256 *g*:
+In the *un-packed* mode, 3-axis (accelerometer-only) values are simply stored as short signed integers.
 
 ```c
 typedef struct
@@ -106,7 +108,21 @@ typedef struct
 } accel_t;
 ```
 
-When the *packing* mode is used, the accelerometer values are stored packed into a single 32-bit integer -- each axis value is a signed integer and must be sign-extended and left-shifted by the exponent 'e', units are 1/256 *g*:
+The unpacked scaling comes from the top three bits of the `lightScale` value, where the scaling is (1/2^(8+n)) in units of *g* -- this is always 1/256 *g* for the AX3.
+
+When the AX6 synchronous gyroscope is enabled, the measurements are 6-axis and stored as follows:
+
+```c
+typedef struct
+{
+    int16_t gx, gy, gz;
+    int16_t ax, ay, az;
+} imu_t;
+```
+
+Bits 10-12 of the lightScale` value determine the gyroscope range of (8000/2^n) degrees per second.
+
+When the *packed* mode is used (AX3 only), the accelerometer values are stored packed into a single 32-bit integer -- each axis value is a signed integer and must be sign-extended and left-shifted by the exponent 'e', resulting units are 1/256 *g*:
 
 ```c
 //   [byte-3] [byte-2] [byte-1] [byte-0]
@@ -134,7 +150,7 @@ typedef struct
     uint8_t  reserved1[1];                      ///< @25  +1   (1 byte reserved)
     uint8_t  flashLed;                          ///< @26  +1   Flash LED during recording
     uint8_t  reserved2[8];                      ///< @27  +8   (8 bytes reserved)
-    uint8_t  sensorConfig;                      ///< @35  +1   Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
+    uint8_t  sensorConfig;                      ///< @35  +1   Fixed rate sensor configuration (AX6 only), 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change meta-data time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
@@ -150,7 +166,7 @@ typedef struct
 
 #### CWA File Data Blocks
 
-The CWA binary file data blocks are always 512 bytes in length at a 512-byte-multiple offset, the first at offset 1024 (immediately after the header).  **The structure must be considered tightly packed.**
+The CWA binary file data blocks are always 512 bytes in length at a 512-byte-multiple offset, the first immediately after the header (typically at offset 1024).  **The structure must be considered tightly packed.**
 
 ```c
 typedef struct
@@ -174,7 +190,7 @@ typedef struct
 } OM_READER_DATA_PACKET;
 ```
 
-**NOTE:** For `.CWA` files produced by an *AX3*: `lightScale` top 6 bits will be zero and can be ignored; `numAxesBPS` top nibble will always be `3`.
+**NOTE:** For `.CWA` files produced by an *AX3*: `lightScale` top 6 bits will be zero and can be ignored and `numAxesBPS` top nibble will always be `3`.
 
 The complexity of the way the timestamp is stored is for historical/backwards-compatibility reasons. Early 8-bit prototype devices didn't have the ability to track the real-time clock to a resolution less than one second, yet did know when the second changed.  To maximize the effective timer resolution (to be the same order as the sampling rate), the relative index of the sample just before the roll-over was recorded (`timestampOffset`). Before any AX3 devices were generally available, back in December 2011 (Firmware V23) one of the device's timers to the RTC's clock crystal to take a precise (sub-second) measurement whenever the underlying accelerometer's buffer fills up (for standard rates: every 25 samples, when it wakes the main processor): recording the index of the sample, and the full timestamp (with fractional part).  This most recent measurement is only actually stored when a whole sector is written. To allow existing file readers to maintain a high timer resolution, the best way to record this additional precision was to make new use of an existing field (`deviceFractional`, indicated by the top bit set) and adjust the `timestampOffset` to be the nearest sample to the whole-second roll-over (assuming the sample rate is exactly as configured).  If the high-precision timer is detected, this adjustment can be undone by newer readers, and the fractional time used instead.  In summary: the original format timestamp has no fractional part and the timestamp-offset is the relative sample index where that time is correct; newer readers can spot that the timestamp now includes the fractional part and the timestamp-offset can be adjusted to point to the sample the fractional timestamp was actually for (the backwards-compatible adjustment is undone).
 
@@ -259,22 +275,29 @@ All of the above return the current status:
 	STOP={-1|0|<YYYY-MM-DD,hh:mm:ss>}
 
 
-#### Accelerometer configuration
+#### Sensor configuration
 
-To set the accelerometer sensors 'rate code':
+To set the accelerometer sensor's `rate-code`:
 
 	RATE <rate-code>
+
+On an AX6, the above command will disable the gyroscope (it will run in accelerometer-only mode).  The synchronous gyroscope can be enabled with a valid `gyro-range` (250/500/1000/2000 dps) using a variation of the command:
+
+	RATE <rate-code>,<gyro-range>
 
 Query only:
 
 	RATE
 
-The above return the current status:
+The above return the current status -- on an AX3:
 
 	RATE=<rate-code>,<frequency-hz>
 
+...on an AX6:
 
-The rate code is split into separate parts: the sensitivity/range and sample frequency.  The frequency rate is `(3200/(1<<(15-(rate & 0x0f))))` Hz, and the range is (+/-g) `(16 >> (rate >> 6))`.
+	RATE=<rate-code>,<frequency-hz>,<gyro-range>
+
+The `rate-code` is split into separate parts: the sensitivity/range and sample frequency.  The sample frequency is `(3200/(1<<(15-(rate & 0x0f))))` Hz, and the range is (+/-g) `(16 >> (rate >> 6))`.
 
 A code can be created by the sum of the parts:
 
@@ -315,6 +338,8 @@ Query the device identification:
 Responds:
 	
 	ID=<type>,<hardwareVer>,<firmwareVer>,<deviceId>
+
+Where `type` will be `CWA` for an *AX3*, and `AX6` for an *AX6*.
 
 
 #### Real-time clock
