@@ -1,4 +1,5 @@
-# CWA Metadata Reader by Dan Jackson, 2017.
+# CWA Reader
+# Dan Jackson, Open Movement, 2017-2021
 #
 
 import sys
@@ -226,6 +227,7 @@ def cwa_data(block, extractData=False):
 			
 			# range = 16 >> (rateCode >> 6)
 			frequency = 3200 / (1 << (15 - (rateCode & 0x0f)))
+			data['frequency'] = frequency
 			
 			timeFractional = 0;
 			# if top-bit set, we have a fractional date
@@ -273,7 +275,7 @@ def cwa_data(block, extractData=False):
 			gyroRange = 2000	# 32768 = 2000dps
 			magUnit = 16		# 1uT = 16
 			# light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
-			accelScale = 1 << (8 + ((light >> 13) & 0x07))
+			accelUnit = 1 << (8 + ((light >> 13) & 0x07))
 			if ((light >> 10) & 0x07) != 0:
 				gyroRange = 8000 // (1 << ((light >> 10) & 0x07))
 			
