@@ -17,6 +17,12 @@ and if you have the [AX3 software](https://github.com/digitalinteraction/openmov
 "%ProgramFiles(x86)%\Open Movement\OM GUI\Plugins\Convert_CWA\cwa-convert.exe"
 ```
 
+* If you are on Windows and would like to build the executable yourself, ensure you have the [Build Tools](https://aka.ms/buildtools) (or Visual Studio) installed, and open the *Developer Command Prompt for VS...* shortcut to ensure `cl.exe` is in your `PATH`, then run:
+
+```cmd
+powershell -Command "& { New-Item -Path "." -Name "cwa-convert.build" -ItemType "directory" ; Invoke-WebRequest https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/main.c -o cwa-convert.build/main.c ; Invoke-WebRequest https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/cwa.h -o cwa-convert.build/cwa.h ; Invoke-WebRequest https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/cwa.c -o cwa-convert.build/cwa.c ; }" ; cl.exe /O2 /Fo:cwa-convert.build\ cwa-convert.build/main.c cwa-convert.build/cwa.c /Fe:cwa-convert.exe
+```
+
 * If you are on Linux, Mac or Windows Subsystem for Linux, you can build the binary yourself with these shell commands (XCode required on Mac):
 
 ```bash
