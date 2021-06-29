@@ -1,5 +1,5 @@
 // CWA Data Conversion
-// Dan Jackson, 2010-2012
+// Dan Jackson, 2010-2021
 //
 // SQLite support added by Stefan Diewald <stefan.diewald@mytum.de>
 
@@ -52,6 +52,11 @@ typedef enum {
 	OPTIONS_BATT_RELATIVE = 0x0080,
 	OPTIONS_NO_GYRO = 0x0100,
 	OPTIONS_NO_MAG = 0x0200,
+	OPTIONS_TEMPC = 0x0400,
+	OPTIONS_FORCE_EMPTY = 0x0800,		// Forced missing values are empty (otherwise zero)
+	OPTIONS_FORCE_ACCEL = 0x1000,		// Force output of Accel axes even if not present (they will be)
+	OPTIONS_FORCE_GYRO = 0x2000,		// Force output of Gyro axes even if not present
+	OPTIONS_FORCE_MAG = 0x4000,			// Force output of Mag axes even if not present (they won't be)
 } Options;
 
 //#define DEFAULT_SAMPLE_RATE 100.0f      // HACK: Remove this, use value from file.
@@ -148,7 +153,7 @@ static float AdcBattToPercent(unsigned int Vbat)
 }
 
 
-static char DumpFile(const char *filename, const char *outfile, Stream stream, Format format, Values values, Time time, Options options, float amplify, unsigned long iStart, unsigned long iLength, unsigned long iStep, int blockStart, int blockCount)
+static char DumpFile(const char *filename, const char *outfile, Stream stream, Format format, Values values, Time time, Options options, float amplify, unsigned long iStart, unsigned long iLength, unsigned long iStep, int blockStart, int blockCount, const char* headerString)
 {
     unsigned long outputSize = 0;
     unsigned long totalSamples = 0;
@@ -211,7 +216,7 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
         if (format == FORMAT_CSV)
         {
             ofp = fopen(outfile, "w");
-        }
+		}
 #ifdef SQLITE
         else if (format == FORMAT_SQLITE)
         {
@@ -261,6 +266,12 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 #endif
     
     if (ofp == NULL) { ofp = stdout; }
+
+	// If a header is specified, it is output as the first line
+	if (format == FORMAT_CSV && headerString != NULL)
+	{
+		fprintf(ofp, "%s\n", headerString);
+	}
 
     fseek(fp, 0, SEEK_END);
     lengthBytes = ftell(fp);
@@ -731,46 +742,73 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 									}
 
 									// Accel
-									if (!(options & OPTIONS_NO_ACCEL) && accelAxis >= 0)
+									if (!(options & OPTIONS_NO_ACCEL))
 									{
-										if (values == VALUES_INT)
+										if (accelAxis >= 0)
 										{
-											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", x, y, z);
+											if (values == VALUES_INT)
+											{
+												outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", x, y, z);
+											}
+											else
+											{
+												outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)x / accelScale, (float)y / accelScale, (float)z / accelScale);
+											}
+											commaNeeded = true;
 										}
-										else
+										else if (options & OPTIONS_FORCE_ACCEL)
 										{
-											outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)x / accelScale, (float)y / accelScale, (float)z / accelScale);
+											const char* empty = (options & OPTIONS_FORCE_EMPTY) ? "" : "0";
+											outputSize += fprintf(ofp, "%s%s,%s,%s", commaNeeded ? "," : "", empty, empty, empty);
+											commaNeeded = true;
 										}
-										commaNeeded = true;
 									}
 
 									// Gyro
-									if (!(options & OPTIONS_NO_GYRO) && gyroAxis >= 0)
+									if (!(options & OPTIONS_NO_GYRO))
 									{
-										float scale = 32768.0f / gyroScale;
-										if (values == VALUES_INT)
+										if (gyroAxis >= 0)
 										{
-											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", gx, gy, gz);
+											float scale = 32768.0f / gyroScale;
+											if (values == VALUES_INT)
+											{
+												outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", gx, gy, gz);
+											}
+											else
+											{
+												outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)gx / scale, (float)gy / scale, (float)gz / scale);
+											}
+											commaNeeded = true;
 										}
-										else
+										else if (options & OPTIONS_FORCE_GYRO)
 										{
-											outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)gx / scale, (float)gy / scale, (float)gz / scale);
+											const char* empty = (options & OPTIONS_FORCE_EMPTY) ? "" : "0";
+											outputSize += fprintf(ofp, "%s%s,%s,%s", commaNeeded ? "," : "", empty, empty, empty);
+											commaNeeded = true;
 										}
-										commaNeeded = true;
 									}
 
 									// Mag
-									if (!(options & OPTIONS_NO_MAG) && magAxis >= 0)
+									if (!(options & OPTIONS_NO_MAG))
 									{
-										if (values == VALUES_INT)
+										if (magAxis >= 0)
 										{
-											outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", mx, my, mz);
+											if (values == VALUES_INT)
+											{
+												outputSize += fprintf(ofp, "%s%d,%d,%d", commaNeeded ? "," : "", mx, my, mz);
+											}
+											else
+											{
+												outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)mx / magScale, (float)my / magScale, (float)mz / magScale);
+											}
+											commaNeeded = true;
 										}
-										else
+										else if (options & OPTIONS_FORCE_MAG)
 										{
-											outputSize += fprintf(ofp, "%s%f,%f,%f", commaNeeded ? "," : "", (float)mx / magScale, (float)my / magScale, (float)mz / magScale);
+											const char* empty = (options & OPTIONS_FORCE_EMPTY) ? "" : "0";
+											outputSize += fprintf(ofp, "%s%s,%s,%s", commaNeeded ? "," : "", empty, empty, empty);
+											commaNeeded = true;
 										}
-										commaNeeded = true;
 									}
 								}
 
@@ -788,7 +826,8 @@ static char DumpFile(const char *filename, const char *outfile, Stream stream, F
 #endif
                                 {
     								if (options & OPTIONS_LIGHT)  { fprintf(ofp, ",%u", light); }
-    								if (options & OPTIONS_TEMP)   { fprintf(ofp, ",%u", dataPacket->temperature); }
+									if (options & OPTIONS_TEMP) { fprintf(ofp, ",%u", dataPacket->temperature); }
+									if (options & OPTIONS_TEMPC) { fprintf(ofp, ",%0.2f", dataPacket->temperature * 75.0f / 256 - 50); }
                                     if (options & OPTIONS_BATT)
                                     {
                                         fprintf(ofp, ",%u", dataPacket->battery);
@@ -889,6 +928,7 @@ int main(int argc, char *argv[])
     int blockStart = 0;
     int blockCount = -1;
     int i;
+	const char *headerString = NULL;
     //Cwa *cwa;
     //Cwa *ocwa;
     //int x;
@@ -930,16 +970,22 @@ atexit(_getch);
 			else if (strcasecmp(argv[i], "-nomag") == 0)       { options = (Options)((unsigned int)options | OPTIONS_NO_MAG); }
 			else if (strcasecmp(argv[i], "-light") == 0)       { options = (Options)((unsigned int)options | OPTIONS_LIGHT); }
 			else if (strcasecmp(argv[i], "-temp") == 0)        { options = (Options)((unsigned int)options | OPTIONS_TEMP); }
+			else if (strcasecmp(argv[i], "-tempc") == 0)       { options = (Options)((unsigned int)options | OPTIONS_TEMPC); }
 			else if (strcasecmp(argv[i], "-batt") == 0)        { options = (Options)((unsigned int)options | OPTIONS_BATT); }
 			else if (strcasecmp(argv[i], "-battv") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_VOLTAGE); }
 			else if (strcasecmp(argv[i], "-battp") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_PERCENT); }
 			else if (strcasecmp(argv[i], "-battr") == 0)       { options = (Options)((unsigned int)options | OPTIONS_BATT_RELATIVE); }
 			else if (strcasecmp(argv[i], "-events") == 0)      { options = (Options)((unsigned int)options | OPTIONS_EVENTS); }
+			else if (strcasecmp(argv[i], "-force:empty") == 0) { options = (Options)((unsigned int)options | OPTIONS_FORCE_EMPTY); }
+			else if (strcasecmp(argv[i], "-force:accel") == 0) { options = (Options)((unsigned int)options | OPTIONS_FORCE_ACCEL); }
+			else if (strcasecmp(argv[i], "-force:gyro") == 0)  { options = (Options)((unsigned int)options | OPTIONS_FORCE_GYRO); }
+			else if (strcasecmp(argv[i], "-force:mag") == 0)   { options = (Options)((unsigned int)options | OPTIONS_FORCE_MAG); }
             else if (strcasecmp(argv[i], "-start") == 0)       { i++; iStart = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-length") == 0)      { i++; iLength = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-step") == 0 || strcasecmp(argv[i], "-skip") == 0) { i++; iStep = atol(argv[i]); }
             else if (strcasecmp(argv[i], "-blockstart") == 0)  { i++; blockStart = atoi(argv[i]); }
-            else if (strcasecmp(argv[i], "-blockcount") == 0)  { i++; blockCount = atoi(argv[i]); }
+			else if (strcasecmp(argv[i], "-blockcount") == 0)  { i++; blockCount = atoi(argv[i]); }
+			else if (strcasecmp(argv[i], "-header") == 0)      { i++; headerString = argv[i]; }
             else if (strcasecmp(argv[i], "-out") == 0)
             {
                 i++; 
@@ -989,12 +1035,12 @@ atexit(_getch);
     
     if (help)
     {
-        fprintf(stderr, "CWA-Convert by Daniel Jackson, 2010-2012\n");
-        fprintf(stderr, "Usage: CWA <filename.cwa> [-s:accel|-s:gyro] [-f:csv|-f:raw|-f:wav"
+        fprintf(stderr, "CWA-Convert by Daniel Jackson, 2010-2021\n");
+        fprintf(stderr, "Usage: CWA <filename.cwa> [-f:csv|-f:raw|-f:wav"
 #ifdef SQLITE
             "|-f:sqlite"
 #endif
-            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-no<data|accel|gyro|mag>] [-light] [-temp] [-batt[v|p|r]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
+            "] [-v:float|-v:int] [-t:timestamp|-t:none|-t:sequence|-t:secs|-t:days|-t:serial|-t:excel|-t:matlab|-t:block] [-no<data|accel|gyro|mag>] [-light] [-temp[c]] [-batt[v|p|r]] [-events] [-amplify 1.0] [-start 0] [-length <len>] [-step 1] [-out <outfile>] [-blockstart 0] [-blockcount <count>]\n");
         return 1;
     }
     
@@ -1003,7 +1049,7 @@ atexit(_getch);
     fprintf(stderr, "DEBUG: Opening file: %s\n", filename);
 #endif
 
-    if (DumpFile(filename, outfilename, stream, format, values, time, options, amplify, iStart, iLength, iStep, blockStart, blockCount))
+    if (DumpFile(filename, outfilename, stream, format, values, time, options, amplify, iStart, iLength, iStep, blockStart, blockCount, headerString))
 	{
 	    fprintf(stderr, "ERROR: Problem dumping file: %s (check exists, readable and not corrupted.)\n", filename);
 	}
