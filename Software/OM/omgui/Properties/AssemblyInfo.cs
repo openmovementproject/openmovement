@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Newcastle University, UK.")]
 [assembly: AssemblyProduct("OmGui")]
-[assembly: AssemblyCopyright("Copyright (c) 2009-2019, Newcastle University, UK.")]
+[assembly: AssemblyCopyright("Copyright (c) 2009-2021, Newcastle University, UK.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.43")]
-[assembly: AssemblyFileVersion("1.0.0.43")]
+[assembly: AssemblyVersion("1.0.0.44")]
+[assembly: AssemblyFileVersion("1.0.0.44")]

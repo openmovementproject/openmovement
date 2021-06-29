@@ -126,6 +126,8 @@ namespace OmGui
         float animateFirstBlock = 0.0f;
         float animateNumBlocks = 0.0f;
 
+        bool showTime = true;
+
         DataBlockCache dataBlockCache = new DataBlockCache();
 
 
@@ -629,12 +631,17 @@ namespace OmGui
                 {
                     lastLocation = e.Location;
 
-                    String label = "";
-                    label += TimeString(TimeForBlock(blockAtCursor));
                     var aggregate = AggregateForBlock(blockAtCursor);
 
                     bool values = (Control.ModifierKeys & Keys.Control) != 0;
                     bool additional = (Control.ModifierKeys & Keys.Shift) != 0;
+
+                    String label = "";
+
+                    if (this.showTime || values || additional)
+                    {
+                        label += TimeString(TimeForBlock(blockAtCursor));
+                    }
 
                     if (values)
                     {

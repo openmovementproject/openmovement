@@ -62,6 +62,7 @@ namespace OmGui
 
         public static string ADVICE = "\r\n\r\n(If device communication problems persist, please disconnect, wait, then reconnect the device.)";
         public int resetIfUnresponsive = 3;
+        public bool timeCheck = true;
 
         //PluginQueue
         Queue<PluginQueueItem> pluginQueueItems = new Queue<PluginQueueItem>();
@@ -127,12 +128,13 @@ namespace OmGui
         private string downloadDumpFile = null;
         private bool noUpdateCheck = false;
         private string startupPath = null;
-        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck, string startupPath, int resetIfUnresponsive)
+        public MainForm(int uac, string myConfigDumpFile, string myDownloadDumpFile, bool noUpdateCheck, string startupPath, int resetIfUnresponsive, bool timeCheck)
         {
             this.configDumpFile = myConfigDumpFile;
             downloadDumpFile = myDownloadDumpFile;
             this.startupPath = startupPath;
             this.resetIfUnresponsive = resetIfUnresponsive;
+            this.timeCheck = timeCheck;
 
             if (uac == 1)
             {
@@ -453,13 +455,16 @@ namespace OmGui
 
             item.ImageIndex = img;
 
-            if (device.DeviceWarning >= 2)
+            if (this.timeCheck)
             {
-                battery = "DAMAGED? (" + battery + ") - indications of possibly damaged device battery or clock, check carefully.";
-            }
-            else if (device.DeviceWarning >= 1)
-            {
-                battery = "DISCHARGED? (" + battery + ") - allowing full discharge can damage battery.";
+                if (device.DeviceWarning >= 2)
+                {
+                    battery = "DAMAGED? (" + battery + ") - indications of possibly damaged device battery or clock, check carefully.";
+                }
+                else if (device.DeviceWarning >= 1)
+                {
+                    battery = "DISCHARGED? (" + battery + ") - allowing full discharge can damage battery.";
+                }
             }
 
             string deviceText = string.Format("{0:00000}", source.DeviceId);
@@ -4080,17 +4085,22 @@ Console.WriteLine("backgroundWorkerUpdate - changed " + device.DeviceId);
                 }
 				if (oldWarning != device.DeviceWarning && device.DeviceWarning > 0) {
 Console.WriteLine("backgroundWorkerUpdate - WARNING STATE CHANGED " + device.DeviceId + " => " + device.DeviceWarning);
-					// device.DeviceWarning // 0=none, 1=discharged, 2=damaged?
-					if (device.DeviceWarning >= 2) {
-						this.Invoke((Func<DialogResult>)(() => 
-							MessageBox.Show(this, "Device " + device.DeviceId + " has a recently restarted clock yet is already appearing fully charged,\r\nwhich is a strong indicator that the device's clock or battery could be damaged.\r\n\r\nPlease label this device and place it aside\r\nuntil you have run some tests to determine its condition.", "Warning: Device Possibly Damaged", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
-						));
-					}
-					else if (device.DeviceWarning >= 1) {
-						this.Invoke((Func<DialogResult>)(() => 
-							MessageBox.Show(this, "Device " + device.DeviceId + " has lost track of the time since last configuration,\r\nwhich is likely caused by leaving the device in a fully discharged state for a significant time.\r\nThis can adversely affect the long-term battery condition.\r\nThe device batteries should be kept topped-up approximately every 3 months.\r\nAlternatively, this might be an indicator of an affected battery.", "Caution: Device May Have Fully Discharged", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1)
-						));
-					}
+                    if (this.timeCheck)
+                    {
+                        // device.DeviceWarning // 0=none, 1=discharged, 2=damaged?
+                        if (device.DeviceWarning >= 2)
+                        {
+                            this.Invoke((Func<DialogResult>)(() =>
+                                MessageBox.Show(this, "Device " + device.DeviceId + " has a recently restarted clock yet is already appearing fully charged,\r\nwhich is a strong indicator that the device's clock or battery could be damaged.\r\n\r\nPlease label this device and place it aside\r\nuntil you have run some tests to determine its condition.", "Warning: Device Possibly Damaged", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1)
+                            ));
+                        }
+                        else if (device.DeviceWarning >= 1)
+                        {
+                            this.Invoke((Func<DialogResult>)(() =>
+                                MessageBox.Show(this, "Device " + device.DeviceId + " has lost track of the time since last configuration,\r\nwhich is likely caused by leaving the device in a fully discharged state for a significant time.\r\nThis can adversely affect the long-term battery condition.\r\nThe device batteries should be kept topped-up approximately every 3 months.\r\nAlternatively, this might be an indicator of an affected battery.", "Caution: Device May Have Fully Discharged", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1)
+                            ));
+                        }
+                    }
 				}
             }
             BackgroundTaskStatus(false);

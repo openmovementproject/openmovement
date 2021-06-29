@@ -45,6 +45,7 @@ namespace OmGui
                 bool noUpdateCheck = false;
                 string startupPath = null;
                 int resetIfUnresponsive = 3;
+                bool timeCheck = true;
 
                 int positional = 0;
                 int uac = 0;
@@ -56,6 +57,8 @@ namespace OmGui
                     else if (args[i].ToLower() == "-noupdatecheck") { noUpdateCheck = true; }
                     else if (args[i].ToLower() == "-folder") { startupPath = args[++i]; }
                     else if (args[i].ToLower() == "-noreset") { resetIfUnresponsive = 0; }
+                    else if (args[i].ToLower() == "-timecheck") { timeCheck = true; }
+                    else if (args[i].ToLower() == "-notimecheck") { timeCheck = false; }
                     else if (args[i].ToLower() == "-uac:none") { uac = 0; }
                     else if (args[i].ToLower() == "-uac:ask")     { uac = 1; }
                     else if (args[i].ToLower() == "-uac:always")  { uac = 2; }
@@ -83,7 +86,7 @@ namespace OmGui
                 splashScreen.Started += (s, e) =>
                 {
                     Console.WriteLine("Splash: ...shown...");
-                    MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile, noUpdateCheck, startupPath, resetIfUnresponsive);
+                    MainForm mainForm = new MainForm(uac, configDumpFile, downloadDumpFile, noUpdateCheck, startupPath, resetIfUnresponsive, timeCheck);
                     //mainForm.LogFile = logFile;
                     mainForm.Started += (sender, e2) =>
                     {
