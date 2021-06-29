@@ -169,7 +169,7 @@ public class CwaBlock implements Cloneable {
     	return new CwaBlock(this);
     }
 
-	// Marks the block as invalidate
+	// Marks the block as invalid
     /*package*/ void invalidate() {
     	bufferValid = false;
     }
@@ -311,7 +311,7 @@ public class CwaBlock implements Cloneable {
 		if (!isValid()) {
 			return BLOCK_NONE;
 		}
-		return byteBuffer.getShort(0);	//(short)(((long)block[0] & 0xff) | (((long)block[1] << 8) & 0xff));
+		return byteBuffer.getShort(0);
 	}
     
 	/**
