@@ -241,8 +241,8 @@ class CWA:
         deviceId = unpack('H', self.read(2))[0]
         sessionId = unpack('I', self.read(4))[0]
         deviceIdUpper = unpack('H', self.read(2))[0]
-		if deviceIdUpper != 0xffff:
-			deviceId |= deviceIdUpper << 16
+        if deviceIdUpper != 0xffff:
+            deviceId |= deviceIdUpper << 16
         loggingStartTime = self.read(4)
         loggingEndTime = self.read(4)
         loggingCapacity = unpack('I', self.read(4))[0]
