@@ -23,13 +23,13 @@ and if you have the [AX3 software](https://github.com/digitalinteraction/openmov
 powershell -Command "& { New-Item -Path "." -Name "cwa-convert.build" -ItemType "directory" ; Invoke-WebRequest https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/main.c -o cwa-convert.build/main.c ; Invoke-WebRequest https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/cwa.h -o cwa-convert.build/cwa.h ; Invoke-WebRequest https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/cwa.c -o cwa-convert.build/cwa.c ; }" ; cl.exe /O2 /Fo:cwa-convert.build\ cwa-convert.build/main.c cwa-convert.build/cwa.c /Fe:cwa-convert.exe
 ```
 
-* If you are on Linux, Mac or Windows Subsystem for Linux, you can build the binary yourself with these shell commands (XCode required on Mac):
+* If you are on Linux, Mac or Windows Subsystem for Linux, you can build the binary yourself with this shell command (XCode required on Mac):
 
 ```bash
-wget -P cwa-convert.build https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/{main.c,cwa.{c,h}}
-cd cwa-convert.build && gcc main.c cwa.c -lm -O2 -o ../cwa-convert && cd -
+wget -P cwa-convert.build https://github.com/digitalinteraction/openmovement/raw/master/Software/AX3/cwa-convert/c/{main.c,cwa.{c,h}} && cd cwa-convert.build && gcc main.c cwa.c -lm -O2 -o ../cwa-convert && cd -
 ```
 
+(If you are using `zsh` with `url-quote-magic` enabled, please make sure the curly braces `{`/`}` are not preceeded by a backslash `\`)
 
 A list of other command-line options is available with:
 
