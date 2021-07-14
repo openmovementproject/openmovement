@@ -939,7 +939,7 @@ atexit(_getch);
 
     for (i = 1; i < argc; i++)
     {
-        if (argv[i][0] == '-' || argv[i][0] == '/')
+        if (argv[i][0] == '-')
         {
             if (strcasecmp(argv[i], "--help") == 0)
             {
@@ -1007,7 +1007,7 @@ atexit(_getch);
         else
         {
 #ifdef _WIN32
-            // On Windows: allow /?, /H, /HELP as parameters
+            // On Windows: allow /?, /H, /HELP as alternatives for help
             if (strcasecmp(argv[i], "/?") == 0 || strcasecmp(argv[i], "/H") == 0 || strcasecmp(argv[i], "/HELP") == 0)
             {
                 help = 1; 
