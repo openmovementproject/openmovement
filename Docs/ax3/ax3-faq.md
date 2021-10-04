@@ -47,3 +47,8 @@ There is no external communication while the AX devices are recording, so they c
 * If you are placing multiple accelerometers on a single moving body over a long period of time (e.g. a person), then there is some software that synchronizes the signal from devices that are likely to see a similar movement: [timesync](https://github.com/digitalinteraction/timesync/).
  
 * Where the setup/access allows (e.g. a lab-based recording, or one with frequent points of contact), you can introduce a "marker" -- a specific movement signal at one or more points (e.g. vigorous shaking before and after a session) that has its time externally recorded.  For a lab-based session, it might be appropriate to video record the session in a way that captures the shaking times directly.  It might be useful to introduce an external clock on a screen, e.g. this page: [Time Sync Clock](https://config.openmovement.dev/timesync/) -- on some supported phones/browsers (e.g. Chrome browser on Android), you can hold the phone against the device and tap-and-hold the screen to introduce an optical and vibration marker/pattern for the time.
+
+**A note about timezones and daylight savings time:** The AX devices do not attempt to adjust for timezone changes or daylight savings adjustment (and they will not know the current location of the wearer).  Instead, the configuring device's local time is used to establish the date and time on the device, and the time and date continue from there for the recording.
+
+
+
