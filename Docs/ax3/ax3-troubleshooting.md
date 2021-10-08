@@ -100,9 +100,11 @@ If these numbers are inconsistent, you could try *resetting the device ID* in th
 
 ## Resetting the device ID
 
-If it appears as if the device ID has somehow been incorrectly reprogrammed, you could try this procedure to reset the ID.  
+**NOTE:** This step is for advanced use only, and should not be performed unless you are sure that it is necessary.
 
-**IMPORTANT:** This will *reformat* the device, deleting any data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.
+**IMPORTANT:** As part of making the ID consistent in the filesystem and data file, this will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.
+
+If it appears as if the device ID has somehow been incorrectly reprogrammed, you could try this procedure to reset the ID.  
  
 1.	Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
 
@@ -139,7 +141,7 @@ If it appears as if the device ID has somehow been incorrectly reprogrammed, you
 
 ## Removing a mount point
 
-(This is for advanced use only, and unlikely to apply/work).
+**NOTE:** This step is for advanced use only, and unlikely to apply to your device and/or unlikely to work.
 
 Perhaps an old *mount point* is interfering somehow - you could try clearing the mount point:
  
