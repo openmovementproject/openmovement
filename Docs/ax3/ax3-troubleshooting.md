@@ -54,7 +54,7 @@
 
 Please try the following to extract a detailed log from *OmGui* about what it can see of the device:
 
-1. Ensure *OmGui* is initially closed.
+1. Ensure *OmGui* is initially closed and that no devices are attached.
    
 2. Open the *Run* window (press <kbd>Windows</kbd>+<kbd>R</kbd>)
    
@@ -67,8 +67,11 @@ Please try the following to extract a detailed log from *OmGui* about what it ca
 4. Use OmGui as before until the problem occurs.
    
 5. Open the View/Log (<kbd>Alt</kbd>+<kbd>V</kbd>, <kbd>L</kbd>) window at the very bottom, and resize it to be a little larger
-   
-6. Attach the device and wait around 10 seconds
+
+6. Now perform the actions that you are troubleshooting, for example, one or more of the steps:
+   * Attach the device (wait around 10 seconds for it to fully connect)
+   * Optional: Attempt to download data from the device
+   * Optional: Attempt to configure the device
    
 7. Click in the Log window and select all of the text and copy it to the clipboard (<kbd>Ctrl</kbd>+<kbd>Home</kbd>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>End</kbd>, <kbd>Ctrl</kbd>+<kbd>C</kbd>)
    
