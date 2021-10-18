@@ -14,7 +14,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
-   sodipodi:docname="axes-zoom.svg">
+   sodipodi:docname="axes.svg">
   <title
      id="title4485">AX Axes</title>
   <defs
@@ -196,5 +196,5 @@
        id="tspan876"
        x="2.0264399"
        y="0.4020429"
-       style="stroke-width:0.0132292">Etched side</tspan></text>
+       style="stroke-width:0.0132292">(etched face)</tspan></text>
 </svg>
