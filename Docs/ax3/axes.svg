@@ -165,7 +165,7 @@
        sodipodi:nodetypes="cccccccccccscccccccccccccsccccccccscc" />
   </g>
   <g
-     transform="matrix(0.30925433,0,0,-0.30925433,0.80325005,3.1258911)"
+     transform="matrix(0.15238096,0,0,-0.2108978,0.80325005,2.7759385)"
      id="g5017"
      style="fill:#000000">
     <path
@@ -197,4 +197,15 @@
        x="2.0264399"
        y="0.4020429"
        style="stroke-width:0.0132292">(etched face)</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:0.529167px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.0132292"
+     x="2.4941616"
+     y="5.1166778"
+     id="text861"><tspan
+       sodipodi:role="line"
+       id="tspan859"
+       x="2.4941616"
+       y="5.1166778"
+       style="font-size:0.211667px;stroke-width:0.0132292">gyroscope roll AX6 only</tspan></text>
 </svg>
