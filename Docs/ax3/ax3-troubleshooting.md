@@ -2,15 +2,11 @@
 
 ## Connection Troubleshooting
 
-1. **What version of OmGui software are you using?**
-
-   Older versions of OmGui will not work on devices with larger IDs.  If it is not recent (e.g. 1.0.0.43), does installing [the current version](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#downloading-and-installing) make a difference? 
-
-2. **What is the connection/charging arrangement between the device and the computer?**
+1. **What is the connection/charging arrangement between the device and the computer?**
 
    Devices should only be connected directly to a computer or a USB hub that is externally powered with its own supply -- not a *passive* hub without its own power, and not left on a hub that is later removed from power. The devices can become discharged if left connected to a USB power source is not providing sufficient power, such as multiple devices connected to a passive USB hub, or a powered hub that is no longer powered, or left attached to a computer that goes to sleep and might provide less power.
 
-3. **What exactly does the LED light do when you connect the device to a computer?**
+2. **What exactly does the LED light do when you connect the device to a computer?**
 
    It should first flash through various colours for a short while, then settle to just a slowly pulsing yellow or white light.
 
@@ -28,33 +24,60 @@
    
    * By gently moving the device around in the light, you should see the five shiny rectangular contacts on the central part of the connector (shorter side) -- is there is any sign of corrosion or grease preventing contact? (If the device has been externally connected to power while conductive liquid was in the port, such as non-pure water, it would be possible to cause corrosion on the connector). 
 
-4. **Does trying the device and software on a completely different computer make a difference?**
+3. **Does trying the device and software on a completely different computer make a difference?**
 
    In particular: if it's not working on an organization-managed PC, does trying on a personal laptop make a difference?
 
 
 *(The following will only apply once the device is connected and the LED pulses yellow/white.)*
 
-5. Under Windows Explorer's *This PC* where you see your computer's drives, **does the AX device appear as a drive?**
+4. Under Windows Explorer's *This PC* where you see your computer's drives, **does the AX device appear as a drive?**
 
    * If so: you can manually copy off the data file `CWA-DATA.CWA`, if required.
    
    * If not: might your computer have any strict anti-virus software or security policies about access to removable USB drives? 
 
-6. Open *Device Manager*, **does an entry appear listed under the *Ports* category for the device?** (Or sometimes under *Portable Devices*) 
+5. Open *Device Manager*, **does an entry appear listed under the *Ports* category for the device?** (Or sometimes under *Portable Devices*) 
    
    If not, then there may be a driver issue, please try the OmGUI installation again, ensuring it is as a user with administrative rights as this attempts to install a driver (not usually be needed if you're running Windows 10) -- did the installation (with driver) complete without any issues?
 
-7. **What does the OmGui Detailed log say?**
-
-   Please obtain an *OmGui Detailed log* as described in the next section.
+6. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *Software Troubleshooting* guide below.
 
 
-## OmGui Detailed log
+## OmGui Troubleshooting
+
+The standard connection software is [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#downloading-and-installing).
+
+1. **What version of OmGui software are you using?**
+
+   Older versions of OmGui will not work on devices with larger IDs.  If it is not recent (e.g. 1.0.0.43), does installing [the current version](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#downloading-and-installing) make a difference? 
+
+2. **Has the computer been restarted?**
+
+   Although a bit of cliché, it is really worth restarting the computer and trying again, as this can clear any issues at the driver or operating system levels.
+
+3. **Does trying the device and software on a completely different computer make a difference?**
+
+   If it's not working on an organization-managed PC (perhaps from restrictive security software or settings), does trying on a personal laptop make a difference?
+
+   Also note that *OmGui* is a Windows application and, although it may run under virtualization technology (such as *Parallels* under *macOS*), it is not tested for such configurations.
+
+4. **Is the workspace on a network drive, or is there a restricted quota or limited drive storage space?**
+
+   Some issues with transferring data may occur if the workspace is set to a network (shared) drive.  (This is often how virtualization programs such as *Parallels* map to the host computer's files).  It may be more reliable to use a local folder as a workspace, and to transfer the files off afterwards.
+   
+   In addition, be sure that the workspace folder you choose has sufficent free drive storage space (and is not restricted by a quota).
+
+5. **Detailed log?**
+   
+   If the above suggestions have not resolved the issue, please obtain an *OmGui Detailed log* as described in the next section.
+
+
+### OmGui Detailed log
 
 Please try the following to extract a detailed log from *OmGui* about what it can see of the device:
 
-1. Ensure *OmGui* is initially closed.
+1. Ensure *OmGui* is initially closed and that no devices are attached.
    
 2. Open the *Run* window (press <kbd>Windows</kbd>+<kbd>R</kbd>)
    
@@ -67,17 +90,32 @@ Please try the following to extract a detailed log from *OmGui* about what it ca
 4. Use OmGui as before until the problem occurs.
    
 5. Open the View/Log (<kbd>Alt</kbd>+<kbd>V</kbd>, <kbd>L</kbd>) window at the very bottom, and resize it to be a little larger
-   
-6. Attach the device and wait around 10 seconds
+
+6. Now perform the actions that you are troubleshooting, for example, one or more of the steps:
+   * Attach the device (wait around 10 seconds for it to fully connect)
+   * Optional: Attempt to download data from the device
+   * Optional: Attempt to configure the device
    
 7. Click in the Log window and select all of the text and copy it to the clipboard (<kbd>Ctrl</kbd>+<kbd>Home</kbd>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>End</kbd>, <kbd>Ctrl</kbd>+<kbd>C</kbd>)
    
 8. Please paste the log output (<kbd>Ctrl</kbd>+<kbd>V</kbd>) in a new text file or document to save it.
+
+
+Checking the log output:
+
+* Device ID consistency: If it contains any `LOG: - MISMATCH:` lines, please see the next section to manually verify the device ID.
+
+* If it shows an issue with a configuration file (in particular, if you are having an issue when trying to configure a device):
+
+   * Check whether your workspace folder has a `recordSetup.xml` file -- this is used to store the previous configuration information so that it can easily be repeated.  If this file has become corrupt, you can remove it (although you will have to re-enter the configuration information).
    
-If the log entry contains any `LOG: - MISMATCH:` lines, this indicating an issue with device ID consistency, please see the next section to manually verify the device ID.
+   * If the applications configuration file has become corrupt (e.g. if `Configuration system failed to initialize`)
+     * Ensure *OmGui* is not running
+     * Press <kbd>Windows</kbd>+<kbd>R</kbd> to open the "Run" window, and type (followed by <kbd>Enter</kbd>): `%LOCALAPPDATA%`
+     * Select the folder `Newcastle_University,_UK`, rename it (<kbd>F2</kbd>) to something else (for example, by adding an underscore (`_`) at the start)
 
 
-## Manually checking device ID consistency
+## Manually verify device ID consistency
 
 If you receive an error `The correct download file name cannot be established (device identifier not verified)` please obtain an *OmGUI Detailed Log* as described above (if not already done so).  The log entry may contain `LOG: - MISMATCH:`, indicating an issue with device ID.  
 
@@ -100,9 +138,11 @@ If these numbers are inconsistent, you could try *resetting the device ID* in th
 
 ## Resetting the device ID
 
-If it appears as if the device ID has somehow been incorrectly reprogrammed, you could try this procedure to reset the ID.  
+**NOTE:** This step is for advanced use only, and should not be performed unless you are sure that it is necessary.
 
-**IMPORTANT:** This will *reformat* the device, deleting any data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.
+**IMPORTANT:** As part of making the ID consistent in the filesystem and data file, this will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.
+
+If it appears as if the device ID has somehow been incorrectly reprogrammed, you could try this procedure to reset the ID.  
  
 1.	Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
 
@@ -139,7 +179,7 @@ If it appears as if the device ID has somehow been incorrectly reprogrammed, you
 
 ## Removing a mount point
 
-(This is for advanced use only, and unlikely to apply/work).
+**NOTE:** This step is for advanced use only, and unlikely to apply to your device and/or unlikely to work.
 
 Perhaps an old *mount point* is interfering somehow - you could try clearing the mount point:
  
