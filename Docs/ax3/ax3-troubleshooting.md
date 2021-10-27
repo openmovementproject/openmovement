@@ -28,20 +28,23 @@
 
    In particular: if it's not working on an organization-managed PC, does trying on a personal laptop make a difference?
 
+4. **Does the device LED slowly pulse yellow/white for a sustained amount of time?** (Check over at least 15 seconds)
 
-*(The following will only apply once the device is connected and the LED pulses yellow/white.)*
+   If not, and everything else above was already checked, there may be an issue with it.
+   
+   _The following points are only likely to be worth considering if the device LED is behaving normally in this way_.
 
-4. Under Windows Explorer's *This PC* where you see your computer's drives, **does the AX device appear as a drive?**
+5. Under Windows Explorer's *This PC* where you see your computer's drives, **does the AX device appear as a drive?**
 
    * If so: you can manually copy off the data file `CWA-DATA.CWA`, if required.
    
    * If not: might your computer have any strict anti-virus software or security policies about access to removable USB drives? 
 
-5. Open *Device Manager*, **does an entry appear listed under the *Ports* category for the device?** (Or sometimes under *Portable Devices*) 
+6. Open *Device Manager*, **does an entry appear listed under the *Ports* category for the device?** (Or sometimes under *Portable Devices*) 
    
    If not, then there may be a driver issue, please try the OmGUI installation again, ensuring it is as a user with administrative rights as this attempts to install a driver (not usually be needed if you're running Windows 10) -- did the installation (with driver) complete without any issues?
 
-6. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *Software Troubleshooting* guide below.
+7. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *Software Troubleshooting* guide below.
 
 
 ## OmGui Troubleshooting
