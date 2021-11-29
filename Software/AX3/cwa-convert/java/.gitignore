@@ -1,2 +1,5 @@
 /bin
 /dist
+run.cmd
+*.csv
+*.class

@@ -45,7 +45,8 @@ public class CwaCsvInputStream extends FilterInputStream {
 	private CwaReader cwaReader;
 
 	// Output buffer
-	private final static int MAX_OUT_BUFFER = (CwaBlock.MAX_SAMPLES_PER_BLOCK * 128);
+	private final static int MAX_LINE_LENGTH = 192;
+	private final static int MAX_OUT_BUFFER = (CwaBlock.MAX_SAMPLES_PER_BLOCK * MAX_LINE_LENGTH);
 	private ByteBuffer outBuffer;
 	private StringBuilder outputStringBuilder;
 	private int line, firstLine, lineSkip, lineCount, options;
@@ -151,12 +152,28 @@ public class CwaCsvInputStream extends FilterInputStream {
 		
 		long[] timestamps = block.getTimestampValues();
 		String lineSeparator = System.getProperty("line.separator");
-		short[] sampleValues = block.getSampleValues();		
+		short[] sampleValues = block.getSampleValues();
 		int numSamples = block.getNumSamples();
+		int numAxes = block.getNumAxes();
+		int accelAxis = block.getAccelAxis();
+		int accelUnit = block.getAccelUnit();
+		int gyroAxis = block.getGyroAxis();
+		int gyroRange = block.getGyroRange();
+		float gyroUnit = (gyroRange != 0) ? (32768.0f / gyroRange) : 0;
 		for (int i = 0; i < numSamples; i++) {
-			float x = (float)sampleValues[CwaBlock.NUM_AXES_PER_SAMPLE * i + 0] / 256.0f;
-			float y = (float)sampleValues[CwaBlock.NUM_AXES_PER_SAMPLE * i + 1] / 256.0f;
-			float z = (float)sampleValues[CwaBlock.NUM_AXES_PER_SAMPLE * i + 2] / 256.0f;
+			float ax = 0, ay = 0, az = 0;
+			if (accelAxis >= 0) {
+				ax = (float)sampleValues[numAxes * i + accelAxis + 0] / accelUnit;
+				ay = (float)sampleValues[numAxes * i + accelAxis + 1] / accelUnit;
+				az = (float)sampleValues[numAxes * i + accelAxis + 2] / accelUnit;
+			}
+
+			float gx = 0, gy = 0, gz = 0;
+			if (gyroAxis >= 0) {
+				gx = (float)sampleValues[numAxes * i + gyroAxis + 0] / gyroUnit;
+				gy = (float)sampleValues[numAxes * i + gyroAxis + 1] / gyroUnit;
+				gz = (float)sampleValues[numAxes * i + gyroAxis + 2] / gyroUnit;
+			}
 			
 			// Accumulate all events until displayed
 			events |= block.getEvents();
@@ -164,7 +181,10 @@ public class CwaCsvInputStream extends FilterInputStream {
 			if (line >= firstLine && (line % lineSkip) == 0 && (lineCount < 0 || line < lineCount * lineSkip)) {
 				//outputStringBuilder.append(timestamps[i]);
 				outputStringBuilder.append(CwaBlock.getDateString(timestamps[i]));
-				outputStringBuilder.append(',').append(x).append(',').append(y).append(',').append(z);
+				outputStringBuilder.append(',').append(ax).append(',').append(ay).append(',').append(az);
+				if (gyroAxis >= 0) {
+					outputStringBuilder.append(',').append(gx).append(',').append(gy).append(',').append(gz);
+				}
 
 				if ((options & OPTIONS_LIGHT) != 0) { outputStringBuilder.append(',').append(block.getLight()); }
 				if ((options & OPTIONS_TEMP) != 0) { outputStringBuilder.append(',').append(block.getTemperature()); }

@@ -34,19 +34,22 @@ public class CwaBlock implements Cloneable {
 	private short batt = 0;
 	private short events = 0;
 	private int sampleCount = 0;
+	private int numAxes = 0;
+	private int accelUnit = 0;	// 1g = 256
+	private int gyroRange = 0;	// 32768 = 2000 dps
+	private int magUnit = 0;    // 1uT = 16 (unused)
+	private int accelAxis = -1;
+	private int gyroAxis = -1;
+	private int magAxis = -1;	// (unused)
 	private long[] sampleTimes;
 	private short[] sampleValues;
 	
+	/** Maximum number of data bytes per block */	
+	public static final int DATA_BYTES_PER_BLOCK = BLOCK_SIZE - 32;		// 480
 	
-	/** Maximum number of samples per (new format) data block */	
-	public static final int MAX_SAMPLES_PER_BLOCK = 120;
-	
-	/** Number of samples per (old format) data block */	
-	public static final int NUM_SAMPLES_PER_OLD_BLOCK = 80;
-	
-	/** Number of axes per sample */	
-	public static final int NUM_AXES_PER_SAMPLE = 3;
-	
+	/** Maximum number of samples in a block (3-axis packed) */
+	public static final int MAX_SAMPLES_PER_BLOCK = (DATA_BYTES_PER_BLOCK / 4);	// 120
+
 	/** Block type - no block */	
 	public static final short BLOCK_NONE = 0;			//
 	
@@ -54,25 +57,10 @@ public class CwaBlock implements Cloneable {
 	public static final short BLOCK_EMPTY = -1;			// 0xffff
 	
 	/** Block type - header block */	
-	public static final short BLOCK_HEADER = 0x444D;		// "MD" (length 0xFFFC)
-	/** Block length - header block */	
-	public static final int LENGTH_HEADER = 0xFFFC;
-	
-	/** Block type - usage block */	
-	public static final short BLOCK_USAGE = 0x4255;			// "UB" (length 0xFFFC)
-	/** Block length - usage block */	
-	public static final int LENGTH_USAGE = 0xFFFC;
-	
-	/** Block type - session info block */	
-	public static final short BLOCK_SESSIONINFO = 0x4953;	// "SI" (length 0x01FC)
-	/** Block length - session info block */	
-	public static final int LENGTH_SESSIONINFO = 0x01FC;
+	public static final short BLOCK_HEADER = 0x444D;		// "MD"
 	
 	/** Block type - data block */	
 	public static final short BLOCK_DATA = 0x5841;			// "AX" (length 0x01FC)
-	/** Block length - data block */	
-	public static final int LENGTH_DATA = 0x01FC;
-	
 	
 	/*
 	// 512-byte data packet
@@ -81,9 +69,9 @@ public class CwaBlock implements Cloneable {
 		unsigned short packetHeader;	// [2] = 0x5841 (ASCII "AX", little-endian)
 		unsigned short packetLength;	// [2] = 508 bytes (contents of this packet is 508 bytes long, + 2 + 2 = 512 bytes total)
 		unsigned short deviceId;		// [2] (16-bit device identifier, 0 = unknown)
-	    unsigned int sessionId;			// [4] (32-bit unique session identifier, 0 = unknown)
-	    unsigned int sequenceId;		// [4] (32-bit sequence counter, each packet has a new number -- reset if restarted?)
-	    unsigned int timestamp;			// [4] (last reported RTC value, 0 = unknown)
+		unsigned int sessionId;			// [4] (32-bit unique session identifier, 0 = unknown)
+		unsigned int sequenceId;		// [4] (32-bit sequence counter, each packet has a new number -- reset if restarted?)
+		unsigned int timestamp;			// [4] (last reported RTC value, 0 = unknown)
 		unsigned short light;			// [2] (last recorded light sensor value in raw units, 0 = none)
 		unsigned short temperature;		// [2] (last recorded temperature sensor value in raw units)
 		unsigned char  events;			// [1] (event flags since last packet, b0 = resume logging from standby, b1 = single-tap event, b2 = double-tap event, b3-b7 = reserved)
@@ -100,18 +88,18 @@ public class CwaBlock implements Cloneable {
 	// Data status structure
 	typedef struct
 	{
-	    // Header
-	    unsigned short header;              // 0x444D = ("MD") Meta data block
-	    unsigned short blockSize;           // 0xFFFC = Packet size (2^16 - 2 - 2)
+		// Header
+		unsigned short header;              // 0x444D = ("MD") Meta data block
+		unsigned short blockSize;           // 0xFFFC = Packet size (2^16 - 2 - 2)
 	
 		// Stored data
 		unsigned char performClear;
 		unsigned short deviceId;
-	    unsigned int sessionId;
+		unsigned int sessionId;
 		unsigned short shippingMinLightLevel;
-	    unsigned int loggingStartTime;
-	    unsigned int loggingEndTime;
-	    unsigned int loggingCapacity;
+		unsigned int loggingStartTime;
+		unsigned int loggingEndTime;
+		unsigned int loggingCapacity;
 		unsigned char allowStandby;			// User allowed to transition LOGGING->STANDBY (and if POWERED->STANDBY/LOGGING)
 		unsigned char debuggingInfo;		// Additional LED debugging info
 		unsigned short batteryMinimumToLog;	// Minimum battery level required for logging
@@ -165,23 +153,23 @@ public class CwaBlock implements Cloneable {
 	}
 
 	// Clone method -- calls copy constructor
-    public Object clone() { // throws CloneNotSupportedException
-    	return new CwaBlock(this);
-    }
+	public Object clone() { // throws CloneNotSupportedException
+		return new CwaBlock(this);
+	}
 
 	// Marks the block as invalid
-    /*package*/ void invalidate() {
-    	bufferValid = false;
-    }
-    
-    /**
-     * @return direct read-only access to the internal ByteBuffer
-     */
-    public ByteBuffer buffer() {
-    	return byteBuffer.asReadOnlyBuffer();
-    }
-    
-    protected long tLast = 0;
+	/*package*/ void invalidate() {
+		bufferValid = false;
+	}
+	
+	/**
+	 * @return direct read-only access to the internal ByteBuffer
+	 */
+	public ByteBuffer buffer() {
+		return byteBuffer.asReadOnlyBuffer();
+	}
+	
+	protected long tLast = 0;
 
 	/**
 	 * Reads the next block into the buffer.
@@ -206,14 +194,15 @@ public class CwaBlock implements Cloneable {
 			if (getBlockType() == BLOCK_DATA) {
 				deviceId = byteBuffer.getShort(4);
 				sessionId = byteBuffer.getInt(6);
-				int blockTimestamp = byteBuffer.getInt(14);				
-				light = byteBuffer.getShort(18);				
-				temp = byteBuffer.getShort(20);				
+				int blockTimestamp = byteBuffer.getInt(14);
+				int rawLight = byteBuffer.getShort(18);
+				light = (short)(rawLight & 0x3ff);
+				temp = byteBuffer.getShort(20);
 				events = (short)(byteBuffer.get(22) & 0xff);
 				batt = (short)(byteBuffer.get(23) & 0xff);
-                short sampleRate = (short)(byteBuffer.get(24) & 0xff);
-                short numAxesBPS = (short)(byteBuffer.get(25) & 0xff);
-                short timestampOffset = byteBuffer.getShort(26);
+				short sampleRate = (short)(byteBuffer.get(24) & 0xff);
+				short numAxesBPS = (short)(byteBuffer.get(25) & 0xff);
+				short timestampOffset = byteBuffer.getShort(26);
 				sampleCount = byteBuffer.getShort(28);
 				short sum = 0;
 				float freq;
@@ -238,25 +227,51 @@ public class CwaBlock implements Cloneable {
 
 								
 				if (sum == 0x0000) { 
-				
-	                int bytesPerSample = 0;
-	                if (((numAxesBPS >> 4) & 0x0f) != NUM_AXES_PER_SAMPLE) { ; }    // Unexpected number of axes
-	                if ((numAxesBPS & 0x0f) == 2) { bytesPerSample = 6; }    // 3*16-bit
-	                else if ((numAxesBPS & 0x0f) == 0) { bytesPerSample = 4; }    // 3*10-bit + 2
-	                short expectedCount = (short)((bytesPerSample != 0) ? 480 / bytesPerSample : 0);
-	                if (sampleCount != expectedCount) { sampleCount = expectedCount; }
+					int bytesPerSample = 0;
+					numAxes = (numAxesBPS >> 4) & 0x0f;
+					if ((numAxesBPS & 0x0f) == 2) { bytesPerSample = 2 * numAxes; }    // 3*16-bit
+					else if ((numAxesBPS & 0x0f) == 0) { bytesPerSample = 4; }    // 3*10-bit + 2
+					short expectedCount = (short)((bytesPerSample != 0) ? 480 / bytesPerSample : 0);
+					if (sampleCount != expectedCount) { sampleCount = expectedCount; }
 					if (sampleCount < 0) { sampleCount = 0; }
-					if (sampleCount > MAX_SAMPLES_PER_BLOCK) { sampleCount = MAX_SAMPLES_PER_BLOCK; }
+					if (sampleCount > DATA_BYTES_PER_BLOCK / bytesPerSample) { sampleCount = DATA_BYTES_PER_BLOCK / bytesPerSample; }
 	
-					int arraySize = sampleCount * NUM_AXES_PER_SAMPLE;
+					// Axes
+					accelAxis = -1;
+					gyroAxis = -1;
+					magAxis = -1;
+					if (numAxes >= 6) {
+						gyroAxis = 0;
+						accelAxis = 3;
+						if (numAxes >= 9) {
+							magAxis = 6;
+						}
+					} else if (numAxes >= 3) {
+						accelAxis = 0;
+					}
+
+					// Default units/scaling/range
+					accelUnit = 256;	// 1g = 256
+					gyroRange = 2000;	// 32768 = 2000dps
+					magUnit = 16;		// 1uT = 16
+
+					// light is least significant 10 bits, accel scale 3-MSB, gyro scale next 3 bits: AAAGGGLLLLLLLLLL
+					accelUnit = 1 << (8 + ((rawLight >>> 13) & 0x07));
+					if (((rawLight >> 10) & 0x07) != 0) {
+						gyroRange = 8000 / (1 << ((rawLight >>> 10) & 0x07));
+					}
+
+					int arraySize = sampleCount * numAxes;
 					if (sampleValues.length != arraySize) {
 						sampleValues = new short[arraySize];
-						sampleTimes = new long[arraySize];
+					}
+					if (sampleTimes.length != sampleCount) {
+						sampleTimes = new long[sampleCount];
 					}
 					
 					long time0 = getTimestamp(blockTimestamp) + (long)(1000 * offsetStart / freq);
 					long time1 = time0 + (long)(1000 * sampleCount / freq);		// Packet end time
-//System.err.println("[" + time0 + " - " + time1 + "]");
+					//System.err.println("[" + time0 + " - " + time1 + "]");
 					if (tLast != 0 && time0 - tLast < 1000) 
 					{ 
 						time0 = tLast;
@@ -264,29 +279,26 @@ public class CwaBlock implements Cloneable {
 					tLast = time1;
 					long timeD = time1 - time0;
 					
-    				for (int i = 0; i < sampleCount; i++) {
+					for (int i = 0; i < sampleCount; i++) {
 						long t = (sampleRate == 0) ? time0 : (time0 + ((i * timeD) / sampleCount));
-                        short x, y, z;
-                                                
-                        if (bytesPerSample == 4) {
-                            long value = byteBuffer.getInt(30 + 4 * i);
-                        	x = (short)((short)(0xffffffc0 & (value <<  6)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
-                        	y = (short)((short)(0xffffffc0 & (value >>  4)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
-                        	z = (short)((short)(0xffffffc0 & (value >> 14)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
-                        } else if (bytesPerSample == 6) {
-	    					x = byteBuffer.getShort(30 + 2 * NUM_AXES_PER_SAMPLE * i + 0);
-	    					y = byteBuffer.getShort(30 + 2 * NUM_AXES_PER_SAMPLE * i + 2);
-	    					z = byteBuffer.getShort(30 + 2 * NUM_AXES_PER_SAMPLE * i + 4);                        	
-                        } else {
-                        	x = 0; y = 0; z = 0;
-                        }
-                        
-                        sampleTimes[i] = t;
-                        sampleValues[i * NUM_AXES_PER_SAMPLE + 0] = x;
-                        sampleValues[i * NUM_AXES_PER_SAMPLE + 1] = y;
-                        sampleValues[i * NUM_AXES_PER_SAMPLE + 2] = z;
-    				}
+						sampleTimes[i] = t;
 
+						if (bytesPerSample == 4) {
+							long value = byteBuffer.getInt(30 + 4 * i);
+							sampleValues[i * numAxes + 0] = (short)((short)(0xffffffc0 & (value <<  6)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
+							sampleValues[i * numAxes + 1] = (short)((short)(0xffffffc0 & (value >>  4)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
+							sampleValues[i * numAxes + 2] = (short)((short)(0xffffffc0 & (value >> 14)) >> (6 - ((value >> 30) & 0x03)));	// Sign-extend 10-bit value, adjust for exponent
+						} else if (bytesPerSample >= 0) {
+							for (int j = 0; j < numAxes; j++) {
+								sampleValues[i * numAxes + j] = byteBuffer.getShort(30 + (2 * numAxes * i) + (2 * j));
+							}
+						} else {
+							for (int j = 0; j < numAxes; j++) {
+								sampleValues[i * numAxes + j] = 0;
+							}
+						}
+					}
+	
 					dataBlockOk = true;
 				}
 				
@@ -313,7 +325,7 @@ public class CwaBlock implements Cloneable {
 		}
 		return byteBuffer.getShort(0);
 	}
-    
+	
 	/**
 	 * Determines whether the block is valid
 	 * @return whether block is valid
@@ -338,6 +350,62 @@ public class CwaBlock implements Cloneable {
 		return dataBlockOk ? sampleCount : 0; 
 	}
 	
+	/**
+	 * Data block number of axes (3=accel x/y/z, 6=gyroscope x/y/z followed by accel x/y/z)
+	 * @return number of axes
+	 */
+	public int getNumAxes() { 
+		return dataBlockOk ? numAxes : 0; 
+	}
+
+	/**
+	 * Accelerometer units per g
+	 * @return unit scaling value for 1 g (e.g. 1g=256)
+	 */
+	public int getAccelUnit() {
+		return accelUnit;
+	}
+
+	/**
+	 * Gyroscope range (2^15 / scale)
+	 * @return gyroscope range (dps) for 32768 units (e.g. 2000dps = 32768)
+	 */
+	public int getGyroRange() {
+		return gyroRange;
+	}
+
+	/**
+	 * Magnetometer units per micro-Tesla (unused)
+	 * @return unit scaling value for 1 uT (e.g. 1uT = 16)
+	 */
+	public int getMagUnit() {
+		return magUnit;
+	}
+	
+	/**
+	 * Accelerometer triaxial axis index offset (e.g. 0 for X/Y/Z axes 0/1/2 when no gyroscope data present; or 3 for X/Y/Z axes 3/4/5 when gyroscope data present)
+	 * @return axis index offset for X/Y/Z axes (or <0 if not present)
+	 */
+	public int getAccelAxis() {
+		return accelAxis;
+	}
+
+	/**
+	 * Gyroscope triaxial axis index offset (e.g. 0 for X/Y/Z axes when gyroscope data present)
+	 * @return axis index offset for X/Y/Z axes (or <0 if not present)
+	 */
+	public int getGyroAxis() {
+		return gyroAxis;
+	}
+
+	/**
+	 * Magnetometer triaxial axis index offset (unused)
+	 * @return axis index offset for X/Y/Z axes (or <0 if not present)
+	 */
+	public int getMagAxis() {
+		return magAxis;
+	}
+
 	/**
 	 * Session identifier
 	 * @return session identifier
@@ -365,7 +433,7 @@ public class CwaBlock implements Cloneable {
 	
 	/**
 	 * Data block samples
-	 * @return samples as signed 16-bit integers (1G = 256), samples are X0,Y0,Z0,X1,Y1,Z1,...
+	 * @return samples as signed 16-bit integers (G-scaled), samples are Ax0,Ay0,Az0,[Gx0,Gy0,Gz0,]Ax1,Ay1,Az1,...
 	 */
 	public short[] getSampleValues() { 
 		if (!isDataBlock()) { return null; }
@@ -407,7 +475,7 @@ public class CwaBlock implements Cloneable {
 	 */
 	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 	
-    private static DateFormat dateFormat = null;
+	private static DateFormat dateFormat = null;
 	/**
 	 * @param timespan Timespan since 1/1/1970 in milliseconds
 	 * @return Standard formatting for the supplied date
@@ -416,7 +484,7 @@ public class CwaBlock implements Cloneable {
 		if (dateFormat == null) {
 			dateFormat = new SimpleDateFormat(DATE_FORMAT);
 		}
-	    return dateFormat.format(new Date(timespan));
+		return dateFormat.format(new Date(timespan));
 	}
 	
 	
