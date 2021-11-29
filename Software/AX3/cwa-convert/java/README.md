@@ -4,9 +4,9 @@
 
 ## File history
 
-**2021-11-29:** Support for AX6 data (gyroscope axes, variable accelerometer scaling)
-**2018-08-24:** Support for larger (32-bit) device IDs
-**2015-03-24:** Bug fixes (copy constructor, battery as unsigned byte, unpacking, constructor accessibility)
-**2011-12-15:** Moved to git repository
-**circa 2010:** Fix to dates
-**circa 2009:** Initial version
+* **2021-11-29:** Support for AX6 data (gyroscope axes, variable accelerometer scaling)
+* **2018-08-24:** Support for larger (32-bit) device IDs
+* **2015-03-24:** Bug fixes (copy constructor, battery as unsigned byte, unpacking, constructor accessibility)
+* **2011-12-15:** Moved to git repository
+* **circa 2010:** Fix to dates
+* **circa 2009:** Initial version
