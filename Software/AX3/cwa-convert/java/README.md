@@ -1,6 +1,6 @@
 # Java .CWA Loader/Converter
 
-**Note:** This is quite old code from around 2009, and does not give quite the full time precision possible from the files -- but it should be good enough for epoch-based reporting.
+**Note:** This is quite old code from around 2009, and does not give quite the full time precision possible from the files -- but it should be good enough for epoch-based reporting.  (The converter appears to possibly skip the very first sector of data, at least from some files?)
 
 ## File history
 
