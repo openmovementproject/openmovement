@@ -1,5 +1,16 @@
-# CWA Reader
+#!/usr/bin/env python
+#
+# CWA Metadata Reader
 # Dan Jackson, Open Movement, 2017-2021
+#
+# Output metadata from a .CWA file.
+#
+# Usage:  python cwa_metadata.py [-mode:json | -mode:ldjson] CWA-DATA.CWA [...]
+#
+# Where:
+#     -mode:json    - Output human-readable formatted JSON (default)
+#     -mode:ldjson  - Output metadata on a single line per file (line-delimited JSON)
+#     CWA-DATA.CWA  - Name of one or more .CWA files to read metadata from
 #
 
 import sys
@@ -108,6 +119,7 @@ def cwa_parse_metadata(data):
 		"_h":  "Height", 
 		"_w":  "Weight", 
 		"_ha": "Handedness", 
+		"_sn": "Subject Notes", 
 	}
 	
 	# CWA File has 448 bytes of metadata at offset 64
