@@ -9,13 +9,8 @@
 % 
 function D = resampleCWA(filename, interpRate)
 	
-	fprintf('\treading file information\n');
-	info = AX3_readFile(filename, 'verbose',1, 'info',1);
-	startTime = info.validPackets(1,2);
-	stopTime  = info.validPackets(end,2);
-	
 	fprintf('\treading file data\n');
-	data = AX3_readFile(filename, 'validPackets', info.validPackets, 'startTime', startTime, 'stopTime', stopTime);
+	data = CWA_readFile(filename);
 	
 	fprintf('\tinterpolating data\n');
     D = resampleACC(data, interpRate);

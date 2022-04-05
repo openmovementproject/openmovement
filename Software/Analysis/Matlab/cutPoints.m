@@ -75,15 +75,9 @@ Fs = p.resampleRate;
 calibrationHours = p.calibrationHours;
 window = p.window;
 
-% Load AX3 file information
-fprintf('\tLoading AX3...\n');
-info = AX3_readFile(filename, 'verbose',1, 'info',1);
-startTime = info.validPackets(1,2);
-stopTime  = info.validPackets(end,2);
-
-% Read raw AX3 data
+% Read raw CWA data
 fprintf('\tReading file data...\n');
-rawData = AX3_readFile(filename, 'validPackets', info.validPackets, 'startTime', startTime, 'stopTime', stopTime);
+rawData = CWA_readFile(filename);
 
 if calibrate && calibrationHours > 0
     % Get samples from stationary periods (NOTE: only use first N hours of file)
