@@ -77,9 +77,12 @@ function data = CWA_readFile(filename, varargin)
     %           >> data = 
     %                 packetInfo: [73059x5 double]
     %                       AXES: [8766736x4 double]
+    %                        ACC: [8766736x4 double]
     %
     %   data.AXES will be [time Ax Ay Az] for accelerometer-only recordings
     %                  or [time Ax Ay Az Gx Gy Gz] for accel + gyro.
+    %
+    %   data.ACC will be [time Ax Ay Az] for backwards compatibility with AX3_readFile
     %
     %   v0.1
     %       Dan Jackson, 2019-2020
@@ -429,6 +432,8 @@ function data = readFile(filename, options)
     % see what modalities to extract...
     if options.modality(1)
         data.AXES = readData(fid, packetInfo, options);
+        % For backwards-compatibility with AX3_readFile, store accelerometer-only data to data.ACC
+        data.ACC = data.AXES(:,1:4);
     end
     if options.modality(2)
         if options.verbose

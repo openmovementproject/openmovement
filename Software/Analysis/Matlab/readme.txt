@@ -1,13 +1,9 @@
-%% NOTE: We now recommend CWA_readFile.m instead of the AX3_readFile.m mentioned below: 
-%%   https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/CWA_readFile.m
-%% ...as that version will work with unpacked data and accelerometer+gyroscope data.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Basic sum(SVM-1) computation with the AX3.
 %
 % You will need the following four files:
 %
-%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/AX3_readFile.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/CWA_readFile.m
 %   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/resampleCWA.m
 %   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/SVM.m
 %   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/epochs.m
@@ -31,23 +27,21 @@ epochSVM = epochs(abs(svm), 60 * Fs);
 %
 % You will need the following four files:
 %
-%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/AX3_readFile.m
+%   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/CWA_readFile.m
 %   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/getStationaryPeriods.m
 %   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/estimateCalibration.m
 %   - https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/rescaleData.m
 %
 %   this script demonstrates the use of the calibration routines for
-%   OpenMovement AX3 devices (even though it should work with other accelerometers as
-%   well). Will plot results with data rescaled to unit gravity
+%   OpenMovement AX devices (even though it should work with other accelerometers as
+%   well). Results in data rescaled to unit gravity.
 %
-%
-%   AX3_readFile should be in your path!
 %
 % read in data
-rawData = AX3_readFile('CWA-DATA.CWA');
+rawData = CWA_readFile('CWA-DATA.CWA');
 
-% get samples from stationary periods (first three hours of file)
-S = getStationaryPeriods(rawData, 'stopTime', rawData.ACC(1,1)+2/24, 'progress', 1);
+% get samples from stationary periods (at most first 7 days of file)
+S = getStationaryPeriods(rawData, 'stopTime', rawData.ACC(1,1)+168/24, 'progress', 1);
 
 % estimate the calibration parameters (scale, offset, temp-offset)
 e = estimateCalibration(S, 'verbose', 1);

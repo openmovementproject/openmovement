@@ -20,7 +20,7 @@
    
    * Completely power-off/shutdown everything, wait a little, then restart -- does this make a difference? (This is not just standby/suspend/hibernate but a full power-off/restart, and any external USB hubs should also be disconnected from power to reset them. Although a cliché, this does often fix many temporary issues, e.g. if a USB port has gone "over current" it may have a temporary thermal fuse "blown" until power is disconnected).
    
-   * By closely looking inside the device connector, is there any debris (such as grit or fluff)?  If so: does removing with a sharp blow or gentle use of a fine point (but do not connect while there is moisture in the port) make a difference?
+   * By closely looking inside the device connector, is there any debris (such as grit or fluff) or grease or damage?  If so: does cleaning with a sharp blow or gentle use of a fine point make a difference? (But do not connect while there is moisture in the port, as this could corrode the contacts).
    
    * By gently moving the device around in the light, you should see the five shiny rectangular contacts on the central part of the connector (shorter side) -- is there is any sign of corrosion or grease preventing contact? (If the device has been externally connected to power while conductive liquid was in the port, such as non-pure water, it would be possible to cause corrosion on the connector). 
 
