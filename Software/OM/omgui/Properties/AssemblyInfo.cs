@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Newcastle University, UK.")]
 [assembly: AssemblyProduct("OmGui")]
-[assembly: AssemblyCopyright("Copyright (c) 2009-2021, Newcastle University, UK.")]
+[assembly: AssemblyCopyright("Copyright (c) 2009-2022, Newcastle University, UK.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
