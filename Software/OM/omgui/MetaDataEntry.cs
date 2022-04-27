@@ -32,6 +32,7 @@ namespace OmGui
             shorthandMetaData.Add("_h","Height");
             shorthandMetaData.Add("_w","Weight");
             shorthandMetaData.Add("_ha","Handedness");
+            shorthandMetaData.Add("_sn", "Subject Notes");
         }
 
         [System.ComponentModel.Browsable(false)]
