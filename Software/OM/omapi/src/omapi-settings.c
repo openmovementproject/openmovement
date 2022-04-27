@@ -341,6 +341,7 @@ int OmSetAccelConfig(int deviceId, int rate, int range)
             case 1000:
             case 500:
             case 250:
+            case 125:
                 break;
             case 1:
                 // 1 is the special case of specifying the gyro is explicitly disabled
