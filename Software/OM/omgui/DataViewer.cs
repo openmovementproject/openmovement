@@ -1133,7 +1133,7 @@ namespace OmGui
                 float battpercent = reader.Batt;
                 float battraw = reader.BattRaw;
                 if (values.Length == 0) { lastTime = firstTime; }
-                else { lastTime = reader.TimeForSample(values.Length - 1); }
+                else { lastTime = reader.TimeForSample((values.Length / reader.Channels) - 1); }
 
                 return new DataBlock((int)reader.SequenceId, blockNumber, firstTime, lastTime, light, temp, battpercent, battraw, values, reader.Channels, reader.AccelOneG, reader.GyroRange);
             }
