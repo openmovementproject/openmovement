@@ -30,7 +30,7 @@
 
 4. **Does the device LED slowly pulse yellow/white for a sustained amount of time?** (Check over at least 15 seconds)
 
-   If not, and everything else above was already checked, there may be an issue with it.
+   If not, and everything else above was already checked, there may be an issue with it.  For further diagnosis, please note exactly what the device LED _is_ doing 
    
    _The following points are only likely to be worth considering if the device LED is behaving normally in this way_.
 
@@ -44,10 +44,10 @@
    
    If not, then there may be a driver issue, please try the OmGUI installation again, ensuring it is as a user with administrative rights as this attempts to install a driver (not usually be needed if you're running Windows 10) -- did the installation (with driver) complete without any issues?
 
-7. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *Software Troubleshooting* guide below.
+7. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *OmGui Software Troubleshooting* guide below.
 
 
-## OmGui Troubleshooting
+## OmGui Software Troubleshooting
 
 The standard connection software is [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#downloading-and-installing).
 
@@ -73,10 +73,10 @@ The standard connection software is [OmGui](https://github.com/digitalinteractio
 
 5. **Detailed log?**
    
-   If the above suggestions have not resolved the issue, please obtain an *OmGui Detailed log* as described in the next section.
+   If the above suggestions have not resolved the issue, please obtain an *OmGui Detailed Log* as described in the next section.
 
 
-### OmGui Detailed log
+### OmGui Detailed Log
 
 Please try the following to extract a detailed log from *OmGui* about what it can see of the device:
 
@@ -118,7 +118,7 @@ Checking the log output:
      * Select the folder `Newcastle_University,_UK`, rename it (<kbd>F2</kbd>) to something else (for example, by adding an underscore (`_`) at the start)
 
 
-## Manually verify device ID consistency
+## Manually Verify Device ID Consistency
 
 If you receive an error `The correct download file name cannot be established (device identifier not verified)` please obtain an *OmGUI Detailed Log* as described above (if not already done so).  The log entry may contain `LOG: - MISMATCH:`, indicating an issue with device ID.  
 
@@ -139,7 +139,7 @@ To manually verify device IDs, with a single connected device, please check the 
 If these numbers are inconsistent, you could try *resetting the device ID* in the next section.
 
 
-## Resetting the device ID
+## Resetting the Device ID
 
 **NOTE:** This step is for advanced use only, and should not be performed unless you are sure that it is necessary.
 
@@ -180,7 +180,7 @@ If it appears as if the device ID has somehow been incorrectly reprogrammed, you
 14. The device should now have the correct ID when inserted again
 
 
-## Removing a mount point
+## Removing a Mount Point
 
 **NOTE:** This step is for advanced use only, and unlikely to apply to your device and/or unlikely to work.
 
