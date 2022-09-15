@@ -3,7 +3,7 @@
 
 ## Maximum recording duration
 
-Approximate maximum recording duration from a single full battery charge.
+Approximate maximum recording duration from a single full battery charge.  A typical configuration may be 100 Hz &plusmn;8 _g_.
 
 | Device  | Configuration  |   Sample Capacity |       6.25 Hz |     12.5 Hz |      25 Hz |    50 Hz |  100 Hz | 200 Hz | 400 Hz | 800 Hz | 1600 Hz | 3200 Hz |
 |---------|----------------|------------------:|--------------:|------------:|-----------:|---------:|--------:|-------:|-------:|-------:|--------:|--------:|
