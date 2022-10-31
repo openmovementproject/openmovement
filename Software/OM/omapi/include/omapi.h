@@ -182,6 +182,7 @@
  #ifndef OM_H
  #define OM_H
 
+#include <stdlib.h>
 
 /* Plain C for undecorated function names in DLL */
 #ifdef __cplusplus
@@ -193,12 +194,14 @@ extern "C" {
  * @cond _
  * On Windows, if not statically linked, we define the Windows DLL import/export declaration
  */
-#if defined(_WIN32) && defined(_WINDLL)
-	#define OM_EXPORT __declspec(dllexport)         /**< Exporting to a DLL (must also ensure setup to be __cdecl). @hideinitializer */
-#elif defined(_WIN32) && defined(OMAPI_DYNLIB_IMPORT)
-	#define OM_EXPORT __declspec(dllimport)         /**< Importing from DLL. @hideinitializer */
-#else
-    #define OM_EXPORT                               /**< A standard, static link. @hideinitializer */
+#ifndef OM_EXPORT
+    #if defined(_WIN32) && defined(_WINDLL)
+	    #define OM_EXPORT __declspec(dllexport)         /**< Exporting to a DLL (must also ensure setup to be __cdecl). @hideinitializer */
+    #elif defined(_WIN32) && defined(OMAPI_DYNLIB_IMPORT)
+    	#define OM_EXPORT __declspec(dllimport)         /**< Importing from DLL. @hideinitializer */
+    #else
+        #define OM_EXPORT                               /**< A standard, static link. @hideinitializer */
+    #endif
 #endif
 /**@endcond*/
 
@@ -563,9 +566,9 @@ OM_EXPORT int OmGetEcc(int deviceId);
  * @note This method is not generally recommended -- incorrect results could lead to unspecified behaviour.
  * @param deviceId Identifier of the device.
  * @param command The command string to send (typically followed with CRLF).
- * @param[out] buffer A buffer to hold the response, or \a NULL if not required.
+ * @param[out] buffer A buffer to hold the response.
  * @param bufferSize The size (in bytes) of the output buffer.
- * @param expected The expected response prefix, or \a NULL if not specified (command will timeout if a response buffer is specified).
+ * @param expected The expected response prefix, or \a NULL if not specified (command will timeout).
  * @param timeoutMs The time, in milliseconds, after which the command will time-out and return.
  * @param[out] parseParts A buffer to hold the parsed response, or \a NULL if parsing is not required.
  * @param parseMax The maximum number of entries the \a parsePoints buffer can hold.

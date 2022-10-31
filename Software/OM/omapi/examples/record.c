@@ -258,8 +258,9 @@ int record_setup(int deviceId)
 	
 	/* Set the debug setting*/
 	char debugCommand[128];
+	char debugResponse[128];
 	sprintf(debugCommand, "\r\nDEBUG %d\r\n", debugMode);
-	OmCommand(deviceId, debugCommand, NULL, 0, "DEBUG=", 2000, NULL, 0);
+	OmCommand(deviceId, debugCommand, debugResponse, sizeof(debugResponse), "DEBUG=", 2000, NULL, 0);
 	
 #if 1
     {

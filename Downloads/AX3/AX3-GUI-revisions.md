@@ -1,5 +1,7 @@
 # AX3 GUI - Revision History
 
+* [AX3-GUI-45](AX3-GUI-45.zip?raw=true) (also a [no installer version](AX3-GUI-45-no-install.zip)) 2022-10-31: (Alpha) Possible fix for occasional communication failures during configuration.
+
 * [AX3-GUI-44](AX3-GUI-44.zip?raw=true) 2022-04-27: (Beta) Fix for configuring gyroscope range of +/- 125 dps. Fix for data preview time tooltip values when zoomed-in. Internally handle "Subject notes" metadata. Splash screen drop shadow.
 
 * [AX3-GUI-43](AX3-GUI-43.zip?raw=true) 2019-08-15: (Current primary release) Fixed saving subsequent recording settings. Prevent invalid configurations (AX6, AX3 6.25 packed). Correctly clear battery warnings.

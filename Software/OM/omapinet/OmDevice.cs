@@ -602,7 +602,8 @@ Console.WriteLine("TIMESYNC-DEBUG: Set time ok, checking for ticks...");
 
         public bool SetDebug(int debugCode)
         {
-            int status = OmApi.OmCommand((int)deviceId, "\r\nDEBUG " + debugCode + "\r\n", null, 0, "DEBUG=", 2000, IntPtr.Zero, 0);
+            StringBuilder responseBuffer = new StringBuilder(256);
+            int status = OmApi.OmCommand((int)deviceId, "\r\nDEBUG " + debugCode + "\r\n", responseBuffer, responseBuffer.Length, "DEBUG=", 2000, IntPtr.Zero, 0);
             return (status >= 0);
         }
 
@@ -642,7 +643,8 @@ Console.WriteLine("TIMESYNC-DEBUG: Set time ok, checking for ticks...");
         public int Reset()
         {
             // [DllImport("libomapi.dll")] public static extern int OmCommand(int deviceId, string command, [MarshalAs(UnmanagedType.LPStr)] StringBuilder metadata, int bufferSize, string expected, uint timeoutMs, IntPtr parseParts, int parseMax); // char **parseParts
-            return OmApi.OmCommand((int)deviceId, "\r\nreset\r\n", (StringBuilder)null, 0, "RESET", (uint)500, IntPtr.Zero, 0);
+            StringBuilder responseBuffer = new StringBuilder(256);
+            return OmApi.OmCommand((int)deviceId, "\r\nreset\r\n", responseBuffer, responseBuffer.Length, "RESET", (uint)500, IntPtr.Zero, 0);
         }
     }
 }
