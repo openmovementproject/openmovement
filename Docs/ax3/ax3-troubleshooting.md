@@ -53,7 +53,7 @@ The standard connection software is [OmGui](https://github.com/digitalinteractio
 
 1. **What version of OmGui software are you using?**
 
-    Older versions of OmGui will not work on devices with larger IDs.  If it is not recent (e.g. 1.0.0.43), does installing [the current version](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md) make a difference? 
+    Older versions of OmGui will not work on devices with larger IDs.  If it is not recent, does installing [the current version](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md) make a difference? 
 
 2. **Has the computer been restarted?**
 
