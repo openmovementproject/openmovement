@@ -1,5 +1,7 @@
 # AX3 GUI - Revision History
 
+Available revisions of [OmGUI software](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI).
+
 * [AX3-GUI-45](AX3-GUI-45.zip?raw=true) (also a [no installer version](AX3-GUI-45-no-install.zip)) 2022-10-31: (**Alpha Release**) Possible fix for occasional communication failures during configuration.
 
 * [AX3-GUI-44](AX3-GUI-44.zip?raw=true) 2022-04-27: (**Beta Release**) Fix for configuring gyroscope range of +/- 125 dps. Fix for data preview time tooltip values when zoomed-in. Internally handle "Subject notes" metadata. Splash screen drop shadow.
