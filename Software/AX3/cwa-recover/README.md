@@ -37,7 +37,7 @@ Follow these instructions to attempt to reconstruct a `.cwa` data file, either f
 
       `python cwa-recover.py`
       
-   ...or for a possibly-corrupted `.cwa` file, type the line above, plus a space, then drag-and-drop your `.cwa` file into the command prompt, so that the full command is something like this (where `CWA-DATA.CWA` is your filename):
+   ...or, for a possibly-corrupted `.cwa` file, type the line above, plus a space, then drag-and-drop your `.cwa` file into the command prompt, so that the full command is something like this (where `CWA-DATA.CWA` is your filename):
 
       `python cwa-recover.py "CWA-DATA.CWA"`
 
