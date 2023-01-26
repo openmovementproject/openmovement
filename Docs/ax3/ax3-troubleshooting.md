@@ -170,31 +170,31 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 
 **IMPORTANT:** This will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.  
  
-1.	Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
+1. Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
 
-2.	Open the .ZIP file and extract the program `HidBootLoader.exe`.
+2. Open the .ZIP file and extract the program `HidBootLoader.exe`.
 
-3.	Ensure no devices are connected and that OmGui is NOT running.
+3. Ensure no devices are connected and that OmGui is NOT running.
 
-4.	Run (double-click) `HidBootLoader.exe`.
+4. Run (double-click) `HidBootLoader.exe`.
 
-5.	Check the *Port* field is clear (if not, make a note of what it says)
+5. Check the *Port* field is clear (if not, make a note of what it says)
 
-6.	Connect the device that you’d like to reset, and which does not contain any data you need to keep (this procedure will wipe the drive), then wait a second or so.
+6. Connect the device that you’d like to reset, and which does not contain any data you need to keep (this procedure will wipe the drive), then wait a second or so.
 
-7.	If enabled, press the *Run* button and wait a couple of seconds or so.
+7. If enabled, press the *Run* button and wait a couple of seconds or so.
 
-8.	Check the *Port* field now displays a `COM` port (if it had a value before, use the drop-down arrow if necessary to ensure that it now has a different value)
+8. Check the *Port* field now displays a `COM` port (if it had a value before, use the drop-down arrow if necessary to ensure that it now has a different value)
 
-9.	In the *Command* field, copy and paste one of the lines below.
-
-	a. If you are just resetting the device state (and not the device ID):
+9. In the *Command* field, copy and paste one of the lines below.
+  
+    * **Not changing the device ID:** If you are just resetting the device state (and not the device ID):
 
        ```
        FORMAT QC|TIME 2020-01-01 00:00:00|LED 5
        ```
 
-	b. If you are also resetting the device ID (if it appears, from the above troubleshooting, that the device ID has somehow become incorrectly programmed):
+    * **Changing the device ID:** If you are also resetting the device ID (if it appears, from the above troubleshooting, that the device ID has somehow become incorrectly programmed):
 
        ```
        DEVICE=12345|TIME 2020-01-01 00:00:00|FORMAT QC|LED 5
