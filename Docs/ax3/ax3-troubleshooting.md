@@ -191,7 +191,7 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
     * **Not changing the device ID:** If you are just resetting the device state (and not the device ID):
 
        ```
-       FORMAT QC|TIME 2020-01-01 00:00:00|LED 5
+       TIME 2020-01-01 00:00:00|FORMAT QC|LED 5
        ```
 
     * **Changing the device ID:** If you are also resetting the device ID (if it appears, from the above troubleshooting, that the device ID has somehow become incorrectly programmed):
