@@ -160,7 +160,7 @@ To manually verify device IDs, with a single connected device, please check the 
 If these numbers are inconsistent, you could try *resetting the device ID* in the next section.
 
 
-## Resetting the Device ID
+## Resetting the device (including the Device ID)
 
 **NOTE:** This step is for advanced use only, and should not be performed unless you are sure that it is necessary.
 
@@ -184,10 +184,10 @@ If it appears as if the device ID has somehow been incorrectly reprogrammed, you
 
 8.	Check the *Port* field now displays a `COM` port (if it had a value before, use the drop-down arrow if necessary to ensure that it now has a different value)
 
-9.	In the *Command* field, copy and paste the following line -- change `12345` to match the ID number on the outside of the device case:
+9.	In the *Command* field, copy and paste the following line -- you must change `12345` to match the ID number on the outside of the device case (after any "17-" or "18-" prefix):
 
     ```
-    DEVICE=12345|FORMAT QC|LED 5
+    DEVICE=12345|FORMAT QC|LED 5|TIME 2020-01-01 00:00:00
     ```
 
 10. Press *Send*
