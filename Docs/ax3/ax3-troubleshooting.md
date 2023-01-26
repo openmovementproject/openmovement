@@ -104,6 +104,10 @@ Configuration system failed to initialize`, the program configuration has become
 
     If the above suggestions have not resolved the issue, please obtain an *OmGui Detailed Log* as described in the next section.
 
+7. **Resetting the device**
+
+    (Advanced) If you are having trouble programming a device, you can [manually reset the device](#resetting-the-device) by following the instructions below.
+
 
 ### OmGui Detailed Log
 
@@ -157,16 +161,14 @@ To manually verify device IDs, with a single connected device, please check the 
    PowerShell -Command "& {$s=[System.IO.File]::OpenRead('D:\CWA-DATA.CWA');$b=New-Object byte[] 13;$c=$s.Read($b,0,13);$s.close();Write-Output(16777216*$b[12]+65536*$b[11]+256*$b[6]+$b[5]);[Console]::ReadKey()}"
    ```
 
-If these numbers are inconsistent, you could try *resetting the device ID* in the next section.
+If these numbers are inconsistent, you could try *resetting the device* (including the device ID) in the next section.
 
 
-## Resetting the device (including the Device ID)
+## Resetting the device
 
-**NOTE:** This step is for advanced use only, and should not be performed unless you are sure that it is necessary.
+**NOTE:** This step is for advanced use only, and should only be performed if necessary.
 
-**IMPORTANT:** As part of making the ID consistent in the filesystem and data file, this will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.
-
-If it appears as if the device ID has somehow been incorrectly reprogrammed, you could try this procedure to reset the ID.  
+**IMPORTANT:** This will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.  
  
 1.	Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
 
@@ -178,17 +180,27 @@ If it appears as if the device ID has somehow been incorrectly reprogrammed, you
 
 5.	Check the *Port* field is clear (if not, make a note of what it says)
 
-6.	Connect a device that you’d like to replace the ID on and does not contain any data (this procedure will wipe the drive) and wait a second or so.
+6.	Connect the device that you’d like to reset, and which does not contain any data you need to keep (this procedure will wipe the drive), then wait a second or so.
 
 7.	If enabled, press the *Run* button and wait a couple of seconds or so.
 
 8.	Check the *Port* field now displays a `COM` port (if it had a value before, use the drop-down arrow if necessary to ensure that it now has a different value)
 
-9.	In the *Command* field, copy and paste the following line -- you must change `12345` to match the ID number on the outside of the device case (after any "17-" or "18-" prefix):
+9.	In the *Command* field, copy and paste one of the lines below.
 
-    ```
-    DEVICE=12345|FORMAT QC|LED 5|TIME 2020-01-01 00:00:00
-    ```
+	a. If you are just resetting the device state (and not the device ID):
+
+       ```
+       FORMAT QC|TIME 2020-01-01 00:00:00|LED 5
+       ```
+
+	b. If you are also resetting the device ID (if it appears, from the above troubleshooting, that the device ID has somehow become incorrectly programmed):
+
+       ```
+       DEVICE=12345|TIME 2020-01-01 00:00:00|FORMAT QC|LED 5
+       ```
+           
+       ...and you must change `12345` to match the ID number on the outside of the device case (after any "17-" or "18-" prefix).
 
 10. Press *Send*
 
