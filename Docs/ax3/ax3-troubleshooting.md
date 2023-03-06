@@ -108,11 +108,11 @@ Configuration system failed to initialize`, the program configuration has become
 
     If the device is not making a recording as you expect, please try the simplest configuration to record *Immediately on Disconnect* at *100 Hz* and *+/- 8 *g**, disabled gyroscope (AX6 only), and select *Flash during recording*.  If the configuration is successful, remove the device for 15 seconds -- does the LED flash green, and is there any data on the device when you connect it afterwards?  
 
-9. **Device log**
+8. **Device log**
 
     If the device is not making a recording as you expect, you can obtain a detailed log from the attached device, which should explain why it has stopped, by downloading the [AX3-Utils-Win-3.zip archive](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip), extracting/unzipping all of the files to a folder, opening that folder, ensuring only the one device is attached, double-clicking `log.cmd` to run it.  Copy the output it gives (there may be some strange characters at the end of some of the lines, these can be ignored) -- this should be a timestamped record of *stop reasons*.
 
-10. **Resetting the device**
+9. **Resetting the device**
 
     (Advanced) If you are having trouble programming a device, you can [manually reset the device](#resetting-the-device) by following the instructions below.
 
