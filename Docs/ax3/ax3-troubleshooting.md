@@ -102,7 +102,7 @@ Configuration system failed to initialize`, the program configuration has become
 
 6. **Detailed log?**
 
-    If the above suggestions have not resolved the issue, please obtain an *OmGui Detailed Log* as described in the next section.
+    If the above suggestions have not resolved the issue, please obtain an [OmGui Detailed Log](#omgui-detailed-log) as described in the next section.
 
 7. **Resetting the device**
 
