@@ -235,7 +235,7 @@ Perhaps an old *mount point* is interfering somehow - you could try clearing the
    
    * Press <kbd>Windows</kbd>+<kbd>R</kbd>, type `cmd`, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd>, select *Yes*
    
-3. Type (or copy/paste, the `|` symbol may be on <kbd>Shift</kbd>+<kbd>\</kbd>):
+3. Type (or copy/paste) followed by <kbd>Enter</kbd>:
 
    ```cmd
    cmd /k mountvol
@@ -243,7 +243,7 @@ Perhaps an old *mount point* is interfering somehow - you could try clearing the
 
 4. The command may list the device's current volume, e.g.: `C:\Mount\AX3_#####\`
 
-5. If so, type: (replace the path with whatever the previous command showed)
+5. If so, type followed by <kbd>Enter</kbd>: (replace the path with whatever the previous command showed)
 
    ```cmd
    mountvol C:\Mount\AX3_#####\ /D 
