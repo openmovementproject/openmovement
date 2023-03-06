@@ -110,11 +110,11 @@ Configuration system failed to initialize`, the program configuration has become
 
 8. **Device log**
 
-    If the device is not making a recording as you expect, you can obtain a detailed log from the attached device, which should explain why it has stopped, by downloading the [AX3-Utils-Win-3.zip archive](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip), extracting/unzipping all of the files to a folder, opening that folder, ensuring only the one device is attached, double-clicking `log.cmd` to run it.  Copy the output it gives (there may be some strange characters at the end of some of the lines, these can be ignored) -- this should be a timestamped record of *stop reasons*.
+    If the device is not making a recording as you expect, you can obtain a detailed log from the attached device, which should explain why it has stopped, by downloading the archive: [AX3-Utils-Win-3.zip](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip), then extracting/unzipping all of the files from it to a folder, opening that folder, ensuring only the one device is attached, then double-clicking `log.cmd` to run the tool.  Copy the output it gives (there may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored) -- this should be a timestamped record of the device's "stop reasons".
 
 9. **Resetting the device**
 
-    (Advanced) If you are having trouble programming a device, you can [manually reset the device](#resetting-the-device) by following the instructions below.
+    (Advanced) If you are having trouble programming a device, you can [manually reset the device](#resetting-the-device) by following the instructions below. 
 
 
 ### OmGui Detailed Log
@@ -218,7 +218,7 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 
 13. Close the bootloader software
 
-14. The device should now have the correct ID when inserted again
+14. The device should now be in a reset state.
 
 
 ## Removing a Mount Point
