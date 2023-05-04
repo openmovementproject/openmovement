@@ -51,4 +51,7 @@ There is no external communication while the AX devices are recording, so they c
 **A note about timezones and daylight savings time:** The AX devices do not attempt to adjust for timezone changes or daylight savings adjustment (and they will not know the current location of the wearer).  Instead, the configuring device's local time is used to establish the date and time on the device, and the time and date continue from there for the recording.
 
 
+## Temperature and Light
+
+Please see [AX3/AX6 Auxiliary Data](ax3-auxiliary.md) for details of using temperature and light sensor data.
 
