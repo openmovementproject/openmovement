@@ -1,6 +1,18 @@
 # CWA Data Recovery
 
-If you have a AX device with a corrupted filesystem, or a file that might have been corrupted, it may be possible to salvage some of the data.
+If you have a AX device with a corrupted filesystem, or a file that might have been corrupted, it may be possible to salvage the data.
+
+If the data is still on the device, you should first try to manually copy the file off the drive:
+
+1. Open Windows *File Manager*
+2. Click on *This PC*
+3. Connect the device and wait 10 seconds
+4. Identify the drive letter for the device and double-click it
+5. Locate the file `CWA-DATA.CWA` and drag-and-drop the file to another location to copy it.
+
+If the copy does not complete successfully, then try the steps below.
+
+**IMPORTANT:** At no point should you accept any offer by Windows of fixing the drive, as this can make things worse!
 
 
 ## Step 1: Getting started
