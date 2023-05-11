@@ -36,7 +36,7 @@ We will use the `cwa-dump.py` script to read the drive to create a disk image.
 
 2. Run the *cwa-dump* script: `python cwa-dump.py` 
 
-3. Wait for the script to complete -- this could take up to half an hour.  
+3. Wait for the script to complete -- this could take a long time
 
 The script will create a disk image file `cwa-dump.img` from the single attached AX device.
 
