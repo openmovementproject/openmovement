@@ -252,6 +252,22 @@ Perhaps an old *mount point* is interfering somehow - you could try clearing the
 6. Assuming no error message was shown, the mount point was removed: you can disconnect the device and close the window.
 
 
+## Battery
+
+### Charging Arrangement
+
+Ensure devices are only charged by directly connecting to a computer or a USB hub that is always externally powered, and not connected through a "passive" hub without its own power, and also not left on a hub or computer that is later removed from power or allowed to sleep or hibernate.
+
+
+### Battery Percentage Estiate
+
+The battery percentage shown is only a rough estimate based on the voltage measurements and an idealized discharge curve - the actual discharge curve depends on the battery/age/components/tolerances, and is highly non-linear – so variation is expected from this estimate.
+
+It quite normal for this value to initially jump when connected, to vary by a few percent once the battery is fully charged (i.e. it discharges slightly before recharging), or to estimate a maximum reading that falls short of a 100% estimate.  In all cases, the battery will be at its maximum capacity when connected to a sufficient power source for up to 2 hours.
+
+The same estimates apply to battery discharge from a data file.  The data preview graph in OmGui allows you to select additional lines on the right-hand side to chart (you will need to resize the graph to access them all), and one of these is the estimated battery percentage.
+
+
 ### Battery Health
 
 Devices have the following notice about maintaining battery health:
@@ -266,8 +282,5 @@ Related to this points, there are two battery health messages in OmGUI:
 
 The message should be cleared once the device's clock is successfully configured to the correct time, and the easiest way to do this is configure any recording with the device.  Note that the configuring software may also remember (while it is kept running) which devices caused the caution even if they're disconnected/reconnected, so you might also have to restart the software too if you're immediately plugging a device back in.  
 
-It is advisable to fully charge the device then run a test recording (this can be just at static recording) for the duration that you'd typically want the devices to record for - this will establish the performance expected for subsequent recordings.  
-
-If you have an unexpected warning, please verify the charging arrangement: ensure devices are only charged by directly connecting to a computer or a USB hub that is externally powered (and not connected through a "passive" hub without its own power; and also not left on a hub/computer that is later removed from power or allowed to sleep or hibernate).
-
+When given a battery health warning, it is advisable to fully charge the device then run a test recording (this can be just at static recording) for the duration that you'd typically want the devices to record for - this will establish the performance expected for subsequent recordings.  
 
