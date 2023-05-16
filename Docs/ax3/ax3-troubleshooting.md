@@ -284,3 +284,10 @@ The message should be cleared once the device's clock is successfully configured
 
 When given a battery health warning, it is advisable to fully charge the device then run a test recording (this can be just at static recording) for the duration that you'd typically want the devices to record for - this will establish the performance expected for subsequent recordings.  
 
+
+## Filesystem or data problems
+
+If you have a device where the filesystem has been corrupted and contains useful data, or a file that might have been corrupted, it may be possible to salvage the data -- try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.
+
+If the device **DOES NOT** contain useful data, but you have a warning about the filesystem -- just try to configure the device as normal.  If this doesn't work, follow the instructions for [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device).
+
