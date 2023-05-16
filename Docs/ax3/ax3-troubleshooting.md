@@ -259,7 +259,7 @@ Perhaps an old *mount point* is interfering somehow - you could try clearing the
 Ensure devices are only charged by directly connecting to a computer or a USB hub that is always externally powered, and not connected through a "passive" hub without its own power, and also not left on a hub or computer that is later removed from power or allowed to sleep or hibernate.
 
 
-### Battery Percentage Estiate
+### Battery Percentage Estimate
 
 The battery percentage shown is only a rough estimate based on the voltage measurements and an idealized discharge curve - the actual discharge curve depends on the battery/age/components/tolerances, and is highly non-linear – so variation is expected from this estimate.
 
