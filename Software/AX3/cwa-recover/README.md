@@ -1,6 +1,6 @@
 # CWA Data Recovery
 
-If you have a AX device where the filesystem containig data has been corrupted, or a data file that might have been corrupted, it may be possible to salvage the data.
+If you have a AX device where the filesystem containing data has been corrupted, or a data file that might have been corrupted, it may be possible to salvage the data.
 
 
 ## Step 1: Attempt a manual copy
