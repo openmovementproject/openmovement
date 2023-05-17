@@ -307,6 +307,9 @@ If the device **DOES NOT** contain useful data, but you have a warning about the
 
 ## Installation
 
+If you have installation issues, consider the "no installer" variants listed at [OmGui Revisions](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md).  These packages are .ZIP archives containing executable content, so you may need to "download anyway".  You may also need to install the [AX Driver](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Driver-Win-5.zip) to use the devices (in particular, on older versions of Windows).  You will also need to ensure *.NET 3.5* componment is enabled (see below).
+
+
 ### .NET 3.5
 
 OmGui requires the *.NET 3.5* Windows component to be enabled on the system.  
