@@ -1,6 +1,6 @@
 # AX3 GUI - Revision History
 
-Available revisions of [OmGUI software](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI).
+Available revisions of [OmGUI software](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI).  If you have any installation issues, see the [AX Troubleshooting Guide - Installation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#installation).
 
 * [AX3-GUI-45](AX3-GUI-45.zip?raw=true) 2022-10-31: (**Alpha Release**) Possible fix for occasional communication failures during configuration.
 
