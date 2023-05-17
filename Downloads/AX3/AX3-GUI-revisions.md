@@ -4,13 +4,13 @@ Available revisions of [OmGUI software](https://github.com/digitalinteraction/op
 
 * [AX3-GUI-45](AX3-GUI-45.zip?raw=true) 2022-10-31: (**Alpha Release**) Possible fix for occasional communication failures during configuration.
 
-  * For advanced users, there is also a ["no installer" version 45](AX3-GUI-45-no-install.zip), you will also need [.NET 3.5](https://www.microsoft.com/en-gb/download/details.aspx?id=21), and possibly the [AX3 Driver](AX3-Driver-Win-5.zip) on older versions of Windows. 
+  * For advanced users, there is also a ["no installer" version 45](AX3-GUI-45-no-install.zip), you will also need to ensure [.NET 3.5](https://learn.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows) Windows component is installed, and possibly also the [AX3 Driver](AX3-Driver-Win-5.zip) on older versions of Windows. 
 
 * [AX3-GUI-44](AX3-GUI-44.zip?raw=true) 2022-04-27: (**Beta Release**) Fix for configuring gyroscope range of +/- 125 dps. Fix for data preview time tooltip values when zoomed-in. Internally handle "Subject notes" metadata. Splash screen drop shadow.
 
 * [AX3-GUI-43](AX3-GUI-43.zip?raw=true) 2019-08-15: (**Stable Release**) Fixed saving subsequent recording settings. Prevent invalid configurations (AX6, AX3 6.25 packed). Correctly clear battery warnings.
 
-  * For advanced users, there is also a ["no installer" version 43](AX3-GUI-43-no-install.zip), you will also need [.NET 3.5](https://www.microsoft.com/en-gb/download/details.aspx?id=21), and possibly the [AX3 Driver](AX3-Driver-Win-5.zip) on older versions of Windows. 
+  * For advanced users, there is also a ["no installer" version 43](AX3-GUI-43-no-install.zip), you will also need to ensure [.NET 3.5](https://learn.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows) Windows component is installed, and possibly also the [AX3 Driver](AX3-Driver-Win-5.zip) on older versions of Windows. 
 
 * [AX3-GUI-42](AX3-GUI-42.zip?raw=true) 2018-11-15: (Beta) Fix for issue configuring AX3 after an AX6 with synchronous gyro configured. 
 
