@@ -111,6 +111,19 @@ Configuration system failed to initialize`, the program configuration has become
 8. **Device log**
 
     If the device is not making a recording as you expect, you can obtain a detailed log from the attached device, which should explain why it has stopped, by downloading the archive: [AX3-Utils-Win-3.zip](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip), then extracting/unzipping all of the files from it to a folder, opening that folder, ensuring only the one device is attached, then double-clicking `log.cmd` to run the tool.  Copy the output it gives (there may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored) -- this should be a timestamped record of the device's "stop reasons".
+    
+    If you have problems using the `log.cmd` above, you could alternatively try:
+
+    * Open a browser that supports *Web Serial*, such as *Google Chrome*.
+    * Visit this page: https://googlechromelabs.github.io/serial-terminal/
+    * Connect the device and wait around 10 seconds.
+    * In the *Port* dropdown, select the serial port the device is on.
+    * Click the *Connect* button
+    * Click in the black terminal area of the page
+    * Type the following, followed by the Enter key (note that you will not see anything appear until you press Enter):
+        `LOG`
+    * Select the output lines of text and press Ctrl+C to copy it to the clipboard
+    * Paste (Ctrl+V) into a text document so that you have a copy of the log
 
 9. **Resetting the device**
 
