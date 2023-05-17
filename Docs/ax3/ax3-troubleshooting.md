@@ -304,3 +304,34 @@ If you have a device where the filesystem has been corrupted and contains useful
 
 If the device **DOES NOT** contain useful data, but you have a warning about the filesystem -- just try to configure the device as normal.  If this doesn't work, follow the instructions for [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device).
 
+
+## Installation
+
+### .NET 3.5
+
+OmGui requires the *.NET 3.5* Windows component to be enabled on the system.  
+
+If it is not already enabled, there is more information on installing and troubleshooting .NET 3.5 at: [Install the .NET Framework 3.5](https://learn.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows)
+
+There are various ways to enable the *.NET 3.5* component:
+
+1. Open *Windows Features* by pressing <kbd>Windows</kbd>+<kbd>R</kbd>, and entering: `appwiz.cpl` -- then click *Turn Windows features on or off* and select *.NET Framework 3.5 (includes .NET 2.0 and 3.0)*, and press *OK*.
+2. Manually with:
+  * Open *Task Manager* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>)
+  * Select *(Run) New task* (under the *File* menu or on the toolbar)
+  * Type: `DISM.EXE /Online /Add-Capability /CapabilityName:NetFx3`
+  * Click *Create this task with administrative privileges*, and press *OK*.
+3. Alternatively, through the online installer: https://www.microsoft.com/en-gb/download/details.aspx?id=21
+8. Alternatively, through the offline installer: https://dotnet.microsoft.com/en-us/download/dotnet-framework/net35-sp1
+
+If you receive error `0x800f0906`, `0x800f0907`, `0x800f081f`, or `0x800F0922`, see: [.NET Framework 3.5 installation errors](https://learn.microsoft.com/en-GB/troubleshoot/windows-client/application-management/dotnet-framework-35-installation-error)
+
+In addition to the above information: if you get error `0x800f081f` try the *Manual* method above; if you get error `0x800f0906`, this may be related to your managed computer having a specific system update source.  This is an issue for your IT administrators.  If you have Administrator permissions, and are allowed to do so, you could change your system update source:
+
+1. Press <kbd>Windows</kbd>+<kbd>R</kbd>, type: `gpedit.msc`
+2. Select *Computer Configuration* / *Administrative Templates* / *System* / *Specify settings for optional component installation and component repair* / *Enabled* / *Contact Windows Update directly to download repair content instead of Windows Server Update Services (WSUS)*
+3. Open *Task Manager* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>)
+4. Select *(Run) New task* (under the *File* menu or on the toolbar)
+5. Type: `gpupdate /force`
+6. Click *Create this task with administrative privileges*, and press *OK*.
+
