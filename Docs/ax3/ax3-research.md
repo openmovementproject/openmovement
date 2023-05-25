@@ -26,7 +26,9 @@ Some simple analysis methods are available through the OmGui configuration tool,
 
 For a richer analysis, a popular option in research is the open source "GGIR" package, which includes sleep analysis and can also produce more visual reports.  A good introduction to the package is given in: https://journals.humankinetics.com/view/journals/jmpb/2/3/article-p188.xml  ...and a "getting started" guide is available at: https://cran.r-project.org/web/packages/GGIR/vignettes/GGIR.html.  Step counting can be added as an external function (https://cran.r-project.org/web/packages/GGIR/vignettes/ExternalFunction.pdf): https://github.com/ShimmerEngineering/Verisense-Toolbox/tree/master/Verisense_step_algorithm. 
 
-Additionally, any available algorithm designed to process raw data might also be used, and there is broad equivalence between raw accelerometer sensors for physical activity, e.g.:
+Additionally, any available algorithm designed to process raw data might also be used, e.g. from a published descriptions of an approach to handling the raw data, or open source code: https://scholar.google.com/scholar?q=%22accelerometer%22+%22analysis%22
+
+...as there is broad equivalence between raw accelerometer sensors for physical activity, as found by, e.g.:
 
 * Ladha, C., Ladha, K., Jackson, D., & Olivier, P. (2013, June). Shaker table validation of Open Movement AX3 accelerometer. In Ahmerst (ICAMPAM 2013 AMHERST): In 3rd International Conference on Ambulatory Monitoring of Physical Activity and Movement (pp. 69-70).
 
