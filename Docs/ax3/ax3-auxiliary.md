@@ -43,11 +43,11 @@ The internal temperature sensor is useful for auto-calibration of the movement d
 
 The AX devices use a light sensor ([APDS-9007](https://docs.broadcom.com/docs/AV02-0512EN)) which has a logarithmic response over a wide dynamic range.  The sensor arrangement is most suitable as a general, relative, indicator of light, for example to distinguish a varying/stable level, or daily maxima/minima. 
 
-The logarithmic output means, for example, changes from 10-100 lux and 1 Klux - 10 Klux both have a relative change of *10*, which is a *10 uA* difference in the sensor output.  The AX3 used a load resistor of 100 kOhm to convert this 10 uA change into a 1 V change, which becomes 341.3 raw 10-bit ADC units.  
+The AX light level indicator is complicated as, in order to not compromise the enclosure's protection, the sensor is used without an optical window, and so its view is diffused through the case material and strap.  Sensors worn on the wrist are also easily obscured in use by the wearer's clothing and bedclothes, and also subject to reflections, shadows, etc.  
+
+The logarithmic output means that light is detectable through the enclosure or strap. For example, changes from 10-100 lux and 1 Klux - 10 Klux both have a relative change of *10* (which is a *10 uA* difference in the sensor output, and the AX3 uses a load resistor of 100 kOhm to convert this 10 uA change into a 1 V change, which becomes 341.3 raw 10-bit ADC units).
 
 **AX6:** To make better use of the range, the AX6 uses a load resistor of only 10 kOhm (e.g. converts a 10 uA change into a 0.1 V change, which becomes 34.13 raw ADC units).  For AX6 data, multiply raw values by 10 to be equivalent to the AX3 raw values discussed below.
-
-The AX light level indicator is complicated.  In order to not compromise the enclosure's protection, the sensor is used without an optical window, and so its view is diffused through the case material and strap.  Sensors worn on the wrist are also easily obscured in use by the wearer's clothing and bedclothes, and also subject to reflections, shadows, etc.  
 
 For many applications, it may be best to use the raw ADC values as a relative indicator of light, as it remains in the linear space of perception.  If you are certain that you want the Lux value, to convert the light ADC values into Lux, the conversion is:
 
