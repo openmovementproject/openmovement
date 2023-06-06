@@ -1,5 +1,17 @@
 # AX3/AX6 FAQ
 
+## Getting Started
+
+* [AX Device Overview](https://github.com/digitalinteraction/openmovement/wiki/AX3)
+* [AX Quick Start Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX3%20Quick%20start%20guide.pdf)
+* [AX-GUI Configuration and Processing Software](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
+* [AX Devices for Physical Activity Research](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md) for information about using the AX devices in physical activity research.
+
+
+## Troubleshooting
+
+Please see the [AX Troubleshooting Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md) for help with connecting or using the devices.
+
 
 ## Maximum recording duration
 
@@ -35,6 +47,9 @@ Approximate maximum recording duration from a single full battery charge.  A typ
 
 <!-- | Samples per 512 byte storage block | Packed (10-bit mode): 120; Unpacked (full resolution): 80. | Accelerometer-only: 80; Accelerometer+Gyroscope: 40. | -->
 
+* Sensor axes: [AX Sensor Axes](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md)
+* Device orientation: [AX Orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
+
 
 ## Synchronizing data between devices, or with other devices
 
@@ -51,7 +66,12 @@ There is no external communication while the AX devices are recording, so they c
 **A note about timezones and daylight savings time:** The AX devices do not attempt to adjust for timezone changes or daylight savings adjustment (and they will not know the current location of the wearer).  Instead, the configuring device's local time is used to establish the date and time on the device, and the time and date continue from there for the recording.
 
 
-## Temperature and Light
+## Technical Details
 
-Please see [AX3/AX6 Auxiliary Data](ax3-auxiliary.md) for details of using temperature and light sensor data.
+* [AX3 Datasheet](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX3v2%20Datasheet.pdf)
+* [AX6 Datasheet](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX6%20Datasheet.pdf)
+* [AX Device - Technical Documentation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md) for firmware details
+* [AX3/AX6 Auxiliary Data](ax3-auxiliary.md) for details of using temperature and light sensor data.
+* [Open Movement API](http://digitalinteraction.github.io/openmovement/omapi/html/)
+* [AX Case Dimensions](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Docs/ax3/ax-case-dimensions.svg)
 
