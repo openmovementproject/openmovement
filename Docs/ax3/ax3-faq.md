@@ -10,7 +10,7 @@
 
 ## Troubleshooting
 
-Please see the [AX Troubleshooting Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md) for help with connecting or using the devices.
+* [AX Troubleshooting Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md) for help with connecting or using the devices.
 
 
 ## Maximum recording duration
