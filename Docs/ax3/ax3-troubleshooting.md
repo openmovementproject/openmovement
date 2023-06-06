@@ -300,9 +300,13 @@ When given a battery health warning, it is advisable to fully charge the device 
 
 ## Filesystem or data problems
 
-If you have a device where the filesystem has been corrupted and contains useful data, or a file that might have been corrupted, it may be possible to salvage the data -- try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.
+If you receive a warning from the operating system about the filesystem (e.g. *Error Checking* / *Repair this drive* / *Do you want to scan and fix*) you should initially ignore the message -- do not allow the operating system to try to fix anything as this can cause problems -- and attempt to continue as normal:
 
-If the device **DOES NOT** contain useful data, but you have a warning about the filesystem -- just try to configure the device as normal.  If this doesn't work, follow the instructions for [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device).
+* If the device contains useful data, try to download the data as usual.  If this does not work, it may be possible to recover the data -- try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.
+
+* If the device does not contain useful data, try to configure the device as normal.  If this doesn't work, follow the troubleshooting instructions above, up to [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device) if required.
+
+You should check that you do not have any software unnecessarily writing to the removable drives, or interfering with their operation (potentially some antivirus/security software).
 
 
 ## Installation
