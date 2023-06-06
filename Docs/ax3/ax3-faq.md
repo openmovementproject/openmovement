@@ -66,6 +66,11 @@ There is no external communication while the AX devices are recording, so they c
 **A note about timezones and daylight savings time:** The AX devices do not attempt to adjust for timezone changes or daylight savings adjustment (and they will not know the current location of the wearer).  Instead, the configuring device's local time is used to establish the date and time on the device, and the time and date continue from there for the recording.
 
 
+## Usage environments
+
+The AX enclosure is designed for IP68 rated water resistance -- not technically "waterproof" (i.e. not ATM rated) as it is a static measure, and not dynamic.  It was designed so that it can be used for daily activities, which includes washing and casual swimming.  Importantly, not continuous immersion, substantial depth, extreme/saltwater/watersports activities, sauna, etc.  Additional care should be taken to avoid impacts while immersed.  The device must be removed and not used if there are any problems or indications of damage.  The USB socket must be free of debris and completely dry before connection.
+
+
 ## Technical Details
 
 * [AX3 Datasheet](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX3v2%20Datasheet.pdf)
