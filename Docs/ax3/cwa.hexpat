@@ -13,6 +13,16 @@
 struct cwa_timestamp_t {
     u32 timestamp;
 };
+
+// bitfield cwa_timestamp_t {
+//     year : 6;
+//     month : 4;
+//     day : 5;
+//     hours : 5;
+//     minutes : 6;
+//     seconds : 6;
+// } [[right_to_left]];
+
 //typedef enum u32 cwa_timestamp_t;
 //#define OM_DATETIME_YEAR(dateTime)    ((unsigned int)((unsigned char)(((dateTime) >> 26) & 0x3f)) + 2000) ///< Extract the year from a packed date/time value.
 //#define OM_DATETIME_MONTH(dateTime)   ((unsigned char)(((dateTime) >> 22) & 0x0f))  ///< Extract the month (1-12) from a packed date/time value.
