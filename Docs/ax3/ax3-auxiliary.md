@@ -43,7 +43,7 @@ The internal temperature sensor is useful for auto-calibration of the movement d
 
 The AX devices use a light sensor ([APDS-9007](https://docs.broadcom.com/docs/AV02-0512EN)) which has a logarithmic response over a wide dynamic range.  The sensor arrangement is most suitable as a general, relative, indicator of light, for example to distinguish a varying/stable level, or daily maxima/minima. 
 
-The AX light level indicator is complicated as, in order to not compromise the enclosure's protection, the sensor is used without an optical window, and so its view is diffused through the case material and strap.  Sensors worn on the wrist are also easily obscured in use by the wearer's clothing and bedclothes, and also subject to reflections, shadows, etc.  
+The AX light level indicator is complicated as, in order to not compromise the enclosure's protection, the sensor is used without a full optical window, and so its view is through the (partially transparent) case material and strap.  Sensors worn on the wrist might become obscured in use by the wearer's clothing or bedclothes, and subject to reflections, shadows, etc.  
 
 The logarithmic output means that light is detectable through the enclosure or strap. For example, changes from 10-100 lux and 1 Klux - 10 Klux both have a relative change of *10* (which is a *10 uA* difference in the sensor output, and the AX3 uses a load resistor of 100 kOhm to convert this 10 uA change into a 1 V change, which becomes 341.3 raw 10-bit ADC units).
 
