@@ -35,8 +35,8 @@ union cwa_timestamp_t {
 
 // 32-bit device ID (assembled in a separate section)
 std::mem::Section device_id_section = std::mem::create_section("device_id_section");
-u16 device_id_low @ 0x00 in device_id_section;
-u16 device_id_high @ 0x02 in device_id_section;
+u16 device_id_low @ 0x00 in device_id_section [[hidden]];
+u16 device_id_high @ 0x02 in device_id_section [[hidden]];
 u32 device_id @ 0x00 in device_id_section;
 
 // CWA sectors
@@ -55,16 +55,16 @@ struct CwaBlock
         cwa_timestamp_t loggingStartTime;       ///< @13  +4   Start time for delayed logging
         cwa_timestamp_t loggingEndTime;         ///< @17  +4   Stop time for delayed logging
         u32 loggingCapacity;                    ///< @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)
-        u8 _reserved1[1];                       ///< @25  +1   (1 byte reserved)
+        u8 _reserved1[1] [[hidden]];            ///< @25  +1   (1 byte reserved)
         u8  flashLed;                           ///< @26  +1   Flash LED during recording
-        u8 _reserved2[8];                       ///< @27  +8   (8 bytes reserved)
+        u8 _reserved2[8] [[hidden]];            ///< @27  +8   (8 bytes reserved)
         u8  sensorConfig;                       ///< @35  +1 * Fixed rate sensor configuration, 0x00 or 0xff means accel only, otherwise bottom nibble is gyro range (8000/2^n dps): 2=2000, 3=1000, 4=500, 5=250, 6=125, top nibble non-zero is magnetometer enabled.
         u8  samplingRate;                       ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
         cwa_timestamp_t lastChangeTime;         ///< @37  +4   Last change metadata time
         u8  firmwareRevision;                   ///< @41  +1   Firmware revision number
-        s16 timeZone;                           ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
-        u8 _reserved3[20];                      ///< @44  +20  (20 bytes reserved)
-        char annotation[448];                    ///< @64  +448 Scratch buffer / meta-data (448 ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
+        s16 timeZone [[hidden]];                ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
+        u8 _reserved3[20] [[hidden]];           ///< @44  +20  (20 bytes reserved)
+        char annotation[448];                   ///< @64  +448 Scratch buffer / meta-data (448 ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
         //u8  reserved[512];                     ///< @512 +512 Reserved for device-specific meta-data (512 bytes, ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs, leading '&' if present?)
 
         // Populate 32-bit device ID
