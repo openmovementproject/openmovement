@@ -16,6 +16,7 @@
 
 // Maximum number of data blocks to decode (for performance reasons)
 #define MAXIMUM_BLOCKS 128
+u32 SECTOR_SIZE = 512;  // as sizeof(CwaData) cannot be computed dynamically because of the code conditional on format
 
 // Timestamps are packed into a 32-bit value: (MSB) YYYYYYMM MMDDDDDh hhhhmmmm mmssssss (LSB)
 using cwa_timestamp_t;
@@ -188,7 +189,7 @@ bitfield events_t {
 /*
 enum num_axis_t : u8 {
     AccelPacked = 0x30,
-    AccelUnpacked = 0x32,
+    Accel = 0x32,
     GyroAccel = 0x62,
     GyroAccelMag = 0x92,
 } [[static]];
@@ -199,7 +200,7 @@ fn format_num_axes(u8 numAxes) {
     if (numAxes == 0x30) { 
         name = "AccelPacked";
     } else if (numAxes == 0x32) { 
-        name = "AccelUnpacked";
+        name = "Accel";
     } else if (numAxes == 0x62) { 
         name = "GyroAccel";
     } else if (numAxes == 0x92) { 
@@ -207,7 +208,6 @@ fn format_num_axes(u8 numAxes) {
     }
     return std::format("{:s} (0x{:02X})", name, numAxes);
 };
-
 
 //   Accelerometer sample values are in units of (where g = 9.81 m/s/s) and need to have a scaling factor applied.
 //   Accel scaling for 16-bit unpacked values: 1/2^(8+n) [g] -- expected values:
@@ -233,9 +233,9 @@ fn format_num_axes(u8 numAxes) {
 //    The 'e' represents the binary exponent value (0-3) -- the number of bits to left-shift all the axis values.
 bitfield packed_t {
     exponent : 2;
-    az: 10;
-    ay: 10;
-    ax: 10;
+    signed az: 10;
+    signed ay: 10;
+    signed ax: 10;
 } [[bitfield_order(std::core::BitfieldOrder::MostToLeastSignificant, 32), static]];
 
 // Split the x/y/z/ values out, using the supplied exponent:
@@ -332,37 +332,31 @@ struct CwaData
     u16 sampleCount;                        ///< @28  +2   Number of sensor samples (if this sector is full -- Axyz: 80 or 120 samples, Gxyz/Axyz: 40 samples)
 
     //if (numAxesBPS == num_axis_t::AccelPacked) {
-//    if (numAxesBPS == 0x30) {
-//        packed_t rawSampleData[120];                 ///< @30  +480 Raw sample data (3-axis packed)
-/*
+    if (numAxesBPS == 0x30) {
+        packed_t samplesAccelPacked[120];                 ///< @30  +480 Raw sample data (3-axis packed)
     } else if (numAxesBPS == 0x32) {
-        accel_t rawSampleData[80];              ///< @30  +480 Raw sample data (3-axis unpacked)
+        accel_t samplesAccel[80];              ///< @30  +480 Raw sample data (3-axis unpacked)
     } else if (numAxesBPS == 0x62) {
-        gyro_accel_t rawSampleData[40];         ///< @30  +480 Raw sample data (6-axis unpackd)
+        gyro_accel_t samplesGyroAccel[40];         ///< @30  +480 Raw sample data (6-axis unpackd)
     } else if (numAxesBPS == 0x92) {
-        gyro_accel_mag_t rawSampleData[26];     ///< @30  +480 Raw sample data (9-axis unpacked)
+        gyro_accel_mag_t samplesGyroAccelMag[26];     ///< @30  +480 Raw sample data (9-axis unpacked)
         u8 _padding[12] [[hidden]];
-*/
-//    } else {
-        u8  rawSampleData[480];                 ///< @30  +480 Raw sample data.  Each sample is either 3x/6x/9x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
-//    }
+    } else {
+        u8  samplesUnknown[480];                 ///< @30  +480 Raw sample data.  Each sample is either 3x/6x/9x 16-bit signed values (x, y, z) or one 32-bit packed value (The bits in bytes [3][2][1][0]: eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent, lsb on right)
+    }
 
     u16 checksum;                           ///< @510 +2   Checksum of packet (16-bit word-wise sum of the whole packet should be zero)
 };  // Not sure if this can be [[static]] as the interpretation of the samples depends on the values
 
 
-
-
-
-CwaHeader cwaHeader @ 0x0000;
+CwaHeader header @0;
 
 // Calculate number of data blocks to decode
 u32 countBlocks = 0;
-if (std::mem::size() > sizeof(cwaHeader)) {
-    countBlocks = (std::mem::size() - sizeof(cwaHeader)) / sizeof(CwaData);
+if (std::mem::size() > sizeof(CwaHeader)) {
+    countBlocks = (std::mem::size() - sizeof(CwaHeader)) / SECTOR_SIZE;
 }
 if (MAXIMUM_BLOCKS > 0 && countBlocks > MAXIMUM_BLOCKS) {
     countBlocks = MAXIMUM_BLOCKS;
 }
-
-CwaData cwaData[countBlocks] @ 0x0400;
+CwaData data[countBlocks] @sizeof(CwaHeader);
