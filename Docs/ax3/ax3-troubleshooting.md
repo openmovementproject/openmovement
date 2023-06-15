@@ -233,6 +233,22 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 
 14. The device should now be in a reset state.
 
+If you have problems using the `HidBootLoader.exe` program above, you could alternatively try:
+
+1. Open a browser that supports *Web Serial*, such as [Google Chrome](https://google.com/chrome).
+2. Visit this page: https://googlechromelabs.github.io/serial-terminal/
+3. Connect the device and wait around 10 seconds.
+4. In the Port dropdown, select the serial port the device is on.
+5. Click the Connect button
+6. Click in the black terminal area of the page
+7. Type `ECHO 1` and press <kbd>Enter</kbd> -- you will not see anything appear until you have typed everything.
+8. Now type the *Command* from the previous section except, after the last command and *instead* of any `|` symbol, press the <kbd>Enter</kbd> key. For example, the lines (remembering to replace `12345` with your device's ID):
+    ```
+    DEVICE=12345
+    TIME 2020-01-01 00:00:00
+    FORMAT QC
+    LED 5
+    ```
 
 ## Removing a Mount Point
 
