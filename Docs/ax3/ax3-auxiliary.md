@@ -13,9 +13,7 @@ See below for specific information on the battery, temperature, and light.
 
 The device battery voltage is sampled as a 10-bit ADC value (0-1023).  
 
-<!--
-Only the top half of this range is useful, and the value is stored into a 8-bit range of 0-255 as: ${packed = \lfloor(value - 512) / 2\rfloor}$; and restored on reading as: ${value = packed * 2 + 512}$.  
--->
+Note that the battery ADC reading is stored into an 8-bit value (0-255) in the [.CWA file format](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md#cwa-file-data-blocks) as only the top half of this range is useful.  Stored as: ${packed = \lfloor(value - 512) / 2\rfloor}$; and restored on reading as: ${value = packed * 2 + 512}$.  
 
 To convert the battery ADC values into voltage (Volts), the conversion is:
 
@@ -27,6 +25,17 @@ $$
 ## Device Temperature
 
 The device internal temperature is measured by an on-board temperature sensor ([MCP9700](https://www.microchip.com/en-us/product/MCP9700)) and is sampled and stored as a 10-bit ADC value (0-1023).  
+
+<!--
+The *MCP9700* outputs the temperature as a voltage offset of 500mV @ 0&deg;C, and linearly increases at 10mV/&deg;C: $voltage = temperature * 0.01 + 0.5$.  The ADC is captured as: $value = voltage * 1024 / 6$.
+
+$$
+temperature = (voltage - 0.5) * 100
+voltage = value * 6 / 1024
+temperature = (value * 6 / 1024 - 0.5) * 100
+temperature = value * 75 / 128 - 50
+$$
+-->
 
 To convert the temperature ADC values into degrees Celsius, the conversion is:
 
