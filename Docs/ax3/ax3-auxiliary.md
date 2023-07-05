@@ -24,20 +24,9 @@ $$
 
 ## Device Temperature
 
-The device internal temperature is measured by an on-board temperature sensor ([MCP9700](https://www.microchip.com/en-us/product/MCP9700)) and is sampled and stored as a 10-bit ADC value (0-1023).  
+The device internal temperature is measured by an on-board temperature sensor ([MCP9700](https://www.microchip.com/en-us/product/MCP9700)) which outputs the temperature as a linearly changing voltage of $10 mV/&deg;C$, with an offset of $500 mV @ 0&deg;C$: $voltage = temperature * 0.01 + 0.5$.  This is sampled and stored as a 10-bit ADC value (0-1023): $value = voltage * 1024 / 3$.  The voltage (Volts) is calculated from the ADC value as: $voltage = value * 3 / 1024$.  As $temperature = (voltage - 0.5) * 100$, this is $temperature = (value * 3 / 1024 - 0.5) * 100$, and simplified below.
 
-<!--
-The *MCP9700* outputs the temperature as a voltage offset of 500mV @ 0&deg;C, and linearly increases at 10mV/&deg;C: $voltage = temperature * 0.01 + 0.5$.  The ADC is captured as: $value = voltage * 1024 / 6$.
-
-$$
-temperature = (voltage - 0.5) * 100
-voltage = value * 6 / 1024
-temperature = (value * 6 / 1024 - 0.5) * 100
-temperature = value * 75 / 128 - 50
-$$
--->
-
-To convert the temperature ADC values into degrees Celsius, the conversion is:
+To convert the temperature ADC values into degrees Celsius, the simplified conversion is:
 
 $$
 temperature = (value * 75 / 256) - 50
