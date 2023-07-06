@@ -37,6 +37,8 @@ Approximate maximum recording duration from a single full battery charge.  A typ
 
 ## Sensor Data Characteristics
 
+The AX6 and AX3 have the same physical dimensions, but the AX6 has more memory and battery capacity, and a different underlying sensor that allows it to (optionally) record gyroscope data.
+
 | Characteristic             | AX3                                             | AX6                                           |
 |----------------------------|-------------------------------------------------|-----------------------------------------------|
 | Sample Rate                | 6.25`*`/12.5/25/50/100/200/400/800/1600/3200 Hz | 6.25`*`/12.5`*`/25/50/100/200/400/800/1600 Hz |
