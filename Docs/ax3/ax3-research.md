@@ -54,3 +54,10 @@ The raw data can be loaded into many processing environments, such as:
  
 All of the above linked software is freely available, and a sample data file (inside a .ZIP archive) is available at: https://github.com/digitalinteraction/openmovement/raw/master/Downloads/AX3/longitudinal_data.zip
 
+
+## Further Reading
+
+For more information on the AX devices, please see:
+
+* [AX Devices - Frequently Asked Questions](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md)
+
