@@ -81,4 +81,4 @@ The AX enclosure is designed for IP68 rated water resistance -- not technically 
 * [AX3/AX6 Auxiliary Data](ax3-auxiliary.md) for details of using temperature and light sensor data.
 * [Open Movement API](http://digitalinteraction.github.io/openmovement/omapi/html/)
 * [AX Case Dimensions](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Docs/ax3/ax-case-dimensions.svg)
-
+* [Can .CWA files be edited?](https://github.com/digitalinteraction/omsynth/blob/master/README.md#splicing-a-cwa-file)
