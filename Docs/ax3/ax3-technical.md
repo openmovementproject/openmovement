@@ -390,6 +390,29 @@ The standard configuration comes from the header of the data file (`CWA-DATA.CWA
 	DATAMODE=20
 
 
+### Data Preview Stream
+
+There is a command to enable a stream of preview data from the underlying sensor:
+ 
+      STREAM
+ 
+...the stream will end when another line is sent to the device (including an empty line, terminated with CR/LF).
+
+If the device is an AX3, the comma-separated values will be:
+ 
+      Ax,Ay,Az
+ 
+...where the accelerometer axis values (A) should be divided by 256 to be in units of g (9.81 m/s/s).
+
+If the device is an AX6, the comma-separated values will be:
+ 
+      Ax,Ay,Az,Gx,Gy,Gz
+ 
+...where the accelerometer axis values (A) should be divided by 4096 to be in units of g (9.81 m/s/s), and the gyroscope axis values (G) should be multiplied by 32768 and divided by 1000 for degrees per second.
+
+Note that this streaming mode is only intended to preview the sampled data.  Importantly, the data is *single sampled*, not at a fixed regular rate, and may be a relatively low sample rate that is slightly variable (depending on the line length and other communication overheads).  These factors make it unsuitable for most uses, other than the intended use of previewing the data.
+
+
 ## Bootloader
 
 Standard use:
