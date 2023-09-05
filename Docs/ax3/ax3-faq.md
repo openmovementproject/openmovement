@@ -65,7 +65,10 @@ There is no external communication while the AX devices are recording, so they c
  
 * Where the setup/access allows (e.g. a lab-based recording, or one with frequent points of contact), you can introduce a "marker" -- a specific movement signal at one or more points (e.g. vigorous shaking before and after a session) that has its time externally recorded.  For a lab-based session, it might be appropriate to video record the session in a way that captures the shaking times directly.  It might be useful to introduce an external clock on a screen, e.g. this page: [Time Sync Clock](https://config.openmovement.dev/timesync/) -- on some supported phones/browsers (e.g. Chrome browser on Android), you can hold the phone against the device and tap-and-hold the screen to introduce an optical and vibration marker/pattern for the time.  You can also use this page to create event markers (by tapping the screen, clicking a mouse, or pressing keys on a keyboard), then download or clear the log of event markers with the buttons at the top of the page.
 
-**A note about timezones and daylight savings time:** The AX devices do not attempt to adjust for timezone changes or daylight savings adjustment (and they will not know the current location of the wearer).  Instead, the configuring device's local time is used to establish the date and time on the device, and the time and date continue from there for the recording.
+
+## Time Zone and DST
+
+The AX devices cannot adjust for timezone changes or daylight savings, as they will not know the current location of the wearer, and as that could lead to duplicate or skipped hours of the day.  Instead, the configuring device's local time is used to establish the date and time on the device at the time of configuration, and the time and date continue from there for any subsequently recorded data.  If you know the configuration time zone (the last configuration time is recorded in the .CWA data file), you could choose to later reinterpret these times as local times (including DST), but you would have to choose what to do with any duplicate or skipped hours of the day.
 
 
 ## Usage environments
