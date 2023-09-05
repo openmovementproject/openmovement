@@ -68,7 +68,7 @@ There is no external communication while the AX devices are recording, so they c
 
 ## Time Zone and DST
 
-The AX devices cannot adjust for timezone changes or daylight savings, as they will not know the current location of the wearer, and as that could lead to duplicate or skipped hours of the day.  Instead, the configuring device's local time is used to establish the date and time on the device at the time of configuration, and the time and date continue from there for any subsequently recorded data.  If you know the configuration time zone (the last configuration time is recorded in the .CWA data file), you could choose to later reinterpret these times as local times (including DST), but you would have to choose what to do with any duplicate or skipped hours of the day.
+The AX devices take the configuring device's local time at the time of configuration, and the time and date continue from there for any subsequently recorded data.  They cannot adjust for timezone changes or daylight savings, as they will not know the current country or locally-defined time zone or daylight savings rules, and also as that could lead to duplicate or skipped hours of the day.  As long as you know the configuration time zone (the last configuration time is recorded in the .CWA data file), you could choose to later reinterpret these times in another time zone (including applying any DST change), but you would have to choose what to do with any duplicate or skipped hours of the day.
 
 
 ## Usage environments
