@@ -53,6 +53,11 @@ The AX6 and AX3 have the same physical dimensions, but the AX6 has more memory a
 * Device orientation: [AX Orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
 
 
+## Time Zone and DST
+
+The AX devices take the configuring device's local time at the time of configuration, and the time and date continue from there for any subsequently recorded data.  They cannot adjust for timezone changes or daylight savings, as they will not know the current country or locally-defined time zone or daylight savings rules, and also as that could lead to duplicate or skipped hours of the day.  As long as you know the configuration time zone (the last configuration time is recorded in the .CWA data file), you could choose to later reinterpret these times in another time zone (including applying any DST change), but you would have to choose what to do with any duplicate or skipped hours of the day.
+
+
 ## Synchronizing data between devices, or with other devices
 
 The AX devices have an internal real-time clock to keep track of time.  When the device is configured, the internal clock is set to the system time of the configuring computer.  This time is set to the nearest second, and the operation itself may be subject to some jitter (e.g. from the operating system performing other actions).  Afterwards, as with any clock, it will be subject to clock drift, potentially of the order of around ±2 seconds per day.  
@@ -64,11 +69,6 @@ There is no external communication while the AX devices are recording, so they c
 * If you are placing multiple accelerometers on a single moving body over a long period of time (e.g. a person), then there is some software that synchronizes the signal from devices that are likely to see a similar movement: [timesync](https://github.com/digitalinteraction/timesync/).
  
 * Where the setup/access allows (e.g. a lab-based recording, or one with frequent points of contact), you can introduce a "marker" -- a specific movement signal at one or more points (e.g. vigorous shaking before and after a session) that has its time externally recorded.  For a lab-based session, it might be appropriate to video record the session in a way that captures the shaking times directly.  It might be useful to introduce an external clock on a screen, e.g. this page: [Time Sync Clock](https://config.openmovement.dev/timesync/) -- on some supported phones/browsers (e.g. Chrome browser on Android), you can hold the phone against the device and tap-and-hold the screen to introduce an optical and vibration marker/pattern for the time.  You can also use this page to create event markers (by tapping the screen, clicking a mouse, or pressing keys on a keyboard), then download or clear the log of event markers with the buttons at the top of the page.
-
-
-## Time Zone and DST
-
-The AX devices take the configuring device's local time at the time of configuration, and the time and date continue from there for any subsequently recorded data.  They cannot adjust for timezone changes or daylight savings, as they will not know the current country or locally-defined time zone or daylight savings rules, and also as that could lead to duplicate or skipped hours of the day.  As long as you know the configuration time zone (the last configuration time is recorded in the .CWA data file), you could choose to later reinterpret these times in another time zone (including applying any DST change), but you would have to choose what to do with any duplicate or skipped hours of the day.
 
 
 ## Usage environments
