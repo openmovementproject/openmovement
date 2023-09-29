@@ -2,6 +2,8 @@
 
 If you have a AX device where the filesystem has been corrupted, or a file that might have been corrupted, it may be possible to salvage the data.
 
+**IMPORTANT:** At no point should you accept any offer by Windows of fixing the drive, as this can make things worse!
+
 
 ## Step 1: Attempt a manual copy
 
@@ -15,16 +17,14 @@ If the data is still on the device, you should first try to manually copy the fi
 
 If the copy does not complete successfully, then try the recover scripts below.
 
-**IMPORTANT:** At no point should you accept any offer by Windows of fixing the drive, as this can make things worse!
-
 
 ## Step 2: Getting started with the recovery scripts
 
 1. Check whether you have *Python* installed, e.g. <kbd>Windows</kbd>+<kbd>R</kbd>: `cmd /k python` -- if you get an error message, you can install Python at: [python.org/downloads](https://www.python.org/downloads/)
 
-2. Save this page: [cwa-dump.py](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-recover/cwa-dump.py) (as a file on your computer named `cwa-dump.py`)
+2. Save this page: [cwa-dump.py](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-recover/cwa-dump.py) as a file on your computer named `cwa-dump.py`
 
-3. Save this page: [cwa-recover.py](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-recover/cwa-recover.py) (as a file on your computer named `cwa-recover.py`, in the same directory)
+3. Save this page: [cwa-recover.py](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-recover/cwa-recover.py) as a file on your computer named `cwa-recover.py`, in the same directory as the previous file.
 
 4. Open a command-line in the same folder as your downloaded files, e.g. <kbd>Windows</kbd>+<kbd>R</kbd>: `cmd /k "cd Downloads"`
 
@@ -60,7 +60,7 @@ Follow these instructions to attempt to reconstruct a `.cwa` data file, either f
 
 3. Inspect the `cwa-recover.cwa` file (e.g. setting the Working Directory in *OmGui* software) to gague how successful the process was.
 
-If you have both a disk image and a downloaded file, you can repeat this process for both files and compare the outputs (you should rename the `cwa-recover.cwa` file between each attempt so that it is not overwritten).
+If you have both a disk image and a downloaded file, you can repeat this process for both files and compare the outputs -- you must rename the `cwa-recover.cwa` file between each attempt, so that it is not overwritten.
 
 <!-- 
 There is a possibility that in some circumstances that being able to read the underlying physical NAND block memory could increase the data recovered, as this would include NAND blocks not used by the logical drive -- however, this is not an interface provided by the current device firmware, and would complicate the recovery, e.g. for overwritten blocks 
