@@ -15,7 +15,9 @@ If the data is still on the device, you should first try to manually copy the fi
 4. Identify the drive letter for the device and double-click it
 5. Locate the file `CWA-DATA.CWA` and drag-and-drop the file to another location to copy it.
 
-If the copy does not complete successfully, then try the recover scripts below.
+If the copy completes, you have successfully downloaded the data file, and should not need any of the following steps.
+
+If the copy does not complete successfully, or you suspect the file is incomplete, then try the steps below to run the recovery script.
 
 
 ## Step 2: Getting started with the recovery scripts
