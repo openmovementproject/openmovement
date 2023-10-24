@@ -58,9 +58,35 @@ As the recorded level is logarithmic, even small measurement noise or inter-devi
 
 ## Exporting/Loading Auxiliary Data
 
+### OmGui
+
+Light and temperature can be exported in *OmGui* software by following these steps:
+
+1. Ensure your *Workspace* set to a folder containing `.cwa` data files (use *Choose Working Folder* to select a folder).
+2. In the *Data Files* tab, select the `.cwa` data file you would like to export the data from.
+3. Click *Plugins...* in toolbar in the *Data Files* tab.
+4. Ensure *Convert CWA* is selected as the Plugin, and click *Run...*
+5. You must enter a file name in the *Output file name and format* box, the same as the source `.cwa` file is recommended.
+6. Ensure *CSV* is selected.
+7. Under *Streams to convert*, click *Light* / *Temperature* / *Battery* as required.
+8. Select a time format, *String yyyy-mm-dd hh:mm:ss.f* is recommended.
+9. Click *Convert Now*
+10. A `.csv` file, with the name you specified, will be created in the Workspace folder.
+
+The exported `.csv` columns will be, for AX3 or AX6 (accelerometer-only mode):
+
+> `Time, Ax(g), Ay(g), Az(g), LightADC, TemperatureADC, BatteryADC`
+
+...or, for AX6 (with gyroscope enabled):
+
+> `Time, Ax(g), Ay(g), Az(g), Gx(d/s), Gy(d/s), Gz(d/s), LightADC, TemperatureADC, BatteryADC`
+
+`LightADC`, `TemperatureADC` and `BatteryADC` depend on the selected *Streams to convert*, and are to be interpreted as described above
+
+
 ### CSV Exporter
 
-One way to quickly export the auxiliary data from the CWA file is to use the [`cwa-convert`](https://github.com/digitalinteraction/openmovement/tree/master/Software/AX3/cwa-convert/c) tool to create a .CSV file.  See link for cross-platform usage or, if you have [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI) installed, you can run the command (where `CWA-DATA.CWA` is your filename):
+One way to quickly export just the auxiliary data from the CWA file is to use the [`cwa-convert`](https://github.com/digitalinteraction/openmovement/tree/master/Software/AX3/cwa-convert/c) tool to create a .CSV file.  See link for cross-platform usage or, if you have [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI) installed, you can run the command (where `CWA-DATA.CWA` is your filename):
 
 ```cmd
 "%ProgramFiles(x86)%\Open Movement\OM GUI\Plugins\Convert_CWA\cwa-convert.exe" "CWA-DATA.CWA" -nodata -t:block -skip 240 -light -temp -batt > "OUTPUT.CSV"
@@ -72,19 +98,21 @@ The export will skip 240 samples, so not export quite every auxiliary value, but
 
 You can alternatively output the battery voltage with the `-battv` parameter, and the temperature in degrees Celsius with the `-tempc` parameter (the latter will only work on later versions of `cwa-convert`).
 
-If you would like to export the data, along with (possibly duplicated) auxiliary data, remove the `-nodata`, `-t:block`, and `-skip` parameters:
+If you would like to export the accelerometer (and, if present, gyroscope) data, along with (possibly duplicated) auxiliary data, remove the `-nodata`, `-t:block`, and `-skip` parameters:
 
 ```cmd
 "%ProgramFiles(x86)%\Open Movement\OM GUI\Plugins\Convert_CWA\cwa-convert.exe" "CWA-DATA.CWA" -light -temp -batt > "OUTPUT.CSV"
 ```
 
-The exported columns will be, for AX3 or AX6 accelerometer-only mode:
+The exported columns will be, for AX3 or AX6 (accelerometer-only mode):
 
 > `Time, Ax(g), Ay(g), Az(g), LightADC, TemperatureADC, BatteryADC`
 
-...or, for AX6 with gyroscope enabled:
+...or, for AX6 (with gyroscope enabled):
 
 > `Time, Ax(g), Ay(g), Az(g), Gx(d/s), Gy(d/s), Gz(d/s), LightADC, TemperatureADC, BatteryADC`
+
+`LightADC`, `TemperatureADC` and `BatteryADC` depend on the specified options, and are to be interpreted as described above.
 
 <!--
 Unlabelled data can usually be identified as the A columns will have a vector magnitude of 1 at rest, the G columns will have a vector magnitude of 0 at rest, the light reading will generally have cases of abrupt fluctuations, while the temperature reading will only change gradually.  Raw ADC values, rather than converted values, can be spotted as they are always whole numbers in the range 0-1023.
