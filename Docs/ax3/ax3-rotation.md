@@ -1,6 +1,13 @@
 # AX Device Rotation: Axis Inversions
 
-Where `*` denotes the thinner, slightly tapered end of the puck.
+## Overview
+
+The effect of making a recording where the device is incorrectly oriented will be to invert two of the axes -- which two depends on the way it was flipped, as described below.
+ 
+However, you may not need to be too concerned as many analysis algorithms do not use the sign of the data (including all of the analysis options built-in to *OmGui*).  Many analysis algorithms for accelerometer data just take the *vector length* and are insensitive to orientation.  Also of note, the sleep algorithm "Estimating sleep parameters using an accelerometer without sleep diary" (e.g. in GGIR), the X/Y values are squared (removing the sign) and, although the Z-axis sign will change the sign of the arctangent (and the angle), it is only the absolute difference in (filtered) angles that is actually used, which is insensitive to the inversion. 
+
+To "future proof" your dataset against future algorithms that might be sensitive to the sign of the data, it is recommended that known inversions are documented.
+
 
 ## AX6 Accel Axes and Gyro Rotation
 
@@ -18,8 +25,12 @@ Where `*` denotes the thinner, slightly tapered end of the puck.
 +---+-----------------------+
 ```
 
+Note, here and in the diagrams below, `*` denotes the thinner, slightly tapered end of the puck.
 
-## Axis at no rotation
+
+## Axis inversion diagrams
+
+### Axis at no rotation
 
 ```
 +---+-----------------------+
@@ -34,7 +45,7 @@ Where `*` denotes the thinner, slightly tapered end of the puck.
 Transform: (identity).
 
 
-## Rotated 180 degrees around Y-axis: "flipped on short side"
+### Rotated 180 degrees around Y-axis: "flipped on short side"
 
 ```
 +-----------------------+---+
@@ -50,7 +61,7 @@ Transform: *x'* = -*x*, *z'* = -*z*.
 Gyro: *gx'* = -*gx*, *gz'* = -*gz*.
 
 
-## Rotated 180 degrees around X-axis: "flipped on long side"
+### Rotated 180 degrees around X-axis: "flipped on long side"
 
 ```
 +---+-----------------------+
@@ -66,7 +77,7 @@ Transform: *y'* = -*y*, *z'* = -*z*.
 Gyro: *gy'* = -*gy*, *gz'* = -*gz*.
 
 
-## Rotated 180 degrees around both X-axis and Y-axis: "rotated 180 degrees around Z-axis", "flipped on long and short sides"
+### Rotated 180 degrees around both X-axis and Y-axis: "rotated 180 degrees around Z-axis", "flipped on long and short sides"
 
 ```
 +-----------------------+---+
@@ -82,27 +93,30 @@ Transform: *x'* = -*x*, *y'* = -*y*.
 Gyro: *gx'* = -*gx*, *gy'* = -*gy*.
 
 
-## Making the transform on .WAV files
+## Undoing the rotation on `.wav` files
 
-Use the UI to generate a resampled .WAV file for your .CWA file by performing one of the analysis steps. 
+If you would like to adjust the axes of an exported `.wav` file:
 
-Install "Audacity": http://www.audacityteam.org/
+1. Use the *OmGui* tool to generate a resampled `.wav` file from your `.cwa` file by performing one of the analysis steps. 
 
-Run "Audacity". 
+2. Run *Audacity* (available from: [audacityteam.org](https://www.audacityteam.org/)).
 
-Select: "Edit" / "Preferences" / "Import/Export" / "When exporting tracks to an audio file" / "Use custom mix (for example to export a 5.1 multichannel file)", "OK". 
+3. Ensure you have selected the preferences:
 
-Select: "Edit" / "Preferences" / "Quality" / "Sampling" / "Default Sample Format" / "16-bit". 
+   * *Edit* / *Preferences* / *Import/Export* / *When exporting tracks to an audio file* / *Use custom mix (for example to export a 5.1 multichannel file)*, *OK*. 
 
-Select: "File" / "Open" / select the .wav file / "Open". 
+   * *Edit* / *Preferences* / *Quality* / *Sampling* / *Default Sample Format* / *16-bit*. 
 
-Perform one or more of these actions:
-- for x' = -x: Click on "Left"  under "sample 1" / "Effect" / "Invert".
-- for y' = -y: Click on "Right" under "sample 2" / "Effect" / "Invert".
-- for z' = -z: Click on "Mono"  under "sample 3" / "Effect" / "Invert".
+4. Select: *File* / *Open* / select the `.wav` file / *Open*. 
 
-Select: "File" / "Export Audio" / select the original .wav file / "Save" / "OK" / "OK". 
+5. Perform one or more of these actions:
 
-Use the UI to perform one of the analysis steps again, the inverted-axis .WAV file will be used.  
+   * *x' = -x:* Click on *Left*  under *sample 1* / *Effect* / *Invert*.
+   * *y' = -y:* Click on *Right* under *sample 2* / *Effect* / *Invert*.
+   * *z' = -z:* Click on *Mono*  under *sample 3* / *Effect* / *Invert*.
 
+6. Select: *File* / *Export Audio* / enter the name of the `.wav` file for exporting to / *Save* / *OK* / *OK*. 
 
+<!--
+7. Use *OmGui* tool to perform one of the analysis steps again, the inverted-axis `.wav` file will be used.  
+-->
