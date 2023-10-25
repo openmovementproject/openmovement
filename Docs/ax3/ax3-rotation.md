@@ -9,9 +9,11 @@ However, you may not need to be too concerned as many analysis algorithms do not
 To "future proof" your dataset against future algorithms that might be sensitive to the sign of the data, it is recommended that known inversions are documented.
 
 
-## AX6 Accel Axes and Gyro Rotation
+## AX Accelerometer Axes (AX3 and AX6) and Gyroscope Rotation (AX6-only)
 
 ![AX6 Axes](axes.svg)
+
+Note: `⊗`, rendered `(+)` below, is used to denote the axis going away from the viewer into the plane; while `⊙`, rendered `(.)` below, is used to denote the axis coming towards the viewer from the plane.  In the diagrams below, `*` denotes the thinner, slightly tapered end of the puck.
 
 ```
 +---+-----------------------+
@@ -24,8 +26,6 @@ To "future proof" your dataset against future algorithms that might be sensitive
 |   |             \_   <-'  |
 +---+-----------------------+
 ```
-
-Note, here and in the diagrams below, `*` denotes the thinner, slightly tapered end of the puck.
 
 
 ## Axis inversion diagrams
