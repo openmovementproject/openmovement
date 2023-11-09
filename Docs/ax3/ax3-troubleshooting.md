@@ -318,7 +318,7 @@ When given a battery health warning, it is advisable to fully charge the device 
 
 If you receive a warning from the operating system about the filesystem (e.g. *Error Checking* / *Repair this drive* / *Do you want to scan and fix*) you should initially ignore the message -- do not allow the operating system to try to fix anything as this can cause problems -- and attempt to continue as normal:
 
-* **If the device contains useful data:** try to download the data as usual.  If this does not work, locate the device's drive (e.g. *File Explorer* / *This PC*), and try to directly copy off the `CWA-DATA.CWA` data file.  If you have any problems with this, it may still be possible to recover the data: try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.
+* **If the device contains useful data:** try to download the data as usual.  If this does not work, locate the device's drive (e.g. *File Explorer* / *This PC* / identify and open the device's drive), and try to directly copy off the `CWA-DATA.CWA` data file.  If you have any problems with this, it may still be possible to recover the data: try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.
 
 * **If the device does not contain useful data:** try to configure the device as normal.  If this doesn't work, follow the troubleshooting instructions above, up to [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device) if required.
 
@@ -326,7 +326,11 @@ You should check that you do not have any other software unnecessarily writing t
 
 ### Partially-downloaded data
 
-`.cwa.part` files are partial `.cwa` files are created by *OmGui* as the data is being downloaded from the device.  When a download is completed successfully, the file is renamed to `.cwa`.  If you have a `.cwa.part` files while no data is being downloaded, it could be that the data transfer might have been interrupted or failed.  Retry the download in *OmGui*.  If this fails, check the *Log* window (opened via the *View* menu), to see if there are any messages.  A download could fail, for example, if the USB connection was interrupted, or because of filling the workspace disk drive capacity or quota.  If you have a `.cwa.part` file, but no longer have the original data on a device, you can rename a `.cwa.part` file to `.cwa`, and the data from an interrupted download will be indistinguishable from a recording that was interrupted prematurely. 
+`.cwa.part` files are partial `.cwa` files are created by *OmGui* as the data is being downloaded from the device.  When a download is completed successfully, the file is renamed to `.cwa`.  
+
+If you have a `.cwa.part` file while not currently downloading data, it could be that the data transfer might have been interrupted or failed.  Retry the download in *OmGui*.  If this fails, check the *Log* window (opened via the *View* menu), to see if there are any messages.  A download could fail, for example, if the USB connection was interrupted, or because of filling the workspace disk drive capacity or quota.   If the problem persists, locate the device's drive (e.g. *File Explorer* / *This PC* / identify and open the device's drive), and directly copy the `CWA-DATA.CWA` data file to your working folder.  
+
+If you have a `.cwa.part` file, but no longer have the original data on a device, you can rename a `.cwa.part` file to `.cwa`, and the data from an interrupted download will be indistinguishable from a recording that was interrupted prematurely. 
 
 
 ## Installation
