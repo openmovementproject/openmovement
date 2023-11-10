@@ -81,6 +81,7 @@ The AX enclosure is designed for IP68 rated water resistance -- not technically 
 * [AX3 Datasheet](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX3v2%20Datasheet.pdf)
 * [AX6 Datasheet](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX6%20Datasheet.pdf)
 * [AX Device - Technical Documentation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md) for firmware details
+    * [cwa_metadata.py](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-convert/python/cwa_metadata.py) - Script to extract metadata from a .CWA file
 * [AX3/AX6 Auxiliary Data](ax3-auxiliary.md) for details of using temperature and light sensor data.
 * [AX Device Rotation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md) for details about axis inversions.
 * [Open Movement API](http://digitalinteraction.github.io/openmovement/omapi/html/)
