@@ -42,9 +42,9 @@
 
 6. Open *Device Manager*, **does an entry appear listed under the *Ports* category for the device?** (Or sometimes under *Portable Devices*) 
    
-    If not, then there may be a driver issue, please try the OmGUI installation again, ensuring it is as a user with administrative rights as this attempts to install a driver (not usually be needed if you're running Windows 10) -- did the installation (with driver) complete without any issues?
+    If not, then there may be a driver issue, please try the OmGUI installation again -- or the separate installer and driver files in [AX3-Driver-Win-5.zip](https://github.com/digitalinteraction/openmovement/raw/master/Downloads/AX3/AX3-Driver-Win-5.zip), ensuring it is as a user with administrative rights as this attempts to install a driver (not usually be needed if you're running Windows 10 or 11) -- did the installation (with driver) complete without any issues?
 
-7. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *OmGui Software Troubleshooting* guide below.
+8. If the device appears as a drive and a "port", then the software should be able to communicate with it.  Please follow the *OmGui Software Troubleshooting* guide below.
 
 
 ## OmGui Software Troubleshooting
