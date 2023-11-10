@@ -112,8 +112,11 @@ def main():
   prefixDrive = b"\\\\.\\PHYSICALDRIVE"
   drivePath = findSingleDrive(prefixDevice, prefixDrive)
   if drivePath == None:
-    print("ERROR: Cannot continue without drive.")
-    return
+    prefixDevice = b"AX6 AX6 Mass Storage USB Device"
+    drivePath = findSingleDrive(prefixDevice, prefixDrive)
+    if drivePath == None:
+      print("ERROR: Cannot continue without drive.")
+      return
   
   print("Checking admin permissions...")
   if is_admin():
