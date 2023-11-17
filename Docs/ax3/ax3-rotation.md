@@ -1,13 +1,4 @@
-# AX Device Rotation: Axis Inversions
-
-## Overview
-
-The effect of making a recording where the device is incorrectly oriented will be to invert two of the axes -- which two depends on the way it was flipped, as described below.
- 
-However, you may not need to be too concerned as many analysis algorithms do not use the sign of the data (including all of the analysis options built-in to *OmGui*).  Many analysis algorithms for accelerometer data just take the *vector length* and are insensitive to orientation.  Also of note, the sleep algorithm "Estimating sleep parameters using an accelerometer without sleep diary" (e.g. in GGIR), the X/Y values are squared (removing the sign) and, although the Z-axis sign will change the sign of the arctangent (and the angle), it is only the absolute difference in (filtered) angles that is actually used, which is insensitive to the inversion. 
-
-To "future proof" your dataset against future algorithms that might be sensitive to the sign of the data, it is recommended that known inversions are documented.
-
+# AX Orientation
 
 ## AX Accelerometer Axes (AX3 and AX6) and Gyroscope Rotation (AX6-only)
 
@@ -28,7 +19,14 @@ Note: `⊗`, rendered `(+)` below, is used to denote the axis going away from th
 ```
 
 
-## Axis inversion diagrams
+## AX Device Rotation: Axis Inversions
+
+The effect of making a recording where the device is incorrectly oriented will be to invert two of the axes -- which two depends on the way it was flipped, as described below.
+ 
+However, you may not need to be too concerned as many analysis algorithms do not use the sign of the data (including all of the analysis options built-in to *OmGui*).  Many analysis algorithms for accelerometer data just take the *vector length* and are insensitive to orientation.  Also of note, the sleep algorithm "Estimating sleep parameters using an accelerometer without sleep diary" (e.g. in GGIR), the X/Y values are squared (removing the sign) and, although the Z-axis sign will change the sign of the arctangent (and the angle), it is only the absolute difference in (filtered) angles that is actually used, which is insensitive to the inversion. 
+
+To "future proof" your dataset against future algorithms that might be sensitive to the sign of the data, it is recommended that known inversions are documented.
+
 
 ### Axis at no rotation
 
