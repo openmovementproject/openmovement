@@ -69,3 +69,15 @@ There is a possibility that in some circumstances that being able to read the un
 
 Read sectors from a device -- for any header or data sectors found: for each session id, create a map of sequence id to dump file offset (should sort by timestamp as the sequence id can be reset).  If more than one session id is found, the user must choose which to restore.  If no header was found for a specific session id, then a dummy one can be created (but the device id should be specified).  It may be necessary to re-base the sequence id so that it starts at 0).
 -->
+
+
+## Step 5: Configure and test the device for reuse
+
+These steps for when the original device, that was a source of the corrupt data, has not yet been cleared and tested.
+
+Once the data is recovered, you can clear the data from the device so that it can be used to make a new recording:
+* Use [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI) software, select the device and press *Clear*.
+* If there is any problem with the previous step, see the [Troubleshooting Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md)
+* If none of the troubleshooting steps work, you can try [resetting the device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device).
+
+To verify the performance of the device, it is strongly recommended that you make a test recording (e.g. a static device) using the same parameters as you would like to use in the future (i.e. initial charge level, sensor configuration, time delay, recording duration).  This test recording should be inidicative of future device performance.  
