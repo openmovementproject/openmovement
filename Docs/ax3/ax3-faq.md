@@ -17,12 +17,12 @@
 
 Approximate maximum recording duration from a single full battery charge.  A typical configuration may be 100 Hz &plusmn;8 _g_.
 
-| Device  | Configuration  |   Sample Capacity |       6.25 Hz |     12.5 Hz |      25 Hz |    50 Hz |  100 Hz | 200 Hz | 400 Hz | 800 Hz | 1600 Hz | 3200 Hz |
-|---------|----------------|------------------:|--------------:|------------:|-----------:|---------:|--------:|-------:|-------:|-------:|--------:|--------:|
-| AX3     | packed         | 119009040 samples |             - | ~65d (110d) | ~48d (55d) |     27d* |  13.5d* |   6.8d |   3.4d |  41.3h |   20.6h |   10.3h |
-| AX3     | unpacked       |  79339360 samples |  >65d? (146d) | ~65d? (73d) |      36.5d |      18d |     9d* |   4.5d |   2.3d |  27.5h |   13.7h |    6.8h |
-| AX6     | accel. only    | 158714880 samples | >146d? (293d) |        146d |        73d |    36.5d |  18.3d  |   9.1d |   4.5d |  55.1h |   27.5h |       - |
-| AX6     | accel. + gyro. |  79357440 samples |             - |           - | 7-9d (36.7d) | 7-9d (18d) | 7-9d* |   4.5d |   2.3d |  27.5h |   13.7h |       - |
+| Device  | Configuration  |   Sample Capacity |       6.25 Hz |     12.5 Hz |        25 Hz |      50 Hz |  100 Hz | 200 Hz | 400 Hz | 800 Hz | 1600 Hz | 3200 Hz |
+|---------|----------------|------------------:|--------------:|------------:|-------------:|-----------:|--------:|-------:|-------:|-------:|--------:|--------:|
+| AX3     | packed^        | 119009040 samples |             - | ~65d (110d) |   ~48d (55d) |       27d* |  13.5d* |   6.8d |   3.4d |  41.3h |   20.6h |   10.3h |
+| AX3     | unpacked^      |  79339360 samples |  >65d? (146d) | ~65d? (73d) |        36.5d |        18d |     9d* |   4.5d |   2.3d |  27.5h |   13.7h |    6.8h |
+| AX6     | accel. only    | 158714880 samples | >146d? (293d) |        146d |          73d |      36.5d |  18.3d  |   9.1d |   4.5d |  55.1h |   27.5h |       - |
+| AX6     | accel. + gyro. |  79357440 samples |             - |           - | 7-9d (36.7d) | 7-9d (18d) |   7-9d* |   4.5d |   2.3d |  27.5h |   13.7h |       - |
 
 * `d` days (<= 400 Hz)
 * `h` hours (>= 800 Hz)
@@ -30,7 +30,8 @@ Approximate maximum recording duration from a single full battery charge.  A typ
 * `?` an extrapolated best-guess
 * `~` uncertainty in the value (charge-limited, and device-dependent)
 * `()` where a recording is likely to be battery-limited, times in brackets are the storage capacity (which could only be reached if recharged). 
-* `*` where the storage- and battery-limits are similar, which is reached first may be device-dependent. 
+* `*` where the storage- and battery-limits are similar, which is reached first may be device-dependent.
+* `^` AX3 *packed* data uses the sensor in a 10-bits per axis mode.  AX3 *unpacked* uses the sensor at full resolution: 10-/11-/12-/13-bits per-axis depending on 2/4/8/16 *g* range (stored as 16-bit values).  AX6 uses unpacked mode, stored as 16-bits per-axis.
 
 <!-- AX6 12.5Hz Accelerometer-only 149 days 100%-39% battery -->
 
