@@ -17,11 +17,13 @@ def driveDump(path, outputFile):
   try:
     startTime = time.time()
     with open(path, 'rb') as fi:
-      # HACK: Fixed AX3 drive size
-      fileSize = 992161*512
-      # fi.seek(0, os.SEEK_END) # 2
-      # fileSize = fi.tell() # 992161*512
-      # fi.seek(0, os.SEEK_SET) # 0
+      # AX3 drive size: fileSize = 992161*512
+      # AX6 drive size: fileSize = 1975995*512
+      fileSize = findPhysicalDriveSize(path)
+      if fileSize <= 0:
+        print("ERROR: Problem determining drive size.")
+        return
+      
       with open(outputFile, 'wb') as fo:
         writtenSize = 0
         while True:
@@ -53,29 +55,41 @@ def driveDump(path, outputFile):
     return
     
 
+def findPhysicalDriveSize(physicalDrive):
+  out = check_output(["wmic", "diskdrive", "list", "brief"])
+  lines = out.split(b"\r\n")
+  for line in lines:
+    parts = line.split()
+    for part in parts:
+      if part.decode() == physicalDrive:
+        return int(parts[-1].decode())
+  return 0
+
+
 def findPhysicalDrives(prefixDevice, prefixDrive):
   out = check_output(["wmic", "diskdrive", "list", "brief"])
-  
   paths = []
   lines = out.split(b"\r\n")
   for line in lines:
-    if line.startswith(prefixDevice):
+    match = False
+    for prefix in prefixDevice:
+      if line.startswith(prefix):
+        match = True
+    if match:
       parts = line.split()
       for part in parts:
         if part.startswith(prefixDrive):
           paths.append(part.decode("utf-8"))
-  
   return paths
 
  
 def findSingleDrive(prefixDevice, prefixDrive):
   paths = findPhysicalDrives(prefixDevice, prefixDrive)
-  
   if len(paths) <= 0:
-    print("ERROR: Found no matching drive")
+    print("WARNING: Found no matching drive (expecting one):")
     return None
   elif len(paths) > 1:
-    print("ERROR: Found too many matching drives (expecting just one):")
+    print("WARNING: Found too many matching drives (expecting at most one):")
     for path in paths:
       print("", path);
     return None
@@ -108,16 +122,13 @@ def main():
     return
   
   print("Autodetect...")
-  prefixDevice = b"AX3 AX3 Mass Storage USB Device"
+  prefixDevice = [b"AX3 AX3 Mass Storage USB Device", b"AX6 AX6 Mass Storage USB Device"]
   prefixDrive = b"\\\\.\\PHYSICALDRIVE"
   drivePath = findSingleDrive(prefixDevice, prefixDrive)
-  if drivePath == None:
-    prefixDevice = b"AX6 AX6 Mass Storage USB Device"
-    drivePath = findSingleDrive(prefixDevice, prefixDrive)
-    if drivePath == None:
-      print("ERROR: Cannot continue without drive.")
-      return
-  
+  if drivePath is None:
+    print("ERROR: Cannot continue without a device drive.")
+    return
+
   print("Checking admin permissions...")
   if is_admin():
     # Run code needing admin rights
