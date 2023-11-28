@@ -87,7 +87,7 @@ def recoverCwa(inputFile, outputFile, method):
             x = sessionId ^ globalSessionId
             bitValue = singleBit(x)
             if bitValue:
-              # print("Corrected probable corrupted session ID: " + str(sessionId) + " (" + str(globalSessionId) + ") ^" + hex(x))
+              print("Corrected probable corrupted session ID: " + str(sessionId) + " (" + str(globalSessionId) + ") ^" + hex(x))
               sessionId ^= bitValue
               countCorrectedSession += 1
             else:
@@ -102,7 +102,7 @@ def recoverCwa(inputFile, outputFile, method):
             x = sequenceId ^ nextSequence
             bitValue = singleBit(x)
             if bitValue:
-              # print("Corrected possible corrupted sequence ID: " + str(sequenceId) + " (" + str(nextSequence) + ") ^" + hex(x))
+              print("Corrected possible corrupted sequence ID: " + str(sequenceId) + " (" + str(nextSequence) + ") ^" + hex(x))
               sequenceId ^= bitValue
               countCorrectedSequence += 1
             else:
