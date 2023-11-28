@@ -19,7 +19,7 @@ def singleBit(value):
   else:
     return 0
 
-def recoverCwa(inputFile, outputFile):
+def recoverCwa(inputFile, outputFile, method):
   initialOffset = 0 # 0x20000 in drive dumps
   sectorSize = 512
   headerSize = 2 * sectorSize
@@ -27,19 +27,10 @@ def recoverCwa(inputFile, outputFile):
   # allowedPadding = [ 0xe0, 0xf0 ] # Allowed garbage bytes
   globalSessionId = None
   globalDeviceId = None
-  
-  if False:  # If clock not corrupted and not reset, session don't have to be unique, sequence may reset
-    idxTimestamp = 0
-    idxSession = 1
-    idxSequenceId = 2
-  elif False:  # Clock may be reset between different sessions were unique, sequence may reset
-    idxSession = 0
-    idxTimestamp = 1
-    idxSequenceId = 2
-  elif True:  # Sessions must be unique and sequence may not reset
-    idxSession = 0
-    idxSequenceId = 1
-    idxTimestamp = 2
+
+  idxTimestamp = method.index('t')
+  idxSession = method.index('s')
+  idxSequenceId = method.index('q')
   
   print("Reading input: ", inputFile)
   
@@ -287,30 +278,50 @@ def recoverCwa(inputFile, outputFile):
 
 def main():
   print("Running...")
-  inputFile = "cwa-dump.img"
-  outputFile = "cwa-recover.cwa"
-  
-  if len(sys.argv) > 1:
-    inputFile = sys.argv[1]
-    print("NOTE: Using input file:", inputFile)
-    
-  if len(sys.argv) > 2:
-    outputFile = sys.argv[1]
-    print("NOTE: Using output file:", outputFile)
-    
-  if len(sys.argv) > 3:
-    print("ERROR: Too many parameters passed")
-    return
-  
+
+  method = 'sqt'
+  inputFile = None
+  outputFile = None
+  arg = 1
+  while arg < len(sys.argv):
+    if sys.argv[arg].startswith("-"):
+      if sys.argv[arg] == "--method-sqt":
+        # 'sqt' - sessions must be unique and sequence may not reset
+        method = "sqt"
+      elif sys.argv[arg] == "--method-tsq":
+        # 'tsq' - clock not reset, session don't have to be unique, sequence may reset
+        method = "tsq"
+      elif sys.argv[arg] == "--method-stq":
+        # 'stq' - clock may be reset, sessions were unique, sequence may reset
+        method = "stq"
+      else:
+        print("ERROR: Unrecognized option: " + sys.argv[arg])
+        return
+    elif inputFile == None:
+      inputFile = sys.argv[arg]
+    elif outputFile == None:
+      outputFile = sys.argv[arg]
+    else:
+      print("ERROR: Unrecognized positional argument: " + sys.argv[arg])
+      return
+    arg += 1
+
+  if inputFile is None:
+    inputFile = "cwa-dump.img"
+  if outputFile is None:
+    outputFile = "cwa-recover.cwa"
+
+  print("NOTE: Using input file:", inputFile)
   if not os.path.exists(inputFile):
     print("ERROR: Input file does not exist:", inputFile)
     return
   
+  print("NOTE: Using output file:", outputFile)
   if os.path.exists(outputFile):
     print("ERROR: Output file already exists, must remove or use another output file:", outputFile)
     return
   
-  return recoverCwa(inputFile, outputFile)
+  return recoverCwa(inputFile, outputFile, method)
 
 if __name__ == "__main__":
   main()
