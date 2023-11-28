@@ -38,14 +38,14 @@ def driveDump(path, outputFile):
             break
             
           writtenSize += written
-          perc = int(100 * writtenSize / fileSize)
+          perc = round(100 * writtenSize / fileSize, 1)
           elapsed = time.time() - startTime
           remaining = 0
           if elapsed > 0:
             rate = writtenSize / elapsed
             if rate > 0:
               remaining = (fileSize - writtenSize) / rate
-          print("Dumping " + str(written) + ", approx. " + str(perc) + "% in " + str(timedelta(seconds=int(elapsed))) + ", est. remaining: " + str(timedelta(seconds=int(remaining))) + "...")
+          print("Dumping " + str(written) + ", =" + str(writtenSize) + "/" + str(fileSize) + " (" + str(perc) + "%) in " + str(timedelta(seconds=int(elapsed))) + ", " + str(round(rate / 1024, 3)) + " kB/s, ETA " + str(timedelta(seconds=int(remaining))) + ".")
           
           if writtenSize >= fileSize:
             break
