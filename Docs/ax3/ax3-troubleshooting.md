@@ -110,24 +110,41 @@ Configuration system failed to initialize`, the program configuration has become
 
 8. **Device log**
 
-    If the device is not making a recording as you expect, you can obtain a detailed log from the attached device, which should explain why it has stopped, by downloading the archive: [AX3-Utils-Win-3.zip](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip), then extracting/unzipping all of the files from it to a folder, opening that folder, ensuring only the one device is attached, then double-clicking `log.cmd` to run the tool.  Copy the output it gives (there may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored) -- this should be a timestamped record of the device's "stop reasons".
-    
-    If you have problems using the `log.cmd` above, you could alternatively try:
+    If the device is not making a recording as you expect, you can [obtain a detailed log from the attached device](#device-log) by following the instructions below. 
 
-    * Open a browser that supports *Web Serial*, such as *Google Chrome*.
-    * Visit this page: https://googlechromelabs.github.io/serial-terminal/
-    * Connect the device and wait around 10 seconds.
-    * In the *Port* dropdown, select the serial port the device is on.
-    * Click the *Connect* button
-    * Click in the black terminal area of the page
-    * Type the following, followed by the Enter key (note that you will not see anything appear until you press Enter):
-        `LOG`
-    * Select the output lines of text and press Ctrl+C to copy it to the clipboard
-    * Paste (Ctrl+V) into a text document so that you have a copy of the log
-
-9. **Resetting the device**
+10. **Resetting the device**
 
     (Advanced) If you are having trouble programming a device, you can [manually reset the device](#resetting-the-device) by following the instructions below. 
+
+
+### Device Log
+
+You can obtain a detailed log from the attached device, which gives a reason for any recent stops to the logging.  There are two methods that can be used to obtain this log.
+
+**Method 1: Log Utility**
+
+1. Download the `.ZIP` archive: [AX3-Utils-Win-3.zip](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip)
+2. Open the downloaded `.ZIP` archive (e.g. open *File Explorer* and locate `Downloads`)
+3. In the toolbar, select *Extract All* / *Extract*.
+4. In the newly-created extracted folder, locate the file: `log.cmd`
+5. Ensuring only a single device is attached, double-click `log.cmd` to run the tool.  If you are prompted with a warning, try *More Info* / *Open Anyway*.
+7. Use the mouse to click and drag to select the output text, and press *Enter* to copy the text  to the clipboard.  There may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored.  
+8. Paste the text into a new text document to save it.  This should be a timestamped record of the device's "stop reasons".
+
+**Method 2: Web-Based Terminal**
+
+If you have problems using the `log.cmd` above, you could alternatively try:
+
+1. Open a browser that supports *Web Serial*, such as *Google Chrome* or *Edge*.
+2. Visit this page: [googlechromelabs.github.io/serial-terminal](https://googlechromelabs.github.io/serial-terminal/)
+3. Ensure the single device is connected (wait around 10 seconds).
+4. In the *Port* dropdown, change the serial port (to the one the device is attached to).
+5. Click the *Connect* button
+6. Click in the black terminal area of the page
+7. Type the following, followed by the *Enter* key (note that you will not see anything appear until you press *Enter*):
+   `LOG`
+8. Select the output lines of text and press *Ctrl*+*C* to copy it to the clipboard.  There may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored.  
+9. Paste (*Ctrl*+*V*) the text into a new text document to save it.  This should be a timestamped record of the device's "stop reasons".
 
 
 ### OmGui Detailed Log
