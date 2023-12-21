@@ -207,7 +207,9 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 **NOTE:** This step is for advanced use only, and should only be performed if necessary.
 
 **IMPORTANT:** This will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.  
- 
+
+**Method 1: Utility Program**
+
 1. Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
 
 2. Open the .ZIP file and extract the program `HidBootLoader.exe`.
@@ -250,22 +252,35 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 
 14. The device should now be in a reset state.
 
+
+**Method 2: Web-Based Terminal**
+
 If you have problems using the `HidBootLoader.exe` program above, you could alternatively try:
 
-1. Open a browser that supports *Web Serial*, such as [Google Chrome](https://google.com/chrome).
-2. Visit this page: https://googlechromelabs.github.io/serial-terminal/
-3. Connect the device and wait around 10 seconds.
-4. In the Port dropdown, select the serial port the device is on.
-5. Click the Connect button
+1. Open a browser that supports *Web Serial*, such as *Google Chrome* or *Edge*.
+2. Visit this page: [googlechromelabs.github.io/serial-terminal](https://googlechromelabs.github.io/serial-terminal/)
+3. Ensure the single device is connected (wait around 10 seconds).
+4. In the *Port* dropdown, change the serial port (to the one the device is attached to).
+5. Click the *Connect* button
 6. Click in the black terminal area of the page
-7. Type `ECHO 1` and press <kbd>Enter</kbd> -- you will not see anything appear until you have typed everything.
-8. Now type the *Command* from the previous section except, after the last command and *instead* of any `|` symbol, press the <kbd>Enter</kbd> key. For example, the lines (remembering to replace `12345` with your device's ID):
+7. Type the following, followed by the <kbd>Enter</kbd> key (note that you will not see anything appear until you press <kbd>Enter</kbd> -- just repeat the whole line if you make any mistakes):
+   ```
+   ECHO 1
+   ```
+9. **Only if** you are changing the device ID, type the following then the <kbd>Enter</kbd> key, replacing `12345` with your device's ID as printed on the case (you can use <kbd>Backspace</kbd> to correct mistakes):
     ```
     DEVICE=12345
+    ```
+10. Type the following, pressing the <kbd>Enter</kbd> key at the end of each line (you can use <kbd>Backspace</kbd> to correct mistakes):
+    ```
     TIME 2020-01-01 00:00:00
     FORMAT QC
     LED 5
     ```
+11. Wait several seconds while the device LED is red, it should eventually turn *Magenta* (a purple blue/red mixture).
+12. Disconnect the device
+13. The device should now be in a reset state.
+
 
 ## Removing a Mount Point
 
