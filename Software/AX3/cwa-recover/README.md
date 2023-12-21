@@ -80,4 +80,4 @@ Once the data is recovered, you can clear the data from the device so that it ca
 * If there is any problem with the previous step, see the [Troubleshooting Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md)
 * If none of the troubleshooting steps work, you can try [resetting the device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device).
 
-To verify the performance of the device, it is strongly recommended that you make a test recording (e.g. a static device) using the same parameters as you would like to use in the future (i.e. initial charge level, sensor configuration, time delay, recording duration).  This test recording should be inidicative of future device performance.  
+To verify the performance of the device, it is strongly recommended that you make a test recording (e.g. a static device) using the same parameters as you would like to use in the future (i.e. initial charge level, sensor configuration, time delay, recording duration).  This test recording should be indicative of future device performance.  
