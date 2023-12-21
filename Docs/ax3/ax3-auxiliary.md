@@ -1,6 +1,9 @@
-# AX3/AX6 Auxiliary Data: Battery, Temperature, Light
+# AX3/AX6 Data
 
-## Auxiliary Data
+This document describes advanced details of AX device data.  For additional information, see [Technical Documentation](ax3-technical.md) for details on how the data is stored, and [Sensor Data Characteristics](ax3-faq.md#sensor-data-characteristics) for details of the underlying sensing device.
+
+
+## Auxiliary Data: Battery, Temperature, Light
 
 The AX3/AX6 device primarily records high-frequency movement data, but also record additional, low-frequency, *auxiliary* data.  This data includes light level indication, device temperature, and device battery voltage.  This data is always recorded, regardless of configuration, whenever the device is logging movement data.
 
@@ -9,7 +12,7 @@ The sensors are internally sampled at 1 Hz, then the most recently sampled value
 See below for specific information on the battery, temperature, and light.
 
 
-## Battery Voltage
+### Battery Voltage
 
 The device battery voltage is sampled as a 10-bit ADC value (0-1023).  
 
@@ -22,7 +25,7 @@ voltage = value * 6 / 1024
 $$
 
 
-## Device Temperature
+### Device Temperature
 
 The device internal temperature is measured by an on-board temperature sensor ([MCP9700](https://www.microchip.com/en-us/product/MCP9700)) which outputs the temperature as a linearly changing voltage of $10 mV/&deg;C$, with an offset of $500 mV @ 0&deg;C$: $voltage = temperature * 0.01 + 0.5$.  This is sampled and stored as a 10-bit ADC value (0-1023): $value = voltage * 1024 / 3$.  The voltage (Volts) is calculated from the ADC value as: $voltage = value * 3 / 1024$.  As $temperature = (voltage - 0.5) * 100$, this is $temperature = (value * 3 / 1024 - 0.5) * 100$, and simplified below.
 
@@ -37,7 +40,7 @@ The internal temperature sensor is useful for auto-calibration of the movement d
 -->
 
 
-## Light Level Indicator
+### Light Level Indicator
 
 The AX devices use a light sensor ([APDS-9007](https://docs.broadcom.com/docs/AV02-0512EN)) which has a logarithmic response over a wide dynamic range.  The sensor arrangement is most suitable as a general, relative, indicator of light, for example to distinguish a varying/stable level, or daily maxima/minima. 
 
@@ -143,3 +146,24 @@ with CwaData(filename, include_gyro=False, include_light=True, include_temperatu
     samples = cwa_data.get_samples()
 ```
 
+
+## Sensor Data Calibration
+
+An explicit design goal of the AX devices was to record only the raw data from an underlying sensor, with everything else applied afterwards in software.
+
+The sensor data is initially bound within manufacturer's tolerances, as described in the [data sheets](ax3-faq.md#sensor-data-characteristics).  The Open Movement quality control testing procedures (e.g. 5-day delay and 8-day recording) are designed to filter out any devices that report data outside of specific thresholds.
+
+Accelerometer data can have a small amount of per-axis *offset* and *gain* error.  This may change based on temperature, ageing or, to a small extent, even local gravity variation.  A static calibration can be insufficient for complete correction, and so a dynamic "auto-" calibration is a standard part of accelerometer data analysis.  
+
+The self-calibration technique was popularized in [Autocalibration of accelerometer data for free-living physical activity assessment using local gravity and temperature: an evaluation on four continents](https://journals.physiology.org/doi/full/10.1152/japplphysiol.00421.2014) by van Hees et al.  
+
+Implementations of this technique are in software such as:
+
+* [GGIR](https://cran.r-project.org/web/packages/GGIR/vignettes/GGIR.html#52_Auto-calibration)
+* [biobankAccelerometerAnalysis](https://github.com/OxWearables/biobankAccelerometerAnalysis#under-the-hood)
+* [omconvert](https://github.com/digitalinteraction/omconvert#analysis-methods)
+* [Open Movement - MATLAB](https://github.com/digitalinteraction/openmovement/blob/master/Software/Analysis/Matlab/estimateCalibration.m)
+
+Auto-calibration uses the variety of orientations observed over the recording to determine calibration parameters which can then be applied to the data.  It is also possible to re-use calibration parameters from one device session to another session from the same device, and this would be best where the temperature ranges observed are roughly comparable.
+
+Analysis algorithms are typically derived from datasets with either raw or auto-calibrated data.  In addition, some algorithms are designed to have a low-sensitivity to calibration.  For example, a high-pass filter can be used to drastically reduce the effect of any systematic offset.
