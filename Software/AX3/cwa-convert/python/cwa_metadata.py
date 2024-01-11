@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Install and run:
-#   wget https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-convert/python/cwa_metadata.py
+#   curl -O https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/AX3/cwa-convert/python/cwa_metadata.py
 #   python cwa_metadata.py CWA-DATA.CWA
 #
 # CWA Metadata Reader
