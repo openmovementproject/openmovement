@@ -165,7 +165,7 @@ def cwa_header(block):
 	if len(block) >= 512:
 		packetHeader = unpack('BB', block[0:2])							# @ 0  +2   ASCII "MD", little-endian (0x444D)
 		packetLength = unpack('<H', block[2:4])[0]						# @ 2  +2   Packet length (1020 bytes, with header (4) = 1024 bytes total)
-		if packetLength != 508:
+		if packetLength != 508 and packetLength != 1020:
 			print('WARNING: Unexpected header block size: ' + str(packetLength))
 		if packetHeader[0] == ord('M') and packetHeader[1] == ord('D') and packetLength >= 508:
 			header['packetLength'] = packetLength
@@ -189,7 +189,7 @@ def cwa_header(block):
 			header['loggingEnd'] = read_timestamp(block[17:21])			# @17  +4   Stop time for delayed logging		
 			header['loggingCapacity'] = unpack('<I', block[21:25])[0]	# @21  +4   (Deprecated: preset maximum number of samples to collect, 0 = unlimited)
 			# header['reserved3'] = block[25:26]						# @25  +1   (1 byte reserved)
-			header['flashLed'] = unpack('B', block[35:36])[0]			# @26  +1   Flash LED during recording
+			header['flashLed'] = unpack('B', block[26:27])[0]			# @26  +1   Flash LED during recording
 			if header['flashLed'] == 0xff:
 				header['flashLed'] = 0
 			# header['reserved4'] = block[27:35]						# @25  +8   (8 bytes reserved)
