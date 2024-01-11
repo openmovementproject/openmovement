@@ -236,9 +236,9 @@ def cwa_data(block, extractData=False):
 				data['sequenceId'] = unpack('<I', block[10:14])[0]			# @10  +4   Sequence counter (0-indexed), each packet has a new number (reset if restarted)
 				timestamp = read_timestamp(block[14:18])					# @14  +4   Last reported RTC value, 0 = unknown
 				light = unpack('<H', block[18:20])[0]						# @18  +2   Last recorded light sensor value in raw units, 0 = none #  log10LuxTimes10Power3 = ((value + 512.0) * 6000 / 1024); lux = pow(10.0, log10LuxTimes10Power3 / 1000.0);
-				data['light'] = light & 0x3f # least-significant 10 bits
+				data['light'] = light & 0x03ff # least-significant 10 bits
 				temperature = unpack('<H', block[20:22])[0]					# @20  +2   Last recorded temperature sensor value in raw units, 0 = none
-				data['temperature'] = temperature * 75.0 / 256 - 50
+				data['temperature'] = (temperature & 0x03ff) * 75.0 / 256 - 50
 				data['events'] = unpack('B', block[22:23])[0]				# @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
 				battery = unpack('B', block[23:24])[0]						# @23  +1   Last recorded battery level in raw units, 0 = unknown
 				data['battery'] = (2 * battery + 512.0) * 6000 / 1024 / 1000.0
@@ -368,8 +368,6 @@ def cwa_data(block, extractData=False):
 							magSamples[i][2] = (block[ofs + 4] | (block[ofs + 5] << 8)) / magUnit
 						data['samplesMag'] = magSamples
 				
-				# Light
-				light &= 0x3ff		# actual light value is least significant 10 bits
 
 	return data
 
