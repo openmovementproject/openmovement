@@ -119,9 +119,18 @@ Configuration system failed to initialize`, the program configuration has become
 
 ### Device Log
 
-You can obtain a detailed log from the attached device, which gives a reason for any recent stops to the logging.  There are two methods that can be used to obtain this log.
+You can obtain a detailed log from the attached device, which gives a reason for any recent stops to the logging.  There are three methods that can be used to obtain this log.
 
-**Method 1: Log Utility**
+**Method 1: Web Page**
+
+1. Open a browser that supports *Web Serial*, such as *Google Chrome* or *Edge*.
+2. Visit the page: [AX Diagnostics](https://config.openmovement.dev/#diagnostics&nolog&noconfigure&title=AX+Diagnostics)
+3. Ensure a single device is connected (wait around 10 seconds after connecting the device).
+4. Click: *Connect serial device...* and choose the attached *AX* device.
+5. Click: *Device Diagnostics* to generate the diagnostic report.
+6. Click: *Download Report* to save a copy of the diagnostics report.
+
+<details><summary><strong>Method 2: Log Utility</strong></summary>
 
 1. Download the `.ZIP` archive: [AX3-Utils-Win-3.zip](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip)
 2. Open the downloaded `.ZIP` archive (e.g. open *File Explorer* and locate `Downloads`)
@@ -131,7 +140,9 @@ You can obtain a detailed log from the attached device, which gives a reason for
 7. Use the mouse to click and drag to select the output text, and press *Enter* to copy the text  to the clipboard.  There may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored.  
 8. Paste the text into a new text document to save it.  This should be a timestamped record of the device's "stop reasons".
 
-**Method 2: Web-Based Terminal**
+</details>
+
+<details><summary><strong>Method 3: Web-Based Terminal</strong></summary>
 
 If you have problems using the `log.cmd` above, you could alternatively try:
 
@@ -145,6 +156,8 @@ If you have problems using the `log.cmd` above, you could alternatively try:
    `LOG`
 8. Select the output lines of text and press *Ctrl*+*C* to copy it to the clipboard.  There may be some unexpected letters or unusal symbols at the end of some of the lines, these can be ignored.  
 9. Paste (*Ctrl*+*V*) the text into a new text document to save it.  This should be a timestamped record of the device's "stop reasons".
+
+</details>
 
 
 ### OmGui Detailed Log
