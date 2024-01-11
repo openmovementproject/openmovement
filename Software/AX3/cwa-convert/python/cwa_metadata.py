@@ -241,7 +241,7 @@ def cwa_data(block, extractData=False):
 				data['temperature'] = temperature * 75.0 / 256 - 50
 				data['events'] = unpack('B', block[22:23])[0]				# @22  +1   Event flags since last packet, b0 = resume logging, b1 = reserved for single-tap event, b2 = reserved for double-tap event, b3 = reserved, b4 = reserved for diagnostic hardware buffer, b5 = reserved for diagnostic software buffer, b6 = reserved for diagnostic internal flag, b7 = reserved)
 				battery = unpack('B', block[23:24])[0]						# @23  +1   Last recorded battery level in raw units, 0 = unknown
-				data['battery'] = (battery + 512.0) * 6000 / 1024 / 1000.0
+				data['battery'] = (2 * battery + 512.0) * 6000 / 1024 / 1000.0
 				rateCode = unpack('B', block[24:25])[0]					    # @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
 				numAxesBPS = unpack('B', block[25:26])[0]					# @25  +1   0x32 (top nibble: number of axes = 3; bottom nibble: packing format - 2 = 3x 16-bit signed, 0 = 3x 10-bit signed + 2-bit exponent)
 				timestampOffset = unpack('<h', block[26:28])[0]				# @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
