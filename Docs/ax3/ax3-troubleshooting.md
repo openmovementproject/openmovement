@@ -221,7 +221,19 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 
 **IMPORTANT:** This will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.  
 
-**Method 1: Utility Program**
+**Method 1: Web Page**
+
+1. Open a browser that supports *Web Serial*, such as *Google Chrome* or *Edge*.
+2. Visit the page: [AX Diagnostics](https://config.openmovement.dev/#diagnostics&nolog&noconfigure&title=AX+Diagnostics)
+3. Ensure a single device is connected (wait around 10 seconds after connecting the device).
+4. Click: *Connect serial device...* and choose the attached *AX* device.
+5. Click: *Reset* and *OK*.
+6. Only if you are resetting the device ID: enter the device ID as displayed on the device case.
+7. Click: *OK*.
+8. The device will be wiped and reset.
+
+
+<details><summary><strong>Method 2: Utility Program</strong></summary>
 
 1. Download the .ZIP file: [AX3-Bootloaders](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Bootloaders.zip?raw=true)
 
@@ -265,8 +277,9 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
 
 14. The device should now be in a reset state.
 
+</details>
 
-**Method 2: Web-Based Terminal**
+<details><summary><strong>Method 3: Web-Based Terminal</strong></summary>
 
 If you have problems using the `HidBootLoader.exe` program above, you could alternatively try:
 
@@ -293,6 +306,8 @@ If you have problems using the `HidBootLoader.exe` program above, you could alte
 11. Wait several seconds while the device LED is red, it should eventually turn *Magenta* (a purple blue/red mixture).
 12. Disconnect the device
 13. The device should now be in a reset state.
+
+</details>
 
 
 ## Removing a Mount Point
@@ -376,6 +391,15 @@ You should check that you do not have any other software unnecessarily writing t
 If you have a `.cwa.part` file while not currently downloading data, it could be that the data transfer might have been interrupted or failed.  Retry the download in *OmGui*.  If this fails, check the *Log* window (opened via the *View* menu), to see if there are any messages.  A download could fail, for example, if the USB connection was interrupted, or because of filling the workspace disk drive capacity or quota.   If the problem persists, locate the device's drive (e.g. *File Explorer* / *This PC* / identify and open the device's drive), and directly copy the `CWA-DATA.CWA` data file to your working folder.  
 
 If you have a `.cwa.part` file, but no longer have the original data on a device, you can rename a `.cwa.part` file to `.cwa`, and the data from an interrupted download will be indistinguishable from a recording that was interrupted prematurely. 
+
+### `.cwa` File Diagnostics
+
+To examine the metadata from a `.cwa` file:
+
+1. In your browser, visit the page: [AX Diagnostics](https://config.openmovement.dev/#diagnostics&nolog&noconfigure&title=AX+Diagnostics)
+2. Click: *File Diagnostics*.
+3. Select your `.cwa` file and press *Open* to generate the diagnostic report.
+4. Click: *Download Report* to save a copy of the diagnostics report.
 
 
 ## Installation
