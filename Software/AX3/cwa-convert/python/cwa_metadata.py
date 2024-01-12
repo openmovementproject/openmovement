@@ -350,7 +350,7 @@ def cwa_data(block, extractData=False):
 								accelSamples[i][2] = (block[ofs + 4] | (block[ofs + 5] << 8)) / accelUnit
 						data['samplesAccel'] = accelSamples
 					
-					if gyroAxis >= 0 and bytesPerSample == 2:
+					if gyroAxis >= 0 and bytesPerAxis == 2:
 						gyroSamples = [[0, 0, 0]] * data['sampleCount']
 						for i in range(data['sampleCount']):
 							ofs = 30 + (i * 2 * channels) + 2 * gyroAxis
@@ -359,7 +359,7 @@ def cwa_data(block, extractData=False):
 							gyroSamples[i][2] = (block[ofs + 4] | (block[ofs + 5] << 8)) / gyroUnit
 						data['samplesGyro'] = gyroSamples
 					
-					if magAxis >= 0 and bytesPerSample == 2:
+					if magAxis >= 0 and bytesPerAxis == 2:
 						magSamples = [[0, 0, 0]] * data['sampleCount']
 						for i in range(data['sampleCount']):
 							ofs = 30 + (i * 2 * channels) + 2 * magAxis
