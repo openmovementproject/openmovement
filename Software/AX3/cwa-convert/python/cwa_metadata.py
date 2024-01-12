@@ -336,7 +336,7 @@ def cwa_data(block, extractData=False):
 						if bytesPerAxis == 0 and channels == 3:
 							for i in range(data['sampleCount']):
 								ofs = 30 + i * 4
-								#val =  block[i] | (block[i + 1] << 8) | (block[i + 2] << 8) | (block[i + 3] << 24)
+								#val =  block[i] | (block[i + 1] << 8) | (block[i + 2] << 16) | (block[i + 3] << 24)
 								val = unpack('<I', block[ofs:ofs + 4])[0]
 								ex = (6 - ((val >> 30) & 3))
 								accelSamples[i][0] = (short_sign_extend((0xffc0 & (val <<  6))) >> ex) / accelUnit
