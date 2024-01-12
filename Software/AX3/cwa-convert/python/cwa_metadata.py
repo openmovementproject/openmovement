@@ -342,7 +342,7 @@ def cwa_data(block, extractData=False):
 								accelSamples[i][0] = (short_sign_extend((0xffc0 & (val <<  6))) >> ex) / accelUnit
 								accelSamples[i][1] = (short_sign_extend((0xffc0 & (val >>  4))) >> ex) / accelUnit
 								accelSamples[i][2] = (short_sign_extend((0xffc0 & (val >> 14))) >> ex) / accelUnit
-						elif bytesPerSample == 2:
+						elif bytesPerAxis == 2:
 							for i in range(data['sampleCount']):
 								ofs = 30 + (i * 2 * channels) + 2 * accelAxis
 								accelSamples[i][0] = (block[ofs + 0] | (block[ofs + 1] << 8)) / accelUnit
