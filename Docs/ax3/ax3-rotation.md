@@ -2,6 +2,8 @@
 
 ## AX Accelerometer Axes (AX3 and AX6) and Gyroscope Rotation (AX6-only)
 
+> When observed on the etched largest face (the LED away, with the longer end of the USB connector closer to you): positive-X matches the "alignment arrow" towards the slightly tapered end of the puck; positive-Y is in the plane of the etched face 90 degrees clockwise; positive-Z is away through the face.  The gyroscope positive rotations are clockwise, when observed from the origin, along each axis.  
+
 ![AX6 Axes](axes.svg)
 
 Note: `⊗`, rendered `(+)` below, is used to denote the axis going away from the viewer into the plane; while `⊙`, rendered `(.)` below, is used to denote the axis coming towards the viewer from the plane.  In the diagrams below, `*` denotes the thinner, slightly tapered end of the puck.
