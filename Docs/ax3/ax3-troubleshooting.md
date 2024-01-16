@@ -256,13 +256,13 @@ If these numbers are inconsistent, you could try *resetting the device* (includi
     * **Not changing the device ID:** If you are just resetting the device state (and not the device ID):
 
        ```
-       TIME 2020-01-01 00:00:00|FORMAT QC|LED 5
+       TIME 2020-01-01 00:00:00|FORMAT WC|LED 5
        ```
 
     * **Changing the device ID:** If you are also resetting the device ID (if it appears, from the above troubleshooting, that the device ID has somehow become incorrectly programmed):
 
        ```
-       DEVICE=12345|TIME 2020-01-01 00:00:00|FORMAT QC|LED 5
+       DEVICE=12345|TIME 2020-01-01 00:00:00|FORMAT WC|LED 5
        ```
            
        ...and you must change `12345` to match the ID number on the outside of the device case (after any "17-" or "18-" prefix).
@@ -300,7 +300,7 @@ If you have problems using the `HidBootLoader.exe` program above, you could alte
 10. Type the following, pressing the <kbd>Enter</kbd> key at the end of each line (you can use <kbd>Backspace</kbd> to correct mistakes):
     ```
     TIME 2020-01-01 00:00:00
-    FORMAT QC
+    FORMAT WC
     LED 5
     ```
 11. Wait several seconds while the device LED is red, it should eventually turn *Magenta* (a purple blue/red mixture).
