@@ -167,3 +167,18 @@ Implementations of this technique are in software such as:
 Auto-calibration uses the variety of orientations observed over the recording to determine calibration parameters which can then be applied to the data.  It is also possible to re-use calibration parameters from one device session to another session from the same device, and this would be best where the temperature ranges observed are roughly comparable.
 
 Analysis algorithms are typically derived from datasets with either raw or auto-calibrated data.  In addition, some algorithms are designed to have a low-sensitivity to calibration.  For example, a high-pass filter can be used to drastically reduce the effect of any systematic offset.
+
+
+## Sensor Fusion: Inertial Measurement Unit
+
+A MEMS accelerometer should perhaps be more accurately be described as an inertial sensor: they not only capture acceleration, but will show a deflection from gravity even when at rest, and this gravity vector changes with the orientation of the sensor.  The resultant signal can therefore be seen as a mix of rotation and acceleration.  One consequence of this is that you cannot, in the general case (e.g. without other constraints or knowledge), easily infer velocity by just using an accelerometer. 
+
+However, signals from an accelerometer *and* a gyroscope can be fused to separate rotation relative to gravity, and *liner acceleration*.  This linear acceleration will be somewhat noisy but could, for example (at least in theory), be used to try to infer approximate velocity (it would likely have to use some heuristics to reset the integration when it is deemed to be stationary).  Again, theoretically, this velocity could in be integrated to approximate position (but any original noise would accumulate very rapidly). 
+
+If you want to combine the accelerometer/gyroscope data, known as *sensor fusion*, to act as a single inertial measurement unit (IMU) device, you could consider:
+
+* MATLAB’s Inertial Sensor Fusion Algorithms: https://uk.mathworks.com/help/fusion/inertial-sensor-fusion.html
+* Sensor fusion in the open source GGIR package in the R language: https://cran.r-project.org/web/packages/GGIR/vignettes/SensorFusionWithGGIR.html
+* Adapting some previous sensor fusion work in Open Movement (for another sensor), *Azimuth*: https://github.com/digitalinteraction/openmovement/tree/master/Software/Azimuth
+* A custom solution based on the raw data
+
