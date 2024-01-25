@@ -169,13 +169,31 @@ Auto-calibration uses the variety of orientations observed over the recording to
 Analysis algorithms are typically derived from datasets with either raw or auto-calibrated data.  In addition, some algorithms are designed to have a low-sensitivity to calibration.  For example, a high-pass filter can be used to drastically reduce the effect of any systematic offset.
 
 
-## Sensor Fusion: Inertial Measurement Unit
+## Estimating pose
 
 The AX devices are designed to record only the raw output from an underlying movement sensor, with any further processing applied afterwards in software.
 
 A MEMS accelerometer should perhaps be more accurately be described as an inertial sensor: they not only capture acceleration, but will show a deflection from gravity even when at rest, and this gravity vector changes with the orientation of the sensor.  The resultant signal can therefore be seen as a mix of rotation and acceleration.  One consequence of this is that you cannot, in the general case (e.g. without other constraints or knowledge), easily infer velocity by just using an accelerometer. 
 
-However, signals from an accelerometer *and* a gyroscope can be fused to separate rotation relative to gravity, and *liner acceleration*.  This linear acceleration will be somewhat noisy but could, for example (at least in theory), be used to try to infer approximate velocity (it would likely have to use some heuristics to reset the integration when it is deemed to be stationary).  Again, theoretically, this velocity could in be integrated to approximate position (but any original noise would accumulate very rapidly). 
+### Using raw sensor values
+
+For some special cases, values can be calculated from the raw sensor data, without requiring sensor fusion.  For example:
+
+* An estimate of the *gravity vector*, relative to the sensor's internal frame of reference, can be directy obtained from the low-frequency accelerometer data axes.
+
+* The *roll* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the two axes normally in the ground plane.  The roll angle becomes undefined as it approaches the gravity vector. 
+
+* The *pitch* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the axis perpendicular to gravity, and the vector length of the other two axes (square root of the sum of the other two axis values squared). The pitch ange becomes undefined as it approaches the ground plane. 
+
+* If the device was perfectly aligned with the axis of interest, then the gyroscope value for the corresponding axis will be the rate of change (degrees-per-second) for that axis.
+
+In addition, other constraints (e.g. attached to a wheel with fixed orientation) can allow useful information (e.g. wheel angle and rotation speed) to be extracted without sensor fusion.
+
+For more general-purpose pose estimation, you can consider sensor fusion (inertial measurement unit).
+
+### Sensor Fusion - Inertial Measurement Unit
+
+Signals from an accelerometer *and* a gyroscope can be fused to separate rotation relative to gravity, and *liner acceleration*.  This linear acceleration will be somewhat noisy but could, for example (at least in theory), be used to try to infer approximate velocity (it would likely have to use some heuristics to reset the integration when it is deemed to be stationary).  Again, theoretically, this velocity could in be integrated to approximate position (but any original noise would accumulate very rapidly). 
 
 If you want to combine the accelerometer/gyroscope data, known as *sensor fusion*, to act as a single inertial measurement unit (IMU) device, you could consider:
 
@@ -187,10 +205,3 @@ If you want to combine the accelerometer/gyroscope data, known as *sensor fusion
 
 * A custom solution based on the raw data
 
-Note that some special cases/constraints allow some values to be calculated from the raw sensor data, without sensor fusion.  For example:
-
-* The *roll* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the two axes normally in the ground plane.  The roll angle becomes undefined as it approaches the gravity vector. 
-
-* The *pitch* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the axis perpendicular to gravity, and the vector length of the other two axes (square root of the sum of the other two axis values squared). The pitch ange becomes undefined as it approaches the ground plane. 
-
-* If the device was perfectly aligned with the axis of interest, then the gyroscope value for the corresponding axis will be the rate of change (degrees-per-second) for that axis.
