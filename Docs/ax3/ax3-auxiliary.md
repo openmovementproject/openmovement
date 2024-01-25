@@ -171,6 +171,8 @@ Analysis algorithms are typically derived from datasets with either raw or auto-
 
 ## Sensor Fusion: Inertial Measurement Unit
 
+The AX devices are designed to record only the raw output from an underlying movement sensor, with any further processing applied afterwards in software.
+
 A MEMS accelerometer should perhaps be more accurately be described as an inertial sensor: they not only capture acceleration, but will show a deflection from gravity even when at rest, and this gravity vector changes with the orientation of the sensor.  The resultant signal can therefore be seen as a mix of rotation and acceleration.  One consequence of this is that you cannot, in the general case (e.g. without other constraints or knowledge), easily infer velocity by just using an accelerometer. 
 
 However, signals from an accelerometer *and* a gyroscope can be fused to separate rotation relative to gravity, and *liner acceleration*.  This linear acceleration will be somewhat noisy but could, for example (at least in theory), be used to try to infer approximate velocity (it would likely have to use some heuristics to reset the integration when it is deemed to be stationary).  Again, theoretically, this velocity could in be integrated to approximate position (but any original noise would accumulate very rapidly). 
