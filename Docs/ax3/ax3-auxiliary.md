@@ -178,7 +178,19 @@ However, signals from an accelerometer *and* a gyroscope can be fused to separat
 If you want to combine the accelerometer/gyroscope data, known as *sensor fusion*, to act as a single inertial measurement unit (IMU) device, you could consider:
 
 * MATLAB’s Inertial Sensor Fusion Algorithms: https://uk.mathworks.com/help/fusion/inertial-sensor-fusion.html
+
 * Sensor fusion in the open source GGIR package in the R language: https://cran.r-project.org/web/packages/GGIR/vignettes/SensorFusionWithGGIR.html
+
 * Adapting some previous sensor fusion work in Open Movement (for another sensor), *Azimuth*: https://github.com/digitalinteraction/openmovement/tree/master/Software/Azimuth
+
 * A custom solution based on the raw data
 
+Note that some special cases/constraints allow some values to be calculated without sensor fusion.  For example:
+
+There are special cases where the raw data might be suitable, for example:
+
+* The *roll* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the two axes normally in the ground plane.  The roll angle becomes undefined as it approaches the gravity vector. 
+
+* The *pitch* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the axis perpendicular to gravity, and the vector length of the other two axes (square root of the sum of the other two axis values squared). The pitch ange becomes undefined as it approaches the ground plane. 
+
+* If the device was perfectly aligned with the axis of interest, then the gyroscope value for the corresponding axis will be the rate of change (degrees-per-second) for that axis.
