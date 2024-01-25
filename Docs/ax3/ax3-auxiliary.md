@@ -185,9 +185,7 @@ If you want to combine the accelerometer/gyroscope data, known as *sensor fusion
 
 * A custom solution based on the raw data
 
-Note that some special cases/constraints allow some values to be calculated without sensor fusion.  For example:
-
-There are special cases where the raw data might be suitable, for example:
+Note that some special cases/constraints allow some values to be calculated from the raw sensor data, without sensor fusion.  For example:
 
 * The *roll* angle with respect to ground (perpendicular to gravity) can be calculated from low-frequency accelerometer data using *atan2* of the two axes normally in the ground plane.  The roll angle becomes undefined as it approaches the gravity vector. 
 
