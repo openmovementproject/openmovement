@@ -61,6 +61,32 @@ A sample data file (inside a `.zip` archive) is available at:
   * [longitudinal_data.zip](https://github.com/digitalinteraction/openmovement/raw/master/Downloads/AX3/longitudinal_data.zip)
 
 
+## Large-scale deployments
+
+For large-scale deployments, you may be interested in the following:
+
+1.	The standard *OmGui* configuration software can configure multiple devices at once (select multiple devices using the standard Shift+click for range selection, and Ctrl+click for toggle selection) before configuring - but only as long as they have an identical configuration.  However, it is recommended to set a unique session ID for each device, so this option may not be suitable:
+
+    * [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
+ 
+2.	The *AX-Deploy* software is specifically for mass deployments, where each device may have a unique configuration:
+ 
+    * [AX-Deploy Website](https://github.com/digitalinteraction/ax-deploy/)
+    *	[AX-Deploy Documentation](https://digitalinteraction.github.io/ax-deploy/)
+ 
+    ...this tool can be used to configure devices quickly by scanning a barcode with a "configuration code" (see the bottom of the documentation) containing session identifier.  This is not be compatible with AX6 device gyroscopes, however, it may still be suitable to use for batch download/clearing.
+
+3.	There is a web-based configuration tool that can be used for one-at-a-time configuration (but not download), which does have the advantage that you can easily construct URLs to assign specific configurations/session IDs etc, and also may work from Android tablets/phones (check with specific devices).
+
+    * [AX-Config Website](https://config.openmovement.dev/)
+    * [AX-Config Documentation](https://github.com/digitalinteraction/openmovement-axconfig/blob/master/README.md)
+
+4.	The AX device communication is documented, and a software API exists that can be used to create your own software to communicate with the AX devices:
+ 
+    * [AX3 Technical Information](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md)
+    * [AX libOMAPI](https://github.com/digitalinteraction/libomapi/)
+
+
 ## Further Reading
 
 For more information on the AX devices, please see:
