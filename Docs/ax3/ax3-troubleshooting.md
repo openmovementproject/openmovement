@@ -404,7 +404,7 @@ To examine the metadata from a `.cwa` file:
 
 ## Installation
 
-If you have installation issues, consider the "no installer" variants listed at [OmGui Revisions](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md).  These packages are .ZIP archives containing executable content, so you may need to "download anyway".  You may also need to install the [AX Driver](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Driver-Win-5.zip) to use the devices (in particular, on older versions of Windows).  You will also need to ensure *.NET 3.5* componment is enabled (see below).
+If you have installation issues, consider the "no installer" variants listed at [OmGui Revisions](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md).  These packages are .ZIP archives containing executable content, so you may need to "download anyway" and/or "More Info/Run Anyway".  You may also need to install the [AX Driver](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Driver-Win-5.zip) to use the devices (in particular, on older versions of Windows).  You will also need to ensure *.NET 3.5* componment is enabled (see below).
 
 
 ### .NET 3.5
