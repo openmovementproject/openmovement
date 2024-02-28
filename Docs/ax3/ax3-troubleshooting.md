@@ -374,6 +374,25 @@ The message should be cleared once the device's clock is successfully configured
 When given a battery health warning, it is advisable to fully charge the device then run a test recording (this can be just at static recording) for the duration that you'd typically want the devices to record for - this will establish the performance expected for subsequent recordings.  
 
 
+### Battery Issues
+
+Checklist:
+
+1. Ensure that you have the correct [charging arrangement](#charging-arrangement), and that your device was fully charged shortly before use.
+
+2. Note the [battery conditioning](#battery-health) information.
+
+3. Note that the battery percentage shown is [only a rough estimate](#battery-percentage-estimate).
+
+4. Note the expected [maximum recording duration](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration) for different configurations, and that, as with any lithium ion battery, capacity will decrease over the lifetime of the device.
+
+5. Check that your device was configured with the correct configuration.  In OmGui software, you can select *View* / *Device Properties* (to check the device) or *View* / *File Properties* (to check a file in the working folder).  For additional details, you can obtain a [device log](#device-log) and/or [.CWA file diagnostics](#cwa-file-diagnostics).
+
+6. To get more detail about the battery level during captured data, the data preview graph in *OmGui* allows you to select additional lines on the right-hand side to chart.  You will need to vertically resize the graph to access them all.  One of these additional plots is the *estimated battery percentage*.  It may help look at the initial charge and how it has discharged over a recording.
+
+7. To verify the performance of a particular device, a 7 day static test recording at 100 Hz accelerometer (and gyroscope enabled on the AX6) is recommended with a fully-charged device.  The device's performance in a test recording is indicative of expected performance for future recordings.
+
+
 ## Filesystem or data problems
 
 If you receive a warning from the operating system about the filesystem (e.g. *Error Checking* / *Repair this drive* / *Do you want to scan and fix*) you should initially ignore the message -- do not allow the operating system to try to fix anything as this can cause problems.  You should attempt to continue as normal:
