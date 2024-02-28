@@ -380,7 +380,7 @@ Checklist:
 
 1. Ensure that you have the correct [charging arrangement](#charging-arrangement), and that your device was fully charged shortly before use.
 
-2. Note the [battery conditioning](#battery-health) information.
+2. Note the [battery conditioning](#battery-health) information, and the battery health warnings that may be shown in *OmGui*.
 
 3. Note that the battery percentage shown is [only a rough estimate](#battery-percentage-estimate).
 
