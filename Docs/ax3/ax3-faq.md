@@ -69,7 +69,13 @@ There is no external communication while the AX devices are recording, so they c
  
 * If you are placing multiple accelerometers on a single moving body over a long period of time (e.g. a person), then there is some software that synchronizes the signal from devices that are likely to see a similar movement: [timesync](https://github.com/digitalinteraction/timesync/).
  
-* Where the setup/access allows (e.g. a lab-based recording, or one with frequent points of contact), you can introduce a "marker" -- a specific movement signal at one or more points (e.g. vigorous shaking before and after a session) that has its time externally recorded.  For a lab-based session, it might be appropriate to video record the session in a way that captures the shaking times directly.  It might be useful to introduce an external clock on a screen, e.g. this page: [Time Sync Clock](https://config.openmovement.dev/timesync/) -- on some supported phones/browsers (e.g. Chrome browser on Android), you can hold the phone against the device and tap-and-hold the screen to introduce an optical and vibration marker/pattern for the time.  You can also use this page to create event markers (by tapping the screen, clicking a mouse, or pressing keys on a keyboard), then download or clear the log of event markers with the buttons at the top of the page.
+* Where the setup/access allows (e.g. a lab-based recording, or one with frequent points of contact), you can introduce a "marker" -- a specific movement signal at one or more points (e.g. vigorous shaking before and after a session) that has its time externally recorded.  For a lab-based session, it might be appropriate to video record the session in a way that captures the shaking times directly.  It might be useful to introduce an external clock on a screen, e.g. this page: [Time Sync Clock](https://config.openmovement.dev/timesync/) -- on some supported phones/browsers (e.g. Chrome browser on Android), you can hold the phone against the device and tap-and-hold the screen to introduce an optical and vibration marker/pattern for the time.
+
+### Event markers
+
+The AX devices are specifically designed to avoid any user-facing interface, to minimise imapact on measurements.  You can use external logging mechanisms to record events if you have a roughly-synchronized clock (see above).
+
+For example, you can use the [Time Sync Clock](https://config.openmovement.dev/timesync/) page to create event markers by tapping the screen, or clicking a mouse, or pressing keys on a keyboard, then download or clear the log of event markers with the buttons at the top of the page.  The event log records the time and event type (e.g. which key was pressed), and can be used in conjunction with the recorded data.
 
 
 ## Usage environments
