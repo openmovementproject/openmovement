@@ -62,7 +62,7 @@ The AX devices take the configuring device's local time at the time of configura
 
 ### Sample timestamps
 
-The AX devices record the raw output from an underlying movement sensor, configured to output at the rate you choose.  This sensor's output rate will vary slightly compared to the onboard (and more accurate) real-time clock.  Particular samples (on average, one every 40/80/120 samples) will be timestamped from this more accurate clock, to allow later reconstruction of timestamps for each sample.
+The AX devices record the raw output from an underlying movement sensor, configured to output at the rate you choose.  This sensor's output rate will vary slightly compared to the onboard (and more accurate) real-time clock.  Particular samples (on average, one every 40/80/120 samples) will be timestamped from this more accurate clock, to allow later reconstruction of timestamps for each sample.  Epoch-based analysis methods can use the raw data directly, while algorithms requiring an exactly fixed rate can use a "resampling" loader to resample the data to a fixed interval.  See next section for information on synchronizing between multiple devices.
 
 ### Synchronizing data between devices, or with other devices
 
