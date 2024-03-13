@@ -54,12 +54,17 @@ The AX6 and AX3 have the same physical dimensions, but the AX6 has more memory a
 * Device orientation: [AX Orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
 
 
-## Time Zone and DST
+## Time and sampling
+
+### Time Zone and DST
 
 The AX devices take the configuring device's local time at the time of configuration, and the time and date continue from there for any subsequently recorded data.  They cannot adjust for time-zone changes or daylight savings, as they will not know the current country or locally-defined time zone or daylight savings rules, and also as that could lead to duplicate or skipped hours of the day.  As long as you know the configuration time zone (the last configuration time is recorded in the .CWA data file), you could choose to later reinterpret these times in another time zone (including applying any DST change), but you would have to choose what to do with any duplicate or skipped hours of the day.
 
+### Raw sensor output
 
-## Synchronizing data between devices, or with other devices
+The AX devices record the raw output from an underlying movement sensor, configured to output at the rate you choose.  This sensor's output rate will vary slightly compared to the onboard (and more accurate) real-time clock.  Particular samples (on average, one every 40/80/120 samples) will be timestamped from this more accurate clock, to allow later reconstruction of timestamps for each sample.
+
+### Synchronizing data between devices, or with other devices
 
 The AX devices have an internal real-time clock to keep track of time.  When the device is configured, the internal clock is set to the system time of the configuring computer.  This time is set to the nearest second, and the operation itself may be subject to some jitter (e.g. from the operating system performing other actions).  Afterwards, as with any clock, it will be subject to clock drift, potentially of the order of around ±2 seconds per day.  
  
