@@ -105,7 +105,7 @@ One attachment method (Schneller et al, *Measuring children's physical activity:
 
 An alternative attachment method is described as: *two layers of Flexifix (WC690-Smith and Nephew Opsite Flexifix Film Roll 5cmx10m) with the sensor between the layers.*
 
-There have also been third-party purpose-built foam pouches, such as those by [Herpatech AB](herpatech.se).
+There have also been third-party purpose-built foam pouches, such as those by [Herpatech AB](http://herpatech.se) (now [nile.se](https://nile.se)).
 
 
 ### Non-human use
