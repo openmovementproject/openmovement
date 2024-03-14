@@ -87,6 +87,40 @@ For large-scale deployments, you may be interested in the following:
     * [AX libOMAPI](https://github.com/digitalinteraction/libomapi/)
 
 
+## Wear sites
+
+AX devices are typically mounted at the wrist and this has been shown to have a very high compliance as participants are generally happy to wear a wrist-worn device for long periods of time.  The Open Movement project includes a [silicon wristband](https://github.com/digitalinteraction/openmovement/blob/master/Mechanical/AX3/AX3%20Band/AX3_Band.PDF).  There are also designs for smaller [infant fabric bands](https://github.com/digitalinteraction/openmovement/blob/master/Mechanical/AX3/AX3%20Fabric%20Band/README.md), although direct use on infants is not recommended without a sufficiently-sized enclosure design (must not fit within a choke test cylinder) that requires a tool to remove.
+
+Alternative means may be used to attach the device at other sites (such as the hip, thigh or back) using medical tape/patches, or a cohesive bandage.  
+
+One attachment method (Schneller et al, *Measuring children's physical activity: compliance using skin-taped accelerometers*):
+
+    * Clean skin using an alcohol wipe and dry.
+    * Take a 30x50mm piece (a little larger than the device) of Fixomull Stretch tape (02036-00; BSN Medical)
+    * Take a small, 10x20mm piece of 3M Scotch double-sided adhesive tape (3M, Hair-set) and secure on top of the Fixomull.
+    * Mount the AX device on the double adhesive tape.
+    * Place the combined AX/Fixomull on the on the clean, dry skin of the subject.
+    * Adhere an 80x100mm piece of Opsite Flexifix (Smith & Nephew, #66000041) with rounded corners, on top of the accelerometer.
+    * Use firm hand pressure on the tape and the device for the pressure-sensitive adhesives
+
+An alternative attachment method is described as: two layers of Flexifix (WC690-Smith and Nephew Opsite Flexifix Film Roll 5cmx10m) with the sensor between the layers.
+
+There have also been third-party purpose-built foam pouches, such as those by [Herpatech AB](herpatech.se).
+
+
+### Non-human use
+
+The AX devices were originally designed for human movement but, as they are general purpose loggers, they have been used on animals and other locations.
+
+While the logger case is designed for IP68 rating, the device left as it is it could still be damaged by activities outside of normal human movement (e.g. impacts against objects, or animals biting the case), and an unprotected device could pose a choke hazard and includes material that should not be ingested.  Dirt should be prevented from becoming lodged inside the USB connector (and the USB connector should never be used while it is dirty or damp as that might cause abrasion or corrosion to the contacts – it must only be connected once clean and dry).  Additionally, the device was designed to be in contact with a body, so should not be exposed to extreme environments (extreme temperature or moisture).  If the case is covered in additional material, a desiccant bag could be used in with the device to ensure moisture is not trapped with the device for extended periods.
+
+If the device could become dislodged, a brightly-colored outer layer may also aid in locating the device.  If relevant, to dissuade against an animal biting a device, consider (if suitable) something like [Bitrex](https://www.bitrex.com/about-bitrex/what-is-bitrex), or a "prickly" deterrant outer layer, or a true physical barrier (e.g. harder protective outer enclosure).  
+
+Some animal research has attached to limbs using [3M Vetrap](https://www.3m.co.uk/3M/en_GB/p/d/v000106104/).  As another example for sensor attachment, from the paper "Freedom to lie: How farrowing environment affects sow lying behavior assessment using inertial sensors" by Thompson et al. - Section 2.1.2. "Sensor protocol" states: 
+
+> *All sows were shaved and cleaned in two locations: at the rear, just above the tail head and between the hip bones; and at the neck, halfway between the shoulder and the base of the skull, […]. Sensors were wrapped in duct tape to provide further protection should they become dislodged. A coating of Evo-Stik contact adhesive was applied in a 2 cm patch around the sensor which was further secured with a layer of Scapa Sniper tape.*
+
+
 ## Further Reading
 
 For more information on the AX devices, please see:
