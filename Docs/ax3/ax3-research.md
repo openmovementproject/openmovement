@@ -95,15 +95,15 @@ Alternative means may be used to attach the device at other sites (such as the h
 
 One attachment method (Schneller et al, *Measuring children's physical activity: compliance using skin-taped accelerometers*):
 
-    * Clean skin using an alcohol wipe and dry.
-    * Take a 30x50mm piece (a little larger than the device) of Fixomull Stretch tape (02036-00; BSN Medical)
-    * Take a small, 10x20mm piece of 3M Scotch double-sided adhesive tape (3M, Hair-set) and secure on top of the Fixomull.
-    * Mount the AX device on the double adhesive tape.
-    * Place the combined AX/Fixomull on the on the clean, dry skin of the subject.
-    * Adhere an 80x100mm piece of Opsite Flexifix (Smith & Nephew, #66000041) with rounded corners, on top of the accelerometer.
-    * Use firm hand pressure on the tape and the device for the pressure-sensitive adhesives
+1. Clean skin using an alcohol wipe and dry.
+2. Take a 30x50mm piece (a little larger than the device) of Fixomull Stretch tape (02036-00; BSN Medical)
+3. Take a small, 10x20mm piece of 3M Scotch double-sided adhesive tape (3M, Hair-set) and secure on top of the Fixomull.
+4. Mount the AX device on the double adhesive tape.
+5. Place the combined AX/Fixomull on the on the clean, dry skin of the subject.
+6. Adhere an 80x100mm piece of Opsite Flexifix (Smith & Nephew, #66000041) with rounded corners, on top of the accelerometer.
+7. Use firm hand pressure on the tape and the device for the pressure-sensitive adhesives
 
-An alternative attachment method is described as: two layers of Flexifix (WC690-Smith and Nephew Opsite Flexifix Film Roll 5cmx10m) with the sensor between the layers.
+An alternative attachment method is described as: *two layers of Flexifix (WC690-Smith and Nephew Opsite Flexifix Film Roll 5cmx10m) with the sensor between the layers.*
 
 There have also been third-party purpose-built foam pouches, such as those by [Herpatech AB](herpatech.se).
 
