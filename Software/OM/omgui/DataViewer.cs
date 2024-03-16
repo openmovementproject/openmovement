@@ -1104,8 +1104,8 @@ namespace OmGui
                 if (channels > 3)
                 {
                     HasGyro = true;
-                    gy = (float)raw[channels * i + 0] * gyroRange / 32768;
-                    gx = (float)raw[channels * i + 1] * gyroRange / 32768;
+                    gx = (float)raw[channels * i + 0] * gyroRange / 32768;
+                    gy = (float)raw[channels * i + 1] * gyroRange / 32768;
                     gz = (float)raw[channels * i + 2] * gyroRange / 32768;
                 }
                 float x = (float)raw[channels * i + channels - 3] / accelOneG;
