@@ -61,6 +61,15 @@ A sample data file (inside a `.zip` archive) is available at:
   * [longitudinal_data.zip](https://github.com/digitalinteraction/openmovement/raw/master/Downloads/AX3/longitudinal_data.zip)
 
 
+### Analysis Expertise
+
+In addition to the open source software and documentation discussed above, other organisations and people do offer expertise in analysing data from Open Movement devices.  Including the following (Note: the Open Movement project does not necessarily endorse, nor is responsible for, any third-parties):
+
+* *McRoberts* offer [analytics using Open Movement sensors](https://mcroberts.nl/axivity-services). 
+* *Dr. Vincent van Hees* (author of *GGIR* analysis package) offers [consulting on movement data](https://accelting.com), including Open Movement sensors.
+* *Dr Rob Thompson* offers [consulting on animal movement](https://rjtanalytics.com). 
+
+
 ## Large-scale deployments
 
 For large-scale deployments, you may be interested in the following:
