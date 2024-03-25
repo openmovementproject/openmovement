@@ -26,4 +26,4 @@ Open Movement devices are miniature, embeddable, open source sensors developed b
 
 ## See Also ##
 
-[YouTube Channel](https://www.youtube.com/channel/UCppN19v-D7q2LR1_LSYUN0w) 
+[YouTube Channel](https://www.youtube.com/channel/UCppN19v-D7q2LR1_LSYUN0w) / [Open Movement Videos](https://www.youtube.com/user/openmovementncl)
