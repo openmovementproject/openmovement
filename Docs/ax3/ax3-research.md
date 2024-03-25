@@ -11,7 +11,7 @@ AX devices have been used in many studies, for example: [Google Scholar: Open Mo
 
 ## Collecting Data
 
-A typical study protocol might be to configure a device to record within a specific interval, then give/mail the device to be worn by a participant for the specified period.  Typically the device is mounted within a wrist strap for the best compliance, but could be attached at other sites.
+A typical study protocol might be to configure a device to record within a specific interval, then give/mail the device to be worn by a participant for the specified period.  Typically the device is mounted within a wrist strap for the best compliance, but could be attached at other sites.  See also [AX Quick Start Guide](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/AX3%20Quick%20start%20guide.pdf)
 
 The maximum duration of a single recording depends on the device and configuration, but for a typical rate of 100 Hz, this is almost two weeks.  For details, please see: [AX Devices FAQ](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration).  If a longer recording is required, a replacement configured unit could be mailed with instructions to swap them over and to return the first unit.  
 
