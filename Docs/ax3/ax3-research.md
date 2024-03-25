@@ -95,6 +95,9 @@ For large-scale deployments, you may be interested in the following:
     * [AX3 Technical Information](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md)
     * [AX libOMAPI](https://github.com/digitalinteraction/libomapi/)
 
+5.  Third-party support for configuring, downloading and analysing data is available (Note: the Open Movement project does not necessarily endorse, nor is responsible for, any third-parties):
+
+    * [McRoberts: data collection and processing using Open Movement sensors](https://mcroberts.nl/axivity-services). 
 
 ## Wear sites
 
