@@ -90,7 +90,7 @@ For large-scale deployments, you may be interested in the following:
     * [AX-Config Website](https://config.openmovement.dev/)
     * [AX-Config Documentation](https://github.com/digitalinteraction/openmovement-axconfig/blob/master/README.md)
 
-4.	The AX device communication is [documented](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md#communication-protocol), and a software API exists that can be used to create your own software to communicate with the AX devices:
+4.	The AX device communication is documented, and a software API exists that can be used to create your own software to communicate with the AX devices:
  
     * [AX3 Technical Information](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md)
     * [AX libOMAPI](https://github.com/digitalinteraction/libomapi/)
