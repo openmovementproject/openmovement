@@ -68,7 +68,7 @@ There are recording-specific settings stored in the data file `CWA-DATA.CWA` in 
 
 ### Measurement data
 
-*Note:* There are multiple ways to load the raw data into programming languages and/or analysis environments described at [AX Research: Raw Data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#raw-data), and [additional information on raw sensor data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md).
+*Note:* There are multiple ways to load the raw data into programming languages and/or analysis environments described at [AX Research: Raw Data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#raw-data).  There is also [additional information on raw sensor data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md).
 
 Measurement data is written to the file `CWA-DATA.CWA` in the root folder, which includes header information and the logged sensor data.  The disk should be formatted at *FAT16* or *FAT32* -- ideally by using the device's own `FORMAT` command which will align the filesystem for maximum efficiency.
 
