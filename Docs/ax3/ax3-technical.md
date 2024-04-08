@@ -68,6 +68,8 @@ There are recording-specific settings stored in the data file `CWA-DATA.CWA` in 
 
 ### Measurement data
 
+*Note:* There are multiple ways to load the raw data into programming languages and/or analysis environments: [AX Research: Raw Data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#raw-data).
+
 Measurement data is written to the file `CWA-DATA.CWA` in the root folder, which includes header information and the logged sensor data.  The disk should be formatted at *FAT16* or *FAT32* -- ideally by using the device's own `FORMAT` command which will align the filesystem for maximum efficiency.
 
 The accelerometer sensor's internal sampling frequency is used and the measurements are treated as a stream and recorded in time-stamped blocks so that:
@@ -196,6 +198,8 @@ The complexity of the way the timestamp is stored is for historical/backwards-co
 
 
 ## Communication Protocol
+
+*Note:* A software API exists that can be used to create your own software to communicate with the AX devices: [AX libOMAPI](https://github.com/digitalinteraction/libomapi/)
 
 Commands and responses are all in plain, 7-bit ASCII text and delimited with *CR*/*LF* (`\r\n`) line endings.  The sections below use the following conventions:
 
