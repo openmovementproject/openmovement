@@ -52,6 +52,7 @@ The AX6 and AX3 have the same physical dimensions, but the AX6 has more memory a
 
 * Sensor axes: [AX Sensor Axes](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md)
 * Device orientation: [AX Orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
+* AX family: [Differences between the AX3 and AX6](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#differences-between-the-ax3-and-ax6)
 
 
 ## Time and sampling
