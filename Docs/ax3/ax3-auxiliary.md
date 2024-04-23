@@ -206,3 +206,19 @@ If you want to combine the accelerometer/gyroscope data, known as *sensor fusion
 
 * A custom solution based on the raw data
 
+
+## Differences between the AX3 and AX6
+
+The AX6 and AX3 are in the same family of devices, with very similar electronic designs and firmware.  
+
+The differences are that the AX6 has: 
+
+* a different [underlying sensor](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#sensor-data-characteristics) for physical movement, which contains a gyroscope and an accelerometer, while the AX3’s sensor is accelerometer-only.
+* larger NAND storage memory: 1024 MB, rather than 512 MB.
+* a larger capacity battery: 250 mAh, rather than 150-180 mAh.
+
+This results in the AX6 having improved [expected maximum recording durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration), depending on the configuration (note that enabling the gyroscope limits the recording to about one week).
+ 
+However, at present, the gyroscope signal is not used in any of the built-in algorithms from OmGui or the GGIR analysis software.  It is being used by researchers developing their own algorithms (e.g. into gait analysis), and it may "future proof" a dataset for possible future algorithm development. 
+ 
+One final point is that the AX6’s accelerometer sensor is newer and objectively better at measuring inertia than the accelerometer in the AX3.  However, it could be the case that some published algorithms (such as wear-time or, possibly, sleep) may have been tuned to measure inactivity based on the noisier signal the AX3.
