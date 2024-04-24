@@ -24,6 +24,8 @@ $$
 voltage = value * 6 / 1024
 $$
 
+> Some software supports a rough estimate of battery percentage based on the voltage.  See also: [AX3/AX6 Troubleshooting - Battery](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#battery)
+
 
 ### Device Temperature
 
