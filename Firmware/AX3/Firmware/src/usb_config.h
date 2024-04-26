@@ -52,6 +52,11 @@
 #ifndef USBCFG_H
 #define USBCFG_H
 
+//When implemented, the Microsoft OS Descriptor allows the WinUSB driver package 
+//installation to be automatic on Windows 8, and is therefore recommended.
+//#define IMPLEMENT_MICROSOFT_OS_DESCRIPTOR
+
+
 /** DEFINITIONS ****************************************************/
 #define USB_EP0_BUFF_SIZE		8	// Valid Options: 8, 16, 32, or 64 bytes.
 								// Using larger options take more SRAM, but
@@ -60,8 +65,14 @@
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
 									
+//Some definitions, only needed when using the MS OS descriptor.
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+#define USB_MAX_NUM_INT     	4
+#define USB_MAX_EP_NUMBER	    5
+#else
 #define USB_MAX_NUM_INT     	3   // [dgj] Was 1. For tracking Alternate Setting
 #define USB_MAX_EP_NUMBER	    3
+#endif
 
 //Device descriptor - if these two definitions are not defined then
 //  a ROM USB_DEVICE_DESCRIPTOR variable by the exact name of device_dsc
@@ -205,5 +216,98 @@
 #define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1 //Set_Line_Coding, Set_Control_Line_State, Get_Line_Coding, and Serial_State commands
 
 /** DEFINITIONS ****************************************************/
+
+
+//Some definitions, only needed when using the MS OS descriptor.
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+    #define MICROSOFT_OS_DESCRIPTOR_INDEX   (unsigned char)0xEE // String index number MS OS descriptor
+    #define GET_MS_DESCRIPTOR               (unsigned char)0xEE // (vendor choice for bRequest)
+    #define EXTENDED_COMPAT_ID              (WORD)0x0004
+    #define EXTENDED_PROPERTIES             (WORD)0x0005
+
+	#define MS_MULTI_SZ		// If defined, use "DeviceInterfaceGUIDs" rather than "DeviceInterfaceGUID" in the Extended Properties OS Feature Descriptor
+
+    typedef struct __attribute__ ((packed)) _MS_OS_DESCRIPTOR
+    {
+        BYTE bLength;
+        BYTE bDscType;
+        WORD string[7];
+        BYTE vendorCode;
+        BYTE bPad;
+    } MS_OS_DESCRIPTOR;
+
+    typedef struct __attribute__ ((packed)) _MS_COMPAT_ID_FEATURE_DESC
+    {
+        DWORD dwLength;
+        WORD bcdVersion;
+        WORD wIndex;
+        BYTE bCount;
+        BYTE Reserved[7];
+        BYTE bFirstInterfaceNumber;
+        BYTE Reserved1;
+        BYTE compatID[8];
+        BYTE subCompatID[8];
+        BYTE Reserved2[6];
+    } MS_COMPAT_ID_FEATURE_DESC;
+
+    typedef struct __attribute__ ((packed)) _MS_EXT_PROPERTY_FEATURE_DESC
+    {
+        DWORD dwLength;
+        WORD bcdVersion;
+        WORD wIndex;
+        WORD wCount;
+        DWORD dwSize;
+        DWORD dwPropertyDataType;
+        WORD wPropertyNameLength;
+		#ifdef MS_MULTI_SZ
+        	WORD bPropertyName[20+1];	// DeviceInterfaceGUIDs\0
+		#else
+        	WORD bPropertyName[20];		// DeviceInterfaceGUID\0
+		#endif
+        DWORD dwPropertyDataLength;
+		#ifdef MS_MULTI_SZ
+	        WORD bPropertyData[39+1];	// {########-####-####-####-############}\0\0
+		#else
+	        WORD bPropertyData[39];		// {########-####-####-####-############}\0
+		#endif
+    } MS_EXT_PROPERTY_FEATURE_DESC;
+    
+    extern const MS_OS_DESCRIPTOR MSOSDescriptor;
+    extern const MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor;
+    extern const MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor;
+
+	// Must respond to 0xEE
+	#undef USB_NUM_STRING_DESCRIPTORS
+	#define USB_NUM_STRING_DESCRIPTORS 0xEF
+
+	// Use interface 4 as a generic interface
+	#define USB_USE_GEN
+	#define USBGEN_EP_SIZE       64
+	#define USBGEN_EP_NUM         4
+	#define GENERIC_BULK_INTF_NUM 3
+
+	#define WINUSB_INTERFACE GENERIC_BULK_INTF_NUM
+
+	//#define MS_OS_20_DESCRIPTOR		// Include MS OS 2 descriptors (as well as the 1.0 descriptors)
+
+	#ifdef MS_OS_20_DESCRIPTOR
+	    #define REQUEST_WINUSB (unsigned char)0xEF		// Vendor choice
+	    #define REQUEST_WEBUSB (unsigned char)0xF0		// Vendor choice
+
+		#define MS_OS_20_DESCRIPTOR_LENGTH (10 + 8 + 20)
+		extern const unsigned char msos2_descriptor[MS_OS_20_DESCRIPTOR_LENGTH];
+		#define BOS_DESCRIPTOR_LENGTH (5+24+28)
+		extern const unsigned char bos_descriptor[BOS_DESCRIPTOR_LENGTH];
+	#endif
+
+#endif
+
+#if 0
+#define ALT_USB_VID 0x1234		// 0x04D8
+#define ALT_USB_PID	0x5678		// 0x0057
+#endif
+
+
+// Right-click, uninstall, remove "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\usbflags\04D80057????"
 
 #endif //USBCFG_H

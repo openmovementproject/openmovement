@@ -165,7 +165,9 @@ int main(void)
     // Initialization
 	InitIO();			// I/O pins
 	CLOCK_SOSCEN(); 	// For the RTC
-	WaitForPrecharge();	// ~0.5mA current
+
+// KL: 19-12-2017, removed unneccessary precharge
+//	WaitForPrecharge();	// ~0.5mA current
 
 	// Peripherals - RTC and ADC always used
     LED_SET(LED_BLUE);  // Blue LED during startup
@@ -361,7 +363,10 @@ void TimedTasks(void)
         // Increment timer and toggle bit on overflow
         inactive = FtlIncrementInactivity();
         AdcSampleNow();
-        if (adcResult.batt > BATT_CHARGE_FULL_USB && status.batteryFull < BATT_FULL_INTERVAL)
+// KL: Added percentage based charge complete, removed fixed threshold 
+        	// if( (adcResult.batt > BATT_CHARGE_FULL_USB)  note: (> BATT_CHARGE_FULL_USB) == 93%) -> green / white 'battery full' LED
+		if( (AdcBattToPercent(adcResult.batt) == 100) &&
+			(status.batteryFull < BATT_FULL_INTERVAL) )
         {
             status.batteryFull++;
             if (status.batteryFull >= BATT_FULL_INTERVAL)
@@ -525,6 +530,12 @@ void RunLogging(void)
         {
             // Strobes LED every few seconds until after start time or USB-connected
             status.debugFlashCount = 5;
+
+// KL: Added, disable NAND in wait mode     
+// Shutdown FTL before NAND power off
+FtlShutdown();
+NandShutdown();
+
             while (restart != 1 && !stopCondition)
             {
                 unsigned int i;
@@ -555,6 +566,14 @@ void RunLogging(void)
                 // Exit condition: Start logging
                 if (RtcNow() >= settings.loggingStartTime) { break; }
             }
+
+// KL: Added, after wait start, re-init NAND and FTL
+// Re-initialise the NAND/FTL after power down
+NandInitialize();
+if (settings.debuggingInfo >= 1)    
+    LED_SET(LED_WHITE);     // White LED during FTL startup
+FtlStartup();               // FTL & NAND startup
+
             LED_SET(LED_OFF);
         }
 

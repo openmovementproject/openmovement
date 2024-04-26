@@ -37,6 +37,11 @@
 
 #warning "KL: 24-02-2015. The old code uses the compiler library with some suspicious code. New projects should not use this. "
 
+#ifdef COMPENSATE_CHARGE_THRESHOLD
+#include "USB/USB.h"
+#include "Peripherals/Rtc.h"
+#endif
+
 // Globals
 adc_results_t adcResult;
 
@@ -212,6 +217,60 @@ unsigned int AdcBattToPercent(unsigned int Vbat)
 	{
 		temp = 0;
 	}
+
+// KL: Added charge termination code 03-12-2018 if FW version 50 to help devices with poor termination problems
+// Apply charging completion compensation
+#ifdef COMPENSATE_CHARGE_THRESHOLD
+#warning "Battery level will be adjusted on charging"
+	// Set maximum time for charge termination with this e.g. 60 minutes
+	#ifndef COMPENSATION_TIME_LIMIT
+	#define COMPENSATION_TIME_LIMIT	60
+	#endif
+	#define COMPENSATION_SECONDS_PER_PERCENT	(\
+				(COMPENSATION_TIME_LIMIT * 60ul) /\
+				(100 - COMPENSATE_CHARGE_THRESHOLD) ) // 180 for 1%/3min
+	{
+		// Static variables for charge complete compensation state
+		static unsigned short rtcTickAtTermination = 0, terminationPercent = COMPENSATE_CHARGE_THRESHOLD;
+
+		if(	(USB_BUS_SENSE) &&							// Is charging, USB voltage present
+			(temp >= COMPENSATE_CHARGE_THRESHOLD) )		// Don't compensate before threshold setting
+			// (USBDeviceState >= CONFIGURED_STATE) &&	NOT USED	// Is connected to a host PC, not just a hub
+		{
+			unsigned short compensated;
+
+			// If charge has increased since starting termination timer or timer was restarted
+			if(rtcTickAtTermination == 0)
+			{
+				// Start termination compensation timer on <80->80% transition
+				rtcTickAtTermination = rtcTicksSeconds;		
+			}
+			if(temp > terminationPercent)
+			{
+				// Subtract compensated percent from counter if charge increases
+				rtcTickAtTermination += (temp - terminationPercent) * COMPENSATION_SECONDS_PER_PERCENT;
+				// Clamp to prevent charging curve slowing down termination
+				if(rtcTickAtTermination > rtcTicksSeconds)rtcTickAtTermination = rtcTicksSeconds; 
+				// Update the current threshold
+				terminationPercent = temp;				
+			}
+
+			// Calculate the offset @ 1% per N (e.g. three) minutes. Then clamp at 100%
+			compensated = terminationPercent + ((rtcTicksSeconds - rtcTickAtTermination) / COMPENSATION_SECONDS_PER_PERCENT);
+			if(compensated > 100) compensated = 100;
+
+			// Report *higher* battery percentage figure
+			if(compensated > temp)
+				temp = compensated;
+		}
+		else
+		{
+			// Reset timer and threshold (on USB detach and 80-79% transition)
+			rtcTickAtTermination = 0;
+			terminationPercent = COMPENSATE_CHARGE_THRESHOLD;
+		}
+	}
+#endif // end ifdef COMPENSATE_CHARGE_THRESHOLD
 
     return (unsigned int)temp;
 }

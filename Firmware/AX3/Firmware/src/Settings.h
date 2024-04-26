@@ -30,7 +30,7 @@
 // Device settings (from file)
 typedef struct
 {
-    unsigned short deviceId;            // Device identifier (stored in ROM)
+    unsigned long deviceId;             // Device identifier (stored in ROM)
     
     unsigned long sessionId;            // Session identifier
     unsigned char sampleRate;           // Sample rate code
@@ -160,3 +160,5 @@ char SettingsSetConfigValue(unsigned int index, unsigned short value);
 // CWA constants
 #define SETTINGS_FILE "SETTINGS.INI"
 #define DEFAULT_FILE "CWA-DATA.CWA"     // CWA 1.6 has a fixed-name default data file
+
+#define DEVICEID_UNSET 0xffff

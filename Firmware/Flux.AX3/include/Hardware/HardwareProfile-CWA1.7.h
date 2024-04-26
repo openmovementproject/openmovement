@@ -67,7 +67,8 @@ extern void WaitForPrecharge(void);
 extern void SystemPwrSave(unsigned long NapSetting);
 
 	// Used for delays in TimeDelay.h
-	#define GetInstructionClock()  4000000
+	#define GetInstructionClock()  4000000ul
+#define FCY 4000000ul
 
     // USB bus sense I/O
     // #define USE_USB_BUS_SENSE_IO
@@ -98,7 +99,12 @@ extern void SystemPwrSave(unsigned long NapSetting);
                             LDR_INIT_PINS();\
                             DRIVE_FLOATING_PINS(); /*Reduce leakage*/\
                             USB_BUS_SENSE_INIT();\
-                            }
+							}
+
+// Testing of USB/Batt problems - not for production
+//CNPD2bits.CN18PDE = 1;/*KL: USB detect PD, 19-12-2017*/
+//TRISBbits.TRISB15 = 0; LATBbits.LATB15 = 0;/*KL: BATT MON LOW, 19-12-2017*/
+                            
 
 	#define DRIVE_FLOATING_PINS() {\
                             TRISGbits.TRISG6 = 0; LATGbits.LATG6 = 0;\
@@ -283,7 +289,7 @@ extern void SystemPwrSave(unsigned long NapSetting);
     #define NAND_DEVICE     	NAND_DEVICE_HY27UF084G2B
     #define NAND_DEVICE_ALT 	NAND_DEVICE_HY27UF084G2x
     #define NAND_DEVICE_ALT2 	NAND_DEVICE_S34ML04G1
-	#define NAND_DEVICE_ALT3 	NAND_DEVICE_MT29F8G08ABADA  // (actually 4Gb model)
+	#define NAND_DEVICE_ALT3 	NAND_DEVICE_MT29F8G08ABADA  // (actually MT29F4G- 4Gb model)
 
 	// Switches on no-RCB for alternative NAND. Eliminating the read copy back code widens the compatibility of this driver at the expense of slower writes and 1 page of RAM usage on the MCU
 	#define NAND_NO_RCB

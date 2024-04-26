@@ -178,19 +178,39 @@ state according to the definition in the USB specification.
 // New constants
 #define bcdCDC 0x0120 // [dgj] Was 0x0110 // CDC spec version: old  V1.10 0x0110, newer V1.20 0x0120
 
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+#define bcdDevice ((0x01 << 8) | HARDWARE_VERSION)		// Bump to device descriptors
+#else
+#define bcdDevice (HARDWARE_VERSION)
+#endif
+
 /* Device Descriptor */
 ROM USB_DEVICE_DESCRIPTOR device_dsc=
 {
     0x12,   				// Size of this descriptor in bytes
     USB_DESCRIPTOR_DEVICE,  // DEVICE descriptor type
+#ifdef MS_OS_20_DESCRIPTOR
+    0x0201,                 // > 0x0200 to request BOS
+#else
     0x0200,                 // USB Spec Release Number in BCD format
+#endif
     0xEF,                   // Class Code
     0x02,                   // Subclass code
     0x01,                   // Protocol code
     USB_EP0_BUFF_SIZE,      // Max packet size for EP0, see usb_config.h
+#ifdef ALT_USB_VID
+#warning Using alternative USB VID
+	ALT_USB_VID,
+#else
     0x04D8,                 // Vendor ID
+#endif
+#ifdef ALT_USB_PID
+#warning Using alternative USB PID
+	ALT_USB_PID,
+#else
     0x0057,                 // Product ID: mass storage device demo
-    0x0000 | HARDWARE_VERSION,  // Device release number in BCD format
+#endif
+    bcdDevice,  // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
 #if USB_NUM_STRING_DESCRIPTORS > 3
@@ -206,8 +226,16 @@ ROM BYTE configDescriptor1[]={
     /* Configuration Descriptor */
     9,    // Size of this descriptor in bytes
     USB_DESCRIPTOR_CONFIGURATION,                // CONFIGURATION descriptor type
-    98, 0,                  // Total length of data for this cfg
+    98
+#if defined(USB_USE_GEN)
+	+23
+#endif
+      , 0,                  // Total length of data for this cfg
+#if defined(USB_USE_GEN)
+    4,                      // Number of interfaces in this cfg
+#else
     3,                      // Number of interfaces in this cfg
+#endif
     1,                      // Index value of this configuration
     2,                      // Configuration string index
     _DEFAULT | _SELF,       // Attributes, see usb_device.h
@@ -331,6 +359,40 @@ ROM BYTE configDescriptor1[]={
     _BULK,                       //Attributes
     CDC_DATA_IN_EP_SIZE,0x00,                  //size
     0x00                       //Interval
+
+#if defined(USB_USE_GEN)
+	,
+    /* Interface Descriptor */
+    0x09,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
+    USB_DESCRIPTOR_INTERFACE,      // INTERFACE descriptor type
+    GENERIC_BULK_INTF_NUM,  // Interface Number
+    0,                      // Alternate Setting Number
+    2,                      // Number of endpoints in this intf
+    0xFF,                   // Class code
+    0xEE,                   // Subclass code
+    0xDD,                   // Protocol code
+#if USB_NUM_STRING_DESCRIPTORS > 4
+    4,                      // Interface string index
+#else
+    0,                      // Interface string index
+#endif
+    
+    /* Endpoint Descriptor */
+    0x07,                       /*sizeof(USB_EP_DSC)*/
+    USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
+    _EP04_OUT,                  //EndpointAddress
+    _BULK,                       //Attributes
+    USBGEN_EP_SIZE,0x00,        //size
+    1,                         //Interval
+    
+    0x07,                       /*sizeof(USB_EP_DSC)*/
+    USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
+    _EP04_IN,                   //EndpointAddress
+    _BULK,                       //Attributes
+    USBGEN_EP_SIZE,0x00,        //size
+    1                          //Interval
+#endif
+
 };
 
 
@@ -357,11 +419,29 @@ ROM struct{BYTE bLength;BYTE bDscType;WORD string[28];}sd002={
 #if USB_NUM_STRING_DESCRIPTORS > 3
 // USB Product serial number -- serial number is overwritten and is initially ',' 
 // characters as that triggers the "invalid serial number" behaviour on Windows
-struct { BYTE bLength; BYTE bDscType; WORD string[11]; } sd003 =
+struct { BYTE bLength; BYTE bDscType; WORD string[11+5]; } sd003 =
 {
     sizeof(sd003), USB_DESCRIPTOR_STRING,		// sizeof(sd003) = 24, USB_DESCRIPTOR_STRING = 0x03
-    {'C','W','A','0' + (HARDWARE_VERSION >> 4),'0' + (HARDWARE_VERSION & 0x0f),'_',',',',',',',',',','}     // Serial number is still 'CWA' for detection code
+    {'C','W','A','0' + (HARDWARE_VERSION >> 4),'0' + (HARDWARE_VERSION & 0x0f),'_',',',',',',',',',',',  ',',',',',',',',','}     // Serial number is still 'CWA' for detection code
 }; //                                                                            14  16  18  20  22
+// word:  "65535" (as words)
+// dword: "4294967295" (as words)
+#endif
+
+#if defined(USB_USE_GEN)
+//Generic interface descriptor
+ROM struct{BYTE bLength;BYTE bDscType;WORD string[28];}sd004={
+    sizeof(sd004), USB_DESCRIPTOR_STRING,
+    {'A','X','3',' ','G','e','n','e','r','i','c',' ','C','o','m','m','u','n','i','c','a','t','i','o','n',' '}
+};
+#endif
+
+#if USB_NUM_STRING_DESCRIPTORS > 4
+struct { BYTE bLength; BYTE bDscType; WORD string[0]; } sdXXX =
+{
+    sizeof(sdXXX), USB_DESCRIPTOR_STRING,		// sizeof(sdXXX), USB_DESCRIPTOR_STRING = 0x03
+    {}
+};
 #endif
 
 //Array of configuration descriptors
@@ -378,6 +458,49 @@ BYTE *USB_SD_Ptr[]=
     (BYTE *)&sd002,
 #if USB_NUM_STRING_DESCRIPTORS > 3
     (BYTE *)&sd003,      // Serial number
+#if USB_NUM_STRING_DESCRIPTORS > 4
+#if USB_NUM_STRING_DESCRIPTORS != 0xEF
+#error String descriptors unexpected value
+#else
+#if defined(USB_USE_GEN)
+	(BYTE *)&sd004,
+#else
+	(BYTE *)&sdXXX,
+#endif
+	// Yuk, this is the only way to do this without editing usb_device.c USBStdGetDscHandler() case USB_DESCRIPTOR_STRING: (SetupPkt.bDscIndex == MICROSOFT_OS_DESCRIPTOR_INDEX)
+                                                                                    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x04-0x07
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x08-0x0f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x10-0x17
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x17-0x1f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x20-0x27
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x27-0x2f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x30-0x37
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x37-0x3f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x40-0x47
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x47-0x4f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x50-0x57
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x57-0x5f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x60-0x67
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x67-0x6f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x70-0x77
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x77-0x7f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x80-0x87
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x87-0x8f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x90-0x97
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0x97-0x9f
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xa0-0xa7
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xa7-0xaf
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xb0-0xb7
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xb7-0xbf
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xc0-0xc7
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xc7-0xcf
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xd0-0xd7
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xd7-0xdf
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,      // 0xe0-0xe7
+    (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX, (BYTE *)&sdXXX,                                      // 0xe7-0xed
+	(BYTE *)&MSOSDescriptor // MICROSOFT_OS_DESCRIPTOR_INDEX (0xEE)
+#endif
+#endif
 #endif
 };
 
@@ -405,19 +528,256 @@ void UsbInitDescriptors(void)
 {
 #if USB_NUM_STRING_DESCRIPTORS > 3
     // If we have a valid serial number, patch the USB response with the serial number
-    if (settings.deviceId != 0xffff)
+    if (settings.deviceId != DEVICEID_UNSET)
 	{
-        unsigned short *number = (unsigned short *)((char *)&sd003 + 14);
+        unsigned short *number = &sd003.string[6];
+		// 10 digits for full 32-bit number range
+        if (settings.deviceId > 9999999ul)
+		{
+	        *number++ = (signed short)'0' + ((settings.deviceId / 1000000000ul) % 10);
+	        *number++ = (signed short)'0' + ((settings.deviceId /  100000000ul) % 10);
+	        *number++ = (signed short)'0' + ((settings.deviceId /   10000000ul) % 10);
+		}
+		// 7 digits to match volume label limit
+        if (settings.deviceId > 99999ul)
+		{
+	        *number++ = (signed short)'0' + ((settings.deviceId /    1000000ul) % 10);
+	        *number++ = (signed short)'0' + ((settings.deviceId /     100000ul) % 10);
+		}
+		// 5 digits appear fully backwards-compatible with 16-bit device ids
         *number++ = (signed short)'0' + ((settings.deviceId / 10000) % 10);
         *number++ = (signed short)'0' + ((settings.deviceId /  1000) % 10);
         *number++ = (signed short)'0' + ((settings.deviceId /   100) % 10);
         *number++ = (signed short)'0' + ((settings.deviceId /    10) % 10);
         *number++ = (signed short)'0' + ((settings.deviceId        ) % 10);
+
+		// Trim length
+		sd003.bLength = (char *)number - (char *)&sd003;
     }
 #else
 	#error "you have made a mistake"
 #endif
 }
+
+
+
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+    // Microsoft "OS Descriptor" 1.0
+    const MS_OS_DESCRIPTOR MSOSDescriptor =
+    {   
+        sizeof(MSOSDescriptor),         // bLength - lenght of this descriptor in bytes
+        USB_DESCRIPTOR_STRING,          // bDescriptorType - "string"
+        {'M','S','F','T','1','0','0'},  // qwSignature - special values that specifies the OS descriptor spec version that this firmware implements
+        GET_MS_DESCRIPTOR,              // bMS_VendorCode - defines the "GET_MS_DESCRIPTOR" bRequest literal value
+        0x00                            // bPad - always 0x00
+    };
+    
+    // Extended Compat ID OS Feature Descriptor
+    const MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor =
+    {
+        //----------Header Section--------------
+        sizeof(CompatIDFeatureDescriptor),  //dwLength
+        0x0100,                             //bcdVersion = 1.00
+        EXTENDED_COMPAT_ID,                 //wIndex
+        0x01,                               //bCount - 0x01 "Function Section(s)" implemented in this descriptor
+        {0,0,0,0,0,0,0},                    //Reserved[7]
+        //----------Function Section 1----------
+        WINUSB_INTERFACE,                   //bFirstInterfaceNumber: the WinUSB interface in this firmware is interface #3
+        0x01,                               //Reserved - fill this reserved byte with 0x01 according to documentation
+        {'W','I','N','U','S','B',0x00,0x00},//compatID - "WINUSB" (with two null terminators to fill all 8 bytes)
+        {0,0,0,0,0,0,0,0},                  //subCompatID - eight bytes of 0
+        {0,0,0,0,0,0}                       //Reserved
+    };    
+    
+    // Extended Properties OS Feature Descriptor
+    const MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor =
+    {
+        //----------Header Section--------------
+        sizeof(ExtPropertyFeatureDescriptor),   //dwLength
+        0x0100,                                 //bcdVersion = 1.00
+        EXTENDED_PROPERTIES,                    //wIndex
+        0x0001,                                 //wCount - 0x0001 "Property Sections" implemented in this descriptor
+        //----------Property Section 1----------
+#ifdef MS_MULTI_SZ
+        132+2+2,                                //dwSize - in this Property Section
+        0x00000007,                             //dwPropertyDataType (Unicode REG_MULTI_SZ)
+        40+2,                                   //wPropertyNameLength - bytes in the bPropertyName field
+#else
+        132,                                    //dwSize - 132 bytes in this Property Section
+        0x00000001,                             //dwPropertyDataType (Unicode string)
+        40,                                     //wPropertyNameLength - 40 bytes in the bPropertyName field
+#endif
+        {
+			'D','e','v','i','c','e','I','n','t','e','r','f','a','c','e','G','U','I','D',
+#ifdef MS_MULTI_SZ
+			's',
+#endif
+			0x0000
+		},  //bPropertyName - "DeviceInterfaceGUID"
+#ifdef MS_MULTI_SZ
+        78+2,                                     //dwPropertyDataLength - in the bPropertyData field (GUID value in UNICODE formatted string, with braces and dashes and additional null)
+#else
+        78,                                     //dwPropertyDataLength - 78 bytes in the bPropertyData field (GUID value in UNICODE formatted string, with braces and dashes)
+#endif
+        //The below value is the Device Interface GUID (a 128-bit long "globally unique identifier")
+        //Please modify the GUID value in your application before moving to production.
+        //When you change the GUID, you must also change the PC application software
+        //that connects to this device, as the software looks for the device based on 
+        //VID, PID, and GUID.  All three values in the PC application must match 
+        //the values in this firmware.
+        //The GUID value can be a randomly generated 128-bit hexadecimal number, 
+        //formatted like the below value.  The actual value is not important,
+        //so long as it is almost certain to be globally unique, and matches the
+        //PC software that communicates with this firmware.
+        {
+		'{','a','c','c','e','1','3','1','7','-','f','3','f','1','-','4','9','2','1','-','8','7','7','e','-','2','3','9','5','2','3','e','8','3','d','e','7','}'
+		,0x0000
+#ifdef MS_MULTI_SZ
+		,0x0000
+#endif
+		}  //bPropertyData - this is the actual GUID value.  Make sure this matches the PC application code trying to connect to the device.
+    };
+
+
+#ifdef MS_OS_20_DESCRIPTOR
+
+#error "MS OS 2 Descriptors not implemented"
+
+    // Microsoft "OS Descriptor" 2.0
+	const unsigned char msos2_descriptor[MS_OS_20_DESCRIPTOR_LENGTH] =
+	{
+		// Microsoft OS 2.0 Descriptor Set header (Table 10)
+		10, 0x00,             		// Descriptor size
+		0x00, 0x00,             	// MS_OS_20_SET_HEADER_DESCRIPTOR
+		0x00, 0x00, 0x03, 0x06, 	// Windows 8.1 (NTDDI_WINBLUE)
+		MS_OS_20_DESCRIPTOR_LENGTH, 0x00, // Length of descriptor set
+
+		// Microsoft OS 2.0 function subset header (Table 12)
+		8, 0x00, 					// Descriptor size
+		0x02, 0x00, 				// MS_OS_20_SUBSET_HEADER_FUNCTION
+		WINUSB_INTERFACE,			// First interface for this subset
+		0x00,       				// Reserved
+		(8 + 20), 0x00, 			// Length of the descriptor subset
+
+		// Microsoft OS 2.0 compatible ID descriptor (Table 13)
+		20, 0x00, 					// Descriptor size
+		0x03, 0x00, 				// MS_OS_20_FEATURE_COMPATIBLE_ID
+		'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,	// Compatible ID string
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	// Sub-compatible ID string
+	};
+
+	// Binary Object Store
+	const unsigned char bos_descriptor[BOS_DESCRIPTOR_LENGTH] =
+	{
+		// Binary Device Object Store (BOS) descriptor
+	    5,								// bLength of the descriptor
+		0x0f,							// bDescriptorType indicates the BOS Descriptor type (0x0F).
+		BOS_DESCRIPTOR_LENGTH, 0x00,	// wTotalLength - Length of this descriptor and all of its sub descriptors
+		2,								// bNumDeviceCaps - The number of separate device capability descriptors in the BOS.	
+
+		// WebUSB Platform Capability Descriptor in Binary Object Store
+		// https://wicg.github.io/webusb/#webusb-platform-capability-descriptor
+	    24, 							// bLength Descriptor size
+	    0x10, 							// bDescriptorType (Device Capability)
+	    0x05, 							// bDevCapabilityType (Platform)
+	    0x00, 							// bReserved
+	    // PlatformCapabilityUUID -- WebUSB is {3408b638-09a9-47a0-8bfd-a0768815b665}.
+	    0x38, 0xb6, 0x08, 0x34, 0xa9, 0x09, 0xa0, 0x47, 0x8b, 0xfd, 0xa0, 0x76, 0x88, 0x15, 0xb6, 0x65,
+		0x00, 0x01,						// bcdVersion Protocol version supported
+	    REQUEST_WEBUSB,					// bVendorCode - bRequest value used for issuing WebUSB requests. 
+	    0,              				// iLandingPage - URL descriptor index of the device’s landing page.
+	
+	    // Microsoft OS 2.0 Platform Capability Descriptor
+	    28,								// bLength Descriptor size
+	    0x10,							// bDescriptorType (Device Capability)
+	    0x05,							// bDevCapabilityType (Platform)
+	    0x00,							// bReserved		
+	    // PlatformCapabilityUUID -- MS OS 2.0 is {d8dd60df-4589-4cc7-9cd2-659d9e648a9f}.
+	    0xdf, 0x60, 0xdd, 0xd8, 0x89, 0x45, 0xc7, 0x4c, 0x9c, 0xd2, 0x65, 0x9d, 0x9e, 0x64, 0x8a, 0x9f,
+	    0x00, 0x00, 0x03, 0x06, 		// Windows 8.1 (NTDDI_WINBLUE)
+	    MS_OS_20_DESCRIPTOR_LENGTH, 0x00,
+	    REQUEST_WINUSB,					// bMS_VendorCode - vendor request value used
+	    0x00               				// No alternatives
+	};
+
+
+/*
+#define WINUSB_REQUEST_DESCRIPTOR (0x07)
+#define USB_BOS_DESCRIPTOR_TYPE (15)
+
+#define WEBUSB_REQUEST_GET_ALLOWED_ORIGINS (0x01)
+#define WEBUSB_REQUEST_GET_URL (0x02)
+
+usbMsgLen_t usbFunctionDescriptor(usbRequest_t *rq)
+{
+  switch (rq->wValue.bytes[1])
+  {
+  case USB_BOS_DESCRIPTOR_TYPE:
+    usbMsgPtr = (unsigned short)(BOS_DESCRIPTOR);
+    return sizeof(BOS_DESCRIPTOR);
+  default:
+    break;
+  }
+  return 0;
+}
+
+usbMsgLen_t usbFunctionSetup(uchar data[8])
+{
+  usbRequest_t *rq = (void *)data;
+  static uchar dataBuffer[4];
+  currentRequest = rq->bRequest;
+  currentValue = rq->wValue.word;
+  currentIndex = rq->wIndex.word;
+
+  usbMsgPtr = (int)dataBuffer;
+  switch (rq->bRequest)
+  {
+  case REQUEST_WEBUSB:
+  {
+    pmResponseIsEEPROM = true;
+    switch (rq->wIndex.word)
+    {
+    case WEBUSB_REQUEST_GET_ALLOWED_ORIGINS:
+      GetDescriptorStart(0, &pmResponsePtr, &pmResponseBytesRemaining);
+      return USB_NO_MSG;
+    case WEBUSB_REQUEST_GET_URL:
+      if (GetDescriptorStart(rq->wValue.word, &pmResponsePtr, &pmResponseBytesRemaining))
+      {
+        return USB_NO_MSG;
+      }
+      else
+      {
+        // Host is messing with us.
+        forceReset();
+      }
+    }
+    break;
+  }
+  case REQUEST_WINUSB:
+  {
+    switch (rq->wIndex.word)
+    {
+    case WINUSB_REQUEST_DESCRIPTOR:
+      pmResponsePtr = MS_OS_20_DESCRIPTOR_SET;
+      pmResponseBytesRemaining = sizeof(MS_OS_20_DESCRIPTOR_SET);
+      return USB_NO_MSG;
+    }
+    break;
+  }
+  return 0;
+}
+
+*/
+
+	#endif
+
+
+#endif
+
+
+
+
+
 
 
 /** EOF usb_descriptors.c ***************************************************/

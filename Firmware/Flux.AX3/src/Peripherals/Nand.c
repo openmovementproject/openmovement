@@ -387,9 +387,9 @@ unsigned char NandVerifyDeviceId(void)
 				if (NAND_DEVICE_ALT3[i] == '\0') 	{nandPresent = 4; break;}	// Successful end of id string
 				if (id[i] != NAND_DEVICE_ALT3[i]) 	{ break; } 					// Character mismatch
 			}
-//#ifdef NAND_NO_RCB
-//			if (nandPresent) { nandNoRCB = 1; }
-//#endif
+#ifdef NAND_NO_RCB
+			if (nandPresent) { nandNoRCB = 1; }	// Setting NoRCB even though not needed, as other alt. NAND chips did also
+#endif
 		}
 #endif
 

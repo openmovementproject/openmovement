@@ -180,10 +180,19 @@ void RunTestSequence(void)
 		{
 				// Format disk on fail
 	        static char volumeBuffer[13] = {0};
-			sprintf	(volumeBuffer,"AX3%c%c_%05u",
-					('0' + ((HARDWARE_VERSION >> 4) & 0x0f)),
-					('0' + ((HARDWARE_VERSION     ) & 0x0f)),
-					settings.deviceId);
+			if (settings.deviceId > 99999ul)
+			{
+				sprintf	(volumeBuffer,"AX3_%07lu",
+						settings.deviceId % 10000000);
+			}
+			else
+			{
+				sprintf	(volumeBuffer,"AX3%c%c_%05lu",
+						('0' + ((HARDWARE_VERSION >> 4) & 0x0f)),
+						('0' + ((HARDWARE_VERSION     ) & 0x0f)),
+						settings.deviceId);
+			}
+
 	        if(FsFtlFormat(TRUE, settings.deviceId, volumeBuffer))
 			{
 				printf("FORMAT FAILED\r\n\r\n");

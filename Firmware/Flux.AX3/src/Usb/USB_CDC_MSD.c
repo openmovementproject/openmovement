@@ -116,6 +116,93 @@
 	#endif
 #endif
 
+
+#ifdef USB_USE_GEN
+#include "./USB/usb_function_generic.h"
+
+static unsigned char genRxHostOutPacket[USBGEN_EP_SIZE];	// Receiving out packets sent from the host
+static unsigned char genTxHostInPacket[USBGEN_EP_SIZE];	// Transmiting in packets sent to the host
+static USB_HANDLE USBGenericOutHandle = 0;
+static USB_HANDLE USBGenericInHandle = 0;
+static BOOL lastReceivedGeneric = FALSE;					// Tracks last incoming packet (generic or CDC)
+
+static unsigned char genTxBuff[USBGEN_EP_SIZE];		// Output buffer (allows larger buffer, ZLP etc.)
+static int genTxLen = -1;							// <0=none, 0=ZLP, >0=payload
+
+void GenericInit()
+{
+	USBGenericOutHandle = 0;
+	USBGenericInHandle = 0;    
+	USBEnableEndpoint(USBGEN_EP_NUM,USB_IN_ENABLED|USB_OUT_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
+	lastReceivedGeneric = FALSE;
+}
+
+void GenericProcessIO()
+{
+	// User Application USB tasks
+	if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl==1)) return;
+	
+	if (!USBHandleBusy(USBGenericOutHandle))		// Check if the endpoint has received any data from the host.
+	{
+		unsigned short len = USBHandleGetLength(CDCDataOutHandle);
+	    unsigned short maxInLength;	
+		if (inTail >= inHead) { maxInLength = IN_BUFFER_CAPACITY + inHead - inTail - 1; }
+		else { maxInLength = inHead - inTail - 1; }
+		if (len <= maxInLength)
+		{
+			unsigned short i;
+        	for (i = 0; i < len; i++)
+		    {
+				inBuffer[inTail] = genRxHostOutPacket[i];
+				inTail = (inTail + 1) % IN_BUFFER_CAPACITY;
+			}   
+			if (len > 0) { lastReceivedGeneric = TRUE; }
+			// Re-arm the OUT endpoint for the next packet:
+			// The USBGenRead() function call "arms" the endpoint (and makes it "busy").  If the endpoint is armed, the SIE will 
+			// automatically accept data from the host, if the host tries to send a packet of data to the endpoint.  Once a data 
+			// packet addressed to this endpoint is received from the host, the endpoint will no longer be busy, and the application
+			// can read the data which will be sitting in the buffer.
+			USBGenericOutHandle = USBGenRead(USBGEN_EP_NUM,(BYTE*)&genRxHostOutPacket,USBGEN_EP_SIZE);	// USBRxOnePacket
+		}
+	}
+
+	// Now check to make sure no previous attempts to send data to the host are still pending.  If any attemps are still
+	// pending, we do not want to write to the endpoint 1 IN buffer again, until the previous transaction is complete.
+	// Otherwise the unsent data waiting in the buffer will get overwritten and will result in unexpected behavior.    
+	if(!USBHandleBusy(USBGenericInHandle))		
+	{	
+		// The endpoint was not "busy", therefore it is safe to write to the buffer and arm the endpoint.					
+		// The USBGenWrite() function call "arms" the endpoint (and makes the handle indicate the endpoint is busy).
+		// Once armed, the data will be automatically sent to the host (in hardware by the SIE) the next time the 
+		// host polls the endpoint.  Once the data is successfully sent, the handle (in this case USBGenericInHandle) 
+		// will indicate the the endpoint is no longer busy.
+		if (genTxLen >= 0)
+		{
+			int len = genTxLen;
+			if (len > USBGEN_EP_SIZE) { len = USBGEN_EP_SIZE; }
+			memcpy(genTxHostInPacket, genTxBuff, len);			
+			USBGenericInHandle = USBGenWrite(USBGEN_EP_NUM,(BYTE*)&genTxHostInPacket, len);
+			if (len >= USBGEN_EP_SIZE) {
+				genTxLen = 0;	// needs ZIP
+			} else {
+				genTxLen = -1;	// no ZLP needed
+			}
+		}
+	}
+}
+
+int GenericWrite(void *buffer, int len)
+{
+	if (genTxLen > 0) { return 0; }
+	if (len > sizeof(genTxBuff)) { len = sizeof(genTxBuff); }
+	memcpy(genTxBuff, buffer, len);
+	genTxLen = len;
+	return len;
+}
+
+#endif
+
+
 #pragma code
 
 // Repurposed - sort out you own oscillator stuff prior to this
@@ -282,6 +369,14 @@ if(SRbits.IPL ==0){
 	    
 	    if (maxOutLength > 0)
 	    {
+#ifdef USB_USE_GEN
+			if (lastReceivedGeneric)
+			{
+	            numBytes = GenericWrite(buffer, maxOutLength);
+                outHead = (outHead + numBytes) % OUT_BUFFER_CAPACITY;
+			}
+			else			// don't write to CDC if directing output to generic
+#endif
 	        if (USBUSARTIsTxTrfReady())
 	        {
 if (maxOutLength > 64) { maxOutLength = 64; }       // needed to fix data loss
@@ -330,6 +425,9 @@ if (len > maxInLength)
 			// If there is sufficient room for the new data
 			if (len <= maxInLength)	
 			{
+#ifdef USB_USE_GEN
+				if (len > 0) { lastReceivedGeneric = FALSE; }
+#endif
 				// Copy data from dual-ram buffer to user's circular buffer
 	        	for(cdc_rx_len = 0; cdc_rx_len < len; cdc_rx_len++)
 			    {
@@ -358,7 +456,11 @@ void USBProcessIO(void)
 
 	#ifdef USB_USE_MSD
     	MSDTasks();  
-	#endif 
+	#endif
+
+	#ifdef USB_USE_GEN
+		GenericProcessIO();
+	#endif
 }
 
 #ifdef USB_USE_CDC
@@ -409,6 +511,128 @@ void USBCBErrorHandler(void)
 }
 
 
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+// Patched version from https://www.microchip.com/forums/m802958.aspx
+void USBCheckVendorRequest(void)
+{
+    #if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+        WORD Length;
+        
+        //Check if the host is requesting an MS feature descriptor
+        if(SetupPkt.bRequest == GET_MS_DESCRIPTOR)
+        {
+            //Figure out which descriptor is being requested
+            if(SetupPkt.wIndex == EXTENDED_COMPAT_ID)
+            {
+                if (SetupPkt.bmRequestType == 0b11000000) //Device to host, Vendor type, device target
+                {
+                    //Determine number of bytes to send to host
+                    //Lesser of: requested amount, or total size of the descriptor
+                    Length = CompatIDFeatureDescriptor.dwLength;
+                    if(SetupPkt.wLength < Length)
+                    {
+                        Length = SetupPkt.wLength;
+                    }
+
+                    //Prepare to send the requested descriptor to the host
+                    USBEP0SendROMPtr((const BYTE*)&CompatIDFeatureDescriptor, Length, USB_EP0_ROM | USB_EP0_INCLUDE_ZERO);
+                }
+            }
+
+            //Figure out which descriptor is being requested
+            else if(SetupPkt.wIndex == EXTENDED_PROPERTIES)
+            {
+                //Documentation states that Extended Properties should only be requested as Interface requests (bmRequestType == 0xC1), not Device (0xC0)
+                //See - Microsoft's Extended Properties OS Feature Descriptor Specification document (Nov 19, 2012)                        
+                //But, when connected to Renesas USB 3.0 on Win7, we observed Extended Properties being requested from the Device (bmRequestType == 0xC0)
+                //This may be a quirk, due to the device being a composite device, with WinUSB support on interface 1
+                //My solution is to respond to both Device & Interface requests for Extended Properties.
+                //Other firmware includes a similar solution, eg. http://sourceforge.net/projects/libwdi/files/misc/
+                
+                if ((SetupPkt.bmRequestType == 0b11000000) || (SetupPkt.bmRequestType == 0b11000001)) //Device to host, Vendor type, (interface OR device) target
+                {
+                    #if defined(USB_USE_GEN)
+                    //GENERIC_BULK_INTF_NUM is the number of the interface supporting WinUSB, as used in the Configuration Descriptor (usb_descriptors.c)
+                    //For most devices, having only one interface, the interface number will be 0.
+
+                    //This is a composite device, therefore we should check that we're responding for the correct interface number.
+                    //The interface number will be in the low byte of wValue according to Microsoft's Extended Properties OS Feature Descriptor Specification document (Nov 19, 2012)
+                    //Luckily, you'd also expect the low byte to be used if the request were a Device request (bmRequestType = 0xC0) [see Microsoft OS Descriptors Overview document]
+// ??? Docs say high byte is interface number? https://docs.microsoft.com/en-us/windows-hardware/drivers/network/mb-interface-model-supplement
+//                    if (SetupPkt.W_Value.byte.LB == GENERIC_BULK_INTF_NUM) //Is the request targetting the Interface supporting WinUSB?
+                    #endif
+                    {
+                        //Determine number of bytes to send to host
+                        //Lesser of: requested amount, or total size of the descriptor
+                        Length = ExtPropertyFeatureDescriptor.dwLength;
+                        if(SetupPkt.wLength < Length)
+                        {
+                            Length = SetupPkt.wLength;
+                        }
+
+                        //Prepare to send the requested descriptor to the host
+                        USBEP0SendROMPtr((const BYTE*)&ExtPropertyFeatureDescriptor, Length, USB_EP0_ROM | USB_EP0_INCLUDE_ZERO);
+                    }
+                }
+            }
+        }
+        
+    #endif //#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR) 
+}//void USBCheckVendorRequest(void)
+
+/*
+void USBCheckVendorRequest(void)
+{
+	WORD Length;
+	
+	//Check if the most recent SETUP request is class specific
+	if(SetupPkt.bmRequestType == 0b11000000)    //Class specific, device to host, device level target
+	{
+	    //Check if the host is requesting an MS feature descriptor
+	    if(SetupPkt.bRequest == GET_MS_DESCRIPTOR)
+	    {
+	        //Figure out which descriptor is being requested
+	        if(SetupPkt.wIndex == EXTENDED_COMPAT_ID)
+	        {
+	            //Determine number of bytes to send to host 
+	            //Lesser of: requested amount, or total size of the descriptor
+	            Length = CompatIDFeatureDescriptor.dwLength;
+	            if(SetupPkt.wLength < Length)
+	            {
+	                Length = SetupPkt.wLength;
+	            }    
+	                 
+	            //Prepare to send the requested descriptor to the host
+	            USBEP0SendROMPtr((const BYTE*)&CompatIDFeatureDescriptor, Length, USB_EP0_ROM | USB_EP0_INCLUDE_ZERO);
+	        }
+	    }            
+	}//if(SetupPkt.bmRequestType == 0b11000000)    
+	if(SetupPkt.bmRequestType == 0b11000001)    //Class specific, device to host, interface target
+	{
+	    //Check if the host is requesting an MS feature descriptor
+	    if(SetupPkt.bRequest == GET_MS_DESCRIPTOR)
+	    {
+	        //Figure out which descriptor is being requested
+	        if(SetupPkt.wIndex == EXTENDED_PROPERTIES)    
+	        {
+	            //Determine number of bytes to send to host 
+	            //Lesser of: requested amount, or total size of the descriptor
+	            Length = ExtPropertyFeatureDescriptor.dwLength;
+	            if(SetupPkt.wLength < Length)
+	            {
+	                Length = SetupPkt.wLength;
+	            }    
+	                 
+	            //Prepare to send the requested descriptor to the host
+	            USBEP0SendROMPtr((const BYTE*)&ExtPropertyFeatureDescriptor, Length, USB_EP0_ROM | USB_EP0_INCLUDE_ZERO);
+	        }    
+	    }                   
+	}//else if(SetupPkt.bmRequestType == 0b11000001)    
+}
+*/
+#endif
+
+
 // USBCBCheckOtherReq() -- Handle class-specific requests.
 void USBCBCheckOtherReq(void)
 {
@@ -417,6 +641,12 @@ void USBCBCheckOtherReq(void)
 	#endif
 	#ifdef USB_USE_CDC
     	USBCheckCDCRequest();
+	#endif
+	#ifdef USB_USE_GEN
+		// ???
+	#endif
+	#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+		USBCheckVendorRequest();
 	#endif
 }
 
@@ -442,6 +672,9 @@ void USBCBInitEP(void)
 	#endif
 	#ifdef USB_USE_CDC
     	CDCInitEP();
+	#endif
+	#ifdef USB_USE_GEN
+		GenericInit();
 	#endif
 }
 

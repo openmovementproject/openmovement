@@ -36,7 +36,10 @@
 	#define HARDWARE_SELECT 0x17
     
     // Define firmware version
-    #define SOFTWARE_VERSION 46
+    #define SOFTWARE_VERSION 50
+
+// Compensate for poor charge termination in some devices (%)
+#define COMPENSATE_CHARGE_THRESHOLD	80
 
 // High-speed capable
 //#define HIGH_SPEED_USES_PLL	// Not fully tested (doesn't appear to be required anyway)

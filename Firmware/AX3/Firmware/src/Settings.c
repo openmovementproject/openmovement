@@ -76,16 +76,25 @@ Status status = {0};
 
 
 // Get the device id
-unsigned short SettingsGetDeviceId(void)
+unsigned long SettingsGetDeviceId(void)
 {
-    unsigned short id = 0xffff;
-    ReadProgram(DEVICE_ID_ADDRESS, &id, sizeof(unsigned short));
+    unsigned long id = DEVICEID_UNSET;
+    ReadProgram(DEVICE_ID_ADDRESS, &id, sizeof(unsigned long));
+	// If high word is not set, treat as zero
+	if ((id >> 16) == 0xffff)
+	{
+		id &= 0x0000fffful;
+	}
+#ifdef __DEBUG
+if(id == 0xffff) 
+	id = 1;
+#endif
     return id;
 }
 
 
 // Rewrite the device id
-void SettingsSetDeviceId(unsigned short newId)
+void SettingsSetDeviceId(unsigned long newId)
 {
     // Check voltage ok to program
     if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return; }
@@ -95,7 +104,7 @@ void SettingsSetDeviceId(unsigned short newId)
     if (newId != settings.deviceId)
     {
         settings.deviceId = newId;
-        WriteProgramPage(DEVICE_ID_ADDRESS, &settings.deviceId, sizeof(unsigned short));
+        WriteProgramPage(DEVICE_ID_ADDRESS, &settings.deviceId, sizeof(unsigned long));
     }
 }
 
@@ -228,7 +237,7 @@ void SettingsInitialize(void)
     memset(&status, 0, sizeof(status));
 
     // Fixed settings
-    settings.deviceId = 0x0000;
+    //settings.deviceId = DEVICEID_UNSET;
     settings.deviceId = SettingsGetDeviceId();
 
     // Current settings
@@ -348,7 +357,7 @@ char SettingsAction(char flags)
         volumeBuffer[3]  = '0' + ((HARDWARE_VERSION >> 4) & 0x0f);
         volumeBuffer[4]  = '0' + ((HARDWARE_VERSION     ) & 0x0f);
         volumeBuffer[5]  = '_';
-        if (settings.deviceId == 0xffff)
+        if (settings.deviceId == DEVICEID_UNSET)
         {
             volumeBuffer[6]  = '_';
             volumeBuffer[7]  = '_';
@@ -359,11 +368,17 @@ char SettingsAction(char flags)
         }
         else
         {
-            volumeBuffer[6]  = '0' + (settings.deviceId / 10000) % 10;
-            volumeBuffer[7]  = '0' + (settings.deviceId /  1000) % 10;
-            volumeBuffer[8]  = '0' + (settings.deviceId /   100) % 10;
-            volumeBuffer[9]  = '0' + (settings.deviceId /    10) % 10;
-            volumeBuffer[10] = '0' + (settings.deviceId        ) % 10;
+	        if (settings.deviceId > 99999ul)
+			{
+		        volumeBuffer[3]  = '_';
+            	volumeBuffer[4]  = '0' + (settings.deviceId / 1000000ul) % 10;
+            	volumeBuffer[5]  = '0' + (settings.deviceId /  100000ul) % 10;
+			}
+            volumeBuffer[6]  = '0' + (settings.deviceId /   10000) % 10;
+            volumeBuffer[7]  = '0' + (settings.deviceId /    1000) % 10;
+            volumeBuffer[8]  = '0' + (settings.deviceId /     100) % 10;
+            volumeBuffer[9]  = '0' + (settings.deviceId /      10) % 10;
+            volumeBuffer[10] = '0' + (settings.deviceId          ) % 10;
             volumeBuffer[11] = '\0';
         }
 
@@ -442,7 +457,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
     }
     else if (strnicmp(line, "id",2) == 0)
     {
-        printf("ID=CWA,%x,%u,%u,%lu\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, settings.deviceId, settings.sessionId);
+        printf("ID=CWA,%x,%u,%lu,%lu\r\n", HARDWARE_VERSION, SOFTWARE_VERSION, settings.deviceId, settings.sessionId);
     }
     else if (strnicmp(line, "sample", 6) == 0 && mode != SETTINGS_BATCH)
     {
@@ -778,14 +793,14 @@ else if (strnicmp(line, "test_results", 12) == 0)
     }
     else if (strnicmp(line, "device", 6) == 0)
     {
-        unsigned int id = 0xffff;
+        unsigned long id = DEVICEID_UNSET;
         if (line[6] != '\0')
 	    { 
-		    id = (unsigned int)my_atoi(line + 6); 
+		    id = my_atoi(line + 6); 
             if (locked) { printf("ERROR: Locked.\r\n"); }
             else { SettingsSetDeviceId(id); }
 	    }    
-        printf("DEVICE=%u,%u\r\n", settings.deviceId, SettingsGetDeviceId());
+        printf("DEVICE=%lu,%lu\r\n", settings.deviceId, SettingsGetDeviceId());
     }
     else if (strnicmp(line, "annotate", 8) == 0)
     {
