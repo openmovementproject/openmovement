@@ -143,7 +143,6 @@ DRESULT disk_write(BYTE drive, const BYTE *buffer, DWORD sector, BYTE count)
 DRESULT disk_ioctl(BYTE drive, BYTE command, void *buffer)
 {
     if (drive != 0) { return RES_PARERR; }
-    if (buffer == 0) { return RES_PARERR; }
     if (mediaInformation == NULL || mediaInformation->errorCode != MEDIA_NO_ERROR) { return RES_NOTRDY; }
 
     switch (command)

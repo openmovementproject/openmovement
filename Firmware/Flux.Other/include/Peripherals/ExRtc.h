@@ -29,6 +29,8 @@ void ExRtcStartup(void);
 DateTime ExRtcReadTime(void);
 // Write time
 void ExRtcWriteTime(DateTime time);
+// Turn on clock out - hardware specific option
+unsigned char ExRtcClockOut(unsigned short freq);
 
 #endif
 

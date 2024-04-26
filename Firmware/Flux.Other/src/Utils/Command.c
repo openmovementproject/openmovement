@@ -38,33 +38,158 @@
 #include <string.h>
 #include <stdio.h>
 
-// Microchip File System I/O defines
-#if defined(__18CXX) || defined(__C30__) || defined( __C32__ ) || defined(__PIC32MX__)
-    #include "MDD File System/FSIO.h"
-    #include "Utils/FSutils.h"
-    #ifdef FILE
-        #undef FILE
-    #endif
-    #ifdef fopen
-        #undef fopen
-    #endif
-    #ifdef fgets
-        #undef fgets
-    #endif
-    #ifdef fclose
-        #undef fclose
-    #endif
-    #define FILE   FSFILE
-    #define fopen  FSfopen
-    #define fgets  FSfgets
-    #define fclose FSfclose
-#endif
-
-#ifndef NO_TIME
-#include "Peripherals/Rtc.h"
-#endif
-
+#include "Peripherals/SysTime.h"
 #include "Utils/Command.h"
+#include "Utils/filesystem.h"
+
+
+// Compares two DateTime_t structures for equality:  (<0): a<b,  (>0): a>b,  (=0): a==b
+int SysTimeEquals(const DateTime_t *a, const DateTime_t *b)
+{
+	const char *pa = (const char *)a;
+	const char *pb = (const char *)b;
+	int ofs;
+	for (ofs = 5; ofs >= 0; ofs--)
+	{
+		if (pa[ofs] > pb[ofs]) { return 1; }
+		if (pa[ofs] < pb[ofs]) { return -1; }
+	}
+	return 0;
+}
+
+// Minimum valid time
+const DateTime_t sysTimeMin = {
+	.seconds = 0,
+	.minutes = 0,
+	.hours = 0,
+	.day = 1,
+	.month = 1,
+	.year = 0,
+};
+
+// Maximum valid time (when packed)
+const DateTime_t sysTimeMax = {
+	.seconds = 59,
+	.minutes = 59,
+	.hours = 23,
+	.day = 31,
+	.month = 12,
+	.year = 63,
+};
+
+// Returns whether a datetime is (=0) at-or-below the minimum, (<0) at-or-below the maximum, or (>0) a standard time.
+int SysTimeMinMax(const DateTime_t *tm)
+{
+	int compMin = SysTimeEquals(tm, &sysTimeMin);
+	int compMax = SysTimeEquals(tm, &sysTimeMax);
+
+	if (compMin == -1 || compMin == 0) { return 0; }	// at-or-below minimum
+	if (compMax == 1 || compMax == 0) { return -1; }	// at-or-below maximum
+	return 1;	// a standard time
+}
+
+// Convert a date/time number to a string ("yyYY/MM/DD,HH:MM:SS+00" -- AT+CCLK compatible for default format)
+const char *SysTimeToString(const DateTime_t *tm)
+{
+    // "yyYY/MM/DD,HH:MM:SS+00"
+	static char rtcString[23];
+    char *c = rtcString;
+    unsigned int v;
+	int minMax = SysTimeMinMax(tm);
+
+	if (minMax == 0) { *c++ = '0'; *c++ = '\0'; }				// "0"
+	else if (minMax < 0) { *c++ = '-'; *c++ = '1'; *c++ = '\0'; }	// "-1"
+	else
+	{
+	    v = 2000 + tm->year; *c++ = '0' + ((v / 1000) % 10); *c++ = '0' + ((v / 100) % 10); *c++ = '0' + ((v / 10) % 10); *c++ = '0' + (v % 10); *c++ = '/';
+	    v = tm->month;       *c++ = '0' + ((v / 10) % 10); *c++ = '0' + (v % 10); *c++ = '/';
+	    v = tm->day;         *c++ = '0' + ((v / 10) % 10); *c++ = '0' + (v % 10); *c++ = ',';
+	    v = tm->hours;       *c++ = '0' + ((v / 10) % 10); *c++ = '0' + (v % 10); *c++ = ':';
+	    v = tm->minutes;     *c++ = '0' + ((v / 10) % 10); *c++ = '0' + (v % 10); *c++ = ':';
+	    v = tm->seconds;     *c++ = '0' + ((v / 10) % 10); *c++ = '0' + (v % 10);
+	    //*c++ = '+'; *c++ = '0'; *c++ = '0';
+	    *c++ = '\0';
+	}
+    return rtcString;
+}
+
+// Convert a date/time number from a string ("YY/MM/DD,HH:MM:SS+00" -- AT+CCLK compatible for default format)
+// Returns >0 for a valid time stored to the structure (<0 for infinitely future, 0 for infinitely past)
+int SysTimeFromString(const char *value, DateTime_t *tm)
+{
+    unsigned short v = 0xffff;
+    int index = 0;
+    const char *c = value;
+
+	if (tm == NULL || value == NULL) { return 0; }
+	if (value[0] == '\0') { return 0; }
+	if (value[0] == '0' && value[1] == '\0') { return 0; }
+	if (value[0] == '-') { return -1; }
+    for (;;)
+    {
+        if (*c >= '0' && *c <= '9') // Part of value
+        {
+            if (v == 0xffff) { v = 0; }
+            v = (v * 10) + (*c - '0');
+        }
+        else
+        {
+            if (v != 0xffff)  // End of value
+            {
+                if      (index == 0) { tm->year = (unsigned char)((v >= 2000) ? (v - 2000) : v); }
+                else if (index == 1) { tm->month = (unsigned char)v; }
+                else if (index == 2) { tm->day = (unsigned char)v; }
+                else if (index == 3) { tm->hours = (unsigned char)v; }
+                else if (index == 4) { tm->minutes = (unsigned char)v; }
+                else if (index == 5) { tm->seconds = (unsigned char)v; }
+                else { break; }
+                index++;
+                v = 0xffff;
+                if (index >= 6) { break; }
+            }
+            if (*c == '\0') { break; }
+        }
+        c++;
+    }
+
+    // Check if parsed six elements and check validity of date
+	if (index != 6 || !SysTimeCheckTime(tm))
+	{
+        return 0;		// invalid
+	}
+	return 1;		// valid time
+}
+
+unsigned long PackedTimeFromString(const char *value)
+{
+	DateTime_t tm;
+	int timeResult = SysTimeFromString(value, &tm);
+	if (timeResult < 0) { return 0xFFFFFFFFul; }
+	if (timeResult == 0) { return 0; }
+	return SysTimeToPacked(&tm);
+}
+
+unsigned long EpochTimeFromString(const char *value)
+{
+	DateTime_t tm;
+	int timeResult = SysTimeFromString(value, &tm);
+	if (timeResult < 0) { return 0xFFFFFFFFul; }
+	if (timeResult == 0) { return 0; }
+	return SysTimeToEpoch(&tm);
+}
+
+const char *PackedTimeToString(unsigned long value)
+{
+	DateTime_t tm;
+	return SysTimeToString(SysTimeFromPacked(value, &tm));
+}
+
+const char *EpochTimeToString(unsigned long value)
+{
+	DateTime_t tm;
+	return SysTimeToString(SysTimeFromEpoch(value, &tm));
+}
+
 
 
 // Set/get char
@@ -82,7 +207,6 @@ int CommandHandlerChar(commandParserState_t *cmd)
 	        if (ivalue < -128) { ivalue = 0xff; }
 	        value = (char)ivalue;
         }
-        value = (char)atoi(cmd->argv[1]);
         *((char *)(cmd->command->pointer)) = value;
     }
     printf("%s=%d\r\n", cmd->command->label, *((char *)(cmd->command->pointer)));
@@ -127,8 +251,7 @@ int CommandHandlerULong(commandParserState_t *cmd)
 }
 
 
-#ifndef NO_TIME
-// Set/get time
+// Set/get packed time
 int CommandHandlerTime(commandParserState_t *cmd)
 {
     if (cmd->argc >= 2)
@@ -136,13 +259,28 @@ int CommandHandlerTime(commandParserState_t *cmd)
 	    unsigned long value;
         if (cmd->command->flags & COMMAND_DEFINITION_READ_ONLY) { return COMMAND_RETURN_RESTRICTED; }
         if (cmd->flags & COMMAND_FLAG_RESTRICTED) { return COMMAND_RETURN_RESTRICTED; }
-        value = RtcFromString(cmd->argv[1]);        
+        value = PackedTimeFromString(cmd->argv[1]);        
         *((unsigned long *)(cmd->command->pointer)) = value;
     }
-    printf("%s=%s\r\n", cmd->command->label, RtcToString(*((unsigned long *)(cmd->command->pointer))));
+    printf("%s=%s\r\n", cmd->command->label, PackedTimeToString(*((unsigned long *)(cmd->command->pointer))));
     return COMMAND_RETURN_OK;
 }
-#endif
+
+
+// Set/get epoch-based time
+int CommandHandlerTimeEpoch(commandParserState_t *cmd)
+{
+    if (cmd->argc >= 2)
+    {
+	    unsigned long value;
+        if (cmd->command->flags & COMMAND_DEFINITION_READ_ONLY) { return COMMAND_RETURN_RESTRICTED; }
+        if (cmd->flags & COMMAND_FLAG_RESTRICTED) { return COMMAND_RETURN_RESTRICTED; }
+        value = EpochTimeFromString(cmd->argv[1]);        
+        *((unsigned long *)(cmd->command->pointer)) = value;
+    }
+    printf("%s=%s\r\n", cmd->command->label, EpochTimeToString(*((unsigned long *)(cmd->command->pointer))));
+    return COMMAND_RETURN_OK;
+}
 
 
 // Print a fixed string
@@ -210,7 +348,7 @@ unsigned long SetBits(const char *string, unsigned long existing, int bitOffset)
 }
 */
 
-int CommandParseList(const command_definition_t *commandList, const char *rawLine, int flags)
+int CommandParseListContext(const command_definition_t *commandList, const char *rawLine, int flags, void *context)
 {
     const char *sourceLine = rawLine;
     char ret = COMMAND_RETURN_NOT_HANDLED;   // "ERROR: Unknown command: %s\r\n"
@@ -365,6 +503,7 @@ int CommandParseList(const command_definition_t *commandList, const char *rawLin
 	        state.argc = numParams;
 	        state.argv = params;
 	        state.flags = flags;
+			state.context = context;
             ret = cmd->handler(&state);
         }
 
@@ -373,6 +512,12 @@ int CommandParseList(const command_definition_t *commandList, const char *rawLin
 
     return ret;
 }
+
+int CommandParseList(const command_definition_t *commandList, const char *rawLine, int flags)
+{
+	return CommandParseListContext(commandList, rawLine, flags, NULL);
+}
+
 
 
 // Array of lists

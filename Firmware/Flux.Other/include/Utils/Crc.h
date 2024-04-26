@@ -30,17 +30,25 @@
 #define CRC_H
 
 // Polynomials (top poly bit must not be set)
-#define CRC_6_ITU_BITS 6     //
-#define CRC_6_ITU_POLY 0x03  // CRC-6-ITU (x^6 + x + 1) = (1)000011
+#define CRC_6_ITU_BITS 6			//
+#define CRC_6_ITU_POLY 0x03			// CRC-6-ITU (x^6 + x + 1) = (1)000011
+#define CRC_6_ITU_INITIAL 0
+
+#define CRC_16_CCITT_BITS 16
+#define CRC_16_CCITT_POLY 0x1021	// (1)0001000000100001
+#define CRC_16_CCITT_INITIAL 0xffff
+
 
 // Maximum CRC size
 typedef unsigned short crc_t;
 
-// Calculate the CRC (starting from the MSB of each byte)
-crc_t CrcCalculate(const void *message, int messagebits, crc_t poly, char polybits);
+// Calculate the CCITT 16-bit CRC on a byte-aligned message
+unsigned short CrcCCITT_16bit_Calculate(const unsigned char *buffer, unsigned short len, unsigned short crcInitVal);
 
+// Calculate the ITU 6-bit CRC on a 10-bit message (MSB first)
+unsigned short Crc6ITU_10bit_Calculate(unsigned short message);
 
-// Specific CRC implementations
-unsigned short Crc6ITU_10bit_Calculate(unsigned short message, unsigned short result);
+// (Slow, generic) Calculate the CRC of a message bits (starting from the MSB of each byte, poly must not have top bit set)
+crc_t CrcCalculateSlow(const void *message, int messagebits, crc_t poly, char polybits, crc_t initialCrc);
 
 #endif

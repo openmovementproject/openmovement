@@ -26,7 +26,7 @@
 // Error Correcting Codes (ECC)
 // Dan Jackson, 2011
 
-#include "Ftl/Ecc.h"
+#include "Ftl/xEcc.h"
 
 // Hamming Error Correction Code (ECC) to detect 2-bit errors and correct 1-bit errors per 256 bytes.
 //

@@ -5,10 +5,10 @@
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
  * 1. Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer.
+ *	 this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice, 
- *    this list of conditions and the following disclaimer in the documentation 
- *    and/or other materials provided with the distribution.
+ *	 this list of conditions and the following disclaimer in the documentation 
+ *	 and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
@@ -28,8 +28,14 @@
 
 #ifndef FIFO_H
 #define FIFO_H
+
+#if defined(__C30__) || defined (__C32__)
 #include "Compiler.h"
 #include "HardwareProfile.h"
+#elif defined(__arm__)
+#include <stdlib.h>
+#include "Config.h"
+#endif
 
 #if defined(__PIC24FJ256DA206__) && !defined(USE_EDS)
 #warning "EDS Expected"
@@ -45,12 +51,12 @@
 // FIFO
 typedef struct
 {
-    unsigned int head;
-    unsigned int tail;
-    size_t elementSize;
-    unsigned int capacity;
-    unsigned int mask;
-    void FIFO_EDS *buffer;
+	unsigned int head;
+	unsigned int tail;
+	size_t elementSize;
+	unsigned int capacity;
+	unsigned int mask;
+	void FIFO_EDS *buffer;
 } fifo_t;
 
 // Interrupt mask protection functions - used to block fifo interrupts (may result in timestamp jitter)
@@ -62,6 +68,18 @@ typedef struct
 	typedef unsigned long FIFO_IPL_shadow_t;
 	#define FIFO_INTS_DISABLE()	{IPLshadow = _CP0_BCS_STATUS((_CP0_STATUS_IPL_MASK&((~FIFO_INTERRUPT_PRIORITY)<<_CP0_STATUS_IPL_POSITION)),(_CP0_STATUS_IPL_MASK&(FIFO_INTERRUPT_PRIORITY<<_CP0_STATUS_IPL_POSITION)));} // Assign IPL equal to FIFO_INTERRUPT_PRIORITY
 	#define FIFO_INTS_ENABLE()	{_CP0_BCS_STATUS((_CP0_STATUS_IPL_MASK&(~IPLshadow)),(_CP0_STATUS_IPL_MASK&IPLshadow));}
+#elif defined (__arm__)
+	// KL: Added standard ARM cmsis interrupt masking method
+	typedef unsigned char FIFO_IPL_shadow_t;
+#if (__CORTEX_M >= 0x03)
+	#define FIFO_BASE_PRI_NUM	(FIFO_INTERRUPT_PRIORITY << (8 - __NVIC_PRIO_BITS))
+	#define FIFO_INTS_DISABLE()	{IPLshadow = __get_BASEPRI(); if(IPLshadow>FIFO_BASE_PRI_NUM){__set_BASEPRI(FIFO_BASE_PRI_NUM);}}
+	#define FIFO_INTS_ENABLE()	{__set_BASEPRI(IPLshadow);}
+#else
+	// M0 processor doesn't support masking
+	#define FIFO_INTS_DISABLE()	{__disable_irq();}
+	#define FIFO_INTS_ENABLE()	{__enable_irq();} 
+#endif
 #endif
 
 // Initialize FIFO data structure

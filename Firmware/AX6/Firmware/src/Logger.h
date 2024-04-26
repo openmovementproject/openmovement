@@ -36,8 +36,7 @@
 // Data type
 typedef struct { unsigned short x, y, z; } DataType;        // Data type
 
-// TODO: Make a larger buffer (something breaks at the moment if it is larger)
-#define DATA_BUFFER_CAPACITY 256   // Buffer size -- must be a power of 2. Memory requirement is * sizeof(DataType) -- e.g. 256 entries takes 1.5 kB
+#define DATA_BUFFER_CAPACITY   2048 // Buffer size -- must be a power of 2. Memory requirement is * sizeof(DataType) -- e.g. 256 entries takes 1.5 kB
 
 // Data buffer
 typedef struct
@@ -77,6 +76,7 @@ void DataTimestamp(DataStream *dataStream, unsigned long *timestamp, unsigned sh
 
 // Collect any new data (usually called from interrupt)
 inline void LoggerAccelTasks(void);
+inline void LoggerAccelTasksSingleSampleAccel(void);
 
 #ifdef USE_GYRO
 // Collect any new data -- typically called from an interrupt

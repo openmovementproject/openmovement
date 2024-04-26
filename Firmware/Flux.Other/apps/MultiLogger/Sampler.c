@@ -749,7 +749,7 @@ void SamplerTasks(void)
 	    // Timer increment and ceiling
 	    if (status.inactivity < 0xffff) status.inactivity++;			// Inactivity timer
 	    if (status.alertTimer < 0xffff) status.alertTimer++;			// Alert timer
-	    if (status.connection != CONNECTION_NONE) { status.disconnectTimer = 0; }
+	    if (status.connection != CONNECTION_NONE) { status.disconnectTimer = 0; logger.debugFlashCount = LED_STATE_FLASH_TIMEOUT;} // Set flash timout
 	    else if (status.disconnectTimer < 0xffff) status.disconnectTimer++;	// Disconnect timer
     
 	    // Always update ADC readings

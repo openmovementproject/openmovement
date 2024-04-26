@@ -9,8 +9,17 @@
 #include "Peripherals/Si443x.h"
 
 // Debug setting
-//	#define DEBUG_ON
+#undef DEBUG_LEVEL
+#define DEBUG_LEVEL	0
+#define DBG_FILE dbg_file
+#if (DEBUG_LEVEL > 0)||(GLOBAL_DEBUG_LEVEL > 0)
+static const char* dbg_file = "si443x";
+#endif
 #include "Debug.h"
+
+#ifndef NULL
+#define NULL 0
+#endif
 
 /* Hardware/firmware API requirements:
 	Si44_IRQ_EN()
@@ -121,18 +130,23 @@ void Si44RadioInit(void)
 	
 	// Setup baseband modem settings
 	// Aiming for 150kbps, Fd=62.5KHz, Manchester coded, 434MHz band
+
+	// RX/TX carrier freq settings
 	Si44WriteReg(Si44_Frequency_Band   			,0x53); 	// 75 430MHz
 	Si44WriteReg(Si44_Nominal_Carrier1 			,0x64);  	// 76
 	Si44WriteReg(Si44_Nominal_Carrier0 			,0x00);  	// 77
 	
+	// TX data rate setting
 	Si44WriteReg(Si44_TX_Data_Rate1 			,0x20); 	// 6E
 	Si44WriteReg(Si44_TX_Data_Rate0  			,0x00); 	// 6F
 	Si44WriteReg(Si44_Modulation_Mode1			,0x0E); 	// 70
 	Si44WriteReg(0x58							,0xED); 	// 58
 
+	// Tx frequency deviation settings
 	Si44WriteReg(Si44_Frequency_Deviation		,0x64); 	// 72	
 	Si44WriteReg(Si44_Modulation_Mode2 			,0x23); 	// 71 - dtmode = 10
 	
+	// GFSK/FSK Rx modem settings
 	Si44WriteReg(Si44_IF_Filter_BW 				,0x8A); 	// 1C	
 	Si44WriteReg(Si44_Clock_Recovery_Oversamp	,0x30);		// 20	
 	Si44WriteReg(Si44_Clock_Recovery_Offset2 	,0x01); 	// 21	 
@@ -208,7 +222,7 @@ unsigned char Si44RadioCheckOk(void)
 	if(gpio0 != 0x12 || gpio1 != 0x15) 	
 	{	
 		// Indicative of hardware error / reset (not values set)
-		DBG_ERROR("Si443x.c: Config mismatch error!\r\n");
+		DBG_ERROR("Si443x.c: Config mismatch error!");
 		Si44RadioState = SI44_HW_ERROR; 
 		return 0;
 	}
@@ -502,14 +516,14 @@ void Si44RadioIrqHandler(void)
 		{
 			Si44RadioState = SI44_STANDBY;
 		}
-		DBG_INFO("Si44 pkt sent ->\r\n");
+		DBG_INFO("\r\nSi44 pkt sent ->");
 	}
 	// Packet received flag
 	else if(intStat[0] & 0x02)
 	{
 		// Handle packet received
 		Si44RadioState = SI44_RXED;
-		DBG_INFO("Si44 pkt rxed <-\r\n");
+		DBG_INFO("\r\nSi44 pkt rxed <-");
 	}
 
 	// // Sync word detected, start of packet, latch rssi if used
@@ -523,7 +537,7 @@ void Si44RadioIrqHandler(void)
 	{
 		// Indicative of hardware error
 		Si44RadioState = SI44_HW_ERROR; 
-		DBG_ERROR("Si443x.c: Reset detected\r\n");
+		DBG_ERROR("Si443x.c: Reset detected");
 	}
 
 	return;

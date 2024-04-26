@@ -12,28 +12,35 @@ void TimerStartup(void);
 void TimerInterruptOn(unsigned short newRate);
 void TimerInterruptOff(void);
 unsigned char TimerTasks(void);
-
-// Get current tick
 unsigned long TimerTicks(void);
 
 // Create similar functionality to RTC driver
 #define rtcTicksSeconds			(timerTicks.w[1])
 #define RtcInterruptOn(_rate_) 	TimerInterruptOn(_rate_)
 
+// KL: 09-08-2016: Changed to only block the timer, not the priority level
+#if 1 // - diabled change
 typedef unsigned char TIMER_IPL_shadow_t;
 #define TIMER_INTS_DISABLE()	{IPLshadow = SRbits.IPL; if(SRbits.IPL<T1_INT_PRIORITY)SRbits.IPL=T1_INT_PRIORITY;}
 #define TIMER_INTS_ENABLE()		{SRbits.IPL = IPLshadow;}
+#else
+typedef unsigned char TIMER_IPL_shadow_t;
+#define TIMER_INTS_DISABLE()	{IPLshadow = IEC0bits.T1IE; IEC0bits.T1IE = 0;}
+#define TIMER_INTS_ENABLE()		{IEC0bits.T1IE = IPLshadow;}
+#endif
 
-#if defined(RTC_SWWDT_TIMEOUT) && (RTC_SWWDT_TIMEOUT>0)
+/* The following is expected to be defined in HardwareProfile.h
+#if defined(SWWDT_TIMEOUT) && (SWWDT_TIMEOUT>0)
 	extern volatile unsigned int SwwdtValue;
 	// These functions are actually defines to ensure they're actually inline
 	//#warning "SW WDT ENABLED"
 	#define SwwdtReset() { SwwdtValue = 0; }
-	#define SwwdtIncrement() { if (++SwwdtValue >= RTC_SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); DelayMs(1000); Reset(); } }
-#else
+	#define SwwdtIncrement() { if (++SwwdtValue >= SWWDT_TIMEOUT) { LED_SET(LED_MAGENTA); DelayMs(1000); Reset(); } }
+#elif !defined(SwwdtReset)
 	#define SwwdtReset() 	{}
 	#define SwwdtIncrement() {}
 #endif
+*/
 
 #endif
 //EOF

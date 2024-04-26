@@ -53,12 +53,16 @@
         // CWA 1.6 & 1.7 uses a PIC24FJ256GB106
         #if HARDWARE_SELECT == 0x16
 	        #include "HardwareProfile-CWA1.6.h"
-//#warning "This is a CWA 1.6 build."
+            //#warning "This is a CWA 1.6 build."
 	    #elif HARDWARE_SELECT == 0x17
 	        #include "HardwareProfile-CWA1.7.h"
 	    #elif HARDWARE_SELECT == 0x18
         	//#include "HardwareProfile-CWA1.8.h"
-#warning "This is a CWA 1.8 build."
+            #warning "This is a CWA 1.8 build."
+        #endif
+    #elif defined (__PIC24FJ1024GB606__)        
+        #if HARDWARE_SELECT == 0x64
+        	#include "HardwareProfile-AX9v4.h"
         #endif
     #else
         #error "Unknown CWA hardware profile."
@@ -66,7 +70,11 @@
 
 	// Verify we've selected the correct hardware profile
 	#if HARDWARE_VERSION != HARDWARE_SELECT
-        #error "Hardware does not match included."
+        #ifndef __DEBUG
+            #error "Hardware does not match included."
+        #else
+            #warning "Check HW version"
+        #endif
 	#endif
 
 

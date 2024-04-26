@@ -1,6 +1,12 @@
 // [dgj] Fixes read problem from last two clusters, and FAT16 FORMAT_SECTORS_PER_CLUSTER
 #define DGJ_FIX
 #define KL_FIX
+#ifdef _WINDOWS
+#pragma warning (disable : 6386)	// Buffer overrun while writing (_DIRENTRY.DIR_Name entry overflows to DIR_Extension entry)
+#pragma warning (disable : 6201)	// Index is out of valid index range (_DIRENTRY.DIR_Name entry overflows to DIR_Extension entry)
+#pragma warning (disable : 6385)	// Reading invalid data (_DIRENTRY.DIR_Name entry overflows to DIR_Extension entry)
+#pragma warning (disable : 4267)	// conversion from 'size_t' to 'unsigned short' (sizes are always less than 65536)
+#endif
 /******************************************************************************
 *
 *               Microchip Memory Disk Drive File System

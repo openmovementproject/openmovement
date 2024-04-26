@@ -31,6 +31,7 @@
 
 #include "USB/usb.h"
 
+void usb_serial_clear(void);
 void usb_putchar(unsigned char);
 int usb_getchar(void);
 char usb_haschar(void);

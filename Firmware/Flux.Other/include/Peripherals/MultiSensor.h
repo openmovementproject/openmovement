@@ -54,10 +54,23 @@ typedef union {
 
 
 // Set in HW profile and pins set to inputs in InitIO()
-#define MULTI_SENSOR_I2CCON	I2C1CON
-#define MULTI_SENSOR_I2CCONbits	I2C1CONbits
-#define MULTI_SENSOR_I2CBRG I2C1BRG
-#define MULTI_SENSOR_I2CSTATbits I2C1STATbits
+#if !defined(MULTI_SENSOR_ALT_I2C) || (MULTI_SENSOR_ALT_I2C == 1)
+	#define MULTI_SENSOR_I2CCON		I2C1CON
+	#define MULTI_SENSOR_I2CCONbits	I2C1CONbits
+	#define MULTI_SENSOR_I2CBRG 	I2C1BRG
+	#define MULTI_SENSOR_I2CSTATbits I2C1STATbits
+	#define MULTI_SENSOR_I2CTRN		I2C1TRN
+	#define MULTI_SENSOR_I2CRCV 	I2C1RCV
+#elif (MULTI_SENSOR_ALT_I2C == 2)
+	#define MULTI_SENSOR_I2CCON		I2C2CON
+	#define MULTI_SENSOR_I2CCONbits	I2C2CONbits
+	#define MULTI_SENSOR_I2CBRG 	I2C2BRG
+	#define MULTI_SENSOR_I2CSTATbits I2C2STATbits
+	#define MULTI_SENSOR_I2CTRN		I2C2TRN
+	#define MULTI_SENSOR_I2CRCV 	I2C2RCV
+#else
+	#error "Which I2C bus?"
+#endif
 
 // Sensors
 #define ACCEL_ADDRESS		0x38 	/*I2C address*/
@@ -73,7 +86,7 @@ typedef union {
 #define GYRO_DEVICE_ID 0xD3	/*Static responce*/
 #define GYRO_MASK_BURST		0x80
 
-// Rate setting for pic24 devices funning at 8/32MHz
+// Rate setting for pic24 devices running at 8/32MHz
 #define I2C_RATE_100kHZ 		((OSCCONbits.COSC==1)? 157 : 39)	
 #define I2C_RATE_200kHZ 		((OSCCONbits.COSC==1)? 72 : 18)
 #define I2C_RATE_400kHZ 		((OSCCONbits.COSC==1)? 37 : 9)	
@@ -98,7 +111,7 @@ unsigned char WriteData(unsigned char busAddress, unsigned char subAddress, unsi
 // Other defines
 
 //Accel addresses
-// MMAQ8452Q registers
+// MMAQ8451Q registers
 #define 	ACCEL_ADDR_STATUS			0x00
 #define 	ACCEL_ADDR_F_STATUS			0x00
 #define 	ACCEL_ADDR_OUT_X_MSB		0x01

@@ -135,11 +135,11 @@ void MagStartup(unsigned char samplingRate)
 	b7		: 	AUTO_MRST_EN Automatic Magnetic Sensor Reset. 0: Automatic Magnetic sensor resets off. 1: Automatic Magnetic sensor resets on.
 	b5		:	RAW 0: Normal mode -data values are corrected by the user offset register values. 1: Raw mode: data values are not corrected by the user offset register values.
 	b4		:	Mag_RST 0: Reset cycle not active. 1: Reset cycle initiate or Reset cycle busy/active.*/
-	MagReopen();
-	MagAddressWrite(MAG_ADDR_CTRL_REG1);
-	/*MAG_ADDR_CTRL_REG1*/
+	MagClose(); 
+
+	/*Write ctrl reg 1 with integrity check*/
 	{
-		unsigned char ctrl_reg1 = 0;
+		unsigned char ctrl_reg1 = 0, read_back = 0, retrys = 3;
 		switch (samplingRate)
 		{
 			/*keeping the minimum possible oversample ratio - lowest power - continuous normal sampling ON */
@@ -153,14 +153,27 @@ void MagStartup(unsigned char samplingRate)
 			case (0)	:	{ctrl_reg1 = 0b00000010;magRate = 0;	break;} /*Polled,12.5ms OSR=16 (fastest)*/
 			default 	:	{ctrl_reg1 = 0b01100010;magRate = 0;	break;} /*Polled,100ms  OSR=16*/
 		}
-		MagWrite(ctrl_reg1); /*
-		b7-5	:	DR[2:0]	Data rate selection. Default value: 000.
-		b4-3	:	OS [1:0] This register configures the over sampling ratio or measurement integration time. Default value: 00.
-		b2		:	FR Fast Read selection. Default value: 0: The full 16-bit values are read. 1: Fast Read, 8-bit values read from the MSB registers.
-		b1		:	TM Trigger immediate measurement. 0: Normal operation based on AC condition. 1: Trigger measurement.
-		b0		:	AC	0: STANDBY mode. 1: ACTIVE mode. */
+		/*Write register with retrys*/
+		while(retrys--)
+		{
+			MagOpen();
+			MagReopen();
+			MagAddressWrite(MAG_ADDR_CTRL_REG1); /*MAG_ADDR_CTRL_REG1*/
+			MagWrite(ctrl_reg1); /*
+				b7-5	:	DR[2:0]	Data rate selection. Default value: 000.
+				b4-3	:	OS [1:0] This register configures the over sampling ratio or measurement integration time. Default value: 00.
+				b2		:	FR Fast Read selection. Default value: 0: The full 16-bit values are read. 1: Fast Read, 8-bit values read from the MSB registers.
+				b1		:	TM Trigger immediate measurement. 0: Normal operation based on AC condition. 1: Trigger measurement.
+				b0		:	AC	0: STANDBY mode. 1: ACTIVE mode. */
+			
+			MagReopen();	
+			MagAddressRead(MAG_ADDR_CTRL_REG1);
+			read_back = MagReadLast();
+			MagClose();
+			if(read_back == ctrl_reg1)break; 	/*Success*/
+			else ; 								/*Fail, retry..*/
+		}
 	}
-	MagClose(); 
 
 	#ifdef MAG_ZERO_ON_POWER_UP
 		// KL: This applies the first sample as an offset

@@ -98,6 +98,7 @@ void RecorderInit()
     logger.recording = RECORDING_OFF;
     logger.stream = STREAM_NONE;
     logger.sampling = SAMPLING_OFF;
+ 	logger.debugFlashCount = LED_STATE_FLASH_TIMEOUT;	// Reset debug LED count
 
     // Misc
     logger.filename[0] = '\0';
@@ -140,7 +141,7 @@ char LoggerOpen(const char *filename)
     ((FSFILE *)logFile)->attributes |= ATTR_ARCHIVE;
 
     // Initially flash to show started
-    //status.debugFlashCount = 5;
+	logger.debugFlashCount = LED_STATE_FLASH_TIMEOUT;	// Reset debug LED count
 
 	return 1; // Done
 }
@@ -499,7 +500,7 @@ if (logger.recording != RECORDING_ON && logger.stream != STREAM_NONE && settings
                     if (logFile != NULL)
                     {
 // Green LED to indicate data write (flashes as will turn off when device sleeps, or in LedTasks)
-if (logger.debugFlashCount) { LED_G = 1; logger.debugFlashCount--; }
+if (settings.debuggingInfo >= 3) { LED_G = 1;}
 
                         offset = FSftell((FSFILE *)logFile);
                     }

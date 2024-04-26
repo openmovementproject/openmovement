@@ -25,19 +25,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include "Ftl/FsFtl.h"
+
 #include "HardwareProfile.h"
-#ifndef USE_FAT_FS
-#include "MDD File System/FSIO.h"
-#else
-#include "FatFs/FatFsIo.h"
-#endif
 
 #include "Utils/Fifo.h"
 #include "Utils/FileStream.h"
 #include "Utils/Util.h"
-#include "Utils/FSutils.h"
 
+#include "Utils/filesystem.h"
+
+#define SECTOR_SIZE 512
 
 
 // Initialize the specified file stream (structure initialized by caller)
@@ -119,17 +116,17 @@ void *FileStreamPrepareData(filestream_t *fileStream, unsigned long timestamp, u
 char FileStreamOutputData(filestream_t *fileStream, char useEcc, char useChecksum)
 {
     filestream_data_t *packet;
-    FSFILE *fp;
+    FILE *fp;
 #ifndef FILE_STREAM_USE_GLOBALS
     packet = (filestream_data_t *)fileStream->scratchBuffer;
-    fp = (FSFILE *)fileStream->fileHandle;
+    fp = (FILE *)fileStream->fileHandle;
 #else
     packet = (filestream_data_t *)scratchBuffer;
 	#ifdef FILE_STREAM_IGNORE_FILE_PTR
 		//KL - if we are not writing to a file then we dont care if its void
 		fp = (void*)!NULL;
 	#else
-	    fp = (FSFILE *)logFile;
+	    fp = (FILE *)logFile;
 	#endif
 #endif
 
@@ -143,10 +140,18 @@ char FileStreamOutputData(filestream_t *fileStream, char useEcc, char useChecksu
     if (fp != NULL)
     {	   
 	    // Output the sector
-	    if (FSfwriteSector(packet, fp, useEcc))
+#if defined(fwriteSector)
+	    if (fwriteSector(packet, fp, useEcc))
 	    {
 	        return 1;
 	    }
+#else
+		if (fwrite(packet, 1, SECTOR_SIZE, fp) == SECTOR_SIZE)
+		{
+			return 1;
+		}
+#endif
+
 	} 
     
     return 0;

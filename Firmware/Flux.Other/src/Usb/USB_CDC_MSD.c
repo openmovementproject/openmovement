@@ -27,7 +27,6 @@
 // Karim Ladha, Dan Jackson, 2011-2012
 
 #include "HardwareProfile.h"
-//#include "Delays.h"
 #include "USB/USB.h"
 #include "Usb/USB_CDC_MSD.h"
 #include "usb_config.h"
@@ -76,21 +75,27 @@
 	extern volatile FAR unsigned char cdc_data_tx[CDC_DATA_IN_EP_SIZE];
 #endif
 
-#ifdef USB_USE_MSD
+#ifdef USB_USE_MSD /* from usb_config.h */
+
 	#if defined(__C30__) || defined(__C32__)
-	// The LUN variable definition for the MSD driver.  
-	LUN_FUNCTIONS LUN[MAX_LUN + 1] = 
-	{
-	    {
-	        &MDD_USB_MediaInitialize,
-	        &MDD_USB_ReadCapacity,
-	        &MDD_USB_ReadSectorSize,
-	        &MDD_USB_MediaDetect,
-	        &MDD_USB_SectorRead,
-	        &MDD_USB_WriteProtectState,
-	        &MDD_USB_SectorWrite
-	    }
-	};
+		// Disk cache apps do not require a LUN table
+		#ifndef USB_USE_ASYNC_MSD
+			// The LUN variable definition for the MSD driver.  
+			LUN_FUNCTIONS LUN[MAX_LUN + 1] = 
+			{
+			    {
+			        &MDD_USB_MediaInitialize,
+			        &MDD_USB_ReadCapacity,
+			        &MDD_USB_ReadSectorSize,
+			        &MDD_USB_MediaDetect,
+			        &MDD_USB_SectorRead,
+			        &MDD_USB_WriteProtectState,
+			        &MDD_USB_SectorWrite
+			    }
+			};
+		#endif
+	#else
+		#error "This drive is not setup for this hardware."
 	#endif
 	
 	#ifndef HAVE_OWN_ENQUIRY_RESPONCE
@@ -123,8 +128,7 @@ void USBInitializeSystem(void)
 {
 #ifdef USB_USE_CDC
     // Clear USB CDC I/O buffers
-    inHead = 0; inTail = 0;
-    outHead = 0; outTail = 0;
+    usb_serial_clear();
 #endif
 
 	UsbInitDescriptors(); // Does nothing if descriptors are static
@@ -141,7 +145,13 @@ void USBInitializeSystem(void)
 }
 
 #ifdef USB_USE_CDC
-	
+	// Reset circular buffer pointers
+	void usb_serial_clear(void)
+	{
+	    inHead = 0; inTail = 0;
+    	outHead = 0; outTail = 0;
+	}	
+
 	// USB-specific put char
 	void usb_putchar(unsigned char v)
 	{
@@ -351,14 +361,14 @@ if (len > maxInLength)
 void USBProcessIO(void)
 {   
 	if((USBDeviceState < CONFIGURED_STATE)||(USBSuspendControl==1)) return;
-	#ifdef USB_USE_CDC
-	    USBSerialIO();
-	    CDCTxService();
-	#endif
-
-	#ifdef USB_USE_MSD
-    	MSDTasks();  
-	#endif 
+// KL: Added support for faster msd
+#if defined(USB_USE_MSD) && !defined(USB_USE_ASYNC_MSD)
+	MSDTasks();
+#endif
+#ifdef USB_USE_CDC
+	USBSerialIO();
+	CDCTxService();
+#endif
 }
 
 #ifdef USB_USE_CDC

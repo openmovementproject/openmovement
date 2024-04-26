@@ -92,6 +92,7 @@
 #define NandStorePage       Nand1StorePage
 #define NandStorePageRepeat Nand1StorePageRepeat
 #define NandReadParameters  Nand1ReadParameters
+#define NandReadBuffer512WordSummed	Nand1ReadBuffer512WordSummed
 
 #include "Peripherals/Nand.h"
 
@@ -109,6 +110,7 @@
 #undef NandStorePage
 #undef NandStorePageRepeat
 #undef NandReadParameters
+#undef NandReadBuffer512WordSummed
 // --------------
 
 
@@ -128,6 +130,7 @@
 #define NandStorePageRepeat Nand2StorePageRepeat
 #define NandReadParameters  Nand2ReadParameters
 #define nandParameters		nand2Parameters	//KL
+#define NandReadBuffer512WordSummed	Nand2ReadBuffer512WordSummed
 
 #include "Peripherals/Nand.h"
 
@@ -146,6 +149,7 @@
 #undef NandStorePageRepeat
 #undef NandReadParameters
 #undef nandParameters	//KL
+#undef NandReadBuffer512WordSummed
 // --------------
 
 
@@ -262,6 +266,14 @@ char NandStorePageRepeat(unsigned short block, unsigned char page)
 {
     if (!(nandLoadedBlock & 1)) { return Nand1StorePageRepeat(block >> 1, page); }
     else                        { return Nand2StorePageRepeat(block >> 1, page); }
+}
+
+#ifdef NAND_READ_SECTOR_WORD_SUMMED
+// Read in from the page buffer 512 bytes to a word-aligned buffer, summing the word-wise values
+char NandReadBuffer512WordSummed(unsigned short offset, unsigned short *wordAlignedBuffer, unsigned short *outSum)
+{
+    if (!(nandLoadedBlock & 1)) { return Nand1ReadBuffer512WordSummed(offset, wordAlignedBuffer, outSum); }
+    else                        { return Nand2ReadBuffer512WordSummed(offset, wordAlignedBuffer, outSum); }
 }
 
 #endif
@@ -476,7 +488,6 @@ char NandStorePageRepeat(unsigned short block, unsigned char page)
 }
 #endif
 
-
 // Read device parameters
 char NandReadParameters(NandParameters_t *nandParameters)
 {
@@ -515,3 +526,5 @@ char NandReadParameters(NandParameters_t *nandParameters)
         
     return ret;
 }
+
+#endif

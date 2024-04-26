@@ -37,9 +37,12 @@ char NandInitialize(void);
 char NandShutdown(void);
 
 // Read the device id (6 bytes)
-extern const unsigned char NAND_DEVICE_HY27UF084G2B[6];
-extern const unsigned char NAND_DEVICE_MT29F8G08AAA[6];
-char NandReadDeviceId(unsigned char* destination);
+//extern const unsigned char NAND_DEVICE_HY27UF084G2B[6];
+//extern const unsigned char NAND_DEVICE_HY27UF084G2x[6];
+//extern const unsigned char NAND_DEVICE_MT29F8G08AAA[6];
+//extern const unsigned char NAND_DEVICE_S34ML04G1[6];
+
+//char NandReadDeviceId(unsigned char* destination);
 
 // Verify the device id
 unsigned char NandVerifyDeviceId(void);
@@ -72,26 +75,29 @@ char NandStorePage(void);
 char NandStorePageRepeat(unsigned short block, unsigned char page);
 
 // Read device parameters
-#ifndef NANDPARAMETERS_T_DEFINED // KL, to fix nand multi bug, we want one definition but two instances
-#define NANDPARAMETERS_T_DEFINED
-	typedef struct
-	{
-	    unsigned short revisionNumber;          // ONFI parameter page offset @4-5
-	    unsigned long  dataBytesPerPage;        // ONFI parameter page offset @80-83
-	    unsigned short spareBytesPerPage;       // ONFI parameter page offset @84-85
-	    unsigned long  pagesPerBlock;           // ONFI parameter page offset @92-94
-	    unsigned long  blocksPerLogicalUnit;    // ONFI parameter page offset @96-99
-	    unsigned char  logicalUnits;            // ONFI parameter page offset @100
-	} NandParameters_t;
+#ifndef NAND_PARAMS_T
+#define NAND_PARAMS_T
+typedef struct 
+{
+    unsigned short revisionNumber;          // ONFI parameter page offset @4-5
+    unsigned long  dataBytesPerPage;        // ONFI parameter page offset @80-83
+    unsigned short spareBytesPerPage;       // ONFI parameter page offset @84-85
+    unsigned long  pagesPerBlock;           // ONFI parameter page offset @92-94
+    unsigned long  blocksPerLogicalUnit;    // ONFI parameter page offset @96-99
+    unsigned char  logicalUnits;            // ONFI parameter page offset @100
+} NandParameters_t;
 #endif
 char NandReadParameters(NandParameters_t *nandParameters);
+
+
+#ifdef NAND_READ_SECTOR_WORD_SUMMED
+char NandReadBuffer512WordSummed(unsigned short offset, unsigned short *wordAlignedBuffer, unsigned short *outSum);
+#endif
+
 
 // Debug functions for emulated NAND
 #ifdef _WIN32
 void NandDebugRead(unsigned short block, unsigned char page, unsigned short offset, unsigned char *buffer, unsigned short length);
 void NandDebugCorrupt(unsigned short block, unsigned char page);
 void NandDebugFail(unsigned short block, unsigned char page);
-void NandDebugMarkBadBlock(unsigned short block, unsigned char page, int offset, unsigned char value);
 #endif
-
-//EOF

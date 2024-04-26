@@ -45,6 +45,9 @@ unsigned short imu_sample_rate = 0;
 unsigned short imu_accel_range = 0;
 unsigned short imu_gyro_range = 0;
 
+uint8_t imu_int1_enabled = 0;
+uint8_t imu_int2_enabled = 0;
+    
 struct bmi160_fifo_frame fifo_frame = {
 	.length = 0,
 	.data = NULL};
@@ -88,16 +91,35 @@ volatile uint16_t dummy;
 							}
 #define IMU_SPI_GETC()		SPI1BUFL							
 
+void IMU_InterruptsPause(void) 
+{
+    IMU_IRQ1_OFF();
+    IMU_IRQ2_OFF();
+}
+void IMU_InterruptsResume(void)
+{
+    if(imu_int1_enabled)
+        {IMU_IRQ1_EN();}
+    if(imu_int2_enabled)
+        {IMU_IRQ2_EN();}
+} 
 
 int8_t user_spi_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len)
 {
 	IMU_SPI_OPEN();
 	IMU_SPI_PUTC(0x80 | reg_addr);	
-	while(len--)
-	{
-		IMU_SPI_PUTC(0xff); // Dummy write
-		*data++ = IMU_SPI_GETC();
-	}
+    if(data == NULL)
+        while(len--) // Cope with NULL reads
+        {
+            IMU_SPI_PUTC(0xff); // Dummy write
+            dummy = IMU_SPI_GETC();
+        }
+    else
+        while(len--)
+        {
+            IMU_SPI_PUTC(0xff); // Dummy write
+            *data++ = IMU_SPI_GETC();
+        }
 	IMU_SPI_CLOSE();
 	return BMI160_OK;	
 }
@@ -362,6 +384,9 @@ int8_t IMU_Init(void)
 void IMU_Off(void)
 {
     int8_t rslt;
+    // Disable interrupts
+    IMU_IRQ1_OFF();
+    IMU_IRQ2_OFF();
 	// Turn off devices
 	bmi160.accel_cfg.power = BMI160_ACCEL_SUSPEND_MODE; 
 	bmi160.gyro_cfg.power = BMI160_GYRO_SUSPEND_MODE; 
@@ -380,10 +405,10 @@ void IMU_Enable_Interrupts(uint8_t flags, uint8_t pinMask)
 	enum bmi160_int_status_sel int_status_sel;
 	struct bmi160_int_settg int_config;
 	int8_t result = BMI160_OK;
-
+    
     // Flush the fifo
     result |= bmi160_set_fifo_flush(&bmi160);
-    // Read interrupt sources
+    // Read interrupt sources to clear
     result |= bmi160_get_int_status(int_status_sel, &interrupt, &bmi160); 
         
 	/* Select the interrupt channel/pin settings */
@@ -405,6 +430,8 @@ void IMU_Enable_Interrupts(uint8_t flags, uint8_t pinMask)
             int_config.int_type =  BMI160_ACC_GYRO_DATA_RDY_INT;
             /* Set the Any-motion interrupt */
             result |= bmi160_set_int_config(&int_config, &bmi160); /* sensor is an instance of the structure bmi160_dev  */
+            // Flag to enable correct interrupt
+            imu_int2_enabled = 1;            
         }   
         else // Normal fifo data modes
         {    
@@ -425,7 +452,9 @@ void IMU_Enable_Interrupts(uint8_t flags, uint8_t pinMask)
                 int_config.fifo_full_int_en = 1;
                 /* Set the Any-motion interrupt */
                 result |= bmi160_set_int_config(&int_config, &bmi160); /* sensor is an instance of the structure bmi160_dev  */
-            }              
+            }    
+            // Flag to enable correct interrupt
+            imu_int1_enabled = 1;
         }
     }
     if(flags & ACCEL_INT_SOURCE_SINGLE_TAP )
@@ -442,6 +471,8 @@ void IMU_Enable_Interrupts(uint8_t flags, uint8_t pinMask)
         int_config.int_type_cfg.acc_tap_int.tap_thr = (32 / imu_accel_range);  // 1g            
         /* Set the Any-motion interrupt */
         result |= bmi160_set_int_config(&int_config, &bmi160); /* sensor is an instance of the structure bmi160_dev  */
+        // Flag to enable correct interrupt
+        imu_int1_enabled = 1;        
     }
     if(flags & ACCEL_INT_SOURCE_DOUBLE_TAP )
     {
@@ -457,19 +488,23 @@ void IMU_Enable_Interrupts(uint8_t flags, uint8_t pinMask)
         int_config.int_type_cfg.acc_tap_int.tap_thr = (32 / imu_accel_range);  // 1g           
         /* Set the Any-motion interrupt */
         result |= bmi160_set_int_config(&int_config, &bmi160); /* sensor is an instance of the structure bmi160_dev  */
+        // Flag to enable correct interrupt
+        imu_int1_enabled = 1;        
     }  
    
-	/* Re-set the bmi160 configuration */
-	//result |= bmi160_set_sens_conf(&bmi160);
+    // Read interrupt sources to clear
+    result |= bmi160_get_int_status(int_status_sel, &interrupt, &bmi160); 
     
     // Checks
     if(result == BMI160_OK)
     {
+    	// Wait for pins to latch, then latch interrupts
+    	user_delay_ms(0);
         IMU_IRQ1_FLAG = IMU_IRQ1;
         IMU_IRQ2_FLAG = IMU_IRQ2;
         // Allow vectoring
-        IMU_IRQ1_EN();
-        IMU_IRQ2_EN();
+        if(imu_int1_enabled){IMU_IRQ1_EN();}
+        if(imu_int2_enabled){IMU_IRQ2_EN();}
     }
 }
 

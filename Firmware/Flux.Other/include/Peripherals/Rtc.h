@@ -45,8 +45,30 @@
 
 
 #include "HardwareProfile.h"
-#include <Rtcc.h>
 
+#ifdef __PIC24FJ1024GB606__ // KL: From code configurator
+// KL: .h Not required
+// union/structure for read/write of time and date from/to the RTCC device
+typedef union
+{ 
+    struct
+    {
+        BYTE    year;       // BCD codification for year, 00-99
+        BYTE    rsvd;       // reserved for future use
+        BYTE    mday;       // BCD codification for day of the month, 01-31
+        BYTE    mon;        // BCD codification for month, 01-12
+        BYTE    hour;       // BCD codification for hours, 00-24
+        BYTE    wday;       // BCD codification for day of the week, 00-06   
+        BYTE    sec;        // BCD codification for seconds, 00-59 
+        BYTE    min;        // BCD codification for minutes, 00-59
+    }f;                     // field access
+    BYTE        b[8];       // BYTE access
+    unsigned short int      w[4];       // 16 bits access
+    unsigned long int      l[2];       // 32 bits access
+}rtccTimeDate;
+#else
+#include <Rtcc.h>
+#endif
 #ifdef __C30__
 	typedef rtccTimeDate rtcInternalTime;
 

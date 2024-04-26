@@ -29,36 +29,22 @@
 #include <stdlib.h>
 #include "Utils/Crc.h"
 
-// Calculate the CRC (starting from the MSB of each byte, poly must not have top bit set)
-crc_t CrcCalculate(const void *message, int messagebits, crc_t poly, char polybits)
+
+
+// Calculate the CCITT 16-bit CRC on a byte-aligned message
+unsigned short CrcCCITT_16bit_Calculate(const unsigned char *buffer, unsigned short len, unsigned short crc)
 {
-    int i;
-    crc_t result = 0;
-
-    // Mask off to ensure top poly bit clear ('polybit' bit position is always treated as '1')
-    poly &= ((1 << (polybits - 1)) - 1);
-
-    for (i = 0; i < messagebits; i++)
-    {
-        // Read the incoming message bit
-        char invert = ((const unsigned char *)message)[i >> 3] & (0x80 >> (i & 0x07)) ? 1 : 0;
-
-        // XOR with top bit of the CRC to see if we should invert
-        invert ^= ((result >> (polybits - 1)) & 0x01);
-
-        // Shift and mask result
-        result <<= 1;
-        result &= ((1 << polybits) - 1);
-
-        // If inverting, toggle poly bits
-        if (invert) result ^= poly;
-    }
-
-    return result;
+	int i;
+	while (len--)
+	{
+		crc ^= (unsigned short)*buffer++ << 8;
+		for (i = 0; i < 8; i++) { crc = crc & 0x8000 ? (crc << 1) ^ CRC_16_CCITT_POLY : (crc << 1); }
+	}
+	return crc;
 }
 
 
-// Calculate the CRC (starting from the MSB of each byte, poly must not have top bit set)
+// Calculate the ITU 6-bit CRC on a 10-bit message (MSB first)
 unsigned short Crc6ITU_10bit_Calculate(unsigned short message)
 {
     int i;
@@ -84,3 +70,32 @@ unsigned short Crc6ITU_10bit_Calculate(unsigned short message)
     return result;
 }
 
+
+
+// (Slow, generic) Calculate the CRC of a message bits (starting from the MSB of each byte, poly must not have top bit set)
+crc_t CrcCalculateSlow(const void *message, int messagebits, crc_t poly, char polybits, crc_t initialCrc)
+{
+	int i;
+	crc_t result = initialCrc;
+
+	// Mask off to ensure top poly bit clear ('polybit' bit position is always treated as '1')
+	poly &= ((1 << (polybits - 1)) - 1);
+
+	for (i = 0; i < messagebits; i++)
+	{
+		// Read the incoming message bit
+		char invert = ((const unsigned char *)message)[i >> 3] & (0x80 >> (i & 0x07)) ? 1 : 0;
+
+		// XOR with top bit of the CRC to see if we should invert
+		invert ^= ((result >> (polybits - 1)) & 0x01);
+
+		// Shift and mask result
+		result <<= 1;
+		result &= ((1 << polybits) - 1);
+
+		// If inverting, toggle poly bits
+		if (invert) result ^= poly;
+	}
+
+	return result;
+}

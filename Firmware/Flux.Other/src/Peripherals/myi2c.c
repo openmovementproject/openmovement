@@ -26,8 +26,8 @@
 // K Ladha 2011
 // Fast software I2C code
 #include <Compiler.h>
-#include "Peripherals\myI2C.h"
 #include "HardwareProfile.h"
+#include "Peripherals\myI2C.h"
 
 #ifdef __DEBUG
 	volatile unsigned short myI2CLastAddress;

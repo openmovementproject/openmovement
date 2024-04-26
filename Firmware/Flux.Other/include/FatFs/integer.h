@@ -8,7 +8,7 @@
 #ifdef _WIN32	/* FatFs development platform */
 
 #include <windows.h>
-#include <tchar.h>
+//#include <tchar.h>
 
 
 #elif defined(__18CXX) || defined(__C30__) || defined(__PIC32MX__)  // [dgj] Added this section for PIC platforms so types are guaranteed compatible

@@ -98,7 +98,6 @@ typedef struct {
 	unsigned short blockNum2;	// 12-bit block number repetition 2
 	unsigned char page1;		// 6-bit page number repetition
 	unsigned char page2;		// 6-bit page number repetition 2	// [dgj] Moved here to improve alignment on 16-bit compilers
-	// 13-bytes per 4 sectors = 52 bytes
 } FtlPageInfo;
 
 #define FTL_PAGEINFO_SIZE 12    // == sizeof(FtlPageInfo)
@@ -399,10 +398,29 @@ EmuVisualizerUpdate(1, sector, 1, 2);
 	// If block was found and loaded, read from the buffer, otherwise return empty sector (of 0xff)
 	if (ftlContext.currentBlock == logicalBlock && ftlContext.currentPage == logicalPage)
 	{
+		char checkEcc = 1;
+
+#ifdef NAND_READ_SECTOR_WORD_SUMMED
+//#warning "NAND_READ_SECTOR_WORD_SUMMED has not been tested -- it must only be used with word-aligned buffers."
+		// Hack to shortcut out the ECC if the sector is a data sector with a correct checksum
+		// IMPORTANT: When this mode is enabled, the caller must always read in to a word-aligned buffer.
+		unsigned short sum;
+		NandReadBuffer512WordSummed(sectorInPage * FTL_SECTOR_SIZE, (unsigned short *)buffer, &sum);
+
+		// If the sum of the sector was 0 and the sector looks like a data sector (first two bytes printable ASCII, next two bytes the little-endian word value 508)
+		if (sum == 0 && buffer[0] >= 32 && buffer[0] <= 127 && buffer[1] >= 32 && buffer[1] <= 127 && buffer[2] == 0xFC && buffer[3] == 0x01)
+		{
+			// Skip the ECC check as it all looks ok
+			checkEcc = 0;
+		}
+#else
+		// Read sector from NAND buffer
 		NandReadBuffer(sectorInPage * FTL_SECTOR_SIZE, buffer, FTL_SECTOR_SIZE);
+#endif
 
 #ifdef FTL_ECC
-        {
+        if (checkEcc)
+	    {
             char ret;
 
             // Retrieve ecc from flash buffer
@@ -430,9 +448,9 @@ EmuVisualizerUpdate(1, sector, 1, 2);
 				return 1;
             }
 LOG("\t...INFO: Read OK\n");
-			return 1;
         }
 #endif
+		return 1;
 	}
 	else
 	{
@@ -2048,7 +2066,7 @@ void FtlDebugDump(FILE *fp)
 #ifndef FTL_BAM_IN_RAM
 	fprintf(fp, "BAM: next-page=%d, bank=%d, block=%d, modified=%d\n", ftlContext.bamBankNextPage, ftlContext.bamBankNumber, ftlContext.bamBlock, ftlContext.bamModified);
 #endif
-	fprintf(fp, "Misc: cur-block=%d, cur-page=%d, last-free-block=%d, page-owner=%d\n", ftlContext.currentBlock, ftlContext.currentPage, ftlContext.lastFreeBlock, ftlContext.pageOwner);
+	fprintf(fp, "Misc: cur-block=%d, cur-page=%d, last-free-block=%d,%d, page-owner=%d\n", ftlContext.currentBlock, ftlContext.currentPage, ftlContext.lastFreeBlock[0], ftlContext.lastFreeBlock[1], ftlContext.pageOwner);
 #endif
 
 	fprintf(fp, "==========\n");
@@ -2220,7 +2238,7 @@ char FtlRelocatePhysicalBlockAndMarkBad(unsigned short physicalBlock)
 		type = FtlBlockInfoDecode(physicalBlock, &logicalBlock);
 
 		// Check if this is not a complete block
-		if (type == FTL_PAGE_INFO_BAD) { FtlWarning("Attempted to relocate/mark-bad an already bad-marked block."); return 0; }
+		if (type == FTL_PAGE_INFO_BAD) { FtlWarning("Attempted to relocate/mark-bad an already bad-marked block."); return -1; }
 
 		// Check we found the logical block address, and it was within range
 		if (type != FTL_PAGE_INFO_BLOCK) { logicalBlock = FTL_LOGICAL_BLOCKS; FtlWarning("The relocate/mark-bad block is a non-completed block."); }

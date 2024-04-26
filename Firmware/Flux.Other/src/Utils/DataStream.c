@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <Compiler.h>
 #include "HardwareProfile.h"
-#include "Peripherals/Rtc.h"
+//#include "Peripherals/Rtc.h"
 #ifndef USE_FAT_FS
 #include "MDD File System/FSIO.h"
 #else
@@ -36,6 +36,9 @@
 #include "Utils/FileStream.h"
 #include "Utils/DataStream.h"
 
+
+// TODO: Put this compat. function in a header
+extern unsigned long RtcNowFractional(unsigned short *fractional);
 
 // Initialize the data stream, specifying the storage buffer (capacity * elementSize)
 void DataStreamInit(datastream_t *dataStream, size_t elementSize, unsigned int capacity, void *buffer)

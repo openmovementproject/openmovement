@@ -30,8 +30,12 @@
 #include <string.h>
 
 #include "Utils/Fifo.h"
-#include <Compiler.h>
+#include "Compiler.h"
+#if defined(__C30__) || defined (__C32__)
 #include "HardwareProfile.h"
+#elif defined(__arm__)
+#include "Config.h"
+#endif
 
 
 /*

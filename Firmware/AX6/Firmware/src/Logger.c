@@ -46,8 +46,11 @@
 //static unsigned short dataIntStack = 0;
 //#define ACCEL_INT_PUSH() { dataIntStack = (dataIntStack << 1) | ACCEL_INT1_IE; dataIntStack = (dataIntStack << 1) | ACCEL_INT2_IE; }
 //#define ACCEL_INT_POP() { ACCEL_INT2_IE = dataIntStack & 1; dataIntStack >>= 1; ACCEL_INT1_IE = dataIntStack & 1; dataIntStack >>= 1; }
-#define ACCEL_INT_DISABLE() { ACCEL_INT1_IE = 0; ACCEL_INT2_IE = 0; }
-#define ACCEL_INT_ENABLE() { ACCEL_INT1_IE = 1; ACCEL_INT2_IE = 1; }
+void IMU_InterruptsPause(void);
+void IMU_InterruptsResume(void);
+
+#define ACCEL_INT_DISABLE() IMU_InterruptsPause(); //{ ACCEL_INT1_IE = 0; ACCEL_INT2_IE = 0; }
+#define ACCEL_INT_ENABLE() IMU_InterruptsResume(); //{ ACCEL_INT1_IE = 1; ACCEL_INT2_IE = 1; }
 
 #ifdef USE_GYRO
 #define GYRO_INT_DISABLE() { GYRO_INT1_IE = 0; GYRO_INT2_IE = 0; }
@@ -212,11 +215,11 @@ unsigned short logger_sw_fifo_count = 0;
 unsigned short logger_sw_fifo_remaining = 0;
 accel_t* logger_sw_fifo_ptr = NULL;
 
-// Collect any new data -- typically called from an interrupt
-inline void LoggerAccelTasks(void)
+// Collect any new data -- Single sample mode for low power, no hardware fifo, case
+inline void LoggerAccelTasksSingleSampleAccel(void)
 {
     // Service either interrupt
-    if (ACCEL_INT2_IF)
+    if(ACCEL_INT2_IF)
     {
         // Clear the ISR flag
         ACCEL_INT2_IF = 0;   
@@ -257,7 +260,12 @@ inline void LoggerAccelTasks(void)
         }
         // Return to logger tasks...
     }
-    if (ACCEL_INT1_IF )//|| ACCEL_INT2_IF)
+}
+
+// Collect any new data -- typically called from an interrupt
+inline void LoggerAccelTasks(void)
+{
+    if(ACCEL_INT1_IF)
     {
         unsigned char source;
 
@@ -277,7 +285,7 @@ inline void LoggerAccelTasks(void)
             // Update timestamp for current FIFO length
             DataUpdateTimestamp(&accelStream);
 
-            // Empty hardware FIFO - up to two passes as first read may be up against the end of the circular buffer
+            int initiallyFree = FifoFree(&accelStream.fifo);
             for (passes = 2; passes != 0; --passes)
             {
                 unsigned short contiguous, num;
@@ -286,11 +294,15 @@ inline void LoggerAccelTasks(void)
                 // See how much contiguous free space we have in the buffer
                 contiguous = FifoContiguousSpaces(&accelStream.fifo, &buffer);
                 
-                // If we aren't able to fit *any* in, we've over-run our software buffer
+                // If we aren't able to fit *any* in...
                 if (contiguous == 0)
                 {
-                    status.events |= DATA_EVENT_BUFFER_OVERFLOW;    // Flag a software FIFO over-run error
-                    AccelReadFIFO(NULL, ACCEL_MAX_FIFO_SAMPLES);    // Dump hardware FIFO contents to prevent continuous watermark/over-run interrupts
+                    // ...and we've over-run our software buffer
+                    if (initiallyFree <= 0)
+                    {
+                        status.events |= DATA_EVENT_BUFFER_OVERFLOW;    // Flag a software FIFO over-run error
+                        AccelReadFIFO(NULL, (480ul/6));    // Dump hardware FIFO contents to prevent continuous watermark/over-run interrupts
+                    }
                     break;
                 }
 
@@ -298,7 +310,7 @@ inline void LoggerAccelTasks(void)
 #ifdef __DEBUG
 //LED_SET(LED_GREEN);    
 #endif  
-                num = AccelReadFIFO((accel_t *)buffer, contiguous);
+                num = AccelReadFIFO((accel_t *)buffer, (contiguous <= 0xff)?contiguous:0xff);
 #ifdef __DEBUG
 //LED_SET(LED_OFF);    
 #endif  
@@ -698,7 +710,7 @@ void LoggerStop(void)
 // Write a logging sector
 short LoggerWrite(void)
 {
-    static unsigned short accelPending;
+    unsigned short accelPending;
 #ifdef USE_GYRO
     static unsigned short gyroPending;
 #endif

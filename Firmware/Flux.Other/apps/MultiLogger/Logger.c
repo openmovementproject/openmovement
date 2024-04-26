@@ -53,6 +53,7 @@
 #include "Utils/Util.h"
 #include "Utils/FSUtils.h"
 #include "MDD File System/FSIO.h"
+#include "Apps/FastMsd/AsyncDiskIO.h"
 #include "USB/USB_CDC_MSD.h"
 #include "Graphics/Display Controller SSD1306.h"
 
@@ -343,6 +344,7 @@ if (status.lockCode == 0)
         #endif
 
         USBProcessIO();
+		AsyncDiskIOTasks();
 
         // Process any incoming line
         if (status.connection == CONNECTION_COMPUTER)
@@ -396,7 +398,7 @@ if (status.lockCode == 0)
 
 
 // Led status
-void __attribute__((weak))LedTasks(void)
+void LedTasksDefault(void)
 {
     static unsigned short time_since_disk_activity = 0;
     static unsigned char lastTime = 0xff;
@@ -540,9 +542,12 @@ void __attribute__((weak))LedTasks(void)
 // Battery tasks
 void BatteryTasks(void)
 {
-    static unsigned short lastTime = 0xffff;
+    static unsigned short lastTime = 0xffff, currentBatt;
     if (lastTime == rtcTicksSeconds) { return; }        // Update 1Hz
     lastTime = rtcTicksSeconds;
+	
+	// Get current battery percentage
+	currentBatt = AdcBattToPercent(adcResult.batt);
 
     // Update battery status (battery reading updated in timer interrupt)
     if (status.connection == CONNECTION_NONE)
@@ -550,13 +555,13 @@ void BatteryTasks(void)
         status.battery = BATTERY_NORMAL;
 
         // Check if battery too low...
-        if (adcResult.batt < BATT_CHARGE_WARNING)
+        if (currentBatt < BATT_PERCENT_WARNING)
         {
 			status.battery = BATTERY_WARNING;
         }
         
         // Check if battery too low...
-        if (adcResult.batt < BATT_CHARGE_MIN_SAFE)
+        if (currentBatt < BATT_PERCENT_MIN)
         {
             if (status.batteryLowTimer < BATT_EMPTY_INTERVAL) { status.batteryLowTimer++; }
             if (status.batteryLowTimer >= BATT_EMPTY_INTERVAL)
@@ -578,17 +583,17 @@ void BatteryTasks(void)
             status.battery = BATTERY_CHARGING;
             status.batteryFullTimer = 0;
         }
-        if (status.battery != BATTERY_FULL && adcResult.batt > BATT_CHARGE_FULL_USB) // Add extra minute of full detection to stop it latching prematurely
+        if (status.battery != BATTERY_FULL && currentBatt == 100) // Add extra minute of full detection to stop it latching prematurely
         {
             status.batteryFullTimer++;       // 1-60
             if (status.batteryFullTimer >= BATT_FULL_INTERVAL)
             {
                 status.battery = BATTERY_FULL;      // while connected, this will latch
-                if ((status.initialBattery != 0) && (status.initialBattery < BATT_CHARGE_MID_USB))
+                if ((status.initialBattery >= 0) && (status.initialBattery < 50))
                 {
                     // Increment battery health counter
                     SettingsIncrementLogValue(LOG_VALUE_BATTERY);
-                    status.initialBattery = 0;      // just make certain this doesn't trip again
+                    status.initialBattery = -1;      // just make certain this doesn't trip again
                 }
             }
         }
@@ -889,7 +894,12 @@ LED_SET(LED_OFF);
 	    if (status.connection == CONNECTION_NONE ) 
 	    {
 			// LED off unless over ridden
-			if(status.ledOverride == -1)LED_SET(LED_OFF);
+			if(status.ledOverride == -1)
+			{
+				// LED_SET(LED_OFF); // Old behaviour
+				LED_R = 0;
+				LED_G = 0;
+			}
 #ifndef BT_NEVER_SLEEP
 			switch (BluetoothGetPowerState()){
 				case (BT_STANDBY)	:

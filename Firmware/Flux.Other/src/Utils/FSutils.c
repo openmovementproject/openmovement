@@ -49,8 +49,12 @@ In fsio.c, FILECreateHeadCluster(), comment out:
 ...I don't think this is required (at least for writing -- check whether reading copes)
 */
 
-#include "MDD File System/FSIO.h"
-#include "FSConfig.h"
+#include "FSConfig.h" // Moved here to allow file system selection- not all functions supported between two fs modes 
+#ifdef USE_FAT_FS
+	#include "FatFs/FatFsIo.h"
+#else
+	#include "MDD File System/FSIO.h"
+#endif
 #include "Utils/FSutils.h"
 
 // FSIO.c doesn't allocate buffers on non-embedded compiles, we'll allocate them here
@@ -174,7 +178,7 @@ extern DWORD FatRootDirClusterValue;
     portion that frees the memory and the line that clears the 
     write flag.
   ************************************************************/
-
+#ifndef USE_FAT_FS
 int FSfflush(FSFILE   *fo)
 {
     WORD        fHandle;
@@ -247,7 +251,7 @@ int FSfflush(FSFILE   *fo)
 
     return(error);
 } // FSfflush
-
+#endif
 
 /*********************************************************************************
 	Modification of the Microchip function FSfwrite by Karim Ladha, auto-flushing and ECC option added by Dan Jackson
@@ -272,6 +276,7 @@ int FSfflush(FSFILE   *fo)
   Remarks:
     None.
   *********************************************************************************/
+#ifndef USE_FAT_FS
 BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc)
 {
     //DWORD       count = size * n;
@@ -281,6 +286,9 @@ BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc)
 	BYTE ret;
 #ifdef FS_SECTOR_FLUSH
 	unsigned char flush = 0;
+#endif
+#ifdef _WIN32
+	printf("--- %d\n", stream->sec);
 #endif
 
     // see if the file was opened in a write mode
@@ -367,6 +375,9 @@ BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc)
 		// get/add a new cluster if necessary
 	    if (stream->sec == dsk->SecPerClus)
 	    {
+#ifdef _WIN32
+			printf("NEW CLUSTER (a) %d\n", stream->ccls);
+#endif
 #ifdef FS_SECTOR_FLUSH
 			flush = (char)(((stream->size / 65536L % FS_SECTOR_FLUSH) == 0) ? (char)1 : (char)0);
 #endif
@@ -397,6 +408,9 @@ end:
 	// get a new cluster if necessary
     if ((stream->sec + 1) == dsk->SecPerClus)
     {
+#ifdef _WIN32
+		printf("NEW CLUSTER (b) %d\n", stream->ccls);
+#endif
 #ifdef FS_SECTOR_FLUSH
 		unsigned short flushEveryNClusters = FS_SECTOR_FLUSH * ((unsigned int)(65536UL / MEDIA_SECTOR_SIZE) / stream->dsk->SecPerClus);		// Flush every FS_SECTOR_FLUSH * 64 kB, (128 sectors per 64kB)
 		if (flushEveryNClusters != 0)
@@ -448,6 +462,9 @@ end:
 #ifdef FS_SECTOR_FLUSH
 	if (flush)
 	{
+#ifdef _WIN32
+		printf("+++ FLUSH!\n");
+#endif
 		FSfflush(stream);
 	}
 #endif
@@ -455,7 +472,7 @@ end:
 	// Ignore 'ret', always return true
 	return TRUE;
 }
-
+#endif
 
 // [dgj] Disk free function
 unsigned long FSDiskFree(void)
@@ -564,6 +581,7 @@ unsigned long FSDiskDataSector(void)
     return diskDataSector;
 }
 
+#ifndef USE_FAT_FS
 unsigned long FSFileOffsetToLogicalSector(const char *filename, unsigned long offset)
 {
     FSFILE *fp;
@@ -571,10 +589,10 @@ unsigned long FSFileOffsetToLogicalSector(const char *filename, unsigned long of
 
     // Start at the first cluster of the file
     fp = FSfopen(filename, "r");
-    if (fp == NULL) { return 0; }
+    if (fp == NULL) { return 0xFFFFFFFFul; }
 
 	// Seek file pointer
-    if (FSfseek(fp, offset, SEEK_SET) != 0) { return 0; }
+    if (FSfseek(fp, offset, SEEK_SET) != 0) { return 0xFFFFFFFFul; }
 
     // The logical sector is the (cluster - 2) * sectors_per_cluster + sector_within_cluster + disk_data_offset
     sector = (((unsigned long)fp->ccls - 2) * fp->dsk->SecPerClus) + fp->sec + fp->dsk->data;
@@ -583,7 +601,9 @@ unsigned long FSFileOffsetToLogicalSector(const char *filename, unsigned long of
 
     return sector;
 }
+#endif
 
+#ifndef USE_FAT_FS
 char FSFollowClusterChain(const char *filename, void *reference, void (*callback)(void *, unsigned short, unsigned long))
 {
     DWORD cluster, lastCluster, failCluster;
@@ -626,7 +646,7 @@ char FSFollowClusterChain(const char *filename, void *reference, void (*callback
 
     return ret;
 }
-
+#endif
 
 // Get a character
 int FSfgetc(FSFILE *fp)
@@ -655,6 +675,7 @@ long FSfgetlong(FSFILE *fp) { unsigned long v = 0; v |= (((unsigned long)FSfgetc
 
 // [experimental - may cause file system problems] Write volume label after formatting
 // Sets the volume label of the drive -- must only be used ONCE after formatting, as it will not remove any existing volume label
+#ifndef USE_FAT_FS
 char FSfsetvolume(const char *fileName)
 {
     FILEOBJ    filePtr;
@@ -741,7 +762,7 @@ char FSfsetvolume(const char *fileName)
 
     return 1;
 }
-
+#endif
 
 
 
@@ -860,7 +881,7 @@ if (numWritten >= numSectors)
 
 
 
-#if 1
+#ifndef USE_FAT_FS
 
 #ifdef ENABLE_SCRAMBLE
 char gFSScramble = 0;

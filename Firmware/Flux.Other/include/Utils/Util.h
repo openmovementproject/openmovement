@@ -65,7 +65,8 @@ int EncodeBase64(char *output, const unsigned char *input, int length);
 // Filename utility functions
 extern char ValidFilename(const char *filename, char allowWildcard);
 
-
+// Convert nibble into hex representation as a char (WITH NIBBLE MASK)
+char NibbleToHex(unsigned char nibble);
 
 // --- Serial timestamp functions ---
 // ??? Consider moving these to rtc.h (or, better still, a new Timestamp.h ?)

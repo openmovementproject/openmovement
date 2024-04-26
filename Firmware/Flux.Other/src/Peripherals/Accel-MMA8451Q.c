@@ -409,7 +409,7 @@ void AccelEnableInterrupts(unsigned char flags, unsigned char pinMask)
 	ACCELWrite(0b00000010);	/*	TRANSIENT_COUNT (x sample time)
 			b7-0	:	D[7:0] Count value. Default value: 0000_0000.*/
 	/*SETUP PULSE/TAP DETECTION*/
-	ACCELWrite(0b01111111); /*PULSE_CFG
+	/*PULSE_CFG
 			b7		:	DPA	0: 	Double Pulse detection is not aborted if the start of a pulse is detected during the time period specified by the PULSE_LTCY register.
 							1: 	Setting the DPA bit momentarily suspends the double tap detection if the start of a pulse is detected during the time period specified
 								by the PULSE_LTCY register and the pulse ends before the end of the time period specified by the PULSE_LTCY register.
@@ -420,16 +420,28 @@ void AccelEnableInterrupts(unsigned char flags, unsigned char pinMask)
 			b2		:	YSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse
 			b1		:	XDPEFE	0: Event detection disabled; 1: Event detection enabled double pulse
 			b0		:	XSPEFE	0: Event detection disabled; 1: Event detection enabled single pulse*/
-
-	ACCELReopen();	
-	ACCELAddressWrite(ACCEL_ADDR_PULSE_THSX); /*7 bit values, 0.063g/LSB fixed, 32 = 2g*/ 
-	ACCELWrite(32); /*X pulse threshold*/
-	ACCELWrite(32); /*Y pulse threshold*/
-	ACCELWrite(32); /*Z pulse threshold*/
-	/*Note: The startup code turns on LPF and HPF for pulse detection.*/
-	ACCELWrite(2);	/*<20ms> PULSE_TMLT - multiple of sample timestep/4 (x by 4 if LPF is on), defines pulse width limit*/
-	ACCELWrite(2); 	/*<40ms> PULSE_LTCY - time after pulse detection that device ignores other pulses in Tsamp/2 (x4 for LPF)*/
-	ACCELWrite(25); /*<250ms>PULSE_WIND - window in which second pulse can arrive to create double tap, same step as PULSE_TMLT*/
+#ifdef ACCEL_INT_DOUBLETAP_ALT_CONFIG
+		ACCELWrite(0x3f); 
+		ACCELReopen();	
+		ACCELAddressWrite(ACCEL_ADDR_PULSE_THSX); /*7 bit values, 0.063g/LSB fixed, 32 = 2g*/ 
+		ACCELWrite(0x20); // 2g
+		ACCELWrite(0x20); // 2g
+		ACCELWrite(0x20); // 2g
+		ACCELWrite(0x24); /*<120ms> PULSE_TMLT - multiple of sample timestep/4 (x by 4 if LPF is on), defines pulse width limit*/
+		ACCELWrite(0x28); /*<400ms> PULSE_LTCY - time after pulse detection that device ignores other pulses in Tsamp/2 (x4 for LPF)*/
+		ACCELWrite(0x3c); /*<600ms> PULSE_WIND - window in which second pulse can arrive to create double tap, same step as PULSE_TMLT*/
+#else
+		ACCELWrite(0b01111111); 
+		ACCELReopen();	
+		ACCELAddressWrite(ACCEL_ADDR_PULSE_THSX); /*7 bit values, 0.063g/LSB fixed, 32 = 2g*/ 
+		ACCELWrite(32); /*X pulse threshold*/
+		ACCELWrite(32); /*Y pulse threshold*/
+		ACCELWrite(32); /*Z pulse threshold*/
+		/*Note: The startup code turns on LPF and HPF for pulse detection.*/
+		ACCELWrite(2);	/*<20ms> PULSE_TMLT - multiple of sample timestep/4 (x by 4 if LPF is on), defines pulse width limit*/
+		ACCELWrite(2); 	/*<40ms> PULSE_LTCY - time after pulse detection that device ignores other pulses in Tsamp/2 (x4 for LPF)*/
+		ACCELWrite(25); /*<250ms>PULSE_WIND - window in which second pulse can arrive to create double tap, same step as PULSE_TMLT*/
+#endif
 
 	// ENABLE SELECTED INTERRUPTS
 	ACCELReopen();
@@ -781,7 +793,12 @@ unsigned short AccelSetting(int rate, int range)
         case    6: value |= ACCEL_RATE_6_25;  break;
         case    3: value |= 0x8000 | ACCEL_RATE_6_25;  break;       // Mark as invalid, closest to 3.125 is 6.25
         case    1: value |= ACCEL_RATE_1_56;  break;
-        default:   value |= ACCEL_RATE; value |= 0x8000; break;     // Mark as invalid
+        default:   
+#ifdef ACCEL_RATE
+			value |= ACCEL_RATE; 
+#endif
+			value |= 0x8000; 				// Mark as invalid
+			break;
     }
 
     switch (range)
@@ -790,7 +807,12 @@ unsigned short AccelSetting(int rate, int range)
         case  8:   value |= ACCEL_RANGE_8G;  break;
         case  4:   value |= ACCEL_RANGE_4G;  break;
         case  2:   value |= ACCEL_RANGE_2G;  break;
-        default: value |= ACCEL_RANGE; value |= 0x8000; break;      // Mark as invalid
+        default: 
+#ifdef ACCEL_RANGE
+			value |= ACCEL_RANGE; 
+#endif
+			value |= 0x8000; 		      // Mark as invalid
+			break;
     }
 
     return value;

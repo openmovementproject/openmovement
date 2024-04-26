@@ -125,7 +125,7 @@ void __attribute__((interrupt,auto_psv)) _INT2Interrupt(void)
 // Indicates ISR rate
 //LED_SET(LED_RED);    
 #endif     
-    LoggerAccelTasks();
+    LoggerAccelTasksSingleSampleAccel();
     //IFS1bits.INT2IF = 0;  // DataTasks() services and clears the interrupt
 }
 
@@ -483,8 +483,24 @@ void LedTasks(void)
     }
     else
     {
-        if (status.batteryFull) { LED_SET(LED_GREEN); }       // full - not enumerated
-        else                    { LED_SET(LED_YELLOW); }      // charging - not enumarated (could change to red if yellow-green contrast not strong enough)
+    	// KL: 09-12-2019, Either of the charge termination bug fixes below work, the lower intensity LED (PWM option) is prefered however.
+    	// Note: Affected hardware revisions are in serial range 601000 to 601999. After this, Microchip update there charger hardware
+        #if 1
+        // KL: Glow green LED to allow < Iterm draw for proper charge termination on <A2 engineering revision on MCP73830 device
+        if (status.batteryFull) { if (((unsigned char)(LEDTimer)) < (256/25)) { LED_SET(LED_GREEN);} else { LED_SET(LED_OFF); } }       // full - not enumerated, 4% Green LED 
+        else                    { if (((unsigned char)(LEDTimer)) < (256/25)) { LED_SET(LED_YELLOW);} else { LED_SET(LED_OFF); } }       // full - not enumerated, 4% Yellow LED       // charging - not enumarated     	
+        #else
+        // KL: Blink green LED to cycle charger patch...
+        if((RtcNow() & 0x0ff) < 3) // In a period of 256 seconds (4mins), turn the LED off for 3s
+        {
+            LED_SET(LED_OFF); // Allow charge current to reach below 20mA to reset charge controller MCP73830
+        }
+        else
+        {
+            if (status.batteryFull) { LED_SET(LED_GREEN); }       // full - not enumerated
+            else                    { LED_SET(LED_YELLOW); }      // charging - not enumarated (could change to red if yellow-green contrast not strong enough)
+        } 
+        #endif
     }
     return;
 }
@@ -582,6 +598,7 @@ void RunLogging(void)
 #if defined (__PIC24FJ1024GB606__) 
     // Shutdown FTL before NAND power off
     FtlShutdown();
+IMU_Off(); // ACCEL_POWER_DOWN - KL: Fixes 30mA wait log bug 05-07-19 (now ~13 uA) FW 53 (no other changes)
     PER_DISABLE();
 #endif            
             while (restart != 1 && !stopCondition)
@@ -756,6 +773,13 @@ else
                             }
                         }
                         else { failCounter = 0; }
+                        
+                        if(result)
+                        {
+                            // KL: Check for extra data
+                            continue;
+                        }
+						// Else - Goto sleep until next interrupt
 	
 #ifdef HIGH_SPEED_USES_PLL
 // [High-speed] No sleep if sampling at high rate

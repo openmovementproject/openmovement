@@ -69,7 +69,7 @@ typedef struct
     StateSampling sampling;
 
     // Status: logging
-    unsigned char debugFlashCount;      // Remaining number of debug flashes
+    unsigned short debugFlashCount;     // Remaining number of debug flashes
     char filename[16];                  // Current data file name
 
 	// Sort these out...

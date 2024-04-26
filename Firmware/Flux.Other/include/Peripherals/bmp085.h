@@ -2,11 +2,12 @@
 // Re-written from the bosch api for the BMP085 sensor
 // This is to add the ability to use the end_of_conversion interrupt
 // avoiding the delay function and allowing the device to be non-polled.
+// 21-03-2016 KL: This header is a shim to make the BMP085 driver behave like the general altimeter driver
 
 #ifndef __BMP085_H__
 #define __BMP085_H__
 
-#include "GenericTypeDefs.h"
+//#include "GenericTypeDefs.h"
 
 /* Example:
 BMP085_init();			// Startup
@@ -70,32 +71,51 @@ void BMP085_standby(void);
 /* Turn on interrups and initate a conversion*/
 void BMP085_int_enable(void);
 /* Call to convert and return the last temp reading in 0.1^C - doesn't use I2C */
+#define AltCalcTemp() BMP085_calc_pressure()
 short BMP085_calc_temperature(void); 
 /* Call to convert and return the last pressure reading in Pa - doesn't use I2C */
-long BMP085_calc_pressure(void);
 #define AltCalcPressure() BMP085_calc_pressure()
-/* Begin the temperature conversion */
-void BMP085_Initiate_ut_conversion(void);
-#define AltSample() BMP085_Initiate_up_conversion() // State machine in isr handles the conversion sequencing
-/* Call from the I2C process priority to read the last temp conversion into the global struct*/
-#ifdef USE_CTRL_REG_BUSY_BIT
-	unsigned char BMP085_read_ut (void);
-#else
-	void BMP085_read_ut (void);
-#endif
+long BMP085_calc_pressure(void);
 /* Begin the pressure conversion */
+#define AltSample() BMP085_Initiate_up_conversion() 
 void BMP085_Initiate_up_conversion(void);
 /* Call from the I2C process priority to read the last pressure conversion into the global struct*/
+#define AltReadLast()	BMP085_read_up()
 #ifdef USE_CTRL_REG_BUSY_BIT
 	unsigned char BMP085_read_up (void);
 #else
 	void BMP085_read_up (void);
 #endif
-#define AltReadLast()	BMP085_read_up()
+/* Begin the temperature conversion */
+#define AltSampleTemp() BMP085_Initiate_ut_conversion() 
+void BMP085_Initiate_ut_conversion(void);
+/* Call from the I2C process priority to read the last temp conversion into the global struct*/
+#define AltReadLastTemp()	BMP085_read_ut()
+#ifdef USE_CTRL_REG_BUSY_BIT
+	unsigned char BMP085_read_ut (void);
+#else
+	void BMP085_read_ut (void);
+#endif
+
 /* Call to convert pressure to altitude*/
 //#define ENABLE_ALTITUDE_CALC
 long CalculateAltitude(long pressure, long pressure_sea_level);
 
+// Rename all driver functions to newer altimeter API
+// KL: Probably not possible really. Will need a newer driver to be written...
+#if 0
+#ifndef BMP085_init	
+#define BMP085_init						AltVerifyDeviceId
+#define BMP085_init						AltInit
+#define BMP085_standby					AltStandby
+#define BMP085_calc_temperature			AltCalcTemp
+#define BMP085_calc_pressure			AltCalcPressure
+#define BMP085_Initiate_up_conversion	AltSample
+#define BMP085_read_up					AltReadLast
+#define BMP085_Initiate_ut_conversion	AltSampleTemp
+#define BMP085_read_ut					AltReadLastTemp
+#endif
+#endif
 
 #endif   // __BMP085_H__
 

@@ -56,7 +56,7 @@ void TimerInterruptOn(unsigned short newRate)
     // Clear counter and set precision timer
     pr1L = PR1 = (((32768)/newRate)-1);			// Period
 	pr1H = pr1L+1;
-	timerError = 32768 - ((PR1+1) * newRate);	// Error in ticks/32768
+	timerError = 32768 - ((pr1L+1) * newRate);	// Error in ticks/32768
 	errorAccumulator = 0;
 	if(TMR1 > PR1) TMR1 = 0;					// If we will miss the next interrupt, clear count
     // Enable RTC and timer interrupts	
@@ -74,7 +74,7 @@ void TimerInterruptOff(void)
     PR1 = 0xffff;
 }
 
-unsigned char TimerTasks(void)
+unsigned char inline __attribute__((always_inline))TimerTasks(void)
 {
 	unsigned char retval = 0; 		// b0 is second elapsed flag, b1 is timer period flag
     if (IFS0bits.T1IF)
@@ -106,13 +106,42 @@ unsigned char TimerTasks(void)
 	return retval;
 }
 
+// Get a safe copy of the ticks
 unsigned long TimerTicks(void)
 {
 	unsigned short tmr1 = TMR1;
 	DWORD_VAL ticks = timerTicks;	// Latest
-	// If interrupt occurs here then ticks + TMR1 will not be valid (short by PR1+1 << 1) 
-	if(tmr1 > TMR1) return 	(ticks.Val + ((PR1+1)<<1)); // It just over
+	// If roll over occurs here then ticks + TMR1 will not be valid (short by PR1+1 << 1) 
+	if(tmr1 > TMR1) return 	(ticks.Val + ((PR1+1)<<1)); // It just rolled over
 	else 			return	(ticks.Val + (tmr1<<1));
+
+/*
+	unsigned short t0 = TMR1;				// Capture the hardware timer before we look at the ticks
+	DWORD_VAL ticks = timerTicks;			// Capture the ticks
+	unsigned short t1 = TMR1;				// Capture the hardware timer after we look at the ticks
+
+	// Check whether a rollover occurred
+	if (t1 < t0)
+	{
+		// Check our current priority level relative to the timer handler
+		if (SRbits.IPL >= T1_INT_PRIORITY)
+		{
+			// If our priority is at-or-above the timer, we must add the roll-over ourselves
+			return (ticks.Val + ((PR1+1)<<1) + t1); // Add the roll-over amount and the current hardware timer
+		}
+		else
+		{
+			// If we are below the timer handler, we can't be sure whether or not 'ticks' included the roll-over as timerTicks was updated before or after we captured it
+			ticks = timerTicks;				// Capture it again (it will definitely contain the roll-over this time)
+			return (ticks.Val + (t1<<1));	// Add the most recent captured hardware timer to the ticks
+		}
+	}
+	else
+	{
+		return (ticks.Val + (t0<<1));		// Add the first captured hardware timer to the ticks
+	}
+*/
+
 }	
 
 //EOF

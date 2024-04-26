@@ -32,8 +32,8 @@
 #endif
 
 // --- NAND 1 ---
-#define FLASH_CE_PIN        FLASH_CE1_PIN
-#define FLASH_CE            FLASH_CE1
+#define FLASH_CE_PIN        NAND_DEVICE1_CE_PIN
+#define FLASH_CE            NAND_DEVICE1_CE
 
 // Remap the names to be device-specific
 //#define NAND_NO_GLOBALS     // Allow globals only for NAND 1
@@ -51,6 +51,8 @@
 #define NandStorePage       Nand1StorePage
 #define NandStorePageRepeat Nand1StorePageRepeat
 #define NandReadParameters  Nand1ReadParameters
+#define NandReadBuffer512WordSummed	Nand1ReadBuffer512WordSummed
+#define NandWritePage		Nand1WritePage
 #define _rbwait_timeout_count _rbwait_timeout_count1
 
 // Use the actual implementation in Nand.c

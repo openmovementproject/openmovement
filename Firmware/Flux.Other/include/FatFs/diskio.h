@@ -27,14 +27,15 @@ typedef enum {
 	RES_PARERR		/* 4: Invalid Parameter */
 } DRESULT;
 
+/*---------------------------------------*/
+/* Status and control value for the disk */
+extern unsigned char gDiskIOStatus;/* DSTATUS, use disk_status(0) */
 
 /*---------------------------------------*/
 /* Prototypes for disk control functions */
-
-
 DSTATUS disk_initialize (BYTE pdrv);
 DSTATUS disk_status (BYTE pdrv);
-DRESULT disk_read (BYTE pdrv, BYTE*buff, DWORD sector, BYTE count);
+DRESULT disk_read (BYTE pdrv, BYTE* buff, DWORD sector, BYTE count);
 DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, BYTE count);
 DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
 
@@ -43,9 +44,12 @@ DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
 #define STA_NOINIT		0x01	/* Drive not initialized */
 #define STA_NODISK		0x02	/* No medium in the drive */
 #define STA_PROTECT		0x04	/* Write protected */
+/* Additional control bits - KL 2015 */
+#define STA_ECC_OFF 	0x10 	/* Do not write ecc info to disk (faster)*/
+#define STA_MSD_NO_DISK	0x20	/* MSD media not detected flag */
+#define STA_MSD_PROTECT	0x40	/* MSD write protect flag */
 
-
-/* Command code for disk_ioctrl fucntion */
+/* Command code for disk_ioctrl function */
 
 /* Generic command (used by FatFs) */
 #define CTRL_SYNC			0	/* Flush disk cache (for write functions) */

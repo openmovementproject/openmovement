@@ -1,56 +1,27 @@
-/* 
- * Copyright (c) 2009-2012, Newcastle University, UK.
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met: 
- * 1. Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice, 
- *    this list of conditions and the following disclaimer in the documentation 
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE. 
- */
-
-// Accel-LIS3DH accelerometer interface
-// Dan Jackson, Karim Ladha 2013.
-
-// Needed, or else spi.h and i2c.h fails
-#define USE_AND_OR
+// LIS3DH accelerometer interface. Initially for NRF51822 and SPI
+// Karim Ladha 2016
 
 // Includes
 #include "HardwareProfile.h"
-#include <stdio.h>
-#include <spi.h>
-#include <TimeDelay.h>
 #include "Peripherals/Accel.h"
-#include "Peripherals/myi2c.h"
-
 
 // I2C routines
 #ifdef ACCEL_I2C_MODE
+	#include "myi2c.h"
+	#error "I2C routines not tested yet"
 	// Set interface speed to default if not defined
 	#ifndef ACCEL_I2C_RATE
 		#define LOCAL_I2C_RATE		I2C_RATE_400kHZ
 	#else
 		#define LOCAL_I2C_RATE		ACCEL_I2C_RATE
 	#endif
-	#define ACCEL_ADDRESS		0x38 	/*I2C address*/
-	#define ACCEL_MASK_READ  	0x01 	/*I2C_READ_MASK*/
-	#define ACCEL_MASK_BURST  	0x00 	/*Implicit for all I2C access*/
+	#ifndef ACCEL_ADDRESS
+		#define ACCEL_ADDRESS		0x30 	/*I2C address*/
+	#endif
+	#define ACCEL_MASK_READ  	0x01 		/*I2C_READ_MASK*/
+	#define ACCEL_MASK_BURST  	0x00 		/*Implicit for all I2C access*/
 	
-	// I2C 
+	// I2C comms
 	#define CUT_DOWN_I2C_CODE_SIZE
 	#ifndef CUT_DOWN_I2C_CODE_SIZE
 	#define ACCELOpen()              myI2COpen();myI2CStart(); WaitStartmyI2C();

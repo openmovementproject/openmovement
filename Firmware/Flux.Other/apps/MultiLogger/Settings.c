@@ -26,6 +26,9 @@
 // Configuration settings, status and command handling
 // Dan Jackson, 2011-2012
 
+#define CRC_COMMANDS		// Enable code to protect commands with CRCs // TODO: Just make this the only case
+
+
 // Includes
 #include "HardwareProfile.h"
 #include <Compiler.h>
@@ -64,7 +67,7 @@
 
 
 // These addresses must match the reserved sections of program memory in the linker script
-
+// TODO: These are device-specific -- move out of apps to project folder
 #define DEVICE_ID_ADDRESS 0x2A000ul
 //ROM BYTE __attribute__ ((address(DEVICE_ID_ADDRESS),space(prog),aligned(ERASE_BLOCK_SIZE),section(".device_id"),noload)) DeviceIdData[ERASE_BLOCK_SIZE];
 
@@ -96,8 +99,6 @@ unsigned short SettingsGetDeviceId(void)
 // Rewrite the device id
 void SettingsSetDeviceId(unsigned short newId)
 {
-    // Check voltage ok to program
-    if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return; }
     // Fetch current id
     settings.deviceId = SettingsGetDeviceId();
     // If different, rewrite
@@ -125,9 +126,6 @@ unsigned short SettingsIncrementLogValue(unsigned int index)
 {
     unsigned short value;
 
-    // Check voltage ok to program
-    if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return 0xffff; }
-
     // Read existing data to RAM
     ReadProgram(LOG_ADDRESS, scratchBuffer, 512);
 
@@ -149,9 +147,6 @@ unsigned short SettingsIncrementLogValue(unsigned int index)
 void SettingsAddLogEntry(unsigned short status, unsigned long timestamp, const char *message)
 {
     int len, i;
-
-    // Check voltage ok to program
-    if (adcResult.batt < BATT_CHARGE_MIN_LOG) { return; }
 
     // Read existing data to RAM
     ReadProgram(LOG_ADDRESS, scratchBuffer, 512);
@@ -356,7 +351,7 @@ void SettingsInitialize(void)
     
     // Status
     //status.attached = 0;
-    status.initialBattery = adcResult.batt;
+    status.initialBattery = AdcBattToPercent(adcResult.batt);
     status.inactivity = 0;       // reset inactivity timer
 
     // System state
@@ -1625,6 +1620,114 @@ int Command_INFO(commandParserState_t *cmd)
 
 
 
+
+
+// CRC-protected commands
+#ifdef CRC_COMMANDS
+
+// Maximum mode index (of USB/alternate)
+#define SETTINGS_MAX_MODE (SETTINGS_USB > SETTINGS_ALTERNATE ? SETTINGS_USB : SETTINGS_ALTERNATE)
+
+// CRC-protected commands/responses
+typedef enum { CRC_STATE_NONE, CRC_STATE_COMMAND, CRC_STATE_RESPONSE } crc_state_t;
+
+// State tracking of CRC-protected commands/responses
+typedef struct
+{
+	crc_state_t crcState;
+	unsigned short commandId;
+	unsigned short commandCrc;
+	unsigned short responseCrc;
+	unsigned char hasCommandCrc;	// 1=CRC_STATE_COMMAND protected by CRC, 0=CRC_STATE_COMMAND not protected by CRC (but caller still wants the ID and response CRC)
+} crc_command_t;
+
+// Per-interface state tracking of CRC-protected commands/responses
+static crc_command_t crcCommand[SETTINGS_MAX_MODE] = {{0}};
+#define COMMAND_RETURN_CRC -123		// Extends values from return
+
+// CCITT 16-bit CRC
+#define CRC_INITIAL 0xffff
+static unsigned short crc16(const unsigned char *buffer, unsigned short len, unsigned short crc)
+{
+	int i;
+	while (len--)
+	{
+		crc ^= (unsigned short)*buffer++ << 8;
+		for (i = 0; i < 8; i++) { crc = crc & 0x8000 ? (crc << 1) ^ 0x1021 : (crc << 1); }
+	}
+	return crc;
+}
+
+
+// CRC-capable write handler for Bluetooth transport
+void crc_Bluetooth_write(const void *buffer, unsigned int len)
+{
+	// Update the CRC for this interface
+	SettingsMode mode = SETTINGS_ALTERNATE;
+	if (crcCommand[mode].crcState == CRC_STATE_RESPONSE)
+	{
+		crcCommand[mode].responseCrc = crc16(buffer, len, crcCommand[mode].responseCrc);
+	}
+	// Chain to actual write handler
+	Bluetooth_write(buffer, len);
+}
+	
+// CRC-capable write handler for USB transport
+void crc_usb_write(const void *buffer, unsigned int len)
+{
+	// Update the CRC for this interface
+	SettingsMode mode = SETTINGS_USB;
+	if (crcCommand[mode].crcState == CRC_STATE_RESPONSE)
+	{
+		crcCommand[mode].responseCrc = crc16(buffer, len, crcCommand[mode].responseCrc);
+	}
+	// Chain to actual write handler
+	usb_write(buffer, len);
+}
+
+// Command: AT
+int Command_AT(commandParserState_t *cmd)
+{
+    if (cmd->argc > 1)
+    {
+        unsigned short id = (unsigned short)strtoul(cmd->argv[1], NULL, 10);
+        unsigned short crc = 0;
+        unsigned char hasCrc = 0;
+    
+	    if (cmd->argc > 2)
+	    {
+	    	hasCrc = 1;
+	        crc = (unsigned short)strtoul(cmd->argv[2], NULL, 16);
+	    }    
+        
+		SettingsMode mode = 0;
+		if (cmd->flags & COMMAND_FLAG_OUTPUT_PRIMARY) { mode = SETTINGS_USB; }
+		if (cmd->flags & COMMAND_FLAG_OUTPUT_ALTERNATIVE) { mode = SETTINGS_ALTERNATE; }
+		
+		crcCommand[mode].crcState = CRC_STATE_COMMAND;
+		crcCommand[mode].commandId = id;
+		crcCommand[mode].commandCrc = crc;
+		crcCommand[mode].responseCrc =  CRC_INITIAL;
+		crcCommand[mode].hasCommandCrc = hasCrc;
+		
+		if (!hasCrc)
+		{
+	    	printf("OK %u\r\n", crcCommand[mode].commandId);
+	 	}
+	 	else
+		{
+	    	printf("OK %u %04X\r\n", crcCommand[mode].commandId, crcCommand[mode].commandCrc);
+		}	
+    }
+    else
+    {
+	    printf("OK\r\n");
+	} 
+	return COMMAND_RETURN_OK;
+}	
+#endif
+
+
 // Command list
 const command_definition_t settingsCommandDefinitions[] =
 {
@@ -1633,7 +1736,11 @@ const command_definition_t settingsCommandDefinitions[] =
     {   0, "HELP", 			CommandHandlerPrintString, 	"HELP: help|echo|reset\r\n", 0 },   //printf("HELP: help|echo|id|status|sample|time|hibernate|stop|standby|serial|debug|clear|device|session|rate|annotate|read|erase|led|reset\r\n");
     {   0, "EXIT", 			CommandHandlerPrintString, 	"INFO: You'll have to close the terminal window yourself!\r\n", 0 },
     {   0, "CLS",           CommandHandlerPrintString, 	"\f", 0 },                          //
+#ifdef CRC_COMMANDS
+    {   0, "AT",            Command_AT,                 NULL, 0 },
+#else
     {   0, "AT",   			CommandHandlerPrintString, 	"OK\r\n", 0 },
+#endif
     {   0, "STANDBY",   	CommandHandlerPrintString, 	"STANDBY=0\r\n", 0 },				// (backwards compatibility)
     {   0, "MAXSAMPLES",  	CommandHandlerPrintString,  "MAXSAMPLES=0\r\n", 0 },            // (backwards compatibility)
     {   0, "LASTCHANGED",  	CommandHandlerPrintString,  "LASTCHANGED=0\r\n",        0 },    // (backwards compatibility)
@@ -1656,6 +1763,7 @@ const command_definition_t settingsCommandDefinitions[] =
     {   0, "STOP", 			CommandHandlerTime, 		&settings.loggingEndTime,   COMMAND_DEFINITION_UNPARSED },
     //{   0, "LASTCHANGED", 	CommandHandlerTime, 		&settings.lastChangeTime,   COMMAND_DEFINITION_READ_ONLY | COMMAND_DEFINITION_UNPARSED },	// (backwards compatibility)
     //{   0, "DATAMODE", 		CommandHandlerChar, 		&settings.dataMode, 	  	0 },	// (not present)
+    {   0, "DFC", 			CommandHandlerUShort, 		&logger.debugFlashCount, 	  	0 },
     // Special prefixes
     {   0, "#",             Command_Passthrough, 	    NULL, COMMAND_DEFINITION_PREFIX },	// pass through to other interface
     // Commands with custom handling
@@ -1711,15 +1819,18 @@ const command_definition_t settingsCommandDefinitions[] =
 extern const command_definition_t APPLICATION_COMMANDS[];
 #endif
 
+
+
+
+
 // Serial commands
 char SettingsCommand(const char *line, SettingsMode mode)
 {
 	write_handler_t oldWriteHandler = writeHandler;
     int flags;
-    int ret;
+    int ret = 0;
     
-    // Ignore empty lines
-    if (line == NULL || strlen(line) == 0) { return 0; }
+    if (line == NULL) { return 0; }		// Cannot handle NULL line
     
     // Disable streaming
 	//if (mode == SETTINGS_USB && logger.stream == STREAM_USB) { logger.stream = STREAM_NONE; }
@@ -1727,13 +1838,78 @@ char SettingsCommand(const char *line, SettingsMode mode)
 
 	// Run command parser
 	flags = 0;
-	if (mode == SETTINGS_USB) { writeHandler = usb_write; flags |= COMMAND_FLAG_OUTPUT_PRIMARY; }
-	if (mode == SETTINGS_ALTERNATE) { writeHandler = Bluetooth_write; flags |= COMMAND_FLAG_OUTPUT_ALTERNATIVE; }	
-	if (mode == SETTINGS_BATCH) { flags |= COMMAND_FLAG_SCRIPT; }
+	if (mode == SETTINGS_USB)
+	{ 
+#ifdef CRC_COMMANDS
+		writeHandler = crc_usb_write; 
+#else
+		writeHandler = usb_write; 
+#endif
+		flags |= COMMAND_FLAG_OUTPUT_PRIMARY;
+	}
+	else if (mode == SETTINGS_ALTERNATE)
+	{
+#ifdef CRC_COMMANDS
+		writeHandler = crc_Bluetooth_write;
+#else
+		writeHandler = Bluetooth_write;
+#endif
+		flags |= COMMAND_FLAG_OUTPUT_ALTERNATIVE;
+	}	
+	else if (mode == SETTINGS_BATCH) { flags |= COMMAND_FLAG_SCRIPT; }
+	
+	// Check if restricted
 	if ((mode == SETTINGS_USB || mode == SETTINGS_ALTERNATE) && (status.lockCode != 0x0000)) { flags |= COMMAND_FLAG_RESTRICTED; }		// Locked
-    
-    ret = 0;
+	
 
+#ifdef CRC_COMMANDS
+	// CRC-protection on USB & alternative link (Bluetooth)
+	if ((mode == SETTINGS_USB || mode == SETTINGS_ALTERNATE) && crcCommand[mode].crcState == CRC_STATE_COMMAND)
+	{
+		unsigned short crc;
+		
+		// Calculate the CRC of the incoming command line (ignore CR/LF)
+		crc = crc16((unsigned char *)line, strlen(line), CRC_INITIAL);
+		
+		// If the protected command is a new 'AT' CRC command -- start a new command
+		if ((line[0] == 'a' || line[0] == 'A') && (line[1] == 't' || line[1] == 'T') && line[2] == ' ')
+		{
+			crcCommand[mode].crcState = CRC_STATE_NONE;
+		}
+		else if (crcCommand[mode].hasCommandCrc)		// If the incoming command is protected by a CRC (and this is not just a request to protect the response)
+		{
+			// If it doens't match what we were told to expect, this is an error.
+			if (crcCommand[mode].commandCrc != crc) 
+			{ 
+				crcCommand[mode].crcState = CRC_STATE_NONE;
+				ret = COMMAND_RETURN_CRC; 
+			}
+		}
+		else
+		{
+			// We didn't have incoming protection on the command's CRC, but our outgoing response can include the CRC of the command we received
+			crcCommand[mode].commandCrc = crc;
+		}	
+		
+		// If we're still in command mode, notify on command start
+		if (crcCommand[mode].crcState == CRC_STATE_COMMAND)
+		{
+			// Notify that we're starting the response
+		    printf("BEGIN %u %04X\r\n", crcCommand[mode].commandId, crcCommand[mode].commandCrc);
+		    
+			// Move to response mode
+			crcCommand[mode].crcState = CRC_STATE_RESPONSE;
+			crcCommand[mode].responseCrc = CRC_INITIAL;
+		}	
+	}
+#endif
+	
+    // Ignore empty lines
+    if (ret == 0 && line[0] == '\0')
+    { 
+    	ret = COMMAND_RETURN_OK; // Ignored
+    }	
+	
     // Application-specific command overrides
 #ifdef APPLICATION_COMMANDS
     if (ret == 0)
@@ -1741,7 +1917,7 @@ char SettingsCommand(const char *line, SettingsMode mode)
         ret = CommandParseList(APPLICATION_COMMANDS, line, flags);
     }
 #endif
-    
+   	
     if (ret == 0)
     {
         ret = CommandParseList(settingsCommandDefinitions, line, flags);
@@ -1760,6 +1936,21 @@ char SettingsCommand(const char *line, SettingsMode mode)
 	{
         printf("ERROR: Unknown command: %s\r\n", line);
     }
+    
+#ifdef CRC_COMMANDS
+	if (ret == COMMAND_RETURN_CRC)
+	{
+		printf("ERROR: CRC mismatch.\r\n"); 
+	}
+
+	// CRC-protection on USB & alternative link (Bluetooth)
+	if ((mode == SETTINGS_USB || mode == SETTINGS_ALTERNATE) && crcCommand[mode].crcState == CRC_STATE_RESPONSE)
+	{
+		// Sent response, send end-of-response footer with ID and CRC
+		crcCommand[mode].crcState = CRC_STATE_NONE;
+		printf("DONE %u %04X\r\n", crcCommand[mode].commandId, crcCommand[mode].responseCrc); 
+	}
+#endif
 
 	// Restore redirect
 	writeHandler = oldWriteHandler;

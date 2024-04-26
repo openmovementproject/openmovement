@@ -201,10 +201,10 @@ int FSfeof(FSFILE *file);
 
 #ifdef ALLOW_FORMATS
 
-// Format a drive. Mode 0 erases the FAT and drive root, mode 1 creates a new boot sector. 
+// Format a drive. 
 // This will use the FORMAT_SECTORS_PER_CLUSTER macro.
 // Returns 0 if successful, -1 otherwise.
-int FSformat(char mode, long int serialNumber, char *volumeId);
+int FSformat(char wipe, long int serialNumber, char *volumeId);
 
 #endif
 

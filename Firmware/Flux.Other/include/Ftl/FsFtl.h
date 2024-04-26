@@ -30,23 +30,41 @@
 #define FSFTL_H
 
 #include "Compiler.h" 
+
+#include "Config.h" 
+#include "HardwareProfile.h" 
+
 #ifndef FSFTL_IN_FSCONFIG
 #include "FSconfig.h"
 #ifndef FS_CONFIG_FTL_AWARE
 #warning "Local FSconfig.h does not seem to be aware of the new FSutils.c/FsFtl.c split, see #defines from CWA/FSconfig.h for example."
 #endif
 #endif
+
 #include "MDD File System/FSDefs.h" 
-#include "MDD File System/FSIO.h"
+
+#ifdef USE_FF
+	#include "FatFs/ff.h"
+#elif defined(USE_FAT_FS)
+	#include "FatFs/FatFsIo.h"
+#else
+	#include "MDD File System/FSIO.h"
+#endif
+
+#include "FtlConfig.h"
+#ifdef FTL_USE_XFTL
+#include "Ftl/xFtl.h"
+#else
 #include "Ftl/Ftl.h"
-
-#if FTL_SECTOR_SIZE != MEDIA_SECTOR_SIZE
-	#error "Sector size mismatch between filesystem and storage."
 #endif
 
-#if ((FTL_LOGICAL_BLOCKS << FTL_SECTOR_TO_BLOCK_SHIFT) > 0x3FFD5F)
-#error "Too many logical sectors for FSformat"
-#endif
+//#if FTL_SECTOR_SIZE != MEDIA_SECTOR_SIZE
+//	#error "Sector size mismatch between filesystem and storage."
+//#endif
+
+//#if ((FTL_LOGICAL_BLOCKS << FTL_SECTOR_TO_BLOCK_SHIFT) > 0x3FFD5F)
+//#error "Too many logical sectors for FSformat"
+//#endif
 
 BYTE MDD_FTL_FSIO_MediaDetect(void);
 BYTE MDD_FTL_USB_MediaDetect(void);

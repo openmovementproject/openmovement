@@ -70,7 +70,7 @@
 #define     HARDWARE_NAME   "AX6" // BootCheck
 #define     HARDWARE_VERSION_STRING  "6.4"
     // Define firmware version
-    #define SOFTWARE_VERSION 52
+    #define SOFTWARE_VERSION 56
 
 // Bootloader version...
 #define STRINGIFY(x) #x

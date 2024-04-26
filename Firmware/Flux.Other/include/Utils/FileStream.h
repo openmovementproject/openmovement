@@ -154,7 +154,7 @@ typedef struct
 // Standard, timestamped data packet
 typedef struct
 {
-	unsigned char  packetType;          // @ 0 [1] Packet type (ASCII 'd' = single-timestamped data stream, 's' = string, others = reserved)
+	unsigned char  packetType;          // @ 0 [1] Packet type (ASCII 'd' = single-timestamped data stream, 's' = timestamped string, 't' = timestamped blocks, others = reserved)
 	unsigned char  streamId;            // @ 1 [1] Stream identifier (by convention: a-ccel, g-yro, m-agnetometer, p-ressure, other-ASCII, non-alphanumeric=reserved, *=all streams)
 	unsigned short payloadLength;       // @ 2 [2] <0x01FC> Payload length (payload is 508 bytes long, + 4 header/length = 512 bytes total)
 

@@ -616,3 +616,72 @@ void AccelPackData(short *input, unsigned char *output)
     return;
 #endif
 }
+
+
+// (Mostly private) returns the setting code for the given values
+unsigned short AccelSetting(int rate, int range)
+{
+	unsigned char rateCode = 0x00;
+	
+	switch (rate)
+	{
+		case 3200: rateCode |= ACCEL_RATE_3200; break;
+		case 1600: rateCode |= ACCEL_RATE_1600; break;
+		case  800: rateCode |= ACCEL_RATE_800;  break;
+		case  400: rateCode |= ACCEL_RATE_400;  break;
+		case  200: rateCode |= ACCEL_RATE_200;  break;
+		case  100: rateCode |= ACCEL_RATE_100;  break;
+		case   50: rateCode |= ACCEL_RATE_50;   break;
+		case   25: rateCode |= ACCEL_RATE_25;   break;
+		case   12: rateCode |= ACCEL_RATE_12_5; break;
+		case    6: rateCode |= ACCEL_RATE_6_25; break;
+	}
+	
+	switch (range)
+	{
+		case 16: rateCode |= ACCEL_RANGE_16G; break;
+		case  8: rateCode |= ACCEL_RANGE_8G;  break;
+		case  4: rateCode |= ACCEL_RANGE_4G;  break;
+		case  2: rateCode |= ACCEL_RANGE_2G;  break;
+	}
+	
+	return rateCode;
+}
+
+
+// [Common sensor API] Returns whether given settings are valid
+char AccelValidSettings(unsigned short rateHz, unsigned short sensitivityG, unsigned long flags)
+{
+	return (
+		(rateHz == 3200 || rateHz == 1600 || rateHz == 800 || rateHz == 400 || rateHz == 200 || rateHz == 100 || rateHz == 50 || rateHz == 25 || rateHz == 12 || rateHz == 6)
+		&& (sensitivityG == 16 || sensitivityG == 8 || sensitivityG == 4 || sensitivityG == 2)
+	);
+}	
+
+// [Common sensor API] Starts the device with the given settings
+void AccelStartupSettings(unsigned short rateHz, unsigned short sensitivityG, unsigned long flags)
+{
+	unsigned char rateCode;
+	unsigned char interruptMask, pinMask;
+	
+	// Start accelerometer with given rate/sensitivity
+	rateCode = AccelSetting(rateHz, sensitivityG);
+	AccelStartup(rateCode);
+	
+	// Flags
+	interruptMask = 0x00;
+	pinMask = 0x00;
+	
+	// FIFO
+	if (flags & ACCEL_FLAG_FIFO_INTERRUPTS) { interruptMask |= (ACCEL_INT_SOURCE_WATERMARK | ACCEL_INT_SOURCE_OVERRUN); }
+	
+	// TODO: Handle other flags
+	
+	// Set interrupts
+	if (interruptMask != 0x00)
+	{
+		AccelEnableInterrupts(interruptMask, pinMask);
+	}	
+	
+	return;
+}

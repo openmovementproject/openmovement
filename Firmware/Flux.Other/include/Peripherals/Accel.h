@@ -115,7 +115,7 @@
 	#define ACCEL_INT_SOURCE_WATERMARK    0x02
 	#define ACCEL_INT_SOURCE_OVERRUN      0x01
 
-#elif defined(ACCEL_LIS3DH)
+#elif defined(ACCEL_LIS3DSH)
 	/*For the LIS3DH*/
 	// Defines
 	// Interrupt source masks

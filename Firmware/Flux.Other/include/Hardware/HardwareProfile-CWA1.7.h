@@ -290,7 +290,8 @@ extern void SystemPwrSave(unsigned long NapSetting);
 								
 									
     // Flash Memory - Hynix/Micron
-    #define NAND_DEVICE     NAND_DEVICE_HY27UF084G2B
+    #define NAND_DEVICE     		NAND_DEVICE_HY27UF084G2B
+	#define NAND_BYTES_PER_PAGE 	2112 /*2048 + 64 extra*/
 
 	#define FLASH_DATA_WR	LATE
 	#define FLASH_DATA_RD	PORTE

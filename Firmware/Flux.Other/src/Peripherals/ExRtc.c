@@ -143,6 +143,32 @@ void ExRtcStartup(void)
 	return;
 }
 
+// Turn on 32kHz output reference clock (0 = off)
+unsigned char ExRtcClockOut(unsigned short freq)
+{
+	unsigned char reg, retval = 1;
+
+	// Early out
+	if(!exRtcPresent)return 0;
+
+	// Supported frequencies
+	if 		(freq == 32768) reg = 0b10000000;
+	else if	(freq == 1024)	reg = 0b10000001;
+	else if	(freq == 32)	reg = 0b10000010;
+	else if	(freq == 1)		reg = 0b10000011;
+	else if (freq == 0) 	reg = 0b00000000;
+	else 					{reg = 0;retval = 0;}
+
+	// Write register
+	ExRtcOpen();	
+	ExRtcAddressWrite(RTC_ADDR_CLKOUT_FREQ);
+	ExRtcWrite(0x00); // Timer ctrl off
+	ExRtcClose();
+
+	// Return 1 for supported
+	return retval;
+}
+
 // Read time
 DateTime ExRtcReadTime(void)
 {

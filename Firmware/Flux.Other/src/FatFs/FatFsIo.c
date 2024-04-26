@@ -29,7 +29,37 @@
 
 // Includes
 #include "stdlib.h"
+#include "Utils/Util.h"
 #include "FatFs/FatFsIo.h"
+
+// Make optional (for flush and destroy)
+#include "Ftl/xFtl.h"
+
+
+// TODO: Put this compat. function in a header
+extern unsigned long RtcNow(void);
+
+// DEBUG
+#define DEBUG_LEVEL_LOCAL	0
+#define DBG_FILE			"fatfsio"
+#include "debug.h"
+
+#if 0 // OLD version - cleaned up above
+#undef DEBUG_LEVEL
+#define DEBUG_LEVEL	2
+#define DBG_FILE dbg_file
+#if (DEBUG_LEVEL > 0)||(GLOBAL_DEBUG_LEVEL > 0)
+static const char* dbg_file = "fatfsio";
+#endif
+#include "debug.h"
+#endif
+
+#ifndef DBG_MALLOC
+	#define DBG_MALLOC malloc
+#endif
+#ifndef DBG_FREE
+	#define DBG_FREE free
+#endif
 
 // State tracking structure
 typedef struct
@@ -44,7 +74,16 @@ typedef struct
 
 static fatfsio_t fatfsio = {{0}};
 
-
+// For debugging file handle leaks
+#if (DEBUG_LEVEL > 3)
+	unsigned short openFiles = 0;
+	typedef struct {
+		FIL *fptr;
+		char fname[14];
+	} DBG_FileRecord_t;
+	
+	DBG_FileRecord_t filesOpen[FS_MAX_FILES_OPEN];	// Doesn't honor FS_MAX_FILES_OPEN when using malloc (but will probably go OOM on PIC24f)
+#endif
 
 /* Unicode support functions */
 #if _USE_LFN							/* Unicode - OEM code conversion */
@@ -65,25 +104,28 @@ WCHAR ff_wtoupper (WCHAR chr)
 /* Allocate memory block */
 void* ff_memalloc (UINT msize)
 { 
-	return malloc((size_t)msize);
+	return DBG_MALLOC((size_t)msize);
 }
 /* Free memory block */
 void ff_memfree (void* mblock)
 {
-	return free(mblock);
+	return DBG_FREE(mblock);
 }
 #endif
 #endif
 
+// Filesystem time override
+static unsigned char overrideFatTimeUsed = 0;
+static unsigned long overrideFatTimeValue = 0;
 
 // Initialize and mounts the disk. Returns TRUE if successful.
 int FSInit(void)
 {
     FRESULT res;
-    int i;
-    
+   
     // Clear all files-in-use
 #ifndef FS_DYNAMIC_MEM
+    int i;
     for (i = 0; i < FS_MAX_FILES_OPEN; i++)
     {
         fatfsio.filesInUse[i] = 0;
@@ -99,13 +141,15 @@ int FSInit(void)
 // The file is created if we are writing (if it already exists, it is removed first).
 // The file pointer is set to the end of the file in append mode.
 FSFILE *FSfopen(const char *filename, const char *mode)
-{
+{	
 	FIL *fil = NULL;
     FSFILE *file = NULL;
     //const char *c;
     unsigned char flags;
     char append;
+#ifndef FS_DYNAMIC_MEM
     int i;
+#endif
     
     // Opening flags
     flags = 0;
@@ -138,11 +182,14 @@ FSFILE *FSfopen(const char *filename, const char *mode)
 		break;
 	}
 #else
-	fil = (FIL*)malloc(sizeof(FIL));
+	fil = (FIL*)FS_malloc(sizeof(FIL));
 #endif
 	// Check we have a valid memory location
+#ifdef ASSERT
+	ASSERT(fil != NULL);
+#endif
 	if (!fil) return NULL;
-
+	
     FRESULT res;
     res = f_open(fil, filename, flags);
     if (res == FR_OK)
@@ -156,6 +203,36 @@ FSFILE *FSfopen(const char *filename, const char *mode)
 #endif
         file = (FSFILE *)fil;
     }
+	else
+	{
+		DBG_FREE(fil);
+		return file;
+	}
+	
+#if (DEBUG_LEVEL > 3)
+{
+	unsigned char f;
+	for(f=0;f<8;f++)
+	{
+		if(filesOpen[f].fptr == 0)
+			break;
+	}
+	
+	if(f<8)	
+	{
+		filesOpen[f].fptr = fil;
+		strncpy(filesOpen[f].fname, filename, 13);
+	} 
+	else 
+	{
+		DBG_INFO("Too many files open to track");
+	}
+	
+	openFiles++;
+	DBG_INFO("\r\nFSfopen   0x%04X   count %u   name %s", file, openFiles, filename);	// Increment debug counter & write to streams
+}	
+#endif
+
     return file;
 }
 
@@ -164,7 +241,9 @@ FSFILE *FSfopen(const char *filename, const char *mode)
 int FSfclose(FSFILE *file)
 {
     FRESULT res;
-	int i;
+#ifndef FS_DYNAMIC_MEM
+    int i;
+#endif
     
     // Close the file
     res = f_close((FIL *)file);
@@ -176,12 +255,31 @@ int FSfclose(FSFILE *file)
         if (file == (FSFILE *)&fatfsio.files[i])
         {
             fatfsio.filesInUse[i] = 0;
+            break;
         }
     }
 #else
-	if(file)free(file);
+	if(file)FS_free(file);
 #endif
-    
+
+#if (DEBUG_LEVEL > 3)
+{
+	unsigned char f;
+	for(f=0;f<8;f++) {
+		if(filesOpen[f].fptr == file)
+		{ 
+			memset(filesOpen[f].fname, '\0', 14);
+			filesOpen[f].fptr = 0;
+			break;
+		}
+	}
+	if(f>=8)
+		DBG_INFO("Failed to remove ptr");
+	
+	openFiles--;
+	DBG_INFO("\r\nFSfclose  0x%04X  count %u", file, openFiles);	// Decrement debug counter & write to streams
+}	
+#endif
     return (res == FR_OK) ? 0 : -1;
 }
 
@@ -240,21 +338,41 @@ int FSfeof(FSFILE *file)
 #error "_USE_MKFS not defined."
 #endif
 
-// Format a drive. Mode 0 erases the FAT and drive root, mode 1 creates a new boot sector. 
+// Format a drive. 
 // This will use the FORMAT_SECTORS_PER_CLUSTER macro.
 // Returns 0 if successful, -1 otherwise.
-int FSformat(char mode, long int serialNumber, char *volumeId)
+int FSformat(char wipe, long int serialNumber, char *volumeId)
 {
     FRESULT res;
     unsigned int allocationUnit = 0;
+
+	// Wipe the NAND device
+	if (wipe != 0) { FtlDestroy(wipe - 1); }
+
+	// Create the file system
     #ifdef FORMAT_SECTORS_PER_CLUSTER
     allocationUnit = (unsigned int)FORMAT_SECTORS_PER_CLUSTER * (unsigned int)MEDIA_SECTOR_SIZE;
     #endif
-    res = f_mkfs(0, 0, allocationUnit);
+
+	// f_mkfs() does not take the serialNumber but uses get_fattime() -- this is therefore a hack so we don't have to edit ff.c
+	overrideFatTimeUsed = 1;
+	overrideFatTimeValue = serialNumber;
+
+    res = f_mkfs(0, 1, allocationUnit);
+
+	overrideFatTimeUsed = 0;
+	overrideFatTimeValue = 0;
+
+	// Volume label
+	if (volumeId != NULL)
+	{
+		FSfsetvolume(volumeId);
+	}
+
     return (res == FR_OK) ? 0 : -1;
 }
 
-#endif
+#endif	// ALLOW_FORMATS
 
 
 #ifdef ALLOW_WRITES
@@ -309,7 +427,7 @@ size_t FSfwrite(const void *buffer, size_t size, size_t count, FSFILE *file)
     return result;
 }
 
-#endif
+#endif	// ALLOW_WRITES
 
 
 
@@ -321,7 +439,7 @@ int FSchdir(char *path)
     return (f_chdir(path) == FR_OK) ? 0 : -1;
 }
 
-// Gets the current working directory. Returns 0 if successful, -1 otherwise.
+// Gets the current working directory. Returns pointer to path, NULL otherwise.
 char *FSgetcwd(char *path, int maxPath)
 {
     FRESULT res;
@@ -343,34 +461,36 @@ int FSrmdir(char * path, unsigned char rmsubdirs)
     return (f_unlink(path) == FR_OK) ? 0 : -1;
 }
 
-#endif
+#endif	// ALLOW_WRITES
 
-#endif
+#endif	// ALLOW_DIRS
 
 
 #ifdef USEREALTIMECLOCK
-// TODO: Make not depend on this...
-#include "Peripherals/Rtc.h"
+	#ifndef UPDATE_FAT_TIME
+		// TODO: Make not depend on this...
+//		#include "Peripherals/Rtc.h"
+	#else
+		// Include support from FSconfig.h
+	#endif
 #endif
 
-
+#ifndef UPDATE_FAT_TIME_IN_DISKIO
 unsigned long get_fattime(void)
 {
+	if (overrideFatTimeUsed) { return overrideFatTimeValue; }
 #ifdef INCREMENTTIMESTAMP
     // Completely different to Microchip implementation (that increments the individual file's timestamp)
     fatfsio.time++;
 #endif
 
 #ifdef USEREALTIMECLOCK
-	{
-		DateTime now = RtcNow();
-		unsigned long offset = ((unsigned long)2000-1980)<<(26);
-		now = (unsigned long)now>>1;
-		now+=offset; // Now it is in FAT format
-		fatfsio.time = now;
-	}
+	DateTime now = RtcNow();
+	unsigned long offset = ((unsigned long)2000-1980)<<(26);	// 20 years
+	now = (unsigned long)now>>1;	// 2-second resolution
+	now+= offset >> 1;				// add 20 years (in 2-second resolution)
+	fatfsio.time = now;
 #endif
-
     return fatfsio.time;
 }
 
@@ -388,8 +508,9 @@ int SetClockVars(unsigned int year, unsigned char month, unsigned char day, unsi
     fatfsio.time |= ((unsigned int)hour << 11) | ((unsigned int)minute << 5) | (second/2);
     return 0;
 }
-#endif
+#endif	//USERDEFINEDCLOCK
 
+#endif // ifndef UPDATE_FAT_TIME_IN_DISKIO
 
 
 
@@ -414,7 +535,7 @@ int FindFirst(const char *filename, unsigned int attributes, SearchRec *search)
 	for (c = filename; *c != '\0'; c++) 
 	{ 
 		if (*c == '/' || *c == '\\') 
-		{  
+		{
 			int len = (int)(c - filename);
 			if (len > sizeof(search->path) - 1) { len = sizeof(search->path) - 1; }
 			memcpy(search->path, filename, len);
@@ -426,8 +547,12 @@ int FindFirst(const char *filename, unsigned int attributes, SearchRec *search)
 	// Find the filename part
 	{
 		// Check for overflow and NULL-terminate
-		int len = sizeof(filenamePart);
-		if (len > sizeof(search->filespec) - 1) { len = sizeof(search->filespec) - 1; }
+		int len = strlen(filenamePart);
+		if (len > sizeof(search->filespec) - 1) 
+		{
+			len = sizeof(search->filespec) - 1;
+		}
+		
 		memcpy(search->filespec, filenamePart, len);
 		search->filespec[len] = '\0';
 	}
@@ -444,31 +569,67 @@ int FindFirst(const char *filename, unsigned int attributes, SearchRec *search)
 // Continue search after FindFirst. Returns 0 if another file was found, or -1 if no further matching files were found.
 int FindNext(SearchRec *search)
 {
-    int ret = -1;
-
 	for (;;)
 	{
-        search->res = f_readdir(&search->dir, &search->fno);                   // Read a directory item
-        if (search->res != FR_OK || search->fno.fname[0] == 0) { ret = -1; break; }  // Break on error or end of dir
-        if (search->fno.fname[0] == '.') continue;             // Ignore dot entry 
+        search->res = f_readdir(&search->dir, &search->fno);	// Read a directory item
+        if (search->res != FR_OK || search->fno.fname[0] == 0)  // Break on error or end of dir
+        { 
+        	return -1; 
+        }
+        
+        if (search->fno.fname[0] == '.')						// Ignore dot entry (../, ./)
+        {
+        	continue;
+        }
+        
+		// Compare directories
+		// TODO: Compare attributes properly
+		if ( (search->attributes & ATTR_DIRECTORY) && !(search->fno.fattrib & AM_DIR)) { continue; }
+		if (!(search->attributes & ATTR_DIRECTORY) &&  (search->fno.fattrib & AM_DIR)) { continue; }
+		
 #if _USE_LFN
         search->filename = *search->fno.lfname ? search->fno.lfname : search->fno.fname;
 #else
         search->filename = search->fno.fname;
 #endif
 
-		// Compare directories
-		// TODO: Compare attributes properly
-		if ( (search->attributes & ATTR_DIRECTORY) && !(search->fno.fattrib & AM_DIR)) { continue; }
-		if (!(search->attributes & ATTR_DIRECTORY) &&  (search->fno.fattrib & AM_DIR)) { continue; }
-
-		ret = 0;
-		break;
+		// If we have a filespec...
+		if (search->filespec[0] != '\0' && strcmp(search->filespec, "*") != 0 && strcmp(search->filespec, "*.*") != 0)
+		{
+			// Compare file name, if not an exact match...
+			if (strnicmp(search->filespec, search->filename, 13) != 0)	// 8.3 filename + null = 13- will early out if _USE_LFN
+			{
+				// Compare wild-cards more complex than "*" and "*.*"
+				// TODO: Doesn't yet handle '?' and '*.XXX' and "XX*YY" etc.
+				int wildcard = (strchr(search->filespec, '*') - search->filespec);	// strchr returns pointer
+				if (wildcard >= 0)
+				{
+					if (strnicmp(search->filespec, search->filename, wildcard) != 0)
+					{
+						continue;
+					}	
+				}	
+				
+				// This is not the file you're looking for...
+				continue;
+			}	 
+		}	
+		
+		// Set filesize
+		search->filesize = search->fno.fsize;
+		
+		// ...and last modified time (converted to RTC from FatFS format)
+		search->timestamp  =((unsigned long) search->fno.ftime) << 1;
+		search->timestamp |=((unsigned long) search->fno.fdate) << 17;
+		search->timestamp -= (2000ul-1980) << 26;
+		
+		return 0;	// File found successfully
 	}
-    //f_closedir(&search->dir);
-	return ret;
+    
+	return -1;		// File not found
 }
-#endif
+
+#endif	//ALLOW_FILESEARCH
 
 
 // Returns the error code for the last file function. See FSIO.h FSerror defintion for full details.
@@ -515,34 +676,29 @@ BOOL FSfwriteSector(const void *ptr, FSFILE *stream, BOOL ecc)
 
 BOOL FSfwriteMultipleSectors(const void *ptr, FSFILE *stream, int count, BOOL ecc)
 {
-    FRESULT res;
-    unsigned int length = count * MEDIA_SECTOR_SIZE;
-    unsigned int result = 0;
-    
     #ifdef FS_WRITE_SECTOR_ECC
         #warning "ECC state passing through FatFs to the FS_WRITE_SECTOR_ECC not yet implemented."
     #endif
-    
-#ifdef FS_SECTOR_FLUSH
-    #warning "FS_SECTOR_FLUSH not yet honoured".
-    /*
-		unsigned short flushEveryNClusters = FS_SECTOR_FLUSH * ((unsigned int)(65536UL / MEDIA_SECTOR_SIZE) / stream->dsk->SecPerClus);		// Flush every FS_SECTOR_FLUSH * 64 kB, (128 sectors per 64kB)
-		if (flushEveryNClusters != 0)
-		{
-			unsigned long cluster = (stream->seek + dsk->sectorSize) / MEDIA_SECTOR_SIZE / stream->dsk->SecPerClus;
-			flush = (char)(((cluster % flushEveryNClusters) == 0) ? (char)1 : (char)0);
-		}
-        if (flush)
-        {
-            FSfflush(stream);
-        }
-    */
+	
+    FRESULT res;
+    unsigned int length = count * MEDIA_SECTOR_SIZE;
+    unsigned int result = 0;
+	
+#ifdef FS_SECTOR_FLUSH	// Flush every N * 64kB written with sector write (8 = 512kB)  	unsigned short size64kBefore, size64kAfter;
+	size64kBefore = (unsigned short)(f_size((FIL *)stream) >> 16);
 #endif
-
+	
     res = f_write((FIL *)stream, ptr, length, &result);
+	
+#ifdef FS_SECTOR_FLUSH	// Flush every N * 64kB written with sector write (8 = 512kB)  	// When the current '64k cluster' has wrapped around the sector flush cycle after this write...
+	size64kAfter = (unsigned short)(f_size((FIL *)stream) >> 16);
+	if ((size64kAfter % FS_SECTOR_FLUSH) < (size64kBefore % FS_SECTOR_FLUSH)) {	// The comparison assumes the written sector count is always less than 128 (64 kB -- the short 'length' would be invalid otherwise anyway)
+		FSfflush(stream);
+	}
+#endif
+	
     return (res == FR_OK && result == length);
 }
-
 
 // Flush writes to a file
 int FSfflush(FSFILE *fo)

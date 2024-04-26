@@ -38,10 +38,11 @@
 // Number of bytes required to pack 'n' 10-bit values:  size = ((n / 4) * 5); if ((n % 4) != 0) size += (n % 4) + 1;
 #define BITPACK10_SIZEOF(_n) ((((_n) / 4) * 5) + ((((_n) & 0x03) == 0) ? 0 : (((_n) & 0x03) + 1)))
 
-#ifndef BITPACK_H_NO_FUNCTIONS
 
 // Pack 4x 10-bit samples into 5-byte groups (stored little-endian).
 // IMPORTANT: Samples must be written sequentially (otherwise destination values will be overwritten or combined incorrectly).
+// (safe -- could be faster if we assume little-endian storage)
+#ifndef BITPACK_H_NO_FUNCTIONS
 static void BitPack_uint10(void *buffer, unsigned short index, unsigned short value)
 {
     unsigned char *p = (unsigned char *)buffer + ((index >> 2) * 5);
@@ -54,12 +55,14 @@ static void BitPack_uint10(void *buffer, unsigned short index, unsigned short va
     }
     return;
 }
+#endif
 
 
 // Un-pack 4x 10-bit samples from each 5-byte group (stored little-endian).
+// (safe -- could be faster if we assume little-endian storage)
+#ifndef BITPACK_H_NO_FUNCTIONS
 static unsigned short BitUnpack_uint10(void *buffer, unsigned short index)
 {
-	unsigned short value;
     unsigned char *p = (unsigned char *)buffer + ((index >> 2) * 5);
     switch (index & 0x03)
     {
@@ -69,13 +72,22 @@ static unsigned short BitUnpack_uint10(void *buffer, unsigned short index)
         case 3: return ((unsigned short)p[3] >> 6) | (((unsigned short)p[4]         ) << 2);    // D
     }
 }
+#endif
 
 
-/*
-// 2x 12-bit samples into 3-byte groups, stored little-endian:
+
+// Bit-pack 2x 12-bit samples into 3-byte groups (stored little-endian).
 // AAAAAAAA BBBBAAAA BBBBBBBB
 // 76543210 3210ba98 ba987654
+
+// Number of bytes required to pack 'n' 12-bit values:
+#define BITPACK12_SIZEOF(_n) (((_n)*3+1)>>1)				// Minimum needed bytes: ((n*3+1)/2)
+#define BITPACK12_PADDED_SIZEOF(_n) ((((_n)+1)>>1)*3)		// To the next 3-byte boundary: (((n+1)/2)*3)
+
+// Pack 2x 12-bit samples into 3-byte groups (stored little-endian).
 // IMPORTANT: Samples must be written sequentially (otherwise destination values will be overwritten or combined incorrectly).
+// (safe -- could be faster if we assume little-endian storage)
+#ifndef BITPACK_H_NO_FUNCTIONS
 static void BitPack_uint12(void *buffer, unsigned short index, unsigned short value)
 {
     unsigned char *p = (unsigned char *)buffer + ((index >> 1) * 3);
@@ -86,7 +98,23 @@ static void BitPack_uint12(void *buffer, unsigned short index, unsigned short va
     }
     return;
 }
-*/
-
 #endif
+
+
+// Un-pack 2x 12-bit samples from each 3-byte group (stored little-endian).
+// (safe -- could be faster if we assume little-endian storage)
+#ifndef BITPACK_H_NO_FUNCTIONS
+static unsigned short BitUnpack_uint12(void *buffer, unsigned short index)
+{
+	unsigned char *p = (unsigned char *)buffer + ((index >> 1) * 3);
+	switch (index & 0x01)
+	{
+		case 0: return ((unsigned short)p[0]) | (((unsigned short)p[1] & 0x000f) << 8);    // A
+		case 1: return ((unsigned short)p[1] >> 4) | ((unsigned short)p[2] << 4);    // B
+	}
+	return;
+}
+#endif
+
+
 #endif

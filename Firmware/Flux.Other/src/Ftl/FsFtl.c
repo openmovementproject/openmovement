@@ -60,7 +60,13 @@ In fsio.c, FILECreateHeadCluster(), comment out:
     // Ignore source file
 #else
 
+// Debug functions for emulated NAND
+#include "FtlConfig.h"
+#ifdef FTL_USE_XFTL
+#include "Ftl/xFtl.h"
+#else
 #include "Ftl/Ftl.h"
+#endif
 #include "Ftl/FsFtl.h"
 
 

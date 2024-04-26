@@ -58,6 +58,7 @@ typedef struct commandParserState_t_struct
     int flags;
     int argc;
     const char **argv;
+	void *context;
 } commandParserState_t;
 
 // Standard command processors
@@ -65,6 +66,7 @@ int CommandHandlerChar(commandParserState_t *cmd);
 int CommandHandlerUShort(commandParserState_t *cmd);
 int CommandHandlerULong(commandParserState_t *cmd);
 int CommandHandlerTime(commandParserState_t *cmd);
+int CommandHandlerTimeEpoch(commandParserState_t *cmd);
 int CommandHandlerPrintString(commandParserState_t *cmd);
 
 // Command parsing flags
@@ -81,6 +83,9 @@ int CommandHandlerPrintString(commandParserState_t *cmd);
 #define COMMAND_RETURN_RESTRICTED   -1
 
 // Parse a command against the specified command list
+int CommandParseListContext(const command_definition_t *commandList, const char *rawLine, int flags, void *context);
+
+// (Compatibility) Parse a command against the specified command list (without any context)
 int CommandParseList(const command_definition_t *commandList, const char *line, int flags);
 
 // Manage an array of lists
@@ -93,5 +98,18 @@ int CommandParse(const char *line, int flags);
 
 // Run a script file, using all registered command lists
 int CommandParseScript(const char *filename);
+
+
+// Packed time from string
+unsigned long PackedTimeFromString(const char *value);
+
+// Packed time to string
+const char *PackedTimeToString(unsigned long value);
+
+// Epoch time from string
+unsigned long EpochTimeFromString(const char *value);
+
+// Epoch time to string
+const char *EpochTimeToString(unsigned long value);
 
 #endif

@@ -96,6 +96,9 @@
 / Jan 24,'13 R0.09b Added f_setlabel() and f_getlabel(). (_USE_LABEL = 1)
 /---------------------------------------------------------------------------*/
 
+#ifdef _WIN32
+#pragma warning(disable: 6235)	// (<non-zero constant> || <expression>) is always a non-zero
+#endif
 #include "FatFs/ff.h"			/* FatFs configurations and declarations */         // [dgj] Added "FatFs/"
 #include "FatFs/diskio.h"		/* Declarations of low level disk I/O functions */  // [dgj] Added "FatFs/"
 

@@ -46,6 +46,12 @@ void LoggerStop(void);
 void RunLogging(void);
 
 // User overidable 'weak' functions
-signed char ButtonTasks(void);
+extern signed char ButtonTasks(void);
 
+extern void LedTasks(void);
+extern void LedTasksDefault(void);
+
+#ifndef LED_TASKS
+	#define LED_TASKS() LedTasksDefault()
+#endif
 #endif

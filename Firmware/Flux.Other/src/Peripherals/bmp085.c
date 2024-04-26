@@ -370,16 +370,15 @@ void BMP085_Initiate_up_conversion(void)
 	datasheet on p14.
 	Returns altitude in cm steps (0.01m)*/
 #ifdef ENABLE_ALTITUDE_CALC
+#warning "Do you wan't to actually use this? It takes 0.5sec at 4MIPs!"
 long CalculateAltitude(long pressure, long pressure_sea_level)
 {
 	long altitude = 0;
-	#ifdef ENABLE_ALTITUDE_CALC
 	float temp1,temp2; /*Using 2 to avoid potential stack issue*/
 	temp1 = ((float)pressure)/((float)pressure_sea_level);
 	temp2 = powf(temp1,0.19029495718363463368220742150333);/*note: powf() takes floats*/
 	temp1 = (float)4433000*(1-temp2); /*note extra zeros for cm resolution*/
 	altitude = ((temp1 >= 0) ? (long)(temp1+0.5) : (long)(temp1-0.5));// Avoid truncation
-	#endif
 	return altitude;
 }
 #endif

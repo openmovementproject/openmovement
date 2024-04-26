@@ -5,8 +5,17 @@
 #include <Compiler.h>
 #include "TimeDelay.h"
 #include "HardwareProfile.h"
+#include "Config.h"
 #include "Peripherals/MultiSensor.h"
 #include "Settings.h"
+
+// Bool types
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
 
 // Globals
 verify_id_t multiPresent;	
@@ -24,9 +33,9 @@ verify_id_t multiPresent;
 #define myI2CAck()			{unsigned short timeout = MY_I2C_TIMEOUT;PLL_DELAY_FIX();MULTI_SENSOR_I2CCONbits.ACKDT = 0;MULTI_SENSOR_I2CCONbits.ACKEN=1;while(MULTI_SENSOR_I2CCONbits.ACKEN&& --timeout);LOCAL_CHECK_TIMEOUT(timeout);}
 #define myI2CNack()			{unsigned short timeout = MY_I2C_TIMEOUT;PLL_DELAY_FIX();MULTI_SENSOR_I2CCONbits.ACKDT = 1;MULTI_SENSOR_I2CCONbits.ACKEN=1;while(MULTI_SENSOR_I2CCONbits.ACKEN&& --timeout);LOCAL_CHECK_TIMEOUT(timeout);}
 #define myI2CClose()		{MULTI_SENSOR_I2CCON = 0x0000;}
-#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;PLL_DELAY_FIX();I2C1TRN=_x;while(I2C1STATbits.TBF&& --timeout);while(I2C1STATbits.TRSTAT&& --timeout);LOCAL_CHECK_TIMEOUT(timeout);} 
-#define myAckStat()			(!I2C1STATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
-unsigned char myI2Cgetc(void)  {PLL_DELAY_FIX();MULTI_SENSOR_I2CCONbits.RCEN = 1; while(MULTI_SENSOR_I2CCONbits.RCEN); MULTI_SENSOR_I2CSTATbits.I2COV = 0; return(I2C1RCV);}
+#define myI2Cputc(_x)		{unsigned short timeout = MY_I2C_TIMEOUT;PLL_DELAY_FIX();MULTI_SENSOR_I2CTRN=_x;while(MULTI_SENSOR_I2CSTATbits.TBF&& --timeout);while(MULTI_SENSOR_I2CSTATbits.TRSTAT&& --timeout);LOCAL_CHECK_TIMEOUT(timeout);} 
+#define myAckStat()			(!MULTI_SENSOR_I2CSTATbits.ACKSTAT) /*TRUE or 1 if slave acked*/
+unsigned char myI2Cgetc(void)  {PLL_DELAY_FIX();MULTI_SENSOR_I2CCONbits.RCEN = 1; while(MULTI_SENSOR_I2CCONbits.RCEN); MULTI_SENSOR_I2CSTATbits.I2COV = 0; return(MULTI_SENSOR_I2CRCV);}
 
 unsigned char MultiVerifyDeviceId(void)
 {
@@ -254,37 +263,61 @@ void MultiSingleSample(sensor_t *sample)
 	if(multiPresent.accel == TRUE)
 	{
 		ReadData(ACCEL_ADDRESS, ACCEL_ADDR_OUT_X_MSB, buffer, 6, ACCEL_BAUD);
+#ifdef MULTI_SENSOR_ROTATE_XY_MINUS_90
+		sample->accel.yh = buffer[0];
+		sample->accel.yl = buffer[1];
+		sample->accel.xh = buffer[2];
+		sample->accel.xl = buffer[3];
+		sample->accel.zh = buffer[4];
+		sample->accel.zl = buffer[5];
+		sample->accel.x = -sample->accel.x;
+#else
 		sample->accel.xh = buffer[0];
 		sample->accel.xl = buffer[1];
 		sample->accel.yh = buffer[2];
 		sample->accel.yl = buffer[3];
 		sample->accel.zh = buffer[4];
 		sample->accel.zl = buffer[5];
+#endif
 	}
 	// Mag
 	if(multiPresent.mag == TRUE)
 	{
 		ReadData(MAG_ADDRESS, MAG_ADDR_OUT_X_MSB, buffer, 6, MAG_BAUD);
+#ifdef MULTI_SENSOR_ROTATE_XY_MINUS_90
+		sample->mag.yh = buffer[0];
+		sample->mag.yl = buffer[1];
+		sample->mag.xh = buffer[2];
+		sample->mag.xl = buffer[3];
+		sample->mag.zh = buffer[4];
+		sample->mag.zl = buffer[5];
+
+		sample->mag.x = -sample->mag.x;
+#else
 		sample->mag.xh = buffer[0];
 		sample->mag.xl = buffer[1];
 		sample->mag.yh = buffer[2];
 		sample->mag.yl = buffer[3];
 		sample->mag.zh = buffer[4];
 		sample->mag.zl = buffer[5];
+#endif
 	}
 	// Gyro
 	if(multiPresent.gyro == TRUE)
 	{
-// Alternate - if ctrlreg4 is set to msb first
-//		ReadData(GYRO_ADDRESS, GYRO_OUT_X_L | GYRO_MASK_BURST, buffer, 6, GYRO_BAUD);
-//		sample->gyro.xh = buffer[0];
-//		sample->gyro.xl = buffer[1];
-//		sample->gyro.yh = buffer[2];
-//		sample->gyro.yl = buffer[3];
-//		sample->gyro.zh = buffer[4];
-//		sample->gyro.zl = buffer[5];
-
+		// Ctrlreg4 is set to msb first, swaps not needed
 		ReadData(GYRO_ADDRESS, GYRO_OUT_X_L | GYRO_MASK_BURST, &sample->gyro.xl, 6, GYRO_BAUD);
+#ifdef MULTI_SENSOR_ROTATE_XY_MINUS_90
+		{
+			// Rotate about Z
+			unsigned short temp;
+			temp = sample->gyro.x;
+			sample->gyro.x = -sample->gyro.y;
+			sample->gyro.y = temp;
+		}
+#else
+		// No rotation
+#endif
 	}
 }
 
@@ -316,7 +349,7 @@ unsigned char ReadData(unsigned char busAddress, unsigned char subAddress, unsig
 		return FALSE;
 	}	
 	myI2Cputc(subAddress);
-	myI2CRestart()
+	myI2CRestart();
  	myI2Cputc(busAddress | I2C_READ_MASK);
 	for(;num>1;num--)
 	{

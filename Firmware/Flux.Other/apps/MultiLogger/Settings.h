@@ -79,7 +79,7 @@ typedef struct
     char annotation[ANNOTATION_COUNT][ANNOTATION_SIZE]; // 14x 32-byte annotation chunks
 
 	// Misc
-    unsigned char debuggingInfo;        // Debug flashing of state (0 = off, 1 = constant, 2 = on tap)
+    unsigned char debuggingInfo;        // Debug flashing of state (0 = off, >0 = on
     short streamFormat;                 // 0 = old, 1 = WAX SLIP, 2 = TEXT, 5 = OMX SLIP
 
     unsigned short batteryLowTimer;     // Battery low counter
@@ -119,7 +119,7 @@ typedef struct
 {
     // Status
     //char attached;                    // USB attached (>0 = configured)
-    unsigned short initialBattery;      // Battery level at start (used for battery health)
+    signed short initialBattery;      // Battery level at start (used for battery health)
 
     // System settings
     StateDiscoverable discoverable;

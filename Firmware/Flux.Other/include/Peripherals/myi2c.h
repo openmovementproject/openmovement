@@ -30,8 +30,8 @@
 #define MYI2C_H
 
 #include <Compiler.h>
-#include "HardwareProfile.h"
 #include <TimeDelay.h>
+#include "HardwareProfile.h"
 
 // Defines
 #define I2C_READ_MASK		0x1

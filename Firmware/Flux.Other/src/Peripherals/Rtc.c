@@ -58,6 +58,13 @@ volatile unsigned short rtcTicksSeconds = 0;
 unsigned short rtcRate = 0;
 volatile signed short rtcTimerTotal = 0;
 
+// KL: Adding patched for new processor - requires Rtcc.c for the device
+#ifdef __PIC24FJ1024GB606__
+#include "time.h"
+extern void RTCC_LockOn(void);
+    
+#endif
+
 #if (defined(RTC_SWWDT) || defined(RTC_SWWDT_TIMEOUT))
 volatile unsigned int rtcSwwdtValue = 0;
 #endif
@@ -120,7 +127,22 @@ void RtcStartup(void)
     rtcLastTimeIndex = 0;
     rtcLastTime[rtcLastTimeIndex].l[0] = 0; 
 	rtcLastTime[rtcLastTimeIndex].l[1] = 0;
-#ifdef __C30__
+#ifdef __PIC24FJ1024GB606__ // KL: From code configurator
+   CLOCK_SOSCEN();
+   RTCCON1Lbits.RTCEN = 0; 
+// KL Alarm 'chime' per second
+RTCCON1H = 0xC101;   
+   // PWCPS 1:1; PS 1:1; CLKSEL SOSC; FDIV 0; 
+   RTCCON2L = 0x0000;
+   // DIV 16384 -> 2Hz clock ; 
+   RTCCON2H = 16383;
+   // PWCSTAB 0; PWCSAMP 0; 
+   RTCCON3L = 0x0000;
+   // RTCEN enabled; OUTSEL Alarm Event; PWCPOE disabled; PWCEN disabled; WRLOCK disabled; PWCPOL disabled; TSAEN disabled; RTCOE disabled; 
+   RTCCON1L = 0x8000; 
+   RTCC_LockOn();    
+   RtccReadTimeDate(&rtcLastTime[rtcLastTimeIndex]);
+#elif defined (__C30__)
     CLOCK_SOSCEN();
 	RtccInitClock();
 	RtccWrOn();
@@ -210,7 +232,9 @@ void RtcInterruptOn(unsigned short newRate)
 	IPC0bits.T1IP = T1_INT_PRIORITY;
 
     rtcRate = newRate;
-
+#ifdef __PIC24FJ1024GB606__
+    // Not needed, chine is already enabled with ISR disabled
+#else
 	// Chime every 1 second to RTC int vector
 	RtccWrOn();
 	//mRtccOn();
@@ -222,7 +246,7 @@ void RtcInterruptOn(unsigned short newRate)
 	//mRtccSetAlrmPtr(0b0000);
 	mRtccAlrmEnable();
 	mRtccWrOff();
-
+#endif
     if (rtcRate == 0)
     {
 		PR1 = 0xffff;
@@ -361,7 +385,20 @@ void RtcWrite(DateTime value)
 {
 	RTC_IPL_shadow_t IPLshadow;
 	RTC_INTS_DISABLE();
-#ifdef __C30__
+#ifdef __PIC24FJ1024GB606__
+    // KL: To prevent having to write my own driver for new hardware
+    struct tm stupidFormatTime;
+    stupidFormatTime.tm_sec =     DATETIME_SECONDS(value);
+    stupidFormatTime.tm_min =     DATETIME_MINUTES(value); 
+    stupidFormatTime.tm_hour =    DATETIME_HOURS(value);
+    stupidFormatTime.tm_mday =    DATETIME_DAY(value);
+    stupidFormatTime.tm_mon =     DATETIME_MONTH(value); 
+    stupidFormatTime.tm_year =    DATETIME_YEAR(value);
+    stupidFormatTime.tm_wday =    0;
+    stupidFormatTime.tm_yday =    0;
+    stupidFormatTime.tm_isdst =   0;
+    RTCC_TimeSet(&stupidFormatTime);
+#elif defined (__C30__)
     if (rtcLastTimeIndex != 0 && rtcLastTimeIndex != 1) { rtcLastTimeIndex = 0; }
     rtcLastTime[rtcLastTimeIndex] = *RtcToInternal(value);
 	RtccWrOn();
@@ -495,7 +532,7 @@ inline void RtcTimerTasks(void)
 
 DateTime RtcNow(void)
 {
-#ifdef __C30__
+#if defined (__C30__)
 
     // If interrupts aren't on, update the time now (if they are on, the time and fractional time is kept up to date in the interrupt handler)
     if (!IEC3bits.RTCIE)
@@ -742,9 +779,7 @@ DateTime RtcCalcOffset(DateTime start, signed long seconds)
 					year--;										// Go back a year
 				}	
 			}
-
-			if ((remainingDays <= maxDays)&&					// Check date is valid
-				(remainingDays > 0))												
+			else												
 			{
 				days = remainingDays;							// Set the value
 				break;											// Exit
@@ -946,7 +981,10 @@ rtcInternalTime *RtcToInternal(DateTime value)
 // Calibrate the RCT to speed up (+ive value) or slow down (-ive value) - send signed int in ppm +/- 258 ppm (PIC32 +/-253)
 void RtcCal(signed short ppm)
 {
-#ifdef __C30__
+#ifdef __PIC24FJ1024GB606__
+    // KL: New hardware - function excluded since its never used anyway
+        
+#elif defined (__C30__)
 	// RCFGCAL adjustments fix +/- 4 pulses per minute x the cal value
 	// 4 pulses per minute = 2.0345 ppm, we will fix this based on one divde and offset
 	// If the ppm adjust value is greater than +/-58, we subtract (or add) an extra 1 to the value to compensate

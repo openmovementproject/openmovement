@@ -53,6 +53,11 @@ char radioPresent = 0;	// [dgj] Global status flag
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
 *  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
+#include "HardwareProfile.h"
+
+// Disable MiWi?
+#ifdef ENABLE_MIWI
+
 #include "SystemProfile.h"
 
 
@@ -1978,3 +1983,4 @@ MRF_UNREMAP();
     extern char bogusVariable;
 #endif
 
+#endif
