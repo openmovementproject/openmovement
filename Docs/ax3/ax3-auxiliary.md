@@ -215,12 +215,12 @@ The AX6 and AX3 are in the same family of devices, with very similar electronic 
 
 The differences are that the AX6 has: 
 
-* a different [underlying sensor](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#sensor-data-characteristics) for physical movement, which contains a gyroscope and an accelerometer, while the AX3’s sensor is accelerometer-only.
-* larger NAND storage memory: 1024 MB, rather than 512 MB.
+* a different [underlying sensor](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#sensor-data-characteristics) for physical movement, which contains a gyroscope and an accelerometer (a [Bosch BMI160](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi160-ds000.pdf)), while the AX3’s sensor is accelerometer-only (an [Analog Devices ADXL345](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)).
+* a larger total storage capacity (NAND memory): 1024 MB, rather than 512 MB.
 * a larger capacity battery: 250 mAh, rather than 150-180 mAh.
 
 This results in the AX6 having improved [expected maximum recording durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration), depending on the configuration (note that enabling the gyroscope limits the recording to about one week).
  
-At present, the gyroscope signal is not used in any of the built-in algorithms from OmGui or the GGIR analysis software.  It is being used by researchers developing their own algorithms (e.g. into gait analysis), and it may "future proof" a dataset for possible future algorithm development.  The combined signal can be used to achieve [sensor fusion](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#sensor-fusion---inertial-measurement-unit).
+At present, the gyroscope signal is not used in any of the built-in algorithms from *OmGui* or the *GGIR* analysis software.  It is being used by researchers developing their own algorithms (e.g. into gait analysis), and it may "future proof" a dataset for novel/future algorithm development.  The combined signal can be used to achieve [sensor fusion](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#sensor-fusion---inertial-measurement-unit).
  
 The AX6’s accelerometer sensor is newer and objectively better at measuring inertia than the accelerometer in the AX3.  There is broad agreement that [raw accelerometer data is generally equivalent](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#data-analysis) however, it could be the case that some published algorithms (such as wear-time or, possibly, sleep) may have been tuned to measure inactivity based on the noisier signal of older sensors (such as that used in the AX3).  It may be possible to add noise to the accelerometer signal to emulate a noisier sensor.
