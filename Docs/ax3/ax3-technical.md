@@ -68,7 +68,7 @@ There are recording-specific settings stored in the data file `CWA-DATA.CWA` in 
 
 ### Measurement data
 
-*Note:* There are multiple ways to load the raw data into programming languages and/or analysis environments described at [AX Research: Raw Data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#raw-data).  There is also [additional information on raw sensor data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md).
+> **Note:** There are multiple ways to load the raw data into programming languages and/or analysis environments described at [AX Research: Raw Data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#raw-data).  There is also [additional information on raw sensor data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md).
 
 Measurement data is written to the file `CWA-DATA.CWA` in the root folder, which includes header information and the logged sensor data.  The disk should be formatted at *FAT16* or *FAT32* -- ideally by using the device's own `FORMAT` command which will align the filesystem for maximum efficiency.
 
@@ -122,7 +122,7 @@ typedef struct
 } imu_t;
 ```
 
-Bits 10-12 of the lightScale` value determine the gyroscope range of (8000/2^n) degrees per second.
+Bits 10-12 of the `lightScale` value determine the gyroscope range of (8000/2^n) degrees per second.
 
 When the *packed* mode is used (AX3 only), the accelerometer values are stored packed into a single 32-bit integer -- each axis value is a signed integer and must be sign-extended and left-shifted by the exponent 'e', resulting units are 1/256 *g*:
 
@@ -163,7 +163,7 @@ typedef struct
 } cwa_header_t;
 ```
 
-**NOTE:** For `.CWA` files produced by an *AX3*, `sensorConfig` can be ignored.
+> **Note:** For `.CWA` files produced by an *AX3*, `sensorConfig` can be ignored.
 
 
 #### CWA File Data Blocks
@@ -192,14 +192,14 @@ typedef struct
 } OM_READER_DATA_PACKET;
 ```
 
-**NOTE:** For `.CWA` files produced by an *AX3*: `lightScale` top 6 bits will be zero and can be ignored and `numAxesBPS` top nibble will always be `3`.
+> **Note:** For `.CWA` files produced by an *AX3*: `lightScale` top 6 bits will be zero and can be ignored and `numAxesBPS` top nibble will always be `3`.
 
 The complexity of the way the timestamp is stored is for historical/backwards-compatibility reasons. Early 8-bit prototype devices didn't have the ability to track the real-time clock to a resolution less than one second, yet did know when the second changed.  To maximize the effective timer resolution (to be the same order as the sampling rate), the relative index of the sample just before the roll-over was recorded (`timestampOffset`). Before any AX3 devices were generally available, back in December 2011 (Firmware V23) one of the device's timers to the RTC's clock crystal to take a precise (sub-second) measurement whenever the underlying accelerometer's buffer fills up (for standard rates: every 25 samples, when it wakes the main processor): recording the index of the sample, and the full timestamp (with fractional part).  This most recent measurement is only actually stored when a whole sector is written. To allow existing file readers to maintain a high timer resolution, the best way to record this additional precision was to make new use of an existing field (`deviceFractional`, indicated by the top bit set) and adjust the `timestampOffset` to be the nearest sample to the whole-second roll-over (assuming the sample rate is exactly as configured).  If the high-precision timer is detected, this adjustment can be undone by newer readers, and the fractional time used instead.  In summary: the original format timestamp has no fractional part and the timestamp-offset is the relative sample index where that time is correct; newer readers can spot that the timestamp now includes the fractional part and the timestamp-offset can be adjusted to point to the sample the fractional timestamp was actually for (the backwards-compatible adjustment is undone).
 
 
 ## Communication Protocol
 
-*Note:* A software API exists that can be used to create your own software to communicate with the AX devices: [AX libOMAPI](https://github.com/digitalinteraction/libomapi/)
+> **Note:** A software API exists that can be used to create your own software to communicate with the AX devices: [AX libOMAPI](https://github.com/digitalinteraction/libomapi/).  There are several existing options for configuring and downloading from AX devices: [AX Devices for Physical Activity Research - Large-scale deployments](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#large-scale-deployments).
 
 Commands and responses are all in plain, 7-bit ASCII text and delimited with *CR*/*LF* (`\r\n`) line endings.  The sections below use the following conventions:
 
