@@ -196,7 +196,8 @@ Checking the log output:
 
 ## Manually Verify Device ID Consistency
 
-If you receive an error `The correct download file name cannot be established (device identifier not verified)` please obtain an *OmGUI Detailed Log* as described above (if not already done so).  The log entry may contain `LOG: - MISMATCH:`, indicating an issue with device ID.  
+If you receive an error `The correct download file name cannot be established (device identifier not verified)` please obtain an [OmGUI Detailed Log](
+#omgui-detailed-log) as described above (if not already done so).  The log entry may contain `LOG: - MISMATCH:`, indicating an issue with device ID.  
 
 To manually verify device IDs, with a single connected device, please check the following four numbers (these should be the same):
 
