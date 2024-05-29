@@ -1,0 +1,22 @@
+Re: Body-worn activity monitor for a research study.
+
+
+To Whom It May Concern,
+
+The bearer of this letter is participating in a research study. 
+
+As part of this study, the participant is wearing a small body-worn activity monitor.
+
+The monitor is attached in such a way that it may not be easily removed without affecting their privacy and/or without significant impact on the data being collected.
+
+The device is an "Open Movement AX3/AX6" monitor, with datasheet: https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-datasheet.md
+
+This device is similar to a smartwatch and should be suitable through security screening scanners.  Screening with an increased scanner sensitivity might incur additional security checking measures.  The monitor must not be worn in extreme environments such as a sauna, or a very strong magnetic field (such as an MRI device), or during activities with a high risk of impact.
+
+The device is a polycarbonate puck (23 x 33 x 9 mm), containing low-power electronics (non-wireless, electronic emissions in compliance with CE/FCC/UKCA regulations), and a small lithium ion battery (AX3: 0.555 Wh; AX6: 0.925 Wh).  As with any battery-containing wearable device: if it becomes damaged, or any abnormal temperature develops, the device should be removed immediately.
+
+For further information, please contact us at the details below.
+
+Yours sincerely,
+
+RESEARCH STUDY - NAMED RESEARCHER & CONTACT DETAILS
