@@ -196,31 +196,40 @@ Checking the log output:
 
 ## Manually Verify Device ID Consistency
 
-If you receive an error `The correct download file name cannot be established (device identifier not verified)` please obtain an [OmGUI Detailed Log](
-#omgui-detailed-log) as described above (if not already done so).  The log entry may contain `LOG: - MISMATCH:`, indicating an issue with device ID.  
+This section is primarily for if you receive an error: *The correct download file name cannot be established (device identifier not verified)*.
 
-To manually verify device IDs, with a single connected device, please check the following four numbers (these should be the same):
+> This message is given when the device is accessed through a communication channel, but the device ID through that channel does not match the ones obtained while accessing through a storage channel -- the software refuses to continue, to preserve data integrity.  This could be caused by manually changing the contents of a drive (such as the data file or volume label), manually changing the device ID, or communication problems.
 
-1. *External ID:* The number written on the side of the device (AX3: the number after the `17-` or `18-` prefix; AX6: 7-digit numbers should start with a `60`)
+1. If the device contains useful data, as an initial priority, you can try to download the data as described in [Filesystem or data problems](#filesystem-or-data-problems).
 
-2. *USB ID:* In *Device Manager*, under *Ports*, and the *COM* device under that, right-click / *Properties* / *Details* / *Property: Parent* -- the number that appears as the *Value* after the first part of the address `USB\VID_04D8&PID_0057\#####_` (where `#####` is `CWA17` or `AX664`)
+2. If every device you have tried has a similar issue, check that you are not running anti-virus/security software that could be interfering with device communication.  If in doubt, try the device on another computer without such software (e.g. a personal laptop).
 
-3. *Filesystem ID:* Locate the disk drive that appears under *This PC* when you connected the device, right-click the drive and select *Properties*, the highlighted field, note the *Volume Label*, it should start `AX#_` (where `#` is `3` or `6`)
+3. You should fully shutdown then restart your operating system (not just sleep/hibernat and resume, but fully shutdown and turn-off, before then restarting).  This will be help ensure there is no persistent driver issue.
 
-4. *Data-file ID:* The ID in the current data file on the device.  This is a bit difficult to extract! Press <kbd>Windows</kbd>+<kbd>R</kbd> to open the *Run* box, and copy and paste the following command to open a window and give you a number (replace `D:` with the drive letter for your device from above if necessary):
+4. If problems persist, to help diagnose the issue, please obtain an [OmGUI Detailed Log](#omgui-detailed-log) as described above (if not already done so).  If the log entry contains `LOG: - MISMATCH:`, it indicates there is still an issue with device IDs not matching.  
 
-   ```cmd
-   PowerShell -Command "& {$s=[System.IO.File]::OpenRead('D:\CWA-DATA.CWA');$b=New-Object byte[] 13;$c=$s.Read($b,0,13);$s.close();Write-Output(16777216*$b[12]+65536*$b[11]+256*$b[6]+$b[5]);[Console]::ReadKey()}"
-   ```
+5. To manually verify each source of the device's ID, with only a single connected device, please make a note of the following four numbers (these should be the same):
 
-If these numbers are inconsistent, you could try *resetting the device* (including the device ID) in the next section.
+    1. *External ID:* The number written on the side of the device (AX3: the number after the `17-` or `18-` prefix; AX6: 7-digit numbers should start with a `60`)
+
+    2. *USB ID:* In *Device Manager*, under *Ports*, and the *COM* device under that, right-click / *Properties* / *Details* / *Property: Parent* -- the number that appears as the *Value* after the first part of the address `USB\VID_04D8&PID_0057\#####_` (where `#####` is `CWA17` or `AX664`)
+
+    3. *Filesystem ID:* Locate the disk drive that appears under *This PC* when you connected the device, right-click the drive and select *Properties*, the highlighted field, note the *Volume Label*, it should start `AX#_` (where `#` is `3` or `6`)
+
+    4. *Data-file ID:* The ID in the current data file on the device.  This is a bit difficult to extract! Press <kbd>Windows</kbd>+<kbd>R</kbd> to open the *Run* box, and copy and paste the following command to open a window and give you a number (replace `D:` with the drive letter for your device from above if necessary):
+
+       ```cmd
+       PowerShell -Command "& {$s=[System.IO.File]::OpenRead('D:\CWA-DATA.CWA');$b=New-Object byte[] 13;$c=$s.Read($b,0,13);$s.close();Write-Output(16777216*$b[12]+65536*$b[11]+256*$b[6]+$b[5]);[Console]::ReadKey()}"
+       ```
+
+6. If any of the ID numbers in the last step are inconsistent, or if you received a `LOG: - MISMATCH:` message from the detailed log, you should try [resetting the device](#resetting-the-device) with a new device ID (from the device case).
 
 
 ## Resetting the device
 
 **NOTE:** This step is for advanced use only, and should only be performed if necessary.
 
-**IMPORTANT:** This will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location.  
+**IMPORTANT:** This will *reformat* the device, deleting any existing data on there.  Please be certain it does not have the only copy of any data you'd like to keep.  You can manually move off data from the drive by locating the device's drive letter in *File Explorer* and move the `CWA-DATA.CWA` file to a safe location (see: [Filesystem or data problems](#filesystem-or-data-problems) for additional information).
 
 **Method 1: Web Page**
 
@@ -398,9 +407,9 @@ Checklist:
 
 If you receive a warning from the operating system about the filesystem (e.g. *Error Checking* / *Repair this drive* / *Do you want to scan and fix*) you should initially ignore the message -- do not allow the operating system to try to fix anything as this can cause problems.  You should attempt to continue as normal:
 
-* **If the device contains useful data:** try to download the data as usual.  If this does not work, locate the device's drive (e.g. *File Explorer* / *This PC* / identify and open the device's drive), and try to directly copy off the `CWA-DATA.CWA` data file.  If you have any problems with copying off the file, it may still be possible to recover the data: try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.  It would be useful to obtain a diagnostics report from the device: [Device Log - Method 1](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#device-log).  
+* **If the device contains useful data:** try to download the data as usual.  If this does not work, locate the device's drive (e.g. *File Explorer* / *This PC* / identify and open the device's drive), and try to directly copy off the `CWA-DATA.CWA` data file.  If you have any problems with copying off the file, it may still be possible to recover the data: try the [cwa-recover](https://github.com/digitalinteraction/openmovement/blob/master/Software/AX3/cwa-recover/) process.  It would be useful to obtain a diagnostics report from the device: [Device Log - Method 1](#device-log).  
 
-* **If the device does not contain useful data:** try to configure the device as normal.  If this doesn't work, follow the troubleshooting instructions above, up to [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device) if required.  It would be useful to obtain a diagnostics report from the device: [Device Log - Method 1](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#device-log) -- before clearing the device.  
+* **If the device does not contain useful data:** try to configure the device as normal.  If this doesn't work, follow the troubleshooting instructions above, up to [Resetting the Device](#resetting-the-device) if required.  It would be useful to obtain a diagnostics report from the device: [Device Log - Method 1](#device-log) -- before clearing the device.  
 
 You should check that you do not have any other software unnecessarily writing to the removable drives, or interfering with their operation (e.g. potentially some antivirus/security software) that may cause filesystem corruption.
 
