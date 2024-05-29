@@ -189,12 +189,12 @@ Please try the following to extract a detailed log from *OmGui* about what it ca
 
 Checking the log output:
 
-* Device ID consistency: If it contains any `LOG: - MISMATCH:` lines, please see the next section to manually verify the device ID.
+* Device ID consistency: If it contains any `LOG: - MISMATCH:` lines, please see the next section to [device ID consistency](#device-id-consistency).
 
 * If it shows an issue with a configuration file (in particular, if you are having an issue when trying to configure a device), see above section: *Standard Log*.
 
 
-## Manually Verify Device ID Consistency
+## Device ID Consistency
 
 This section is primarily for if you receive an error: *The correct download file name cannot be established (device identifier not verified)*.
 
@@ -210,19 +210,19 @@ This section is primarily for if you receive an error: *The correct download fil
 
 5. To manually verify each source of the device's ID, with only a single connected device, please make a note of the following four numbers (these should be the same):
 
-    1. *External ID:* The number written on the side of the device (AX3: the number after the `17-` or `18-` prefix; AX6: 7-digit numbers should start with a `60`)
+    1. *External ID:* The number written on the side of the device (AX3: the 4-6 digit number after the `17-` or `18-` prefix; AX6: 7-digit number that should start with a `60`).
 
-    2. *USB ID:* In *Device Manager*, under *Ports*, and the *COM* device under that, right-click / *Properties* / *Details* / *Property: Parent* -- the number that appears as the *Value* after the first part of the address `USB\VID_04D8&PID_0057\#####_` (where `#####` is `CWA17` or `AX664`)
+    2. *USB ID:* In *Device Manager*, under *Ports*, and the *COM* device under that, right-click / *Properties* / *Details* / *Property: Parent* -- the number that appears as the *Value* after the first part of the address `USB\VID_04D8&PID_0057\#####_` (where `#####` is `CWA17` or `AX664`).
 
-    3. *Filesystem ID:* Locate the disk drive that appears under *This PC* when you connected the device, right-click the drive and select *Properties*, the highlighted field, note the *Volume Label*, it should start `AX#_` (where `#` is `3` or `6`)
+    3. *Filesystem ID:* Locate the disk drive that appears under *This PC* when you connected the device, right-click the drive and select *Properties*, the highlighted field, note the *Volume Label* after the `AX3_` or `AX6_` prefix.
 
-    4. *Data-file ID:* The ID in the current data file on the device.  This is a bit difficult to extract! Press <kbd>Windows</kbd>+<kbd>R</kbd> to open the *Run* box, and copy and paste the following command to open a window and give you a number (replace `D:` with the drive letter for your device from above if necessary):
+    4. *Data-file ID:* The ID in the current data file on the device.  This is a bit difficult to extract!  Press <kbd>Windows</kbd>+<kbd>R</kbd> to open the *Run* box, and copy and paste the following command to open a window and display a number, being sure to replace `D:` with the current drive letter for your device from the previous step:
 
        ```cmd
        PowerShell -Command "& {$s=[System.IO.File]::OpenRead('D:\CWA-DATA.CWA');$b=New-Object byte[] 13;$c=$s.Read($b,0,13);$s.close();Write-Output(16777216*$b[12]+65536*$b[11]+256*$b[6]+$b[5]);[Console]::ReadKey()}"
        ```
 
-6. If any of the ID numbers in the last step are inconsistent, or if you received a `LOG: - MISMATCH:` message from the detailed log, you should try [resetting the device](#resetting-the-device) with a new device ID (from the device case).
+6. If any of the ID numbers in the last step are inconsistent, or if you received a `LOG: - MISMATCH:` message from the detailed log, you have inconsistent device IDs.  You should follow the instructions for [resetting the device](#resetting-the-device) with a new device ID from the device's case (after any `17-` or `18-` prefix for AX3 devices).
 
 
 ## Resetting the device
@@ -238,7 +238,7 @@ This section is primarily for if you receive an error: *The correct download fil
 3. Ensure a single device is connected (wait around 10 seconds after connecting the device).
 4. Click: *Connect serial device...* and choose the attached *AX* device.
 5. Click: *Reset* and *OK*.
-6. Only if you are resetting the device ID: enter the device ID as displayed on the device case.
+6. Only if you are resetting the device ID: enter the device ID as displayed on the device case (after any `17-` or `18-` prefix on AX3 devices).
 7. Click: *OK*.
 8. The device will be wiped and reset.
 
