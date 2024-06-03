@@ -12,6 +12,7 @@
 #endif
 
 //#define SQLITE
+#define USE_LOCAL_TIMEGM	// Fixes: https://github.com/muschellij2/read.cwa/issues/1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,28 @@
 #include <time.h>
 #include <math.h>
 #include <limits.h>
+
+
+// Use a local definition of timegm() for better portability
+#ifdef USE_LOCAL_TIMEGM
+	static time_t my_timegm(struct tm *tm)
+	{
+		// This function works for full range of 32-bit time_t (1970-2106)
+		static const unsigned int daysBeforeMonth[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+		int year = tm->tm_year + 1900 - 1970;
+		unsigned int t = (year * 365) + ((year - 2 + 3) / 4);
+		if (year >= 30 && tm->tm_mon >= 2) t -= (year - 30) / 100;
+		else if (year >= 30) t -= (year - 31) / 100;
+		t += daysBeforeMonth[tm->tm_mon] + (tm->tm_mday - 1) + (((((year + 2) % 4) == 0) && (tm->tm_mon >= 2)) ? 1 : 0);
+		t = (t * 24 + tm->tm_hour) * 3600 + (60 * tm->tm_min) + tm->tm_sec;
+		return t;
+	}
+	#ifdef timegm
+	#undef timegm
+	#endif
+	#define timegm my_timegm
+#endif
+
 
 #ifdef _DEBUG
 #include <conio.h>
