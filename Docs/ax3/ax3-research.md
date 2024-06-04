@@ -28,6 +28,9 @@ For a richer analysis, a popular option in research is the open source *GGIR* pa
 
 Alternative analysis toolsets include: [biobankAccelerometerAnalysis](https://github.com/OxWearables/biobankAccelerometerAnalysis) (Oxford Wearables Group, Oxford University; Academic Use Licence; not currently compatible with AX6 data); [pampro](https://github.com/Thomite/pampro) (MRC Epidemiology, Cambridge University; not compatible with AX6 data).
 
+
+### Raw data equivalence
+
 Additionally, any available algorithm designed to process raw data might also be used, e.g. from a published descriptions of an approach to handling the raw data, or open source code: [Google Scholar: Accelerometer Analysis](https://scholar.google.com/scholar?q=%22accelerometer%22+%22analysis%22) ...as there is broad equivalence between raw accelerometer sensors for physical activity, as found by, e.g.:
 
    * Ladha, C., Ladha, K., Jackson, D., & Olivier, P. (2013, June). Shaker table validation of Open Movement AX3 accelerometer. In Ahmerst (ICAMPAM 2013 AMHERST): In 3rd International Conference on Ambulatory Monitoring of Physical Activity and Movement (pp. 69-70).
