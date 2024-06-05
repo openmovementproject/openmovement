@@ -435,7 +435,7 @@ To examine the metadata from a `.cwa` file:
 
 If you have installation issues, consider the "no installer" variants listed at [OmGui Revisions](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md).  These packages are .ZIP archives containing executable content, so you may need to "download anyway" and/or "More Info/Run Anyway".  You may also need to install the [AX Driver](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Driver-Win-5.zip) to use the devices (in particular, on older versions of Windows).  You will also need to ensure *.NET 3.5* componment is enabled (see below).
 
-> *See also:* Software for [large-scale deployments](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#large-scale-deployments) and [Cross-platform software (including Mac and Linux)](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#cross-platform-software-including-mac-and-linux).
+> **See also:** Software for [large-scale deployments](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#large-scale-deployments) and [Cross-platform software (including Mac and Linux)](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#cross-platform-software-including-mac-and-linux).
 
 ### .NET 3.5
 
