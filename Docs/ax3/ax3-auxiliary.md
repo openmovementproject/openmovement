@@ -170,6 +170,8 @@ Auto-calibration uses the variety of orientations observed over the recording to
 
 Analysis algorithms are typically derived from datasets with either raw or auto-calibrated data.  In addition, some algorithms are designed to have a low-sensitivity to calibration.  For example, a high-pass filter can be used to drastically reduce the effect of any systematic offset.
 
+Gyroscope data is subject to small amounts of biased noise which, although typically not significant for human movement analysis techniques, could be adjusted for by extending the auto-calibration process.
+
 > See also: information on [loading raw data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#raw-data) and [information on sample timestamps](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#sample-timestamps)
 
 ## Estimating pose
