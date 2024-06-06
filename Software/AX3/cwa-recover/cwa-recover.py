@@ -19,7 +19,32 @@ def singleBit(value):
   else:
     return 0
 
-def recoverCwa(inputFile, outputFile, method):
+def _fast_timestamp(value):
+    """Faster date/time parsing.  This does not include 'always' limits; invalid dates do not cause an error; the first call will be slower as a lookup table is created."""
+    # On first run, build lookup table for initial 10-bits of the packed date-time parsing, minus one day as days are 1-indexed
+    if not hasattr(_fast_timestamp, "SECONDS_BEFORE_YEAR_MONTH"):
+        _fast_timestamp.SECONDS_BEFORE_YEAR_MONTH = [0] * 1024        # YYYYYYMM MM (Y=years since 2000, M=month-of-year 1-indexed)
+        SECONDS_PER_DAY = 24 * 60 * 60
+        DAYS_IN_MONTH = [ 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0, 0, 0 ]    # invalid month 0, months 1-12 (non-leap-year), invalid months 13-15
+        seconds_before = 946684800      # Seconds from UNIX epoch (1970) until device epoch (2000)
+        for year in range(0, 64):       # 2000-2063
+            for month in range(0, 16):  # invalid month 0, months 1-12, invalid months 13-15
+                index = (year << 4) + month
+                _fast_timestamp.SECONDS_BEFORE_YEAR_MONTH[index] = seconds_before - SECONDS_PER_DAY    # minus one day as day-of-month is 1-based
+                days = DAYS_IN_MONTH[month]
+                if year % 4 == 0 and month == 2:    # Correct for this year range (2000 was a leap year, despite being a multiple of 100, as it is a multiple of 400)
+                    days += 1
+                seconds_before += days * SECONDS_PER_DAY
+
+    year_month = (value >> 22) & 0x3ff
+    day   = (value >> 17) & 0x1f
+    hours = (value >> 12) & 0x1f
+    mins  = (value >>  6) & 0x3f
+    secs  = value & 0x3f
+    return _fast_timestamp.SECONDS_BEFORE_YEAR_MONTH[year_month] + ((day * 24 + hours) * 60 + mins) * 60 + secs
+
+
+def recoverCwa(inputFile, outputFile, method, modifyFlags):
   initialOffset = 0 # 0x20000 in drive dumps
   sectorSize = 512
   headerSize = 2 * sectorSize
@@ -42,10 +67,12 @@ def recoverCwa(inputFile, outputFile, method):
   
   # Store found data sectors
   metadata = [] # (offset,size,sessionId)
-  data = []     # (offset,size,sessionId,sequenceId,timestamp)
+  data = []     # (offset,size,sessionId,sequenceId,
   
   countCorrectedSession = 0
   countCorrectedSequence = 0
+  countChecksumErrors = 0
+  maxChecksumErrors = 10000
   
   numSectors = fileSize // sectorSize
   print("Processing " + str(numSectors) + " sectors...")
@@ -69,21 +96,39 @@ def recoverCwa(inputFile, outputFile, method):
         fileOffset = i * sectorSize + o
         blockLength = sectorSize - o
         sessionId = unpack('<I', block[o+6:o+10])[0]
-        timestamp = (unpack('<I', block[o+14:o+18])[0] << 16) + ((unpack('<H', block[o+4:o+6])[0] & 0x8fff) << 1)
+        
+        rateCode = unpack('B', block[24:25])[0]                   # @24  +1   Sample rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
+        frequency = 3200 / (1 << (15 - (rateCode & 0x0f)))        
+        
+        timestamp = _fast_timestamp(unpack('<I', block[o+14:o+18])[0])
+        deviceFractional = (timestamp << 16) + ((unpack('<H', block[o+4:o+6])[0] & 0x8fff) << 1)
+        timestampOffset = unpack('<h', block[26:28])[0]           # @26  +2   Relative sample index from the start of the buffer where the whole-second timestamp is valid
+        
+        timeFractional = 0;
+        # Need to undo backwards-compatible shim by calculating how many whole samples the fractional part of timestamp accounts for.
+        timeFractional = (deviceFractional & 0x7fff) << 1     # use original deviceId field bottom 15-bits as 16-bit fractional time
+        timestampOffset += (timeFractional * int(frequency)) >> 16 # undo the backwards-compatible shift (as we have a true fractional)
+
+        # Add fractional time to timestamp
+        timestamp += timeFractional / 65536
+                    
         sequenceId = unpack('<I', block[o+10:o+14])[0]
         
         # Report on mismatched checksums
-        if True:
+        if countChecksumErrors < maxChecksumErrors:
           if completeBlock:
             checksum = unpack('<H', block[o+510:o+512])[0]
             actualChecksum = checksum512(block)
             if actualChecksum != 0:
-              print("Mismatched checksum at " + str(i) + " = " + str(actualChecksum) + " (" + str(checksum) + ")")
+              countChecksumErrors += 1
+              print("Mismatched checksum #" + str(countChecksumErrors) + " at " + str(i) + " = " + str(actualChecksum) + " (" + str(checksum) + ")")
+              if countChecksumErrors >= maxChecksumErrors:
+                print("NOTE: No more checksum errors will be reported!")
 
         # For an incomplete block
         if not completeBlock:
           # Check basic information
-          if sessionId != globalSessionId:
+          if sessionId != globalSessionId and (modifyFlags & 4 != 0):
             x = sessionId ^ globalSessionId
             bitValue = singleBit(x)
             if bitValue:
@@ -98,7 +143,7 @@ def recoverCwa(inputFile, outputFile, method):
           if len(data) > 0:
             lastItem = data[len(data) - 1]
             nextSequence = lastItem[idxSequenceId] + 1
-          if nextSequence != None and sequenceId != nextSequence:
+          if nextSequence != None and sequenceId != nextSequence and (modifyFlags & 8 != 0):
             x = sequenceId ^ nextSequence
             bitValue = singleBit(x)
             if bitValue:
@@ -190,13 +235,28 @@ def recoverCwa(inputFile, outputFile, method):
         prevTimestamp = None
         prevSequenceId = None
         prevFileSector = None
-        
+      
+      print("Timestamp: " + str(timestamp))
+      
       block = bytearray(fileData[fileOffset:fileOffset + sectorSize]) # blockLength
       
       # Patch-in possibly updated values
-      pack_into('<I', block, 6, sessionId)
-      pack_into('<I', block, 10, sequenceId)
-        
+      if (modifyFlags & 12) != 0:
+        pack_into('<I', block, 6, sessionId)
+        pack_into('<I', block, 10, sequenceId)
+      
+      # Resequence
+      if (modifyFlags & 1) != 0:
+        if prevSequenceId is not None and sequenceId != prevSequenceId + 1:
+          nextSequence = prevSequenceId + 1
+          print("Resequenced: " + str(sequenceId) + " -> " + str(nextSequence))
+          sequenceId = nextSequence
+          pack_into('<I', block, 10, sequenceId)
+          # Recalculate checksum
+          pack_into('<H', block, 510, 0)
+          checksumAtZero = checksum512(block)
+          pack_into('<H', block, 510, (~checksumAtZero + 1) & 0xffff)
+      
       # Trace
       if False:
         print("#" + str(i) + " session=" + str(sessionId) + " t=" + str(timestamp) +  " sequence=" + str(sequenceId) + " @" + str(fileOffset) + "+" + str(blockLength) + " ")
@@ -226,25 +286,41 @@ def recoverCwa(inputFile, outputFile, method):
       if sessionId != globalSessionId:
         print("WARNING: #" + str(i) + " Mismatched session ID: " + str(sessionId) + " but header is " + str(globalSessionId) + " file offset " + str(fileOffset))
         numOtherSession += 1
+        # Resequence
+        if (modifyFlags & 2) != 0:
+            pack_into('<I', block, 6, globalSessionId)
+            # Recalculate checksum
+            pack_into('<H', block, 510, 0)
+            checksumAtZero = checksum512(block)
+            pack_into('<H', block, 510, (~checksumAtZero + 1) & 0xffff)
+            
       
       missingBytes = 0
       if blockLength < sectorSize:
         # Pad block with missing bytes
         missingBytes = sectorSize - blockLength
+        print("NOTE: Missing bytes: " + str(missingBytes))
         for o in range(missingBytes):
           block[blockLength + o] = 0
       
       # Determine number of bytes per sample
-      bytesPerSample = block[25] & 0x0f
-      if bytesPerSample == 0:
-        bytesPerSample = 4  # packed
+      numAxesBPS = block[25]
+      channels = (numAxesBPS >> 4) & 0x0f
+      bytesPerAxis = numAxesBPS & 0x0f
+      bytesPerSample = 0
+      if bytesPerAxis == 0 and channels == 3:
+        bytesPerSample = 4
+      elif bytesPerAxis > 0 and channels > 0:
+        bytesPerSample = bytesPerAxis * channels
       
       if missingBytes > 0:
         # Calculate number of missing samples
         missingSamples = 0
-        if missingBytes > 2: # after checksum
+        if missingBytes > 2 and bytesPerSample > 0: # after checksum
           missingSamples = (missingBytes - 2 + bytesPerSample - 1) // bytesPerSample
         
+        print("NOTE: Missing samples: " + str(missingSamples) + " -- " + bytesPerSample + " bytes-per-sample")
+          
         # Are the any missing samples?
         if missingSamples > 0:
           totalMissingSamples += missingSamples
@@ -261,7 +337,8 @@ def recoverCwa(inputFile, outputFile, method):
       fo.write(block)
       lastData = data[i]
       numWritten += 1
-      totalSamples += (480 / bytesPerSample)
+      if bytesPerSample != 0:
+        totalSamples += (480 / bytesPerSample)
 
     print("Wrote " + str(numWritten) + " sectors")
     print("Duplicates: " + str(numDuplicates))
@@ -282,6 +359,7 @@ def main():
   method = 'sqt'
   inputFile = None
   outputFile = None
+  modifyFlags = 0
   arg = 1
   while arg < len(sys.argv):
     if sys.argv[arg].startswith("-"):
@@ -294,6 +372,9 @@ def main():
       elif sys.argv[arg] == "--method-stq":
         # 'stq' - clock may be reset, sessions were unique, sequence may reset
         method = "stq"
+      elif sys.argv[arg] == "--modify":
+        arg += 1
+        modifyFlags = int(sys.argv[arg])
       else:
         print("ERROR: Unrecognized option: " + sys.argv[arg])
         return
@@ -321,7 +402,7 @@ def main():
     print("ERROR: Output file already exists, must remove or use another output file:", outputFile)
     return
   
-  return recoverCwa(inputFile, outputFile, method)
+  return recoverCwa(inputFile, outputFile, method, modifyFlags)
 
 if __name__ == "__main__":
   main()
