@@ -31,7 +31,7 @@ Alternative analysis toolsets include: [biobankAccelerometerAnalysis](https://gi
 
 ### Raw data equivalence
 
-Additionally, any available algorithm designed to process raw data might also be used, e.g. from a published descriptions of an approach to handling the raw data, or open source code: [Google Scholar: Accelerometer Analysis](https://scholar.google.com/scholar?q=%22accelerometer%22+%22analysis%22) ...as there is broad equivalence between raw accelerometer sensors for physical activity, as found by, e.g.:
+In addition to [numerous validation studies involving the AX devices](https://scholar.google.com/scholar?q=%28%22Open+Movement%22+%7C+%22Axivity%22%29+%28%22AX3%22+%7C+%22AX6%22%29+%28%22validate%22+%7C+%22validation%22%29), any available algorithm designed to process raw data might also be used, e.g. from a published descriptions of an approach to handling the raw data, or open source code: [Google Scholar: Accelerometer Analysis](https://scholar.google.com/scholar?q=%22accelerometer%22+%22analysis%22) ...as there is broad equivalence between raw accelerometer sensors for physical activity, as found by, e.g.:
 
    * Ladha, C., Ladha, K., Jackson, D., & Olivier, P. (2013, June). Shaker table validation of Open Movement AX3 accelerometer. In Ahmerst (ICAMPAM 2013 AMHERST): In 3rd International Conference on Ambulatory Monitoring of Physical Activity and Movement (pp. 69-70).
 
@@ -40,6 +40,8 @@ Additionally, any available algorithm designed to process raw data might also be
    * Feng, Y., Wong, C. K., Janeja, V., Kuber, R., & Mentis, H. M. (2017). Comparison of tri-axial accelerometers step-count accuracy in slow walking conditions. Gait & posture, 53, 11-16.
 
    * Crowley, P., Skotte, J., Stamatakis, E., Hamer, M., Aadahl, M., Stevens, M. L., ... & Holtermann, A. (2019). Comparison of physical behavior estimates from three different thigh-worn accelerometers brands: a proof-of-concept for the prospective physical activity, sitting, and sleep Consortium (ProPASS). International Journal of Behavioral Nutrition and Physical Activity, 16(1), 1-7.
+
+Specific validation for the AX6, includes: [comparison to the AX3](https://www.sciencedirect.com/science/article/abs/pii/S2352648321000428)<!-- [alt](https://nrl.northumbria.ac.uk/id/eprint/47513/1/Powell_ax3_ax6_validation_paper_RG.pdf) -->, [PA cut-points](https://www.medrxiv.org/content/10.1101/2023.08.19.23294309v1.full.pdf), [sedentary behaviour](https://www.mdpi.com/1424-8220/23/10/4605).
 
 
 ### Raw data
