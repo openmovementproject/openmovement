@@ -377,11 +377,11 @@ Related to this points, there are two battery health messages in OmGUI:
  
 * A "Caution: Device May Have Fully Discharged" message is based on a heuristic that the software notices a connected device had lost track of time, as this implies that the battery became fully discharged.  This does not necessarily mean there is a problem, but is primarily a reminder to explain that devices should not be left fully discharged for extended periods as lithium ion batteries could become damaged if they are stored completely depleted for a significant time - and that devices should be charged periodically to ensure this doesn't happen. 
  
-* A "Warning: Device Possibly Damaged" message is also based on a heuristic, however, it is a generally reliable indicator that the device may be damaged.  It is given when a device appears to have been reset recently, which should only happen if the battery was fully discharged, and yet the battery is already reporting a high level of charge.  This situation has been observed if the battery has become damaged to the point of holding very little charge, but it might be possible that it could occur for other reasons, so the device should still be tested as describe below.
+* A "Warning: Device Possibly Damaged" message is also based on a heuristic, however, it is a generally reliable indicator that the device may be damaged.  It is given when a device appears to have been reset recently, which should only happen if the battery was fully discharged, and yet the battery is already reporting a high level of charge.  This situation has been observed if the battery has become damaged to the point of holding very little charge, but it might be possible that it could occur for other reasons, so the device should still [be tested](#test-recording).
 
 The message should be cleared once the device's clock is successfully configured to the correct time, and the easiest way to do this is configure any recording with the device.  Note that the configuring software may also remember (while it is kept running) which devices caused the caution even if they're disconnected/reconnected, so you might also have to restart the software too if you're immediately plugging a device back in.  
 
-When given a battery health warning, it is advisable to fully charge the device then run a test recording (this can be just at static recording) for the duration that you'd typically want the devices to record for - this will establish the performance expected for subsequent recordings.  
+When given a battery health warning, it is advisable to fully charge the device then run a [test recording](#test-recording).
 
 
 ### Battery Issues
@@ -400,7 +400,11 @@ Checklist:
 
 6. To get more detail about the battery level during captured data, the data preview graph in *OmGui* allows you to select additional lines on the right-hand side to chart.  You will need to vertically resize the graph to access them all.  One of these additional plots is the *estimated battery percentage*.  It may help look at the initial charge and how it has discharged over a recording.
 
-7. To verify the performance of a particular device, a 7 day static test recording at 100 Hz accelerometer (and gyroscope enabled on the AX6) is recommended with a fully-charged device.  The device's performance in a test recording is indicative of expected performance for future recordings.
+7. To verify the performance of a particular device, a [test recording](#test-recording) is recommended.
+
+### Test recording
+
+To verify the performance of a particular device, a test recording should be made with a fully-charged device.  This should normally be for the duration that you'd typically want the devices to record for (taking into account the [maximum expected durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration)), with the recommended test being 7 days at 100 Hz sampling (±8 𝑔 accelerometer range and, for the AX6, ±2000 °/s sensitivity for the gyroscope).  This can be a static recording (e.g. can be just on a desk or in a drawer).  The device's performance in a test recording will establish the performance expected for subsequent recordings.
 
 
 ## Filesystem or data problems
