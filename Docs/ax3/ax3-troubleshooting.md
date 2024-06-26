@@ -466,9 +466,9 @@ To install *OmGui*:
 
 8. You can choose to install the driver with the *Install AX3 Driver* option.  This may only be required on older versions of Windows.  Press *Install* to continue the instalation.
 
-  * If you have installation issues related to enabling/installing *.NET 3.5*, see the next section: [.NET 3.5](#net-35)
+    * If you have installation issues related to enabling/installing *.NET 3.5*, see the next section: [.NET 3.5](#net-35)
 
-  * If you had the *Install AX3 Driver* option selected, you may be prompted again with a *User Account Control* message (*Yes*), and the *AX3 Driver Setup Wizard* (*Next* / *Next* / *Install*).  You may be prompted with *Windows Security* - *Would you like to install this device software?* (*Install* / *Next* / *Finish*).
+    * If you had the *Install AX3 Driver* option selected, you may be prompted again with a *User Account Control* message (*Yes*), and the *AX3 Driver Setup Wizard* (*Next* / *Next* / *Install*).  You may be prompted with *Windows Security* - *Would you like to install this device software?* (*Install* / *Next* / *Finish*).
 
 9. Click *Finish*.  If you had the *Launch OmGui* option selected, the *OmGUI* software should now run.  Otherwise, open the Windows Start Menu, *All apps* (or *All Programs*), *OmGui* folder, *OmGui* shortcut.  For any issues with the software after successful installation, see [OmGui Software Troubleshooting](#omgui-software-troubleshooting).
 
