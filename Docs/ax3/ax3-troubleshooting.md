@@ -51,6 +51,9 @@
 
 The standard connection software is [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#downloading-and-installing).
 
+> **Note:** If the software has not been installed correctly, see [installation troubleshooting](#installation).
+> Before beginning software troubleshooting, ensure that you have first completed any [connection troubleshooting](#connection-troubleshooting) that may be required.
+
 1. **What version of OmGui software are you using?**
 
     Does installing [the current version](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md) (including any alpha/beta versions that may be available) make a difference? 
@@ -437,9 +440,41 @@ To examine the metadata from a `.cwa` file:
 
 ## Installation
 
-If you have installation issues, consider the "no installer" variants listed at [OmGui Revisions](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md).  These packages are .ZIP archives containing executable content, so you may need to "download anyway" and/or "More Info/Run Anyway".  You may also need to install the [AX Driver](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Driver-Win-5.zip) to use the devices (in particular, on older versions of Windows).  You will also need to ensure *.NET 3.5* componment is enabled (see below).
+The standard software to configure AX devices is the Open Movement Graphical User Interface: *OmGUI* (for Windows).  
+
+* [OmGUI Documentation](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
 
 > **See also:** Software for [large-scale deployments](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-research.md#large-scale-deployments) and [Cross-platform software (including Mac and Linux)](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#cross-platform-software-including-mac-and-linux).
+
+To install *OmGui*:
+
+1. Using an Internet browser on a *Windows* PC, visit the sofware download page:
+
+    * [OmGui Software Download](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md)
+
+2. Click the topmost link to the latest version listed for *AX3-GUI*, which will download a `.zip` file archive.
+
+3. Once the download has finished, locate your `Downloads` folder and open (double-click) the downloaded `AX3-GUI-??.zip` file.
+
+4. Inside the archive, locate and open (double-click) the `AX3-GUI-??.exe` installer file to start the installer.
+
+5. If you are prompted with *Windows protected your PC* (or similar message), this is because the operating system is reluctant to run unrecognized executable code from the Internet.  To continue to the installer, click *More info* and *Run anyway*.
+
+6. The installer needs to run with Administrator permissions, so you may be prompted with *User Account Control* - *Do you want to allow this app from an unknown publisher to make changes to your device?*.  To continue to the installer, click *Yes*.
+
+7. Proceed through the installer.  For the default installation options, click *Next* / *Next* / *Next*. 
+
+8. You can choose to install the driver with the *Install AX3 Driver* option.  This may only be required on older versions of Windows.  Press *Install* to continue the instalation.
+
+  * If you have installation issues related to enabling/installing *.NET 3.5*, see the next section: [.NET 3.5](#net-35)
+
+  * If you had the *Install AX3 Driver* option selected, you may be prompted again with a *User Account Control* message (*Yes*), and the *AX3 Driver Setup Wizard* (*Next* / *Next* / *Install*).  You may be prompted with *Windows Security* - *Would you like to install this device software?* (*Install* / *Next* / *Finish*).
+
+9. Click *Finish*.  If you had the *Launch OmGui* option selected, the *OmGUI* software should now run.  Otherwise, open the Windows Start Menu, *All apps* (or *All Programs*), *OmGui* folder, *OmGui* shortcut.  For any issues with the software after successful installation, see [OmGui Software Troubleshooting](#omgui-software-troubleshooting).
+
+
+If you have installation issues with the above (e.g. if related to permissions, such as a user account without administrative rights) consider the "no installer" variants listed on the [OmGui Software Download](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md) page.  These packages are `.zip` archives containing executable content, so you may need to "download anyway" and/or "More Info/Run Anyway".  On older versions of Windows, you may also need to install the [AX Driver](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-Driver-Win-5.zip) to use the devices.  You will also need to ensure the [.NET 3.5 component is enabled](#net-35).
+
 
 ### .NET 3.5
 
@@ -450,13 +485,13 @@ If it is not already enabled, there is more information on installing and troubl
 There are various ways to enable the *.NET 3.5* component:
 
 1. Open *Windows Features* by pressing <kbd>Windows</kbd>+<kbd>R</kbd>, and entering: `appwiz.cpl` -- then click *Turn Windows features on or off* and select *.NET Framework 3.5 (includes .NET 2.0 and 3.0)*, and press *OK*.
-2. Manually with:
+2. Alternatively, a manual method would be to:
   * Open *Task Manager* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>)
   * Select *(Run) New task* (under the *File* menu or on the toolbar)
   * Type: `DISM.EXE /Online /Add-Capability /CapabilityName:NetFx3`
   * Click *Create this task with administrative privileges*, and press *OK*.
 3. Alternatively, through the online installer: https://www.microsoft.com/en-gb/download/details.aspx?id=21
-8. Alternatively, through the offline installer: https://dotnet.microsoft.com/en-us/download/dotnet-framework/net35-sp1
+4. Alternatively, through the offline installer: https://dotnet.microsoft.com/en-us/download/dotnet-framework/net35-sp1
 
 If you receive error `0x800f0906`, `0x800f0907`, `0x800f081f`, or `0x800F0922`, see: [.NET Framework 3.5 installation errors](https://learn.microsoft.com/en-GB/troubleshoot/windows-client/application-management/dotnet-framework-35-installation-error)
 
