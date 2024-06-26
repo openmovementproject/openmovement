@@ -486,10 +486,10 @@ There are various ways to enable the *.NET 3.5* component:
 
 1. Open *Windows Features* by pressing <kbd>Windows</kbd>+<kbd>R</kbd>, and entering: `appwiz.cpl` -- then click *Turn Windows features on or off* and select *.NET Framework 3.5 (includes .NET 2.0 and 3.0)*, and press *OK*.
 2. Alternatively, a manual method would be to:
-  * Open *Task Manager* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>)
-  * Select *(Run) New task* (under the *File* menu or on the toolbar)
-  * Type: `DISM.EXE /Online /Add-Capability /CapabilityName:NetFx3`
-  * Click *Create this task with administrative privileges*, and press *OK*.
+    * Open *Task Manager* (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd>)
+    * Select *(Run) New task* (under the *File* menu or on the toolbar)
+    * Type: `DISM.EXE /Online /Add-Capability /CapabilityName:NetFx3`
+    * Click *Create this task with administrative privileges*, and press *OK*.
 3. Alternatively, through the online installer: https://www.microsoft.com/en-gb/download/details.aspx?id=21
 4. Alternatively, through the offline installer: https://dotnet.microsoft.com/en-us/download/dotnet-framework/net35-sp1
 
