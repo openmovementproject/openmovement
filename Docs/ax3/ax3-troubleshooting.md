@@ -460,7 +460,7 @@ To install *OmGui*:
 
 5. If you are prompted with *Windows protected your PC* (or similar message), this is because the operating system is reluctant to run unrecognized executable code from the Internet.  To continue to the installer, click *More info* and *Run anyway*.
 
-6. The installer needs to run with Administrator permissions, so you may be prompted with *User Account Control* - *Do you want to allow this app from an unknown publisher to make changes to your device?*.  To continue to the installer, click *Yes*.
+6. The installer needs to run with Administrator permissions, so you may be prompted with *User Account Control* - *Do you want to allow this app from an unknown publisher to make changes to your device?*  To continue to the installer, click *Yes*.
 
 7. Proceed through the installer.  For the default installation options, click *Next* / *Next* / *Next*. 
 
