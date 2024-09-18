@@ -407,7 +407,7 @@ Checklist:
 
 ### Test recording
 
-To verify the performance of a particular device, a test recording should be made with a fully-charged device.  This should normally be for the duration that you'd typically want the devices to record for (taking into account the [maximum expected durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration)), with the recommended test being 7 days at 100 Hz sampling (±8 𝑔 accelerometer range and, for the AX6, ±2000 °/s sensitivity for the gyroscope).  This can be a static recording (e.g. can be just on a desk or in a drawer).  The device's performance in a test recording will establish the performance expected for subsequent recordings.
+To verify the performance of a particular device, a test recording should be made with a fully-charged device.  This should be multi-day, a three day test is recommended or, if larger, up to the duration that you'd typically want the devices to record for (taking into account the [maximum expected durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration)).  For example, a typical test might be 7 days at 100 Hz sampling (±8 𝑔 accelerometer range and, for the AX6, ±2000 °/s sensitivity for the gyroscope).  This can be a static recording (e.g. can be just on a desk or in a drawer).  The device's performance in a test recording will establish the performance expected for subsequent recordings.
 
 
 ## Filesystem or data problems
