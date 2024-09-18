@@ -46,9 +46,8 @@ The AX6 and AX3 have the same physical dimensions, but the AX6 has more memory a
 | Accelerometer Range        | &plusmn;2/4/8/16 _g_                            | &plusmn;2/4/8/16 _g_                          |
 | Gyroscope Range            | _none_                                           | 125/250/500/1000/2000 &deg;/s                 |
 | Underlying sensing device  | [Analog Devices ADXL345](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf) | [Bosch BMI160](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi160-ds000.pdf) |
+| Samples stored per 512 byte storage block | Packed (10-bit mode): 120; Unpacked (full resolution): 80*. | Accelerometer-only: 80*; Accelerometer+Gyroscope: 40. |
 | Notes                      | `*` 'Unpacked' recording mode only.             | `*` With gyroscope off.                       |
-
-<!-- | Samples per 512 byte storage block | Packed (10-bit mode): 120; Unpacked (full resolution): 80. | Accelerometer-only: 80; Accelerometer+Gyroscope: 40. | -->
 
 * Sensor axes: [AX Sensor Axes](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md)
 * Device orientation: [AX Orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
