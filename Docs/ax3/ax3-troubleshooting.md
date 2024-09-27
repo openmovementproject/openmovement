@@ -124,7 +124,7 @@ Configuration system failed to initialize`, the program configuration has become
 
 You can obtain a detailed log from the attached device, which gives a reason for any recent stops to the logging.  There are three methods that can be used to obtain this log.
 
-**Method 1: Web Page**
+**Method 1: Web Page** (full diagnostics report - recommended)
 
 1. Open a browser that supports *Web Serial*, such as *Google Chrome* or *Edge*.
 2. Visit the page: [AX Diagnostics](https://config.openmovement.dev/#diagnostics&nolog&noconfigure&title=AX+Diagnostics)
@@ -133,7 +133,7 @@ You can obtain a detailed log from the attached device, which gives a reason for
 5. Click: *Device Diagnostics* to generate the diagnostic report.
 6. Click: *Download Report* to save a copy of the diagnostics report.
 
-<details><summary><strong>Method 2: Log Utility</strong></summary>
+<details><summary><strong>Method 2: Log Utility</strong> (status and device log only)</summary>
 
 1. Download the `.ZIP` archive: [AX3-Utils-Win-3.zip](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Utils-Win-3.zip)
 2. Open the downloaded `.ZIP` archive (e.g. open *File Explorer* and locate `Downloads`)
@@ -145,7 +145,7 @@ You can obtain a detailed log from the attached device, which gives a reason for
 
 </details>
 
-<details><summary><strong>Method 3: Web-Based Terminal</strong></summary>
+<details><summary><strong>Method 3: Web-Based Terminal</strong> (device log only)</summary>
 
 If you have problems using the `log.cmd` above, you could alternatively try:
 
