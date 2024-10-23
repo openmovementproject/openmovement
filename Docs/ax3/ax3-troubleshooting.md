@@ -409,6 +409,8 @@ Checklist:
 
 To verify the performance of a particular device, a test recording should be made with a fully-charged device.  This should be multi-day, a three day test is recommended or, if larger, up to the duration that you'd typically want the devices to record for (taking into account the [maximum expected durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration)).  For example, a typical test might be 7 days at 100 Hz sampling (±8 𝑔 accelerometer range and, for the AX6, ±2000 °/s sensitivity for the gyroscope).  This can be a static recording (e.g. can be just on a desk or in a drawer).  The device's performance in a test recording will establish the performance expected for subsequent recordings.
 
+To start a test recording: open the [*OmGui* software](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI), connect a device, select it from the upper panel, press the [*Record...*](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#configure-the-sensor-to-record) button (if this is not available, you may first need to [*Clear*](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#clear-any-existing-data) the device of any existing, unwanted data), enter the configuration details, and press *OK*.
+
 
 ## Filesystem or data problems
 
