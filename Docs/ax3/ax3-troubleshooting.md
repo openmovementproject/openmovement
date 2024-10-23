@@ -409,19 +409,25 @@ Checklist:
 
 To verify the performance of a particular device, a test recording should be made with a fully-charged device.  This should be multi-day, a three day test is recommended or, if larger, up to the duration that you'd typically want the devices to record for (taking into account the [maximum expected durations](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration)).  For example, a typical test might be 7 days at 100 Hz sampling (±8 𝑔 accelerometer range and, for the AX6, ±2000 °/s sensitivity for the gyroscope).  This can be a static recording (e.g. can be just on a desk or in a drawer).  The device's performance in a test recording will establish the performance expected for subsequent recordings.
 
-#### Starting a test recording
+#### Start a test recording
 
 1. Open the [*OmGui* software](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI).
 2. Connect the single device you would like to test, wait a few seconds.
 3. Select the device from the upper panel.
 4. Wait until it is suitably charged.
-5. Press the [*Record...*](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#configure-the-sensor-to-record) button (if this is not available, you may first need to [*Clear*](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#clear-any-existing-data) the device of any existing, unwanted data)
-6. Enter suitable configuration details as above, and press *OK*.
-7. Disconnect the device to allow it to make the recording.
+5. Only if the device has existing data (the *Record...* button is not available) you may first press the [*Clear*](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#clear-any-existing-data) button to remove any existing, unwanted data.
+6. Press the [*Record...*](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#configure-the-sensor-to-record) button.
+7. Enter suitable configuration details, as above, for the recording settings.  Make a note of the settings you have chosen, and the *End Date/End Time* in particular.  
+8. Disconnect the device to allow it to make the recording (from the *Start Date/Start Time* you configured).
 
-#### Checking a test recording
+#### Check a test recording
 
-To check a test recording: wait until after the "Stop Recording" time you configured, open *OmGui*, connect the single device, select the device in the upper panel, check the information from the device panel and the data overview below to determine the duration of the recording made, compare this with the expected duration.
+1. Wait until after the *End Date/End Time* you previously configured.
+2. Open *OmGui* software
+3. Connect a single device that has being tested.
+4. Select the device in the upper panel
+5. Use the *data preview graph* in the middle of the window to check the start and end times of the data to assess the device's performance against its configuration.  The date/time is shown as the pointer is moved over the graph.  The *Zoom* magnifier tool (left-click to zoom in, right-click to zoom out) can be used to change the scale of the data preview.
+6. You may optionally want to *Clear* any unwanted data.
 
 
 ## Filesystem or data problems
