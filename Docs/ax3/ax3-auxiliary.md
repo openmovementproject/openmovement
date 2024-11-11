@@ -202,11 +202,13 @@ Signals from an accelerometer *and* a gyroscope can be fused to separate rotatio
 
 If you want to combine the accelerometer/gyroscope data, known as *sensor fusion*, to act as a single inertial measurement unit (IMU) device, you could consider:
 
-* MATLAB’s Inertial Sensor Fusion Algorithms: https://uk.mathworks.com/help/fusion/inertial-sensor-fusion.html
+* [MATLAB](https://www.mathworks.com/products/matlab.html)'s Inertial Sensor Fusion Algorithms: https://uk.mathworks.com/help/fusion/inertial-sensor-fusion.html
 
-* Sensor fusion in the open source GGIR package in the R language: https://cran.r-project.org/web/packages/GGIR/vignettes/SensorFusionWithGGIR.html
+* Sensor fusion in the open source [GGIR](https://cran.r-project.org/web/packages/GGIR) package in the R language: https://cran.r-project.org/web/packages/GGIR/vignettes/SensorFusionWithGGIR.html
 
-* Adapting some previous sensor fusion work in Open Movement (for another sensor), *Azimuth*: https://github.com/digitalinteraction/openmovement/tree/master/Software/Azimuth
+* Sensor fusion in the [mobgap](https://github.com/mobilise-d/mobgap/) software: https://github.com/mobilise-d/mobgap/tree/main/mobgap/orientation_estimation
+
+* Adapting some previous sensor fusion work in Open Movement (for another sensor), *Azimuth*: https://github.com/openmovementproject/azimuth
 
 * A custom solution based on the raw data
 
