@@ -31,7 +31,7 @@ Approximate maximum recording duration from a single full battery charge.  A typ
 * `~` more uncertainty in the value (charge-limited, and device-dependent)
 * `()` where a recording is likely to be battery-limited, times in brackets are the storage capacity (which could only be reached if recharged). 
 * `*` where the storage- and battery-limits are similar, which is reached first may be device-dependent.
-* `^` AX3 *packed* data uses the sensor in a 10-bits per axis mode.  AX3 *unpacked* uses the sensor at full resolution: 10-/11-/12-/13-bits per-axis depending on 2/4/8/16 *g* range (stored as 16-bit values).  AX6 uses unpacked mode, stored as 16-bits per-axis.
+* `^` AX3 *packed* data uses the sensor in a 10-bits per axis mode.  AX3 *unpacked* uses the sensor at full resolution: 10-/11-/12-/13-bits per-axis depending on 2/4/8/16 *g* range (stored as 16-bit values).  AX6 uses unpacked mode, stored as 16-bits per-axis, regardless of the range.
 
 <!-- AX6 12.5Hz Accelerometer-only 149 days 100%-39% battery -->
 
