@@ -432,13 +432,13 @@ To verify the performance of a particular device, a test recording should be mad
 
 ## Filesystem or data problems
 
-If you receive a warning from the operating system about the filesystem (e.g. *Error Checking* / *Repair this drive* / *Do you want to scan and fix*) you should initially ignore the message -- do not allow the operating system to try to fix anything as this can cause problems.  You should attempt to continue as normal:
+If you receive a warning from the operating system about the filesystem (e.g. *Error Checking* / *Repair this drive* / *Do you want to scan and fix* / *Please run the Chkdsk utility.*) you should initially ignore the message -- do not allow the operating system to try to fix anything as this can cause problems.  You should attempt to continue as normal:
 
 * **If the device contains useful data:** try to download the data as usual.  If this does not work, locate the device's drive (e.g. *File Explorer* / *This PC* / identify and open the device's drive), and try to directly copy off the `CWA-DATA.CWA` data file.  If you have any problems with copying off the file, it may still be possible to recover the data: try the [cwa-recover](https://github.com/digitalinteraction/cwa-recover/) process.  It would be useful to obtain a diagnostics report from the device: [Device Log - Method 1](#device-log).  
 
-* **If the device does not contain useful data:** try to configure the device as normal.  If this doesn't work, follow the troubleshooting instructions above, up to [Resetting the Device](#resetting-the-device) if required.  It would be useful to obtain a diagnostics report from the device: [Device Log - Method 1](#device-log) -- before clearing the device.  
+* **If the device does not contain useful data:** try to configure a new recording on the device as normal (even to a temporary configuration that you can immediately *Clear* if unwanted).  If this doesn't work, follow the troubleshooting instructions above, up to [Resetting the Device](#resetting-the-device) if required.  It might be useful to obtain a diagnostics report from the device: [Device Log - Method 1](#device-log) -- before clearing the device.  
 
-You should check that you do not have any other software unnecessarily writing to the removable drives, or interfering with their operation (e.g. potentially some antivirus/security software) that may cause filesystem corruption.
+You should check that you do not have any other software unnecessarily writing to the removable drives, or interfering with their operation (e.g. potentially some antivirus/security software) that may cause filesystem corruption.  To confirm the performance of a particular device in the future, a [test recording](#test-recording) is recommended -- if this is unsuccessful, the device should not be used.
 
 ### Partially-downloaded data
 
