@@ -1,4 +1,4 @@
-Copyright (c) 2009-2024, Newcastle University, UK.
+Copyright (c) 2009-2025, Newcastle University (UK) and Open Movement project contributors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without 
