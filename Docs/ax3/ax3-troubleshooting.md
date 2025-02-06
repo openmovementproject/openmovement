@@ -382,7 +382,9 @@ Related to this points, there are two battery health messages in OmGUI:
  
 * A "Warning: Device Possibly Damaged" message is also based on a heuristic, however, it is a generally reliable indicator that the device may be damaged.  It is given when a device appears to have been reset recently, which should only happen if the battery was fully discharged, and yet the battery is already reporting a high level of charge.  This situation has been observed if the battery has become damaged to the point of holding very little charge, but it might be possible that it could occur for other reasons, so the device should still [be tested](#test-recording).
 
-The message should be cleared once the device's clock is successfully configured to the correct time, and the easiest way to do this is configure any recording with the device.  Note that the configuring software may also remember (while it is kept running) which devices caused the caution even if they're disconnected/reconnected, so you might also have to restart the software too if you're immediately plugging a device back in.  
+**If you have data on the device:** You should first dismiss the notification, click on the device to ensure it is selected, and click to download the data as usual.  If you have problems downloading your data, see: [Filesystem or Data Problems](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#filesystem-or-data-problems).
+
+**Note:** This message will continue to reappear for this device until it is cleared.  The message should be cleared once the device's clock is successfully configured to the correct time, and the easiest way to do this is to configure any recording with the device.  Note that the configuring software may also remember (while it is running) which devices caused the caution even if they're disconnected/reconnected, so you might also have to restart the software too if you're immediately plugging a device back in.  
 
 When given a battery health warning, it is advisable to fully charge the device then run a [test recording](#test-recording).
 
