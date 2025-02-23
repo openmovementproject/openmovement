@@ -208,6 +208,8 @@ If you want to combine the accelerometer/gyroscope data, known as *sensor fusion
 
 * Sensor fusion in the [mobgap](https://github.com/mobilise-d/mobgap/) software: https://github.com/mobilise-d/mobgap/tree/main/mobgap/orientation_estimation
 
+* [Extended Kalman Filter](https://ardupilot.org/dev/docs/extended-kalman-filter.html)
+
 * Adapting some previous sensor fusion work in Open Movement (for another sensor), *Azimuth*: https://github.com/openmovementproject/azimuth
 
 * A custom solution based on the raw data
