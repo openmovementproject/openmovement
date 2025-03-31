@@ -413,7 +413,7 @@ To verify the performance of a particular device, a test recording should be mad
 
 #### Start a test recording
 
-1. Open the [*OmGui* software](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI).
+1. Open the [*OmGui* software](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI) (or, if you are not able to easily install the software, you could try the [AX Configure](https://config.openmovement.dev/) web-based tool instead, although the remaining instructions are for OmGui).
 2. Connect the single device you would like to test, wait a few seconds.
 3. Select the device from the upper panel.
 4. Wait until it is suitably charged.
