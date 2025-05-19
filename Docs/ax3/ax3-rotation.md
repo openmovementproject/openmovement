@@ -20,6 +20,10 @@ Note: `⊗`, rendered `(+)` below, is used to denote the axis going away from th
 +---+-----------------------+
 ```
 
+Device orientation diagram:
+
+![Device Orientation](ax-orientation.png)
+
 
 ## AX Device Rotation: Axis Inversions
 
