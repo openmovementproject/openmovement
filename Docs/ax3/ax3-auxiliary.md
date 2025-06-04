@@ -212,7 +212,7 @@ If you want to combine the accelerometer/gyroscope data, known as *sensor fusion
 
 * Adapting some previous sensor fusion work in Open Movement (for another sensor), *Azimuth*: https://github.com/openmovementproject/azimuth
 
-* A custom solution based on the raw data
+* A custom solution based on the [raw data](ax3-research.md#raw-data).
 
 
 ## Differences between the AX3 and AX6
