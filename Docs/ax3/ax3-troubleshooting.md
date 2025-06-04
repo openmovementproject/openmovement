@@ -56,25 +56,31 @@ The standard connection software is [OmGui](https://github.com/digitalinteractio
 
 1. **What version of OmGui software are you using?**
 
-    Does installing [the current version](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md) (including any alpha/beta versions that may be available) make a difference? 
+    If you are on an earlier version, you should run [the current version](https://github.com/digitalinteraction/openmovement/blob/master/Downloads/AX3/AX3-GUI-revisions.md) &mdash; does this make a difference? 
 
 2. **Has the computer been restarted?**
 
     Although a bit of cliché, it is really worth restarting the computer and trying again, as this can clear any issues at the driver or operating system levels.
 
-3. **Does trying the device and software on a completely different computer make a difference?**
+3. **Could other software or a security configurtion be interfering?**
 
-    If it's not working on an organization-managed PC (perhaps from restrictive security software or settings), does trying on a personal laptop make a difference?
+   If it's an organization-managed PC, could restrictive security software or a security configuration be interfering with device communication? (e.g. External USB devices may be blocked?)  If so, can this configuration be changed?
+
+   Is there other software on the computer that communicates with devices (in particular, over a "serial" or "COM" port)?  If so, this might be interfering with the device communication &mdash; please ensure the other software is fully closed (and not still running in the background, e.g. in the taskbar notification area / system tray).
+
+4. **Does trying the device and software on a completely different computer make a difference?**
+
+    If it's not working on an organization-managed PC (perhaps from software or a configuration you are not able to change), does trying on a personal laptop make a difference?
 
     Also note that *OmGui* is a Windows application and, although it may run under virtualization technology (such as *Parallels* under *macOS*), it is not tested for such configurations.
 
-4. **Is the workspace on a network drive, or is there a restricted quota or limited drive storage space?**
+5. **Is the workspace on a network drive, or is there a restricted quota or limited drive storage space?**
 
     Some issues with transferring data may occur if the workspace is set to a network (shared) drive.  (This is often how virtualization programs such as *Parallels* map to the host computer's files).  It may be more reliable to use a local folder as a workspace, and to transfer the files off afterwards.
    
     In addition, be sure that the workspace folder you choose has sufficent free drive storage space (and is not restricted by a quota).
 
-5. **Standard Log**
+6. **Standard Log**
 
     Select *View*/*Log* (<kbd>Alt</kbd>+<kbd>V</kbd>, <kbd>L</kbd>), the log window will appear at the very bottom.  Resize it to be a little larger by dragging the bar just above it.  Perform the actions that you are troubleshooting.  If anything interesting appears in the log window, click in the Log window and select all of the text and copy it to the clipboard (<kbd>Ctrl</kbd>+<kbd>Home</kbd>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>End</kbd>, <kbd>Ctrl</kbd>+<kbd>C</kbd>).  Please paste the log output (<kbd>Ctrl</kbd>+<kbd>V</kbd>) into a document to save it.
 
@@ -103,15 +109,15 @@ Configuration system failed to initialize`, the program configuration has become
 
         f. Now restart OmGui
 
-6. **Detailed log?**
+7. **Detailed log?**
 
     If the above suggestions have not resolved the issue, please obtain an [OmGui Detailed Log](#omgui-detailed-log) as described in the next section.
 
-7. **Simplest recording**
+8. **Simplest recording**
 
     If the device is not making a recording as you expect, please try the simplest configuration to record *Immediately on Disconnect* at *100 Hz* and *+/- 8 *g**, disabled gyroscope (AX6 only), and select *Flash during recording*.  If the configuration is successful, remove the device for 15 seconds -- does the LED flash green, and is there any data on the device when you connect it afterwards?  
 
-8. **Device log**
+9. **Device log**
 
     If the device is not making a recording as you expect, you can [obtain a detailed log from the attached device](#device-log) by following the instructions below. 
 
@@ -203,9 +209,9 @@ This section is primarily for if you receive an error: *The correct download fil
 
 > This message is given when the device is accessed through a communication channel, but the device ID through that channel does not match the ones obtained while accessing through a storage channel -- the software refuses to continue, to preserve data integrity.  This could be caused by manually changing the contents of a drive (such as the data file or volume label), manually changing the device ID, or communication problems.
 
-1. If the device contains useful data, as an initial priority, you can try to download the data as described in [Filesystem or data problems](#filesystem-or-data-problems).
+1. If the device contains useful data, as an initial priority, you can try to download the data manually as described in [Filesystem or data problems](#filesystem-or-data-problems).
 
-2. If every device you have tried has a similar issue, check that you are not running anti-virus/security software that could be interfering with device communication.  If in doubt, try the device on another computer without such software (e.g. a personal laptop).
+2. If every device you have tried has a similar issue, check that you are not running anti-virus/security software, or other software that could be interfering with device communication (such as software that interacts with hardware devices using a serial/COM port).  If in doubt, try the device on another computer without such software (e.g. a personal laptop).
 
 3. You should fully shutdown then restart your operating system (not just sleep/hibernat and resume, but fully shutdown and turn-off, before then restarting).  This will be help ensure there is no persistent driver issue.
 
