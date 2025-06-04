@@ -62,7 +62,7 @@ The standard connection software is [OmGui](https://github.com/digitalinteractio
 
     Although a bit of cliché, it is really worth restarting the computer and trying again, as this can clear any issues at the driver or operating system levels.
 
-3. **Could other software or a security configurtion be interfering?**
+3. **Could other software or a security configuration be interfering?**
 
    If it's an organization-managed PC, could restrictive security software or a security configuration be interfering with device communication? (e.g. External USB devices may be blocked?)  If so, can this configuration be changed?
 
@@ -207,7 +207,7 @@ Checking the log output:
 
 This section is primarily for if you receive an error: *The correct download file name cannot be established (device identifier not verified)*.
 
-> This message is given when the device is accessed through a communication channel, but the device ID through that channel does not match the ones obtained while accessing through a storage channel -- the software refuses to continue, to preserve data integrity.  This could be caused by manually changing the contents of a drive (such as the data file or volume label), manually changing the device ID, or communication problems.
+> This message is given when the device is accessed through a communication channel, but the device ID through that channel does not match the ones obtained while accessing through a storage channel -- the software refuses to continue, to preserve data integrity.  This could be caused by manually changing the contents of a drive (such as the data file or volume label), manually changing the device ID, or communication problems (see [OmGui Software Troubleshooting](#omgui-software-troubleshooting)).
 
 1. If the device contains useful data, as an initial priority, you can try to download the data manually as described in [Filesystem or data problems](#filesystem-or-data-problems).
 
