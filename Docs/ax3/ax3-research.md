@@ -24,7 +24,7 @@ The raw accelerometer data can be processed to derive metrics, and there are man
 
 Some simple analysis methods are available through the open source OmGui configuration tool, as described at: [OmGui - Analysis and Data Manipulation](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#analysis-and-data-manipulation). 
 
-For a richer analysis, a popular option in research is the open source *GGIR* package, which includes sleep analysis and can also produce more visual reports.  A good introduction to the package is given in: [GGIR: A Research Community–Driven Open Source R Package for Generating Physical Activity and Sleep Outcomes From Multi-Day Raw Accelerometer Data](https://journals.humankinetics.com/view/journals/jmpb/2/3/article-p188.xml), and a *getting started* guide is available at: [Accelerometer data processing with GGIR](https://cran.r-project.org/web/packages/GGIR/vignettes/GGIR.html).  Step counting can be [added as an external function](https://cran.r-project.org/web/packages/GGIR/vignettes/ExternalFunction.pdf): [Verisense Step Count Algorithm for GGIR](https://github.com/ShimmerEngineering/Verisense-Toolbox/tree/master/Verisense_step_algorithm). 
+For a richer analysis, a popular option in research is the open source *GGIR* package, which includes sleep analysis and can also produce more visual reports.  A good introduction to the package is given in: [GGIR: A Research Community–Driven Open Source R Package for Generating Physical Activity and Sleep Outcomes From Multi-Day Raw Accelerometer Data](https://journals.humankinetics.com/view/journals/jmpb/2/3/article-p188.xml), and a *getting started* guide is available at: [Accelerometer data processing with GGIR](https://cran.r-project.org/web/packages/GGIR/vignettes/GGIR.html).  Step counting can be [added as an external function](https://cran.r-project.org/web/packages/GGIR/vignettes/ExternalFunction.html): [Verisense Step Count Algorithm for GGIR](https://github.com/ShimmerEngineering/Verisense-Toolbox/tree/master/Verisense_step_algorithm). 
 
 Alternative analysis toolsets include: [biobankAccelerometerAnalysis](https://github.com/OxWearables/biobankAccelerometerAnalysis) (Oxford Wearables Group, Oxford University; Academic Use Licence; not currently compatible with AX6 data); [pampro](https://github.com/Thomite/pampro) (MRC Epidemiology, Cambridge University; not compatible with AX6 data); [mobgap](https://github.com/mobilise-d/mobgap) (currently in development).
 
@@ -72,7 +72,6 @@ In addition to the open source software and documentation discussed above, other
 
 * *McRoberts* offer [analytics using Open Movement sensors](https://mcroberts.nl/axivity-services). 
 * *Dr. Vincent van Hees* (author of *GGIR* analysis package) offers [consulting on movement data](https://accelting.com), including Open Movement sensors.
-* *Dr Rob Thompson* offers [consulting on animal movement](https://rjtanalytics.com). 
 
 
 ## Large-scale deployments
