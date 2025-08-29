@@ -40,7 +40,7 @@ The goal of this maturity description is to describe how the Open Movement proje
 
 *QU20* The project aims to produce well documented software.
 
-*QU30* The project members may be contact via a private channel to report security issues.
+*QU30* The project members may be contact via a private channel to report security issues: (support `@` openmovement.dev)
 
 *QU40* The project puts a priority on backwards compatibility and aims to document any incompatible changes and provide tools and documentation to help users transition to new features. 
 
