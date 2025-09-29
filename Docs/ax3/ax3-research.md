@@ -22,7 +22,7 @@ Whenever a unit is returned, the data can be downloaded, the device recharged, t
 
 The raw accelerometer data can be processed to derive metrics, and there are many published algorithms for analysing raw accelerometer data.  
 
-Some simple analysis methods are available through the open source OmGui configuration tool, as described at: [OmGui - Analysis and Data Manipulation](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#analysis-and-data-manipulation). 
+Some simple analysis methods are available through the open source OmGui configuration tool, as described at: [OmGui - Analysis and Data Manipulation](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI#analysis-and-data-manipulation) (via the underlying [omconvert](https://github.com/openmovementproject/omconvert#analysis-methods) software). 
 
 For a richer analysis, a popular option in research is the open source *GGIR* package, which includes sleep analysis and can also produce more visual reports.  A good introduction to the package is given in: [GGIR: A Research Community–Driven Open Source R Package for Generating Physical Activity and Sleep Outcomes From Multi-Day Raw Accelerometer Data](https://journals.humankinetics.com/view/journals/jmpb/2/3/article-p188.xml), and a *getting started* guide is available at: [Accelerometer data processing with GGIR](https://cran.r-project.org/web/packages/GGIR/vignettes/GGIR.html).  Step counting can be [added as an external function](https://cran.r-project.org/web/packages/GGIR/vignettes/ExternalFunction.html): [Verisense Step Count Algorithm for GGIR](https://github.com/ShimmerEngineering/Verisense-Toolbox/tree/master/Verisense_step_algorithm). 
 
