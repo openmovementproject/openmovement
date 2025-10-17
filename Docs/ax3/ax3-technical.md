@@ -454,8 +454,12 @@ AX devices have a standard USB micro-B socket.
 
 **Topology:** Each hub is a USB device of its own, and chains from one input port to multiple other output ports.  A hub chip has a limited number of ports it may support (e.g. 1-to-4), and a multi-port hub may internally be a combination of more than one hub chip -- which may have implications for the "depth" of the USB tree topology, and there will be a maximum depth.
 
+A typical configuration at scale may be to connect 3x 7-port powered USB hubs directly to a computer, allowing up to 21 devices to be connected to a single computer; and perhaps using multiple computers configured this way.
+
 
 ### Windows COM Ports
+
+https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-technical.md#windows-com-ports
 
 Windows can run out of COM ports after seeing more than (4096-4=) 4092 serial devices with unique IDs.
 
@@ -472,4 +476,11 @@ Things can be reset by:
 3. Restart the computer.
 
 4. Connect a new device to check that it works.
+
+
+### Windows Drives
+
+Windows uses letters of the alphabet (`A`-`Z`) to label USB drives.  There are mechanisms in, e.g. *OmGui*, to try to communicate with devices even if these letters are exhausted (using a direct path to the partition), but it is recommended to not use more devices than available drive letters.
+
+
 
