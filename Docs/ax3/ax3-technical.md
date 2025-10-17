@@ -459,8 +459,6 @@ A typical configuration at scale may be to connect 3x 7-port powered USB hubs di
 
 ### Windows COM Ports
 
-https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-technical.md#windows-com-ports
-
 Windows can run out of COM ports after seeing more than (4096-4=) 4092 serial devices with unique IDs.
 
 Things can be reset by:
