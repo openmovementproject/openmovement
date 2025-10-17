@@ -469,7 +469,7 @@ Things can be reset by:
 
 2. Edit the Windows registry -- either:
 
-  * Download [AX-Ports.zip](AX-Ports.zip), unzip the files inside the archive, open `COMNameArbiter.reg` (you may have to select *more actions* / *run anyway* and ignore security warning); or
+  * Download [AX-Ports.zip](https://github.com/openmovementproject/openmovement/raw/refs/heads/master/Downloads/AX3/AX3-Ports.zip), unzip the files inside the archive, open `COMNameArbiter.reg` (you may have to select *more actions* / *run anyway* and ignore security warning); or
 
   * Run Registry Editor (`regedit.exe`), open the key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\COM Name Arbiter`, edit `ComDB`, set the first byte to `07` (to preserve the first four port numbers), and set the rest of the bytes to `00`.  Be careful not to add or remove any bytes (there should be *32*, or *0x20*) -- this is the usage bitmap for the first 256 COM ports.  Then, leaving `COM1:` to `COM4:`, remove all other `COM####:` values in the key.
 
