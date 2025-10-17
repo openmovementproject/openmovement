@@ -438,3 +438,38 @@ Update the firmware:
 
 4. (normal device operations as described above)
 
+
+---
+
+
+## Ports
+
+### USB Ports
+
+AX devices have a standard USB micro-B socket.
+
+**Power:** Devices must be connected directly to a USB port on a computer, or to USB hubs which have their own external power supply.  Devices must not be connected to hubs without power, nor to powered hubs where the computer is allowed to be disconnected or go into standby.
+
+**Endpoints:** There are limits on the total number of "USB endpoints" a USB network may have, and each device has multiple endpoints.  
+
+**Topology:** Each hub is a USB device of its own, and chains from one input port to multiple other output ports.  A hub chip has a limited number of ports it may support (e.g. 1-to-4), and a multi-port hub may internally be a combination of more than one hub chip -- which may have implications for the "depth" of the USB tree topology, and there will be a maximum depth.
+
+
+### Windows COM Ports
+
+Windows can run out of COM ports after seeing more than (4096-4=) 4092 serial devices with unique IDs.
+
+Things can be reset by:
+
+1. Disconnect all devices
+
+2. Edit the Windows registry -- either:
+
+  * Download [AX-Ports.zip](AX-Ports.zip), unzip the files inside the archive, open `COMNameArbiter.reg` (you may have to select *more actions* / *run anyway* and ignore security warning); or
+
+  * Run Registry Editor (`regedit.exe`), open the key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\COM Name Arbiter`, edit `ComDB`, set the first byte to `07` (to preserve the first four port numbers), and set the rest of the bytes to `00`.  Be careful not to add or remove any bytes (there should be *32*, or *0x20*) -- this is the usage bitmap for the first 256 COM ports.  Then, leaving `COM1:` to `COM4:`, remove all other `COM####:` values in the key.
+
+3. Restart the computer.
+
+4. Connect a new device to check that it works.
+
