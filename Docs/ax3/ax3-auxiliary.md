@@ -37,7 +37,7 @@ $$
 temperature = (value * 75 / 256) - 50
 $$
 
-The temperature sensor measures the internal temperature of the device, and it is primarily useful to help with sensor auto-calibration.  The device temperature can be affected by the wearer's temperature, coupling, environmental factors, etc.  As an auxiliary channel of information, it might be possible to use this signal for other purposes (e.g. perhaps to help differentiate non-wear time from low-activity sleep; or perhaps as an additional factor towards analyzing sleep stages).
+The temperature sensor measures the internal temperature of the device, and it is primarily useful to help with sensor auto-calibration.  The device temperature can be affected by the wearer's skin temperature, coupling, environmental factors, etc.  As an auxiliary channel of information, it might be possible to use this signal for other purposes (e.g. perhaps to help differentiate non-wear time from low-activity sleep; or perhaps as an additional factor towards analyzing sleep stages).
 
 
 ### Light Level Indicator
