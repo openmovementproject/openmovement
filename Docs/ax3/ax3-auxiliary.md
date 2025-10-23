@@ -63,6 +63,8 @@ As the recorded level is logarithmic, even small measurement noise or inter-devi
 
 ## Exporting/Loading Auxiliary Data
 
+Information on exporting or loading the [light](#light-level-indicator), [temperature](#device-temperature), and [battery](#battery-voltage) information, using either *OmGui*, a *CSV Exporter*, the *MATLAB loader*, or the *Python loader*.
+
 ### OmGui
 
 Light and temperature can be exported in *OmGui* software by following these steps:
