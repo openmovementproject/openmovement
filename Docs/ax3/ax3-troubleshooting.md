@@ -26,7 +26,7 @@
 
 3. **Does trying the device and software on a completely different computer make a difference?**
 
-    In particular: if it's not working on an organization-managed PC, does trying on a personal laptop make a difference?
+    In particular: if it's not working on an organization-managed PC, does trying on a personal laptop make a difference?  Organization-managed computers may have security software, or a configuration, that is preventing access to (or interfering with) USB removable devices.
 
 4. **Does the device LED slowly pulse yellow/white for a sustained amount of time?** (Check over at least 15 seconds)
 
