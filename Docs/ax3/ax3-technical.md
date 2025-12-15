@@ -156,8 +156,8 @@ typedef struct
     uint8_t  samplingRate;                      ///< @36  +1   Sampling rate code, frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, range (+/-g) (16 >> (rate >> 6)).
     cwa_timestamp_t lastChangeTime;             ///< @37  +4   Last change meta-data time
     uint8_t  firmwareRevision;                  ///< @41  +1   Firmware revision number
-    int16_t  timeZone;                          ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
-    uint8_t  reserved3[20];                     ///< @44  +20  (20 bytes reserved)
+    int16_t  reserved3;                         ///< @42  +2   (Unused: originally reserved for a "Time Zone offset from UTC in minutes", 0xffff = -1 = unknown)
+    uint8_t  reserved4[20];                     ///< @44  +20  (20 bytes reserved)
     uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448 Scratch buffer / meta-data (448 characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
     uint8_t  reserved[512];                     ///< @512 +512 (Reserved for device-specific meta-data in the same format as the user meta-data) (512 bytes)
 } cwa_header_t;
