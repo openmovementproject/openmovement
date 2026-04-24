@@ -82,6 +82,8 @@ For large-scale deployments, you may be interested in the following:
 1.	The standard *OmGui* configuration software can configure multiple devices at once (select multiple devices using the standard Shift+click for range selection, and Ctrl+click for toggle selection) before configuring - but only as long as they have an identical configuration.  However, it is recommended to set a unique session ID for each device, so this option may not be suitable.  Batch processing operations can be performed on files in a similar way.
    
     * [OmGui](https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI)
+  
+    There are also some [command-line options](https://github.com/openmovementproject/openmovement/wiki/AX3-GUI#command-line-options) that may be useful to locally log the configurations.
  
 2.	The *AX-Deploy* software is specifically for mass deployments, where each device may have a unique configuration:
  
