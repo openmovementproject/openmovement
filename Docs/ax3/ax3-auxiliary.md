@@ -149,7 +149,9 @@ with CwaData(filename, include_gyro=False, include_light=True, include_temperatu
 ```
 
 
-## Sensor Data Calibration
+## Sensor Data
+
+### Sensor Data Calibration
 
 An explicit design goal of the AX devices was to record only the raw data from an underlying sensor, with everything else applied afterwards in software.
 
