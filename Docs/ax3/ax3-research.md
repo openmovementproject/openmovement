@@ -110,7 +110,7 @@ For large-scale deployments, you may be interested in the following:
 
 AX devices are typically mounted at the wrist and this has been shown to have a very high compliance as participants are generally happy to wear a wrist-worn device for long periods of time.  The Open Movement project includes a [silicon wristband](https://github.com/digitalinteraction/openmovement/blob/master/Mechanical/AX3/AX3%20Band/AX3_Band.PDF).  The band and device are designed to be worn for [daily activities](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-faq.md#usage-environments).  There are also designs for smaller [infant fabric bands](https://github.com/digitalinteraction/openmovement/blob/master/Mechanical/AX3/AX3%20Fabric%20Band/README.md), although direct use on infants is not recommended without a sufficiently-sized enclosure design (must not fit within a choke test cylinder) that requires a tool to remove.
 
-Alternative means may be used to attach the device at other sites (such as the hip, thigh or back) using medical tape/patches, or a cohesive bandage.  
+Alternative means may be used to attach the device at other sites (such as the hip, thigh or back) using medical tape/patches, or a cohesive bandage.  **Important:** Please see [Safety](#safety) information at any site, but particularly important if you intend to use it e.g. under clothing.
 
 One attachment method (Schneller et al, *Measuring children's physical activity: compliance using skin-taped accelerometers*):
 
@@ -126,7 +126,6 @@ An alternative attachment method is described as: *two layers of Flexifix (WC690
 
 There have also been third-party purpose-built foam pouches, such as those by [Herpatech AB](http://herpatech.se) (now [nile.se](https://nile.se)).
 
-
 ### Non-human use
 
 The AX devices were originally designed for human movement but, as they are general purpose loggers, they have been used on animals and other locations.
@@ -138,6 +137,17 @@ If the device could become dislodged, a brightly-colored outer layer may also ai
 Some animal research has attached to limbs using [3M Vetrap](https://www.3m.co.uk/3M/en_GB/p/d/v000106104/).  As another example for sensor attachment, from the paper "Freedom to lie: How farrowing environment affects sow lying behavior assessment using inertial sensors" by Thompson et al. - Section 2.1.2. "Sensor protocol" states: 
 
 > *All sows were shaved and cleaned in two locations: at the rear, just above the tail head and between the hip bones; and at the neck, halfway between the shoulder and the base of the skull, […]. Sensors were wrapped in duct tape to provide further protection should they become dislodged. A coating of Evo-Stik contact adhesive was applied in a 2 cm patch around the sensor which was further secured with a layer of Scapa Sniper tape.*
+
+
+## Safety
+
+From the [Quick Start Guide](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/AX3%20Quick%20start%20guide.pdf):
+
+* **Use only in suitable environments:** The enclosure is designed to meet IP68 rating and be suitable for day to day activities including showering and bathing, but should not be worn for more extreme activities, such as diving or swimming, or in extreme environments, such as sauna/steam rooms.
+
+* **Device safety:** Do not allow the device to be accessible to infants under 36 months as it can pose a choking hazard. Do not wear the device while charging. Inspect the device carefully before every use, and do not use the device if there are any signs of damage. Users must be instructed to remove the device immediately if any damage occurs or is noticed, or if heat develops in the device, or if any irritation occurs.  (The device should always be accessible for the user to remove themselves.)
+
+* **Cleaning the device and optional silicone wrist band:** Clean with skin-safe alcohol wipes, and do not allow contact with any other solvents, abrasives, or other chemical cleaning agents as these may compromise the device enclosure.
 
 
 ## Further Reading
