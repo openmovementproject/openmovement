@@ -53,7 +53,7 @@ See also:
 * [Sensor Axes](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md)
 * [Device orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
 * [Differences between the AX3 and AX6](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#differences-between-the-ax3-and-ax6).
-* [Sensor Data](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#sensor-data-calibration)
+* [Sensor Data](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#sensor-data)
 * [Measurement Data](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-technical.md#measurement-data)
 
 
