@@ -49,9 +49,12 @@ The AX6 and AX3 have the same physical dimensions, but the AX6 has more memory a
 | Samples stored per 512 byte storage block | Packed (10-bit mode): 120; Unpacked (full resolution): 80*. | Accelerometer-only: 80*; Accelerometer+Gyroscope: 40. |
 | Notes                      | `*` 'Unpacked' recording mode only.             | `*` With gyroscope off.                       |
 
-* Sensor axes: [AX Sensor Axes](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md)
-* Device orientation: [AX Orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
-* AX family: [Differences between the AX3 and AX6](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#differences-between-the-ax3-and-ax6)
+See also:
+* [Sensor Axes](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-rotation.md)
+* [Device orientation](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax-orientation.png)
+* [Differences between the AX3 and AX6](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#differences-between-the-ax3-and-ax6).
+* [Sensor Data](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-auxiliary.md#sensor-data-calibration)
+* [Measurement Data](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-technical.md#measurement-data)
 
 
 ## Time and sampling
