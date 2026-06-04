@@ -2,22 +2,22 @@
 
 You should not need to update the firmware yourself.
 
-* [AX3 Firmware V50 WinUSB/Generic](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-50-winusb-generic.zip) -
+* [AX3 Firmware V50 WinUSB/Generic](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-50-winusb-generic.zip) - 19-05-2020 
 Experimental alternative generic (and WinUSB) interface support.
 
-* [AX3 Firmware V48](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-48.zip) - Wide (32-bit) device IDs
+* [AX3 Firmware V48](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-48.zip) - 11-05-2020 Wide (32-bit) device IDs
 
-* [AX3 Firmware V47](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-47.zip) - Allows USB start without battery
+* [AX3 Firmware V47](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-Firmware-47.zip) - 12-10-2018 Allows USB start without battery
 
-* [AX3 Firmware V46](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/CWA17_46.hex) (.hex only) - Improved USB descriptors for Mac/Linux compatibility
+* [AX3 Firmware V46](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/CWA17_46.hex) (.hex only) - (internal) Improved USB descriptors for Mac/Linux compatibility
 
-* [AX3 Firmware V45](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/CWA17_45.hex) (.hex only) - Additional NAND white-list
+* [AX3 Firmware V45](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/CWA17_45.hex) (.hex only) - (internal) Additional NAND white-list
 
-* [AX3 Firmware V44](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-44.zip) - Fixed occasional high power consumption in V42
+* [AX3 Firmware V44](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-44.zip) - (<2015) Fixed occasional high power consumption in V42
 
-* AX3 Firmware V42 - Additional NAND white-list; working with higher sample rates.
+* [AX3 Firmware V42](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-42.zip) - (internal, <2015) Additional NAND white-list; working with higher sample rates.
 
-* [AX3 Firmware V36](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-36.zip) - Original
+* [AX3 Firmware V36](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Downloads/AX3/AX3-1.7-Firmware-36.zip) - (<2015) - Original firmware
 
 ---
 
