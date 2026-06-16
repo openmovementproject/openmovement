@@ -207,17 +207,19 @@ Checking the log output:
 
 This section is primarily for if you receive an error: *The correct download file name cannot be established (device identifier not verified)*.
 
-> This message is given when the device is accessed through a communication channel, but the device ID through that channel does not match the ones obtained while accessing through a storage channel -- the software refuses to continue, to preserve data integrity.  This could be caused by manually changing the contents of a drive (such as the data file or volume label), manually changing the device ID, or communication problems.
+This message is given when the device is accessed through a communication channel, but the device ID through that channel does not match the ones obtained while accessing through a storage channel -- the software refuses to continue, to preserve data integrity.  This could be caused by manually changing the contents of a drive (such as the data file or volume label), manually changing the device ID, or communication problems.
 
-1. If the device contains useful data, as an initial priority, you can try to download the data manually as described in [Filesystem or data problems](#filesystem-or-data-problems).
+1. Initially, try disconnecting and reconnecting the device.
 
-2. If every device you have tried has a similar issue, check that you are not running anti-virus/security software, or other software that could be interfering with device communication (such as software that interacts with hardware devices using a serial/COM port).  If in doubt, try the device on another computer without such software (e.g. a personal laptop).
+2. If the device contains useful data, as an initial priority, you can try to download the data manually as described in [Filesystem or data problems](#filesystem-or-data-problems).
 
-3. You should fully shutdown then restart your operating system (not just sleep/hibernate and resume, but fully shutdown and turn-off, before then restarting).  This will be help ensure there is no persistent driver issue.
+3. If every device you have tried has a similar issue, check that you are not running anti-virus/security software, or other software that could be interfering with device communication (such as software that interacts with hardware devices using a serial/COM port).  If in doubt, try the device on another computer without such software (e.g. a personal laptop).
 
-4. If problems persist, to help diagnose the issue, please obtain an [OmGUI Detailed Log](#omgui-detailed-log) as described above (if not already done so).  If the log entry contains `LOG: - MISMATCH:`, it indicates there is still an issue with device IDs not matching.  
+4. You should fully shutdown then restart your operating system (not just sleep/hibernate and resume, but fully shutdown and turn-off, before then restarting).  This will be help ensure there is no persistent driver issue.
 
-5. To manually verify each source of the device's ID, with only a single connected device, please make a note of the following four numbers (these should be the same):
+5. If problems persist, to help diagnose the issue, please obtain an [OmGUI Detailed Log](#omgui-detailed-log) as described above (if not already done so).  If the log entry contains `LOG: - MISMATCH:`, it indicates there is still an issue with device IDs not matching.  
+
+6. To manually verify each source of the device's ID, with only a single connected device, please make a note of the following four numbers (these should be the same):
 
     1. *External ID:* The number written on the side of the device (AX3: the 4-6 digit number after the `17-` or `18-` prefix; AX6: 7-digit number that should start with a `60`).
 
@@ -231,9 +233,9 @@ This section is primarily for if you receive an error: *The correct download fil
        PowerShell -Command "& {$s=[System.IO.File]::OpenRead('D:\CWA-DATA.CWA');$b=New-Object byte[] 13;$c=$s.Read($b,0,13);$s.close();Write-Output(16777216*$b[12]+65536*$b[11]+256*$b[6]+$b[5]);[Console]::ReadKey()}"
        ```
 
-6. If any of the ID numbers in the last step are inconsistent, or if you received a `LOG: - MISMATCH:` message from the detailed log, you have inconsistent device IDs.  IF so, you should follow the instructions for [resetting the device](#resetting-the-device) with a new device ID from the device's case (after any `17-` or `18-` prefix for AX3 devices).
+7. If any of the ID numbers in the last step are inconsistent, or if you received a `LOG: - MISMATCH:` message from the detailed log, you have inconsistent device IDs.  IF so, you should follow the instructions for [resetting the device](#resetting-the-device) with a new device ID from the device's case (after any `17-` or `18-` prefix for AX3 devices).
 
-7. If problems persist, please check the [OmGui Software Troubleshooting](#omgui-software-troubleshooting) guide, including a detailed log.
+8. If problems persist, please check the [OmGui Software Troubleshooting](#omgui-software-troubleshooting) guide, including a detailed log.
 
 
 ## Resetting the device
