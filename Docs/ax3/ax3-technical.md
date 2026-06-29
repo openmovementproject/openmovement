@@ -442,7 +442,7 @@ Update the firmware:
 ---
 
 
-## Ports
+## Device Information
 
 ### USB Ports
 
