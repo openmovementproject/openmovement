@@ -481,4 +481,25 @@ Things can be reset by:
 Windows uses letters of the alphabet (`A`-`Z`) to label USB drives.  There are mechanisms in, e.g. *OmGui*, to try to communicate with devices even if these letters are exhausted (using a direct path to the partition), but it is recommended to not use more devices than available drive letters.
 
 
+### File size
 
+The [recording configuration](https://github.com/openmovementproject/openmovement/blob/master/Docs/ax3/ax3-faq.md#maximum-recording-duration) drastically affects the file size (and so the download duration).  Both the sample rate and the recording interval are proportionally reflected in the file size.
+
+The file size, in bytes, can be approximated as: 
+
+```
+ceiling(duration_seconds * samples_per_second * bytes_per_sample / 480) * 512 + 1024
+```
+
+...where `bytes_per_sample` is `4` for AX3 packed, `6` for AX3 unpacked or AX6 accelerometer-only, and `12` for AX6 accelerometer+gyroscope.
+
+The AX drive capacity may vary slightly, but is approximately 507772928 bytes on the AX3, and approximately 1015776256 bytes on the AX6.
+
+
+### Transfer Rate
+
+The AX devices were designed to record for long durations, so do not use the type of processors/memory that are found in faster, higher-power devices.  The AX download speed is approximately 300000 bytes/second.  Recordings made at typical rates would likely also need to be connected for at least a similar amount to the transfer time just to recharge anyway.  The download can be unattended once started.  Many downloads can be run in parallel (e.g. through a powered USB hub) without significantly affecting the overall duration.  If you are seeing significantly slower rates than this, it might be worth checking whether anti-virus/security software may be slowing things down, or whether the USB bus is under too high a contention.  
+
+If your application is near real-time (e.g. you require results as quickly as possible from a device), consider if there is a way to configure the sequence of events to minimize any waiting.  For a faster transfer, you could consider minimizing the file size (see previous section).  Depending on whether it is suitable for the application, custom software would be possible that starts to analyse the data as it is being downloaded, or to only download subsets of the data that are relevant.
+
+If you absolutely require a faster download rate, there is one more option which has the chance to roughly double the transfer speed: disabling error correction for the recorded data.  This is usually enabled as flash memory has a small chance of an error developing, and the error correction code detects and fixes such an event.  However, it is rare, and each data sector (40/80/120 samples depending on configuration) also has a "checksum", so most of the loaders (in particular *omconvert* and *cwa-convert*) would spot any issue and ignore that small bit of data.  This option keeps error correction in the non-data parts of the storage, such as the filesystem metadata.  If you would like to try this option, you can do so by following the steps at [Resetting the Device](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-troubleshooting.md#resetting-the-device), but substitute in this command in step 9 with: `ECC 0|LED 5`.  Importantly, this will only speed up downloading of data that is recorded on this specific device and recorded after the setting change, so you will need to configure a new recording to test it.  The original setting can be restored by swapping the `0` for a `1`.  With this setting, as an example, a file of 240 MB (around a week at 100 Hz on an AX3 in packed mode) might take approximately 6-7 minutes to download.  
