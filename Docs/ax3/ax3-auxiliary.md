@@ -167,6 +167,7 @@ Implementations of this technique are in software such as:
 * [biobankAccelerometerAnalysis](https://github.com/OxWearables/biobankAccelerometerAnalysis#under-the-hood)
 * [omconvert](https://github.com/digitalinteraction/omconvert#analysis-methods)
 * [Open Movement - MATLAB](https://github.com/digitalinteraction/openmovement/blob/master/Software/Analysis/Matlab/estimateCalibration.m)
+* [openmovement-python](https://github.com/openmovementproject/openmovement-python/blob/master/src/openmovement/experimental/calibrate.py)
 
 Auto-calibration uses the variety of orientations observed over the recording to determine calibration parameters which can then be applied to the data.  It is also possible to re-use calibration parameters from one device session to another session from the same device, and this would be best where the temperature ranges observed are roughly comparable.
 
