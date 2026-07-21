@@ -53,7 +53,7 @@ The [raw data](https://github.com/digitalinteraction/openmovement/blob/master/Do
    * [R (GGIR)](https://cran.r-project.org/web/packages/GGIR/index.html) & [R (axR)](https://axr.circadia-lab.uk/)
    * [Python](https://github.com/digitalinteraction/openmovement-python/#cwa_load---cwa-file-loader)
    * [C](https://github.com/digitalinteraction/libomapi/)
-   * [Other languages](https://github.com/digitalinteraction/libomapi/tree/master/bindings)
+   * [Other languages](https://github.com/openmovementproject/libomapi/tree/master#libomapi)
 
 ...or, indirectly via another file format:
 
