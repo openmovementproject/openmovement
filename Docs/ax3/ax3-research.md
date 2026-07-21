@@ -50,7 +50,7 @@ See also: [Differences between the AX3 and AX6](https://github.com/openmovementp
 The [raw data](https://github.com/digitalinteraction/openmovement/blob/master/Docs/ax3/ax3-technical.md#measurement-data) can be loaded into many languages/processing environments, such as:
 
    * [MATLAB](https://raw.githubusercontent.com/digitalinteraction/openmovement/master/Software/Analysis/Matlab/CWA_readFile.m)
-   * [R](https://cran.r-project.org/web/packages/GGIR/index.html)
+   * [R (GGIR)](https://cran.r-project.org/web/packages/GGIR/index.html) & [R (axR)](https://axr.circadia-lab.uk/)
    * [Python](https://github.com/digitalinteraction/openmovement-python/#cwa_load---cwa-file-loader)
    * [C](https://github.com/digitalinteraction/libomapi/)
    * [Other languages](https://github.com/digitalinteraction/libomapi/tree/master/bindings)
