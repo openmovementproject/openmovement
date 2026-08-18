@@ -81,14 +81,14 @@ There is no external communication while the AX devices are recording, so they c
 
 ### Event markers
 
-The AX devices are specifically designed to avoid any user-facing interface, to minimise imapact on measurements.  You can use external logging mechanisms to record events if you have a roughly-synchronized clock (see above).
+The AX devices are specifically designed to avoid any user-facing interface, to minimise impact on measurements.  You can use external logging mechanisms to record events if you have a roughly-synchronized clock (see above).
 
 For example, you can use the [Time Sync Clock](https://config.openmovement.dev/timesync/) page to create event markers by tapping the screen, or clicking a mouse, or pressing keys on a keyboard, then download or clear the log of event markers with the buttons at the top of the page.  The event log records the time and event type (e.g. which key was pressed), and can be used in conjunction with the recorded data.
 
 
 ## Usage environments
 
-The AX enclosure is designed for IP68 rated water resistance -- not technically "waterproof" (i.e. not ATM rated) as it is a static measure, and not dynamic.  It was designed so that it can be used for daily activities, which includes washing and casual swimming.  Importantly, not continuous immersion, substantial depth, extreme/saltwater/watersports activities, sauna, etc.  Additional care should be taken to avoid impacts while immersed.  The device must be removed and not used if there are any problems or indications of damage.  The USB socket must be free of debris and completely dry before connection.
+The AX enclosure is designed for IP68 rated water resistance -- not technically "waterproof" (i.e. not ATM rated) as it is a static measure, and not dynamic.  It was designed so that it can be used for daily activities, which includes washing and casual swimming.  Importantly, not continuous immersion, substantial depth, sauna, saltwater/water-sports, high-altitude, or other extreme activities.  Additional care should be taken to avoid impacts while immersed.  The device must be removed and not used if there are any problems or indications of damage.  The USB socket must be free of debris and completely dry before connection.
 
 
 ## Technical Details
